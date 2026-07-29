@@ -1,4 +1,5 @@
 import { FormEvent, useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, ReferenceLine } from "recharts";
 import { api } from "../api/client";
 import { useAuth } from "../context/AuthContext";
@@ -24,6 +25,7 @@ function SensorForm({ zones, initial, onSubmit, onCancel }: {
   onSubmit: (data: any) => Promise<void>;
   onCancel: () => void;
 }) {
+  const { t } = useTranslation();
   const [name, setName] = useState(initial?.name ?? "");
   const [type, setType] = useState<SensorType>(initial?.type ?? "METHANE");
   const [unit, setUnit] = useState(initial?.unit ?? "");
@@ -54,35 +56,35 @@ function SensorForm({ zones, initial, onSubmit, onCancel }: {
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <div>
-        <label className={labelClass}>Sensor name</label>
+        <label className={labelClass}>{t("sensors.sensorName")}</label>
         <input className={inputClass} value={name} onChange={(e) => setName(e.target.value)} required />
       </div>
       <div className="grid grid-cols-2 gap-3">
         <div>
-          <label className={labelClass}>Type</label>
+          <label className={labelClass}>{t("common.type")}</label>
           <select className={inputClass} value={type} onChange={(e) => setType(e.target.value as SensorType)}>
-            {sensorTypes.map((t) => (
-              <option key={t} value={t}>{t.replace(/_/g, " ")}</option>
+            {sensorTypes.map((sensorType) => (
+              <option key={sensorType} value={sensorType}>{sensorType.replace(/_/g, " ")}</option>
             ))}
           </select>
         </div>
         <div>
-          <label className={labelClass}>Unit</label>
-          <input className={inputClass} value={unit} onChange={(e) => setUnit(e.target.value)} placeholder="ppm, %, °C…" required />
+          <label className={labelClass}>{t("sensors.unit")}</label>
+          <input className={inputClass} value={unit} onChange={(e) => setUnit(e.target.value)} placeholder={t("sensors.unitPlaceholder") ?? ""} required />
         </div>
       </div>
       <div className="grid grid-cols-2 gap-3">
         <div>
-          <label className={labelClass}>Min safe</label>
+          <label className={labelClass}>{t("sensors.minSafe")}</label>
           <input className={inputClass} type="number" step="any" value={minSafe} onChange={(e) => setMinSafe(e.target.value)} required />
         </div>
         <div>
-          <label className={labelClass}>Max safe</label>
+          <label className={labelClass}>{t("sensors.maxSafe")}</label>
           <input className={inputClass} type="number" step="any" value={maxSafe} onChange={(e) => setMaxSafe(e.target.value)} required />
         </div>
       </div>
       <div>
-        <label className={labelClass}>Zone</label>
+        <label className={labelClass}>{t("common.zone")}</label>
         <select className={inputClass} value={zoneId} onChange={(e) => setZoneId(e.target.value)} required>
           {zones.map((z) => (
             <option key={z.id} value={z.id}>{z.site?.name} · {z.name}</option>
@@ -90,22 +92,23 @@ function SensorForm({ zones, initial, onSubmit, onCancel }: {
         </select>
       </div>
       <div>
-        <label className={labelClass}>Status</label>
+        <label className={labelClass}>{t("common.status")}</label>
         <select className={inputClass} value={status} onChange={(e) => setStatus(e.target.value as any)}>
-          <option value="ACTIVE">Active</option>
-          <option value="INACTIVE">Inactive</option>
-          <option value="FAULT">Fault</option>
+          <option value="ACTIVE">{t("sensors.active")}</option>
+          <option value="INACTIVE">{t("sensors.inactive")}</option>
+          <option value="FAULT">{t("sensors.fault")}</option>
         </select>
       </div>
       <div className="flex justify-end gap-2 pt-2">
-        <button type="button" className={buttonSecondary} onClick={onCancel}>Cancel</button>
-        <button type="submit" className={buttonPrimary} disabled={saving}>{saving ? "Saving…" : "Save"}</button>
+        <button type="button" className={buttonSecondary} onClick={onCancel}>{t("common.cancel")}</button>
+        <button type="submit" className={buttonPrimary} disabled={saving}>{saving ? t("common.saving") : t("common.save")}</button>
       </div>
     </form>
   );
 }
 
 function SensorChart({ sensor, onClose }: { sensor: Sensor; onClose: () => void }) {
+  const { t } = useTranslation();
   const [readings, setReadings] = useState<SensorReading[]>([]);
   const socket = useSocket();
 
@@ -131,27 +134,28 @@ function SensorChart({ sensor, onClose }: { sensor: Sensor; onClose: () => void 
   }));
 
   return (
-    <Modal title={`${sensor.name} — Live Readings`} onClose={onClose}>
+    <Modal title={`${sensor.name} — ${t("sensors.liveReadings")}`} onClose={onClose}>
       <div className="h-64">
         <ResponsiveContainer width="100%" height="100%">
           <LineChart data={data}>
-            <XAxis dataKey="time" tick={{ fontSize: 10, fill: "#96b4a5" }} interval="preserveStartEnd" />
-            <YAxis tick={{ fontSize: 10, fill: "#96b4a5" }} domain={["auto", "auto"]} />
-            <Tooltip contentStyle={{ background: "#1c2f2a", border: "1px solid #29463c", fontSize: 12 }} />
+            <XAxis dataKey="time" tick={{ fontSize: 10, fill: "#29463c" }} interval="preserveStartEnd" />
+            <YAxis tick={{ fontSize: 10, fill: "#29463c" }} domain={["auto", "auto"]} />
+            <Tooltip contentStyle={{ background: "#e3ebe6", border: "1px solid #c3d5cb", fontSize: 12 }} />
             <ReferenceLine y={sensor.minSafe} stroke="#e13b2e" strokeDasharray="4 4" />
             <ReferenceLine y={sensor.maxSafe} stroke="#e13b2e" strokeDasharray="4 4" />
-            <Line type="monotone" dataKey="value" stroke="#658c7a" strokeWidth={2} dot={false} isAnimationActive={false} />
+            <Line type="monotone" dataKey="value" stroke="#456f5f" strokeWidth={2} dot={false} isAnimationActive={false} />
           </LineChart>
         </ResponsiveContainer>
       </div>
       <div className="text-xs text-mine-400 mt-2">
-        Safe range: {sensor.minSafe}–{sensor.maxSafe}{sensor.unit}
+        {t("sensors.safeRangeLabel", { min: sensor.minSafe, max: sensor.maxSafe, unit: sensor.unit })}
       </div>
     </Modal>
   );
 }
 
 export default function Sensors() {
+  const { t } = useTranslation();
   const { user } = useAuth();
   const canEdit = user?.role === "ADMIN" || user?.role === "SUPERVISOR";
   const [sensors, setSensors] = useState<Sensor[]>([]);
@@ -203,23 +207,23 @@ export default function Sensors() {
   }
 
   async function deleteSensor(id: string) {
-    if (!confirm("Delete this sensor and its reading history?")) return;
+    if (!confirm(t("sensors.confirmDelete"))) return;
     await api.delete(`/sensors/${id}`);
     await load();
   }
 
-  if (loading) return <div className="text-mine-300">Loading sensors…</div>;
+  if (loading) return <div className="text-mine-300">{t("sensors.loading")}</div>;
 
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-xl font-bold">Sensors</h1>
-          <p className="text-mine-300 text-sm">Live readings update automatically every few seconds</p>
+          <h1 className="text-xl font-bold">{t("sensors.title")}</h1>
+          <p className="text-mine-300 text-sm">{t("sensors.subtitle")}</p>
         </div>
         {canEdit && zones.length > 0 && (
           <button className={buttonPrimary} onClick={() => setSensorModal("create")}>
-            + New Sensor
+            {t("sensors.newSensor")}
           </button>
         )}
       </div>
@@ -228,12 +232,12 @@ export default function Sensors() {
         <table className="w-full text-sm">
           <thead className="bg-mine-800/50 text-mine-300 text-xs uppercase">
             <tr>
-              <th className="text-left px-4 py-2">Sensor</th>
-              <th className="text-left px-4 py-2">Zone</th>
-              <th className="text-left px-4 py-2">Type</th>
-              <th className="text-left px-4 py-2">Latest Reading</th>
-              <th className="text-left px-4 py-2">Safe Range</th>
-              <th className="text-left px-4 py-2">Status</th>
+              <th className="text-left px-4 py-2">{t("sensors.colSensor")}</th>
+              <th className="text-left px-4 py-2">{t("sensors.colZone")}</th>
+              <th className="text-left px-4 py-2">{t("sensors.colType")}</th>
+              <th className="text-left px-4 py-2">{t("sensors.colLatestReading")}</th>
+              <th className="text-left px-4 py-2">{t("sensors.colSafeRange")}</th>
+              <th className="text-left px-4 py-2">{t("sensors.colStatus")}</th>
               <th className="px-4 py-2"></th>
             </tr>
           </thead>
@@ -258,8 +262,8 @@ export default function Sensors() {
                   <td className="px-4 py-2 text-right">
                     {canEdit && (
                       <div className="flex justify-end gap-2">
-                        <button className="text-xs text-mine-300 hover:text-white" onClick={() => setSensorModal(sensor)}>Edit</button>
-                        <button className={buttonDanger} onClick={() => deleteSensor(sensor.id)}>Delete</button>
+                        <button className="text-xs text-mine-300 hover:text-white" onClick={() => setSensorModal(sensor)}>{t("common.edit")}</button>
+                        <button className={buttonDanger} onClick={() => deleteSensor(sensor.id)}>{t("common.delete")}</button>
                       </div>
                     )}
                   </td>
@@ -269,7 +273,7 @@ export default function Sensors() {
             {sensors.length === 0 && (
               <tr>
                 <td colSpan={7} className="px-4 py-6 text-center text-mine-400">
-                  No sensors yet.
+                  {t("sensors.noSensorsYet")}
                 </td>
               </tr>
             )}
@@ -278,7 +282,7 @@ export default function Sensors() {
       </div>
 
       {sensorModal && (
-        <Modal title={sensorModal === "create" ? "New Sensor" : "Edit Sensor"} onClose={() => setSensorModal(null)}>
+        <Modal title={sensorModal === "create" ? t("sensors.newSensorTitle") : t("sensors.editSensorTitle")} onClose={() => setSensorModal(null)}>
           <SensorForm
             zones={zones}
             initial={sensorModal === "create" ? undefined : sensorModal}

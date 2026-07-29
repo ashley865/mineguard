@@ -1,18 +1,23 @@
 import { NavLink, Outlet } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { useAuth } from "../context/AuthContext";
-
-const navItems = [
-  { to: "/", label: "Dashboard", end: true },
-  { to: "/sites", label: "Sites & Zones" },
-  { to: "/sensors", label: "Sensors" },
-  { to: "/alerts", label: "Alerts" },
-  { to: "/workers", label: "Workers" },
-  { to: "/incidents", label: "Incidents" },
-  { to: "/equipment", label: "Equipment" },
-];
+import LanguageSwitcher from "./LanguageSwitcher";
 
 export default function Layout() {
+  const { t } = useTranslation();
   const { user, logout } = useAuth();
+
+  const navItems = [
+    ...(user?.role === "EXECUTIVE"
+      ? [{ to: "/", label: t("nav.executiveDashboard"), end: true }]
+      : [{ to: "/", label: t("nav.dashboard"), end: true }]),
+    { to: "/sites", label: t("nav.sitesZones") },
+    { to: "/sensors", label: t("nav.sensors") },
+    { to: "/alerts", label: t("nav.alerts") },
+    { to: "/workers", label: t("nav.workers") },
+    { to: "/incidents", label: t("nav.incidents") },
+    { to: "/equipment", label: t("nav.equipment") },
+  ];
 
   return (
     <div className="min-h-screen flex">
@@ -39,15 +44,18 @@ export default function Layout() {
             </NavLink>
           ))}
         </nav>
-        <div className="px-4 py-4 border-t border-mine-800">
-          <div className="text-sm font-medium">{user?.name}</div>
-          <div className="text-xs text-mine-300">{user?.role}</div>
-          <button
-            onClick={logout}
-            className="mt-3 w-full text-sm px-3 py-1.5 rounded-md bg-mine-800 hover:bg-mine-700 transition-colors"
-          >
-            Sign out
-          </button>
+        <div className="px-4 py-4 border-t border-mine-800 space-y-3">
+          <LanguageSwitcher className="w-full" />
+          <div>
+            <div className="text-sm font-medium">{user?.name}</div>
+            <div className="text-xs text-mine-300">{user?.role}</div>
+            <button
+              onClick={logout}
+              className="mt-3 w-full text-sm px-3 py-1.5 rounded-md bg-mine-800 hover:bg-mine-700 transition-colors"
+            >
+              {t("nav.signOut")}
+            </button>
+          </div>
         </div>
       </aside>
       <main className="flex-1 bg-mine-950 overflow-y-auto">

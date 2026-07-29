@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { z } from "zod";
 import { prisma } from "../prisma";
-import { requireAuth } from "../middleware/auth";
+import { requireAuth, requireRole } from "../middleware/auth";
 
 const router = Router();
 
@@ -20,6 +20,11 @@ const updateSchema = z.object({
   status: z.enum(["OPEN", "INVESTIGATING", "RESOLVED"]).optional(),
 });
 
+const reviewSchema = z.object({
+  decision: z.enum(["APPROVED", "REJECTED"]),
+  note: z.string().optional(),
+});
+
 router.use(requireAuth);
 
 router.get("/", async (req, res) => {
@@ -34,6 +39,7 @@ router.get("/", async (req, res) => {
       site: { select: { id: true, name: true } },
       zone: { select: { id: true, name: true } },
       reportedBy: { select: { id: true, name: true } },
+      reviewedBy: { select: { id: true, name: true } },
     },
     orderBy: { createdAt: "desc" },
   });
@@ -66,6 +72,26 @@ router.delete("/:id", async (req, res) => {
   try {
     await prisma.incident.delete({ where: { id: req.params.id } });
     res.status(204).send();
+  } catch {
+    res.status(404).json({ error: "Incident not found" });
+  }
+});
+
+router.post("/:id/review", requireRole("EXECUTIVE"), async (req, res) => {
+  const parsed = reviewSchema.safeParse(req.body);
+  if (!parsed.success) return res.status(400).json({ error: parsed.error.flatten() });
+  try {
+    const incident = await prisma.incident.update({
+      where: { id: req.params.id },
+      data: {
+        reviewStatus: parsed.data.decision,
+        reviewNote: parsed.data.note,
+        reviewedAt: new Date(),
+        reviewedById: req.auth!.userId,
+      },
+      include: { reviewedBy: { select: { id: true, name: true } } },
+    });
+    res.json(incident);
   } catch {
     res.status(404).json({ error: "Incident not found" });
   }

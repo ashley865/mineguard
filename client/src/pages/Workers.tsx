@@ -1,4 +1,5 @@
 import { FormEvent, useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { api } from "../api/client";
 import { useAuth } from "../context/AuthContext";
 import { Site, Worker, WorkerStatus, Zone } from "../api/types";
@@ -13,6 +14,7 @@ function WorkerForm({ sites, zones, initial, onSubmit, onCancel }: {
   onSubmit: (data: any) => Promise<void>;
   onCancel: () => void;
 }) {
+  const { t } = useTranslation();
   const [name, setName] = useState(initial?.name ?? "");
   const [employeeId, setEmployeeId] = useState(initial?.employeeId ?? "");
   const [role, setRole] = useState(initial?.role ?? "");
@@ -42,57 +44,58 @@ function WorkerForm({ sites, zones, initial, onSubmit, onCancel }: {
     <form onSubmit={handleSubmit} className="space-y-4">
       <div className="grid grid-cols-2 gap-3">
         <div>
-          <label className={labelClass}>Name</label>
+          <label className={labelClass}>{t("common.name")}</label>
           <input className={inputClass} value={name} onChange={(e) => setName(e.target.value)} required />
         </div>
         <div>
-          <label className={labelClass}>Employee ID</label>
+          <label className={labelClass}>{t("workers.employeeId")}</label>
           <input className={inputClass} value={employeeId} onChange={(e) => setEmployeeId(e.target.value)} required />
         </div>
       </div>
       <div className="grid grid-cols-2 gap-3">
         <div>
-          <label className={labelClass}>Role</label>
+          <label className={labelClass}>{t("common.role")}</label>
           <input className={inputClass} value={role} onChange={(e) => setRole(e.target.value)} required />
         </div>
         <div>
-          <label className={labelClass}>Phone</label>
+          <label className={labelClass}>{t("common.phone")}</label>
           <input className={inputClass} value={phone} onChange={(e) => setPhone(e.target.value)} />
         </div>
       </div>
       <div className="grid grid-cols-2 gap-3">
         <div>
-          <label className={labelClass}>Site</label>
+          <label className={labelClass}>{t("common.site")}</label>
           <select className={inputClass} value={siteId} onChange={(e) => { setSiteId(e.target.value); setZoneId(""); }}>
             {sites.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
           </select>
         </div>
         <div>
-          <label className={labelClass}>Zone</label>
+          <label className={labelClass}>{t("common.zone")}</label>
           <select className={inputClass} value={zoneId} onChange={(e) => setZoneId(e.target.value)}>
-            <option value="">Unassigned</option>
+            <option value="">{t("common.unassigned")}</option>
             {zonesForSite.map((z) => <option key={z.id} value={z.id}>{z.name}</option>)}
           </select>
         </div>
       </div>
       <div>
-        <label className={labelClass}>Status</label>
+        <label className={labelClass}>{t("common.status")}</label>
         <select className={inputClass} value={status} onChange={(e) => setStatus(e.target.value as WorkerStatus)}>
-          <option value="ON_SHIFT">On shift</option>
-          <option value="OFF_SHIFT">Off shift</option>
-          <option value="EMERGENCY">Emergency</option>
+          <option value="ON_SHIFT">{t("workers.onShift")}</option>
+          <option value="OFF_SHIFT">{t("workers.offShift")}</option>
+          <option value="EMERGENCY">{t("workers.emergency")}</option>
         </select>
       </div>
       {error && <div className="text-danger-400 text-sm">{error}</div>}
       <div className="flex justify-end gap-2 pt-2">
-        <button type="button" className={buttonSecondary} onClick={onCancel}>Cancel</button>
-        <button type="submit" className={buttonPrimary} disabled={saving}>{saving ? "Saving…" : "Save"}</button>
+        <button type="button" className={buttonSecondary} onClick={onCancel}>{t("common.cancel")}</button>
+        <button type="submit" className={buttonPrimary} disabled={saving}>{saving ? t("common.saving") : t("common.save")}</button>
       </div>
     </form>
   );
 }
 
 export default function Workers() {
+  const { t } = useTranslation();
   const { user } = useAuth();
   const canEdit = user?.role === "ADMIN" || user?.role === "SUPERVISOR";
   const [workers, setWorkers] = useState<Worker[]>([]);
@@ -131,22 +134,22 @@ export default function Workers() {
   }
 
   async function deleteWorker(id: string) {
-    if (!confirm("Remove this worker record?")) return;
+    if (!confirm(t("workers.confirmDelete"))) return;
     await api.delete(`/workers/${id}`);
     await load();
   }
 
-  if (loading) return <div className="text-mine-300">Loading workers…</div>;
+  if (loading) return <div className="text-mine-300">{t("workers.loading")}</div>;
 
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-xl font-bold">Workers</h1>
-          <p className="text-mine-300 text-sm">Personnel assigned across sites and zones</p>
+          <h1 className="text-xl font-bold">{t("workers.title")}</h1>
+          <p className="text-mine-300 text-sm">{t("workers.subtitle")}</p>
         </div>
         {canEdit && sites.length > 0 && (
-          <button className={buttonPrimary} onClick={() => setModal("create")}>+ New Worker</button>
+          <button className={buttonPrimary} onClick={() => setModal("create")}>{t("workers.newWorker")}</button>
         )}
       </div>
 
@@ -154,11 +157,11 @@ export default function Workers() {
         <table className="w-full text-sm">
           <thead className="bg-mine-800/50 text-mine-300 text-xs uppercase">
             <tr>
-              <th className="text-left px-4 py-2">Name</th>
-              <th className="text-left px-4 py-2">Employee ID</th>
-              <th className="text-left px-4 py-2">Role</th>
-              <th className="text-left px-4 py-2">Site / Zone</th>
-              <th className="text-left px-4 py-2">Status</th>
+              <th className="text-left px-4 py-2">{t("workers.colName")}</th>
+              <th className="text-left px-4 py-2">{t("workers.colEmployeeId")}</th>
+              <th className="text-left px-4 py-2">{t("workers.colRole")}</th>
+              <th className="text-left px-4 py-2">{t("workers.colSiteZone")}</th>
+              <th className="text-left px-4 py-2">{t("workers.colStatus")}</th>
               <th className="px-4 py-2"></th>
             </tr>
           </thead>
@@ -175,22 +178,22 @@ export default function Workers() {
                 <td className="px-4 py-2 text-right">
                   {canEdit && (
                     <div className="flex justify-end gap-2">
-                      <button className="text-xs text-mine-300 hover:text-white" onClick={() => setModal(w)}>Edit</button>
-                      <button className={buttonDanger} onClick={() => deleteWorker(w.id)}>Delete</button>
+                      <button className="text-xs text-mine-300 hover:text-white" onClick={() => setModal(w)}>{t("common.edit")}</button>
+                      <button className={buttonDanger} onClick={() => deleteWorker(w.id)}>{t("common.delete")}</button>
                     </div>
                   )}
                 </td>
               </tr>
             ))}
             {workers.length === 0 && (
-              <tr><td colSpan={6} className="px-4 py-6 text-center text-mine-400">No workers yet.</td></tr>
+              <tr><td colSpan={6} className="px-4 py-6 text-center text-mine-400">{t("workers.noWorkersYet")}</td></tr>
             )}
           </tbody>
         </table>
       </div>
 
       {modal && (
-        <Modal title={modal === "create" ? "New Worker" : "Edit Worker"} onClose={() => setModal(null)}>
+        <Modal title={modal === "create" ? t("workers.newWorkerTitle") : t("workers.editWorkerTitle")} onClose={() => setModal(null)}>
           <WorkerForm
             sites={sites}
             zones={zones}

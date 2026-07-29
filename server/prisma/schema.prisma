@@ -11,6 +11,13 @@ enum Role {
   ADMIN
   SUPERVISOR
   VIEWER
+  EXECUTIVE
+}
+
+enum ExecReviewStatus {
+  PENDING
+  APPROVED
+  REJECTED
 }
 
 enum SiteStatus {
@@ -76,6 +83,8 @@ model User {
 
   acknowledgedAlerts Alert[]    @relation("AlertAcknowledgedBy")
   reportedIncidents  Incident[] @relation("IncidentReportedBy")
+  reviewedAlerts     Alert[]    @relation("AlertReviewedBy")
+  reviewedIncidents  Incident[] @relation("IncidentReviewedBy")
 }
 
 model Site {
@@ -154,6 +163,12 @@ model Alert {
   acknowledgedBy   User?       @relation("AlertAcknowledgedBy", fields: [acknowledgedById], references: [id], onDelete: SetNull)
   resolvedAt     DateTime?
 
+  reviewStatus ExecReviewStatus @default(PENDING)
+  reviewNote   String?
+  reviewedAt   DateTime?
+  reviewedById String?
+  reviewedBy   User?            @relation("AlertReviewedBy", fields: [reviewedById], references: [id], onDelete: SetNull)
+
   @@index([status])
 }
 
@@ -184,6 +199,12 @@ model Incident {
   zone         Zone?          @relation(fields: [zoneId], references: [id], onDelete: SetNull)
   reportedById String?
   reportedBy   User?          @relation("IncidentReportedBy", fields: [reportedById], references: [id], onDelete: SetNull)
+
+  reviewStatus ExecReviewStatus @default(PENDING)
+  reviewNote   String?
+  reviewedAt   DateTime?
+  reviewedById String?
+  reviewedBy   User?            @relation("IncidentReviewedBy", fields: [reviewedById], references: [id], onDelete: SetNull)
 
   createdAt  DateTime  @default(now())
   resolvedAt DateTime?

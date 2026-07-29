@@ -1,9 +1,12 @@
 import { FormEvent, useState } from "react";
 import { Link, Navigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { useAuth } from "../context/AuthContext";
 import { buttonPrimary, buttonSecondary, inputClass, labelClass } from "../components/ui";
+import LanguageSwitcher from "../components/LanguageSwitcher";
 
 export default function Login() {
+  const { t } = useTranslation();
   const { user, login } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -19,7 +22,7 @@ export default function Login() {
     try {
       await login(email, password);
     } catch (err: any) {
-      setError(err.response?.data?.error ?? "Login failed");
+      setError(err.response?.data?.error ?? t("login.error"));
     } finally {
       setLoading(false);
     }
@@ -28,13 +31,16 @@ export default function Login() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-mine-950 px-4">
       <div className="w-full max-w-sm">
+        <div className="flex justify-end mb-3">
+          <LanguageSwitcher />
+        </div>
         <div className="text-center mb-8">
           <div className="text-3xl font-bold">⛏ Mine Guard</div>
-          <div className="text-mine-300 text-sm mt-1">Mine Safety Monitoring System</div>
+          <div className="text-mine-300 text-sm mt-1">{t("login.tagline")}</div>
         </div>
         <form onSubmit={handleSubmit} className="bg-mine-900 border border-mine-800 rounded-lg p-6 space-y-4">
           <div>
-            <label className={labelClass}>Email</label>
+            <label className={labelClass}>{t("login.email")}</label>
             <input
               className={inputClass}
               type="email"
@@ -44,7 +50,7 @@ export default function Login() {
             />
           </div>
           <div>
-            <label className={labelClass}>Password</label>
+            <label className={labelClass}>{t("login.password")}</label>
             <input
               className={inputClass}
               type="password"
@@ -55,10 +61,10 @@ export default function Login() {
           </div>
           {error && <div className="text-danger-400 text-sm">{error}</div>}
           <button type="submit" disabled={loading} className={`${buttonPrimary} w-full`}>
-            {loading ? "Signing in…" : "Sign in"}
+            {loading ? t("login.signingIn") : t("login.signIn")}
           </button>
           <Link to="/signup" className={`${buttonSecondary} w-full block text-center`}>
-            Create Account
+            {t("login.createAccount")}
           </Link>
         </form>
       </div>

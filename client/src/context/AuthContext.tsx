@@ -7,7 +7,7 @@ interface AuthContextValue {
   token: string | null;
   loading: boolean;
   login: (email: string, password: string) => Promise<void>;
-  register: (email: string, password: string, name: string) => Promise<void>;
+  register: (email: string, password: string, name: string, role: "ADMIN" | "EXECUTIVE") => Promise<void>;
   logout: () => void;
 }
 
@@ -53,8 +53,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     persist(res.data.token, res.data.user);
   }
 
-  async function register(email: string, password: string, name: string) {
-    const res = await api.post("/auth/register", { email, password, name });
+  async function register(email: string, password: string, name: string, role: "ADMIN" | "EXECUTIVE") {
+    const res = await api.post("/auth/register", { email, password, name, role });
     persist(res.data.token, res.data.user);
   }
 

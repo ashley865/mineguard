@@ -1,4 +1,5 @@
-export type Role = "ADMIN" | "SUPERVISOR" | "VIEWER";
+export type Role = "ADMIN" | "SUPERVISOR" | "VIEWER" | "EXECUTIVE";
+export type ExecReviewStatus = "PENDING" | "APPROVED" | "REJECTED";
 
 export interface User {
   id: string;
@@ -78,6 +79,10 @@ export interface Alert {
   acknowledgedAt?: string | null;
   acknowledgedBy?: { id: string; name: string } | null;
   resolvedAt?: string | null;
+  reviewStatus: ExecReviewStatus;
+  reviewNote?: string | null;
+  reviewedAt?: string | null;
+  reviewedBy?: { id: string; name: string } | null;
 }
 
 export type WorkerStatus = "ON_SHIFT" | "OFF_SHIFT" | "EMERGENCY";
@@ -110,6 +115,10 @@ export interface Incident {
   reportedBy?: { id: string; name: string } | null;
   createdAt: string;
   resolvedAt?: string | null;
+  reviewStatus: ExecReviewStatus;
+  reviewNote?: string | null;
+  reviewedAt?: string | null;
+  reviewedBy?: { id: string; name: string } | null;
 }
 
 export type EquipmentStatus = "OPERATIONAL" | "MAINTENANCE" | "DOWN";
@@ -138,4 +147,14 @@ export interface DashboardSummary {
   };
   recentAlerts: Alert[];
   sites: Site[];
+}
+
+export interface ExecutiveSummary {
+  siteStatus: Record<SiteStatus, number>;
+  alertSeverity: Record<AlertSeverity, number>;
+  incidents: { open: number; investigating: number; resolved: number };
+  incidentTrend: { date: string; count: number }[];
+  workers: { total: number; onShift: number };
+  equipment: { total: number; operational: number; uptimePct: number };
+  pendingReviews: { alerts: Alert[]; incidents: Incident[] };
 }

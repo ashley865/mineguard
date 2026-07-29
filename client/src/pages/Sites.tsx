@@ -1,4 +1,5 @@
 import { FormEvent, useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { api } from "../api/client";
 import { useAuth } from "../context/AuthContext";
 import { Site, SiteStatus, Zone } from "../api/types";
@@ -11,6 +12,7 @@ function SiteForm({ initial, onSubmit, onCancel }: {
   onSubmit: (data: { name: string; location: string; description?: string; status: SiteStatus }) => Promise<void>;
   onCancel: () => void;
 }) {
+  const { t } = useTranslation();
   const [name, setName] = useState(initial?.name ?? "");
   const [location, setLocation] = useState(initial?.location ?? "");
   const [description, setDescription] = useState(initial?.description ?? "");
@@ -30,28 +32,28 @@ function SiteForm({ initial, onSubmit, onCancel }: {
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <div>
-        <label className={labelClass}>Site name</label>
+        <label className={labelClass}>{t("sites.siteName")}</label>
         <input className={inputClass} value={name} onChange={(e) => setName(e.target.value)} required />
       </div>
       <div>
-        <label className={labelClass}>Location</label>
+        <label className={labelClass}>{t("common.location")}</label>
         <input className={inputClass} value={location} onChange={(e) => setLocation(e.target.value)} required />
       </div>
       <div>
-        <label className={labelClass}>Description</label>
+        <label className={labelClass}>{t("common.description")}</label>
         <textarea className={inputClass} value={description} onChange={(e) => setDescription(e.target.value)} rows={2} />
       </div>
       <div>
-        <label className={labelClass}>Status</label>
+        <label className={labelClass}>{t("common.status")}</label>
         <select className={inputClass} value={status} onChange={(e) => setStatus(e.target.value as SiteStatus)}>
-          <option value="OPERATIONAL">Operational</option>
-          <option value="RESTRICTED">Restricted</option>
-          <option value="SHUT_DOWN">Shut down</option>
+          <option value="OPERATIONAL">{t("sites.operational")}</option>
+          <option value="RESTRICTED">{t("sites.restricted")}</option>
+          <option value="SHUT_DOWN">{t("sites.shutDown")}</option>
         </select>
       </div>
       <div className="flex justify-end gap-2 pt-2">
-        <button type="button" className={buttonSecondary} onClick={onCancel}>Cancel</button>
-        <button type="submit" className={buttonPrimary} disabled={saving}>{saving ? "Saving…" : "Save"}</button>
+        <button type="button" className={buttonSecondary} onClick={onCancel}>{t("common.cancel")}</button>
+        <button type="submit" className={buttonPrimary} disabled={saving}>{saving ? t("common.saving") : t("common.save")}</button>
       </div>
     </form>
   );
@@ -63,6 +65,7 @@ function ZoneForm({ siteId, initial, onSubmit, onCancel }: {
   onSubmit: (data: { name: string; description?: string; siteId: string }) => Promise<void>;
   onCancel: () => void;
 }) {
+  const { t } = useTranslation();
   const [name, setName] = useState(initial?.name ?? "");
   const [description, setDescription] = useState(initial?.description ?? "");
   const [saving, setSaving] = useState(false);
@@ -80,22 +83,23 @@ function ZoneForm({ siteId, initial, onSubmit, onCancel }: {
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <div>
-        <label className={labelClass}>Zone name</label>
+        <label className={labelClass}>{t("sites.zoneName")}</label>
         <input className={inputClass} value={name} onChange={(e) => setName(e.target.value)} required />
       </div>
       <div>
-        <label className={labelClass}>Description</label>
+        <label className={labelClass}>{t("common.description")}</label>
         <textarea className={inputClass} value={description} onChange={(e) => setDescription(e.target.value)} rows={2} />
       </div>
       <div className="flex justify-end gap-2 pt-2">
-        <button type="button" className={buttonSecondary} onClick={onCancel}>Cancel</button>
-        <button type="submit" className={buttonPrimary} disabled={saving}>{saving ? "Saving…" : "Save"}</button>
+        <button type="button" className={buttonSecondary} onClick={onCancel}>{t("common.cancel")}</button>
+        <button type="submit" className={buttonPrimary} disabled={saving}>{saving ? t("common.saving") : t("common.save")}</button>
       </div>
     </form>
   );
 }
 
 export default function Sites() {
+  const { t } = useTranslation();
   const { user } = useAuth();
   const canEdit = user?.role === "ADMIN" || user?.role === "SUPERVISOR";
   const [sites, setSites] = useState<Site[]>([]);
@@ -127,7 +131,7 @@ export default function Sites() {
   }
 
   async function deleteSite(id: string) {
-    if (!confirm("Delete this site and all its zones, sensors, workers, and equipment?")) return;
+    if (!confirm(t("sites.confirmDeleteSite"))) return;
     await api.delete(`/sites/${id}`);
     await load();
   }
@@ -145,23 +149,23 @@ export default function Sites() {
   }
 
   async function deleteZone(id: string) {
-    if (!confirm("Delete this zone and all its sensors?")) return;
+    if (!confirm(t("sites.confirmDeleteZone"))) return;
     await api.delete(`/zones/${id}`);
     await load();
   }
 
-  if (loading) return <div className="text-mine-300">Loading sites…</div>;
+  if (loading) return <div className="text-mine-300">{t("sites.loading")}</div>;
 
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-xl font-bold">Sites & Zones</h1>
-          <p className="text-mine-300 text-sm">Manage mine sites and their internal zones</p>
+          <h1 className="text-xl font-bold">{t("sites.title")}</h1>
+          <p className="text-mine-300 text-sm">{t("sites.subtitle")}</p>
         </div>
         {canEdit && (
           <button className={buttonPrimary} onClick={() => setSiteModal("create")}>
-            + New Site
+            {t("sites.newSite")}
           </button>
         )}
       </div>
@@ -180,9 +184,9 @@ export default function Sites() {
               </div>
               {canEdit && (
                 <div className="flex gap-2">
-                  <button className={buttonSecondary} onClick={() => setSiteModal(site)}>Edit</button>
+                  <button className={buttonSecondary} onClick={() => setSiteModal(site)}>{t("common.edit")}</button>
                   {user?.role === "ADMIN" && (
-                    <button className={buttonDanger} onClick={() => deleteSite(site.id)}>Delete</button>
+                    <button className={buttonDanger} onClick={() => deleteSite(site.id)}>{t("common.delete")}</button>
                   )}
                 </div>
               )}
@@ -190,13 +194,13 @@ export default function Sites() {
 
             <div className="mt-4 border-t border-mine-800 pt-4">
               <div className="flex items-center justify-between mb-2">
-                <h3 className="text-sm font-semibold text-mine-200">Zones</h3>
+                <h3 className="text-sm font-semibold text-mine-200">{t("sites.zones")}</h3>
                 {canEdit && (
                   <button
                     className="text-xs text-mine-300 hover:text-white underline"
                     onClick={() => setZoneModal({ siteId: site.id })}
                   >
-                    + Add zone
+                    {t("sites.addZone")}
                   </button>
                 )}
               </div>
@@ -213,30 +217,30 @@ export default function Sites() {
                           className="text-xs text-mine-300 hover:text-white"
                           onClick={() => setZoneModal({ siteId: site.id, zone })}
                         >
-                          Edit
+                          {t("common.edit")}
                         </button>
                         <button
                           className="text-xs text-danger-400 hover:text-danger-300"
                           onClick={() => deleteZone(zone.id)}
                         >
-                          Delete
+                          {t("common.delete")}
                         </button>
                       </div>
                     )}
                   </div>
                 ))}
                 {(site.zones ?? []).length === 0 && (
-                  <div className="text-xs text-mine-400">No zones yet.</div>
+                  <div className="text-xs text-mine-400">{t("sites.noZonesYet")}</div>
                 )}
               </div>
             </div>
           </div>
         ))}
-        {sites.length === 0 && <div className="text-mine-400">No sites yet. Create one to get started.</div>}
+        {sites.length === 0 && <div className="text-mine-400">{t("sites.noSitesYet")}</div>}
       </div>
 
       {siteModal && (
-        <Modal title={siteModal === "create" ? "New Site" : "Edit Site"} onClose={() => setSiteModal(null)}>
+        <Modal title={siteModal === "create" ? t("sites.newSiteTitle") : t("sites.editSiteTitle")} onClose={() => setSiteModal(null)}>
           <SiteForm
             initial={siteModal === "create" ? undefined : siteModal}
             onSubmit={(data) => (siteModal === "create" ? createSite(data) : updateSite(siteModal.id, data))}
@@ -246,7 +250,7 @@ export default function Sites() {
       )}
 
       {zoneModal && (
-        <Modal title={zoneModal.zone ? "Edit Zone" : "New Zone"} onClose={() => setZoneModal(null)}>
+        <Modal title={zoneModal.zone ? t("sites.editZoneTitle") : t("sites.newZoneTitle")} onClose={() => setZoneModal(null)}>
           <ZoneForm
             siteId={zoneModal.siteId}
             initial={zoneModal.zone}

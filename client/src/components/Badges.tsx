@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { AlertSeverity, AlertStatus, EquipmentStatus, SensorStatus, SiteStatus, WorkerStatus } from "../api/types";
 
 const severityColors: Record<AlertSeverity, string> = {
@@ -8,9 +9,10 @@ const severityColors: Record<AlertSeverity, string> = {
 };
 
 export function SeverityBadge({ severity }: { severity: AlertSeverity }) {
+  const { t } = useTranslation();
   return (
     <span className={`px-2 py-0.5 rounded text-xs font-semibold ${severityColors[severity]}`}>
-      {severity}
+      {t(`badges.severity.${severity}`)}
     </span>
   );
 }
@@ -31,6 +33,8 @@ const statusColors: Record<string, string> = {
   EMERGENCY: "bg-danger-500 text-white animate-pulse",
   MAINTENANCE: "bg-hazard-500 text-white",
   DOWN: "bg-danger-500 text-white",
+  APPROVED: "bg-emerald-600 text-white",
+  REJECTED: "bg-danger-500 text-white",
 };
 
 export function StatusBadge({
@@ -38,9 +42,10 @@ export function StatusBadge({
 }: {
   status: AlertStatus | SensorStatus | SiteStatus | WorkerStatus | EquipmentStatus | string;
 }) {
+  const { t } = useTranslation();
   return (
     <span className={`px-2 py-0.5 rounded text-xs font-semibold ${statusColors[status] ?? "bg-mine-600"}`}>
-      {status.replace(/_/g, " ")}
+      {t(`badges.status.${status}`, status.replace(/_/g, " "))}
     </span>
   );
 }

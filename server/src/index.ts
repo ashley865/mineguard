@@ -13,6 +13,7 @@ import workersRoutes from "./routes/workers";
 import incidentsRoutes from "./routes/incidents";
 import equipmentRoutes from "./routes/equipment";
 import dashboardRoutes from "./routes/dashboard";
+import executiveRoutes from "./routes/executive";
 import { startSimulator } from "./services/simulator";
 
 const app = express();
@@ -39,6 +40,7 @@ app.use("/api/workers", workersRoutes);
 app.use("/api/incidents", incidentsRoutes);
 app.use("/api/equipment", equipmentRoutes);
 app.use("/api/dashboard", dashboardRoutes);
+app.use("/api/executive", executiveRoutes);
 
 app.use((err: any, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
   console.error(err);
