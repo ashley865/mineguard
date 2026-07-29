@@ -260,7 +260,8 @@
       "TEMPORARILY_UNFIT": "No apto temporalmente",
       "UNFIT": "No apto",
       "PENDING_RENEWAL": "Renovación pendiente",
-      "SUSPENDED": "Suspendido"
+      "SUSPENDED": "Suspendido",
+      "ARCHIVED": "Archivado"
     },
     "severity": {
       "LOW": "Baja",
@@ -494,6 +495,45 @@
         "SKILLS_DEVELOPMENT": "Desarrollo de Habilidades",
         "OTHER": "Otro"
       }
+    }
+  },
+  "documents": {
+    "nav": "Control de Documentos",
+    "title": "Control de Documentos",
+    "subtitle": "Registro central de documentos controlados: políticas, procedimientos y registros",
+    "new": "+ Subir Documento",
+    "titleField": "Título",
+    "type": "Tipo de documento",
+    "version": "Versión",
+    "reviewDate": "Fecha de revisión",
+    "site": "Sitio",
+    "companyWide": "A nivel de empresa",
+    "file": "Archivo",
+    "fileRequired": "Selecciona un archivo para subir.",
+    "fileLocked": "Archivo: {{fileName}} (elimina y vuelve a subir para reemplazarlo)",
+    "saveFailed": "Error al guardar el documento",
+    "colTitle": "Título",
+    "colType": "Tipo",
+    "colVersion": "Versión",
+    "colSite": "Sitio",
+    "colSize": "Tamaño",
+    "colStatus": "Estado",
+    "download": "Descargar",
+    "noneYet": "Aún no se han subido documentos.",
+    "confirmDelete": "¿Eliminar este documento?",
+    "newTitle": "Subir Documento",
+    "editTitle": "Editar Documento",
+    "loading": "Cargando…",
+    "types": {
+      "POLICY": "Política",
+      "CODE_OF_PRACTICE": "Código de Práctica",
+      "PERMIT": "Permiso",
+      "CERTIFICATE": "Certificado",
+      "REPORT": "Informe",
+      "PROCEDURE": "Procedimiento",
+      "DRAWING": "Plano",
+      "CONTRACT": "Contrato",
+      "OTHER": "Otro"
     }
   }
 }

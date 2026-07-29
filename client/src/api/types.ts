@@ -333,3 +333,33 @@ export interface TrainingRecord {
   expiryDate?: string | null;
   provider: string;
 }
+
+export type DocumentType =
+  | "POLICY"
+  | "CODE_OF_PRACTICE"
+  | "PERMIT"
+  | "CERTIFICATE"
+  | "REPORT"
+  | "PROCEDURE"
+  | "DRAWING"
+  | "CONTRACT"
+  | "OTHER";
+export type DocumentStatus = "DRAFT" | "ACTIVE" | "UNDER_REVIEW" | "ARCHIVED" | "WITHDRAWN";
+
+export interface MineDocument {
+  id: string;
+  title: string;
+  type: DocumentType;
+  version: string;
+  status: DocumentStatus;
+  description?: string | null;
+  reviewDate?: string | null;
+  siteId?: string | null;
+  site?: { id: string; name: string } | null;
+  fileName: string;
+  fileMimeType: string;
+  fileSize: number;
+  uploadedById?: string | null;
+  uploadedBy?: { id: string; name: string } | null;
+  createdAt: string;
+}

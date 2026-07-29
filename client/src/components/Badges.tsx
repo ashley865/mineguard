@@ -50,6 +50,7 @@ const statusColors: Record<string, string> = {
   UNFIT: "bg-danger-500 text-white",
   PENDING_RENEWAL: "bg-hazard-500 text-white",
   SUSPENDED: "bg-danger-500 text-white",
+  ARCHIVED: "bg-mine-600 text-mine-100",
 };
 
 export function StatusBadge({

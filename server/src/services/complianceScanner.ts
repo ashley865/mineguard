@@ -166,6 +166,22 @@ export async function scanCompliance(io?: Server) {
     if (alert) newAlerts.push(alert);
   }
 
+  const documents = await prisma.document.findMany({
+    where: { status: "ACTIVE", reviewDate: { not: null }, siteId: { not: null } },
+  });
+  for (const doc of documents) {
+    if (!doc.reviewDate || !doc.siteId) continue;
+    const days = daysFromNow(doc.reviewDate);
+    if (days > REVIEW_WARNING_DAYS) continue;
+    const severity: AlertSeverity = days < 0 ? "MEDIUM" : days <= 7 ? "LOW" : "LOW";
+    const message =
+      days < 0
+        ? `Document "${doc.title}" review is overdue by ${Math.abs(days)} day(s)`
+        : `Document "${doc.title}" review due in ${days} day(s)`;
+    const alert = await raiseAlertIfMissing({ siteId: doc.siteId, severity, message });
+    if (alert) newAlerts.push(alert);
+  }
+
   if (io) {
     for (const alert of newAlerts) io.emit("alert:new", alert);
   }

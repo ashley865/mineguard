@@ -154,6 +154,7 @@ model User {
   reportedIncidents  Incident[] @relation("IncidentReportedBy")
   reviewedAlerts     Alert[]    @relation("AlertReviewedBy")
   reviewedIncidents  Incident[] @relation("IncidentReviewedBy")
+  uploadedDocuments  Document[]
 }
 
 model Site {
@@ -176,6 +177,7 @@ model Site {
   regulatoryNotices RegulatoryNotice[]
   safetyInspections SafetyInspection[]
   permits           Permit[]
+  documents         Document[]
 }
 
 model Zone {
@@ -488,6 +490,48 @@ model TrainingRecord {
   completionDate DateTime
   expiryDate     DateTime?
   provider       String
+
+  createdAt DateTime @default(now())
+}
+
+enum DocumentType {
+  POLICY
+  CODE_OF_PRACTICE
+  PERMIT
+  CERTIFICATE
+  REPORT
+  PROCEDURE
+  DRAWING
+  CONTRACT
+  OTHER
+}
+
+enum DocumentStatus {
+  DRAFT
+  ACTIVE
+  UNDER_REVIEW
+  ARCHIVED
+  WITHDRAWN
+}
+
+model Document {
+  id          String         @id @default(cuid())
+  title       String
+  type        DocumentType
+  version     String
+  status      DocumentStatus @default(ACTIVE)
+  description String?
+  reviewDate  DateTime?
+  siteId      String?
+  site        Site?          @relation(fields: [siteId], references: [id], onDelete: SetNull)
+
+  fileName     String
+  fileMimeType String
+  fileSize     Int
+  fileData     Bytes
+
+  uploadedById String?
+  uploadedBy   User?   @relation(fields: [uploadedById], references: [id], onDelete: SetNull)
 
   createdAt DateTime @default(now())
 }

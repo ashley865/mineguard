@@ -260,7 +260,8 @@
       "TEMPORARILY_UNFIT": "Temporairement inapte",
       "UNFIT": "Inapte",
       "PENDING_RENEWAL": "Renouvellement en attente",
-      "SUSPENDED": "Suspendu"
+      "SUSPENDED": "Suspendu",
+      "ARCHIVED": "Archivé"
     },
     "severity": {
       "LOW": "Faible",
@@ -494,6 +495,45 @@
         "SKILLS_DEVELOPMENT": "Développement des Compétences",
         "OTHER": "Autre"
       }
+    }
+  },
+  "documents": {
+    "nav": "Contrôle des Documents",
+    "title": "Contrôle des Documents",
+    "subtitle": "Registre central des documents contrôlés : politiques, procédures et dossiers",
+    "new": "+ Téléverser un Document",
+    "titleField": "Titre",
+    "type": "Type de document",
+    "version": "Version",
+    "reviewDate": "Date de révision",
+    "site": "Site",
+    "companyWide": "À l'échelle de l'entreprise",
+    "file": "Fichier",
+    "fileRequired": "Veuillez choisir un fichier à téléverser.",
+    "fileLocked": "Fichier : {{fileName}} (supprimer et retéléverser pour remplacer)",
+    "saveFailed": "Échec de l'enregistrement du document",
+    "colTitle": "Titre",
+    "colType": "Type",
+    "colVersion": "Version",
+    "colSite": "Site",
+    "colSize": "Taille",
+    "colStatus": "Statut",
+    "download": "Télécharger",
+    "noneYet": "Aucun document téléversé pour le moment.",
+    "confirmDelete": "Supprimer ce document ?",
+    "newTitle": "Téléverser un Document",
+    "editTitle": "Modifier le Document",
+    "loading": "Chargement…",
+    "types": {
+      "POLICY": "Politique",
+      "CODE_OF_PRACTICE": "Code de Pratique",
+      "PERMIT": "Permis",
+      "CERTIFICATE": "Certificat",
+      "REPORT": "Rapport",
+      "PROCEDURE": "Procédure",
+      "DRAWING": "Plan",
+      "CONTRACT": "Contrat",
+      "OTHER": "Autre"
     }
   }
 }

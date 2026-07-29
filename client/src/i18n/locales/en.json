@@ -260,7 +260,8 @@
       "TEMPORARILY_UNFIT": "Temporarily unfit",
       "UNFIT": "Unfit",
       "PENDING_RENEWAL": "Pending renewal",
-      "SUSPENDED": "Suspended"
+      "SUSPENDED": "Suspended",
+      "ARCHIVED": "Archived"
     },
     "severity": {
       "LOW": "Low",
@@ -494,6 +495,45 @@
         "SKILLS_DEVELOPMENT": "Skills Development",
         "OTHER": "Other"
       }
+    }
+  },
+  "documents": {
+    "nav": "Document Control",
+    "title": "Document Control",
+    "subtitle": "Central register of controlled documents — policies, procedures, and records",
+    "new": "+ Upload Document",
+    "titleField": "Title",
+    "type": "Document type",
+    "version": "Version",
+    "reviewDate": "Review date",
+    "site": "Site",
+    "companyWide": "Company-wide",
+    "file": "File",
+    "fileRequired": "Please choose a file to upload.",
+    "fileLocked": "File: {{fileName}} (delete and re-upload to replace)",
+    "saveFailed": "Failed to save document",
+    "colTitle": "Title",
+    "colType": "Type",
+    "colVersion": "Version",
+    "colSite": "Site",
+    "colSize": "Size",
+    "colStatus": "Status",
+    "download": "Download",
+    "noneYet": "No documents uploaded yet.",
+    "confirmDelete": "Delete this document?",
+    "newTitle": "Upload Document",
+    "editTitle": "Edit Document",
+    "loading": "Loading…",
+    "types": {
+      "POLICY": "Policy",
+      "CODE_OF_PRACTICE": "Code of Practice",
+      "PERMIT": "Permit",
+      "CERTIFICATE": "Certificate",
+      "REPORT": "Report",
+      "PROCEDURE": "Procedure",
+      "DRAWING": "Drawing",
+      "CONTRACT": "Contract",
+      "OTHER": "Other"
     }
   }
 }
