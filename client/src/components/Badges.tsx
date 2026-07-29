@@ -35,6 +35,19 @@ const statusColors: Record<string, string> = {
   DOWN: "bg-danger-500 text-white",
   APPROVED: "bg-emerald-600 text-white",
   REJECTED: "bg-danger-500 text-white",
+  DRAFT: "bg-mine-600 text-mine-100",
+  UNDER_REVIEW: "bg-hazard-500 text-white",
+  EXPIRED: "bg-danger-500 text-white",
+  WITHDRAWN: "bg-mine-600 text-mine-100",
+  COMPLIED: "bg-emerald-600 text-white",
+  APPEALED: "bg-hazard-500 text-white",
+  SCHEDULED: "bg-mine-600 text-mine-100",
+  COMPLETED: "bg-emerald-600 text-white",
+  OVERDUE: "bg-danger-500 text-white",
+  FIT: "bg-emerald-600 text-white",
+  FIT_WITH_RESTRICTION: "bg-hazard-500 text-white",
+  TEMPORARILY_UNFIT: "bg-hazard-600/80 text-white",
+  UNFIT: "bg-danger-500 text-white",
 };
 
 export function StatusBadge({

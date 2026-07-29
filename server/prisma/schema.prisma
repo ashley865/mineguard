@@ -73,6 +73,75 @@ enum EquipmentStatus {
   DOWN
 }
 
+enum CopCategory {
+  ROCK_ENGINEERING
+  VENTILATION
+  EXPLOSIVES
+  FALL_OF_GROUND
+  TRACKLESS_MOBILE_MACHINERY
+  WINDING_PLANT
+  ELECTRICAL
+  OCCUPATIONAL_HEALTH
+  EMERGENCY_PREPAREDNESS
+  OTHER
+}
+
+enum CopStatus {
+  DRAFT
+  ACTIVE
+  UNDER_REVIEW
+  EXPIRED
+  WITHDRAWN
+}
+
+enum RiskLevel {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+enum RiskAssessmentStatus {
+  DRAFT
+  APPROVED
+  UNDER_REVIEW
+  EXPIRED
+}
+
+enum NoticeSection {
+  SECTION_54
+  SECTION_55
+  SECTION_53
+  OTHER
+}
+
+enum NoticeStatus {
+  OPEN
+  COMPLIED
+  WITHDRAWN
+  APPEALED
+}
+
+enum ExamType {
+  PRE_EMPLOYMENT
+  PERIODICAL
+  EXIT
+  RETURN_TO_WORK
+}
+
+enum FitnessResult {
+  FIT
+  FIT_WITH_RESTRICTION
+  TEMPORARILY_UNFIT
+  UNFIT
+}
+
+enum InspectionStatus {
+  SCHEDULED
+  COMPLETED
+  OVERDUE
+}
+
 model User {
   id           String   @id @default(cuid())
   email        String   @unique
@@ -101,6 +170,11 @@ model Site {
   incidents Incident[]
   equipment Equipment[]
   alerts    Alert[]
+
+  codesOfPractice   CodeOfPractice[]
+  riskAssessments   RiskAssessment[]
+  regulatoryNotices RegulatoryNotice[]
+  safetyInspections SafetyInspection[]
 }
 
 model Zone {
@@ -115,6 +189,11 @@ model Zone {
   incidents Incident[]
   equipment Equipment[]
   alerts    Alert[]
+
+  codesOfPractice   CodeOfPractice[]
+  riskAssessments   RiskAssessment[]
+  regulatoryNotices RegulatoryNotice[]
+  safetyInspections SafetyInspection[]
 
   createdAt DateTime @default(now())
 }
@@ -184,6 +263,8 @@ model Worker {
   zoneId     String?
   zone       Zone?        @relation(fields: [zoneId], references: [id], onDelete: SetNull)
 
+  medicalRecords MedicalSurveillance[]
+
   createdAt DateTime @default(now())
 }
 
@@ -220,6 +301,93 @@ model Equipment {
   zoneId          String?
   zone            Zone?           @relation(fields: [zoneId], references: [id], onDelete: SetNull)
   lastMaintenance DateTime?
+
+  createdAt DateTime @default(now())
+}
+
+model CodeOfPractice {
+  id            String      @id @default(cuid())
+  title         String
+  category      CopCategory
+  version       String
+  status        CopStatus   @default(DRAFT)
+  effectiveDate DateTime
+  reviewDate    DateTime
+  approvedBy    String?
+  description   String?
+  siteId        String
+  site          Site        @relation(fields: [siteId], references: [id], onDelete: Cascade)
+  zoneId        String?
+  zone          Zone?       @relation(fields: [zoneId], references: [id], onDelete: SetNull)
+
+  createdAt DateTime @default(now())
+}
+
+model RiskAssessment {
+  id                String               @id @default(cuid())
+  title             String
+  hazard            String
+  initialRiskLevel  RiskLevel
+  residualRiskLevel RiskLevel
+  controlMeasures   String
+  assessor          String
+  status            RiskAssessmentStatus @default(DRAFT)
+  assessmentDate    DateTime
+  reviewDate        DateTime
+  siteId            String
+  site              Site                 @relation(fields: [siteId], references: [id], onDelete: Cascade)
+  zoneId            String?
+  zone              Zone?                @relation(fields: [zoneId], references: [id], onDelete: SetNull)
+
+  createdAt DateTime @default(now())
+}
+
+model RegulatoryNotice {
+  id                  String         @id @default(cuid())
+  noticeNumber        String
+  section             NoticeSection
+  issuedBy            String
+  issuedDate          DateTime
+  description         String
+  complianceDeadline  DateTime?
+  status              NoticeStatus   @default(OPEN)
+  compliedDate        DateTime?
+  siteId              String
+  site                Site           @relation(fields: [siteId], references: [id], onDelete: Cascade)
+  zoneId              String?
+  zone                Zone?          @relation(fields: [zoneId], references: [id], onDelete: SetNull)
+
+  createdAt DateTime @default(now())
+}
+
+model MedicalSurveillance {
+  id            String        @id @default(cuid())
+  workerId      String
+  worker        Worker        @relation(fields: [workerId], references: [id], onDelete: Cascade)
+  examType      ExamType
+  examDate      DateTime
+  result        FitnessResult
+  restrictions  String?
+  nextExamDue   DateTime
+  practitioner  String
+
+  createdAt DateTime @default(now())
+}
+
+model SafetyInspection {
+  id               String            @id @default(cuid())
+  title            String
+  inspectionType   String
+  scheduledDate    DateTime
+  completedDate    DateTime?
+  inspector        String
+  findings         String?
+  correctiveActions String?
+  status           InspectionStatus  @default(SCHEDULED)
+  siteId           String
+  site             Site              @relation(fields: [siteId], references: [id], onDelete: Cascade)
+  zoneId           String?
+  zone             Zone?             @relation(fields: [zoneId], references: [id], onDelete: SetNull)
 
   createdAt DateTime @default(now())
 }

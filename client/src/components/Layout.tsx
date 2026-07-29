@@ -17,6 +17,7 @@ export default function Layout() {
     { to: "/workers", label: t("nav.workers") },
     { to: "/incidents", label: t("nav.incidents") },
     { to: "/equipment", label: t("nav.equipment") },
+    { to: "/compliance", label: t("compliance.nav") },
   ];
 
   return (

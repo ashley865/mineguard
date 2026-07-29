@@ -158,3 +158,104 @@ export interface ExecutiveSummary {
   equipment: { total: number; operational: number; uptimePct: number };
   pendingReviews: { alerts: Alert[]; incidents: Incident[] };
 }
+
+export type CopCategory =
+  | "ROCK_ENGINEERING"
+  | "VENTILATION"
+  | "EXPLOSIVES"
+  | "FALL_OF_GROUND"
+  | "TRACKLESS_MOBILE_MACHINERY"
+  | "WINDING_PLANT"
+  | "ELECTRICAL"
+  | "OCCUPATIONAL_HEALTH"
+  | "EMERGENCY_PREPAREDNESS"
+  | "OTHER";
+export type CopStatus = "DRAFT" | "ACTIVE" | "UNDER_REVIEW" | "EXPIRED" | "WITHDRAWN";
+
+export interface CodeOfPractice {
+  id: string;
+  title: string;
+  category: CopCategory;
+  version: string;
+  status: CopStatus;
+  effectiveDate: string;
+  reviewDate: string;
+  approvedBy?: string | null;
+  description?: string | null;
+  siteId: string;
+  site?: { id: string; name: string };
+  zoneId?: string | null;
+  zone?: { id: string; name: string } | null;
+}
+
+export type RiskLevel = "LOW" | "MEDIUM" | "HIGH" | "CRITICAL";
+export type RiskAssessmentStatus = "DRAFT" | "APPROVED" | "UNDER_REVIEW" | "EXPIRED";
+
+export interface RiskAssessment {
+  id: string;
+  title: string;
+  hazard: string;
+  initialRiskLevel: RiskLevel;
+  residualRiskLevel: RiskLevel;
+  controlMeasures: string;
+  assessor: string;
+  status: RiskAssessmentStatus;
+  assessmentDate: string;
+  reviewDate: string;
+  siteId: string;
+  site?: { id: string; name: string };
+  zoneId?: string | null;
+  zone?: { id: string; name: string } | null;
+}
+
+export type NoticeSection = "SECTION_54" | "SECTION_55" | "SECTION_53" | "OTHER";
+export type NoticeStatus = "OPEN" | "COMPLIED" | "WITHDRAWN" | "APPEALED";
+
+export interface RegulatoryNotice {
+  id: string;
+  noticeNumber: string;
+  section: NoticeSection;
+  issuedBy: string;
+  issuedDate: string;
+  description: string;
+  complianceDeadline?: string | null;
+  status: NoticeStatus;
+  compliedDate?: string | null;
+  siteId: string;
+  site?: { id: string; name: string };
+  zoneId?: string | null;
+  zone?: { id: string; name: string } | null;
+}
+
+export type ExamType = "PRE_EMPLOYMENT" | "PERIODICAL" | "EXIT" | "RETURN_TO_WORK";
+export type FitnessResult = "FIT" | "FIT_WITH_RESTRICTION" | "TEMPORARILY_UNFIT" | "UNFIT";
+
+export interface MedicalSurveillance {
+  id: string;
+  workerId: string;
+  worker?: { id: string; name: string; employeeId: string; siteId: string };
+  examType: ExamType;
+  examDate: string;
+  result: FitnessResult;
+  restrictions?: string | null;
+  nextExamDue: string;
+  practitioner: string;
+}
+
+export type InspectionStatus = "SCHEDULED" | "COMPLETED" | "OVERDUE";
+
+export interface SafetyInspection {
+  id: string;
+  title: string;
+  inspectionType: string;
+  scheduledDate: string;
+  completedDate?: string | null;
+  inspector: string;
+  findings?: string | null;
+  correctiveActions?: string | null;
+  status: InspectionStatus;
+  siteId: string;
+  site?: { id: string; name: string };
+  zoneId?: string | null;
+  zone?: { id: string; name: string } | null;
+}

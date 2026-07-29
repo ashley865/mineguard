@@ -11,6 +11,7 @@ import Alerts from "./pages/Alerts";
 import Workers from "./pages/Workers";
 import Incidents from "./pages/Incidents";
 import Equipment from "./pages/Equipment";
+import SafetyCompliance from "./pages/SafetyCompliance";
 
 function HomeRoute() {
   const { user } = useAuth();
@@ -30,6 +31,7 @@ export default function App() {
         <Route path="/workers" element={<Workers />} />
         <Route path="/incidents" element={<Incidents />} />
         <Route path="/equipment" element={<Equipment />} />
+        <Route path="/compliance" element={<SafetyCompliance />} />
       </Route>
     </Routes>
   );

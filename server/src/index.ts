@@ -14,7 +14,13 @@ import incidentsRoutes from "./routes/incidents";
 import equipmentRoutes from "./routes/equipment";
 import dashboardRoutes from "./routes/dashboard";
 import executiveRoutes from "./routes/executive";
+import codesOfPracticeRoutes from "./routes/codesOfPractice";
+import riskAssessmentsRoutes from "./routes/riskAssessments";
+import regulatoryNoticesRoutes from "./routes/regulatoryNotices";
+import medicalSurveillanceRoutes from "./routes/medicalSurveillance";
+import safetyInspectionsRoutes from "./routes/safetyInspections";
 import { startSimulator } from "./services/simulator";
+import { scanCompliance } from "./services/complianceScanner";
 
 const app = express();
 const httpServer = createServer(app);
@@ -41,6 +47,11 @@ app.use("/api/incidents", incidentsRoutes);
 app.use("/api/equipment", equipmentRoutes);
 app.use("/api/dashboard", dashboardRoutes);
 app.use("/api/executive", executiveRoutes);
+app.use("/api/codes-of-practice", codesOfPracticeRoutes);
+app.use("/api/risk-assessments", riskAssessmentsRoutes);
+app.use("/api/regulatory-notices", regulatoryNoticesRoutes);
+app.use("/api/medical-surveillance", medicalSurveillanceRoutes);
+app.use("/api/safety-inspections", safetyInspectionsRoutes);
 
 app.use((err: any, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
   console.error(err);
@@ -51,8 +62,14 @@ io.on("connection", (socket) => {
   socket.on("disconnect", () => {});
 });
 
+const COMPLIANCE_SCAN_INTERVAL_MS = 6 * 60 * 60 * 1000;
+
 const port = Number(process.env.PORT) || 4000;
 httpServer.listen(port, () => {
   console.log(`Mine Guard API listening on port ${port}`);
   startSimulator(io);
+  scanCompliance(io).catch((err) => console.error("Compliance scan failed", err));
+  setInterval(() => {
+    scanCompliance(io).catch((err) => console.error("Compliance scan failed", err));
+  }, COMPLIANCE_SCAN_INTERVAL_MS);
 });
