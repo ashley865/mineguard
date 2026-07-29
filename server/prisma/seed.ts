@@ -1,33 +1,8 @@
-import bcrypt from "bcryptjs";
 import { PrismaClient } from "@prisma/client";
 
 const prisma = new PrismaClient();
 
 async function main() {
-  const adminPasswordHash = await bcrypt.hash("Admin123!", 10);
-  const admin = await prisma.user.upsert({
-    where: { email: "admin@mineguard.dev" },
-    update: {},
-    create: {
-      email: "admin@mineguard.dev",
-      passwordHash: adminPasswordHash,
-      name: "Site Administrator",
-      role: "ADMIN",
-    },
-  });
-
-  const supervisorPasswordHash = await bcrypt.hash("Supervisor123!", 10);
-  await prisma.user.upsert({
-    where: { email: "supervisor@mineguard.dev" },
-    update: {},
-    create: {
-      email: "supervisor@mineguard.dev",
-      passwordHash: supervisorPasswordHash,
-      name: "Shift Supervisor",
-      role: "SUPERVISOR",
-    },
-  });
-
   const site = await prisma.site.create({
     data: {
       name: "Blackrock Coal Mine",
@@ -97,12 +72,10 @@ async function main() {
       status: "INVESTIGATING",
       siteId: site.id,
       zoneId: shaftB.id,
-      reportedById: admin.id,
     },
   });
 
-  console.log("Seed complete.");
-  console.log("Login with admin@mineguard.dev / Admin123! or supervisor@mineguard.dev / Supervisor123!");
+  console.log("Seed complete: demo mine data created.");
 }
 
 main()
