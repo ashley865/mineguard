@@ -98,6 +98,9 @@ export interface Worker {
   site?: { id: string; name: string };
   zoneId?: string | null;
   zone?: { id: string; name: string } | null;
+  nextOfKinName?: string | null;
+  nextOfKinRelationship?: string | null;
+  nextOfKinPhone?: string | null;
 }
 
 export type IncidentStatus = "OPEN" | "INVESTIGATING" | "RESOLVED";
@@ -284,4 +287,49 @@ export interface Permit {
   conditions?: string | null;
   siteId: string;
   site?: { id: string; name: string };
+}
+
+export type CertificateType =
+  | "MINE_MANAGER"
+  | "MINE_OVERSEER"
+  | "SHIFT_SUPERVISOR"
+  | "BLASTING"
+  | "ROCK_BREAKER"
+  | "WINDING_ENGINE_DRIVER"
+  | "ELECTRICAL"
+  | "MECHANICAL"
+  | "OTHER";
+export type CertificateStatus = "ACTIVE" | "EXPIRED" | "SUSPENDED" | "WITHDRAWN";
+
+export interface Certificate {
+  id: string;
+  workerId: string;
+  worker?: { id: string; name: string; employeeId: string; siteId: string };
+  type: CertificateType;
+  certificateNumber: string;
+  issuingBody: string;
+  issueDate: string;
+  expiryDate?: string | null;
+  status: CertificateStatus;
+}
+
+export type TrainingType =
+  | "INDUCTION"
+  | "REFRESHER"
+  | "FIRST_AID"
+  | "FIRE_FIGHTING"
+  | "SELF_RESCUE"
+  | "HAZARD_SPECIFIC"
+  | "SKILLS_DEVELOPMENT"
+  | "OTHER";
+
+export interface TrainingRecord {
+  id: string;
+  workerId: string;
+  worker?: { id: string; name: string; employeeId: string; siteId: string };
+  courseName: string;
+  trainingType: TrainingType;
+  completionDate: string;
+  expiryDate?: string | null;
+  provider: string;
 }

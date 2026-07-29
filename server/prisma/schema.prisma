@@ -264,7 +264,13 @@ model Worker {
   zoneId     String?
   zone       Zone?        @relation(fields: [zoneId], references: [id], onDelete: SetNull)
 
-  medicalRecords MedicalSurveillance[]
+  nextOfKinName         String?
+  nextOfKinRelationship String?
+  nextOfKinPhone        String?
+
+  medicalRecords  MedicalSurveillance[]
+  certificates    Certificate[]
+  trainingRecords TrainingRecord[]
 
   createdAt DateTime @default(now())
 }
@@ -425,6 +431,63 @@ model Permit {
   conditions       String?
   siteId           String
   site             Site         @relation(fields: [siteId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+}
+
+enum CertificateType {
+  MINE_MANAGER
+  MINE_OVERSEER
+  SHIFT_SUPERVISOR
+  BLASTING
+  ROCK_BREAKER
+  WINDING_ENGINE_DRIVER
+  ELECTRICAL
+  MECHANICAL
+  OTHER
+}
+
+enum CertificateStatus {
+  ACTIVE
+  EXPIRED
+  SUSPENDED
+  WITHDRAWN
+}
+
+model Certificate {
+  id                String            @id @default(cuid())
+  workerId          String
+  worker            Worker            @relation(fields: [workerId], references: [id], onDelete: Cascade)
+  type              CertificateType
+  certificateNumber String
+  issuingBody       String
+  issueDate         DateTime
+  expiryDate        DateTime?
+  status            CertificateStatus @default(ACTIVE)
+
+  createdAt DateTime @default(now())
+}
+
+enum TrainingType {
+  INDUCTION
+  REFRESHER
+  FIRST_AID
+  FIRE_FIGHTING
+  SELF_RESCUE
+  HAZARD_SPECIFIC
+  SKILLS_DEVELOPMENT
+  OTHER
+}
+
+model TrainingRecord {
+  id             String       @id @default(cuid())
+  workerId       String
+  worker         Worker       @relation(fields: [workerId], references: [id], onDelete: Cascade)
+  courseName     String
+  trainingType   TrainingType
+  completionDate DateTime
+  expiryDate     DateTime?
+  provider       String
 
   createdAt DateTime @default(now())
 }

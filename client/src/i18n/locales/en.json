@@ -169,7 +169,11 @@
     "newWorkerTitle": "New Worker",
     "editWorkerTitle": "Edit Worker",
     "confirmDelete": "Remove this worker record?",
-    "loading": "Loading workers…"
+    "loading": "Loading workers…",
+    "nextOfKin": "Next of Kin",
+    "nextOfKinName": "Next of kin name",
+    "nextOfKinRelationship": "Relationship",
+    "nextOfKinPhone": "Next of kin phone"
   },
   "equipment": {
     "title": "Equipment",
@@ -426,6 +430,70 @@
       "EXPLOSIVES_LICENSE": "Explosives License",
       "MINE_WORKS_PROGRAMME": "Mine Works Programme",
       "OTHER": "Other"
+    }
+  },
+  "workforce": {
+    "nav": "Workforce Management",
+    "subtitle": "Statutory competency certificates and training records for mine personnel",
+    "tabCertificates": "Certificates of Competency",
+    "tabTraining": "Training Records",
+    "loading": "Loading…",
+    "cert": {
+      "new": "+ New Certificate",
+      "worker": "Worker",
+      "type": "Certificate type",
+      "certificateNumber": "Certificate number",
+      "issuingBody": "Issuing body",
+      "issueDate": "Issue date",
+      "expiryDate": "Expiry date (if applicable)",
+      "colWorker": "Worker",
+      "colType": "Type",
+      "colNumber": "Certificate #",
+      "colExpiry": "Expiry",
+      "colStatus": "Status",
+      "noneYet": "No certificates of competency recorded yet.",
+      "confirmDelete": "Delete this certificate?",
+      "newTitle": "New Certificate of Competency",
+      "editTitle": "Edit Certificate of Competency",
+      "types": {
+        "MINE_MANAGER": "Mine Manager",
+        "MINE_OVERSEER": "Mine Overseer",
+        "SHIFT_SUPERVISOR": "Shift Supervisor",
+        "BLASTING": "Blasting",
+        "ROCK_BREAKER": "Rock Breaker",
+        "WINDING_ENGINE_DRIVER": "Winding Engine Driver",
+        "ELECTRICAL": "Electrical",
+        "MECHANICAL": "Mechanical",
+        "OTHER": "Other"
+      }
+    },
+    "training": {
+      "new": "+ New Training Record",
+      "worker": "Worker",
+      "courseName": "Course name",
+      "trainingType": "Training type",
+      "completionDate": "Completion date",
+      "expiryDate": "Refresher due (if applicable)",
+      "provider": "Training provider",
+      "colWorker": "Worker",
+      "colCourse": "Course",
+      "colType": "Type",
+      "colCompletion": "Completed",
+      "colExpiry": "Refresher Due",
+      "noneYet": "No training records yet.",
+      "confirmDelete": "Delete this training record?",
+      "newTitle": "New Training Record",
+      "editTitle": "Edit Training Record",
+      "types": {
+        "INDUCTION": "Induction",
+        "REFRESHER": "Refresher",
+        "FIRST_AID": "First Aid",
+        "FIRE_FIGHTING": "Fire Fighting",
+        "SELF_RESCUE": "Self Rescue",
+        "HAZARD_SPECIFIC": "Hazard Specific",
+        "SKILLS_DEVELOPMENT": "Skills Development",
+        "OTHER": "Other"
+      }
     }
   }
 }

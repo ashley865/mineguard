@@ -169,7 +169,11 @@
     "newWorkerTitle": "Nouveau travailleur",
     "editWorkerTitle": "Modifier le travailleur",
     "confirmDelete": "Supprimer cette fiche de travailleur ?",
-    "loading": "Chargement des travailleurs…"
+    "loading": "Chargement des travailleurs…",
+    "nextOfKin": "Personne à Contacter",
+    "nextOfKinName": "Nom du contact",
+    "nextOfKinRelationship": "Lien de parenté",
+    "nextOfKinPhone": "Téléphone du contact"
   },
   "equipment": {
     "title": "Équipements",
@@ -426,6 +430,70 @@
       "EXPLOSIVES_LICENSE": "Licence d'Explosifs",
       "MINE_WORKS_PROGRAMME": "Programme de Travaux Miniers",
       "OTHER": "Autre"
+    }
+  },
+  "workforce": {
+    "nav": "Gestion du Personnel",
+    "subtitle": "Certificats de compétence statutaires et dossiers de formation du personnel minier",
+    "tabCertificates": "Certificats de Compétence",
+    "tabTraining": "Dossiers de Formation",
+    "loading": "Chargement…",
+    "cert": {
+      "new": "+ Nouveau Certificat",
+      "worker": "Travailleur",
+      "type": "Type de certificat",
+      "certificateNumber": "Numéro de certificat",
+      "issuingBody": "Organisme émetteur",
+      "issueDate": "Date de délivrance",
+      "expiryDate": "Date d'expiration (le cas échéant)",
+      "colWorker": "Travailleur",
+      "colType": "Type",
+      "colNumber": "N° de Certificat",
+      "colExpiry": "Expiration",
+      "colStatus": "Statut",
+      "noneYet": "Aucun certificat de compétence enregistré pour le moment.",
+      "confirmDelete": "Supprimer ce certificat ?",
+      "newTitle": "Nouveau Certificat de Compétence",
+      "editTitle": "Modifier le Certificat de Compétence",
+      "types": {
+        "MINE_MANAGER": "Directeur de Mine",
+        "MINE_OVERSEER": "Surveillant de Mine",
+        "SHIFT_SUPERVISOR": "Chef de Poste",
+        "BLASTING": "Minage",
+        "ROCK_BREAKER": "Brise-Roche",
+        "WINDING_ENGINE_DRIVER": "Conducteur de Machine d'Extraction",
+        "ELECTRICAL": "Électrique",
+        "MECHANICAL": "Mécanique",
+        "OTHER": "Autre"
+      }
+    },
+    "training": {
+      "new": "+ Nouveau Dossier de Formation",
+      "worker": "Travailleur",
+      "courseName": "Nom du cours",
+      "trainingType": "Type de formation",
+      "completionDate": "Date d'achèvement",
+      "expiryDate": "Recyclage requis le (le cas échéant)",
+      "provider": "Organisme de formation",
+      "colWorker": "Travailleur",
+      "colCourse": "Cours",
+      "colType": "Type",
+      "colCompletion": "Terminé",
+      "colExpiry": "Recyclage Requis",
+      "noneYet": "Aucun dossier de formation pour le moment.",
+      "confirmDelete": "Supprimer ce dossier de formation ?",
+      "newTitle": "Nouveau Dossier de Formation",
+      "editTitle": "Modifier le Dossier de Formation",
+      "types": {
+        "INDUCTION": "Induction",
+        "REFRESHER": "Recyclage",
+        "FIRST_AID": "Premiers Secours",
+        "FIRE_FIGHTING": "Lutte contre l'Incendie",
+        "SELF_RESCUE": "Auto-Sauvetage",
+        "HAZARD_SPECIFIC": "Danger Spécifique",
+        "SKILLS_DEVELOPMENT": "Développement des Compétences",
+        "OTHER": "Autre"
+      }
     }
   }
 }

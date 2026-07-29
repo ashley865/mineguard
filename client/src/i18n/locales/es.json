@@ -169,7 +169,11 @@
     "newWorkerTitle": "Nuevo Trabajador",
     "editWorkerTitle": "Editar Trabajador",
     "confirmDelete": "¿Eliminar este registro de trabajador?",
-    "loading": "Cargando trabajadores…"
+    "loading": "Cargando trabajadores…",
+    "nextOfKin": "Contacto de Emergencia",
+    "nextOfKinName": "Nombre del contacto",
+    "nextOfKinRelationship": "Parentesco",
+    "nextOfKinPhone": "Teléfono del contacto"
   },
   "equipment": {
     "title": "Equipos",
@@ -426,6 +430,70 @@
       "EXPLOSIVES_LICENSE": "Licencia de Explosivos",
       "MINE_WORKS_PROGRAMME": "Programa de Obras Mineras",
       "OTHER": "Otro"
+    }
+  },
+  "workforce": {
+    "nav": "Gestión de Personal",
+    "subtitle": "Certificados de competencia estatutarios y registros de capacitación del personal minero",
+    "tabCertificates": "Certificados de Competencia",
+    "tabTraining": "Registros de Capacitación",
+    "loading": "Cargando…",
+    "cert": {
+      "new": "+ Nuevo Certificado",
+      "worker": "Trabajador",
+      "type": "Tipo de certificado",
+      "certificateNumber": "Número de certificado",
+      "issuingBody": "Entidad emisora",
+      "issueDate": "Fecha de emisión",
+      "expiryDate": "Fecha de vencimiento (si aplica)",
+      "colWorker": "Trabajador",
+      "colType": "Tipo",
+      "colNumber": "N.º de Certificado",
+      "colExpiry": "Vencimiento",
+      "colStatus": "Estado",
+      "noneYet": "Aún no hay certificados de competencia registrados.",
+      "confirmDelete": "¿Eliminar este certificado?",
+      "newTitle": "Nuevo Certificado de Competencia",
+      "editTitle": "Editar Certificado de Competencia",
+      "types": {
+        "MINE_MANAGER": "Gerente de Mina",
+        "MINE_OVERSEER": "Supervisor de Mina",
+        "SHIFT_SUPERVISOR": "Supervisor de Turno",
+        "BLASTING": "Voladura",
+        "ROCK_BREAKER": "Rompedor de Roca",
+        "WINDING_ENGINE_DRIVER": "Operador de Máquina de Izaje",
+        "ELECTRICAL": "Eléctrico",
+        "MECHANICAL": "Mecánico",
+        "OTHER": "Otro"
+      }
+    },
+    "training": {
+      "new": "+ Nuevo Registro de Capacitación",
+      "worker": "Trabajador",
+      "courseName": "Nombre del curso",
+      "trainingType": "Tipo de capacitación",
+      "completionDate": "Fecha de finalización",
+      "expiryDate": "Reciclaje vence (si aplica)",
+      "provider": "Proveedor de capacitación",
+      "colWorker": "Trabajador",
+      "colCourse": "Curso",
+      "colType": "Tipo",
+      "colCompletion": "Completado",
+      "colExpiry": "Reciclaje Vence",
+      "noneYet": "Aún no hay registros de capacitación.",
+      "confirmDelete": "¿Eliminar este registro de capacitación?",
+      "newTitle": "Nuevo Registro de Capacitación",
+      "editTitle": "Editar Registro de Capacitación",
+      "types": {
+        "INDUCTION": "Inducción",
+        "REFRESHER": "Reciclaje",
+        "FIRST_AID": "Primeros Auxilios",
+        "FIRE_FIGHTING": "Lucha contra Incendios",
+        "SELF_RESCUE": "Autorrescate",
+        "HAZARD_SPECIFIC": "Peligro Específico",
+        "SKILLS_DEVELOPMENT": "Desarrollo de Habilidades",
+        "OTHER": "Otro"
+      }
     }
   }
 }

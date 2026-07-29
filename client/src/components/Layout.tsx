@@ -15,6 +15,7 @@ export default function Layout() {
     { to: "/sensors", label: t("nav.sensors") },
     { to: "/alerts", label: t("nav.alerts") },
     { to: "/workers", label: t("nav.workers") },
+    { to: "/workforce", label: t("workforce.nav") },
     { to: "/incidents", label: t("nav.incidents") },
     { to: "/equipment", label: t("nav.equipment") },
     { to: "/compliance", label: t("compliance.nav") },

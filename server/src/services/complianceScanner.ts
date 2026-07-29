@@ -121,6 +121,51 @@ export async function scanCompliance(io?: Server) {
     if (alert) newAlerts.push(alert);
   }
 
+  const certificates = await prisma.certificate.findMany({
+    where: { status: "ACTIVE", expiryDate: { not: null } },
+    include: { worker: true },
+  });
+  for (const cert of certificates) {
+    if (!cert.expiryDate) continue;
+    const days = daysFromNow(cert.expiryDate);
+    if (days > REVIEW_WARNING_DAYS) continue;
+    const severity: AlertSeverity = days < 0 ? "HIGH" : days <= 7 ? "MEDIUM" : "LOW";
+    const typeLabel = cert.type.replace(/_/g, " ");
+    const message =
+      days < 0
+        ? `${typeLabel} Certificate of Competency for ${cert.worker.name} is overdue by ${Math.abs(days)} day(s)`
+        : `${typeLabel} Certificate of Competency for ${cert.worker.name} expires in ${days} day(s)`;
+    const alert = await raiseAlertIfMissing({
+      siteId: cert.worker.siteId,
+      zoneId: cert.worker.zoneId,
+      severity,
+      message,
+    });
+    if (alert) newAlerts.push(alert);
+  }
+
+  const trainingRecords = await prisma.trainingRecord.findMany({
+    where: { expiryDate: { not: null } },
+    include: { worker: true },
+  });
+  for (const training of trainingRecords) {
+    if (!training.expiryDate) continue;
+    const days = daysFromNow(training.expiryDate);
+    if (days > REVIEW_WARNING_DAYS) continue;
+    const severity: AlertSeverity = days < 0 ? "MEDIUM" : days <= 7 ? "LOW" : "LOW";
+    const message =
+      days < 0
+        ? `${training.courseName} training for ${training.worker.name} is overdue by ${Math.abs(days)} day(s)`
+        : `${training.courseName} training for ${training.worker.name} due in ${days} day(s)`;
+    const alert = await raiseAlertIfMissing({
+      siteId: training.worker.siteId,
+      zoneId: training.worker.zoneId,
+      severity,
+      message,
+    });
+    if (alert) newAlerts.push(alert);
+  }
+
   if (io) {
     for (const alert of newAlerts) io.emit("alert:new", alert);
   }

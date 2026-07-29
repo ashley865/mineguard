@@ -13,6 +13,9 @@ const workerSchema = z.object({
   status: z.enum(["ON_SHIFT", "OFF_SHIFT", "EMERGENCY"]).optional(),
   siteId: z.string().min(1),
   zoneId: z.string().optional().nullable(),
+  nextOfKinName: z.string().optional(),
+  nextOfKinRelationship: z.string().optional(),
+  nextOfKinPhone: z.string().optional(),
 });
 
 router.use(requireAuth);

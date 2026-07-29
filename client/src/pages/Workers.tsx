@@ -22,6 +22,9 @@ function WorkerForm({ sites, zones, initial, onSubmit, onCancel }: {
   const [status, setStatus] = useState<WorkerStatus>(initial?.status ?? "OFF_SHIFT");
   const [siteId, setSiteId] = useState(initial?.siteId ?? sites[0]?.id ?? "");
   const [zoneId, setZoneId] = useState(initial?.zoneId ?? "");
+  const [nextOfKinName, setNextOfKinName] = useState(initial?.nextOfKinName ?? "");
+  const [nextOfKinRelationship, setNextOfKinRelationship] = useState(initial?.nextOfKinRelationship ?? "");
+  const [nextOfKinPhone, setNextOfKinPhone] = useState(initial?.nextOfKinPhone ?? "");
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -32,7 +35,18 @@ function WorkerForm({ sites, zones, initial, onSubmit, onCancel }: {
     setSaving(true);
     setError(null);
     try {
-      await onSubmit({ name, employeeId, role, phone, status, siteId, zoneId: zoneId || null });
+      await onSubmit({
+        name,
+        employeeId,
+        role,
+        phone,
+        status,
+        siteId,
+        zoneId: zoneId || null,
+        nextOfKinName: nextOfKinName || undefined,
+        nextOfKinRelationship: nextOfKinRelationship || undefined,
+        nextOfKinPhone: nextOfKinPhone || undefined,
+      });
     } catch (err: any) {
       setError(err.response?.data?.error ?? "Failed to save worker");
     } finally {
@@ -84,6 +98,23 @@ function WorkerForm({ sites, zones, initial, onSubmit, onCancel }: {
           <option value="OFF_SHIFT">{t("workers.offShift")}</option>
           <option value="EMERGENCY">{t("workers.emergency")}</option>
         </select>
+      </div>
+      <div className="border-t border-mine-800 pt-4">
+        <div className="text-xs font-semibold text-mine-300 uppercase mb-2">{t("workers.nextOfKin")}</div>
+        <div className="grid grid-cols-2 gap-3">
+          <div>
+            <label className={labelClass}>{t("workers.nextOfKinName")}</label>
+            <input className={inputClass} value={nextOfKinName} onChange={(e) => setNextOfKinName(e.target.value)} />
+          </div>
+          <div>
+            <label className={labelClass}>{t("workers.nextOfKinRelationship")}</label>
+            <input className={inputClass} value={nextOfKinRelationship} onChange={(e) => setNextOfKinRelationship(e.target.value)} />
+          </div>
+        </div>
+        <div className="mt-3">
+          <label className={labelClass}>{t("workers.nextOfKinPhone")}</label>
+          <input className={inputClass} value={nextOfKinPhone} onChange={(e) => setNextOfKinPhone(e.target.value)} />
+        </div>
       </div>
       {error && <div className="text-danger-400 text-sm">{error}</div>}
       <div className="flex justify-end gap-2 pt-2">
