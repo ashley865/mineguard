@@ -1,0 +1,141 @@
+export type Role = "ADMIN" | "SUPERVISOR" | "VIEWER";
+
+export interface User {
+  id: string;
+  email: string;
+  name: string;
+  role: Role;
+}
+
+export type SiteStatus = "OPERATIONAL" | "RESTRICTED" | "SHUT_DOWN";
+
+export interface Site {
+  id: string;
+  name: string;
+  location: string;
+  description?: string | null;
+  status: SiteStatus;
+  createdAt: string;
+  zones?: Zone[];
+  _count?: { workers: number; incidents: number; equipment: number; alerts: number };
+}
+
+export interface Zone {
+  id: string;
+  name: string;
+  description?: string | null;
+  siteId: string;
+  site?: { id: string; name: string };
+  sensors?: Sensor[];
+}
+
+export type SensorType =
+  | "METHANE"
+  | "CARBON_MONOXIDE"
+  | "OXYGEN"
+  | "TEMPERATURE"
+  | "HUMIDITY"
+  | "SEISMIC"
+  | "AIR_FLOW";
+
+export type SensorStatus = "ACTIVE" | "INACTIVE" | "FAULT";
+
+export interface Sensor {
+  id: string;
+  name: string;
+  type: SensorType;
+  unit: string;
+  minSafe: number;
+  maxSafe: number;
+  status: SensorStatus;
+  zoneId: string;
+  zone?: { id: string; name: string; siteId: string };
+  readings?: SensorReading[];
+}
+
+export interface SensorReading {
+  id: string;
+  sensorId: string;
+  value: number;
+  recordedAt: string;
+}
+
+export type AlertSeverity = "LOW" | "MEDIUM" | "HIGH" | "CRITICAL";
+export type AlertStatus = "OPEN" | "ACKNOWLEDGED" | "RESOLVED";
+
+export interface Alert {
+  id: string;
+  siteId: string;
+  site?: { id: string; name: string };
+  zoneId?: string | null;
+  zone?: { id: string; name: string } | null;
+  sensorId?: string | null;
+  sensor?: { id: string; name: string; type: SensorType } | null;
+  severity: AlertSeverity;
+  message: string;
+  status: AlertStatus;
+  createdAt: string;
+  acknowledgedAt?: string | null;
+  acknowledgedBy?: { id: string; name: string } | null;
+  resolvedAt?: string | null;
+}
+
+export type WorkerStatus = "ON_SHIFT" | "OFF_SHIFT" | "EMERGENCY";
+
+export interface Worker {
+  id: string;
+  name: string;
+  employeeId: string;
+  role: string;
+  phone?: string | null;
+  status: WorkerStatus;
+  siteId: string;
+  site?: { id: string; name: string };
+  zoneId?: string | null;
+  zone?: { id: string; name: string } | null;
+}
+
+export type IncidentStatus = "OPEN" | "INVESTIGATING" | "RESOLVED";
+
+export interface Incident {
+  id: string;
+  title: string;
+  description: string;
+  severity: AlertSeverity;
+  status: IncidentStatus;
+  siteId: string;
+  site?: { id: string; name: string };
+  zoneId?: string | null;
+  zone?: { id: string; name: string } | null;
+  reportedBy?: { id: string; name: string } | null;
+  createdAt: string;
+  resolvedAt?: string | null;
+}
+
+export type EquipmentStatus = "OPERATIONAL" | "MAINTENANCE" | "DOWN";
+
+export interface Equipment {
+  id: string;
+  name: string;
+  type: string;
+  status: EquipmentStatus;
+  siteId: string;
+  site?: { id: string; name: string };
+  zoneId?: string | null;
+  zone?: { id: string; name: string } | null;
+  lastMaintenance?: string | null;
+}
+
+export interface DashboardSummary {
+  counts: {
+    siteCount: number;
+    sensorCount: number;
+    openAlerts: number;
+    criticalAlerts: number;
+    onShiftWorkers: number;
+    openIncidents: number;
+    equipmentDown: number;
+  };
+  recentAlerts: Alert[];
+  sites: Site[];
+}

@@ -1,0 +1,204 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+}
+
+enum Role {
+  ADMIN
+  SUPERVISOR
+  VIEWER
+}
+
+enum SiteStatus {
+  OPERATIONAL
+  RESTRICTED
+  SHUT_DOWN
+}
+
+enum SensorType {
+  METHANE
+  CARBON_MONOXIDE
+  OXYGEN
+  TEMPERATURE
+  HUMIDITY
+  SEISMIC
+  AIR_FLOW
+}
+
+enum SensorStatus {
+  ACTIVE
+  INACTIVE
+  FAULT
+}
+
+enum AlertSeverity {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+enum AlertStatus {
+  OPEN
+  ACKNOWLEDGED
+  RESOLVED
+}
+
+enum WorkerStatus {
+  ON_SHIFT
+  OFF_SHIFT
+  EMERGENCY
+}
+
+enum IncidentStatus {
+  OPEN
+  INVESTIGATING
+  RESOLVED
+}
+
+enum EquipmentStatus {
+  OPERATIONAL
+  MAINTENANCE
+  DOWN
+}
+
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  passwordHash String
+  name         String
+  role         Role     @default(VIEWER)
+  createdAt    DateTime @default(now())
+
+  acknowledgedAlerts Alert[]    @relation("AlertAcknowledgedBy")
+  reportedIncidents  Incident[] @relation("IncidentReportedBy")
+}
+
+model Site {
+  id          String     @id @default(cuid())
+  name        String
+  location    String
+  description String?
+  status      SiteStatus @default(OPERATIONAL)
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  zones     Zone[]
+  workers   Worker[]
+  incidents Incident[]
+  equipment Equipment[]
+  alerts    Alert[]
+}
+
+model Zone {
+  id          String  @id @default(cuid())
+  name        String
+  description String?
+  siteId      String
+  site        Site    @relation(fields: [siteId], references: [id], onDelete: Cascade)
+
+  sensors   Sensor[]
+  workers   Worker[]
+  incidents Incident[]
+  equipment Equipment[]
+  alerts    Alert[]
+
+  createdAt DateTime @default(now())
+}
+
+model Sensor {
+  id       String       @id @default(cuid())
+  name     String
+  type     SensorType
+  unit     String
+  minSafe  Float
+  maxSafe  Float
+  status   SensorStatus @default(ACTIVE)
+  zoneId   String
+  zone     Zone         @relation(fields: [zoneId], references: [id], onDelete: Cascade)
+
+  readings SensorReading[]
+  alerts   Alert[]
+
+  createdAt DateTime @default(now())
+}
+
+model SensorReading {
+  id         String   @id @default(cuid())
+  sensorId   String
+  sensor     Sensor   @relation(fields: [sensorId], references: [id], onDelete: Cascade)
+  value      Float
+  recordedAt DateTime @default(now())
+
+  @@index([sensorId, recordedAt])
+}
+
+model Alert {
+  id             String        @id @default(cuid())
+  siteId         String
+  site           Site          @relation(fields: [siteId], references: [id], onDelete: Cascade)
+  zoneId         String?
+  zone           Zone?         @relation(fields: [zoneId], references: [id], onDelete: Cascade)
+  sensorId       String?
+  sensor         Sensor?       @relation(fields: [sensorId], references: [id], onDelete: SetNull)
+  severity       AlertSeverity
+  message        String
+  status         AlertStatus   @default(OPEN)
+  createdAt      DateTime      @default(now())
+  acknowledgedAt DateTime?
+  acknowledgedById String?
+  acknowledgedBy   User?       @relation("AlertAcknowledgedBy", fields: [acknowledgedById], references: [id], onDelete: SetNull)
+  resolvedAt     DateTime?
+
+  @@index([status])
+}
+
+model Worker {
+  id         String       @id @default(cuid())
+  name       String
+  employeeId String       @unique
+  role       String
+  phone      String?
+  status     WorkerStatus @default(OFF_SHIFT)
+  siteId     String
+  site       Site         @relation(fields: [siteId], references: [id], onDelete: Cascade)
+  zoneId     String?
+  zone       Zone?        @relation(fields: [zoneId], references: [id], onDelete: SetNull)
+
+  createdAt DateTime @default(now())
+}
+
+model Incident {
+  id           String         @id @default(cuid())
+  title        String
+  description  String
+  severity     AlertSeverity
+  status       IncidentStatus @default(OPEN)
+  siteId       String
+  site         Site           @relation(fields: [siteId], references: [id], onDelete: Cascade)
+  zoneId       String?
+  zone         Zone?          @relation(fields: [zoneId], references: [id], onDelete: SetNull)
+  reportedById String?
+  reportedBy   User?          @relation("IncidentReportedBy", fields: [reportedById], references: [id], onDelete: SetNull)
+
+  createdAt  DateTime  @default(now())
+  resolvedAt DateTime?
+}
+
+model Equipment {
+  id              String          @id @default(cuid())
+  name            String
+  type            String
+  status          EquipmentStatus @default(OPERATIONAL)
+  siteId          String
+  site            Site            @relation(fields: [siteId], references: [id], onDelete: Cascade)
+  zoneId          String?
+  zone            Zone?           @relation(fields: [zoneId], references: [id], onDelete: SetNull)
+  lastMaintenance DateTime?
+
+  createdAt DateTime @default(now())
+}
