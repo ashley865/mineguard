@@ -175,6 +175,7 @@ model Site {
   riskAssessments   RiskAssessment[]
   regulatoryNotices RegulatoryNotice[]
   safetyInspections SafetyInspection[]
+  permits           Permit[]
 }
 
 model Zone {
@@ -388,6 +389,42 @@ model SafetyInspection {
   site             Site              @relation(fields: [siteId], references: [id], onDelete: Cascade)
   zoneId           String?
   zone             Zone?             @relation(fields: [zoneId], references: [id], onDelete: SetNull)
+
+  createdAt DateTime @default(now())
+}
+
+enum PermitType {
+  MINING_RIGHT
+  MINING_PERMIT
+  PROSPECTING_RIGHT
+  WATER_USE_LICENSE
+  ENVIRONMENTAL_AUTHORISATION
+  SOCIAL_LABOUR_PLAN
+  EXPLOSIVES_LICENSE
+  MINE_WORKS_PROGRAMME
+  OTHER
+}
+
+enum PermitStatus {
+  ACTIVE
+  PENDING_RENEWAL
+  EXPIRED
+  SUSPENDED
+  WITHDRAWN
+}
+
+model Permit {
+  id               String       @id @default(cuid())
+  permitNumber     String
+  type             PermitType
+  issuingAuthority String
+  holderName       String
+  issueDate        DateTime
+  expiryDate       DateTime
+  status           PermitStatus @default(ACTIVE)
+  conditions       String?
+  siteId           String
+  site             Site         @relation(fields: [siteId], references: [id], onDelete: Cascade)
 
   createdAt DateTime @default(now())
 }

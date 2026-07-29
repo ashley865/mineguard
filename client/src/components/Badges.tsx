@@ -48,6 +48,8 @@ const statusColors: Record<string, string> = {
   FIT_WITH_RESTRICTION: "bg-hazard-500 text-white",
   TEMPORARILY_UNFIT: "bg-hazard-600/80 text-white",
   UNFIT: "bg-danger-500 text-white",
+  PENDING_RENEWAL: "bg-hazard-500 text-white",
+  SUSPENDED: "bg-danger-500 text-white",
 };
 
 export function StatusBadge({

@@ -254,7 +254,9 @@
       "FIT": "Fit",
       "FIT_WITH_RESTRICTION": "Fit with restriction",
       "TEMPORARILY_UNFIT": "Temporarily unfit",
-      "UNFIT": "Unfit"
+      "UNFIT": "Unfit",
+      "PENDING_RENEWAL": "Pending renewal",
+      "SUSPENDED": "Suspended"
     },
     "severity": {
       "LOW": "Low",
@@ -391,5 +393,39 @@
       "editTitle": "Edit Safety Inspection"
     },
     "loading": "Loading…"
+  },
+  "permits": {
+    "nav": "Regulatory & Permits",
+    "title": "Regulatory & Permit Management",
+    "subtitle": "Mining rights, licenses, and statutory authorisations under South African mining law",
+    "new": "+ New Permit",
+    "permitNumber": "Permit / reference number",
+    "type": "Permit type",
+    "issuingAuthority": "Issuing authority",
+    "holderName": "Holder name",
+    "issueDate": "Issue date",
+    "expiryDate": "Expiry date",
+    "conditions": "Conditions",
+    "colNumber": "Number",
+    "colType": "Type",
+    "colSite": "Site",
+    "colExpiry": "Expiry",
+    "colStatus": "Status",
+    "noneYet": "No permits recorded yet.",
+    "confirmDelete": "Delete this permit?",
+    "newTitle": "New Permit",
+    "editTitle": "Edit Permit",
+    "loading": "Loading…",
+    "types": {
+      "MINING_RIGHT": "Mining Right",
+      "MINING_PERMIT": "Mining Permit",
+      "PROSPECTING_RIGHT": "Prospecting Right",
+      "WATER_USE_LICENSE": "Water Use License",
+      "ENVIRONMENTAL_AUTHORISATION": "Environmental Authorisation",
+      "SOCIAL_LABOUR_PLAN": "Social and Labour Plan",
+      "EXPLOSIVES_LICENSE": "Explosives License",
+      "MINE_WORKS_PROGRAMME": "Mine Works Programme",
+      "OTHER": "Other"
+    }
   }
 }

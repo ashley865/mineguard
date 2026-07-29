@@ -4,6 +4,7 @@ import { prisma } from "../prisma";
 
 const REVIEW_WARNING_DAYS = 30;
 const NOTICE_WARNING_DAYS = 7;
+const PERMIT_WARNING_DAYS = 90;
 
 function daysFromNow(date: Date): number {
   return Math.ceil((date.getTime() - Date.now()) / (1000 * 60 * 60 * 24));
@@ -104,6 +105,20 @@ export async function scanCompliance(io?: Server) {
       const alert = await raiseAlertIfMissing({ siteId: insp.siteId, zoneId: insp.zoneId, severity: "LOW", message });
       if (alert) newAlerts.push(alert);
     }
+  }
+
+  const permits = await prisma.permit.findMany({ where: { status: { in: ["ACTIVE", "PENDING_RENEWAL"] } } });
+  for (const permit of permits) {
+    const days = daysFromNow(permit.expiryDate);
+    if (days > PERMIT_WARNING_DAYS) continue;
+    const severity: AlertSeverity = days < 0 ? "CRITICAL" : days <= 14 ? "HIGH" : days <= 30 ? "MEDIUM" : "LOW";
+    const typeLabel = permit.type.replace(/_/g, " ");
+    const message =
+      days < 0
+        ? `${typeLabel} "${permit.permitNumber}" expired ${Math.abs(days)} day(s) ago`
+        : `${typeLabel} "${permit.permitNumber}" expires in ${days} day(s)`;
+    const alert = await raiseAlertIfMissing({ siteId: permit.siteId, severity, message });
+    if (alert) newAlerts.push(alert);
   }
 
   if (io) {

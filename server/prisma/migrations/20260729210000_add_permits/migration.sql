@@ -1,0 +1,25 @@
+-- CreateEnum
+CREATE TYPE "PermitType" AS ENUM ('MINING_RIGHT', 'MINING_PERMIT', 'PROSPECTING_RIGHT', 'WATER_USE_LICENSE', 'ENVIRONMENTAL_AUTHORISATION', 'SOCIAL_LABOUR_PLAN', 'EXPLOSIVES_LICENSE', 'MINE_WORKS_PROGRAMME', 'OTHER');
+
+-- CreateEnum
+CREATE TYPE "PermitStatus" AS ENUM ('ACTIVE', 'PENDING_RENEWAL', 'EXPIRED', 'SUSPENDED', 'WITHDRAWN');
+
+-- CreateTable
+CREATE TABLE "Permit" (
+    "id" TEXT NOT NULL,
+    "permitNumber" TEXT NOT NULL,
+    "type" "PermitType" NOT NULL,
+    "issuingAuthority" TEXT NOT NULL,
+    "holderName" TEXT NOT NULL,
+    "issueDate" TIMESTAMP(3) NOT NULL,
+    "expiryDate" TIMESTAMP(3) NOT NULL,
+    "status" "PermitStatus" NOT NULL DEFAULT 'ACTIVE',
+    "conditions" TEXT,
+    "siteId" TEXT NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "Permit_pkey" PRIMARY KEY ("id")
+);
+
+-- AddForeignKey
+ALTER TABLE "Permit" ADD CONSTRAINT "Permit_siteId_fkey" FOREIGN KEY ("siteId") REFERENCES "Site"("id") ON DELETE CASCADE ON UPDATE CASCADE;

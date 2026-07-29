@@ -254,7 +254,9 @@
       "FIT": "Apte",
       "FIT_WITH_RESTRICTION": "Apte avec restriction",
       "TEMPORARILY_UNFIT": "Temporairement inapte",
-      "UNFIT": "Inapte"
+      "UNFIT": "Inapte",
+      "PENDING_RENEWAL": "Renouvellement en attente",
+      "SUSPENDED": "Suspendu"
     },
     "severity": {
       "LOW": "Faible",
@@ -391,5 +393,39 @@
       "editTitle": "Modifier l'Inspection de Sécurité"
     },
     "loading": "Chargement…"
+  },
+  "permits": {
+    "nav": "Réglementation et Permis",
+    "title": "Gestion de la Réglementation et des Permis",
+    "subtitle": "Droits miniers, licences et autorisations légales selon la législation minière sud-africaine",
+    "new": "+ Nouveau Permis",
+    "permitNumber": "Numéro de permis / référence",
+    "type": "Type de permis",
+    "issuingAuthority": "Autorité de délivrance",
+    "holderName": "Nom du titulaire",
+    "issueDate": "Date de délivrance",
+    "expiryDate": "Date d'expiration",
+    "conditions": "Conditions",
+    "colNumber": "Numéro",
+    "colType": "Type",
+    "colSite": "Site",
+    "colExpiry": "Expiration",
+    "colStatus": "Statut",
+    "noneYet": "Aucun permis enregistré pour le moment.",
+    "confirmDelete": "Supprimer ce permis ?",
+    "newTitle": "Nouveau Permis",
+    "editTitle": "Modifier le Permis",
+    "loading": "Chargement…",
+    "types": {
+      "MINING_RIGHT": "Droit Minier",
+      "MINING_PERMIT": "Permis Minier",
+      "PROSPECTING_RIGHT": "Droit de Prospection",
+      "WATER_USE_LICENSE": "Licence d'Utilisation de l'Eau",
+      "ENVIRONMENTAL_AUTHORISATION": "Autorisation Environnementale",
+      "SOCIAL_LABOUR_PLAN": "Plan Social et du Travail",
+      "EXPLOSIVES_LICENSE": "Licence d'Explosifs",
+      "MINE_WORKS_PROGRAMME": "Programme de Travaux Miniers",
+      "OTHER": "Autre"
+    }
   }
 }

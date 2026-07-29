@@ -259,3 +259,29 @@ export interface SafetyInspection {
   zoneId?: string | null;
   zone?: { id: string; name: string } | null;
 }
+
+export type PermitType =
+  | "MINING_RIGHT"
+  | "MINING_PERMIT"
+  | "PROSPECTING_RIGHT"
+  | "WATER_USE_LICENSE"
+  | "ENVIRONMENTAL_AUTHORISATION"
+  | "SOCIAL_LABOUR_PLAN"
+  | "EXPLOSIVES_LICENSE"
+  | "MINE_WORKS_PROGRAMME"
+  | "OTHER";
+export type PermitStatus = "ACTIVE" | "PENDING_RENEWAL" | "EXPIRED" | "SUSPENDED" | "WITHDRAWN";
+
+export interface Permit {
+  id: string;
+  permitNumber: string;
+  type: PermitType;
+  issuingAuthority: string;
+  holderName: string;
+  issueDate: string;
+  expiryDate: string;
+  status: PermitStatus;
+  conditions?: string | null;
+  siteId: string;
+  site?: { id: string; name: string };
+}
