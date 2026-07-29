@@ -15,6 +15,7 @@ import SafetyCompliance from "./pages/SafetyCompliance";
 import Permits from "./pages/Permits";
 import WorkforceManagement from "./pages/WorkforceManagement";
 import DocumentControl from "./pages/DocumentControl";
+import GovernmentInspection from "./pages/GovernmentInspection";
 
 function HomeRoute() {
   const { user } = useAuth();
@@ -38,6 +39,7 @@ export default function App() {
         <Route path="/permits" element={<Permits />} />
         <Route path="/workforce" element={<WorkforceManagement />} />
         <Route path="/documents" element={<DocumentControl />} />
+        <Route path="/inspection" element={<GovernmentInspection />} />
       </Route>
     </Routes>
   );

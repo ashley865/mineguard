@@ -363,3 +363,40 @@ export interface MineDocument {
   uploadedBy?: { id: string; name: string } | null;
   createdAt: string;
 }
+
+export type InspectionOutcome = "NO_ACTION" | "VERBAL_WARNING" | "NOTICE_ISSUED" | "FOLLOW_UP_REQUIRED";
+
+export interface InspectionVisit {
+  id: string;
+  visitDate: string;
+  inspectorName: string;
+  inspectorBadge?: string | null;
+  authority: string;
+  areasInspected: string;
+  purpose?: string | null;
+  findings?: string | null;
+  outcome: InspectionOutcome;
+  siteId: string;
+  site?: { id: string; name: string };
+  relatedNoticeId?: string | null;
+  relatedNotice?: { id: string; noticeNumber: string; section: NoticeSection } | null;
+}
+
+export interface ComplianceSnapshot {
+  site: Site;
+  generatedAt: string;
+  permits: Permit[];
+  codesOfPractice: CodeOfPractice[];
+  riskAssessments: RiskAssessment[];
+  openNotices: RegulatoryNotice[];
+  safetyInspections: { total: number; completed: number; overdue: number };
+  workforce: {
+    totalWorkers: number;
+    certificatesTotal: number;
+    certificatesActive: number;
+    certificatesExpiringSoon: number;
+    trainingTotal: number;
+    trainingExpiringSoon: number;
+  };
+  recentVisits: InspectionVisit[];
+}

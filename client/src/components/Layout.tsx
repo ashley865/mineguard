@@ -21,11 +21,12 @@ export default function Layout() {
     { to: "/compliance", label: t("compliance.nav") },
     { to: "/permits", label: t("permits.nav") },
     { to: "/documents", label: t("documents.nav") },
+    { to: "/inspection", label: t("inspection.nav") },
   ];
 
   return (
     <div className="min-h-screen flex">
-      <aside className="w-60 shrink-0 bg-mine-900 border-r border-mine-800 flex flex-col">
+      <aside className="w-60 shrink-0 bg-mine-900 border-r border-mine-800 flex flex-col print:hidden">
         <div className="px-5 py-5 border-b border-mine-800">
           <div className="text-lg font-bold tracking-tight">⛏ Mine Guard</div>
           <div className="text-xs text-mine-300 mt-0.5">Safety Monitoring</div>

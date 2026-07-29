@@ -535,5 +535,54 @@
       "CONTRACT": "Contrat",
       "OTHER": "Autre"
     }
+  },
+  "inspection": {
+    "nav": "Inspection Gouvernementale",
+    "subtitle": "Registre des visites d'inspecteurs et aperçu de conformité pour les inspections réglementaires",
+    "tabVisits": "Registre des Visites",
+    "tabSnapshot": "Aperçu de Conformité",
+    "loading": "Chargement…",
+    "visit": {
+      "new": "+ Nouvelle Visite",
+      "visitDate": "Date de visite",
+      "inspectorName": "Nom de l'inspecteur",
+      "inspectorBadge": "Badge / ID de l'inspecteur",
+      "authority": "Autorité",
+      "areasInspected": "Zones inspectées",
+      "purpose": "Objet de la visite",
+      "findings": "Constatations",
+      "outcome": "Résultat",
+      "relatedNotice": "Avis associé (le cas échéant)",
+      "noNotice": "Aucun",
+      "colDate": "Date",
+      "colSite": "Site",
+      "colInspector": "Inspecteur",
+      "colAreas": "Zones Inspectées",
+      "colOutcome": "Résultat",
+      "noneYet": "Aucune visite d'inspection enregistrée pour le moment.",
+      "confirmDelete": "Supprimer cette fiche de visite ?",
+      "newTitle": "Nouvelle Visite d'Inspection",
+      "editTitle": "Modifier la Visite d'Inspection",
+      "outcomes": {
+        "NO_ACTION": "Aucune Action",
+        "VERBAL_WARNING": "Avertissement Verbal",
+        "NOTICE_ISSUED": "Avis Émis",
+        "FOLLOW_UP_REQUIRED": "Suivi Requis"
+      }
+    },
+    "snapshot": {
+      "noSites": "Aucun site disponible.",
+      "print": "Imprimer",
+      "generatedAt": "Généré le {{date}}",
+      "openNotices": "Avis Ouverts",
+      "activePermits": "Permis Actifs",
+      "inspectionsCompleted": "Inspections Terminées",
+      "certificatesActive": "Certificats Actifs",
+      "permits": "Permis",
+      "codesOfPractice": "Codes de Pratique",
+      "openNoticesList": "Avis Réglementaires Ouverts",
+      "noOpenNotices": "Aucun avis ouvert.",
+      "recentVisits": "Visites d'Inspection Récentes"
+    }
   }
 }

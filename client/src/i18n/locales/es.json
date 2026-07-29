@@ -535,5 +535,54 @@
       "CONTRACT": "Contrato",
       "OTHER": "Otro"
     }
+  },
+  "inspection": {
+    "nav": "Inspección Gubernamental",
+    "subtitle": "Registro de visitas de inspectores y resumen de cumplimiento para inspecciones regulatorias",
+    "tabVisits": "Registro de Visitas",
+    "tabSnapshot": "Resumen de Cumplimiento",
+    "loading": "Cargando…",
+    "visit": {
+      "new": "+ Nueva Visita",
+      "visitDate": "Fecha de visita",
+      "inspectorName": "Nombre del inspector",
+      "inspectorBadge": "Credencial / ID del inspector",
+      "authority": "Autoridad",
+      "areasInspected": "Áreas inspeccionadas",
+      "purpose": "Propósito de la visita",
+      "findings": "Hallazgos",
+      "outcome": "Resultado",
+      "relatedNotice": "Notificación relacionada (si aplica)",
+      "noNotice": "Ninguna",
+      "colDate": "Fecha",
+      "colSite": "Sitio",
+      "colInspector": "Inspector",
+      "colAreas": "Áreas Inspeccionadas",
+      "colOutcome": "Resultado",
+      "noneYet": "Aún no hay visitas de inspección registradas.",
+      "confirmDelete": "¿Eliminar este registro de visita?",
+      "newTitle": "Nueva Visita de Inspección",
+      "editTitle": "Editar Visita de Inspección",
+      "outcomes": {
+        "NO_ACTION": "Sin Acción",
+        "VERBAL_WARNING": "Advertencia Verbal",
+        "NOTICE_ISSUED": "Notificación Emitida",
+        "FOLLOW_UP_REQUIRED": "Requiere Seguimiento"
+      }
+    },
+    "snapshot": {
+      "noSites": "No hay sitios disponibles.",
+      "print": "Imprimir",
+      "generatedAt": "Generado {{date}}",
+      "openNotices": "Notificaciones Abiertas",
+      "activePermits": "Permisos Activos",
+      "inspectionsCompleted": "Inspecciones Completadas",
+      "certificatesActive": "Certificados Activos",
+      "permits": "Permisos",
+      "codesOfPractice": "Códigos de Práctica",
+      "openNoticesList": "Notificaciones Regulatorias Abiertas",
+      "noOpenNotices": "No hay notificaciones abiertas.",
+      "recentVisits": "Visitas de Inspección Recientes"
+    }
   }
 }

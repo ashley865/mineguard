@@ -23,6 +23,8 @@ import permitsRoutes from "./routes/permits";
 import certificatesRoutes from "./routes/certificates";
 import trainingRecordsRoutes from "./routes/trainingRecords";
 import documentsRoutes from "./routes/documents";
+import inspectionVisitsRoutes from "./routes/inspectionVisits";
+import inspectionSnapshotRoutes from "./routes/inspectionSnapshot";
 import { startSimulator } from "./services/simulator";
 import { scanCompliance } from "./services/complianceScanner";
 
@@ -60,6 +62,8 @@ app.use("/api/permits", permitsRoutes);
 app.use("/api/certificates", certificatesRoutes);
 app.use("/api/training-records", trainingRecordsRoutes);
 app.use("/api/documents", documentsRoutes);
+app.use("/api/inspection-visits", inspectionVisitsRoutes);
+app.use("/api/inspection-snapshot", inspectionSnapshotRoutes);
 
 app.use((err: any, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
   console.error(err);

@@ -535,5 +535,54 @@
       "CONTRACT": "Contract",
       "OTHER": "Other"
     }
+  },
+  "inspection": {
+    "nav": "Government Inspection",
+    "subtitle": "Inspector visit log and compliance snapshot for regulatory inspections",
+    "tabVisits": "Visit Log",
+    "tabSnapshot": "Compliance Snapshot",
+    "loading": "Loading…",
+    "visit": {
+      "new": "+ New Visit",
+      "visitDate": "Visit date",
+      "inspectorName": "Inspector name",
+      "inspectorBadge": "Inspector badge / ID",
+      "authority": "Authority",
+      "areasInspected": "Areas inspected",
+      "purpose": "Purpose of visit",
+      "findings": "Findings",
+      "outcome": "Outcome",
+      "relatedNotice": "Related notice (if any)",
+      "noNotice": "None",
+      "colDate": "Date",
+      "colSite": "Site",
+      "colInspector": "Inspector",
+      "colAreas": "Areas Inspected",
+      "colOutcome": "Outcome",
+      "noneYet": "No inspection visits recorded yet.",
+      "confirmDelete": "Delete this visit record?",
+      "newTitle": "New Inspection Visit",
+      "editTitle": "Edit Inspection Visit",
+      "outcomes": {
+        "NO_ACTION": "No Action",
+        "VERBAL_WARNING": "Verbal Warning",
+        "NOTICE_ISSUED": "Notice Issued",
+        "FOLLOW_UP_REQUIRED": "Follow-up Required"
+      }
+    },
+    "snapshot": {
+      "noSites": "No sites available.",
+      "print": "Print",
+      "generatedAt": "Generated {{date}}",
+      "openNotices": "Open Notices",
+      "activePermits": "Active Permits",
+      "inspectionsCompleted": "Inspections Completed",
+      "certificatesActive": "Certificates Active",
+      "permits": "Permits",
+      "codesOfPractice": "Codes of Practice",
+      "openNoticesList": "Open Regulatory Notices",
+      "noOpenNotices": "No open notices.",
+      "recentVisits": "Recent Inspection Visits"
+    }
   }
 }

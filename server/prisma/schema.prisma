@@ -178,6 +178,7 @@ model Site {
   safetyInspections SafetyInspection[]
   permits           Permit[]
   documents         Document[]
+  inspectionVisits  InspectionVisit[]
 }
 
 model Zone {
@@ -366,6 +367,8 @@ model RegulatoryNotice {
   zoneId              String?
   zone                Zone?          @relation(fields: [zoneId], references: [id], onDelete: SetNull)
 
+  visits InspectionVisit[]
+
   createdAt DateTime @default(now())
 }
 
@@ -532,6 +535,32 @@ model Document {
 
   uploadedById String?
   uploadedBy   User?   @relation(fields: [uploadedById], references: [id], onDelete: SetNull)
+
+  createdAt DateTime @default(now())
+}
+
+enum InspectionOutcome {
+  NO_ACTION
+  VERBAL_WARNING
+  NOTICE_ISSUED
+  FOLLOW_UP_REQUIRED
+}
+
+model InspectionVisit {
+  id             String            @id @default(cuid())
+  visitDate      DateTime
+  inspectorName  String
+  inspectorBadge String?
+  authority      String
+  areasInspected String
+  purpose        String?
+  findings       String?
+  outcome        InspectionOutcome @default(NO_ACTION)
+  siteId         String
+  site           Site              @relation(fields: [siteId], references: [id], onDelete: Cascade)
+
+  relatedNoticeId String?
+  relatedNotice   RegulatoryNotice? @relation(fields: [relatedNoticeId], references: [id], onDelete: SetNull)
 
   createdAt DateTime @default(now())
 }
