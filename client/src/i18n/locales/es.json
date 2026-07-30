@@ -92,6 +92,8 @@
     "copy": "Copiar",
     "copied": "¡Copiado!",
     "passkeyWarning": "Guarda esta clave de acceso ahora. No se mostrará de nuevo, y cualquiera que la tenga podrá unirse a la cuenta de tu mina.",
+    "inviteLinkLabel": "Enlace de invitación para ejecutivos y administradores",
+    "inviteLinkHint": "Compartir este enlace equivale a compartir la clave de acceso: envíalo solo a quienes quieras darles acceso.",
     "continue": "Continuar al panel"
   },
   "dashboard": {
@@ -644,5 +646,11 @@
       "safetyInspections": "Inspecciones de Seguridad",
       "regulatoryNotices": "Notificaciones Regulatorias"
     }
+  },
+  "notifications": {
+    "title": "Notificaciones",
+    "empty": "Aún no hay aprobaciones ni rechazos.",
+    "alertLabel": "Alerta",
+    "incidentLabel": "Incidente"
   }
 }

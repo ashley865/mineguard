@@ -35,6 +35,15 @@ router.get("/search", async (req, res) => {
   res.json(mines);
 });
 
+router.get("/:id", async (req, res) => {
+  const mine = await prisma.mine.findUnique({
+    where: { id: req.params.id },
+    select: { id: true, name: true, location: true },
+  });
+  if (!mine) return res.status(404).json({ error: "Mine not found" });
+  res.json(mine);
+});
+
 router.post("/register", async (req, res) => {
   const parsed = registerMineSchema.safeParse(req.body);
   if (!parsed.success) return res.status(400).json({ error: parsed.error.flatten() });

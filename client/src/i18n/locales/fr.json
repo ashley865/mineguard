@@ -92,6 +92,8 @@
     "copy": "Copier",
     "copied": "Copié !",
     "passkeyWarning": "Enregistrez cette clé d'accès maintenant. Elle ne sera plus affichée, et toute personne qui la possède peut rejoindre le compte de votre mine.",
+    "inviteLinkLabel": "Lien d'invitation pour les exécutifs et administrateurs",
+    "inviteLinkHint": "Partager ce lien revient à partager la clé d'accès — ne l'envoyez qu'aux personnes à qui vous voulez donner accès.",
     "continue": "Continuer vers le tableau de bord"
   },
   "dashboard": {
@@ -644,5 +646,11 @@
       "safetyInspections": "Inspections de Sécurité",
       "regulatoryNotices": "Avis Réglementaires"
     }
+  },
+  "notifications": {
+    "title": "Notifications",
+    "empty": "Aucune approbation ou rejet pour le moment.",
+    "alertLabel": "Alerte",
+    "incidentLabel": "Incident"
   }
 }

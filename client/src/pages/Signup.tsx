@@ -1,5 +1,5 @@
 import { FormEvent, useEffect, useState } from "react";
-import { Link, Navigate, useNavigate } from "react-router-dom";
+import { Link, Navigate, useNavigate, useSearchParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useAuth } from "../context/AuthContext";
 import { api } from "../api/client";
@@ -11,6 +11,7 @@ export default function Signup() {
   const { t } = useTranslation();
   const { user, register } = useAuth();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -35,6 +36,20 @@ export default function Signup() {
     return () => clearTimeout(handle);
   }, [mineQuery, selectedMine]);
 
+  useEffect(() => {
+    const mineId = searchParams.get("mine");
+    const key = searchParams.get("key");
+    if (!mineId || !key) return;
+    api
+      .get<Mine>(`/mines/${mineId}`)
+      .then((res) => {
+        setSelectedMine(res.data);
+        setPasskey(key);
+      })
+      .catch(() => {});
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   if (user) return <Navigate to="/" replace />;
 
   async function handleSubmit(e: FormEvent) {
@@ -56,16 +71,17 @@ export default function Signup() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-mine-950 px-4 py-8">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-mine-950 via-mine-950 to-mine-900 px-4 py-8">
       <div className="w-full max-w-sm">
         <div className="flex justify-end mb-3">
           <LanguageSwitcher />
         </div>
         <div className="text-center mb-8">
-          <div className="text-3xl font-bold">⛏ Mine Guard</div>
+          <div className="text-4xl">⛏</div>
+          <div className="text-2xl font-bold tracking-tight mt-1">Mine Guard</div>
           <div className="text-mine-300 text-sm mt-1">{t("signup.title")}</div>
         </div>
-        <form onSubmit={handleSubmit} className="bg-mine-900 border border-mine-800 rounded-lg p-6 space-y-4">
+        <form onSubmit={handleSubmit} className="bg-mine-900 border border-mine-800 rounded-xl shadow-xl shadow-black/10 p-6 space-y-4">
           <div>
             <label className={labelClass}>{t("signup.mine")}</label>
             {selectedMine ? (

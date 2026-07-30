@@ -2,6 +2,7 @@ import { NavLink, Outlet } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useAuth } from "../context/AuthContext";
 import LanguageSwitcher from "./LanguageSwitcher";
+import NotificationBell from "./NotificationBell";
 
 export default function Layout() {
   const { t } = useTranslation();
@@ -27,22 +28,22 @@ export default function Layout() {
 
   return (
     <div className="min-h-screen flex">
-      <aside className="w-60 shrink-0 bg-mine-900 border-r border-mine-800 flex flex-col print:hidden">
+      <aside className="w-60 shrink-0 bg-mine-900 border-r border-mine-800 shadow-lg shadow-black/10 flex flex-col print:hidden">
         <div className="px-5 py-5 border-b border-mine-800">
           <div className="text-lg font-bold tracking-tight">⛏ Mine Guard</div>
           <div className="text-xs text-mine-300 mt-0.5">Safety Monitoring</div>
         </div>
-        <nav className="flex-1 px-2 py-4 space-y-1">
+        <nav className="flex-1 px-2 py-4 space-y-0.5 overflow-y-auto">
           {navItems.map((item) => (
             <NavLink
               key={item.to}
               to={item.to}
               end={item.end}
               className={({ isActive }) =>
-                `block px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+                `block pl-3 pr-3 py-2 rounded-lg text-sm font-medium border-l-[3px] transition-colors ${
                   isActive
-                    ? "bg-mine-700 text-white"
-                    : "text-mine-200 hover:bg-mine-800 hover:text-white"
+                    ? "bg-mine-800 border-mine-500 text-white"
+                    : "border-transparent text-mine-200 hover:bg-mine-800/60 hover:text-white"
                 }`
               }
             >
@@ -57,18 +58,23 @@ export default function Layout() {
             <div className="text-xs text-mine-300">{user?.role}</div>
             <button
               onClick={logout}
-              className="mt-3 w-full text-sm px-3 py-1.5 rounded-md bg-mine-800 hover:bg-mine-700 transition-colors"
+              className="mt-3 w-full text-sm px-3 py-1.5 rounded-lg bg-mine-800 hover:bg-mine-700 border border-mine-700 transition-colors"
             >
               {t("nav.signOut")}
             </button>
           </div>
         </div>
       </aside>
-      <main className="flex-1 bg-mine-950 overflow-y-auto">
-        <div className="max-w-7xl mx-auto p-6">
-          <Outlet />
-        </div>
-      </main>
+      <div className="flex-1 flex flex-col min-w-0">
+        <header className="h-14 shrink-0 border-b border-mine-800 bg-mine-900/60 backdrop-blur flex items-center justify-end px-6 print:hidden">
+          <NotificationBell />
+        </header>
+        <main className="flex-1 bg-mine-950 overflow-y-auto">
+          <div className="max-w-7xl mx-auto p-6">
+            <Outlet />
+          </div>
+        </main>
+      </div>
     </div>
   );
 }

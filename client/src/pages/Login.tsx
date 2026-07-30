@@ -29,16 +29,17 @@ export default function Login() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-mine-950 px-4">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-mine-950 via-mine-950 to-mine-900 px-4">
       <div className="w-full max-w-sm">
         <div className="flex justify-end mb-3">
           <LanguageSwitcher />
         </div>
         <div className="text-center mb-8">
-          <div className="text-3xl font-bold">⛏ Mine Guard</div>
+          <div className="text-4xl">⛏</div>
+          <div className="text-2xl font-bold tracking-tight mt-1">Mine Guard</div>
           <div className="text-mine-300 text-sm mt-1">{t("login.tagline")}</div>
         </div>
-        <form onSubmit={handleSubmit} className="bg-mine-900 border border-mine-800 rounded-lg p-6 space-y-4">
+        <form onSubmit={handleSubmit} className="bg-mine-900 border border-mine-800 rounded-xl shadow-xl shadow-black/10 p-6 space-y-4">
           <div>
             <label className={labelClass}>{t("login.email")}</label>
             <input

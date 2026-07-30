@@ -92,6 +92,8 @@
     "copy": "Kopieer",
     "copied": "Gekopieer!",
     "passkeyWarning": "Stoor hierdie toegangsleutel nou. Dit sal nie weer gewys word nie, en enigiemand wat dit het, kan by jou myn se rekening aansluit.",
+    "inviteLinkLabel": "Uitnodigingskakel vir uitvoerende beamptes en administrateurs",
+    "inviteLinkHint": "Om hierdie skakel te deel is dieselfde as om die toegangsleutel te deel — stuur dit slegs aan mense vir wie jy toegang wil gee.",
     "continue": "Gaan voort na dashboard"
   },
   "dashboard": {
@@ -644,5 +646,11 @@
       "safetyInspections": "Veiligheidsinspeksies",
       "regulatoryNotices": "Regulatoriese Kennisgewings"
     }
+  },
+  "notifications": {
+    "title": "Kennisgewings",
+    "empty": "Nog geen goedkeurings of verwerpings nie.",
+    "alertLabel": "Waarskuwing",
+    "incidentLabel": "Voorval"
   }
 }

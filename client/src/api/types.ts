@@ -18,6 +18,18 @@ export interface Mine {
   description?: string | null;
 }
 
+export interface ReviewNotification {
+  id: string;
+  kind: "alert" | "incident";
+  title: string;
+  severity: AlertSeverity;
+  reviewStatus: ExecReviewStatus;
+  reviewNote?: string | null;
+  reviewedAt: string;
+  reviewedBy?: { id: string; name: string } | null;
+  site?: { id: string; name: string } | null;
+}
+
 export type SiteStatus = "OPERATIONAL" | "RESTRICTED" | "SHUT_DOWN";
 
 export interface Site {

@@ -24,6 +24,7 @@ export default function RegisterMine() {
 
   const [result, setResult] = useState<{ mine: Mine; passkey: string } | null>(null);
   const [copied, setCopied] = useState(false);
+  const [linkCopied, setLinkCopied] = useState(false);
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
@@ -55,15 +56,28 @@ export default function RegisterMine() {
     setTimeout(() => setCopied(false), 2000);
   }
 
+  function inviteLink() {
+    if (!result) return "";
+    const params = new URLSearchParams({ mine: result.mine.id, key: result.passkey });
+    return `${window.location.origin}/signup?${params.toString()}`;
+  }
+
+  function copyInviteLink() {
+    navigator.clipboard.writeText(inviteLink());
+    setLinkCopied(true);
+    setTimeout(() => setLinkCopied(false), 2000);
+  }
+
   if (result) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-mine-950 px-4">
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-mine-950 via-mine-950 to-mine-900 px-4">
         <div className="w-full max-w-lg">
           <div className="text-center mb-8">
-            <div className="text-3xl font-bold">⛏ Mine Guard</div>
+            <div className="text-4xl">⛏</div>
+            <div className="text-2xl font-bold tracking-tight mt-1">Mine Guard</div>
             <div className="text-mine-300 text-sm mt-1">{t("registerMine.successTitle")}</div>
           </div>
-          <div className="bg-mine-900 border border-mine-800 rounded-lg p-6 space-y-4">
+          <div className="bg-mine-900 border border-mine-800 rounded-xl shadow-xl shadow-black/10 p-6 space-y-4">
             <div className="text-sm">
               {t("registerMine.successBody", { name: result.mine.name })}
             </div>
@@ -84,6 +98,21 @@ export default function RegisterMine() {
             <div className="text-xs text-danger-400 bg-danger-500/10 border border-danger-500/30 rounded-md p-3">
               {t("registerMine.passkeyWarning")}
             </div>
+            <div className="pt-2 border-t border-mine-800">
+              <label className={labelClass}>{t("registerMine.inviteLinkLabel")}</label>
+              <div className="flex gap-2">
+                <input
+                  readOnly
+                  className={`${inputClass} font-mono text-xs`}
+                  value={inviteLink()}
+                  onFocus={(e) => e.target.select()}
+                />
+                <button type="button" className={buttonSecondary} onClick={copyInviteLink}>
+                  {linkCopied ? t("registerMine.copied") : t("registerMine.copy")}
+                </button>
+              </div>
+              <div className="text-xs text-mine-400 mt-1">{t("registerMine.inviteLinkHint")}</div>
+            </div>
             <button className={`${buttonPrimary} w-full`} onClick={() => navigate("/")}>
               {t("registerMine.continue")}
             </button>
@@ -94,16 +123,17 @@ export default function RegisterMine() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-mine-950 px-4 py-8">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-mine-950 via-mine-950 to-mine-900 px-4 py-8">
       <div className="w-full max-w-lg">
         <div className="flex justify-end mb-3">
           <LanguageSwitcher />
         </div>
         <div className="text-center mb-8">
-          <div className="text-3xl font-bold">⛏ Mine Guard</div>
+          <div className="text-4xl">⛏</div>
+          <div className="text-2xl font-bold tracking-tight mt-1">Mine Guard</div>
           <div className="text-mine-300 text-sm mt-1">{t("registerMine.title")}</div>
         </div>
-        <form onSubmit={handleSubmit} className="bg-mine-900 border border-mine-800 rounded-lg p-6 space-y-4">
+        <form onSubmit={handleSubmit} className="bg-mine-900 border border-mine-800 rounded-xl shadow-xl shadow-black/10 p-6 space-y-4">
           <div className="text-xs font-semibold text-mine-300 uppercase">{t("registerMine.mineDetails")}</div>
           <div>
             <label className={labelClass}>{t("registerMine.mineName")}</label>

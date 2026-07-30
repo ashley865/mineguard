@@ -92,6 +92,8 @@
     "copy": "Kopieren",
     "copied": "Kopiert!",
     "passkeyWarning": "Speichern Sie diesen Zugangsschlüssel jetzt. Er wird nicht erneut angezeigt, und jeder, der ihn besitzt, kann dem Konto Ihrer Mine beitreten.",
+    "inviteLinkLabel": "Einladungslink für Führungskräfte und Administratoren",
+    "inviteLinkHint": "Das Teilen dieses Links entspricht dem Teilen des Zugangsschlüssels — senden Sie ihn nur an Personen, denen Sie Zugriff gewähren möchten.",
     "continue": "Weiter zum Dashboard"
   },
   "dashboard": {
@@ -644,5 +646,11 @@
       "safetyInspections": "Sicherheitsinspektionen",
       "regulatoryNotices": "Behördliche Bescheide"
     }
+  },
+  "notifications": {
+    "title": "Benachrichtigungen",
+    "empty": "Noch keine Genehmigungen oder Ablehnungen.",
+    "alertLabel": "Alarm",
+    "incidentLabel": "Vorfall"
   }
 }

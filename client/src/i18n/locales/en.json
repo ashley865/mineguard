@@ -92,6 +92,8 @@
     "copy": "Copy",
     "copied": "Copied!",
     "passkeyWarning": "Save this passkey now. It will not be shown again, and anyone who has it can join your mine's account.",
+    "inviteLinkLabel": "Invite link for executives and admins",
+    "inviteLinkHint": "Sharing this link is the same as sharing the passkey — only send it to people you want to give access.",
     "continue": "Continue to dashboard"
   },
   "dashboard": {
@@ -644,5 +646,11 @@
       "safetyInspections": "Safety Inspections",
       "regulatoryNotices": "Regulatory Notices"
     }
+  },
+  "notifications": {
+    "title": "Notifications",
+    "empty": "No approvals or rejections yet.",
+    "alertLabel": "Alert",
+    "incidentLabel": "Incident"
   }
 }
