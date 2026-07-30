@@ -11,7 +11,7 @@ const assignmentSelect = {
   userId: true,
   siteId: true,
   createdAt: true,
-  user: { select: { id: true, name: true, email: true } },
+  user: { select: { id: true, name: true, email: true, title: true } },
   site: { select: { id: true, name: true } },
 } as const;
 
@@ -25,7 +25,7 @@ router.get("/mine", async (req, res) => {
 router.get("/executives", requireRole("ADMIN"), async (_req, res) => {
   const executives = await prisma.user.findMany({
     where: { role: "EXECUTIVE" },
-    select: { id: true, name: true, email: true },
+    select: { id: true, name: true, email: true, title: true },
     orderBy: { name: "asc" },
   });
   res.json(executives);

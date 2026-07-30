@@ -1,0 +1,8 @@
+-- CreateEnum
+CREATE TYPE "ExecutiveTitle" AS ENUM ('GENERAL_MANAGER', 'CFO', 'COO', 'HR_MANAGER', 'SECURITY_MANAGER', 'SAFETY_MANAGER', 'OPERATIONS_MANAGER', 'COMPLIANCE_OFFICER', 'IT_MANAGER', 'OTHER');
+
+-- AlterTable
+ALTER TABLE "User" ADD COLUMN "title" "ExecutiveTitle";
+
+-- AlterTable
+ALTER TABLE "ExecutiveInvite" ADD COLUMN "title" "ExecutiveTitle" NOT NULL DEFAULT 'OTHER';

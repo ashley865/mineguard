@@ -1,13 +1,14 @@
 import { FormEvent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { api } from "../../api/client";
-import { ExecutiveSiteAssignment, Site } from "../../api/types";
+import { ExecutiveSiteAssignment, ExecutiveTitle, Site } from "../../api/types";
 import { buttonDanger, buttonPrimary, cardClass, inputClass, labelClass } from "../../components/ui";
 
 interface ExecutiveOption {
   id: string;
   name: string;
   email: string;
+  title?: ExecutiveTitle | null;
 }
 
 export default function ExecutiveAccessTab() {
@@ -70,7 +71,9 @@ export default function ExecutiveAccessTab() {
               <label className={labelClass}>{t("executiveAccess.executive")}</label>
               <select className={inputClass} value={userId} onChange={(e) => setUserId(e.target.value)}>
                 {executives.map((ex) => (
-                  <option key={ex.id} value={ex.id}>{ex.name} ({ex.email})</option>
+                  <option key={ex.id} value={ex.id}>
+                    {ex.name}{ex.title ? ` — ${t(`settings.invites.titles.${ex.title}`)}` : ""} ({ex.email})
+                  </option>
                 ))}
               </select>
             </div>
@@ -86,7 +89,7 @@ export default function ExecutiveAccessTab() {
         </div>
       )}
 
-      <div className={`${cardClass} overflow-hidden`}>
+      <div className={`${cardClass} overflow-x-auto`}>
         <table className="w-full text-sm">
           <thead className="bg-mine-800/50 text-mine-300 text-xs uppercase">
             <tr>
@@ -98,7 +101,11 @@ export default function ExecutiveAccessTab() {
           <tbody>
             {assignments.map((a) => (
               <tr key={a.id} className="border-t border-mine-800 hover:bg-mine-800/30">
-                <td className="px-4 py-2 font-medium">{a.user.name}<div className="text-xs text-mine-400">{a.user.email}</div></td>
+                <td className="px-4 py-2 font-medium">
+                  {a.user.name}
+                  {a.user.title && <div className="text-xs text-mine-400">{t(`settings.invites.titles.${a.user.title}`)} · {a.user.email}</div>}
+                  {!a.user.title && <div className="text-xs text-mine-400">{a.user.email}</div>}
+                </td>
                 <td className="px-4 py-2 text-mine-300">{a.site.name}</td>
                 <td className="px-4 py-2 text-right">
                   <button className={buttonDanger} onClick={() => unassign(a.id)}>{t("common.delete")}</button>

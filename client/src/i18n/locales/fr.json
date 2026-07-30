@@ -83,7 +83,12 @@
     "join": "Créer mon compte",
     "joining": "Création du compte…",
     "error": "Impossible d'accepter cette invitation",
-    "invalid": "Ce lien d'invitation est invalide, déjà utilisé, ou a été révoqué. Demandez à votre administrateur d'en envoyer un nouveau."
+    "invalid": "Ce lien d'invitation est invalide, déjà utilisé, ou a été révoqué. Demandez à votre administrateur d'en envoyer un nouveau.",
+    "alreadySignedIn": "Vous êtes actuellement connecté en tant que {{name}}. Déconnectez-vous pour accepter cette invitation avec le compte invité.",
+    "logOutAndContinue": "Se déconnecter et continuer",
+    "stayLoggedIn": "Rester connecté et aller à mon tableau de bord",
+    "inviteKey": "Clé d'invitation",
+    "inviteKeyHint": "Pré-remplie depuis votre lien d'invitation. Si elle est vide, collez la clé qui vous a été envoyée séparément."
   },
   "registerMine": {
     "title": "Enregistrez votre mine",
@@ -119,7 +124,10 @@
     "siteStatus": "État des sites",
     "activeAlerts": "Alertes actives",
     "noOpenAlerts": "Aucune alerte ouverte. Tout est en ordre.",
-    "loading": "Chargement du tableau de bord…"
+    "loading": "Chargement du tableau de bord…",
+    "complianceScore": "Score de Conformité",
+    "workforceStatus": "État du Personnel",
+    "equipmentStatus": "État des Équipements"
   },
   "executive": {
     "title": "Tableau de bord exécutif",
@@ -149,7 +157,8 @@
     "visitorsOnSite": "Visiteurs sur le Site",
     "pendingPermitsToWork": "Permis de Travail en Attente d'Approbation",
     "escalatedRisks": "Risques Escaladés",
-    "noSiteAccess": "Vous n'avez encore été affecté à aucun site. Demandez à un administrateur de vous accorder l'accès à un site pour voir ici la Gestion des Visiteurs, le Permis de Travail et le Registre des Risques."
+    "noSiteAccess": "Vous n'avez encore été affecté à aucun site. Demandez à un administrateur de vous accorder l'accès à un site pour voir ici la Gestion des Visiteurs, le Permis de Travail et le Registre des Risques.",
+    "complianceBreakdown": "Répartition de la Conformité"
   },
   "sites": {
     "title": "Sites et zones",
@@ -820,6 +829,7 @@
       "newHint": "Génère un lien à usage unique avec une clé unique. Seule cette personne peut l'utiliser, une fois, pour créer son compte Exécutif.",
       "name": "Nom complet",
       "email": "E-mail",
+      "titleField": "Titre / Département",
       "create": "Créer l'invitation",
       "createError": "Impossible de créer cette invitation",
       "createdTitle": "Invitation créée pour {{name}}",
@@ -829,7 +839,19 @@
       "invitedBy": "Invité par",
       "revoke": "Révoquer",
       "confirmRevoke": "Révoquer cette invitation ? Le lien cessera de fonctionner.",
-      "noneYet": "Aucune invitation envoyée pour le moment."
+      "noneYet": "Aucune invitation envoyée pour le moment.",
+      "titles": {
+        "GENERAL_MANAGER": "Directeur Général",
+        "CFO": "Directeur Financier",
+        "COO": "Directeur des Opérations",
+        "HR_MANAGER": "Responsable des Ressources Humaines",
+        "SECURITY_MANAGER": "Responsable de la Sécurité",
+        "SAFETY_MANAGER": "Responsable Hygiène et Sécurité",
+        "OPERATIONS_MANAGER": "Responsable des Opérations",
+        "COMPLIANCE_OFFICER": "Responsable de la Conformité",
+        "IT_MANAGER": "Responsable Informatique",
+        "OTHER": "Autre"
+      }
     }
   }
 }

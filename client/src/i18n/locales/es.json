@@ -83,7 +83,12 @@
     "join": "Crear mi cuenta",
     "joining": "Creando cuenta…",
     "error": "No se pudo aceptar esta invitación",
-    "invalid": "Este enlace de invitación no es válido, ya fue usado o fue revocado. Pide a tu administrador que envíe uno nuevo."
+    "invalid": "Este enlace de invitación no es válido, ya fue usado o fue revocado. Pide a tu administrador que envíe uno nuevo.",
+    "alreadySignedIn": "Actualmente has iniciado sesión como {{name}}. Cierra sesión para aceptar esta invitación con la cuenta invitada.",
+    "logOutAndContinue": "Cerrar sesión y continuar",
+    "stayLoggedIn": "Mantener la sesión y ir a mi panel",
+    "inviteKey": "Clave de invitación",
+    "inviteKeyHint": "Prellenada desde tu enlace de invitación. Si está vacía, pega la clave que te enviaron por separado."
   },
   "registerMine": {
     "title": "Registra tu mina",
@@ -119,7 +124,10 @@
     "siteStatus": "Estado de Sitios",
     "activeAlerts": "Alertas Activas",
     "noOpenAlerts": "No hay alertas abiertas. Todo despejado.",
-    "loading": "Cargando panel…"
+    "loading": "Cargando panel…",
+    "complianceScore": "Puntaje de Cumplimiento",
+    "workforceStatus": "Estado del Personal",
+    "equipmentStatus": "Estado de Equipos"
   },
   "executive": {
     "title": "Panel Ejecutivo",
@@ -149,7 +157,8 @@
     "visitorsOnSite": "Visitantes en el Sitio",
     "pendingPermitsToWork": "Permisos de Trabajo Pendientes de Aprobación",
     "escalatedRisks": "Riesgos Escalados",
-    "noSiteAccess": "Aún no se te han asignado sitios. Pide a un administrador que te dé acceso a un sitio para ver aquí la Gestión de Visitantes, el Permiso de Trabajo y el Registro de Riesgos."
+    "noSiteAccess": "Aún no se te han asignado sitios. Pide a un administrador que te dé acceso a un sitio para ver aquí la Gestión de Visitantes, el Permiso de Trabajo y el Registro de Riesgos.",
+    "complianceBreakdown": "Desglose de Cumplimiento"
   },
   "sites": {
     "title": "Sitios y Zonas",
@@ -820,6 +829,7 @@
       "newHint": "Genera un enlace de un solo uso con una clave única. Solo esta persona puede usarlo, una vez, para crear su cuenta de Ejecutivo.",
       "name": "Nombre completo",
       "email": "Correo electrónico",
+      "titleField": "Cargo / Departamento",
       "create": "Crear invitación",
       "createError": "No se pudo crear esta invitación",
       "createdTitle": "Invitación creada para {{name}}",
@@ -829,7 +839,19 @@
       "invitedBy": "Invitado por",
       "revoke": "Revocar",
       "confirmRevoke": "¿Revocar esta invitación? El enlace dejará de funcionar.",
-      "noneYet": "Aún no se han enviado invitaciones."
+      "noneYet": "Aún no se han enviado invitaciones.",
+      "titles": {
+        "GENERAL_MANAGER": "Gerente General",
+        "CFO": "Director Financiero",
+        "COO": "Director de Operaciones",
+        "HR_MANAGER": "Gerente de Recursos Humanos",
+        "SECURITY_MANAGER": "Gerente de Seguridad",
+        "SAFETY_MANAGER": "Gerente de Seguridad Laboral",
+        "OPERATIONS_MANAGER": "Gerente de Operaciones",
+        "COMPLIANCE_OFFICER": "Oficial de Cumplimiento",
+        "IT_MANAGER": "Gerente de TI",
+        "OTHER": "Otro"
+      }
     }
   }
 }

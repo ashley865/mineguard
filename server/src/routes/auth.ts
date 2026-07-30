@@ -64,7 +64,7 @@ router.post("/register", async (req, res) => {
   const token = signToken(user.id, user.role);
   res.status(201).json({
     token,
-    user: { id: user.id, email: user.email, name: user.name, role: user.role, mineId: user.mineId },
+    user: { id: user.id, email: user.email, name: user.name, role: user.role, title: user.title, mineId: user.mineId },
   });
 });
 
@@ -87,7 +87,7 @@ router.post("/login", async (req, res) => {
   const token = signToken(user.id, user.role);
   res.json({
     token,
-    user: { id: user.id, email: user.email, name: user.name, role: user.role, mineId: user.mineId },
+    user: { id: user.id, email: user.email, name: user.name, role: user.role, title: user.title, mineId: user.mineId },
   });
 });
 
@@ -96,7 +96,7 @@ router.get("/me", requireAuth, async (req, res) => {
   if (!user) {
     return res.status(404).json({ error: "User not found" });
   }
-  res.json({ id: user.id, email: user.email, name: user.name, role: user.role, mineId: user.mineId });
+  res.json({ id: user.id, email: user.email, name: user.name, role: user.role, title: user.title, mineId: user.mineId });
 });
 
 router.put("/me", requireAuth, async (req, res) => {
@@ -106,7 +106,7 @@ router.put("/me", requireAuth, async (req, res) => {
     where: { id: req.auth!.userId },
     data: { name: parsed.data.name },
   });
-  res.json({ id: user.id, email: user.email, name: user.name, role: user.role, mineId: user.mineId });
+  res.json({ id: user.id, email: user.email, name: user.name, role: user.role, title: user.title, mineId: user.mineId });
 });
 
 router.post("/change-password", requireAuth, async (req, res) => {

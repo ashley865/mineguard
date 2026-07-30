@@ -70,7 +70,7 @@ export default function RegisterMine() {
 
   if (result) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-sky-50 via-white to-fuchsia-50 px-4">
+      <div className="min-h-screen flex items-center justify-center bg-mine-950 px-4">
         <div className="w-full max-w-lg">
           <div className="text-center mb-8">
             <div className="text-4xl">⛏</div>
@@ -123,7 +123,7 @@ export default function RegisterMine() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-sky-50 via-white to-fuchsia-50 px-4 py-8">
+    <div className="min-h-screen flex items-center justify-center bg-mine-950 px-4 py-8">
       <div className="w-full max-w-lg">
         <div className="flex justify-end mb-3">
           <LanguageSwitcher />

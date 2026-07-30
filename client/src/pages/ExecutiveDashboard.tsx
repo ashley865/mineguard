@@ -3,64 +3,41 @@ import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
 import { api } from "../api/client";
-import { Alert, ExecutiveSummary, Incident } from "../api/types";
+import { Alert, ExecutiveSummary, Incident, ReportTrends } from "../api/types";
 import { SeverityBadge } from "../components/Badges";
 import { buttonPrimary, buttonSecondary, cardClass } from "../components/ui";
 
-const accentBorders: Record<string, string> = {
-  sky: "border-t-4 border-t-sky-500",
-  violet: "border-t-4 border-t-violet-500",
-  teal: "border-t-4 border-t-teal-500",
-  rose: "border-t-4 border-t-rose-500",
-  amber: "border-t-4 border-t-amber-500",
-  fuchsia: "border-t-4 border-t-fuchsia-500",
-  emerald: "border-t-4 border-t-emerald-500",
-};
+type Tone = "positive" | "negative" | "caution";
 
-type Accent = keyof typeof accentBorders;
+function toneText(tone?: Tone) {
+  return tone === "positive" ? "text-success-500" : tone === "negative" ? "text-danger-500" : tone === "caution" ? "text-hazard-500" : "text-mine-50";
+}
 
-function OpsCard({
-  label,
-  value,
-  to,
-  tone,
-  accent,
-}: {
-  label: string;
-  value: number;
-  to: string;
-  tone?: "hazard" | "danger";
-  accent?: Accent;
-}) {
-  const toneClass = tone === "danger" ? "text-danger-500" : tone === "hazard" ? "text-hazard-500" : "text-mine-50";
+function OpsCard({ label, value, to, tone }: { label: string; value: number; to: string; tone?: Tone }) {
   return (
-    <Link
-      to={to}
-      className={`${cardClass} ${accent ? accentBorders[accent] : ""} px-5 py-4 block hover:border-brand-500 transition-colors`}
-    >
+    <Link to={to} className={`${cardClass} px-5 py-4 block hover:border-hazard-500 transition-colors`}>
       <div className="text-xs text-mine-300 uppercase tracking-wide">{label}</div>
-      <div className={`text-2xl font-bold mt-1 ${toneClass}`}>{value}</div>
+      <div className={`text-2xl font-bold mt-1 ${toneText(tone)}`}>{value}</div>
     </Link>
   );
 }
 
-function StatCard({
-  label,
-  value,
-  tone,
-  accent,
-}: {
-  label: string;
-  value: string | number;
-  tone?: "danger" | "hazard";
-  accent?: Accent;
-}) {
-  const toneClass =
-    tone === "danger" ? "text-danger-400" : tone === "hazard" ? "text-hazard-400" : "text-mine-50";
+function StatCard({ label, value, tone }: { label: string; value: string | number; tone?: Tone }) {
   return (
-    <div className={`${cardClass} ${accent ? accentBorders[accent] : ""} px-5 py-4`}>
+    <div className={`${cardClass} px-5 py-4`}>
       <div className="text-xs text-mine-300 uppercase tracking-wide">{label}</div>
-      <div className={`text-2xl font-bold mt-1 ${toneClass}`}>{value}</div>
+      <div className={`text-2xl font-bold mt-1 ${toneText(tone)}`}>{value}</div>
+    </div>
+  );
+}
+
+function RateRow({ label, numerator, denominator }: { label: string; numerator: number; denominator: number }) {
+  const pct = denominator === 0 ? 100 : Math.round((numerator / denominator) * 100);
+  const tone: Tone = pct >= 80 ? "positive" : pct >= 50 ? "caution" : "negative";
+  return (
+    <div className="flex items-center justify-between text-sm">
+      <span className="text-mine-300">{label}</span>
+      <span className={`font-semibold ${toneText(tone)}`}>{pct}%</span>
     </div>
   );
 }
@@ -100,10 +77,15 @@ function ReviewRow({
 export default function ExecutiveDashboard() {
   const { t } = useTranslation();
   const [summary, setSummary] = useState<ExecutiveSummary | null>(null);
+  const [trends, setTrends] = useState<ReportTrends | null>(null);
 
   async function load() {
-    const res = await api.get<ExecutiveSummary>("/executive/summary");
-    setSummary(res.data);
+    const [s, r] = await Promise.all([
+      api.get<ExecutiveSummary>("/executive/summary"),
+      api.get<ReportTrends>("/reports/trends", { params: { days: 30 } }),
+    ]);
+    setSummary(s.data);
+    setTrends(r.data);
   }
 
   useEffect(() => {
@@ -127,7 +109,7 @@ export default function ExecutiveDashboard() {
   const { siteStatus, alertSeverity, complianceScore, executiveOps, incidents, incidentTrend, workers, equipment, pendingReviews } =
     summary;
   const scoreTone =
-    complianceScore >= 80 ? "text-emerald-500" : complianceScore >= 50 ? "text-hazard-500" : "text-danger-500";
+    complianceScore >= 80 ? "text-success-500" : complianceScore >= 50 ? "text-hazard-500" : "text-danger-500";
 
   return (
     <div className="space-y-6">
@@ -143,32 +125,45 @@ export default function ExecutiveDashboard() {
       </div>
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-        <StatCard label={t("executive.operational")} value={siteStatus.OPERATIONAL} accent="emerald" />
-        <StatCard label={t("executive.restricted")} value={siteStatus.RESTRICTED} tone={siteStatus.RESTRICTED > 0 ? "hazard" : undefined} accent="amber" />
-        <StatCard label={t("executive.shutDown")} value={siteStatus.SHUT_DOWN} tone={siteStatus.SHUT_DOWN > 0 ? "danger" : undefined} accent="rose" />
-        <StatCard label={t("executive.equipmentUptime")} value={`${equipment.uptimePct}%`} accent="sky" />
+        <StatCard label={t("executive.operational")} value={siteStatus.OPERATIONAL} tone="positive" />
+        <StatCard label={t("executive.restricted")} value={siteStatus.RESTRICTED} tone={siteStatus.RESTRICTED > 0 ? "caution" : undefined} />
+        <StatCard label={t("executive.shutDown")} value={siteStatus.SHUT_DOWN} tone={siteStatus.SHUT_DOWN > 0 ? "negative" : undefined} />
+        <StatCard label={t("executive.equipmentUptime")} value={`${equipment.uptimePct}%`} tone={equipment.uptimePct >= 80 ? "positive" : equipment.uptimePct >= 50 ? "caution" : "negative"} />
       </div>
 
       {executiveOps.hasSiteAccess ? (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-          <OpsCard label={t("executive.visitorsOnSite")} value={executiveOps.visitorsOnSite} to="/visitors" accent="teal" />
+          <OpsCard label={t("executive.visitorsOnSite")} value={executiveOps.visitorsOnSite} to="/visitors" />
           <OpsCard
             label={t("executive.pendingPermitsToWork")}
             value={executiveOps.pendingPermitsToWork}
             to="/permits-to-work"
-            tone={executiveOps.pendingPermitsToWork > 0 ? "hazard" : undefined}
-            accent="violet"
+            tone={executiveOps.pendingPermitsToWork > 0 ? "caution" : "positive"}
           />
           <OpsCard
             label={t("executive.escalatedRisks")}
             value={executiveOps.escalatedRisks}
             to="/compliance"
-            tone={executiveOps.escalatedRisks > 0 ? "danger" : undefined}
-            accent="fuchsia"
+            tone={executiveOps.escalatedRisks > 0 ? "negative" : "positive"}
           />
         </div>
       ) : (
         <div className={`${cardClass} p-4 text-sm text-mine-300`}>{t("executive.noSiteAccess")}</div>
+      )}
+
+      {trends && (
+        <div className={`${cardClass} p-5`}>
+          <h2 className="text-sm font-semibold mb-4">{t("executive.complianceBreakdown")}</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-x-6 gap-y-2">
+            <RateRow label={t("compliance.tabCop")} numerator={trends.compliance.codesOfPractice.active} denominator={trends.compliance.codesOfPractice.total} />
+            <RateRow label={t("compliance.tabRisk")} numerator={trends.compliance.riskAssessments.approved} denominator={trends.compliance.riskAssessments.total} />
+            <RateRow label={t("permits.nav")} numerator={trends.compliance.permits.active} denominator={trends.compliance.permits.total} />
+            <RateRow label={t("compliance.tabInspections")} numerator={trends.compliance.safetyInspections.completed} denominator={trends.compliance.safetyInspections.total} />
+            <RateRow label={t("workforce.tabCertificates")} numerator={trends.compliance.certificates.active} denominator={trends.compliance.certificates.total} />
+            <RateRow label={t("reporting.trainingCurrent")} numerator={trends.compliance.trainingRecords.total - trends.compliance.trainingRecords.expiringSoon} denominator={trends.compliance.trainingRecords.total} />
+            <RateRow label={t("contractors.nav")} numerator={trends.compliance.contractors.active} denominator={trends.compliance.contractors.total} />
+          </div>
+        </div>
       )}
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -236,7 +231,7 @@ export default function ExecutiveDashboard() {
               />
               <YAxis tick={{ fontSize: 10, fill: "#52525b" }} allowDecimals={false} />
               <Tooltip contentStyle={{ background: "#fafafa", border: "1px solid #e5e5e5", fontSize: 12 }} />
-              <Bar dataKey="count" fill="#6366f1" radius={[3, 3, 0, 0]} />
+              <Bar dataKey="count" fill="#c48a1f" radius={[3, 3, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
         </div>

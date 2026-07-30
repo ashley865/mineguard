@@ -83,7 +83,12 @@
     "join": "Create my account",
     "joining": "Creating account…",
     "error": "Could not accept this invite",
-    "invalid": "This invite link is invalid, already used, or has been revoked. Ask your Administrator to send a new one."
+    "invalid": "This invite link is invalid, already used, or has been revoked. Ask your Administrator to send a new one.",
+    "alreadySignedIn": "You're currently signed in as {{name}}. Log out to accept this invite under the invited account.",
+    "logOutAndContinue": "Log out and continue",
+    "stayLoggedIn": "Stay signed in and go to my dashboard",
+    "inviteKey": "Invite key",
+    "inviteKeyHint": "Pre-filled from your invite link. If it's blank, paste the key sent to you separately."
   },
   "registerMine": {
     "title": "Register your mine",
@@ -119,7 +124,10 @@
     "siteStatus": "Site Status",
     "activeAlerts": "Active Alerts",
     "noOpenAlerts": "No open alerts. All clear.",
-    "loading": "Loading dashboard…"
+    "loading": "Loading dashboard…",
+    "complianceScore": "Compliance Score",
+    "workforceStatus": "Workforce Status",
+    "equipmentStatus": "Equipment Status"
   },
   "executive": {
     "title": "Executive Dashboard",
@@ -149,7 +157,8 @@
     "visitorsOnSite": "Visitors On Site",
     "pendingPermitsToWork": "Permits to Work Awaiting Approval",
     "escalatedRisks": "Escalated Risks",
-    "noSiteAccess": "You haven't been assigned to any sites yet. Ask an administrator to grant you site access to see Visitor Management, Permit to Work, and Risk Register operations here."
+    "noSiteAccess": "You haven't been assigned to any sites yet. Ask an administrator to grant you site access to see Visitor Management, Permit to Work, and Risk Register operations here.",
+    "complianceBreakdown": "Compliance Breakdown"
   },
   "sites": {
     "title": "Sites & Zones",
@@ -820,6 +829,7 @@
       "newHint": "Generates a one-time link with a unique key. Only this person can use it, once, to create their Executive account.",
       "name": "Full name",
       "email": "Email",
+      "titleField": "Title / Department",
       "create": "Create invite",
       "createError": "Could not create this invite",
       "createdTitle": "Invite created for {{name}}",
@@ -829,7 +839,19 @@
       "invitedBy": "Invited by",
       "revoke": "Revoke",
       "confirmRevoke": "Revoke this invite? The link will stop working.",
-      "noneYet": "No invites sent yet."
+      "noneYet": "No invites sent yet.",
+      "titles": {
+        "GENERAL_MANAGER": "General Manager",
+        "CFO": "Chief Financial Officer",
+        "COO": "Chief Operating Officer",
+        "HR_MANAGER": "HR Manager",
+        "SECURITY_MANAGER": "Security Manager",
+        "SAFETY_MANAGER": "Safety Manager",
+        "OPERATIONS_MANAGER": "Operations Manager",
+        "COMPLIANCE_OFFICER": "Compliance Officer",
+        "IT_MANAGER": "IT Manager",
+        "OTHER": "Other"
+      }
     }
   }
 }

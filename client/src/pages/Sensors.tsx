@@ -143,7 +143,7 @@ function SensorChart({ sensor, onClose }: { sensor: Sensor; onClose: () => void 
             <Tooltip contentStyle={{ background: "#fafafa", border: "1px solid #e5e5e5", fontSize: 12 }} />
             <ReferenceLine y={sensor.minSafe} stroke="#e13b2e" strokeDasharray="4 4" />
             <ReferenceLine y={sensor.maxSafe} stroke="#e13b2e" strokeDasharray="4 4" />
-            <Line type="monotone" dataKey="value" stroke="#0ea5e9" strokeWidth={2} dot={false} isAnimationActive={false} />
+            <Line type="monotone" dataKey="value" stroke="#c48a1f" strokeWidth={2} dot={false} isAnimationActive={false} />
           </LineChart>
         </ResponsiveContainer>
       </div>
@@ -228,7 +228,7 @@ export default function Sensors() {
         )}
       </div>
 
-      <div className={`${cardClass} overflow-hidden`}>
+      <div className={`${cardClass} overflow-x-auto`}>
         <table className="w-full text-sm">
           <thead className="bg-mine-800/50 text-mine-300 text-xs uppercase">
             <tr>

@@ -1,11 +1,24 @@
 export type Role = "ADMIN" | "SUPERVISOR" | "VIEWER" | "EXECUTIVE";
 export type ExecReviewStatus = "PENDING" | "APPROVED" | "REJECTED";
 
+export type ExecutiveTitle =
+  | "GENERAL_MANAGER"
+  | "CFO"
+  | "COO"
+  | "HR_MANAGER"
+  | "SECURITY_MANAGER"
+  | "SAFETY_MANAGER"
+  | "OPERATIONS_MANAGER"
+  | "COMPLIANCE_OFFICER"
+  | "IT_MANAGER"
+  | "OTHER";
+
 export interface User {
   id: string;
   email: string;
   name: string;
   role: Role;
+  title?: ExecutiveTitle | null;
   mineId?: string | null;
 }
 
@@ -25,6 +38,7 @@ export interface ExecutiveInvite {
   id: string;
   name: string;
   email: string;
+  title: ExecutiveTitle;
   status: InviteStatus;
   createdAt: string;
   acceptedAt?: string | null;
@@ -184,6 +198,9 @@ export interface DashboardSummary {
     openIncidents: number;
     equipmentDown: number;
   };
+  workforce: { total: number; byStatus: Record<WorkerStatus, number> };
+  equipmentSummary: { total: number; byStatus: Record<EquipmentStatus, number> };
+  complianceScore: number;
   recentAlerts: Alert[];
   sites: Site[];
 }
@@ -505,7 +522,7 @@ export interface ExecutiveSiteAssignment {
   userId: string;
   siteId: string;
   createdAt: string;
-  user: { id: string; name: string; email: string };
+  user: { id: string; name: string; email: string; title?: ExecutiveTitle | null };
   site: { id: string; name: string };
 }
 

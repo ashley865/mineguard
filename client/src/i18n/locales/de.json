@@ -83,7 +83,12 @@
     "join": "Mein Konto erstellen",
     "joining": "Konto wird erstellt…",
     "error": "Diese Einladung konnte nicht angenommen werden",
-    "invalid": "Dieser Einladungslink ist ungültig, bereits verwendet oder wurde widerrufen. Bitten Sie Ihren Administrator, einen neuen zu senden."
+    "invalid": "Dieser Einladungslink ist ungültig, bereits verwendet oder wurde widerrufen. Bitten Sie Ihren Administrator, einen neuen zu senden.",
+    "alreadySignedIn": "Sie sind derzeit als {{name}} angemeldet. Melden Sie sich ab, um diese Einladung mit dem eingeladenen Konto anzunehmen.",
+    "logOutAndContinue": "Abmelden und fortfahren",
+    "stayLoggedIn": "Angemeldet bleiben und zu meinem Dashboard gehen",
+    "inviteKey": "Einladungsschlüssel",
+    "inviteKeyHint": "Aus Ihrem Einladungslink vorausgefüllt. Falls leer, fügen Sie den Ihnen separat gesendeten Schlüssel ein."
   },
   "registerMine": {
     "title": "Registrieren Sie Ihre Mine",
@@ -119,7 +124,10 @@
     "siteStatus": "Standortstatus",
     "activeAlerts": "Aktive Alarme",
     "noOpenAlerts": "Keine offenen Alarme. Alles in Ordnung.",
-    "loading": "Dashboard wird geladen…"
+    "loading": "Dashboard wird geladen…",
+    "complianceScore": "Compliance-Bewertung",
+    "workforceStatus": "Belegschaftsstatus",
+    "equipmentStatus": "Ausrüstungsstatus"
   },
   "executive": {
     "title": "Führungskräfte-Dashboard",
@@ -149,7 +157,8 @@
     "visitorsOnSite": "Besucher vor Ort",
     "pendingPermitsToWork": "Arbeitserlaubnisse, die auf Genehmigung warten",
     "escalatedRisks": "Eskalierte Risiken",
-    "noSiteAccess": "Ihnen wurden noch keine Standorte zugewiesen. Bitten Sie einen Administrator, Ihnen Standortzugriff zu gewähren, um hier Besucherverwaltung, Arbeitserlaubnis und Risikoregister zu sehen."
+    "noSiteAccess": "Ihnen wurden noch keine Standorte zugewiesen. Bitten Sie einen Administrator, Ihnen Standortzugriff zu gewähren, um hier Besucherverwaltung, Arbeitserlaubnis und Risikoregister zu sehen.",
+    "complianceBreakdown": "Compliance-Aufschlüsselung"
   },
   "sites": {
     "title": "Standorte & Zonen",
@@ -820,6 +829,7 @@
       "newHint": "Erstellt einen einmaligen Link mit einem eindeutigen Schlüssel. Nur diese Person kann ihn einmal verwenden, um ihr Führungskräftekonto zu erstellen.",
       "name": "Vollständiger Name",
       "email": "E-Mail",
+      "titleField": "Titel / Abteilung",
       "create": "Einladung erstellen",
       "createError": "Diese Einladung konnte nicht erstellt werden",
       "createdTitle": "Einladung für {{name}} erstellt",
@@ -829,7 +839,19 @@
       "invitedBy": "Eingeladen von",
       "revoke": "Widerrufen",
       "confirmRevoke": "Diese Einladung widerrufen? Der Link funktioniert dann nicht mehr.",
-      "noneYet": "Noch keine Einladungen gesendet."
+      "noneYet": "Noch keine Einladungen gesendet.",
+      "titles": {
+        "GENERAL_MANAGER": "Generaldirektor",
+        "CFO": "Finanzvorstand",
+        "COO": "Betriebsleiter",
+        "HR_MANAGER": "Personalleiter",
+        "SECURITY_MANAGER": "Sicherheitsleiter",
+        "SAFETY_MANAGER": "Arbeitssicherheitsleiter",
+        "OPERATIONS_MANAGER": "Betriebsleiter (Operations)",
+        "COMPLIANCE_OFFICER": "Compliance-Beauftragter",
+        "IT_MANAGER": "IT-Leiter",
+        "OTHER": "Sonstiges"
+      }
     }
   }
 }

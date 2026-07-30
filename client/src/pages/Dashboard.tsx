@@ -6,32 +6,19 @@ import { Alert, DashboardSummary } from "../api/types";
 import { SeverityBadge, StatusBadge } from "../components/Badges";
 import { cardClass } from "../components/ui";
 
-const accentBorders: Record<string, string> = {
-  sky: "border-t-4 border-t-sky-500",
-  violet: "border-t-4 border-t-violet-500",
-  teal: "border-t-4 border-t-teal-500",
-  rose: "border-t-4 border-t-rose-500",
-  amber: "border-t-4 border-t-amber-500",
-  fuchsia: "border-t-4 border-t-fuchsia-500",
-  emerald: "border-t-4 border-t-emerald-500",
-  indigo: "border-t-4 border-t-indigo-500",
-};
-
 function StatCard({
   label,
   value,
   tone,
-  accent,
 }: {
   label: string;
   value: number;
-  tone?: "danger" | "hazard";
-  accent?: keyof typeof accentBorders;
+  tone?: "danger" | "hazard" | "success";
 }) {
   const toneClass =
-    tone === "danger" ? "text-danger-400" : tone === "hazard" ? "text-hazard-400" : "text-mine-50";
+    tone === "danger" ? "text-danger-500" : tone === "hazard" ? "text-hazard-500" : tone === "success" ? "text-success-500" : "text-mine-50";
   return (
-    <div className={`${cardClass} ${accent ? accentBorders[accent] : ""} px-5 py-4`}>
+    <div className={`${cardClass} px-5 py-4`}>
       <div className="text-xs text-mine-300 uppercase tracking-wide">{label}</div>
       <div className={`text-2xl font-bold mt-1 ${toneClass}`}>{value}</div>
     </div>
@@ -75,7 +62,9 @@ export default function Dashboard() {
     return <div className="text-mine-300">{t("dashboard.loading")}</div>;
   }
 
-  const { counts, recentAlerts, sites } = summary;
+  const { counts, workforce, equipmentSummary, complianceScore, recentAlerts, sites } = summary;
+  const scoreTone =
+    complianceScore >= 80 ? "text-success-500" : complianceScore >= 50 ? "text-hazard-500" : "text-danger-500";
 
   return (
     <div className="space-y-6">
@@ -85,13 +74,64 @@ export default function Dashboard() {
       </div>
 
       <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-3">
-        <StatCard label={t("dashboard.sites")} value={counts.siteCount} accent="sky" />
-        <StatCard label={t("dashboard.sensors")} value={counts.sensorCount} accent="teal" />
-        <StatCard label={t("dashboard.openAlerts")} value={counts.openAlerts} tone={counts.openAlerts > 0 ? "hazard" : undefined} accent="amber" />
-        <StatCard label={t("dashboard.critical")} value={counts.criticalAlerts} tone={counts.criticalAlerts > 0 ? "danger" : undefined} accent="rose" />
-        <StatCard label={t("dashboard.onShift")} value={counts.onShiftWorkers} accent="violet" />
-        <StatCard label={t("dashboard.openIncidents")} value={counts.openIncidents} tone={counts.openIncidents > 0 ? "hazard" : undefined} accent="fuchsia" />
-        <StatCard label={t("dashboard.equipmentDown")} value={counts.equipmentDown} tone={counts.equipmentDown > 0 ? "danger" : undefined} accent="indigo" />
+        <StatCard label={t("dashboard.sites")} value={counts.siteCount} />
+        <StatCard label={t("dashboard.sensors")} value={counts.sensorCount} />
+        <StatCard label={t("dashboard.openAlerts")} value={counts.openAlerts} tone={counts.openAlerts > 0 ? "hazard" : "success"} />
+        <StatCard label={t("dashboard.critical")} value={counts.criticalAlerts} tone={counts.criticalAlerts > 0 ? "danger" : "success"} />
+        <StatCard label={t("dashboard.onShift")} value={counts.onShiftWorkers} tone="success" />
+        <StatCard label={t("dashboard.openIncidents")} value={counts.openIncidents} tone={counts.openIncidents > 0 ? "hazard" : "success"} />
+        <StatCard label={t("dashboard.equipmentDown")} value={counts.equipmentDown} tone={counts.equipmentDown > 0 ? "danger" : "success"} />
+      </div>
+
+      <div className={`${cardClass} p-5 flex items-center justify-between flex-wrap gap-4`}>
+        <h2 className="text-sm font-semibold">{t("dashboard.complianceScore")}</h2>
+        <div className={`text-3xl font-bold ${scoreTone}`}>{complianceScore}%</div>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className={`${cardClass} p-5`}>
+          <h2 className="text-sm font-semibold mb-4">{t("dashboard.workforceStatus")}</h2>
+          <div className="space-y-2 text-sm">
+            <div className="flex items-center justify-between">
+              <span className="text-mine-300">{t("workers.onShift")}</span>
+              <span className="font-semibold text-success-500">{workforce.byStatus.ON_SHIFT}</span>
+            </div>
+            <div className="flex items-center justify-between">
+              <span className="text-mine-300">{t("workers.offShift")}</span>
+              <span className="font-semibold">{workforce.byStatus.OFF_SHIFT}</span>
+            </div>
+            <div className="flex items-center justify-between">
+              <span className="text-mine-300">{t("workers.emergency")}</span>
+              <span className={`font-semibold ${workforce.byStatus.EMERGENCY > 0 ? "text-danger-500" : ""}`}>{workforce.byStatus.EMERGENCY}</span>
+            </div>
+            <div className="flex items-center justify-between pt-2 border-t border-mine-800">
+              <span className="text-mine-300">{t("workers.title")}</span>
+              <span className="font-semibold">{workforce.total}</span>
+            </div>
+          </div>
+        </div>
+
+        <div className={`${cardClass} p-5`}>
+          <h2 className="text-sm font-semibold mb-4">{t("dashboard.equipmentStatus")}</h2>
+          <div className="space-y-2 text-sm">
+            <div className="flex items-center justify-between">
+              <span className="text-mine-300">{t("equipment.operational")}</span>
+              <span className="font-semibold text-success-500">{equipmentSummary.byStatus.OPERATIONAL}</span>
+            </div>
+            <div className="flex items-center justify-between">
+              <span className="text-mine-300">{t("equipment.maintenance")}</span>
+              <span className="font-semibold text-hazard-500">{equipmentSummary.byStatus.MAINTENANCE}</span>
+            </div>
+            <div className="flex items-center justify-between">
+              <span className="text-mine-300">{t("equipment.down")}</span>
+              <span className={`font-semibold ${equipmentSummary.byStatus.DOWN > 0 ? "text-danger-500" : ""}`}>{equipmentSummary.byStatus.DOWN}</span>
+            </div>
+            <div className="flex items-center justify-between pt-2 border-t border-mine-800">
+              <span className="text-mine-300">{t("equipment.title")}</span>
+              <span className="font-semibold">{equipmentSummary.total}</span>
+            </div>
+          </div>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">

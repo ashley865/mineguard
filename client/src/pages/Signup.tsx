@@ -70,7 +70,7 @@ export default function Signup() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-sky-50 via-white to-fuchsia-50 px-4 py-8">
+    <div className="min-h-screen flex items-center justify-center bg-mine-950 px-4 py-8">
       <div className="w-full max-w-sm">
         <div className="flex justify-end mb-3">
           <LanguageSwitcher />

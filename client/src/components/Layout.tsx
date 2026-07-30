@@ -13,6 +13,7 @@ export default function Layout() {
   const { user, logout } = useAuth();
   const { siteIds: assignedSiteIds } = useAssignedSiteIds();
   const [mine, setMine] = useState<Mine | null>(null);
+  const [mobileOpen, setMobileOpen] = useState(false);
 
   useEffect(() => {
     api
@@ -24,24 +25,6 @@ export default function Layout() {
   const isAdmin = user?.role === "ADMIN";
   const isExecutiveWithSites = user?.role === "EXECUTIVE" && (assignedSiteIds?.length ?? 0) > 0;
   const canSeeExecutiveOps = isAdmin || isExecutiveWithSites;
-
-  const dotColors = [
-    "bg-sky-500",
-    "bg-violet-500",
-    "bg-rose-500",
-    "bg-teal-500",
-    "bg-amber-500",
-    "bg-fuchsia-500",
-    "bg-lime-500",
-    "bg-cyan-500",
-    "bg-orange-500",
-    "bg-pink-500",
-    "bg-emerald-500",
-    "bg-indigo-500",
-    "bg-red-500",
-    "bg-purple-500",
-    "bg-blue-500",
-  ];
 
   const navItems = [
     ...(user?.role === "EXECUTIVE"
@@ -67,25 +50,36 @@ export default function Layout() {
         ]
       : []),
     { to: "/settings", label: t("settings.nav") },
-  ].map((item, i) => ({ ...item, dot: dotColors[i % dotColors.length] }));
+  ];
 
   return (
-    <div className="min-h-screen flex">
-      <aside className="w-60 shrink-0 bg-mine-900 border-r border-mine-800 shadow-lg shadow-black/10 flex flex-col print:hidden">
-        <div className="px-5 py-5 border-b border-mine-800 bg-gradient-to-r from-brand-600 via-violet-600 to-fuchsia-600">
+    <div className="min-h-screen md:flex">
+      {mobileOpen && (
+        <button
+          aria-label="Close menu"
+          className="fixed inset-0 bg-black/50 z-30 md:hidden"
+          onClick={() => setMobileOpen(false)}
+        />
+      )}
+      <aside
+        className={`w-64 md:w-60 shrink-0 bg-mine-900 border-r border-mine-800 shadow-lg shadow-black/10 flex flex-col print:hidden fixed inset-y-0 left-0 z-40 transform transition-transform md:translate-x-0 md:static ${
+          mobileOpen ? "translate-x-0" : "-translate-x-full"
+        }`}
+      >
+        <div className="px-5 py-5 border-b border-mine-800 bg-mine-100">
           <div className="flex items-center gap-2">
             {mine?.hasLogo ? (
               <img
                 src={`${API_URL}/api/mines/${mine.id}/logo`}
                 alt={mine.name}
-                className="w-7 h-7 rounded object-contain bg-white/90 p-0.5 shrink-0"
+                className="w-7 h-7 rounded object-contain bg-white p-0.5 shrink-0"
               />
             ) : (
               <span className="text-lg">⛏</span>
             )}
             <div className="text-lg font-bold tracking-tight text-white truncate">{mine?.name || "Mine Guard"}</div>
           </div>
-          <div className="text-xs text-white/80 mt-0.5">Safety Monitoring</div>
+          <div className="text-xs text-mine-600 mt-0.5">Safety Monitoring</div>
         </div>
         <nav className="flex-1 px-2 py-4 space-y-0.5 overflow-y-auto">
           {navItems.map((item) => (
@@ -93,15 +87,15 @@ export default function Layout() {
               key={item.to}
               to={item.to}
               end={item.end}
+              onClick={() => setMobileOpen(false)}
               className={({ isActive }) =>
-                `flex items-center gap-2.5 pl-3 pr-3 py-2 rounded-lg text-sm font-medium border-l-[3px] transition-colors ${
+                `block pl-3 pr-3 py-2 rounded-lg text-sm font-medium border-l-[3px] transition-colors ${
                   isActive
-                    ? "bg-mine-800 border-brand-500 text-mine-50"
-                    : "border-transparent text-mine-200 hover:bg-mine-800/60 hover:text-mine-50"
+                    ? "bg-mine-800 border-hazard-500 text-mine-50"
+                    : "border-transparent text-mine-300 hover:bg-mine-800/60 hover:text-mine-50"
                 }`
               }
             >
-              <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${item.dot}`} />
               {item.label}
             </NavLink>
           ))}
@@ -110,7 +104,9 @@ export default function Layout() {
           <LanguageSwitcher className="w-full" />
           <div>
             <div className="text-sm font-medium">{user?.name}</div>
-            <div className="text-xs text-mine-300">{user?.role}</div>
+            <div className="text-xs text-mine-400">
+              {user?.title ? t(`settings.invites.titles.${user.title}`) : user?.role}
+            </div>
             <button
               onClick={logout}
               className="mt-3 w-full text-sm px-3 py-1.5 rounded-lg bg-mine-800 hover:bg-mine-700 border border-mine-700 transition-colors"
@@ -121,11 +117,21 @@ export default function Layout() {
         </div>
       </aside>
       <div className="flex-1 flex flex-col min-w-0">
-        <header className="h-14 shrink-0 border-b border-mine-800 bg-mine-900/60 backdrop-blur flex items-center justify-end px-6 print:hidden">
+        <header className="h-14 shrink-0 border-b border-mine-800 bg-mine-900/80 backdrop-blur flex items-center justify-between px-4 md:px-6 print:hidden">
+          <button
+            aria-label="Open menu"
+            className="md:hidden p-2 -ml-2 rounded-lg text-mine-50 hover:bg-mine-800"
+            onClick={() => setMobileOpen(true)}
+          >
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M3 6h18M3 12h18M3 18h18" strokeLinecap="round" />
+            </svg>
+          </button>
+          <div className="md:hidden font-semibold text-sm truncate">{mine?.name || "Mine Guard"}</div>
           <NotificationBell />
         </header>
         <main className="flex-1 bg-mine-950 overflow-y-auto">
-          <div className="max-w-7xl mx-auto p-6">
+          <div className="max-w-7xl mx-auto p-4 sm:p-6">
             <Outlet />
           </div>
         </main>

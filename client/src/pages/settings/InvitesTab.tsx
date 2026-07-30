@@ -1,9 +1,22 @@
 import { FormEvent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { api } from "../../api/client";
-import { ExecutiveInvite } from "../../api/types";
+import { ExecutiveInvite, ExecutiveTitle } from "../../api/types";
 import { StatusBadge } from "../../components/Badges";
 import { buttonDanger, buttonPrimary, buttonSecondary, cardClass, inputClass, labelClass } from "../../components/ui";
+
+const executiveTitles: ExecutiveTitle[] = [
+  "GENERAL_MANAGER",
+  "CFO",
+  "COO",
+  "HR_MANAGER",
+  "SECURITY_MANAGER",
+  "SAFETY_MANAGER",
+  "OPERATIONS_MANAGER",
+  "COMPLIANCE_OFFICER",
+  "IT_MANAGER",
+  "OTHER",
+];
 
 export default function InvitesTab() {
   const { t } = useTranslation();
@@ -11,6 +24,7 @@ export default function InvitesTab() {
   const [loading, setLoading] = useState(true);
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
+  const [title, setTitle] = useState<ExecutiveTitle>("GENERAL_MANAGER");
   const [creating, setCreating] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<{ invite: ExecutiveInvite; key: string } | null>(null);
@@ -33,7 +47,7 @@ export default function InvitesTab() {
     setError(null);
     setCreating(true);
     try {
-      const res = await api.post<{ invite: ExecutiveInvite; key: string }>("/executive-invites", { name, email });
+      const res = await api.post<{ invite: ExecutiveInvite; key: string }>("/executive-invites", { name, email, title });
       setResult(res.data);
       setName("");
       setEmail("");
@@ -84,6 +98,14 @@ export default function InvitesTab() {
             <input className={inputClass} type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
           </div>
         </div>
+        <div>
+          <label className={labelClass}>{t("settings.invites.titleField")}</label>
+          <select className={inputClass} value={title} onChange={(e) => setTitle(e.target.value as ExecutiveTitle)}>
+            {executiveTitles.map((ti) => (
+              <option key={ti} value={ti}>{t(`settings.invites.titles.${ti}`)}</option>
+            ))}
+          </select>
+        </div>
         {error && <div className="text-danger-500 text-xs">{error}</div>}
         <button type="submit" className={buttonPrimary} disabled={creating}>
           {creating ? t("common.saving") : t("settings.invites.create")}
@@ -91,8 +113,8 @@ export default function InvitesTab() {
       </form>
 
       {result && (
-        <div className={`${cardClass} p-5 space-y-3 max-w-lg border-emerald-500/40`}>
-          <h2 className="text-sm font-semibold text-emerald-500">{t("settings.invites.createdTitle", { name: result.invite.name })}</h2>
+        <div className={`${cardClass} p-5 space-y-3 max-w-lg border-success-500/40`}>
+          <h2 className="text-sm font-semibold text-success-500">{t("settings.invites.createdTitle", { name: result.invite.name })}</h2>
           <div>
             <label className={labelClass}>{t("settings.invites.linkLabel")}</label>
             <div className="flex gap-2">
@@ -117,12 +139,13 @@ export default function InvitesTab() {
         </div>
       )}
 
-      <div className={`${cardClass} overflow-hidden`}>
+      <div className={`${cardClass} overflow-x-auto`}>
         <table className="w-full text-sm">
           <thead className="bg-mine-800/50 text-mine-300 text-xs uppercase">
             <tr>
               <th className="text-left px-4 py-2">{t("settings.invites.name")}</th>
               <th className="text-left px-4 py-2">{t("settings.invites.email")}</th>
+              <th className="text-left px-4 py-2">{t("settings.invites.titleField")}</th>
               <th className="text-left px-4 py-2">{t("common.status")}</th>
               <th className="text-left px-4 py-2">{t("settings.invites.invitedBy")}</th>
               <th className="px-4 py-2"></th>
@@ -134,6 +157,7 @@ export default function InvitesTab() {
                 <tr key={inv.id} className="border-t border-mine-800 hover:bg-mine-800/30">
                   <td className="px-4 py-2 font-medium">{inv.name}</td>
                   <td className="px-4 py-2 text-mine-300">{inv.email}</td>
+                  <td className="px-4 py-2 text-mine-300">{t(`settings.invites.titles.${inv.title}`)}</td>
                   <td className="px-4 py-2"><StatusBadge status={inv.status} /></td>
                   <td className="px-4 py-2 text-mine-300">{inv.invitedBy?.name ?? "—"}</td>
                   <td className="px-4 py-2 text-right">
@@ -146,7 +170,7 @@ export default function InvitesTab() {
                 </tr>
               ))}
             {!loading && invites.length === 0 && (
-              <tr><td colSpan={5} className="px-4 py-6 text-center text-mine-400">{t("settings.invites.noneYet")}</td></tr>
+              <tr><td colSpan={6} className="px-4 py-6 text-center text-mine-400">{t("settings.invites.noneYet")}</td></tr>
             )}
           </tbody>
         </table>

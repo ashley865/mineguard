@@ -83,7 +83,12 @@
     "join": "Skep my rekening",
     "joining": "Skep tans rekening…",
     "error": "Kon nie hierdie uitnodiging aanvaar nie",
-    "invalid": "Hierdie uitnodigingskakel is ongeldig, reeds gebruik, of is herroep. Vra jou administrateur om 'n nuwe een te stuur."
+    "invalid": "Hierdie uitnodigingskakel is ongeldig, reeds gebruik, of is herroep. Vra jou administrateur om 'n nuwe een te stuur.",
+    "alreadySignedIn": "Jy is tans aangemeld as {{name}}. Meld af om hierdie uitnodiging met die genooide rekening te aanvaar.",
+    "logOutAndContinue": "Meld af en gaan voort",
+    "stayLoggedIn": "Bly aangemeld en gaan na my dashboard",
+    "inviteKey": "Uitnodigingsleutel",
+    "inviteKeyHint": "Voorafingevul vanaf jou uitnodigingskakel. As dit leeg is, plak die sleutel wat afsonderlik aan jou gestuur is."
   },
   "registerMine": {
     "title": "Registreer jou myn",
@@ -119,7 +124,10 @@
     "siteStatus": "Terreinstatus",
     "activeAlerts": "Aktiewe Waarskuwings",
     "noOpenAlerts": "Geen oop waarskuwings nie. Alles is veilig.",
-    "loading": "Laai dashboard tans…"
+    "loading": "Laai dashboard tans…",
+    "complianceScore": "Voldoeningstelling",
+    "workforceStatus": "Arbeidsmagstatus",
+    "equipmentStatus": "Toerustingstatus"
   },
   "executive": {
     "title": "Uitvoerende Dashboard",
@@ -149,7 +157,8 @@
     "visitorsOnSite": "Besoekers op die Terrein",
     "pendingPermitsToWork": "Werkpermitte wat Goedkeuring Wag",
     "escalatedRisks": "Geëskaleerde Risiko's",
-    "noSiteAccess": "Jy is nog aan geen terreine toegewys nie. Vra 'n administrateur om jou terreintoegang te gee om hier Besoekersbestuur, Werkpermit en Risikoregister te sien."
+    "noSiteAccess": "Jy is nog aan geen terreine toegewys nie. Vra 'n administrateur om jou terreintoegang te gee om hier Besoekersbestuur, Werkpermit en Risikoregister te sien.",
+    "complianceBreakdown": "Voldoeningsverdeling"
   },
   "sites": {
     "title": "Terreine & Sones",
@@ -820,6 +829,7 @@
       "newHint": "Genereer 'n eenmalige skakel met 'n unieke sleutel. Slegs hierdie persoon kan dit een keer gebruik om hul Uitvoerende-rekening te skep.",
       "name": "Volle naam",
       "email": "E-pos",
+      "titleField": "Titel / Departement",
       "create": "Skep uitnodiging",
       "createError": "Kon nie hierdie uitnodiging skep nie",
       "createdTitle": "Uitnodiging geskep vir {{name}}",
@@ -829,7 +839,19 @@
       "invitedBy": "Genooi deur",
       "revoke": "Herroep",
       "confirmRevoke": "Herroep hierdie uitnodiging? Die skakel sal ophou werk.",
-      "noneYet": "Nog geen uitnodigings gestuur nie."
+      "noneYet": "Nog geen uitnodigings gestuur nie.",
+      "titles": {
+        "GENERAL_MANAGER": "Algemene Bestuurder",
+        "CFO": "Finansiële Direkteur",
+        "COO": "Bedryfsdirekteur",
+        "HR_MANAGER": "MH-bestuurder",
+        "SECURITY_MANAGER": "Sekuriteitsbestuurder",
+        "SAFETY_MANAGER": "Veiligheidsbestuurder",
+        "OPERATIONS_MANAGER": "Bedryfsbestuurder",
+        "COMPLIANCE_OFFICER": "Voldoeningsbeampte",
+        "IT_MANAGER": "IT-bestuurder",
+        "OTHER": "Ander"
+      }
     }
   }
 }

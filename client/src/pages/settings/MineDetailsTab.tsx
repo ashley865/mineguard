@@ -136,7 +136,7 @@ export default function MineDetailsTab() {
           <button type="submit" className={buttonPrimary} disabled={saving}>
             {saving ? t("common.saving") : t("common.save")}
           </button>
-          {saved && <span className="text-xs text-emerald-500">{t("settings.profile.saved")}</span>}
+          {saved && <span className="text-xs text-success-500">{t("settings.profile.saved")}</span>}
         </div>
       </form>
     </div>

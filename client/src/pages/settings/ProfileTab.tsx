@@ -77,7 +77,7 @@ export default function ProfileTab() {
           <button type="submit" className={buttonPrimary} disabled={savingProfile}>
             {savingProfile ? t("common.saving") : t("common.save")}
           </button>
-          {profileSaved && <span className="text-xs text-emerald-500">{t("settings.profile.saved")}</span>}
+          {profileSaved && <span className="text-xs text-success-500">{t("settings.profile.saved")}</span>}
         </div>
       </form>
 
@@ -120,7 +120,7 @@ export default function ProfileTab() {
           <button type="submit" className={buttonPrimary} disabled={savingPassword}>
             {savingPassword ? t("common.saving") : t("settings.profile.updatePassword")}
           </button>
-          {passwordSaved && <span className="text-xs text-emerald-500">{t("settings.profile.saved")}</span>}
+          {passwordSaved && <span className="text-xs text-success-500">{t("settings.profile.saved")}</span>}
         </div>
       </form>
     </div>

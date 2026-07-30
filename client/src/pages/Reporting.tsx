@@ -10,7 +10,7 @@ const dayOptions = [30, 90, 180, 365];
 
 function RateCard({ label, numerator, denominator }: { label: string; numerator: number; denominator: number }) {
   const pct = denominator === 0 ? 100 : Math.round((numerator / denominator) * 100);
-  const tone = pct >= 80 ? "text-emerald-500" : pct >= 50 ? "text-hazard-500" : "text-danger-500";
+  const tone = pct >= 80 ? "text-success-500" : pct >= 50 ? "text-hazard-500" : "text-danger-500";
   return (
     <div className={`${cardClass} px-4 py-3`}>
       <div className="text-xs text-mine-300 uppercase tracking-wide">{label}</div>
@@ -104,7 +104,7 @@ export default function Reporting() {
             <div
               className={`text-4xl font-bold ${
                 data.complianceScore >= 80
-                  ? "text-emerald-500"
+                  ? "text-success-500"
                   : data.complianceScore >= 50
                   ? "text-hazard-500"
                   : "text-danger-500"
@@ -134,7 +134,7 @@ export default function Reporting() {
                   <Tooltip contentStyle={{ background: "#fafafa", border: "1px solid #e5e5e5", fontSize: 12 }} />
                   <Legend wrapperStyle={{ fontSize: 12 }} />
                   <Line type="monotone" dataKey="incidents" name={t("reporting.incidents")} stroke="#e13b2e" strokeWidth={2} dot={false} />
-                  <Line type="monotone" dataKey="alerts" name={t("reporting.alerts")} stroke="#6366f1" strokeWidth={2} dot={false} />
+                  <Line type="monotone" dataKey="alerts" name={t("reporting.alerts")} stroke="#c48a1f" strokeWidth={2} dot={false} />
                 </LineChart>
               </ResponsiveContainer>
             </div>
@@ -161,7 +161,7 @@ export default function Reporting() {
                     <XAxis dataKey="label" tick={{ fontSize: 10, fill: "#52525b" }} />
                     <YAxis tick={{ fontSize: 10, fill: "#52525b" }} allowDecimals={false} />
                     <Tooltip contentStyle={{ background: "#fafafa", border: "1px solid #e5e5e5", fontSize: 12 }} />
-                    <Bar dataKey="count" fill="#8b5cf6" radius={[3, 3, 0, 0]} />
+                    <Bar dataKey="count" fill="#c48a1f" radius={[3, 3, 0, 0]} />
                   </BarChart>
                 </ResponsiveContainer>
               </div>

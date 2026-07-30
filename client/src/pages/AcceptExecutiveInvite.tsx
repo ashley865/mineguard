@@ -1,9 +1,9 @@
 import { FormEvent, useEffect, useState } from "react";
-import { Navigate, useNavigate, useParams, useSearchParams } from "react-router-dom";
+import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useAuth } from "../context/AuthContext";
 import { api } from "../api/client";
-import { buttonPrimary, inputClass, labelClass } from "../components/ui";
+import { buttonPrimary, buttonSecondary, inputClass, labelClass } from "../components/ui";
 import LanguageSwitcher from "../components/LanguageSwitcher";
 
 interface InviteInfo {
@@ -14,11 +14,11 @@ interface InviteInfo {
 
 export default function AcceptExecutiveInvite() {
   const { t } = useTranslation();
-  const { user, acceptExecutiveInvite } = useAuth();
+  const { user, logout, acceptExecutiveInvite } = useAuth();
   const navigate = useNavigate();
   const { inviteId } = useParams<{ inviteId: string }>();
   const [searchParams] = useSearchParams();
-  const key = searchParams.get("key") ?? "";
+  const [key, setKey] = useState(searchParams.get("key") ?? "");
 
   const [invite, setInvite] = useState<InviteInfo | null>(null);
   const [notFound, setNotFound] = useState(false);
@@ -33,8 +33,6 @@ export default function AcceptExecutiveInvite() {
       .then((res) => setInvite(res.data))
       .catch(() => setNotFound(true));
   }, [inviteId]);
-
-  if (user) return <Navigate to="/" replace />;
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
@@ -53,7 +51,7 @@ export default function AcceptExecutiveInvite() {
 
   if (notFound) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-sky-50 via-white to-fuchsia-50 px-4">
+      <div className="min-h-screen flex items-center justify-center bg-mine-950 px-4">
         <div className="bg-mine-900 border border-mine-800 rounded-xl shadow-xl shadow-black/10 p-6 max-w-sm text-center text-mine-300">
           {t("acceptInvite.invalid")}
         </div>
@@ -61,8 +59,28 @@ export default function AcceptExecutiveInvite() {
     );
   }
 
+  if (user) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-mine-950 px-4">
+        <div className="bg-mine-900 border border-mine-800 rounded-xl shadow-xl shadow-black/10 p-6 max-w-sm w-full text-center space-y-4">
+          <div className="text-4xl">⛏</div>
+          <p className="text-sm text-mine-300">{t("acceptInvite.alreadySignedIn", { name: user.name })}</p>
+          <button
+            className={`${buttonPrimary} w-full`}
+            onClick={() => logout()}
+          >
+            {t("acceptInvite.logOutAndContinue")}
+          </button>
+          <button className={`${buttonSecondary} w-full`} onClick={() => navigate("/")}>
+            {t("acceptInvite.stayLoggedIn")}
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-sky-50 via-white to-fuchsia-50 px-4 py-8">
+    <div className="min-h-screen flex items-center justify-center bg-mine-950 px-4 py-8">
       <div className="w-full max-w-sm">
         <div className="flex justify-end mb-3">
           <LanguageSwitcher />
@@ -81,6 +99,16 @@ export default function AcceptExecutiveInvite() {
             </div>
           )}
           <div>
+            <label className={labelClass}>{t("acceptInvite.inviteKey")}</label>
+            <input
+              className={`${inputClass} font-mono`}
+              value={key}
+              onChange={(e) => setKey(e.target.value)}
+              required
+            />
+            <div className="text-xs text-mine-400 mt-1">{t("acceptInvite.inviteKeyHint")}</div>
+          </div>
+          <div>
             <label className={labelClass}>{t("signup.password")}</label>
             <input
               className={inputClass}
@@ -92,7 +120,7 @@ export default function AcceptExecutiveInvite() {
             />
             <div className="text-xs text-mine-400 mt-1">{t("signup.passwordHint")}</div>
           </div>
-          {error && <div className="text-danger-400 text-sm">{error}</div>}
+          {error && <div className="text-danger-500 text-sm">{error}</div>}
           <button type="submit" disabled={loading || !invite} className={`${buttonPrimary} w-full`}>
             {loading ? t("acceptInvite.joining") : t("acceptInvite.join")}
           </button>

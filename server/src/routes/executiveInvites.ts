@@ -8,9 +8,23 @@ import { requireAuth, requireRole } from "../middleware/auth";
 
 const router = Router();
 
+const executiveTitleEnum = z.enum([
+  "GENERAL_MANAGER",
+  "CFO",
+  "COO",
+  "HR_MANAGER",
+  "SECURITY_MANAGER",
+  "SAFETY_MANAGER",
+  "OPERATIONS_MANAGER",
+  "COMPLIANCE_OFFICER",
+  "IT_MANAGER",
+  "OTHER",
+]);
+
 const createInviteSchema = z.object({
   name: z.string().min(1),
   email: z.string().email(),
+  title: executiveTitleEnum,
 });
 
 const acceptInviteSchema = z.object({
@@ -28,6 +42,7 @@ const inviteSelect = {
   id: true,
   name: true,
   email: true,
+  title: true,
   status: true,
   createdAt: true,
   acceptedAt: true,
@@ -44,7 +59,7 @@ router.get("/:id/info", async (req, res) => {
   if (!invite || invite.status !== "PENDING") {
     return res.status(404).json({ error: "This invite is invalid, already used, or has been revoked" });
   }
-  res.json({ name: invite.name, email: invite.email, mine: invite.mine });
+  res.json({ name: invite.name, email: invite.email, title: invite.title, mine: invite.mine });
 });
 
 router.post("/:id/accept", async (req, res) => {
@@ -63,7 +78,14 @@ router.post("/:id/accept", async (req, res) => {
 
   const passwordHash = await bcrypt.hash(parsed.data.password, 10);
   const user = await prisma.user.create({
-    data: { email: invite.email, passwordHash, name: invite.name, role: "EXECUTIVE", mineId: invite.mineId },
+    data: {
+      email: invite.email,
+      passwordHash,
+      name: invite.name,
+      role: "EXECUTIVE",
+      title: invite.title,
+      mineId: invite.mineId,
+    },
   });
   await prisma.executiveInvite.update({
     where: { id: invite.id },
@@ -73,7 +95,7 @@ router.post("/:id/accept", async (req, res) => {
   const token = signToken(user.id, user.role);
   res.status(201).json({
     token,
-    user: { id: user.id, email: user.email, name: user.name, role: user.role, mineId: user.mineId },
+    user: { id: user.id, email: user.email, name: user.name, role: user.role, title: user.title, mineId: user.mineId },
   });
 });
 
@@ -107,6 +129,7 @@ router.post("/", async (req, res) => {
       mineId: admin.mineId,
       name: parsed.data.name,
       email: parsed.data.email,
+      title: parsed.data.title,
       keyHash,
       invitedById: admin.id,
     },

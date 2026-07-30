@@ -166,7 +166,7 @@ export default function VisitLogTab({ sites }: { sites: Site[] }) {
         </div>
       )}
 
-      <div className={`${cardClass} overflow-hidden`}>
+      <div className={`${cardClass} overflow-x-auto`}>
         <table className="w-full text-sm">
           <thead className="bg-mine-800/50 text-mine-300 text-xs uppercase">
             <tr>

@@ -14,6 +14,19 @@ enum Role {
   EXECUTIVE
 }
 
+enum ExecutiveTitle {
+  GENERAL_MANAGER
+  CFO
+  COO
+  HR_MANAGER
+  SECURITY_MANAGER
+  SAFETY_MANAGER
+  OPERATIONS_MANAGER
+  COMPLIANCE_OFFICER
+  IT_MANAGER
+  OTHER
+}
+
 enum ExecReviewStatus {
   PENDING
   APPROVED
@@ -150,12 +163,13 @@ enum InspectionStatus {
 }
 
 model User {
-  id           String   @id @default(cuid())
-  email        String   @unique
+  id           String          @id @default(cuid())
+  email        String          @unique
   passwordHash String
   name         String
-  role         Role     @default(VIEWER)
-  createdAt    DateTime @default(now())
+  role         Role            @default(VIEWER)
+  title        ExecutiveTitle?
+  createdAt    DateTime        @default(now())
 
   mineId String?
   mine   Mine?   @relation(fields: [mineId], references: [id], onDelete: SetNull)
@@ -618,13 +632,14 @@ enum InviteStatus {
 }
 
 model ExecutiveInvite {
-  id             String       @id @default(cuid())
+  id             String         @id @default(cuid())
   mineId         String
-  mine           Mine         @relation(fields: [mineId], references: [id], onDelete: Cascade)
+  mine           Mine           @relation(fields: [mineId], references: [id], onDelete: Cascade)
   name           String
   email          String
+  title          ExecutiveTitle @default(OTHER)
   keyHash        String
-  status         InviteStatus @default(PENDING)
+  status         InviteStatus   @default(PENDING)
   invitedById    String?
   invitedBy      User?        @relation("InviteCreatedBy", fields: [invitedById], references: [id], onDelete: SetNull)
   acceptedAt     DateTime?
