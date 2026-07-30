@@ -76,13 +76,21 @@ export default function ExecutiveDashboard() {
     return <div className="text-mine-300">{t("executive.loading")}</div>;
   }
 
-  const { siteStatus, alertSeverity, incidents, incidentTrend, workers, equipment, pendingReviews } = summary;
+  const { siteStatus, alertSeverity, complianceScore, incidents, incidentTrend, workers, equipment, pendingReviews } = summary;
+  const scoreTone =
+    complianceScore >= 80 ? "text-emerald-500" : complianceScore >= 50 ? "text-hazard-500" : "text-danger-500";
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-xl font-bold">{t("executive.title")}</h1>
-        <p className="text-mine-300 text-sm">{t("executive.subtitle")}</p>
+      <div className="flex items-start justify-between gap-4 flex-wrap">
+        <div>
+          <h1 className="text-xl font-bold">{t("executive.title")}</h1>
+          <p className="text-mine-300 text-sm">{t("executive.subtitle")}</p>
+        </div>
+        <div className={`${cardClass} px-5 py-3 text-right`}>
+          <div className="text-xs text-mine-300 uppercase tracking-wide">{t("executive.complianceScore")}</div>
+          <div className={`text-3xl font-bold ${scoreTone}`}>{complianceScore}%</div>
+        </div>
       </div>
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
@@ -151,13 +159,13 @@ export default function ExecutiveDashboard() {
             <BarChart data={incidentTrend}>
               <XAxis
                 dataKey="date"
-                tick={{ fontSize: 10, fill: "#5c4d1e" }}
+                tick={{ fontSize: 10, fill: "#52525b" }}
                 tickFormatter={(d: string) => d.slice(5)}
                 interval="preserveStartEnd"
               />
-              <YAxis tick={{ fontSize: 10, fill: "#5c4d1e" }} allowDecimals={false} />
-              <Tooltip contentStyle={{ background: "#f6f0d9", border: "1px solid #ecdfae", fontSize: 12 }} />
-              <Bar dataKey="count" fill="#a1852f" radius={[3, 3, 0, 0]} />
+              <YAxis tick={{ fontSize: 10, fill: "#52525b" }} allowDecimals={false} />
+              <Tooltip contentStyle={{ background: "#fafafa", border: "1px solid #e5e5e5", fontSize: 12 }} />
+              <Bar dataKey="count" fill="#a5811f" radius={[3, 3, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
         </div>

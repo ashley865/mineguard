@@ -114,6 +114,7 @@
   "executive": {
     "title": "Tableau de bord exécutif",
     "subtitle": "Aperçu général de la performance et de la sécurité",
+    "complianceScore": "Score de Conformité",
     "siteStatus": "État des sites",
     "operational": "Opérationnel",
     "restricted": "Restreint",
@@ -619,6 +620,8 @@
   "reporting": {
     "nav": "Rapports et BI",
     "subtitle": "Analyse des tendances, taux de conformité et exportation de données",
+    "complianceScore": "Score de Conformité Global",
+    "complianceScoreNote": "Moyenne pondérée entre Codes de Pratique, Évaluations des Risques, Permis, Inspections, Certificats, Formation et Sous-traitants",
     "allSites": "Tous les Sites",
     "lastNDays": "{{count}} derniers jours",
     "loading": "Chargement…",
@@ -644,7 +647,8 @@
       "certificates": "Certificats",
       "trainingRecords": "Dossiers de Formation",
       "safetyInspections": "Inspections de Sécurité",
-      "regulatoryNotices": "Avis Réglementaires"
+      "regulatoryNotices": "Avis Réglementaires",
+      "contractors": "Sous-traitants"
     }
   },
   "notifications": {
@@ -652,5 +656,30 @@
     "empty": "Aucune approbation ou rejet pour le moment.",
     "alertLabel": "Alerte",
     "incidentLabel": "Incident"
+  },
+  "contractors": {
+    "nav": "Sous-traitants",
+    "title": "Gestion des Sous-traitants",
+    "subtitle": "Sous-traitants externes, conditions contractuelles et documentation de conformité",
+    "new": "+ Nouveau Sous-traitant",
+    "companyName": "Nom de l'entreprise",
+    "registrationNumber": "Numéro d'enregistrement",
+    "scopeOfWork": "Étendue des travaux",
+    "contactName": "Personne de contact",
+    "contactEmail": "E-mail de contact",
+    "contractStartDate": "Date de début du contrat",
+    "contractEndDate": "Date de fin du contrat",
+    "goodStandingExpiry": "Expiration de la Lettre de Bonne Réputation",
+    "insuranceExpiry": "Expiration de l'assurance responsabilité civile",
+    "colCompany": "Entreprise",
+    "colScope": "Étendue des Travaux",
+    "colSite": "Site",
+    "colContractEnd": "Fin du Contrat",
+    "colStatus": "Statut",
+    "noneYet": "Aucun sous-traitant enregistré pour le moment.",
+    "confirmDelete": "Supprimer ce sous-traitant ?",
+    "newTitle": "Nouveau Sous-traitant",
+    "editTitle": "Modifier le Sous-traitant",
+    "loading": "Chargement…"
   }
 }

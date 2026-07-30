@@ -209,7 +209,7 @@ export default function Workers() {
                 <td className="px-4 py-2 text-right">
                   {canEdit && (
                     <div className="flex justify-end gap-2">
-                      <button className="text-xs text-mine-300 hover:text-white" onClick={() => setModal(w)}>{t("common.edit")}</button>
+                      <button className="text-xs text-mine-300 hover:text-mine-50" onClick={() => setModal(w)}>{t("common.edit")}</button>
                       <button className={buttonDanger} onClick={() => deleteWorker(w.id)}>{t("common.delete")}</button>
                     </div>
                   )}

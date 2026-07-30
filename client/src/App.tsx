@@ -18,6 +18,7 @@ import WorkforceManagement from "./pages/WorkforceManagement";
 import DocumentControl from "./pages/DocumentControl";
 import GovernmentInspection from "./pages/GovernmentInspection";
 import Reporting from "./pages/Reporting";
+import Contractors from "./pages/Contractors";
 
 function HomeRoute() {
   const { user } = useAuth();
@@ -44,6 +45,7 @@ export default function App() {
         <Route path="/documents" element={<DocumentControl />} />
         <Route path="/inspection" element={<GovernmentInspection />} />
         <Route path="/reporting" element={<Reporting />} />
+        <Route path="/contractors" element={<Contractors />} />
       </Route>
     </Routes>
   );

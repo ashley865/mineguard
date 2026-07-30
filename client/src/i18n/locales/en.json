@@ -114,6 +114,7 @@
   "executive": {
     "title": "Executive Dashboard",
     "subtitle": "High-level performance and safety overview",
+    "complianceScore": "Compliance Score",
     "siteStatus": "Site Status",
     "operational": "Operational",
     "restricted": "Restricted",
@@ -619,6 +620,8 @@
   "reporting": {
     "nav": "Reporting & BI",
     "subtitle": "Trend analytics, compliance rates, and data export",
+    "complianceScore": "Overall Compliance Score",
+    "complianceScoreNote": "Weighted average across Codes of Practice, Risk Assessments, Permits, Inspections, Certificates, Training, and Contractors",
     "allSites": "All Sites",
     "lastNDays": "Last {{count}} days",
     "loading": "Loading…",
@@ -644,7 +647,8 @@
       "certificates": "Certificates",
       "trainingRecords": "Training Records",
       "safetyInspections": "Safety Inspections",
-      "regulatoryNotices": "Regulatory Notices"
+      "regulatoryNotices": "Regulatory Notices",
+      "contractors": "Contractors"
     }
   },
   "notifications": {
@@ -652,5 +656,30 @@
     "empty": "No approvals or rejections yet.",
     "alertLabel": "Alert",
     "incidentLabel": "Incident"
+  },
+  "contractors": {
+    "nav": "Contractors",
+    "title": "Contractor Management",
+    "subtitle": "Third-party contractors, contract terms, and compliance documentation",
+    "new": "+ New Contractor",
+    "companyName": "Company name",
+    "registrationNumber": "Registration number",
+    "scopeOfWork": "Scope of work",
+    "contactName": "Contact person",
+    "contactEmail": "Contact email",
+    "contractStartDate": "Contract start date",
+    "contractEndDate": "Contract end date",
+    "goodStandingExpiry": "Letter of Good Standing expiry",
+    "insuranceExpiry": "Public liability insurance expiry",
+    "colCompany": "Company",
+    "colScope": "Scope of Work",
+    "colSite": "Site",
+    "colContractEnd": "Contract End",
+    "colStatus": "Status",
+    "noneYet": "No contractors recorded yet.",
+    "confirmDelete": "Delete this contractor?",
+    "newTitle": "New Contractor",
+    "editTitle": "Edit Contractor",
+    "loading": "Loading…"
   }
 }

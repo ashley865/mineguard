@@ -191,7 +191,7 @@ export default function VisitLogTab({ sites }: { sites: Site[] }) {
                 <td className="px-4 py-2 text-right">
                   {canEdit && (
                     <div className="flex justify-end gap-2">
-                      <button className="text-xs text-mine-300 hover:text-white" onClick={() => setModal(v)}>{t("common.edit")}</button>
+                      <button className="text-xs text-mine-300 hover:text-mine-50" onClick={() => setModal(v)}>{t("common.edit")}</button>
                       <button className={buttonDanger} onClick={() => remove(v.id)}>{t("common.delete")}</button>
                     </div>
                   )}

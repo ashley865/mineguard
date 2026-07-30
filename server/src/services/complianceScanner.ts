@@ -182,6 +182,28 @@ export async function scanCompliance(io?: Server) {
     if (alert) newAlerts.push(alert);
   }
 
+  const contractors = await prisma.contractor.findMany({ where: { status: "ACTIVE" } });
+  for (const contractor of contractors) {
+    const checks: { date: Date; label: string }[] = [{ date: contractor.contractEndDate, label: "Contract" }];
+    if (contractor.goodStandingExpiry) {
+      checks.push({ date: contractor.goodStandingExpiry, label: "Letter of Good Standing" });
+    }
+    if (contractor.insuranceExpiry) {
+      checks.push({ date: contractor.insuranceExpiry, label: "Public liability insurance" });
+    }
+    for (const check of checks) {
+      const days = daysFromNow(check.date);
+      if (days > REVIEW_WARNING_DAYS) continue;
+      const severity: AlertSeverity = days < 0 ? "HIGH" : days <= 7 ? "MEDIUM" : "LOW";
+      const message =
+        days < 0
+          ? `${check.label} for contractor "${contractor.companyName}" is overdue by ${Math.abs(days)} day(s)`
+          : `${check.label} for contractor "${contractor.companyName}" expires in ${days} day(s)`;
+      const alert = await raiseAlertIfMissing({ siteId: contractor.siteId, severity, message });
+      if (alert) newAlerts.push(alert);
+    }
+  }
+
   if (io) {
     for (const alert of newAlerts) io.emit("alert:new", alert);
   }

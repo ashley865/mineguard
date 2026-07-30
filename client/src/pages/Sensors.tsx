@@ -138,12 +138,12 @@ function SensorChart({ sensor, onClose }: { sensor: Sensor; onClose: () => void 
       <div className="h-64">
         <ResponsiveContainer width="100%" height="100%">
           <LineChart data={data}>
-            <XAxis dataKey="time" tick={{ fontSize: 10, fill: "#5c4d1e" }} interval="preserveStartEnd" />
-            <YAxis tick={{ fontSize: 10, fill: "#5c4d1e" }} domain={["auto", "auto"]} />
-            <Tooltip contentStyle={{ background: "#f6f0d9", border: "1px solid #ecdfae", fontSize: 12 }} />
+            <XAxis dataKey="time" tick={{ fontSize: 10, fill: "#52525b" }} interval="preserveStartEnd" />
+            <YAxis tick={{ fontSize: 10, fill: "#52525b" }} domain={["auto", "auto"]} />
+            <Tooltip contentStyle={{ background: "#fafafa", border: "1px solid #e5e5e5", fontSize: 12 }} />
             <ReferenceLine y={sensor.minSafe} stroke="#e13b2e" strokeDasharray="4 4" />
             <ReferenceLine y={sensor.maxSafe} stroke="#e13b2e" strokeDasharray="4 4" />
-            <Line type="monotone" dataKey="value" stroke="#a1852f" strokeWidth={2} dot={false} isAnimationActive={false} />
+            <Line type="monotone" dataKey="value" stroke="#a5811f" strokeWidth={2} dot={false} isAnimationActive={false} />
           </LineChart>
         </ResponsiveContainer>
       </div>
@@ -262,7 +262,7 @@ export default function Sensors() {
                   <td className="px-4 py-2 text-right">
                     {canEdit && (
                       <div className="flex justify-end gap-2">
-                        <button className="text-xs text-mine-300 hover:text-white" onClick={() => setSensorModal(sensor)}>{t("common.edit")}</button>
+                        <button className="text-xs text-mine-300 hover:text-mine-50" onClick={() => setSensorModal(sensor)}>{t("common.edit")}</button>
                         <button className={buttonDanger} onClick={() => deleteSensor(sensor.id)}>{t("common.delete")}</button>
                       </div>
                     )}

@@ -92,7 +92,7 @@ export default function Signup() {
                 </div>
                 <button
                   type="button"
-                  className="text-xs text-mine-300 underline hover:text-white"
+                  className="text-xs text-mine-300 underline hover:text-mine-50"
                   onClick={() => { setSelectedMine(null); setMineQuery(""); setPasskey(""); }}
                 >
                   {t("signup.change")}

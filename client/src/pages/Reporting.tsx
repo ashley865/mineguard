@@ -96,13 +96,32 @@ export default function Reporting() {
 
       {!loading && data && (
         <>
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
+          <div className={`${cardClass} p-5 flex items-center justify-between flex-wrap gap-4`}>
+            <div>
+              <h2 className="text-sm font-semibold">{t("reporting.complianceScore")}</h2>
+              <p className="text-xs text-mine-400 mt-0.5">{t("reporting.complianceScoreNote")}</p>
+            </div>
+            <div
+              className={`text-4xl font-bold ${
+                data.complianceScore >= 80
+                  ? "text-emerald-500"
+                  : data.complianceScore >= 50
+                  ? "text-hazard-500"
+                  : "text-danger-500"
+              }`}
+            >
+              {data.complianceScore}%
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-7 gap-3">
             <RateCard label={t("compliance.tabCop")} numerator={data.compliance.codesOfPractice.active} denominator={data.compliance.codesOfPractice.total} />
             <RateCard label={t("compliance.tabRisk")} numerator={data.compliance.riskAssessments.approved} denominator={data.compliance.riskAssessments.total} />
             <RateCard label={t("permits.nav")} numerator={data.compliance.permits.active} denominator={data.compliance.permits.total} />
             <RateCard label={t("compliance.tabInspections")} numerator={data.compliance.safetyInspections.completed} denominator={data.compliance.safetyInspections.total} />
             <RateCard label={t("workforce.tabCertificates")} numerator={data.compliance.certificates.active} denominator={data.compliance.certificates.total} />
             <RateCard label={t("reporting.trainingCurrent")} numerator={data.compliance.trainingRecords.total - data.compliance.trainingRecords.expiringSoon} denominator={data.compliance.trainingRecords.total} />
+            <RateCard label={t("contractors.nav")} numerator={data.compliance.contractors.active} denominator={data.compliance.contractors.total} />
           </div>
 
           <div className={`${cardClass} p-5`}>
@@ -110,12 +129,12 @@ export default function Reporting() {
             <div className="h-64">
               <ResponsiveContainer width="100%" height="100%">
                 <LineChart data={data.trend}>
-                  <XAxis dataKey="date" tick={{ fontSize: 10, fill: "#5c4d1e" }} tickFormatter={(d: string) => d.slice(5)} interval="preserveStartEnd" />
-                  <YAxis tick={{ fontSize: 10, fill: "#5c4d1e" }} allowDecimals={false} />
-                  <Tooltip contentStyle={{ background: "#f6f0d9", border: "1px solid #ecdfae", fontSize: 12 }} />
+                  <XAxis dataKey="date" tick={{ fontSize: 10, fill: "#52525b" }} tickFormatter={(d: string) => d.slice(5)} interval="preserveStartEnd" />
+                  <YAxis tick={{ fontSize: 10, fill: "#52525b" }} allowDecimals={false} />
+                  <Tooltip contentStyle={{ background: "#fafafa", border: "1px solid #e5e5e5", fontSize: 12 }} />
                   <Legend wrapperStyle={{ fontSize: 12 }} />
                   <Line type="monotone" dataKey="incidents" name={t("reporting.incidents")} stroke="#e13b2e" strokeWidth={2} dot={false} />
-                  <Line type="monotone" dataKey="alerts" name={t("reporting.alerts")} stroke="#a1852f" strokeWidth={2} dot={false} />
+                  <Line type="monotone" dataKey="alerts" name={t("reporting.alerts")} stroke="#a5811f" strokeWidth={2} dot={false} />
                 </LineChart>
               </ResponsiveContainer>
             </div>
@@ -139,10 +158,10 @@ export default function Reporting() {
               <div className="h-48">
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart data={data.expiryForecast.map((f) => ({ ...f, label: t(`reporting.categories.${f.category}`) }))}>
-                    <XAxis dataKey="label" tick={{ fontSize: 10, fill: "#5c4d1e" }} />
-                    <YAxis tick={{ fontSize: 10, fill: "#5c4d1e" }} allowDecimals={false} />
-                    <Tooltip contentStyle={{ background: "#f6f0d9", border: "1px solid #ecdfae", fontSize: 12 }} />
-                    <Bar dataKey="count" fill="#c2a23e" radius={[3, 3, 0, 0]} />
+                    <XAxis dataKey="label" tick={{ fontSize: 10, fill: "#52525b" }} />
+                    <YAxis tick={{ fontSize: 10, fill: "#52525b" }} allowDecimals={false} />
+                    <Tooltip contentStyle={{ background: "#fafafa", border: "1px solid #e5e5e5", fontSize: 12 }} />
+                    <Bar dataKey="count" fill="#c49a2e" radius={[3, 3, 0, 0]} />
                   </BarChart>
                 </ResponsiveContainer>
               </div>

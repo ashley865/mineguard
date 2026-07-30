@@ -1,6 +1,7 @@
 import { Router } from "express";
 import { prisma } from "../prisma";
 import { requireAuth, requireRole } from "../middleware/auth";
+import { computeComplianceScore } from "../services/complianceScore";
 
 const router = Router();
 
@@ -29,52 +30,17 @@ router.get("/trends", async (req, res) => {
   const siteFilter = siteId ? { siteId } : {};
   const workerSiteFilter = siteId ? { worker: { siteId } } : {};
 
-  const [
-    incidents,
-    alerts,
-    alertsBySeverity,
-    copActive,
-    copTotal,
-    riskApproved,
-    riskTotal,
-    permitsActive,
-    permitsTotal,
-    inspectionsCompleted,
-    inspectionsTotal,
-    certificatesActive,
-    certificatesTotal,
-    trainingRecords,
-    permits,
-    certificates,
-    cops,
-    medicalRecords,
-  ] = await Promise.all([
-    prisma.incident.findMany({ where: { ...siteFilter, createdAt: { gte: since } }, select: { createdAt: true } }),
-    prisma.alert.findMany({ where: { ...siteFilter, createdAt: { gte: since } }, select: { createdAt: true } }),
-    prisma.alert.groupBy({ by: ["severity"], where: { ...siteFilter, createdAt: { gte: since } }, _count: true }),
-    prisma.codeOfPractice.count({ where: { ...siteFilter, status: "ACTIVE" } }),
-    prisma.codeOfPractice.count({ where: siteFilter }),
-    prisma.riskAssessment.count({ where: { ...siteFilter, status: "APPROVED" } }),
-    prisma.riskAssessment.count({ where: siteFilter }),
-    prisma.permit.count({ where: { ...siteFilter, status: "ACTIVE" } }),
-    prisma.permit.count({ where: siteFilter }),
-    prisma.safetyInspection.count({ where: { ...siteFilter, status: "COMPLETED" } }),
-    prisma.safetyInspection.count({ where: siteFilter }),
-    prisma.certificate.count({ where: { ...workerSiteFilter, status: "ACTIVE" } }),
-    prisma.certificate.count({ where: workerSiteFilter }),
-    prisma.trainingRecord.count({ where: workerSiteFilter }),
-    prisma.permit.findMany({ where: siteFilter, select: { expiryDate: true, status: true } }),
-    prisma.certificate.findMany({ where: workerSiteFilter, select: { expiryDate: true, status: true } }),
-    prisma.codeOfPractice.findMany({ where: { ...siteFilter, status: "ACTIVE" }, select: { reviewDate: true } }),
-    prisma.medicalSurveillance.findMany({ where: workerSiteFilter, select: { nextExamDue: true } }),
-  ]);
-
-  const trainingExpiringSoonCount = await prisma.trainingRecord.count({
-    where: {
-      ...workerSiteFilter,
-      expiryDate: { not: null, lte: new Date(Date.now() + 90 * 86400000) },
-    },
-  });
+  const [incidents, alerts, alertsBySeverity, permits, certificates, cops, medicalRecords, { score: complianceScore, breakdown }] =
+    await Promise.all([
+      prisma.incident.findMany({ where: { ...siteFilter, createdAt: { gte: since } }, select: { createdAt: true } }),
+      prisma.alert.findMany({ where: { ...siteFilter, createdAt: { gte: since } }, select: { createdAt: true } }),
+      prisma.alert.groupBy({ by: ["severity"], where: { ...siteFilter, createdAt: { gte: since } }, _count: true }),
+      prisma.permit.findMany({ where: siteFilter, select: { expiryDate: true, status: true } }),
+      prisma.certificate.findMany({ where: workerSiteFilter, select: { expiryDate: true, status: true } }),
+      prisma.codeOfPractice.findMany({ where: { ...siteFilter, status: "ACTIVE" }, select: { reviewDate: true } }),
+      prisma.medicalSurveillance.findMany({ where: workerSiteFilter, select: { nextExamDue: true } }),
+      computeComplianceScore(siteId),
+    ]);
 
   const dayBuckets = new Map<string, { incidents: number; alerts: number }>();
   for (let i = 0; i < days; i++) {
@@ -106,14 +72,8 @@ router.get("/trends", async (req, res) => {
     days,
     trend: Array.from(dayBuckets.entries()).map(([date, v]) => ({ date, ...v })),
     alertsBySeverity: severity,
-    compliance: {
-      codesOfPractice: { active: copActive, total: copTotal },
-      riskAssessments: { approved: riskApproved, total: riskTotal },
-      permits: { active: permitsActive, total: permitsTotal },
-      safetyInspections: { completed: inspectionsCompleted, total: inspectionsTotal },
-      certificates: { active: certificatesActive, total: certificatesTotal },
-      trainingRecords: { total: trainingRecords, expiringSoon: trainingExpiringSoonCount },
-    },
+    complianceScore,
+    compliance: breakdown,
     expiryForecast: [
       { category: "permits", count: expiringSoon(permits) },
       { category: "certificates", count: expiringSoon(certificates) },
@@ -252,6 +212,26 @@ const exportConfigs: Record<string, { columns: { key: string; label: string }[];
         where: siteId ? { siteId } : undefined,
         include: { site: { select: { name: true } } },
         orderBy: { issuedDate: "desc" },
+      });
+      return rows.map((r) => ({ ...r, site: r.site?.name }));
+    },
+  },
+  contractors: {
+    columns: [
+      { key: "companyName", label: "Company Name" },
+      { key: "scopeOfWork", label: "Scope of Work" },
+      { key: "status", label: "Status" },
+      { key: "site", label: "Site" },
+      { key: "contractStartDate", label: "Contract Start" },
+      { key: "contractEndDate", label: "Contract End" },
+      { key: "goodStandingExpiry", label: "Good Standing Expiry" },
+      { key: "insuranceExpiry", label: "Insurance Expiry" },
+    ],
+    query: async (siteId) => {
+      const rows = await prisma.contractor.findMany({
+        where: siteId ? { siteId } : undefined,
+        include: { site: { select: { name: true } } },
+        orderBy: { contractEndDate: "asc" },
       });
       return rows.map((r) => ({ ...r, site: r.site?.name }));
     },

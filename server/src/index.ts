@@ -28,6 +28,7 @@ import inspectionSnapshotRoutes from "./routes/inspectionSnapshot";
 import reportsRoutes from "./routes/reports";
 import minesRoutes from "./routes/mines";
 import notificationsRoutes from "./routes/notifications";
+import contractorsRoutes from "./routes/contractors";
 import { startSimulator } from "./services/simulator";
 import { scanCompliance } from "./services/complianceScanner";
 
@@ -70,6 +71,7 @@ app.use("/api/inspection-snapshot", inspectionSnapshotRoutes);
 app.use("/api/reports", reportsRoutes);
 app.use("/api/mines", minesRoutes);
 app.use("/api/notifications", notificationsRoutes);
+app.use("/api/contractors", contractorsRoutes);
 
 app.use((err: any, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
   console.error(err);

@@ -1,6 +1,7 @@
 import { Router } from "express";
 import { prisma } from "../prisma";
 import { requireAuth, requireRole } from "../middleware/auth";
+import { computeComplianceScore } from "../services/complianceScore";
 
 const router = Router();
 
@@ -69,9 +70,12 @@ router.get("/summary", async (_req, res) => {
   const alertSeverity = { LOW: 0, MEDIUM: 0, HIGH: 0, CRITICAL: 0 } as Record<string, number>;
   for (const row of openAlertsBySeverity) alertSeverity[row.severity] = row._count;
 
+  const { score: complianceScore } = await computeComplianceScore();
+
   res.json({
     siteStatus,
     alertSeverity,
+    complianceScore,
     incidents: {
       open: openIncidents,
       investigating: investigatingIncidents,

@@ -159,7 +159,7 @@ export default function Equipment() {
                 <td className="px-4 py-2 text-right">
                   {canEdit && (
                     <div className="flex justify-end gap-2">
-                      <button className="text-xs text-mine-300 hover:text-white" onClick={() => setModal(eq)}>{t("common.edit")}</button>
+                      <button className="text-xs text-mine-300 hover:text-mine-50" onClick={() => setModal(eq)}>{t("common.edit")}</button>
                       <button className={buttonDanger} onClick={() => deleteEquipment(eq.id)}>{t("common.delete")}</button>
                     </div>
                   )}

@@ -114,6 +114,7 @@
   "executive": {
     "title": "Panel Ejecutivo",
     "subtitle": "Resumen general de rendimiento y seguridad",
+    "complianceScore": "Puntaje de Cumplimiento",
     "siteStatus": "Estado de Sitios",
     "operational": "Operativo",
     "restricted": "Restringido",
@@ -619,6 +620,8 @@
   "reporting": {
     "nav": "Informes e Inteligencia de Negocio",
     "subtitle": "Análisis de tendencias, tasas de cumplimiento y exportación de datos",
+    "complianceScore": "Puntaje General de Cumplimiento",
+    "complianceScoreNote": "Promedio ponderado entre Códigos de Práctica, Evaluaciones de Riesgo, Permisos, Inspecciones, Certificados, Capacitación y Contratistas",
     "allSites": "Todos los Sitios",
     "lastNDays": "Últimos {{count}} días",
     "loading": "Cargando…",
@@ -644,7 +647,8 @@
       "certificates": "Certificados",
       "trainingRecords": "Registros de Capacitación",
       "safetyInspections": "Inspecciones de Seguridad",
-      "regulatoryNotices": "Notificaciones Regulatorias"
+      "regulatoryNotices": "Notificaciones Regulatorias",
+      "contractors": "Contratistas"
     }
   },
   "notifications": {
@@ -652,5 +656,30 @@
     "empty": "Aún no hay aprobaciones ni rechazos.",
     "alertLabel": "Alerta",
     "incidentLabel": "Incidente"
+  },
+  "contractors": {
+    "nav": "Contratistas",
+    "title": "Gestión de Contratistas",
+    "subtitle": "Contratistas externos, términos contractuales y documentación de cumplimiento",
+    "new": "+ Nuevo Contratista",
+    "companyName": "Nombre de la empresa",
+    "registrationNumber": "Número de registro",
+    "scopeOfWork": "Alcance del trabajo",
+    "contactName": "Persona de contacto",
+    "contactEmail": "Correo de contacto",
+    "contractStartDate": "Fecha de inicio del contrato",
+    "contractEndDate": "Fecha de fin del contrato",
+    "goodStandingExpiry": "Vencimiento de la Carta de Buena Reputación",
+    "insuranceExpiry": "Vencimiento del seguro de responsabilidad civil",
+    "colCompany": "Empresa",
+    "colScope": "Alcance del Trabajo",
+    "colSite": "Sitio",
+    "colContractEnd": "Fin del Contrato",
+    "colStatus": "Estado",
+    "noneYet": "Aún no hay contratistas registrados.",
+    "confirmDelete": "¿Eliminar este contratista?",
+    "newTitle": "Nuevo Contratista",
+    "editTitle": "Editar Contratista",
+    "loading": "Cargando…"
   }
 }

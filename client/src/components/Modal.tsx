@@ -14,7 +14,7 @@ export default function Modal({
       <div className="bg-mine-900 border border-mine-800 rounded-lg w-full max-w-lg max-h-[90vh] overflow-y-auto">
         <div className="flex items-center justify-between px-5 py-4 border-b border-mine-800">
           <h2 className="text-base font-semibold">{title}</h2>
-          <button onClick={onClose} className="text-mine-300 hover:text-white text-xl leading-none">
+          <button onClick={onClose} className="text-mine-300 hover:text-mine-50 text-xl leading-none">
             ×
           </button>
         </div>

@@ -17,6 +17,7 @@ export default function Layout() {
     { to: "/alerts", label: t("nav.alerts") },
     { to: "/workers", label: t("nav.workers") },
     { to: "/workforce", label: t("workforce.nav") },
+    { to: "/contractors", label: t("contractors.nav") },
     { to: "/incidents", label: t("nav.incidents") },
     { to: "/equipment", label: t("nav.equipment") },
     { to: "/compliance", label: t("compliance.nav") },
@@ -42,8 +43,8 @@ export default function Layout() {
               className={({ isActive }) =>
                 `block pl-3 pr-3 py-2 rounded-lg text-sm font-medium border-l-[3px] transition-colors ${
                   isActive
-                    ? "bg-mine-800 border-mine-500 text-white"
-                    : "border-transparent text-mine-200 hover:bg-mine-800/60 hover:text-white"
+                    ? "bg-mine-800 border-mine-500 text-mine-50"
+                    : "border-transparent text-mine-200 hover:bg-mine-800/60 hover:text-mine-50"
                 }`
               }
             >

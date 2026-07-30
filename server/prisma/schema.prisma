@@ -182,6 +182,7 @@ model Site {
   permits           Permit[]
   documents         Document[]
   inspectionVisits  InspectionVisit[]
+  contractors       Contractor[]
 }
 
 model Zone {
@@ -579,4 +580,30 @@ model Mine {
   createdAt          DateTime @default(now())
 
   users User[]
+}
+
+enum ContractorStatus {
+  ACTIVE
+  EXPIRED
+  SUSPENDED
+  TERMINATED
+}
+
+model Contractor {
+  id                  String           @id @default(cuid())
+  companyName         String
+  registrationNumber  String?
+  scopeOfWork         String
+  contactName         String
+  contactPhone        String?
+  contactEmail        String?
+  contractStartDate   DateTime
+  contractEndDate     DateTime
+  goodStandingExpiry  DateTime?
+  insuranceExpiry     DateTime?
+  status              ContractorStatus @default(ACTIVE)
+  siteId              String
+  site                Site             @relation(fields: [siteId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
 }

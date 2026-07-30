@@ -114,6 +114,7 @@
   "executive": {
     "title": "Führungskräfte-Dashboard",
     "subtitle": "Übergeordneter Leistungs- und Sicherheitsüberblick",
+    "complianceScore": "Compliance-Bewertung",
     "siteStatus": "Standortstatus",
     "operational": "Betriebsbereit",
     "restricted": "Eingeschränkt",
@@ -619,6 +620,8 @@
   "reporting": {
     "nav": "Berichte & BI",
     "subtitle": "Trendanalysen, Compliance-Quoten und Datenexport",
+    "complianceScore": "Gesamte Compliance-Bewertung",
+    "complianceScoreNote": "Gewichteter Durchschnitt über Verhaltenskodizes, Risikobewertungen, Genehmigungen, Inspektionen, Nachweise, Schulungen und Auftragnehmer",
     "allSites": "Alle Standorte",
     "lastNDays": "Letzte {{count}} Tage",
     "loading": "Wird geladen…",
@@ -644,7 +647,8 @@
       "certificates": "Nachweise",
       "trainingRecords": "Schulungsunterlagen",
       "safetyInspections": "Sicherheitsinspektionen",
-      "regulatoryNotices": "Behördliche Bescheide"
+      "regulatoryNotices": "Behördliche Bescheide",
+      "contractors": "Auftragnehmer"
     }
   },
   "notifications": {
@@ -652,5 +656,30 @@
     "empty": "Noch keine Genehmigungen oder Ablehnungen.",
     "alertLabel": "Alarm",
     "incidentLabel": "Vorfall"
+  },
+  "contractors": {
+    "nav": "Auftragnehmer",
+    "title": "Auftragnehmerverwaltung",
+    "subtitle": "Externe Auftragnehmer, Vertragsbedingungen und Compliance-Dokumentation",
+    "new": "+ Neuer Auftragnehmer",
+    "companyName": "Firmenname",
+    "registrationNumber": "Handelsregisternummer",
+    "scopeOfWork": "Leistungsumfang",
+    "contactName": "Ansprechpartner",
+    "contactEmail": "Kontakt-E-Mail",
+    "contractStartDate": "Vertragsbeginn",
+    "contractEndDate": "Vertragsende",
+    "goodStandingExpiry": "Ablauf der Unbedenklichkeitsbescheinigung",
+    "insuranceExpiry": "Ablauf der Haftpflichtversicherung",
+    "colCompany": "Firma",
+    "colScope": "Leistungsumfang",
+    "colSite": "Standort",
+    "colContractEnd": "Vertragsende",
+    "colStatus": "Status",
+    "noneYet": "Noch keine Auftragnehmer erfasst.",
+    "confirmDelete": "Diesen Auftragnehmer löschen?",
+    "newTitle": "Neuer Auftragnehmer",
+    "editTitle": "Auftragnehmer bearbeiten",
+    "loading": "Wird geladen…"
   }
 }

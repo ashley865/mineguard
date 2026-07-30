@@ -197,7 +197,7 @@ export default function Sites() {
                 <h3 className="text-sm font-semibold text-mine-200">{t("sites.zones")}</h3>
                 {canEdit && (
                   <button
-                    className="text-xs text-mine-300 hover:text-white underline"
+                    className="text-xs text-mine-300 hover:text-mine-50 underline"
                     onClick={() => setZoneModal({ siteId: site.id })}
                   >
                     {t("sites.addZone")}
@@ -214,7 +214,7 @@ export default function Sites() {
                     {canEdit && (
                       <div className="flex gap-1 shrink-0">
                         <button
-                          className="text-xs text-mine-300 hover:text-white"
+                          className="text-xs text-mine-300 hover:text-mine-50"
                           onClick={() => setZoneModal({ siteId: site.id, zone })}
                         >
                           {t("common.edit")}

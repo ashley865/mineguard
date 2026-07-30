@@ -177,6 +177,7 @@ export interface DashboardSummary {
 export interface ExecutiveSummary {
   siteStatus: Record<SiteStatus, number>;
   alertSeverity: Record<AlertSeverity, number>;
+  complianceScore: number;
   incidents: { open: number; investigating: number; resolved: number };
   incidentTrend: { date: string; count: number }[];
   workers: { total: number; onShift: number };
@@ -427,6 +428,7 @@ export interface ReportTrends {
   days: number;
   trend: { date: string; incidents: number; alerts: number }[];
   alertsBySeverity: Record<AlertSeverity, number>;
+  complianceScore: number;
   compliance: {
     codesOfPractice: { active: number; total: number };
     riskAssessments: { approved: number; total: number };
@@ -434,6 +436,7 @@ export interface ReportTrends {
     safetyInspections: { completed: number; total: number };
     certificates: { active: number; total: number };
     trainingRecords: { total: number; expiringSoon: number };
+    contractors: { active: number; total: number };
   };
   expiryForecast: { category: string; count: number }[];
 }
@@ -446,5 +449,25 @@ export const exportableEntities = [
   "trainingRecords",
   "safetyInspections",
   "regulatoryNotices",
+  "contractors",
 ] as const;
 export type ExportableEntity = (typeof exportableEntities)[number];
+
+export type ContractorStatus = "ACTIVE" | "EXPIRED" | "SUSPENDED" | "TERMINATED";
+
+export interface Contractor {
+  id: string;
+  companyName: string;
+  registrationNumber?: string | null;
+  scopeOfWork: string;
+  contactName: string;
+  contactPhone?: string | null;
+  contactEmail?: string | null;
+  contractStartDate: string;
+  contractEndDate: string;
+  goodStandingExpiry?: string | null;
+  insuranceExpiry?: string | null;
+  status: ContractorStatus;
+  siteId: string;
+  site?: { id: string; name: string };
+}

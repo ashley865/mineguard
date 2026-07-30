@@ -114,6 +114,7 @@
   "executive": {
     "title": "Uitvoerende Dashboard",
     "subtitle": "Oorhoofse prestasie- en veiligheidsoorsig",
+    "complianceScore": "Voldoeningstelling",
     "siteStatus": "Terreinstatus",
     "operational": "Bedryfsgereed",
     "restricted": "Beperk",
@@ -619,6 +620,8 @@
   "reporting": {
     "nav": "Verslagdoening & BI",
     "subtitle": "Neigingsanalise, voldoeningskoerse en dataeksport",
+    "complianceScore": "Algehele Voldoeningstelling",
+    "complianceScoreNote": "Geweegde gemiddelde oor Gedragskodes, Risikobeoordelings, Permitte, Inspeksies, Sertifikate, Opleiding, en Kontrakteurs",
     "allSites": "Alle Terreine",
     "lastNDays": "Afgelope {{count}} dae",
     "loading": "Laai tans…",
@@ -644,7 +647,8 @@
       "certificates": "Sertifikate",
       "trainingRecords": "Opleidingsrekords",
       "safetyInspections": "Veiligheidsinspeksies",
-      "regulatoryNotices": "Regulatoriese Kennisgewings"
+      "regulatoryNotices": "Regulatoriese Kennisgewings",
+      "contractors": "Kontrakteurs"
     }
   },
   "notifications": {
@@ -652,5 +656,30 @@
     "empty": "Nog geen goedkeurings of verwerpings nie.",
     "alertLabel": "Waarskuwing",
     "incidentLabel": "Voorval"
+  },
+  "contractors": {
+    "nav": "Kontrakteurs",
+    "title": "Kontrakteurbestuur",
+    "subtitle": "Derdeparty-kontrakteurs, kontrakvoorwaardes en voldoeningsdokumentasie",
+    "new": "+ Nuwe Kontrakteur",
+    "companyName": "Maatskappynaam",
+    "registrationNumber": "Registrasienommer",
+    "scopeOfWork": "Werkomvang",
+    "contactName": "Kontakpersoon",
+    "contactEmail": "Kontak-e-pos",
+    "contractStartDate": "Kontrak begindatum",
+    "contractEndDate": "Kontrak einddatum",
+    "goodStandingExpiry": "Vervaldatum van Brief van Goeie Gedrag",
+    "insuranceExpiry": "Vervaldatum van openbare aanspreeklikheidsversekering",
+    "colCompany": "Maatskappy",
+    "colScope": "Werkomvang",
+    "colSite": "Terrein",
+    "colContractEnd": "Kontrak Einde",
+    "colStatus": "Status",
+    "noneYet": "Nog geen kontrakteurs aangeteken nie.",
+    "confirmDelete": "Skrap hierdie kontrakteur?",
+    "newTitle": "Nuwe Kontrakteur",
+    "editTitle": "Wysig Kontrakteur",
+    "loading": "Laai tans…"
   }
 }

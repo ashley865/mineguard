@@ -240,12 +240,12 @@ export default function DocumentControl() {
                 <td className="px-4 py-2"><StatusBadge status={doc.status} /></td>
                 <td className="px-4 py-2 text-right">
                   <div className="flex justify-end gap-2">
-                    <button className="text-xs text-mine-300 hover:text-white" onClick={() => download(doc)}>
+                    <button className="text-xs text-mine-300 hover:text-mine-50" onClick={() => download(doc)}>
                       {t("documents.download")}
                     </button>
                     {canEdit && (
                       <>
-                        <button className="text-xs text-mine-300 hover:text-white" onClick={() => setModal(doc)}>{t("common.edit")}</button>
+                        <button className="text-xs text-mine-300 hover:text-mine-50" onClick={() => setModal(doc)}>{t("common.edit")}</button>
                         <button className={buttonDanger} onClick={() => remove(doc.id)}>{t("common.delete")}</button>
                       </>
                     )}
