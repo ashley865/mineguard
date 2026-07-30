@@ -2,13 +2,15 @@ import { FormEvent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { api } from "../../api/client";
 import { useAuth } from "../../context/AuthContext";
-import { RiskAssessment, RiskAssessmentStatus, RiskLevel, Site, Zone } from "../../api/types";
+import { RiskAssessment, RiskAssessmentStatus, RiskLevel, RiskMitigationStatus, Site, Zone } from "../../api/types";
 import { SeverityBadge, StatusBadge } from "../../components/Badges";
 import Modal from "../../components/Modal";
 import { buttonDanger, buttonPrimary, buttonSecondary, cardClass, inputClass, labelClass } from "../../components/ui";
 
 const riskLevels: RiskLevel[] = ["LOW", "MEDIUM", "HIGH", "CRITICAL"];
 const statuses: RiskAssessmentStatus[] = ["DRAFT", "APPROVED", "UNDER_REVIEW", "EXPIRED"];
+const mitigationStatuses: RiskMitigationStatus[] = ["OPEN", "IN_PROGRESS", "MITIGATED", "ACCEPTED"];
+const ratingScale = [1, 2, 3, 4, 5];
 
 function RiskForm({ sites, zones, initial, onSubmit, onCancel }: {
   sites: Site[];
@@ -29,6 +31,11 @@ function RiskForm({ sites, zones, initial, onSubmit, onCancel }: {
   const [reviewDate, setReviewDate] = useState(initial?.reviewDate?.slice(0, 10) ?? "");
   const [siteId, setSiteId] = useState(initial?.siteId ?? sites[0]?.id ?? "");
   const [zoneId, setZoneId] = useState(initial?.zoneId ?? "");
+  const [likelihood, setLikelihood] = useState(initial?.likelihood ?? 3);
+  const [severity, setSeverity] = useState(initial?.severity ?? 3);
+  const [owner, setOwner] = useState(initial?.owner ?? "");
+  const [mitigationStatus, setMitigationStatus] = useState<RiskMitigationStatus>(initial?.mitigationStatus ?? "OPEN");
+  const [mitigationDueDate, setMitigationDueDate] = useState(initial?.mitigationDueDate?.slice(0, 10) ?? "");
   const [saving, setSaving] = useState(false);
 
   const zonesForSite = zones.filter((z) => z.siteId === siteId);
@@ -49,6 +56,11 @@ function RiskForm({ sites, zones, initial, onSubmit, onCancel }: {
         reviewDate,
         siteId,
         zoneId: zoneId || null,
+        likelihood,
+        severity,
+        owner: owner || null,
+        mitigationStatus,
+        mitigationDueDate: mitigationDueDate || null,
       });
     } finally {
       setSaving(false);
@@ -120,6 +132,45 @@ function RiskForm({ sites, zones, initial, onSubmit, onCancel }: {
           </select>
         </div>
       </div>
+
+      <div className="border-t border-mine-800 pt-4 space-y-4">
+        <h3 className="text-xs font-semibold text-mine-300 uppercase">{t("compliance.risk.registerSection")}</h3>
+        <div className="grid grid-cols-3 gap-3">
+          <div>
+            <label className={labelClass}>{t("compliance.risk.likelihood")}</label>
+            <select className={inputClass} value={likelihood} onChange={(e) => setLikelihood(Number(e.target.value))}>
+              {ratingScale.map((n) => <option key={n} value={n}>{n}</option>)}
+            </select>
+          </div>
+          <div>
+            <label className={labelClass}>{t("compliance.risk.severityScore")}</label>
+            <select className={inputClass} value={severity} onChange={(e) => setSeverity(Number(e.target.value))}>
+              {ratingScale.map((n) => <option key={n} value={n}>{n}</option>)}
+            </select>
+          </div>
+          <div>
+            <label className={labelClass}>{t("compliance.risk.rating")}</label>
+            <div className={`${inputClass} bg-mine-800/40 font-semibold text-center`}>{likelihood * severity}</div>
+          </div>
+        </div>
+        <div className="grid grid-cols-2 gap-3">
+          <div>
+            <label className={labelClass}>{t("compliance.risk.owner")}</label>
+            <input className={inputClass} value={owner} onChange={(e) => setOwner(e.target.value)} />
+          </div>
+          <div>
+            <label className={labelClass}>{t("compliance.risk.mitigationStatus")}</label>
+            <select className={inputClass} value={mitigationStatus} onChange={(e) => setMitigationStatus(e.target.value as RiskMitigationStatus)}>
+              {mitigationStatuses.map((s) => <option key={s} value={s}>{t(`badges.status.${s}`)}</option>)}
+            </select>
+          </div>
+        </div>
+        <div>
+          <label className={labelClass}>{t("compliance.risk.mitigationDueDate")}</label>
+          <input className={inputClass} type="date" value={mitigationDueDate} onChange={(e) => setMitigationDueDate(e.target.value)} />
+        </div>
+      </div>
+
       <div className="flex justify-end gap-2 pt-2">
         <button type="button" className={buttonSecondary} onClick={onCancel}>{t("common.cancel")}</button>
         <button type="submit" className={buttonPrimary} disabled={saving}>{saving ? t("common.saving") : t("common.save")}</button>
@@ -185,18 +236,31 @@ export default function RiskAssessmentsTab({ sites, zones }: { sites: Site[]; zo
               <th className="text-left px-4 py-2">{t("compliance.risk.colResidual")}</th>
               <th className="text-left px-4 py-2">{t("compliance.risk.colStatus")}</th>
               <th className="text-left px-4 py-2">{t("compliance.risk.colReviewDate")}</th>
+              <th className="text-left px-4 py-2">{t("compliance.risk.rating")}</th>
+              <th className="text-left px-4 py-2">{t("compliance.risk.owner")}</th>
+              <th className="text-left px-4 py-2">{t("compliance.risk.mitigationStatus")}</th>
               <th className="px-4 py-2"></th>
             </tr>
           </thead>
           <tbody>
             {items.map((item) => (
               <tr key={item.id} className="border-t border-mine-800 hover:bg-mine-800/30">
-                <td className="px-4 py-2 font-medium">{item.title}</td>
+                <td className="px-4 py-2 font-medium">
+                  {item.title}
+                  {item.escalated && (
+                    <span className="ml-2 px-1.5 py-0.5 rounded text-[10px] font-semibold bg-danger-500 text-white align-middle">
+                      {t("compliance.risk.escalated")}
+                    </span>
+                  )}
+                </td>
                 <td className="px-4 py-2 text-mine-300">{item.hazard}</td>
                 <td className="px-4 py-2"><SeverityBadge severity={item.initialRiskLevel} /></td>
                 <td className="px-4 py-2"><SeverityBadge severity={item.residualRiskLevel} /></td>
                 <td className="px-4 py-2"><StatusBadge status={item.status} /></td>
                 <td className="px-4 py-2 text-mine-300">{new Date(item.reviewDate).toLocaleDateString()}</td>
+                <td className="px-4 py-2 text-mine-300 font-semibold">{item.likelihood * item.severity}</td>
+                <td className="px-4 py-2 text-mine-300">{item.owner || "—"}</td>
+                <td className="px-4 py-2"><StatusBadge status={item.mitigationStatus} /></td>
                 <td className="px-4 py-2 text-right">
                   {canEdit && (
                     <div className="flex justify-end gap-2">
@@ -208,7 +272,7 @@ export default function RiskAssessmentsTab({ sites, zones }: { sites: Site[]; zo
               </tr>
             ))}
             {items.length === 0 && (
-              <tr><td colSpan={7} className="px-4 py-6 text-center text-mine-400">{t("compliance.risk.noneYet")}</td></tr>
+              <tr><td colSpan={10} className="px-4 py-6 text-center text-mine-400">{t("compliance.risk.noneYet")}</td></tr>
             )}
           </tbody>
         </table>

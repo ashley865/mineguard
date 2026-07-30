@@ -2,12 +2,13 @@ import { Router } from "express";
 import { prisma } from "../prisma";
 import { requireAuth, requireRole } from "../middleware/auth";
 import { computeComplianceScore } from "../services/complianceScore";
+import { getAssignedSiteIds } from "../services/executiveSites";
 
 const router = Router();
 
 router.use(requireAuth, requireRole("EXECUTIVE", "ADMIN"));
 
-router.get("/summary", async (_req, res) => {
+router.get("/summary", async (req, res) => {
   const [
     sitesByStatus,
     openAlertsBySeverity,
@@ -72,10 +73,24 @@ router.get("/summary", async (_req, res) => {
 
   const { score: complianceScore } = await computeComplianceScore();
 
+  const assignedSiteIds = req.auth!.role === "EXECUTIVE" ? await getAssignedSiteIds(req.auth!.userId) : null;
+  const siteFilter = assignedSiteIds ? { siteId: { in: assignedSiteIds } } : {};
+  const [visitorsOnSite, pendingPermitsToWork, escalatedRisks] = await Promise.all([
+    prisma.visitor.count({ where: { status: "CHECKED_IN", ...siteFilter } }),
+    prisma.permitToWork.count({ where: { status: "PENDING_EXECUTIVE", ...siteFilter } }),
+    prisma.riskAssessment.count({ where: { escalated: true, mitigationStatus: { in: ["OPEN", "IN_PROGRESS"] }, ...siteFilter } }),
+  ]);
+
   res.json({
     siteStatus,
     alertSeverity,
     complianceScore,
+    executiveOps: {
+      hasSiteAccess: assignedSiteIds === null || assignedSiteIds.length > 0,
+      visitorsOnSite,
+      pendingPermitsToWork,
+      escalatedRisks,
+    },
     incidents: {
       open: openIncidents,
       investigating: investigatingIncidents,

@@ -19,6 +19,11 @@ const raSchema = z.object({
   reviewDate: z.coerce.date(),
   siteId: z.string().min(1),
   zoneId: z.string().optional().nullable(),
+  likelihood: z.coerce.number().int().min(1).max(5).optional(),
+  severity: z.coerce.number().int().min(1).max(5).optional(),
+  owner: z.string().optional().nullable(),
+  mitigationStatus: z.enum(["OPEN", "IN_PROGRESS", "MITIGATED", "ACCEPTED"]).optional(),
+  mitigationDueDate: z.coerce.date().optional().nullable(),
 });
 
 router.use(requireAuth);

@@ -1,12 +1,18 @@
 import { NavLink, Outlet } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useAuth } from "../context/AuthContext";
+import { useAssignedSiteIds } from "../hooks/useAssignedSiteIds";
 import LanguageSwitcher from "./LanguageSwitcher";
 import NotificationBell from "./NotificationBell";
 
 export default function Layout() {
   const { t } = useTranslation();
   const { user, logout } = useAuth();
+  const { siteIds: assignedSiteIds } = useAssignedSiteIds();
+
+  const isAdmin = user?.role === "ADMIN";
+  const isExecutiveWithSites = user?.role === "EXECUTIVE" && (assignedSiteIds?.length ?? 0) > 0;
+  const canSeeExecutiveOps = isAdmin || isExecutiveWithSites;
 
   const navItems = [
     ...(user?.role === "EXECUTIVE"
@@ -25,6 +31,13 @@ export default function Layout() {
     { to: "/documents", label: t("documents.nav") },
     { to: "/inspection", label: t("inspection.nav") },
     { to: "/reporting", label: t("reporting.nav") },
+    ...(canSeeExecutiveOps
+      ? [
+          { to: "/visitors", label: t("visitors.nav") },
+          { to: "/permits-to-work", label: t("permitToWork.nav") },
+        ]
+      : []),
+    ...(isAdmin ? [{ to: "/executive-access", label: t("executiveAccess.nav") }] : []),
   ];
 
   return (

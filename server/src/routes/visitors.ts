@@ -1,0 +1,172 @@
+import { Router } from "express";
+import multer from "multer";
+import { z } from "zod";
+import { prisma } from "../prisma";
+import { requireAuth, requireRole } from "../middleware/auth";
+import { getAssignedSiteIds } from "../services/executiveSites";
+
+const router = Router();
+
+const upload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 10 * 1024 * 1024 },
+});
+
+const checkinSchema = z.object({
+  fullName: z.string().min(1),
+  idNumber: z.string().min(1),
+  company: z.string().optional(),
+  contactPhone: z.string().min(1),
+  contactEmail: z.string().email().optional().or(z.literal("")),
+  hostName: z.string().min(1),
+  purposeOfVisit: z.string().min(1),
+  vehicleRegistration: z.string().optional(),
+  inductionAcknowledged: z.coerce.boolean(),
+  popiaConsentAccepted: z.coerce.boolean(),
+  indemnityAccepted: z.coerce.boolean(),
+});
+
+const visitorSelect = {
+  id: true,
+  fullName: true,
+  idNumber: true,
+  company: true,
+  contactPhone: true,
+  contactEmail: true,
+  hostName: true,
+  purposeOfVisit: true,
+  vehicleRegistration: true,
+  siteId: true,
+  status: true,
+  checkInAt: true,
+  checkOutAt: true,
+  inductionAcknowledged: true,
+  popiaConsentAccepted: true,
+  indemnityAccepted: true,
+  createdAt: true,
+  site: { select: { id: true, name: true } },
+  documents: {
+    select: { id: true, docType: true, fileName: true, fileMimeType: true, fileSize: true, createdAt: true },
+  },
+} as const;
+
+async function assertSiteAccess(req: any, res: any, siteId: string): Promise<boolean> {
+  if (req.auth!.role === "EXECUTIVE") {
+    const allowed = await getAssignedSiteIds(req.auth!.userId);
+    if (!allowed.includes(siteId)) {
+      res.status(403).json({ error: "You are not assigned to this site" });
+      return false;
+    }
+  }
+  return true;
+}
+
+// Public self-service check-in reached by scanning the site's QR code. No auth: this is the
+// visitor-facing entry point, gated instead by the required RSA-law declarations below.
+router.get("/site/:siteId/info", async (req, res) => {
+  const site = await prisma.site.findUnique({
+    where: { id: req.params.siteId },
+    select: { id: true, name: true, location: true },
+  });
+  if (!site) return res.status(404).json({ error: "Site not found" });
+  res.json(site);
+});
+
+router.post("/checkin/:siteId", upload.array("documents", 5), async (req, res) => {
+  const site = await prisma.site.findUnique({ where: { id: req.params.siteId } });
+  if (!site) return res.status(404).json({ error: "Site not found" });
+
+  const parsed = checkinSchema.safeParse(req.body);
+  if (!parsed.success) return res.status(400).json({ error: parsed.error.flatten() });
+  const { inductionAcknowledged, popiaConsentAccepted, indemnityAccepted } = parsed.data;
+  if (!inductionAcknowledged || !popiaConsentAccepted || !indemnityAccepted) {
+    return res.status(400).json({
+      error: "Safety induction, POPIA consent, and indemnity acknowledgement are all required before check-in",
+    });
+  }
+
+  const files = (req.files as Express.Multer.File[] | undefined) ?? [];
+  const visitor = await prisma.visitor.create({
+    data: {
+      fullName: parsed.data.fullName,
+      idNumber: parsed.data.idNumber,
+      company: parsed.data.company || undefined,
+      contactPhone: parsed.data.contactPhone,
+      contactEmail: parsed.data.contactEmail || undefined,
+      hostName: parsed.data.hostName,
+      purposeOfVisit: parsed.data.purposeOfVisit,
+      vehicleRegistration: parsed.data.vehicleRegistration || undefined,
+      siteId: site.id,
+      inductionAcknowledged,
+      popiaConsentAccepted,
+      indemnityAccepted,
+      documents: {
+        create: files.map((f) => ({
+          docType: "OTHER" as const,
+          fileName: f.originalname,
+          fileMimeType: f.mimetype,
+          fileSize: f.size,
+          fileData: Uint8Array.from(f.buffer),
+        })),
+      },
+    },
+    select: visitorSelect,
+  });
+  res.status(201).json(visitor);
+});
+
+router.use(requireAuth);
+
+router.get("/", requireRole("ADMIN", "EXECUTIVE"), async (req, res) => {
+  const siteId = req.query.siteId as string | undefined;
+  let allowedSiteIds: string[] | null = null;
+  if (req.auth!.role === "EXECUTIVE") {
+    allowedSiteIds = await getAssignedSiteIds(req.auth!.userId);
+    if (siteId && !allowedSiteIds.includes(siteId)) {
+      return res.status(403).json({ error: "You are not assigned to this site" });
+    }
+  }
+  const items = await prisma.visitor.findMany({
+    where: { siteId: siteId ?? (allowedSiteIds ? { in: allowedSiteIds } : undefined) },
+    select: visitorSelect,
+    orderBy: { checkInAt: "desc" },
+  });
+  res.json(items);
+});
+
+router.post("/:id/checkout", requireRole("ADMIN", "EXECUTIVE"), async (req, res) => {
+  const visitor = await prisma.visitor.findUnique({ where: { id: req.params.id } });
+  if (!visitor) return res.status(404).json({ error: "Visitor not found" });
+  if (!(await assertSiteAccess(req, res, visitor.siteId))) return;
+
+  const updated = await prisma.visitor.update({
+    where: { id: req.params.id },
+    data: { status: "CHECKED_OUT", checkOutAt: new Date() },
+    select: visitorSelect,
+  });
+  res.json(updated);
+});
+
+router.get("/:id/documents/:docId/download", requireRole("ADMIN", "EXECUTIVE"), async (req, res) => {
+  const doc = await prisma.visitorDocument.findUnique({
+    where: { id: req.params.docId },
+    include: { visitor: { select: { id: true, siteId: true } } },
+  });
+  if (!doc || doc.visitor.id !== req.params.id) return res.status(404).json({ error: "Document not found" });
+  if (!(await assertSiteAccess(req, res, doc.visitor.siteId))) return;
+
+  res.setHeader("Content-Type", doc.fileMimeType);
+  res.setHeader("Content-Disposition", `attachment; filename="${encodeURIComponent(doc.fileName)}"`);
+  res.send(Buffer.from(doc.fileData));
+});
+
+router.delete("/:id", requireRole("ADMIN"), async (req, res) => {
+  try {
+    await prisma.visitor.delete({ where: { id: req.params.id } });
+    res.status(204).send();
+  } catch {
+    res.status(404).json({ error: "Visitor not found" });
+  }
+});
+
+export default router;

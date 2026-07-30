@@ -20,7 +20,8 @@
     "approve": "Genehmigen",
     "reject": "Ablehnen",
     "reviewNotePlaceholder": "Optionale Anmerkung…",
-    "reviewedBy": "Geprüft von {{name}}"
+    "reviewedBy": "Geprüft von {{name}}",
+    "copy": "Kopieren"
   },
   "nav": {
     "dashboard": "Übersicht",
@@ -135,7 +136,11 @@
     "pendingIncidents": "Vorfälle",
     "noPendingAlerts": "Keine Alarme zur Prüfung ausstehend.",
     "noPendingIncidents": "Keine Vorfälle zur Prüfung ausstehend.",
-    "loading": "Führungskräfte-Dashboard wird geladen…"
+    "loading": "Führungskräfte-Dashboard wird geladen…",
+    "visitorsOnSite": "Besucher vor Ort",
+    "pendingPermitsToWork": "Arbeitserlaubnisse, die auf Genehmigung warten",
+    "escalatedRisks": "Eskalierte Risiken",
+    "noSiteAccess": "Ihnen wurden noch keine Standorte zugewiesen. Bitten Sie einen Administrator, Ihnen Standortzugriff zu gewähren, um hier Besucherverwaltung, Arbeitserlaubnis und Risikoregister zu sehen."
   },
   "sites": {
     "title": "Standorte & Zonen",
@@ -293,7 +298,17 @@
       "UNFIT": "Untauglich",
       "PENDING_RENEWAL": "Verlängerung ausstehend",
       "SUSPENDED": "Ausgesetzt",
-      "ARCHIVED": "Archiviert"
+      "ARCHIVED": "Archiviert",
+      "IN_PROGRESS": "In Bearbeitung",
+      "MITIGATED": "Gemindert",
+      "ACCEPTED": "Akzeptiert",
+      "TERMINATED": "Beendet",
+      "CHECKED_IN": "Angemeldet",
+      "CHECKED_OUT": "Abgemeldet",
+      "DENIED": "Abgelehnt",
+      "PENDING_SUPERVISOR": "Ausstehend beim Vorgesetzten",
+      "PENDING_EXECUTIVE": "Ausstehend bei Führungskraft",
+      "CLOSED": "Abgeschlossen"
     },
     "severity": {
       "LOW": "Niedrig",
@@ -359,7 +374,15 @@
       "noneYet": "Noch keine Risikobewertungen erfasst.",
       "confirmDelete": "Diese Risikobewertung löschen?",
       "newTitle": "Neue Risikobewertung",
-      "editTitle": "Risikobewertung bearbeiten"
+      "editTitle": "Risikobewertung bearbeiten",
+      "registerSection": "Risikoregister",
+      "likelihood": "Wahrscheinlichkeit (1-5)",
+      "severityScore": "Schweregrad (1-5)",
+      "rating": "Risikobewertung",
+      "owner": "Risikoverantwortlicher",
+      "mitigationStatus": "Minderungsstatus",
+      "mitigationDueDate": "Fälligkeitsdatum der Minderung",
+      "escalated": "Eskaliert"
     },
     "notice": {
       "new": "+ Neuer behördlicher Bescheid",
@@ -681,5 +704,77 @@
     "newTitle": "Neuer Auftragnehmer",
     "editTitle": "Auftragnehmer bearbeiten",
     "loading": "Wird geladen…"
+  },
+  "visitors": {
+    "nav": "Besucherverwaltung",
+    "title": "Besucherverwaltung",
+    "subtitle": "Zeitprotokollierte An- und Abmeldung von Besuchern, gemäß der Sicherheitseinweisung des Standorts und den POPIA-Anforderungen",
+    "loading": "Besucher werden geladen…",
+    "noSiteAccess": "Ihnen wurden noch keine Standorte zugewiesen. Bitten Sie einen Administrator, Ihnen Standortzugriff zu gewähren.",
+    "qrTitle": "Anmelde-QR-Code — {{site}}",
+    "qrHint": "Zeigen oder drucken Sie diesen Code am Standorteingang aus. Besucher scannen ihn mit ihrem Telefon, um sich selbst anzumelden.",
+    "colName": "Besucher",
+    "colHost": "Gastgeber",
+    "colCheckIn": "Anmeldung",
+    "colCheckOut": "Abmeldung",
+    "checkOut": "Abmelden",
+    "noneYet": "Noch keine Besucher erfasst."
+  },
+  "visitorCheckin": {
+    "declarationsRequired": "Bitte bestätigen Sie die Erklärungen zu Sicherheitseinweisung, POPIA-Einwilligung und Haftungsfreistellung, bevor Sie sich anmelden.",
+    "submitError": "Anmeldung fehlgeschlagen. Bitte überprüfen Sie Ihre Angaben und versuchen Sie es erneut.",
+    "siteNotFound": "Dieser Anmeldelink ist ungültig oder der Standort konnte nicht gefunden werden.",
+    "successTitle": "Sie sind angemeldet",
+    "successBody": "Angemeldet um {{time}}. Bitte begeben Sie sich zum Empfang oder kontaktieren Sie Ihren Gastgeber.",
+    "title": "Besucheranmeldung",
+    "subtitle": "Anmeldung bei {{site}}",
+    "fullName": "Vollständiger Name",
+    "idNumber": "Ausweis- / Reisepassnummer",
+    "company": "Firma / Organisation",
+    "vehicleRegistration": "Fahrzeugkennzeichen",
+    "contactPhone": "Kontakttelefon",
+    "contactEmail": "Kontakt-E-Mail",
+    "hostName": "Besuchte Person",
+    "purposeOfVisit": "Zweck des Besuchs",
+    "documents": "Begleitdokumente (Ausweiskopie, ärztliches Attest usw.)",
+    "documentsHint": "Optional. Akzeptierte Formate: Bilder und PDF.",
+    "declarationsIntro": "Erforderliche Erklärungen gemäß südafrikanischem Bergbau-Gesundheits- und Sicherheitsrecht:",
+    "inductionDeclaration": "Ich bestätige, dass ich die verpflichtende Sicherheitseinweisung des Standorts absolviert habe, wie es das Bergbau-Gesundheits- und Sicherheitsgesetz vorschreibt.",
+    "popiaDeclaration": "Ich stimme der Verarbeitung und Speicherung meiner personenbezogenen Daten zu Zwecken der Standortsicherheit und Zutrittskontrolle gemäß dem Gesetz zum Schutz personenbezogener Informationen (POPIA) zu.",
+    "indemnityDeclaration": "Ich nehme den Gefahrenhinweis des Standorts zur Kenntnis und akzeptiere die Haftungsfreistellungsbedingungen für Besucher für die Dauer meines Besuchs.",
+    "submit": "Anmelden"
+  },
+  "permitToWork": {
+    "nav": "Arbeitserlaubnis",
+    "title": "Arbeitserlaubnis",
+    "subtitle": "Arbeitsgenehmigung für Auftragnehmer mit einer Genehmigungskette vom Vorgesetzten zur Führungskraft",
+    "loading": "Arbeitserlaubnisse werden geladen…",
+    "noSiteAccess": "Ihnen wurden noch keine Standorte zugewiesen. Bitten Sie einen Administrator, Ihnen Standortzugriff zu gewähren.",
+    "new": "+ Neue Arbeitserlaubnis",
+    "newTitle": "Neue Arbeitserlaubnis",
+    "contractor": "Auftragnehmer",
+    "selectContractor": "Auftragnehmer auswählen…",
+    "workDescription": "Beschreibung der Arbeiten",
+    "workArea": "Arbeitsbereich / Ort",
+    "requestedBy": "Beantragt von",
+    "hazardsIdentified": "Identifizierte Gefahren",
+    "controlMeasures": "Kontrollmaßnahmen",
+    "startDate": "Startdatum",
+    "endDate": "Enddatum",
+    "confirmDelete": "Diese Arbeitserlaubnis löschen?",
+    "noneYet": "Noch keine Arbeitserlaubnisse erfasst.",
+    "awaitingExecutive": "Wartet auf Genehmigung der Führungskraft.",
+    "close": "Als abgeschlossen markieren"
+  },
+  "executiveAccess": {
+    "nav": "Zugriff für Führungskräfte",
+    "title": "Standortzugriff für Führungskräfte",
+    "subtitle": "Steuern Sie, welche Standorte jede Führungskraft in Besucherverwaltung, Arbeitserlaubnis und Risikoregister sehen kann",
+    "loading": "Wird geladen…",
+    "noExecutives": "Noch keine Führungskräftekonten. Führungskräfte, die Ihrer Mine beitreten, erscheinen hier.",
+    "executive": "Führungskraft",
+    "assign": "Zuweisen",
+    "assignError": "Diese Zuweisung konnte nicht erstellt werden.",
+    "noneYet": "Noch keine Standortzuweisungen."
   }
 }

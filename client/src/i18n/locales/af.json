@@ -20,7 +20,8 @@
     "approve": "Keur goed",
     "reject": "Verwerp",
     "reviewNotePlaceholder": "Opsionele nota…",
-    "reviewedBy": "Nagegaan deur {{name}}"
+    "reviewedBy": "Nagegaan deur {{name}}",
+    "copy": "Kopieer"
   },
   "nav": {
     "dashboard": "Oorsig",
@@ -135,7 +136,11 @@
     "pendingIncidents": "Voorvalle",
     "noPendingAlerts": "Geen waarskuwings wag vir hersiening nie.",
     "noPendingIncidents": "Geen voorvalle wag vir hersiening nie.",
-    "loading": "Laai uitvoerende dashboard tans…"
+    "loading": "Laai uitvoerende dashboard tans…",
+    "visitorsOnSite": "Besoekers op die Terrein",
+    "pendingPermitsToWork": "Werkpermitte wat Goedkeuring Wag",
+    "escalatedRisks": "Geëskaleerde Risiko's",
+    "noSiteAccess": "Jy is nog aan geen terreine toegewys nie. Vra 'n administrateur om jou terreintoegang te gee om hier Besoekersbestuur, Werkpermit en Risikoregister te sien."
   },
   "sites": {
     "title": "Terreine & Sones",
@@ -293,7 +298,17 @@
       "UNFIT": "Ongeskik",
       "PENDING_RENEWAL": "Hernuwing Hangend",
       "SUSPENDED": "Opgeskort",
-      "ARCHIVED": "Geargiveer"
+      "ARCHIVED": "Geargiveer",
+      "IN_PROGRESS": "In Proses",
+      "MITIGATED": "Versag",
+      "ACCEPTED": "Aanvaar",
+      "TERMINATED": "Beëindig",
+      "CHECKED_IN": "Aangemeld",
+      "CHECKED_OUT": "Afgemeld",
+      "DENIED": "Geweier",
+      "PENDING_SUPERVISOR": "Wag vir Toesighouer",
+      "PENDING_EXECUTIVE": "Wag vir Uitvoerende Beampte",
+      "CLOSED": "Gesluit"
     },
     "severity": {
       "LOW": "Laag",
@@ -359,7 +374,15 @@
       "noneYet": "Nog geen risikobeoordelings aangeteken nie.",
       "confirmDelete": "Skrap hierdie risikobeoordeling?",
       "newTitle": "Nuwe Risikobeoordeling",
-      "editTitle": "Wysig Risikobeoordeling"
+      "editTitle": "Wysig Risikobeoordeling",
+      "registerSection": "Risikoregister",
+      "likelihood": "Waarskynlikheid (1-5)",
+      "severityScore": "Erns (1-5)",
+      "rating": "Risikogradering",
+      "owner": "Risiko-eienaar",
+      "mitigationStatus": "Versagtingstatus",
+      "mitigationDueDate": "Versagtingsperdatum",
+      "escalated": "Geëskaleer"
     },
     "notice": {
       "new": "+ Nuwe Regulatoriese Kennisgewing",
@@ -681,5 +704,77 @@
     "newTitle": "Nuwe Kontrakteur",
     "editTitle": "Wysig Kontrakteur",
     "loading": "Laai tans…"
+  },
+  "visitors": {
+    "nav": "Besoekersbestuur",
+    "title": "Besoekersbestuur",
+    "subtitle": "Tydsgestempelde besoekersaanmelding en -afmelding, belyn met terreinveiligheidsinduksie en POPIA-vereistes",
+    "loading": "Laai besoekers tans…",
+    "noSiteAccess": "Jy is nog aan geen terreine toegewys nie. Vra 'n administrateur om jou terreintoegang te gee.",
+    "qrTitle": "Aanmeld-QR — {{site}}",
+    "qrHint": "Vertoon of druk hierdie kode by die terreiningang. Besoekers skandeer dit met hul foon om hulself aan te meld.",
+    "colName": "Besoeker",
+    "colHost": "Gasheer",
+    "colCheckIn": "Aanmelding",
+    "colCheckOut": "Afmelding",
+    "checkOut": "Meld af",
+    "noneYet": "Nog geen besoekers aangeteken nie."
+  },
+  "visitorCheckin": {
+    "declarationsRequired": "Bevestig asseblief die veiligheidsinduksie-, POPIA-toestemmings- en vrywaringsverklarings voordat jy aanmeld.",
+    "submitError": "Aanmelding het misluk. Kontroleer jou besonderhede en probeer weer.",
+    "siteNotFound": "Hierdie aanmeldskakel is ongeldig of die terrein kon nie gevind word nie.",
+    "successTitle": "Jy is aangemeld",
+    "successBody": "Aangemeld om {{time}}. Gaan asseblief na ontvangs of kontak jou gasheer.",
+    "title": "Besoekersaanmelding",
+    "subtitle": "Meld tans aan by {{site}}",
+    "fullName": "Volle naam",
+    "idNumber": "ID- / paspoortnommer",
+    "company": "Maatskappy / organisasie",
+    "vehicleRegistration": "Voertuigregistrasie",
+    "contactPhone": "Kontaktelefoon",
+    "contactEmail": "Kontak-e-pos",
+    "hostName": "Persoon wat jy besoek",
+    "purposeOfVisit": "Doel van besoek",
+    "documents": "Ondersteunende dokumente (ID-afskrif, mediese sertifikaat, ens.)",
+    "documentsHint": "Opsioneel. Aanvaarde formate: beelde en PDF.",
+    "declarationsIntro": "Verpligte verklarings, ooreenkomstig Suid-Afrikaanse mynveiligheids- en -gesondheidswetgewing:",
+    "inductionDeclaration": "Ek bevestig dat ek die terrein se verpligte veiligheidsinduksie-sessie voltooi het, soos vereis ingevolge die Mynveiligheids- en -gesondheidswet.",
+    "popiaDeclaration": "Ek stem in tot die verwerking en berging van my persoonlike inligting vir terreinveiligheid en toegangsbeheer, ooreenkomstig die Wet op Beskerming van Persoonlike Inligting (POPIA).",
+    "indemnityDeclaration": "Ek erken die terrein se gevaarkennisgewing en aanvaar die besoeker-vrywaringsvoorwaardes vir die duur van my besoek.",
+    "submit": "Meld aan"
+  },
+  "permitToWork": {
+    "nav": "Werkpermit",
+    "title": "Werkpermit",
+    "subtitle": "Kontrakteur-werkmagtiging met 'n goedkeuringsketting van toesighouer na uitvoerende beampte",
+    "loading": "Laai werkpermitte tans…",
+    "noSiteAccess": "Jy is nog aan geen terreine toegewys nie. Vra 'n administrateur om jou terreintoegang te gee.",
+    "new": "+ Nuwe Werkpermit",
+    "newTitle": "Nuwe Werkpermit",
+    "contractor": "Kontrakteur",
+    "selectContractor": "Kies 'n kontrakteur…",
+    "workDescription": "Beskrywing van werk",
+    "workArea": "Werkarea / ligging",
+    "requestedBy": "Aangevra deur",
+    "hazardsIdentified": "Geïdentifiseerde gevare",
+    "controlMeasures": "Beheermaatreëls",
+    "startDate": "Begindatum",
+    "endDate": "Einddatum",
+    "confirmDelete": "Skrap hierdie werkpermit?",
+    "noneYet": "Nog geen werkpermitte aangeteken nie.",
+    "awaitingExecutive": "Wag vir goedkeuring deur uitvoerende beampte.",
+    "close": "Merk as gesluit"
+  },
+  "executiveAccess": {
+    "nav": "Uitvoerende Toegang",
+    "title": "Uitvoerende Terreintoegang",
+    "subtitle": "Beheer watter terreine elke uitvoerende beampte kan sien in Besoekersbestuur, Werkpermit en Risikoregister",
+    "loading": "Laai tans…",
+    "noExecutives": "Nog geen uitvoerende rekeninge nie. Uitvoerende beamptes wat by jou myn aansluit, sal hier verskyn.",
+    "executive": "Uitvoerende beampte",
+    "assign": "Wys toe",
+    "assignError": "Kon nie hierdie toewysing skep nie.",
+    "noneYet": "Nog geen terreintoewysings nie."
   }
 }

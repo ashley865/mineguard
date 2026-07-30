@@ -20,7 +20,8 @@
     "approve": "Approve",
     "reject": "Reject",
     "reviewNotePlaceholder": "Optional note…",
-    "reviewedBy": "Reviewed by {{name}}"
+    "reviewedBy": "Reviewed by {{name}}",
+    "copy": "Copy"
   },
   "nav": {
     "dashboard": "Dashboard",
@@ -135,7 +136,11 @@
     "pendingIncidents": "Incidents",
     "noPendingAlerts": "No alerts awaiting review.",
     "noPendingIncidents": "No incidents awaiting review.",
-    "loading": "Loading executive dashboard…"
+    "loading": "Loading executive dashboard…",
+    "visitorsOnSite": "Visitors On Site",
+    "pendingPermitsToWork": "Permits to Work Awaiting Approval",
+    "escalatedRisks": "Escalated Risks",
+    "noSiteAccess": "You haven't been assigned to any sites yet. Ask an administrator to grant you site access to see Visitor Management, Permit to Work, and Risk Register operations here."
   },
   "sites": {
     "title": "Sites & Zones",
@@ -293,7 +298,17 @@
       "UNFIT": "Unfit",
       "PENDING_RENEWAL": "Pending renewal",
       "SUSPENDED": "Suspended",
-      "ARCHIVED": "Archived"
+      "ARCHIVED": "Archived",
+      "IN_PROGRESS": "In progress",
+      "MITIGATED": "Mitigated",
+      "ACCEPTED": "Accepted",
+      "TERMINATED": "Terminated",
+      "CHECKED_IN": "Checked in",
+      "CHECKED_OUT": "Checked out",
+      "DENIED": "Denied",
+      "PENDING_SUPERVISOR": "Pending supervisor",
+      "PENDING_EXECUTIVE": "Pending executive",
+      "CLOSED": "Closed"
     },
     "severity": {
       "LOW": "Low",
@@ -359,7 +374,15 @@
       "noneYet": "No risk assessments recorded yet.",
       "confirmDelete": "Delete this risk assessment?",
       "newTitle": "New Risk Assessment",
-      "editTitle": "Edit Risk Assessment"
+      "editTitle": "Edit Risk Assessment",
+      "registerSection": "Risk Register",
+      "likelihood": "Likelihood (1-5)",
+      "severityScore": "Severity (1-5)",
+      "rating": "Risk Rating",
+      "owner": "Risk owner",
+      "mitigationStatus": "Mitigation status",
+      "mitigationDueDate": "Mitigation due date",
+      "escalated": "Escalated"
     },
     "notice": {
       "new": "+ New Regulatory Notice",
@@ -681,5 +704,77 @@
     "newTitle": "New Contractor",
     "editTitle": "Edit Contractor",
     "loading": "Loading…"
+  },
+  "visitors": {
+    "nav": "Visitor Management",
+    "title": "Visitor Management",
+    "subtitle": "Time-logged visitor check-in and check-out, aligned to site safety induction and POPIA requirements",
+    "loading": "Loading visitors…",
+    "noSiteAccess": "You haven't been assigned to any sites yet. Ask an administrator to grant you site access.",
+    "qrTitle": "Check-in QR — {{site}}",
+    "qrHint": "Display or print this code at the site entrance. Visitors scan it with their phone to self-check-in.",
+    "colName": "Visitor",
+    "colHost": "Host",
+    "colCheckIn": "Check-in",
+    "colCheckOut": "Check-out",
+    "checkOut": "Check out",
+    "noneYet": "No visitors logged yet."
+  },
+  "visitorCheckin": {
+    "declarationsRequired": "Please acknowledge the safety induction, POPIA consent, and indemnity declarations before checking in.",
+    "submitError": "Check-in failed. Please check your details and try again.",
+    "siteNotFound": "This check-in link is invalid or the site could not be found.",
+    "successTitle": "You're checked in",
+    "successBody": "Checked in at {{time}}. Please proceed to reception or contact your host.",
+    "title": "Visitor Check-In",
+    "subtitle": "Checking in at {{site}}",
+    "fullName": "Full name",
+    "idNumber": "ID / passport number",
+    "company": "Company / organisation",
+    "vehicleRegistration": "Vehicle registration",
+    "contactPhone": "Contact phone",
+    "contactEmail": "Contact email",
+    "hostName": "Person you are visiting",
+    "purposeOfVisit": "Purpose of visit",
+    "documents": "Supporting documents (ID copy, medical certificate, etc.)",
+    "documentsHint": "Optional. Accepted formats: images and PDF.",
+    "declarationsIntro": "Required declarations, in line with South African mine health and safety law:",
+    "inductionDeclaration": "I confirm I have completed the site's mandatory safety induction briefing, as required under the Mine Health and Safety Act.",
+    "popiaDeclaration": "I consent to the processing and storage of my personal information for site safety and access-control purposes, in accordance with the Protection of Personal Information Act (POPIA).",
+    "indemnityDeclaration": "I acknowledge the site's hazard notice and accept the visitor indemnity terms for the duration of my visit.",
+    "submit": "Check in"
+  },
+  "permitToWork": {
+    "nav": "Permit to Work",
+    "title": "Permit to Work",
+    "subtitle": "Contractor work authorisation with a supervisor-then-executive approval chain",
+    "loading": "Loading permits to work…",
+    "noSiteAccess": "You haven't been assigned to any sites yet. Ask an administrator to grant you site access.",
+    "new": "+ New Permit to Work",
+    "newTitle": "New Permit to Work",
+    "contractor": "Contractor",
+    "selectContractor": "Select a contractor…",
+    "workDescription": "Description of work",
+    "workArea": "Work area / location",
+    "requestedBy": "Requested by",
+    "hazardsIdentified": "Hazards identified",
+    "controlMeasures": "Control measures",
+    "startDate": "Start date",
+    "endDate": "End date",
+    "confirmDelete": "Delete this permit to work?",
+    "noneYet": "No permits to work recorded yet.",
+    "awaitingExecutive": "Awaiting executive approval.",
+    "close": "Mark as closed"
+  },
+  "executiveAccess": {
+    "nav": "Executive Access",
+    "title": "Executive Site Access",
+    "subtitle": "Control which sites each executive can see in Visitor Management, Permit to Work, and Risk Register",
+    "loading": "Loading…",
+    "noExecutives": "No executive accounts yet. Executives who join your mine will appear here.",
+    "executive": "Executive",
+    "assign": "Assign",
+    "assignError": "Could not create this assignment.",
+    "noneYet": "No site assignments yet."
   }
 }

@@ -20,7 +20,8 @@
     "approve": "Aprobar",
     "reject": "Rechazar",
     "reviewNotePlaceholder": "Nota opcional…",
-    "reviewedBy": "Revisado por {{name}}"
+    "reviewedBy": "Revisado por {{name}}",
+    "copy": "Copiar"
   },
   "nav": {
     "dashboard": "Panel",
@@ -135,7 +136,11 @@
     "pendingIncidents": "Incidentes",
     "noPendingAlerts": "No hay alertas pendientes de revisión.",
     "noPendingIncidents": "No hay incidentes pendientes de revisión.",
-    "loading": "Cargando panel ejecutivo…"
+    "loading": "Cargando panel ejecutivo…",
+    "visitorsOnSite": "Visitantes en el Sitio",
+    "pendingPermitsToWork": "Permisos de Trabajo Pendientes de Aprobación",
+    "escalatedRisks": "Riesgos Escalados",
+    "noSiteAccess": "Aún no se te han asignado sitios. Pide a un administrador que te dé acceso a un sitio para ver aquí la Gestión de Visitantes, el Permiso de Trabajo y el Registro de Riesgos."
   },
   "sites": {
     "title": "Sitios y Zonas",
@@ -293,7 +298,17 @@
       "UNFIT": "No apto",
       "PENDING_RENEWAL": "Renovación pendiente",
       "SUSPENDED": "Suspendido",
-      "ARCHIVED": "Archivado"
+      "ARCHIVED": "Archivado",
+      "IN_PROGRESS": "En progreso",
+      "MITIGATED": "Mitigado",
+      "ACCEPTED": "Aceptado",
+      "TERMINATED": "Terminado",
+      "CHECKED_IN": "Registrado",
+      "CHECKED_OUT": "Salida registrada",
+      "DENIED": "Denegado",
+      "PENDING_SUPERVISOR": "Pendiente del supervisor",
+      "PENDING_EXECUTIVE": "Pendiente del ejecutivo",
+      "CLOSED": "Cerrado"
     },
     "severity": {
       "LOW": "Baja",
@@ -359,7 +374,15 @@
       "noneYet": "Aún no hay evaluaciones de riesgo registradas.",
       "confirmDelete": "¿Eliminar esta evaluación de riesgo?",
       "newTitle": "Nueva Evaluación de Riesgo",
-      "editTitle": "Editar Evaluación de Riesgo"
+      "editTitle": "Editar Evaluación de Riesgo",
+      "registerSection": "Registro de Riesgos",
+      "likelihood": "Probabilidad (1-5)",
+      "severityScore": "Severidad (1-5)",
+      "rating": "Calificación de Riesgo",
+      "owner": "Responsable del riesgo",
+      "mitigationStatus": "Estado de mitigación",
+      "mitigationDueDate": "Fecha límite de mitigación",
+      "escalated": "Escalado"
     },
     "notice": {
       "new": "+ Nueva Notificación Regulatoria",
@@ -681,5 +704,77 @@
     "newTitle": "Nuevo Contratista",
     "editTitle": "Editar Contratista",
     "loading": "Cargando…"
+  },
+  "visitors": {
+    "nav": "Gestión de Visitantes",
+    "title": "Gestión de Visitantes",
+    "subtitle": "Registro de horarios de entrada y salida de visitantes, conforme a la inducción de seguridad del sitio y los requisitos de POPIA",
+    "loading": "Cargando visitantes…",
+    "noSiteAccess": "Aún no se te han asignado sitios. Pide a un administrador que te dé acceso a un sitio.",
+    "qrTitle": "Código QR de registro — {{site}}",
+    "qrHint": "Muestra o imprime este código en la entrada del sitio. Los visitantes lo escanean con su teléfono para registrarse ellos mismos.",
+    "colName": "Visitante",
+    "colHost": "Anfitrión",
+    "colCheckIn": "Entrada",
+    "colCheckOut": "Salida",
+    "checkOut": "Registrar salida",
+    "noneYet": "Aún no hay visitantes registrados."
+  },
+  "visitorCheckin": {
+    "declarationsRequired": "Por favor, confirma las declaraciones de inducción de seguridad, consentimiento POPIA e indemnización antes de registrarte.",
+    "submitError": "No se pudo completar el registro. Verifica tus datos e inténtalo de nuevo.",
+    "siteNotFound": "Este enlace de registro no es válido o no se pudo encontrar el sitio.",
+    "successTitle": "Registro completado",
+    "successBody": "Registrado a las {{time}}. Dirígete a recepción o contacta a tu anfitrión.",
+    "title": "Registro de Visitantes",
+    "subtitle": "Registrándose en {{site}}",
+    "fullName": "Nombre completo",
+    "idNumber": "Número de identificación / pasaporte",
+    "company": "Empresa / organización",
+    "vehicleRegistration": "Matrícula del vehículo",
+    "contactPhone": "Teléfono de contacto",
+    "contactEmail": "Correo de contacto",
+    "hostName": "Persona a quien visita",
+    "purposeOfVisit": "Motivo de la visita",
+    "documents": "Documentos de respaldo (copia de identificación, certificado médico, etc.)",
+    "documentsHint": "Opcional. Formatos aceptados: imágenes y PDF.",
+    "declarationsIntro": "Declaraciones obligatorias, conforme a la legislación sudafricana de salud y seguridad minera:",
+    "inductionDeclaration": "Confirmo que he completado la charla de inducción de seguridad obligatoria del sitio, según lo exige la Ley de Salud y Seguridad Minera.",
+    "popiaDeclaration": "Doy mi consentimiento para el tratamiento y almacenamiento de mis datos personales con fines de seguridad y control de acceso al sitio, conforme a la Ley de Protección de Información Personal (POPIA).",
+    "indemnityDeclaration": "Reconozco el aviso de peligro del sitio y acepto los términos de indemnización del visitante durante la duración de mi visita.",
+    "submit": "Registrarse"
+  },
+  "permitToWork": {
+    "nav": "Permiso de Trabajo",
+    "title": "Permiso de Trabajo",
+    "subtitle": "Autorización de trabajo para contratistas con una cadena de aprobación de supervisor y luego ejecutivo",
+    "loading": "Cargando permisos de trabajo…",
+    "noSiteAccess": "Aún no se te han asignado sitios. Pide a un administrador que te dé acceso a un sitio.",
+    "new": "+ Nuevo Permiso de Trabajo",
+    "newTitle": "Nuevo Permiso de Trabajo",
+    "contractor": "Contratista",
+    "selectContractor": "Selecciona un contratista…",
+    "workDescription": "Descripción del trabajo",
+    "workArea": "Área / ubicación de trabajo",
+    "requestedBy": "Solicitado por",
+    "hazardsIdentified": "Peligros identificados",
+    "controlMeasures": "Medidas de control",
+    "startDate": "Fecha de inicio",
+    "endDate": "Fecha de finalización",
+    "confirmDelete": "¿Eliminar este permiso de trabajo?",
+    "noneYet": "Aún no hay permisos de trabajo registrados.",
+    "awaitingExecutive": "Pendiente de aprobación ejecutiva.",
+    "close": "Marcar como cerrado"
+  },
+  "executiveAccess": {
+    "nav": "Acceso Ejecutivo",
+    "title": "Acceso Ejecutivo por Sitio",
+    "subtitle": "Controla qué sitios puede ver cada ejecutivo en Gestión de Visitantes, Permiso de Trabajo y Registro de Riesgos",
+    "loading": "Cargando…",
+    "noExecutives": "Aún no hay cuentas ejecutivas. Los ejecutivos que se unan a tu mina aparecerán aquí.",
+    "executive": "Ejecutivo",
+    "assign": "Asignar",
+    "assignError": "No se pudo crear esta asignación.",
+    "noneYet": "Aún no hay asignaciones de sitios."
   }
 }

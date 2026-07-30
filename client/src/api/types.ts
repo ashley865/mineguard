@@ -178,6 +178,12 @@ export interface ExecutiveSummary {
   siteStatus: Record<SiteStatus, number>;
   alertSeverity: Record<AlertSeverity, number>;
   complianceScore: number;
+  executiveOps: {
+    hasSiteAccess: boolean;
+    visitorsOnSite: number;
+    pendingPermitsToWork: number;
+    escalatedRisks: number;
+  };
   incidents: { open: number; investigating: number; resolved: number };
   incidentTrend: { date: string; count: number }[];
   workers: { total: number; onShift: number };
@@ -216,6 +222,7 @@ export interface CodeOfPractice {
 
 export type RiskLevel = "LOW" | "MEDIUM" | "HIGH" | "CRITICAL";
 export type RiskAssessmentStatus = "DRAFT" | "APPROVED" | "UNDER_REVIEW" | "EXPIRED";
+export type RiskMitigationStatus = "OPEN" | "IN_PROGRESS" | "MITIGATED" | "ACCEPTED";
 
 export interface RiskAssessment {
   id: string;
@@ -232,6 +239,13 @@ export interface RiskAssessment {
   site?: { id: string; name: string };
   zoneId?: string | null;
   zone?: { id: string; name: string } | null;
+  likelihood: number;
+  severity: number;
+  owner?: string | null;
+  mitigationStatus: RiskMitigationStatus;
+  mitigationDueDate?: string | null;
+  escalated: boolean;
+  escalatedAt?: string | null;
 }
 
 export type NoticeSection = "SECTION_54" | "SECTION_55" | "SECTION_53" | "OTHER";
@@ -470,4 +484,78 @@ export interface Contractor {
   status: ContractorStatus;
   siteId: string;
   site?: { id: string; name: string };
+}
+
+export interface ExecutiveSiteAssignment {
+  id: string;
+  userId: string;
+  siteId: string;
+  createdAt: string;
+  user: { id: string; name: string; email: string };
+  site: { id: string; name: string };
+}
+
+export type VisitorStatus = "CHECKED_IN" | "CHECKED_OUT" | "DENIED";
+export type VisitorDocumentType = "ID_DOCUMENT" | "MEDICAL_CERTIFICATE" | "INDUCTION_ACKNOWLEDGEMENT" | "OTHER";
+
+export interface VisitorDocument {
+  id: string;
+  docType: VisitorDocumentType;
+  fileName: string;
+  fileMimeType: string;
+  fileSize: number;
+  createdAt: string;
+}
+
+export interface Visitor {
+  id: string;
+  fullName: string;
+  idNumber: string;
+  company?: string | null;
+  contactPhone: string;
+  contactEmail?: string | null;
+  hostName: string;
+  purposeOfVisit: string;
+  vehicleRegistration?: string | null;
+  siteId: string;
+  site?: { id: string; name: string };
+  status: VisitorStatus;
+  checkInAt: string;
+  checkOutAt?: string | null;
+  inductionAcknowledged: boolean;
+  popiaConsentAccepted: boolean;
+  indemnityAccepted: boolean;
+  createdAt: string;
+  documents: VisitorDocument[];
+}
+
+export type PermitToWorkStatus =
+  | "PENDING_SUPERVISOR"
+  | "PENDING_EXECUTIVE"
+  | "APPROVED"
+  | "REJECTED"
+  | "EXPIRED"
+  | "CLOSED";
+
+export interface PermitToWork {
+  id: string;
+  contractorId: string;
+  contractor?: { id: string; companyName: string };
+  siteId: string;
+  site?: { id: string; name: string };
+  workDescription: string;
+  workArea: string;
+  hazardsIdentified: string;
+  controlMeasures: string;
+  startDate: string;
+  endDate: string;
+  requestedByName: string;
+  status: PermitToWorkStatus;
+  supervisorNote?: string | null;
+  supervisorDecidedAt?: string | null;
+  supervisorDecidedBy?: { id: string; name: string } | null;
+  executiveNote?: string | null;
+  executiveDecidedAt?: string | null;
+  executiveDecidedBy?: { id: string; name: string } | null;
+  createdAt: string;
 }

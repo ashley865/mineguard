@@ -20,7 +20,8 @@
     "approve": "Approuver",
     "reject": "Rejeter",
     "reviewNotePlaceholder": "Note facultative…",
-    "reviewedBy": "Révisé par {{name}}"
+    "reviewedBy": "Révisé par {{name}}",
+    "copy": "Copier"
   },
   "nav": {
     "dashboard": "Tableau de bord",
@@ -135,7 +136,11 @@
     "pendingIncidents": "Incidents",
     "noPendingAlerts": "Aucune alerte en attente de révision.",
     "noPendingIncidents": "Aucun incident en attente de révision.",
-    "loading": "Chargement du tableau de bord exécutif…"
+    "loading": "Chargement du tableau de bord exécutif…",
+    "visitorsOnSite": "Visiteurs sur le Site",
+    "pendingPermitsToWork": "Permis de Travail en Attente d'Approbation",
+    "escalatedRisks": "Risques Escaladés",
+    "noSiteAccess": "Vous n'avez encore été affecté à aucun site. Demandez à un administrateur de vous accorder l'accès à un site pour voir ici la Gestion des Visiteurs, le Permis de Travail et le Registre des Risques."
   },
   "sites": {
     "title": "Sites et zones",
@@ -293,7 +298,17 @@
       "UNFIT": "Inapte",
       "PENDING_RENEWAL": "Renouvellement en attente",
       "SUSPENDED": "Suspendu",
-      "ARCHIVED": "Archivé"
+      "ARCHIVED": "Archivé",
+      "IN_PROGRESS": "En cours",
+      "MITIGATED": "Atténué",
+      "ACCEPTED": "Accepté",
+      "TERMINATED": "Résilié",
+      "CHECKED_IN": "Enregistré",
+      "CHECKED_OUT": "Sorti",
+      "DENIED": "Refusé",
+      "PENDING_SUPERVISOR": "En attente du superviseur",
+      "PENDING_EXECUTIVE": "En attente de l'exécutif",
+      "CLOSED": "Clôturé"
     },
     "severity": {
       "LOW": "Faible",
@@ -359,7 +374,15 @@
       "noneYet": "Aucune évaluation des risques enregistrée pour le moment.",
       "confirmDelete": "Supprimer cette évaluation des risques ?",
       "newTitle": "Nouvelle Évaluation des Risques",
-      "editTitle": "Modifier l'Évaluation des Risques"
+      "editTitle": "Modifier l'Évaluation des Risques",
+      "registerSection": "Registre des Risques",
+      "likelihood": "Probabilité (1-5)",
+      "severityScore": "Gravité (1-5)",
+      "rating": "Cotation du Risque",
+      "owner": "Responsable du risque",
+      "mitigationStatus": "Statut d'atténuation",
+      "mitigationDueDate": "Échéance d'atténuation",
+      "escalated": "Escaladé"
     },
     "notice": {
       "new": "+ Nouvel Avis Réglementaire",
@@ -681,5 +704,77 @@
     "newTitle": "Nouveau Sous-traitant",
     "editTitle": "Modifier le Sous-traitant",
     "loading": "Chargement…"
+  },
+  "visitors": {
+    "nav": "Gestion des Visiteurs",
+    "title": "Gestion des Visiteurs",
+    "subtitle": "Enregistrement horodaté des entrées et sorties des visiteurs, conforme à l'induction de sécurité du site et aux exigences POPIA",
+    "loading": "Chargement des visiteurs…",
+    "noSiteAccess": "Vous n'avez encore été affecté à aucun site. Demandez à un administrateur de vous accorder l'accès à un site.",
+    "qrTitle": "QR code d'enregistrement — {{site}}",
+    "qrHint": "Affichez ou imprimez ce code à l'entrée du site. Les visiteurs le scannent avec leur téléphone pour s'enregistrer eux-mêmes.",
+    "colName": "Visiteur",
+    "colHost": "Hôte",
+    "colCheckIn": "Entrée",
+    "colCheckOut": "Sortie",
+    "checkOut": "Enregistrer la sortie",
+    "noneYet": "Aucun visiteur enregistré pour le moment."
+  },
+  "visitorCheckin": {
+    "declarationsRequired": "Veuillez confirmer les déclarations d'induction de sécurité, de consentement POPIA et d'indemnisation avant de vous enregistrer.",
+    "submitError": "L'enregistrement a échoué. Vérifiez vos informations et réessayez.",
+    "siteNotFound": "Ce lien d'enregistrement est invalide ou le site est introuvable.",
+    "successTitle": "Vous êtes enregistré",
+    "successBody": "Enregistré à {{time}}. Veuillez vous présenter à la réception ou contacter votre hôte.",
+    "title": "Enregistrement des Visiteurs",
+    "subtitle": "Enregistrement au site {{site}}",
+    "fullName": "Nom complet",
+    "idNumber": "Numéro d'identité / passeport",
+    "company": "Entreprise / organisation",
+    "vehicleRegistration": "Immatriculation du véhicule",
+    "contactPhone": "Téléphone de contact",
+    "contactEmail": "E-mail de contact",
+    "hostName": "Personne visitée",
+    "purposeOfVisit": "Objet de la visite",
+    "documents": "Documents justificatifs (copie de pièce d'identité, certificat médical, etc.)",
+    "documentsHint": "Facultatif. Formats acceptés : images et PDF.",
+    "declarationsIntro": "Déclarations obligatoires, conformément à la législation sud-africaine sur la santé et la sécurité minière :",
+    "inductionDeclaration": "Je confirme avoir suivi la séance d'induction de sécurité obligatoire du site, comme l'exige la Loi sur la Santé et la Sécurité Minière.",
+    "popiaDeclaration": "Je consens au traitement et à la conservation de mes données personnelles à des fins de sécurité du site et de contrôle d'accès, conformément à la Loi sur la Protection des Informations Personnelles (POPIA).",
+    "indemnityDeclaration": "Je reconnais l'avis de danger du site et j'accepte les conditions d'indemnisation des visiteurs pour la durée de ma visite.",
+    "submit": "S'enregistrer"
+  },
+  "permitToWork": {
+    "nav": "Permis de Travail",
+    "title": "Permis de Travail",
+    "subtitle": "Autorisation de travail pour sous-traitants avec une chaîne d'approbation superviseur puis exécutif",
+    "loading": "Chargement des permis de travail…",
+    "noSiteAccess": "Vous n'avez encore été affecté à aucun site. Demandez à un administrateur de vous accorder l'accès à un site.",
+    "new": "+ Nouveau Permis de Travail",
+    "newTitle": "Nouveau Permis de Travail",
+    "contractor": "Sous-traitant",
+    "selectContractor": "Sélectionnez un sous-traitant…",
+    "workDescription": "Description des travaux",
+    "workArea": "Zone / emplacement des travaux",
+    "requestedBy": "Demandé par",
+    "hazardsIdentified": "Dangers identifiés",
+    "controlMeasures": "Mesures de contrôle",
+    "startDate": "Date de début",
+    "endDate": "Date de fin",
+    "confirmDelete": "Supprimer ce permis de travail ?",
+    "noneYet": "Aucun permis de travail enregistré pour le moment.",
+    "awaitingExecutive": "En attente d'approbation exécutive.",
+    "close": "Marquer comme clôturé"
+  },
+  "executiveAccess": {
+    "nav": "Accès Exécutif",
+    "title": "Accès Exécutif par Site",
+    "subtitle": "Contrôlez les sites que chaque exécutif peut voir dans la Gestion des Visiteurs, le Permis de Travail et le Registre des Risques",
+    "loading": "Chargement…",
+    "noExecutives": "Aucun compte exécutif pour le moment. Les exécutifs qui rejoignent votre mine apparaîtront ici.",
+    "executive": "Exécutif",
+    "assign": "Affecter",
+    "assignError": "Impossible de créer cette affectation.",
+    "noneYet": "Aucune affectation de site pour le moment."
   }
 }

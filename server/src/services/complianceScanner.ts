@@ -204,6 +204,39 @@ export async function scanCompliance(io?: Server) {
     }
   }
 
+  const overdueRisks = await prisma.riskAssessment.findMany({
+    where: {
+      escalated: false,
+      mitigationStatus: { in: ["OPEN", "IN_PROGRESS"] },
+      mitigationDueDate: { not: null, lt: new Date() },
+    },
+  });
+  for (const risk of overdueRisks) {
+    const days = daysFromNow(risk.mitigationDueDate!);
+    const message = `Risk "${risk.title}" mitigation is overdue by ${Math.abs(days)} day(s) and has been escalated`;
+    const alert = await raiseAlertIfMissing({ siteId: risk.siteId, zoneId: risk.zoneId, severity: "CRITICAL", message });
+    if (alert) newAlerts.push(alert);
+    await prisma.riskAssessment.update({ where: { id: risk.id }, data: { escalated: true, escalatedAt: new Date() } });
+  }
+
+  const activePermitsToWork = await prisma.permitToWork.findMany({
+    where: { status: "APPROVED" },
+    include: { contractor: true },
+  });
+  for (const ptw of activePermitsToWork) {
+    const days = daysFromNow(ptw.endDate);
+    if (days < 0) {
+      await prisma.permitToWork.update({ where: { id: ptw.id }, data: { status: "EXPIRED" } });
+      const message = `Permit to Work for ${ptw.contractor.companyName} ("${ptw.workDescription}") expired ${Math.abs(days)} day(s) ago`;
+      const alert = await raiseAlertIfMissing({ siteId: ptw.siteId, severity: "HIGH", message });
+      if (alert) newAlerts.push(alert);
+    } else if (days <= 3) {
+      const message = `Permit to Work for ${ptw.contractor.companyName} ("${ptw.workDescription}") expires in ${days} day(s)`;
+      const alert = await raiseAlertIfMissing({ siteId: ptw.siteId, severity: "LOW", message });
+      if (alert) newAlerts.push(alert);
+    }
+  }
+
   if (io) {
     for (const alert of newAlerts) io.emit("alert:new", alert);
   }

@@ -29,6 +29,9 @@ import reportsRoutes from "./routes/reports";
 import minesRoutes from "./routes/mines";
 import notificationsRoutes from "./routes/notifications";
 import contractorsRoutes from "./routes/contractors";
+import executiveSitesRoutes from "./routes/executiveSites";
+import visitorsRoutes from "./routes/visitors";
+import permitsToWorkRoutes from "./routes/permitsToWork";
 import { startSimulator } from "./services/simulator";
 import { scanCompliance } from "./services/complianceScanner";
 
@@ -72,6 +75,9 @@ app.use("/api/reports", reportsRoutes);
 app.use("/api/mines", minesRoutes);
 app.use("/api/notifications", notificationsRoutes);
 app.use("/api/contractors", contractorsRoutes);
+app.use("/api/executive-sites", executiveSitesRoutes);
+app.use("/api/visitors", visitorsRoutes);
+app.use("/api/permits-to-work", permitsToWorkRoutes);
 
 app.use((err: any, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
   console.error(err);

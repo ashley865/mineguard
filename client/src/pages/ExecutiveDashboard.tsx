@@ -1,10 +1,21 @@
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { Link } from "react-router-dom";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
 import { api } from "../api/client";
 import { Alert, ExecutiveSummary, Incident } from "../api/types";
 import { SeverityBadge } from "../components/Badges";
 import { buttonPrimary, buttonSecondary, cardClass } from "../components/ui";
+
+function OpsCard({ label, value, to, tone }: { label: string; value: number; to: string; tone?: "hazard" | "danger" }) {
+  const toneClass = tone === "danger" ? "text-danger-500" : tone === "hazard" ? "text-hazard-500" : "text-mine-50";
+  return (
+    <Link to={to} className={`${cardClass} px-5 py-4 block hover:border-mine-600 transition-colors`}>
+      <div className="text-xs text-mine-300 uppercase tracking-wide">{label}</div>
+      <div className={`text-2xl font-bold mt-1 ${toneClass}`}>{value}</div>
+    </Link>
+  );
+}
 
 function StatCard({ label, value, tone }: { label: string; value: string | number; tone?: "danger" | "hazard" }) {
   const toneClass =
@@ -76,7 +87,8 @@ export default function ExecutiveDashboard() {
     return <div className="text-mine-300">{t("executive.loading")}</div>;
   }
 
-  const { siteStatus, alertSeverity, complianceScore, incidents, incidentTrend, workers, equipment, pendingReviews } = summary;
+  const { siteStatus, alertSeverity, complianceScore, executiveOps, incidents, incidentTrend, workers, equipment, pendingReviews } =
+    summary;
   const scoreTone =
     complianceScore >= 80 ? "text-emerald-500" : complianceScore >= 50 ? "text-hazard-500" : "text-danger-500";
 
@@ -99,6 +111,26 @@ export default function ExecutiveDashboard() {
         <StatCard label={t("executive.shutDown")} value={siteStatus.SHUT_DOWN} tone={siteStatus.SHUT_DOWN > 0 ? "danger" : undefined} />
         <StatCard label={t("executive.equipmentUptime")} value={`${equipment.uptimePct}%`} />
       </div>
+
+      {executiveOps.hasSiteAccess ? (
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+          <OpsCard label={t("executive.visitorsOnSite")} value={executiveOps.visitorsOnSite} to="/visitors" />
+          <OpsCard
+            label={t("executive.pendingPermitsToWork")}
+            value={executiveOps.pendingPermitsToWork}
+            to="/permits-to-work"
+            tone={executiveOps.pendingPermitsToWork > 0 ? "hazard" : undefined}
+          />
+          <OpsCard
+            label={t("executive.escalatedRisks")}
+            value={executiveOps.escalatedRisks}
+            to="/compliance"
+            tone={executiveOps.escalatedRisks > 0 ? "danger" : undefined}
+          />
+        </div>
+      ) : (
+        <div className={`${cardClass} p-4 text-sm text-mine-300`}>{t("executive.noSiteAccess")}</div>
+      )}
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className={`${cardClass} p-5`}>

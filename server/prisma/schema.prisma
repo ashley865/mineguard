@@ -108,6 +108,13 @@ enum RiskAssessmentStatus {
   EXPIRED
 }
 
+enum RiskMitigationStatus {
+  OPEN
+  IN_PROGRESS
+  MITIGATED
+  ACCEPTED
+}
+
 enum NoticeSection {
   SECTION_54
   SECTION_55
@@ -158,6 +165,10 @@ model User {
   reviewedAlerts     Alert[]    @relation("AlertReviewedBy")
   reviewedIncidents  Incident[] @relation("IncidentReviewedBy")
   uploadedDocuments  Document[]
+
+  siteAssignments        ExecutiveSiteAssignment[]
+  ptwSupervisorDecisions PermitToWork[]             @relation("PtwSupervisorDecision")
+  ptwExecutiveDecisions  PermitToWork[]             @relation("PtwExecutiveDecision")
 }
 
 model Site {
@@ -183,6 +194,10 @@ model Site {
   documents         Document[]
   inspectionVisits  InspectionVisit[]
   contractors       Contractor[]
+
+  executiveAssignments ExecutiveSiteAssignment[]
+  visitors             Visitor[]
+  permitsToWork        PermitToWork[]
 }
 
 model Zone {
@@ -352,6 +367,14 @@ model RiskAssessment {
   site              Site                 @relation(fields: [siteId], references: [id], onDelete: Cascade)
   zoneId            String?
   zone              Zone?                @relation(fields: [zoneId], references: [id], onDelete: SetNull)
+
+  likelihood        Int                   @default(3)
+  severity          Int                   @default(3)
+  owner             String?
+  mitigationStatus  RiskMitigationStatus  @default(OPEN)
+  mitigationDueDate DateTime?
+  escalated         Boolean               @default(false)
+  escalatedAt       DateTime?
 
   createdAt DateTime @default(now())
 }
@@ -604,6 +627,106 @@ model Contractor {
   status              ContractorStatus @default(ACTIVE)
   siteId              String
   site                Site             @relation(fields: [siteId], references: [id], onDelete: Cascade)
+
+  permitsToWork PermitToWork[]
+
+  createdAt DateTime @default(now())
+}
+
+model ExecutiveSiteAssignment {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  siteId    String
+  site      Site     @relation(fields: [siteId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@unique([userId, siteId])
+}
+
+enum VisitorStatus {
+  CHECKED_IN
+  CHECKED_OUT
+  DENIED
+}
+
+enum VisitorDocumentType {
+  ID_DOCUMENT
+  MEDICAL_CERTIFICATE
+  INDUCTION_ACKNOWLEDGEMENT
+  OTHER
+}
+
+model Visitor {
+  id                    String        @id @default(cuid())
+  fullName              String
+  idNumber              String
+  company               String?
+  contactPhone          String
+  contactEmail          String?
+  hostName              String
+  purposeOfVisit        String
+  vehicleRegistration   String?
+  siteId                String
+  site                  Site          @relation(fields: [siteId], references: [id], onDelete: Cascade)
+  status                VisitorStatus @default(CHECKED_IN)
+  checkInAt             DateTime      @default(now())
+  checkOutAt            DateTime?
+  inductionAcknowledged Boolean       @default(false)
+  popiaConsentAccepted  Boolean       @default(false)
+  indemnityAccepted     Boolean       @default(false)
+
+  documents VisitorDocument[]
+
+  createdAt DateTime @default(now())
+}
+
+model VisitorDocument {
+  id           String              @id @default(cuid())
+  visitorId    String
+  visitor      Visitor             @relation(fields: [visitorId], references: [id], onDelete: Cascade)
+  docType      VisitorDocumentType @default(OTHER)
+  fileName     String
+  fileMimeType String
+  fileSize     Int
+  fileData     Bytes
+
+  createdAt DateTime @default(now())
+}
+
+enum PermitToWorkStatus {
+  PENDING_SUPERVISOR
+  PENDING_EXECUTIVE
+  APPROVED
+  REJECTED
+  EXPIRED
+  CLOSED
+}
+
+model PermitToWork {
+  id                String             @id @default(cuid())
+  contractorId      String
+  contractor        Contractor         @relation(fields: [contractorId], references: [id], onDelete: Cascade)
+  siteId            String
+  site              Site               @relation(fields: [siteId], references: [id], onDelete: Cascade)
+  workDescription   String
+  workArea          String
+  hazardsIdentified String
+  controlMeasures   String
+  startDate         DateTime
+  endDate           DateTime
+  requestedByName   String
+  status            PermitToWorkStatus @default(PENDING_SUPERVISOR)
+
+  supervisorNote        String?
+  supervisorDecidedAt   DateTime?
+  supervisorDecidedById String?
+  supervisorDecidedBy   User?     @relation("PtwSupervisorDecision", fields: [supervisorDecidedById], references: [id], onDelete: SetNull)
+
+  executiveNote        String?
+  executiveDecidedAt   DateTime?
+  executiveDecidedById String?
+  executiveDecidedBy   User?     @relation("PtwExecutiveDecision", fields: [executiveDecidedById], references: [id], onDelete: SetNull)
 
   createdAt DateTime @default(now())
 }

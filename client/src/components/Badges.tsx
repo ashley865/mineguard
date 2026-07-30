@@ -51,6 +51,16 @@ const statusColors: Record<string, string> = {
   PENDING_RENEWAL: "bg-hazard-500 text-white",
   SUSPENDED: "bg-danger-500 text-white",
   ARCHIVED: "bg-mine-600 text-mine-100",
+  IN_PROGRESS: "bg-hazard-500 text-white",
+  MITIGATED: "bg-emerald-600 text-white",
+  ACCEPTED: "bg-mine-600 text-mine-100",
+  TERMINATED: "bg-danger-500 text-white",
+  CHECKED_IN: "bg-emerald-600 text-white",
+  CHECKED_OUT: "bg-mine-600 text-mine-100",
+  DENIED: "bg-danger-500 text-white",
+  PENDING_SUPERVISOR: "bg-hazard-500 text-white",
+  PENDING_EXECUTIVE: "bg-hazard-600/80 text-white",
+  CLOSED: "bg-mine-600 text-mine-100",
 };
 
 export function StatusBadge({
