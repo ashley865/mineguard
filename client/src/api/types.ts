@@ -400,3 +400,29 @@ export interface ComplianceSnapshot {
   };
   recentVisits: InspectionVisit[];
 }
+
+export interface ReportTrends {
+  days: number;
+  trend: { date: string; incidents: number; alerts: number }[];
+  alertsBySeverity: Record<AlertSeverity, number>;
+  compliance: {
+    codesOfPractice: { active: number; total: number };
+    riskAssessments: { approved: number; total: number };
+    permits: { active: number; total: number };
+    safetyInspections: { completed: number; total: number };
+    certificates: { active: number; total: number };
+    trainingRecords: { total: number; expiringSoon: number };
+  };
+  expiryForecast: { category: string; count: number }[];
+}
+
+export const exportableEntities = [
+  "incidents",
+  "alerts",
+  "permits",
+  "certificates",
+  "trainingRecords",
+  "safetyInspections",
+  "regulatoryNotices",
+] as const;
+export type ExportableEntity = (typeof exportableEntities)[number];

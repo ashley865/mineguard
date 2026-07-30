@@ -22,6 +22,7 @@ export default function Layout() {
     { to: "/permits", label: t("permits.nav") },
     { to: "/documents", label: t("documents.nav") },
     { to: "/inspection", label: t("inspection.nav") },
+    { to: "/reporting", label: t("reporting.nav") },
   ];
 
   return (

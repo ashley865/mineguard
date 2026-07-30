@@ -584,5 +584,36 @@
       "noOpenNotices": "No open notices.",
       "recentVisits": "Recent Inspection Visits"
     }
+  },
+  "reporting": {
+    "nav": "Reporting & BI",
+    "subtitle": "Trend analytics, compliance rates, and data export",
+    "allSites": "All Sites",
+    "lastNDays": "Last {{count}} days",
+    "loading": "Loading…",
+    "trendTitle": "Incidents & Alerts Trend",
+    "incidents": "Incidents",
+    "alerts": "Alerts",
+    "alertsBySeverity": "Alerts by Severity",
+    "expiryForecast": "Expiry Forecast (Next 90 Days)",
+    "expiryForecastNote": "Items due for renewal or review within the next 90 days",
+    "trainingCurrent": "Training Current",
+    "exportTitle": "Export Data (CSV)",
+    "exporting": "Exporting…",
+    "categories": {
+      "permits": "Permits",
+      "certificates": "Certificates",
+      "codesOfPractice": "Codes of Practice",
+      "medicalSurveillance": "Medical Surveillance"
+    },
+    "entities": {
+      "incidents": "Incidents",
+      "alerts": "Alerts",
+      "permits": "Permits",
+      "certificates": "Certificates",
+      "trainingRecords": "Training Records",
+      "safetyInspections": "Safety Inspections",
+      "regulatoryNotices": "Regulatory Notices"
+    }
   }
 }

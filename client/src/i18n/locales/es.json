@@ -584,5 +584,36 @@
       "noOpenNotices": "No hay notificaciones abiertas.",
       "recentVisits": "Visitas de Inspección Recientes"
     }
+  },
+  "reporting": {
+    "nav": "Informes e Inteligencia de Negocio",
+    "subtitle": "Análisis de tendencias, tasas de cumplimiento y exportación de datos",
+    "allSites": "Todos los Sitios",
+    "lastNDays": "Últimos {{count}} días",
+    "loading": "Cargando…",
+    "trendTitle": "Tendencia de Incidentes y Alertas",
+    "incidents": "Incidentes",
+    "alerts": "Alertas",
+    "alertsBySeverity": "Alertas por Severidad",
+    "expiryForecast": "Pronóstico de Vencimientos (Próximos 90 Días)",
+    "expiryForecastNote": "Elementos que vencen para renovación o revisión en los próximos 90 días",
+    "trainingCurrent": "Capacitación Vigente",
+    "exportTitle": "Exportar Datos (CSV)",
+    "exporting": "Exportando…",
+    "categories": {
+      "permits": "Permisos",
+      "certificates": "Certificados",
+      "codesOfPractice": "Códigos de Práctica",
+      "medicalSurveillance": "Vigilancia Médica"
+    },
+    "entities": {
+      "incidents": "Incidentes",
+      "alerts": "Alertas",
+      "permits": "Permisos",
+      "certificates": "Certificados",
+      "trainingRecords": "Registros de Capacitación",
+      "safetyInspections": "Inspecciones de Seguridad",
+      "regulatoryNotices": "Notificaciones Regulatorias"
+    }
   }
 }
