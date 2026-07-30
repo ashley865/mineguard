@@ -138,12 +138,12 @@ function SensorChart({ sensor, onClose }: { sensor: Sensor; onClose: () => void 
       <div className="h-64">
         <ResponsiveContainer width="100%" height="100%">
           <LineChart data={data}>
-            <XAxis dataKey="time" tick={{ fontSize: 10, fill: "#29463c" }} interval="preserveStartEnd" />
-            <YAxis tick={{ fontSize: 10, fill: "#29463c" }} domain={["auto", "auto"]} />
-            <Tooltip contentStyle={{ background: "#e3ebe6", border: "1px solid #c3d5cb", fontSize: 12 }} />
+            <XAxis dataKey="time" tick={{ fontSize: 10, fill: "#5c4d1e" }} interval="preserveStartEnd" />
+            <YAxis tick={{ fontSize: 10, fill: "#5c4d1e" }} domain={["auto", "auto"]} />
+            <Tooltip contentStyle={{ background: "#f6f0d9", border: "1px solid #ecdfae", fontSize: 12 }} />
             <ReferenceLine y={sensor.minSafe} stroke="#e13b2e" strokeDasharray="4 4" />
             <ReferenceLine y={sensor.maxSafe} stroke="#e13b2e" strokeDasharray="4 4" />
-            <Line type="monotone" dataKey="value" stroke="#456f5f" strokeWidth={2} dot={false} isAnimationActive={false} />
+            <Line type="monotone" dataKey="value" stroke="#a1852f" strokeWidth={2} dot={false} isAnimationActive={false} />
           </LineChart>
         </ResponsiveContainer>
       </div>

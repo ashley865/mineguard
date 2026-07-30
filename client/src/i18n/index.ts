@@ -3,8 +3,10 @@ import { initReactI18next } from "react-i18next";
 import en from "./locales/en.json";
 import es from "./locales/es.json";
 import fr from "./locales/fr.json";
+import af from "./locales/af.json";
+import de from "./locales/de.json";
 
-export const supportedLanguages = ["en", "es", "fr"] as const;
+export const supportedLanguages = ["en", "es", "fr", "af", "de"] as const;
 export type SupportedLanguage = (typeof supportedLanguages)[number];
 
 const stored = localStorage.getItem("mineguard_lang");
@@ -17,6 +19,8 @@ i18n.use(initReactI18next).init({
     en: { translation: en },
     es: { translation: es },
     fr: { translation: fr },
+    af: { translation: af },
+    de: { translation: de },
   },
   lng: initialLanguage,
   fallbackLng: "en",

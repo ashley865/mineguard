@@ -110,12 +110,12 @@ export default function Reporting() {
             <div className="h-64">
               <ResponsiveContainer width="100%" height="100%">
                 <LineChart data={data.trend}>
-                  <XAxis dataKey="date" tick={{ fontSize: 10, fill: "#29463c" }} tickFormatter={(d: string) => d.slice(5)} interval="preserveStartEnd" />
-                  <YAxis tick={{ fontSize: 10, fill: "#29463c" }} allowDecimals={false} />
-                  <Tooltip contentStyle={{ background: "#e3ebe6", border: "1px solid #c3d5cb", fontSize: 12 }} />
+                  <XAxis dataKey="date" tick={{ fontSize: 10, fill: "#5c4d1e" }} tickFormatter={(d: string) => d.slice(5)} interval="preserveStartEnd" />
+                  <YAxis tick={{ fontSize: 10, fill: "#5c4d1e" }} allowDecimals={false} />
+                  <Tooltip contentStyle={{ background: "#f6f0d9", border: "1px solid #ecdfae", fontSize: 12 }} />
                   <Legend wrapperStyle={{ fontSize: 12 }} />
                   <Line type="monotone" dataKey="incidents" name={t("reporting.incidents")} stroke="#e13b2e" strokeWidth={2} dot={false} />
-                  <Line type="monotone" dataKey="alerts" name={t("reporting.alerts")} stroke="#456f5f" strokeWidth={2} dot={false} />
+                  <Line type="monotone" dataKey="alerts" name={t("reporting.alerts")} stroke="#a1852f" strokeWidth={2} dot={false} />
                 </LineChart>
               </ResponsiveContainer>
             </div>
@@ -139,10 +139,10 @@ export default function Reporting() {
               <div className="h-48">
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart data={data.expiryForecast.map((f) => ({ ...f, label: t(`reporting.categories.${f.category}`) }))}>
-                    <XAxis dataKey="label" tick={{ fontSize: 10, fill: "#29463c" }} />
-                    <YAxis tick={{ fontSize: 10, fill: "#29463c" }} allowDecimals={false} />
-                    <Tooltip contentStyle={{ background: "#e3ebe6", border: "1px solid #c3d5cb", fontSize: 12 }} />
-                    <Bar dataKey="count" fill="#658c7a" radius={[3, 3, 0, 0]} />
+                    <XAxis dataKey="label" tick={{ fontSize: 10, fill: "#5c4d1e" }} />
+                    <YAxis tick={{ fontSize: 10, fill: "#5c4d1e" }} allowDecimals={false} />
+                    <Tooltip contentStyle={{ background: "#f6f0d9", border: "1px solid #ecdfae", fontSize: 12 }} />
+                    <Bar dataKey="count" fill="#c2a23e" radius={[3, 3, 0, 0]} />
                   </BarChart>
                 </ResponsiveContainer>
               </div>

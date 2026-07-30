@@ -151,13 +151,13 @@ export default function ExecutiveDashboard() {
             <BarChart data={incidentTrend}>
               <XAxis
                 dataKey="date"
-                tick={{ fontSize: 10, fill: "#29463c" }}
+                tick={{ fontSize: 10, fill: "#5c4d1e" }}
                 tickFormatter={(d: string) => d.slice(5)}
                 interval="preserveStartEnd"
               />
-              <YAxis tick={{ fontSize: 10, fill: "#29463c" }} allowDecimals={false} />
-              <Tooltip contentStyle={{ background: "#e3ebe6", border: "1px solid #c3d5cb", fontSize: 12 }} />
-              <Bar dataKey="count" fill="#456f5f" radius={[3, 3, 0, 0]} />
+              <YAxis tick={{ fontSize: 10, fill: "#5c4d1e" }} allowDecimals={false} />
+              <Tooltip contentStyle={{ background: "#f6f0d9", border: "1px solid #ecdfae", fontSize: 12 }} />
+              <Bar dataKey="count" fill="#a1852f" radius={[3, 3, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
         </div>

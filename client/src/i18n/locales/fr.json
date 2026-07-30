@@ -37,7 +37,9 @@
     "label": "Langue",
     "en": "English",
     "es": "Español",
-    "fr": "Français"
+    "fr": "Français",
+    "af": "Afrikaans",
+    "de": "Deutsch"
   },
   "login": {
     "tagline": "Système de surveillance de la sécurité minière",

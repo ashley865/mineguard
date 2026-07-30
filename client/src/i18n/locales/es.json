@@ -37,7 +37,9 @@
     "label": "Idioma",
     "en": "English",
     "es": "Español",
-    "fr": "Français"
+    "fr": "Français",
+    "af": "Afrikaans",
+    "de": "Deutsch"
   },
   "login": {
     "tagline": "Sistema de Monitoreo de Seguridad Minera",

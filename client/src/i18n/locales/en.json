@@ -37,7 +37,9 @@
     "label": "Language",
     "en": "English",
     "es": "Español",
-    "fr": "Français"
+    "fr": "Français",
+    "af": "Afrikaans",
+    "de": "Deutsch"
   },
   "login": {
     "tagline": "Mine Safety Monitoring System",
