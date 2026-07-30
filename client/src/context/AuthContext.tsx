@@ -18,15 +18,11 @@ interface AuthContextValue {
   token: string | null;
   loading: boolean;
   login: (email: string, password: string) => Promise<void>;
-  register: (
-    email: string,
-    password: string,
-    name: string,
-    role: "ADMIN" | "EXECUTIVE",
-    mineId: string,
-    passkey: string
-  ) => Promise<void>;
+  register: (email: string, password: string, name: string, mineId: string, passkey: string) => Promise<void>;
   registerMine: (payload: RegisterMinePayload) => Promise<{ mine: Mine; passkey: string }>;
+  acceptExecutiveInvite: (inviteId: string, key: string, password: string) => Promise<void>;
+  updateProfile: (name: string) => Promise<void>;
+  changePassword: (currentPassword: string, newPassword: string) => Promise<void>;
   logout: () => void;
 }
 
@@ -72,15 +68,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     persist(res.data.token, res.data.user);
   }
 
-  async function register(
-    email: string,
-    password: string,
-    name: string,
-    role: "ADMIN" | "EXECUTIVE",
-    mineId: string,
-    passkey: string
-  ) {
-    const res = await api.post("/auth/register", { email, password, name, role, mineId, passkey });
+  async function register(email: string, password: string, name: string, mineId: string, passkey: string) {
+    const res = await api.post("/auth/register", { email, password, name, mineId, passkey });
     persist(res.data.token, res.data.user);
   }
 
@@ -88,6 +77,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const res = await api.post("/mines/register", payload);
     persist(res.data.token, res.data.user);
     return { mine: res.data.mine as Mine, passkey: res.data.passkey as string };
+  }
+
+  async function acceptExecutiveInvite(inviteId: string, key: string, password: string) {
+    const res = await api.post(`/executive-invites/${inviteId}/accept`, { key, password });
+    persist(res.data.token, res.data.user);
+  }
+
+  async function updateProfile(name: string) {
+    const res = await api.put("/auth/me", { name });
+    const newUser = res.data as User;
+    localStorage.setItem("mineguard_user", JSON.stringify(newUser));
+    setUser(newUser);
+  }
+
+  async function changePassword(currentPassword: string, newPassword: string) {
+    await api.post("/auth/change-password", { currentPassword, newPassword });
   }
 
   function logout() {
@@ -98,7 +103,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }
 
   return (
-    <AuthContext.Provider value={{ user, token, loading, login, register, registerMine, logout }}>
+    <AuthContext.Provider
+      value={{
+        user,
+        token,
+        loading,
+        login,
+        register,
+        registerMine,
+        acceptExecutiveInvite,
+        updateProfile,
+        changePassword,
+        logout,
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );

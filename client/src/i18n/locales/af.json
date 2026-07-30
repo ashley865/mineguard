@@ -69,12 +69,21 @@
     "adminDesc": "Volle toegang om in te voer en te wysig oor elke module: terreine, sensors, werkers, toerusting, voldoening, permitte en voorvalle.",
     "executive": "Uitvoerende beampte",
     "executiveDesc": "Dieselfde volle toegang om in te voer en te wysig soos Administrateur, plus die Uitvoerende Dashboard en gesag om waarskuwings en voorvalle goed te keur of te verwerp.",
+    "adminOnlyNote": "Hierdie skakel skep 'n Administrateur-rekening. Uitvoerende beamptes sluit aan via 'n persoonlike uitnodigingskakel wat deur 'n Administrateur gestuur word.",
     "createAccount": "Skep rekening",
     "creatingAccount": "Skep tans rekening…",
     "alreadyHaveAccount": "Het jy reeds 'n rekening?",
     "signIn": "Meld aan",
     "registerNewMine": "Registreer 'n nuwe myn",
     "error": "Registrasie het misluk"
+  },
+  "acceptInvite": {
+    "title": "Sluit aan as Uitvoerende Beampte",
+    "joiningMine": "Jy sluit aan by {{mine}}",
+    "join": "Skep my rekening",
+    "joining": "Skep tans rekening…",
+    "error": "Kon nie hierdie uitnodiging aanvaar nie",
+    "invalid": "Hierdie uitnodigingskakel is ongeldig, reeds gebruik, of is herroep. Vra jou administrateur om 'n nuwe een te stuur."
   },
   "registerMine": {
     "title": "Registreer jou myn",
@@ -776,5 +785,51 @@
     "assign": "Wys toe",
     "assignError": "Kon nie hierdie toewysing skep nie.",
     "noneYet": "Nog geen terreintoewysings nie."
+  },
+  "settings": {
+    "nav": "Instellings",
+    "title": "Instellings",
+    "subtitle": "Bestuur jou profiel, myn-besonderhede, en uitvoerende toegang",
+    "tabProfile": "My Profiel",
+    "tabMine": "Myn-besonderhede",
+    "tabAccess": "Uitvoerende Toegang",
+    "tabInvites": "Nooi Uitvoerende Beamptes",
+    "profile": {
+      "title": "Profiel",
+      "name": "Volle naam",
+      "email": "E-pos",
+      "saveError": "Kon nie jou profiel opdateer nie",
+      "saved": "Gestoor",
+      "passwordTitle": "Verander wagwoord",
+      "currentPassword": "Huidige wagwoord",
+      "newPassword": "Nuwe wagwoord",
+      "confirmPassword": "Bevestig nuwe wagwoord",
+      "passwordMismatch": "Nuwe wagwoorde stem nie ooreen nie",
+      "passwordError": "Kon nie jou wagwoord verander nie",
+      "updatePassword": "Werk wagwoord by"
+    },
+    "mine": {
+      "loading": "Laai tans…",
+      "title": "Myn-besonderhede",
+      "saveError": "Kon nie myn-besonderhede opdateer nie",
+      "logoTitle": "Myn-logo",
+      "uploadLogo": "Laai logo op"
+    },
+    "invites": {
+      "newTitle": "Nooi 'n Uitvoerende Beampte",
+      "newHint": "Genereer 'n eenmalige skakel met 'n unieke sleutel. Slegs hierdie persoon kan dit een keer gebruik om hul Uitvoerende-rekening te skep.",
+      "name": "Volle naam",
+      "email": "E-pos",
+      "create": "Skep uitnodiging",
+      "createError": "Kon nie hierdie uitnodiging skep nie",
+      "createdTitle": "Uitnodiging geskep vir {{name}}",
+      "linkLabel": "Uitnodigingskakel",
+      "keyLabel": "Uitnodigingsleutel",
+      "keyWarning": "Stoor hierdie skakel nou. Dit sal nie weer gewys word nie — stuur dit direk aan die genooide uitvoerende beampte.",
+      "invitedBy": "Genooi deur",
+      "revoke": "Herroep",
+      "confirmRevoke": "Herroep hierdie uitnodiging? Die skakel sal ophou werk.",
+      "noneYet": "Nog geen uitnodigings gestuur nie."
+    }
   }
 }

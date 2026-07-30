@@ -29,7 +29,7 @@ export default function Login() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-mine-950 via-mine-950 to-mine-900 px-4">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-sky-50 via-white to-fuchsia-50 px-4">
       <div className="w-full max-w-sm">
         <div className="flex justify-end mb-3">
           <LanguageSwitcher />

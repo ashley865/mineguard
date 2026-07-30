@@ -134,7 +134,7 @@ export default function Reporting() {
                   <Tooltip contentStyle={{ background: "#fafafa", border: "1px solid #e5e5e5", fontSize: 12 }} />
                   <Legend wrapperStyle={{ fontSize: 12 }} />
                   <Line type="monotone" dataKey="incidents" name={t("reporting.incidents")} stroke="#e13b2e" strokeWidth={2} dot={false} />
-                  <Line type="monotone" dataKey="alerts" name={t("reporting.alerts")} stroke="#a5811f" strokeWidth={2} dot={false} />
+                  <Line type="monotone" dataKey="alerts" name={t("reporting.alerts")} stroke="#6366f1" strokeWidth={2} dot={false} />
                 </LineChart>
               </ResponsiveContainer>
             </div>
@@ -161,7 +161,7 @@ export default function Reporting() {
                     <XAxis dataKey="label" tick={{ fontSize: 10, fill: "#52525b" }} />
                     <YAxis tick={{ fontSize: 10, fill: "#52525b" }} allowDecimals={false} />
                     <Tooltip contentStyle={{ background: "#fafafa", border: "1px solid #e5e5e5", fontSize: 12 }} />
-                    <Bar dataKey="count" fill="#c49a2e" radius={[3, 3, 0, 0]} />
+                    <Bar dataKey="count" fill="#8b5cf6" radius={[3, 3, 0, 0]} />
                   </BarChart>
                 </ResponsiveContainer>
               </div>

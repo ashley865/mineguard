@@ -22,7 +22,8 @@ import Contractors from "./pages/Contractors";
 import VisitorManagement from "./pages/VisitorManagement";
 import VisitorCheckIn from "./pages/VisitorCheckIn";
 import PermitToWork from "./pages/PermitToWork";
-import ExecutiveAccess from "./pages/ExecutiveAccess";
+import Settings from "./pages/Settings";
+import AcceptExecutiveInvite from "./pages/AcceptExecutiveInvite";
 
 function HomeRoute() {
   const { user } = useAuth();
@@ -36,6 +37,7 @@ export default function App() {
       <Route path="/signup" element={<Signup />} />
       <Route path="/register-mine" element={<RegisterMine />} />
       <Route path="/visit/:siteId" element={<VisitorCheckIn />} />
+      <Route path="/join-executive/:inviteId" element={<AcceptExecutiveInvite />} />
       <Route element={<ProtectedRoute />}>
         <Route path="/" element={<HomeRoute />} />
         <Route path="/sites" element={<Sites />} />
@@ -53,7 +55,7 @@ export default function App() {
         <Route path="/contractors" element={<Contractors />} />
         <Route path="/visitors" element={<VisitorManagement />} />
         <Route path="/permits-to-work" element={<PermitToWork />} />
-        <Route path="/executive-access" element={<ExecutiveAccess />} />
+        <Route path="/settings" element={<Settings />} />
       </Route>
     </Routes>
   );

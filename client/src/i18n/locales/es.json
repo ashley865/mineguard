@@ -69,12 +69,21 @@
     "adminDesc": "Acceso completo de entrada y edición en todos los módulos: sitios, sensores, trabajadores, equipos, cumplimiento, permisos e incidentes.",
     "executive": "Ejecutivo",
     "executiveDesc": "El mismo acceso completo de entrada y edición que el Administrador, además del Panel Ejecutivo y la autoridad para aprobar o rechazar alertas e incidentes.",
+    "adminOnlyNote": "Este enlace crea una cuenta de Administrador. Los ejecutivos se unen mediante un enlace de invitación personal enviado por un Administrador.",
     "createAccount": "Crear cuenta",
     "creatingAccount": "Creando cuenta…",
     "alreadyHaveAccount": "¿Ya tienes una cuenta?",
     "signIn": "Iniciar sesión",
     "registerNewMine": "Registrar una nueva mina",
     "error": "Error en el registro"
+  },
+  "acceptInvite": {
+    "title": "Únete como Ejecutivo",
+    "joiningMine": "Te estás uniendo a {{mine}}",
+    "join": "Crear mi cuenta",
+    "joining": "Creando cuenta…",
+    "error": "No se pudo aceptar esta invitación",
+    "invalid": "Este enlace de invitación no es válido, ya fue usado o fue revocado. Pide a tu administrador que envíe uno nuevo."
   },
   "registerMine": {
     "title": "Registra tu mina",
@@ -776,5 +785,51 @@
     "assign": "Asignar",
     "assignError": "No se pudo crear esta asignación.",
     "noneYet": "Aún no hay asignaciones de sitios."
+  },
+  "settings": {
+    "nav": "Configuración",
+    "title": "Configuración",
+    "subtitle": "Gestiona tu perfil, los datos de la mina y el acceso de ejecutivos",
+    "tabProfile": "Mi Perfil",
+    "tabMine": "Datos de la Mina",
+    "tabAccess": "Acceso Ejecutivo",
+    "tabInvites": "Invitar Ejecutivos",
+    "profile": {
+      "title": "Perfil",
+      "name": "Nombre completo",
+      "email": "Correo electrónico",
+      "saveError": "No se pudo actualizar tu perfil",
+      "saved": "Guardado",
+      "passwordTitle": "Cambiar contraseña",
+      "currentPassword": "Contraseña actual",
+      "newPassword": "Nueva contraseña",
+      "confirmPassword": "Confirmar nueva contraseña",
+      "passwordMismatch": "Las nuevas contraseñas no coinciden",
+      "passwordError": "No se pudo cambiar tu contraseña",
+      "updatePassword": "Actualizar contraseña"
+    },
+    "mine": {
+      "loading": "Cargando…",
+      "title": "Datos de la mina",
+      "saveError": "No se pudieron actualizar los datos de la mina",
+      "logoTitle": "Logotipo de la mina",
+      "uploadLogo": "Subir logotipo"
+    },
+    "invites": {
+      "newTitle": "Invitar a un Ejecutivo",
+      "newHint": "Genera un enlace de un solo uso con una clave única. Solo esta persona puede usarlo, una vez, para crear su cuenta de Ejecutivo.",
+      "name": "Nombre completo",
+      "email": "Correo electrónico",
+      "create": "Crear invitación",
+      "createError": "No se pudo crear esta invitación",
+      "createdTitle": "Invitación creada para {{name}}",
+      "linkLabel": "Enlace de invitación",
+      "keyLabel": "Clave de invitación",
+      "keyWarning": "Guarda este enlace ahora. No se volverá a mostrar — envíalo directamente al ejecutivo invitado.",
+      "invitedBy": "Invitado por",
+      "revoke": "Revocar",
+      "confirmRevoke": "¿Revocar esta invitación? El enlace dejará de funcionar.",
+      "noneYet": "Aún no se han enviado invitaciones."
+    }
   }
 }

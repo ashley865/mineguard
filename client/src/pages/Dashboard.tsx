@@ -6,11 +6,32 @@ import { Alert, DashboardSummary } from "../api/types";
 import { SeverityBadge, StatusBadge } from "../components/Badges";
 import { cardClass } from "../components/ui";
 
-function StatCard({ label, value, tone }: { label: string; value: number; tone?: "danger" | "hazard" }) {
+const accentBorders: Record<string, string> = {
+  sky: "border-t-4 border-t-sky-500",
+  violet: "border-t-4 border-t-violet-500",
+  teal: "border-t-4 border-t-teal-500",
+  rose: "border-t-4 border-t-rose-500",
+  amber: "border-t-4 border-t-amber-500",
+  fuchsia: "border-t-4 border-t-fuchsia-500",
+  emerald: "border-t-4 border-t-emerald-500",
+  indigo: "border-t-4 border-t-indigo-500",
+};
+
+function StatCard({
+  label,
+  value,
+  tone,
+  accent,
+}: {
+  label: string;
+  value: number;
+  tone?: "danger" | "hazard";
+  accent?: keyof typeof accentBorders;
+}) {
   const toneClass =
     tone === "danger" ? "text-danger-400" : tone === "hazard" ? "text-hazard-400" : "text-mine-50";
   return (
-    <div className={`${cardClass} px-5 py-4`}>
+    <div className={`${cardClass} ${accent ? accentBorders[accent] : ""} px-5 py-4`}>
       <div className="text-xs text-mine-300 uppercase tracking-wide">{label}</div>
       <div className={`text-2xl font-bold mt-1 ${toneClass}`}>{value}</div>
     </div>
@@ -64,13 +85,13 @@ export default function Dashboard() {
       </div>
 
       <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-3">
-        <StatCard label={t("dashboard.sites")} value={counts.siteCount} />
-        <StatCard label={t("dashboard.sensors")} value={counts.sensorCount} />
-        <StatCard label={t("dashboard.openAlerts")} value={counts.openAlerts} tone={counts.openAlerts > 0 ? "hazard" : undefined} />
-        <StatCard label={t("dashboard.critical")} value={counts.criticalAlerts} tone={counts.criticalAlerts > 0 ? "danger" : undefined} />
-        <StatCard label={t("dashboard.onShift")} value={counts.onShiftWorkers} />
-        <StatCard label={t("dashboard.openIncidents")} value={counts.openIncidents} tone={counts.openIncidents > 0 ? "hazard" : undefined} />
-        <StatCard label={t("dashboard.equipmentDown")} value={counts.equipmentDown} tone={counts.equipmentDown > 0 ? "danger" : undefined} />
+        <StatCard label={t("dashboard.sites")} value={counts.siteCount} accent="sky" />
+        <StatCard label={t("dashboard.sensors")} value={counts.sensorCount} accent="teal" />
+        <StatCard label={t("dashboard.openAlerts")} value={counts.openAlerts} tone={counts.openAlerts > 0 ? "hazard" : undefined} accent="amber" />
+        <StatCard label={t("dashboard.critical")} value={counts.criticalAlerts} tone={counts.criticalAlerts > 0 ? "danger" : undefined} accent="rose" />
+        <StatCard label={t("dashboard.onShift")} value={counts.onShiftWorkers} accent="violet" />
+        <StatCard label={t("dashboard.openIncidents")} value={counts.openIncidents} tone={counts.openIncidents > 0 ? "hazard" : undefined} accent="fuchsia" />
+        <StatCard label={t("dashboard.equipmentDown")} value={counts.equipmentDown} tone={counts.equipmentDown > 0 ? "danger" : undefined} accent="indigo" />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">

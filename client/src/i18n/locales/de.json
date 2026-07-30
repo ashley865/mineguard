@@ -69,12 +69,21 @@
     "adminDesc": "Vollständiger Eingabe- und Bearbeitungszugriff auf alle Module: Standorte, Sensoren, Mitarbeiter, Ausrüstung, Compliance, Genehmigungen und Vorfälle.",
     "executive": "Führungskraft",
     "executiveDesc": "Derselbe vollständige Eingabe- und Bearbeitungszugriff wie Administrator, zusätzlich das Führungskräfte-Dashboard und die Befugnis, Alarme und Vorfälle zu genehmigen oder abzulehnen.",
+    "adminOnlyNote": "Dieser Link erstellt ein Administratorkonto. Führungskräfte treten über einen persönlichen Einladungslink bei, der von einem Administrator gesendet wird.",
     "createAccount": "Konto erstellen",
     "creatingAccount": "Konto wird erstellt…",
     "alreadyHaveAccount": "Haben Sie bereits ein Konto?",
     "signIn": "Anmelden",
     "registerNewMine": "Neue Mine registrieren",
     "error": "Registrierung fehlgeschlagen"
+  },
+  "acceptInvite": {
+    "title": "Als Führungskraft beitreten",
+    "joiningMine": "Sie treten {{mine}} bei",
+    "join": "Mein Konto erstellen",
+    "joining": "Konto wird erstellt…",
+    "error": "Diese Einladung konnte nicht angenommen werden",
+    "invalid": "Dieser Einladungslink ist ungültig, bereits verwendet oder wurde widerrufen. Bitten Sie Ihren Administrator, einen neuen zu senden."
   },
   "registerMine": {
     "title": "Registrieren Sie Ihre Mine",
@@ -776,5 +785,51 @@
     "assign": "Zuweisen",
     "assignError": "Diese Zuweisung konnte nicht erstellt werden.",
     "noneYet": "Noch keine Standortzuweisungen."
+  },
+  "settings": {
+    "nav": "Einstellungen",
+    "title": "Einstellungen",
+    "subtitle": "Verwalten Sie Ihr Profil, die Minendetails und den Zugriff für Führungskräfte",
+    "tabProfile": "Mein Profil",
+    "tabMine": "Minendetails",
+    "tabAccess": "Zugriff für Führungskräfte",
+    "tabInvites": "Führungskräfte einladen",
+    "profile": {
+      "title": "Profil",
+      "name": "Vollständiger Name",
+      "email": "E-Mail",
+      "saveError": "Ihr Profil konnte nicht aktualisiert werden",
+      "saved": "Gespeichert",
+      "passwordTitle": "Passwort ändern",
+      "currentPassword": "Aktuelles Passwort",
+      "newPassword": "Neues Passwort",
+      "confirmPassword": "Neues Passwort bestätigen",
+      "passwordMismatch": "Die neuen Passwörter stimmen nicht überein",
+      "passwordError": "Ihr Passwort konnte nicht geändert werden",
+      "updatePassword": "Passwort aktualisieren"
+    },
+    "mine": {
+      "loading": "Wird geladen…",
+      "title": "Minendetails",
+      "saveError": "Minendetails konnten nicht aktualisiert werden",
+      "logoTitle": "Minenlogo",
+      "uploadLogo": "Logo hochladen"
+    },
+    "invites": {
+      "newTitle": "Eine Führungskraft einladen",
+      "newHint": "Erstellt einen einmaligen Link mit einem eindeutigen Schlüssel. Nur diese Person kann ihn einmal verwenden, um ihr Führungskräftekonto zu erstellen.",
+      "name": "Vollständiger Name",
+      "email": "E-Mail",
+      "create": "Einladung erstellen",
+      "createError": "Diese Einladung konnte nicht erstellt werden",
+      "createdTitle": "Einladung für {{name}} erstellt",
+      "linkLabel": "Einladungslink",
+      "keyLabel": "Einladungsschlüssel",
+      "keyWarning": "Speichern Sie diesen Link jetzt. Er wird nicht erneut angezeigt — senden Sie ihn direkt an die eingeladene Führungskraft.",
+      "invitedBy": "Eingeladen von",
+      "revoke": "Widerrufen",
+      "confirmRevoke": "Diese Einladung widerrufen? Der Link funktioniert dann nicht mehr.",
+      "noneYet": "Noch keine Einladungen gesendet."
+    }
   }
 }

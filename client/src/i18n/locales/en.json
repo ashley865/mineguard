@@ -69,12 +69,21 @@
     "adminDesc": "Full input and edit access across every module: sites, sensors, workers, equipment, compliance, permits, and incidents.",
     "executive": "Executive",
     "executiveDesc": "Same full input and edit access as Administrator, plus the Executive Dashboard and approve/reject authority on alerts and incidents.",
+    "adminOnlyNote": "This link creates an Administrator account. Executives join via a personal invite link sent by an Administrator.",
     "createAccount": "Create account",
     "creatingAccount": "Creating account…",
     "alreadyHaveAccount": "Already have an account?",
     "signIn": "Sign in",
     "registerNewMine": "Register a new mine",
     "error": "Registration failed"
+  },
+  "acceptInvite": {
+    "title": "Join as an Executive",
+    "joiningMine": "You're joining {{mine}}",
+    "join": "Create my account",
+    "joining": "Creating account…",
+    "error": "Could not accept this invite",
+    "invalid": "This invite link is invalid, already used, or has been revoked. Ask your Administrator to send a new one."
   },
   "registerMine": {
     "title": "Register your mine",
@@ -771,10 +780,56 @@
     "title": "Executive Site Access",
     "subtitle": "Control which sites each executive can see in Visitor Management, Permit to Work, and Risk Register",
     "loading": "Loading…",
-    "noExecutives": "No executive accounts yet. Executives who join your mine will appear here.",
+    "noExecutives": "No executive accounts yet. Invite an executive first, then assign them to a site.",
     "executive": "Executive",
     "assign": "Assign",
     "assignError": "Could not create this assignment.",
     "noneYet": "No site assignments yet."
+  },
+  "settings": {
+    "nav": "Settings",
+    "title": "Settings",
+    "subtitle": "Manage your profile, mine details, and executive access",
+    "tabProfile": "My Profile",
+    "tabMine": "Mine Details",
+    "tabAccess": "Executive Access",
+    "tabInvites": "Invite Executives",
+    "profile": {
+      "title": "Profile",
+      "name": "Full name",
+      "email": "Email",
+      "saveError": "Could not update your profile",
+      "saved": "Saved",
+      "passwordTitle": "Change password",
+      "currentPassword": "Current password",
+      "newPassword": "New password",
+      "confirmPassword": "Confirm new password",
+      "passwordMismatch": "New passwords do not match",
+      "passwordError": "Could not change your password",
+      "updatePassword": "Update password"
+    },
+    "mine": {
+      "loading": "Loading…",
+      "title": "Mine details",
+      "saveError": "Could not update mine details",
+      "logoTitle": "Mine logo",
+      "uploadLogo": "Upload logo"
+    },
+    "invites": {
+      "newTitle": "Invite an Executive",
+      "newHint": "Generates a one-time link with a unique key. Only this person can use it, once, to create their Executive account.",
+      "name": "Full name",
+      "email": "Email",
+      "create": "Create invite",
+      "createError": "Could not create this invite",
+      "createdTitle": "Invite created for {{name}}",
+      "linkLabel": "Invite link",
+      "keyLabel": "Invite key",
+      "keyWarning": "Save this link now. It will not be shown again — send it directly to the invited executive.",
+      "invitedBy": "Invited by",
+      "revoke": "Revoke",
+      "confirmRevoke": "Revoke this invite? The link will stop working.",
+      "noneYet": "No invites sent yet."
+    }
   }
 }

@@ -2,10 +2,25 @@ import { Router } from "express";
 import crypto from "crypto";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
+import multer from "multer";
 import { z } from "zod";
 import { prisma } from "../prisma";
+import { requireAuth, requireRole } from "../middleware/auth";
 
 const router = Router();
+
+const upload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 5 * 1024 * 1024 },
+});
+
+const mineDetailsSchema = z.object({
+  name: z.string().min(1),
+  location: z.string().min(1),
+  registrationNumber: z.string().optional().nullable(),
+  miningRightNumber: z.string().optional().nullable(),
+  description: z.string().optional().nullable(),
+});
 
 const registerMineSchema = z.object({
   mineName: z.string().min(1),
@@ -35,13 +50,81 @@ router.get("/search", async (req, res) => {
   res.json(mines);
 });
 
+router.get("/mine", requireAuth, async (req, res) => {
+  const user = await prisma.user.findUnique({ where: { id: req.auth!.userId } });
+  if (!user?.mineId) return res.status(404).json({ error: "Not a member of a mine" });
+  const mine = await prisma.mine.findUnique({ where: { id: user.mineId } });
+  if (!mine) return res.status(404).json({ error: "Mine not found" });
+  res.json({
+    id: mine.id,
+    name: mine.name,
+    location: mine.location,
+    registrationNumber: mine.registrationNumber,
+    miningRightNumber: mine.miningRightNumber,
+    description: mine.description,
+    hasLogo: !!mine.logoData,
+  });
+});
+
+router.put("/mine", requireAuth, requireRole("ADMIN"), async (req, res) => {
+  const parsed = mineDetailsSchema.safeParse(req.body);
+  if (!parsed.success) return res.status(400).json({ error: parsed.error.flatten() });
+  const user = await prisma.user.findUnique({ where: { id: req.auth!.userId } });
+  if (!user?.mineId) return res.status(404).json({ error: "Not a member of a mine" });
+  const mine = await prisma.mine.update({
+    where: { id: user.mineId },
+    data: {
+      name: parsed.data.name,
+      location: parsed.data.location,
+      registrationNumber: parsed.data.registrationNumber || null,
+      miningRightNumber: parsed.data.miningRightNumber || null,
+      description: parsed.data.description || null,
+    },
+  });
+  res.json({
+    id: mine.id,
+    name: mine.name,
+    location: mine.location,
+    registrationNumber: mine.registrationNumber,
+    miningRightNumber: mine.miningRightNumber,
+    description: mine.description,
+    hasLogo: !!mine.logoData,
+  });
+});
+
+router.post("/mine/logo", requireAuth, requireRole("ADMIN"), upload.single("logo"), async (req, res) => {
+  if (!req.file) return res.status(400).json({ error: "A logo file is required" });
+  const user = await prisma.user.findUnique({ where: { id: req.auth!.userId } });
+  if (!user?.mineId) return res.status(404).json({ error: "Not a member of a mine" });
+  await prisma.mine.update({
+    where: { id: user.mineId },
+    data: {
+      logoData: Uint8Array.from(req.file.buffer),
+      logoMimeType: req.file.mimetype,
+      logoFileName: req.file.originalname,
+    },
+  });
+  res.status(204).send();
+});
+
+router.get("/:id/logo", async (req, res) => {
+  const mine = await prisma.mine.findUnique({
+    where: { id: req.params.id },
+    select: { logoData: true, logoMimeType: true },
+  });
+  if (!mine?.logoData || !mine.logoMimeType) return res.status(404).json({ error: "No logo set" });
+  res.setHeader("Content-Type", mine.logoMimeType);
+  res.setHeader("Cache-Control", "public, max-age=300");
+  res.send(Buffer.from(mine.logoData));
+});
+
 router.get("/:id", async (req, res) => {
   const mine = await prisma.mine.findUnique({
     where: { id: req.params.id },
-    select: { id: true, name: true, location: true },
+    select: { id: true, name: true, location: true, logoData: true },
   });
   if (!mine) return res.status(404).json({ error: "Mine not found" });
-  res.json(mine);
+  res.json({ id: mine.id, name: mine.name, location: mine.location, hasLogo: !!mine.logoData });
 });
 
 router.post("/register", async (req, res) => {

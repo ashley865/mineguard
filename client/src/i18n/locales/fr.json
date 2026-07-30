@@ -69,12 +69,21 @@
     "adminDesc": "Accès complet de saisie et de modification sur tous les modules : sites, capteurs, travailleurs, équipements, conformité, permis et incidents.",
     "executive": "Exécutif",
     "executiveDesc": "Le même accès complet de saisie et de modification que l'Administrateur, plus le Tableau de bord exécutif et le pouvoir d'approbation ou de rejet des alertes et incidents.",
+    "adminOnlyNote": "Ce lien crée un compte Administrateur. Les exécutifs rejoignent via un lien d'invitation personnel envoyé par un Administrateur.",
     "createAccount": "Créer le compte",
     "creatingAccount": "Création du compte…",
     "alreadyHaveAccount": "Vous avez déjà un compte ?",
     "signIn": "Se connecter",
     "registerNewMine": "Enregistrer une nouvelle mine",
     "error": "Échec de l'inscription"
+  },
+  "acceptInvite": {
+    "title": "Rejoindre en tant qu'Exécutif",
+    "joiningMine": "Vous rejoignez {{mine}}",
+    "join": "Créer mon compte",
+    "joining": "Création du compte…",
+    "error": "Impossible d'accepter cette invitation",
+    "invalid": "Ce lien d'invitation est invalide, déjà utilisé, ou a été révoqué. Demandez à votre administrateur d'en envoyer un nouveau."
   },
   "registerMine": {
     "title": "Enregistrez votre mine",
@@ -776,5 +785,51 @@
     "assign": "Affecter",
     "assignError": "Impossible de créer cette affectation.",
     "noneYet": "Aucune affectation de site pour le moment."
+  },
+  "settings": {
+    "nav": "Paramètres",
+    "title": "Paramètres",
+    "subtitle": "Gérez votre profil, les détails de la mine et l'accès des exécutifs",
+    "tabProfile": "Mon Profil",
+    "tabMine": "Détails de la Mine",
+    "tabAccess": "Accès Exécutif",
+    "tabInvites": "Inviter des Exécutifs",
+    "profile": {
+      "title": "Profil",
+      "name": "Nom complet",
+      "email": "E-mail",
+      "saveError": "Impossible de mettre à jour votre profil",
+      "saved": "Enregistré",
+      "passwordTitle": "Changer le mot de passe",
+      "currentPassword": "Mot de passe actuel",
+      "newPassword": "Nouveau mot de passe",
+      "confirmPassword": "Confirmer le nouveau mot de passe",
+      "passwordMismatch": "Les nouveaux mots de passe ne correspondent pas",
+      "passwordError": "Impossible de changer votre mot de passe",
+      "updatePassword": "Mettre à jour le mot de passe"
+    },
+    "mine": {
+      "loading": "Chargement…",
+      "title": "Détails de la mine",
+      "saveError": "Impossible de mettre à jour les détails de la mine",
+      "logoTitle": "Logo de la mine",
+      "uploadLogo": "Téléverser le logo"
+    },
+    "invites": {
+      "newTitle": "Inviter un Exécutif",
+      "newHint": "Génère un lien à usage unique avec une clé unique. Seule cette personne peut l'utiliser, une fois, pour créer son compte Exécutif.",
+      "name": "Nom complet",
+      "email": "E-mail",
+      "create": "Créer l'invitation",
+      "createError": "Impossible de créer cette invitation",
+      "createdTitle": "Invitation créée pour {{name}}",
+      "linkLabel": "Lien d'invitation",
+      "keyLabel": "Clé d'invitation",
+      "keyWarning": "Enregistrez ce lien maintenant. Il ne sera plus affiché — envoyez-le directement à l'exécutif invité.",
+      "invitedBy": "Invité par",
+      "revoke": "Révoquer",
+      "confirmRevoke": "Révoquer cette invitation ? Le lien cessera de fonctionner.",
+      "noneYet": "Aucune invitation envoyée pour le moment."
+    }
   }
 }

@@ -2,10 +2,10 @@ import { useTranslation } from "react-i18next";
 import { AlertSeverity, AlertStatus, EquipmentStatus, SensorStatus, SiteStatus, WorkerStatus } from "../api/types";
 
 const severityColors: Record<AlertSeverity, string> = {
-  LOW: "bg-mine-700 text-mine-100",
-  MEDIUM: "bg-hazard-600/80 text-white",
-  HIGH: "bg-hazard-500 text-white",
-  CRITICAL: "bg-danger-500 text-white",
+  LOW: "bg-sky-500 text-white",
+  MEDIUM: "bg-amber-500 text-white",
+  HIGH: "bg-orange-500 text-white",
+  CRITICAL: "bg-rose-600 text-white",
 };
 
 export function SeverityBadge({ severity }: { severity: AlertSeverity }) {

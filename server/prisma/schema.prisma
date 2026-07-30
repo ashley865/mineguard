@@ -169,6 +169,8 @@ model User {
   siteAssignments        ExecutiveSiteAssignment[]
   ptwSupervisorDecisions PermitToWork[]             @relation("PtwSupervisorDecision")
   ptwExecutiveDecisions  PermitToWork[]             @relation("PtwExecutiveDecision")
+  createdInvites         ExecutiveInvite[]          @relation("InviteCreatedBy")
+  acceptedInvite         ExecutiveInvite?           @relation("InviteAcceptedUser")
 }
 
 model Site {
@@ -600,9 +602,36 @@ model Mine {
   miningRightNumber  String?
   description        String?
   passkeyHash        String
+  logoData           Bytes?
+  logoMimeType       String?
+  logoFileName       String?
   createdAt          DateTime @default(now())
 
-  users User[]
+  users            User[]
+  executiveInvites ExecutiveInvite[]
+}
+
+enum InviteStatus {
+  PENDING
+  ACCEPTED
+  REVOKED
+}
+
+model ExecutiveInvite {
+  id             String       @id @default(cuid())
+  mineId         String
+  mine           Mine         @relation(fields: [mineId], references: [id], onDelete: Cascade)
+  name           String
+  email          String
+  keyHash        String
+  status         InviteStatus @default(PENDING)
+  invitedById    String?
+  invitedBy      User?        @relation("InviteCreatedBy", fields: [invitedById], references: [id], onDelete: SetNull)
+  acceptedAt     DateTime?
+  acceptedUserId String?      @unique
+  acceptedUser   User?        @relation("InviteAcceptedUser", fields: [acceptedUserId], references: [id], onDelete: SetNull)
+
+  createdAt DateTime @default(now())
 }
 
 enum ContractorStatus {

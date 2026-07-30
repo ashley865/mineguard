@@ -32,6 +32,7 @@ import contractorsRoutes from "./routes/contractors";
 import executiveSitesRoutes from "./routes/executiveSites";
 import visitorsRoutes from "./routes/visitors";
 import permitsToWorkRoutes from "./routes/permitsToWork";
+import executiveInvitesRoutes from "./routes/executiveInvites";
 import { startSimulator } from "./services/simulator";
 import { scanCompliance } from "./services/complianceScanner";
 
@@ -78,6 +79,7 @@ app.use("/api/contractors", contractorsRoutes);
 app.use("/api/executive-sites", executiveSitesRoutes);
 app.use("/api/visitors", visitorsRoutes);
 app.use("/api/permits-to-work", permitsToWorkRoutes);
+app.use("/api/executive-invites", executiveInvitesRoutes);
 
 app.use((err: any, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
   console.error(err);

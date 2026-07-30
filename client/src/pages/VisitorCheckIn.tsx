@@ -75,7 +75,7 @@ export default function VisitorCheckIn() {
 
   if (notFound) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-mine-950 p-4">
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-emerald-50 via-white to-sky-50 p-4">
         <div className={`${cardClass} p-6 max-w-md text-center`}>{t("visitorCheckin.siteNotFound")}</div>
       </div>
     );
@@ -83,7 +83,7 @@ export default function VisitorCheckIn() {
 
   if (done) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-mine-950 p-4">
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-emerald-50 via-white to-sky-50 p-4">
         <div className={`${cardClass} p-8 max-w-md text-center space-y-3`}>
           <div className="text-3xl">✅</div>
           <h1 className="text-lg font-bold">{t("visitorCheckin.successTitle")}</h1>
@@ -96,7 +96,7 @@ export default function VisitorCheckIn() {
   }
 
   return (
-    <div className="min-h-screen bg-mine-950 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-white to-sky-50 flex items-center justify-center p-4">
       <div className={`${cardClass} p-6 w-full max-w-lg space-y-5`}>
         <div>
           <div className="text-lg font-bold tracking-tight">⛏ Mine Guard</div>

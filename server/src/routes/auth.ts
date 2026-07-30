@@ -11,7 +11,6 @@ const registerSchema = z.object({
   email: z.string().email(),
   password: z.string().min(8),
   name: z.string().min(1),
-  role: z.enum(["ADMIN", "EXECUTIVE"]).default("ADMIN"),
   mineId: z.string().min(1),
   passkey: z.string().min(1),
 });
@@ -19,6 +18,15 @@ const registerSchema = z.object({
 const loginSchema = z.object({
   email: z.string().email(),
   password: z.string().min(1),
+});
+
+const updateProfileSchema = z.object({
+  name: z.string().min(1),
+});
+
+const changePasswordSchema = z.object({
+  currentPassword: z.string().min(1),
+  newPassword: z.string().min(8),
 });
 
 function signToken(userId: string, role: string) {
@@ -32,7 +40,7 @@ router.post("/register", async (req, res) => {
   if (!parsed.success) {
     return res.status(400).json({ error: parsed.error.flatten() });
   }
-  const { email, password, name, role, mineId, passkey } = parsed.data;
+  const { email, password, name, mineId, passkey } = parsed.data;
 
   const existing = await prisma.user.findUnique({ where: { email } });
   if (existing) {
@@ -50,7 +58,7 @@ router.post("/register", async (req, res) => {
 
   const passwordHash = await bcrypt.hash(password, 10);
   const user = await prisma.user.create({
-    data: { email, passwordHash, name, role, mineId: mine.id },
+    data: { email, passwordHash, name, role: "ADMIN", mineId: mine.id },
   });
 
   const token = signToken(user.id, user.role);
@@ -89,6 +97,28 @@ router.get("/me", requireAuth, async (req, res) => {
     return res.status(404).json({ error: "User not found" });
   }
   res.json({ id: user.id, email: user.email, name: user.name, role: user.role, mineId: user.mineId });
+});
+
+router.put("/me", requireAuth, async (req, res) => {
+  const parsed = updateProfileSchema.safeParse(req.body);
+  if (!parsed.success) return res.status(400).json({ error: parsed.error.flatten() });
+  const user = await prisma.user.update({
+    where: { id: req.auth!.userId },
+    data: { name: parsed.data.name },
+  });
+  res.json({ id: user.id, email: user.email, name: user.name, role: user.role, mineId: user.mineId });
+});
+
+router.post("/change-password", requireAuth, async (req, res) => {
+  const parsed = changePasswordSchema.safeParse(req.body);
+  if (!parsed.success) return res.status(400).json({ error: parsed.error.flatten() });
+  const user = await prisma.user.findUnique({ where: { id: req.auth!.userId } });
+  if (!user) return res.status(404).json({ error: "User not found" });
+  const valid = await bcrypt.compare(parsed.data.currentPassword, user.passwordHash);
+  if (!valid) return res.status(401).json({ error: "Current password is incorrect" });
+  const passwordHash = await bcrypt.hash(parsed.data.newPassword, 10);
+  await prisma.user.update({ where: { id: user.id }, data: { passwordHash } });
+  res.status(204).send();
 });
 
 export default router;

@@ -15,7 +15,6 @@ export default function Signup() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [role, setRole] = useState<"ADMIN" | "EXECUTIVE">("EXECUTIVE");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
@@ -61,7 +60,7 @@ export default function Signup() {
     }
     setLoading(true);
     try {
-      await register(email, password, name, role, selectedMine.id, passkey);
+      await register(email, password, name, selectedMine.id, passkey);
       navigate("/");
     } catch (err: any) {
       setError(err.response?.data?.error?.formErrors?.[0] ?? err.response?.data?.error ?? t("signup.error"));
@@ -71,7 +70,7 @@ export default function Signup() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-mine-950 via-mine-950 to-mine-900 px-4 py-8">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-sky-50 via-white to-fuchsia-50 px-4 py-8">
       <div className="w-full max-w-sm">
         <div className="flex justify-end mb-3">
           <LanguageSwitcher />
@@ -168,44 +167,8 @@ export default function Signup() {
             />
             <div className="text-xs text-mine-400 mt-1">{t("signup.passwordHint")}</div>
           </div>
-          <div>
-            <label className={labelClass}>{t("signup.accountType")}</label>
-            <div className="space-y-2">
-              <label
-                className={`flex items-start gap-2 border rounded-md p-3 cursor-pointer ${
-                  role === "EXECUTIVE" ? "border-mine-500 bg-mine-800/40" : "border-mine-800"
-                }`}
-              >
-                <input
-                  type="radio"
-                  name="role"
-                  className="mt-1"
-                  checked={role === "EXECUTIVE"}
-                  onChange={() => setRole("EXECUTIVE")}
-                />
-                <div>
-                  <div className="text-sm font-medium">{t("signup.executive")}</div>
-                  <div className="text-xs text-mine-400">{t("signup.executiveDesc")}</div>
-                </div>
-              </label>
-              <label
-                className={`flex items-start gap-2 border rounded-md p-3 cursor-pointer ${
-                  role === "ADMIN" ? "border-mine-500 bg-mine-800/40" : "border-mine-800"
-                }`}
-              >
-                <input
-                  type="radio"
-                  name="role"
-                  className="mt-1"
-                  checked={role === "ADMIN"}
-                  onChange={() => setRole("ADMIN")}
-                />
-                <div>
-                  <div className="text-sm font-medium">{t("signup.admin")}</div>
-                  <div className="text-xs text-mine-400">{t("signup.adminDesc")}</div>
-                </div>
-              </label>
-            </div>
+          <div className="text-xs text-mine-400 bg-mine-800/40 border border-mine-800 rounded-md p-3">
+            {t("signup.adminOnlyNote")}
           </div>
           {error && <div className="text-danger-400 text-sm">{error}</div>}
           <button type="submit" disabled={loading} className={`${buttonPrimary} w-full`}>

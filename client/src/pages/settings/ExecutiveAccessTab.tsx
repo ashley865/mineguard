@@ -1,8 +1,8 @@
 import { FormEvent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { api } from "../api/client";
-import { ExecutiveSiteAssignment, Site } from "../api/types";
-import { buttonDanger, buttonPrimary, cardClass, inputClass, labelClass } from "../components/ui";
+import { api } from "../../api/client";
+import { ExecutiveSiteAssignment, Site } from "../../api/types";
+import { buttonDanger, buttonPrimary, cardClass, inputClass, labelClass } from "../../components/ui";
 
 interface ExecutiveOption {
   id: string;
@@ -10,7 +10,7 @@ interface ExecutiveOption {
   email: string;
 }
 
-export default function ExecutiveAccess() {
+export default function ExecutiveAccessTab() {
   const { t } = useTranslation();
   const [executives, setExecutives] = useState<ExecutiveOption[]>([]);
   const [sites, setSites] = useState<Site[]>([]);
@@ -59,10 +59,7 @@ export default function ExecutiveAccess() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-xl font-bold">{t("executiveAccess.title")}</h1>
-        <p className="text-mine-300 text-sm">{t("executiveAccess.subtitle")}</p>
-      </div>
+      <p className="text-mine-300 text-sm">{t("executiveAccess.subtitle")}</p>
 
       {executives.length === 0 ? (
         <div className={`${cardClass} p-6 text-center text-mine-300`}>{t("executiveAccess.noExecutives")}</div>

@@ -7,21 +7,58 @@ import { Alert, ExecutiveSummary, Incident } from "../api/types";
 import { SeverityBadge } from "../components/Badges";
 import { buttonPrimary, buttonSecondary, cardClass } from "../components/ui";
 
-function OpsCard({ label, value, to, tone }: { label: string; value: number; to: string; tone?: "hazard" | "danger" }) {
+const accentBorders: Record<string, string> = {
+  sky: "border-t-4 border-t-sky-500",
+  violet: "border-t-4 border-t-violet-500",
+  teal: "border-t-4 border-t-teal-500",
+  rose: "border-t-4 border-t-rose-500",
+  amber: "border-t-4 border-t-amber-500",
+  fuchsia: "border-t-4 border-t-fuchsia-500",
+  emerald: "border-t-4 border-t-emerald-500",
+};
+
+type Accent = keyof typeof accentBorders;
+
+function OpsCard({
+  label,
+  value,
+  to,
+  tone,
+  accent,
+}: {
+  label: string;
+  value: number;
+  to: string;
+  tone?: "hazard" | "danger";
+  accent?: Accent;
+}) {
   const toneClass = tone === "danger" ? "text-danger-500" : tone === "hazard" ? "text-hazard-500" : "text-mine-50";
   return (
-    <Link to={to} className={`${cardClass} px-5 py-4 block hover:border-mine-600 transition-colors`}>
+    <Link
+      to={to}
+      className={`${cardClass} ${accent ? accentBorders[accent] : ""} px-5 py-4 block hover:border-brand-500 transition-colors`}
+    >
       <div className="text-xs text-mine-300 uppercase tracking-wide">{label}</div>
       <div className={`text-2xl font-bold mt-1 ${toneClass}`}>{value}</div>
     </Link>
   );
 }
 
-function StatCard({ label, value, tone }: { label: string; value: string | number; tone?: "danger" | "hazard" }) {
+function StatCard({
+  label,
+  value,
+  tone,
+  accent,
+}: {
+  label: string;
+  value: string | number;
+  tone?: "danger" | "hazard";
+  accent?: Accent;
+}) {
   const toneClass =
     tone === "danger" ? "text-danger-400" : tone === "hazard" ? "text-hazard-400" : "text-mine-50";
   return (
-    <div className={`${cardClass} px-5 py-4`}>
+    <div className={`${cardClass} ${accent ? accentBorders[accent] : ""} px-5 py-4`}>
       <div className="text-xs text-mine-300 uppercase tracking-wide">{label}</div>
       <div className={`text-2xl font-bold mt-1 ${toneClass}`}>{value}</div>
     </div>
@@ -106,26 +143,28 @@ export default function ExecutiveDashboard() {
       </div>
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-        <StatCard label={t("executive.operational")} value={siteStatus.OPERATIONAL} />
-        <StatCard label={t("executive.restricted")} value={siteStatus.RESTRICTED} tone={siteStatus.RESTRICTED > 0 ? "hazard" : undefined} />
-        <StatCard label={t("executive.shutDown")} value={siteStatus.SHUT_DOWN} tone={siteStatus.SHUT_DOWN > 0 ? "danger" : undefined} />
-        <StatCard label={t("executive.equipmentUptime")} value={`${equipment.uptimePct}%`} />
+        <StatCard label={t("executive.operational")} value={siteStatus.OPERATIONAL} accent="emerald" />
+        <StatCard label={t("executive.restricted")} value={siteStatus.RESTRICTED} tone={siteStatus.RESTRICTED > 0 ? "hazard" : undefined} accent="amber" />
+        <StatCard label={t("executive.shutDown")} value={siteStatus.SHUT_DOWN} tone={siteStatus.SHUT_DOWN > 0 ? "danger" : undefined} accent="rose" />
+        <StatCard label={t("executive.equipmentUptime")} value={`${equipment.uptimePct}%`} accent="sky" />
       </div>
 
       {executiveOps.hasSiteAccess ? (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-          <OpsCard label={t("executive.visitorsOnSite")} value={executiveOps.visitorsOnSite} to="/visitors" />
+          <OpsCard label={t("executive.visitorsOnSite")} value={executiveOps.visitorsOnSite} to="/visitors" accent="teal" />
           <OpsCard
             label={t("executive.pendingPermitsToWork")}
             value={executiveOps.pendingPermitsToWork}
             to="/permits-to-work"
             tone={executiveOps.pendingPermitsToWork > 0 ? "hazard" : undefined}
+            accent="violet"
           />
           <OpsCard
             label={t("executive.escalatedRisks")}
             value={executiveOps.escalatedRisks}
             to="/compliance"
             tone={executiveOps.escalatedRisks > 0 ? "danger" : undefined}
+            accent="fuchsia"
           />
         </div>
       ) : (
@@ -197,7 +236,7 @@ export default function ExecutiveDashboard() {
               />
               <YAxis tick={{ fontSize: 10, fill: "#52525b" }} allowDecimals={false} />
               <Tooltip contentStyle={{ background: "#fafafa", border: "1px solid #e5e5e5", fontSize: 12 }} />
-              <Bar dataKey="count" fill="#a5811f" radius={[3, 3, 0, 0]} />
+              <Bar dataKey="count" fill="#6366f1" radius={[3, 3, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
         </div>

@@ -1,7 +1,10 @@
+import { useEffect, useState } from "react";
 import { NavLink, Outlet } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useAuth } from "../context/AuthContext";
 import { useAssignedSiteIds } from "../hooks/useAssignedSiteIds";
+import { api, API_URL } from "../api/client";
+import { Mine } from "../api/types";
 import LanguageSwitcher from "./LanguageSwitcher";
 import NotificationBell from "./NotificationBell";
 
@@ -9,10 +12,36 @@ export default function Layout() {
   const { t } = useTranslation();
   const { user, logout } = useAuth();
   const { siteIds: assignedSiteIds } = useAssignedSiteIds();
+  const [mine, setMine] = useState<Mine | null>(null);
+
+  useEffect(() => {
+    api
+      .get<Mine>("/mines/mine")
+      .then((res) => setMine(res.data))
+      .catch(() => {});
+  }, []);
 
   const isAdmin = user?.role === "ADMIN";
   const isExecutiveWithSites = user?.role === "EXECUTIVE" && (assignedSiteIds?.length ?? 0) > 0;
   const canSeeExecutiveOps = isAdmin || isExecutiveWithSites;
+
+  const dotColors = [
+    "bg-sky-500",
+    "bg-violet-500",
+    "bg-rose-500",
+    "bg-teal-500",
+    "bg-amber-500",
+    "bg-fuchsia-500",
+    "bg-lime-500",
+    "bg-cyan-500",
+    "bg-orange-500",
+    "bg-pink-500",
+    "bg-emerald-500",
+    "bg-indigo-500",
+    "bg-red-500",
+    "bg-purple-500",
+    "bg-blue-500",
+  ];
 
   const navItems = [
     ...(user?.role === "EXECUTIVE"
@@ -37,15 +66,26 @@ export default function Layout() {
           { to: "/permits-to-work", label: t("permitToWork.nav") },
         ]
       : []),
-    ...(isAdmin ? [{ to: "/executive-access", label: t("executiveAccess.nav") }] : []),
-  ];
+    { to: "/settings", label: t("settings.nav") },
+  ].map((item, i) => ({ ...item, dot: dotColors[i % dotColors.length] }));
 
   return (
     <div className="min-h-screen flex">
       <aside className="w-60 shrink-0 bg-mine-900 border-r border-mine-800 shadow-lg shadow-black/10 flex flex-col print:hidden">
-        <div className="px-5 py-5 border-b border-mine-800">
-          <div className="text-lg font-bold tracking-tight">⛏ Mine Guard</div>
-          <div className="text-xs text-mine-300 mt-0.5">Safety Monitoring</div>
+        <div className="px-5 py-5 border-b border-mine-800 bg-gradient-to-r from-brand-600 via-violet-600 to-fuchsia-600">
+          <div className="flex items-center gap-2">
+            {mine?.hasLogo ? (
+              <img
+                src={`${API_URL}/api/mines/${mine.id}/logo`}
+                alt={mine.name}
+                className="w-7 h-7 rounded object-contain bg-white/90 p-0.5 shrink-0"
+              />
+            ) : (
+              <span className="text-lg">⛏</span>
+            )}
+            <div className="text-lg font-bold tracking-tight text-white truncate">{mine?.name || "Mine Guard"}</div>
+          </div>
+          <div className="text-xs text-white/80 mt-0.5">Safety Monitoring</div>
         </div>
         <nav className="flex-1 px-2 py-4 space-y-0.5 overflow-y-auto">
           {navItems.map((item) => (
@@ -54,13 +94,14 @@ export default function Layout() {
               to={item.to}
               end={item.end}
               className={({ isActive }) =>
-                `block pl-3 pr-3 py-2 rounded-lg text-sm font-medium border-l-[3px] transition-colors ${
+                `flex items-center gap-2.5 pl-3 pr-3 py-2 rounded-lg text-sm font-medium border-l-[3px] transition-colors ${
                   isActive
-                    ? "bg-mine-800 border-mine-500 text-mine-50"
+                    ? "bg-mine-800 border-brand-500 text-mine-50"
                     : "border-transparent text-mine-200 hover:bg-mine-800/60 hover:text-mine-50"
                 }`
               }
             >
+              <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${item.dot}`} />
               {item.label}
             </NavLink>
           ))}

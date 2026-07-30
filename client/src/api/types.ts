@@ -16,6 +16,20 @@ export interface Mine {
   registrationNumber?: string | null;
   miningRightNumber?: string | null;
   description?: string | null;
+  hasLogo?: boolean;
+}
+
+export type InviteStatus = "PENDING" | "ACCEPTED" | "REVOKED";
+
+export interface ExecutiveInvite {
+  id: string;
+  name: string;
+  email: string;
+  status: InviteStatus;
+  createdAt: string;
+  acceptedAt?: string | null;
+  invitedBy?: { id: string; name: string } | null;
+  acceptedUser?: { id: string; name: string; email: string } | null;
 }
 
 export interface ReviewNotification {
