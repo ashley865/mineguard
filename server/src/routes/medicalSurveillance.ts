@@ -29,14 +29,14 @@ router.get("/", async (req, res) => {
   res.json(items);
 });
 
-router.post("/", requireRole("ADMIN", "SUPERVISOR"), async (req, res) => {
+router.post("/", requireRole("ADMIN", "SUPERVISOR", "EXECUTIVE"), async (req, res) => {
   const parsed = medicalSchema.safeParse(req.body);
   if (!parsed.success) return res.status(400).json({ error: parsed.error.flatten() });
   const item = await prisma.medicalSurveillance.create({ data: parsed.data });
   res.status(201).json(item);
 });
 
-router.put("/:id", requireRole("ADMIN", "SUPERVISOR"), async (req, res) => {
+router.put("/:id", requireRole("ADMIN", "SUPERVISOR", "EXECUTIVE"), async (req, res) => {
   const parsed = medicalSchema.partial().safeParse(req.body);
   if (!parsed.success) return res.status(400).json({ error: parsed.error.flatten() });
   try {
@@ -47,7 +47,7 @@ router.put("/:id", requireRole("ADMIN", "SUPERVISOR"), async (req, res) => {
   }
 });
 
-router.delete("/:id", requireRole("ADMIN"), async (req, res) => {
+router.delete("/:id", requireRole("ADMIN", "EXECUTIVE"), async (req, res) => {
   try {
     await prisma.medicalSurveillance.delete({ where: { id: req.params.id } });
     res.status(204).send();

@@ -117,7 +117,7 @@ function VisitForm({ sites, notices, initial, onSubmit, onCancel }: {
 export default function VisitLogTab({ sites }: { sites: Site[] }) {
   const { t } = useTranslation();
   const { user } = useAuth();
-  const canEdit = user?.role === "ADMIN" || user?.role === "SUPERVISOR";
+  const canEdit = user?.role === "ADMIN" || user?.role === "SUPERVISOR" || user?.role === "EXECUTIVE";
   const [items, setItems] = useState<InspectionVisit[]>([]);
   const [notices, setNotices] = useState<RegulatoryNotice[]>([]);
   const [loading, setLoading] = useState(true);

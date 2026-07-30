@@ -101,7 +101,7 @@ function ZoneForm({ siteId, initial, onSubmit, onCancel }: {
 export default function Sites() {
   const { t } = useTranslation();
   const { user } = useAuth();
-  const canEdit = user?.role === "ADMIN" || user?.role === "SUPERVISOR";
+  const canEdit = user?.role === "ADMIN" || user?.role === "SUPERVISOR" || user?.role === "EXECUTIVE";
   const [sites, setSites] = useState<Site[]>([]);
   const [loading, setLoading] = useState(true);
   const [siteModal, setSiteModal] = useState<null | "create" | Site>(null);
@@ -185,7 +185,7 @@ export default function Sites() {
               {canEdit && (
                 <div className="flex gap-2">
                   <button className={buttonSecondary} onClick={() => setSiteModal(site)}>{t("common.edit")}</button>
-                  {user?.role === "ADMIN" && (
+                  {(user?.role === "ADMIN" || user?.role === "EXECUTIVE") && (
                     <button className={buttonDanger} onClick={() => deleteSite(site.id)}>{t("common.delete")}</button>
                   )}
                 </div>

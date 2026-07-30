@@ -6,6 +6,16 @@ export interface User {
   email: string;
   name: string;
   role: Role;
+  mineId?: string | null;
+}
+
+export interface Mine {
+  id: string;
+  name: string;
+  location: string;
+  registrationNumber?: string | null;
+  miningRightNumber?: string | null;
+  description?: string | null;
 }
 
 export type SiteStatus = "OPERATIONAL" | "RESTRICTED" | "SHUT_DOWN";

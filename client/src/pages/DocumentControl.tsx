@@ -152,7 +152,7 @@ function DocumentForm({ sites, initial, onSubmit, onCancel }: {
 export default function DocumentControl() {
   const { t } = useTranslation();
   const { user } = useAuth();
-  const canEdit = user?.role === "ADMIN" || user?.role === "SUPERVISOR";
+  const canEdit = user?.role === "ADMIN" || user?.role === "SUPERVISOR" || user?.role === "EXECUTIVE";
   const [items, setItems] = useState<MineDocument[]>([]);
   const [sites, setSites] = useState<Site[]>([]);
   const [loading, setLoading] = useState(true);

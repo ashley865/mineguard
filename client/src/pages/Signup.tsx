@@ -1,7 +1,9 @@
-import { FormEvent, useState } from "react";
+import { FormEvent, useEffect, useState } from "react";
 import { Link, Navigate, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useAuth } from "../context/AuthContext";
+import { api } from "../api/client";
+import { Mine } from "../api/types";
 import { buttonPrimary, inputClass, labelClass } from "../components/ui";
 import LanguageSwitcher from "../components/LanguageSwitcher";
 
@@ -12,18 +14,39 @@ export default function Signup() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [role, setRole] = useState<"ADMIN" | "EXECUTIVE">("ADMIN");
+  const [role, setRole] = useState<"ADMIN" | "EXECUTIVE">("EXECUTIVE");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+
+  const [mineQuery, setMineQuery] = useState("");
+  const [mineResults, setMineResults] = useState<Mine[]>([]);
+  const [selectedMine, setSelectedMine] = useState<Mine | null>(null);
+  const [passkey, setPasskey] = useState("");
+
+  useEffect(() => {
+    if (selectedMine || mineQuery.trim().length < 2) {
+      setMineResults([]);
+      return;
+    }
+    const handle = setTimeout(async () => {
+      const res = await api.get<Mine[]>("/mines/search", { params: { q: mineQuery } });
+      setMineResults(res.data);
+    }, 300);
+    return () => clearTimeout(handle);
+  }, [mineQuery, selectedMine]);
 
   if (user) return <Navigate to="/" replace />;
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
     setError(null);
+    if (!selectedMine) {
+      setError(t("signup.mineRequired"));
+      return;
+    }
     setLoading(true);
     try {
-      await register(email, password, name, role);
+      await register(email, password, name, role, selectedMine.id, passkey);
       navigate("/");
     } catch (err: any) {
       setError(err.response?.data?.error?.formErrors?.[0] ?? err.response?.data?.error ?? t("signup.error"));
@@ -33,7 +56,7 @@ export default function Signup() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-mine-950 px-4">
+    <div className="min-h-screen flex items-center justify-center bg-mine-950 px-4 py-8">
       <div className="w-full max-w-sm">
         <div className="flex justify-end mb-3">
           <LanguageSwitcher />
@@ -43,6 +66,60 @@ export default function Signup() {
           <div className="text-mine-300 text-sm mt-1">{t("signup.title")}</div>
         </div>
         <form onSubmit={handleSubmit} className="bg-mine-900 border border-mine-800 rounded-lg p-6 space-y-4">
+          <div>
+            <label className={labelClass}>{t("signup.mine")}</label>
+            {selectedMine ? (
+              <div className="flex items-center justify-between bg-mine-800 border border-mine-700 rounded-md px-3 py-2">
+                <div>
+                  <div className="text-sm font-medium">{selectedMine.name}</div>
+                  <div className="text-xs text-mine-400">{selectedMine.location}</div>
+                </div>
+                <button
+                  type="button"
+                  className="text-xs text-mine-300 underline hover:text-white"
+                  onClick={() => { setSelectedMine(null); setMineQuery(""); setPasskey(""); }}
+                >
+                  {t("signup.change")}
+                </button>
+              </div>
+            ) : (
+              <>
+                <input
+                  className={inputClass}
+                  value={mineQuery}
+                  onChange={(e) => setMineQuery(e.target.value)}
+                  placeholder={t("signup.mineSearchPlaceholder") ?? ""}
+                />
+                {mineResults.length > 0 && (
+                  <div className="mt-1 border border-mine-700 rounded-md overflow-hidden">
+                    {mineResults.map((m) => (
+                      <button
+                        type="button"
+                        key={m.id}
+                        className="w-full text-left px-3 py-2 text-sm hover:bg-mine-800"
+                        onClick={() => setSelectedMine(m)}
+                      >
+                        <div className="font-medium">{m.name}</div>
+                        <div className="text-xs text-mine-400">{m.location}</div>
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </>
+            )}
+          </div>
+          {selectedMine && (
+            <div>
+              <label className={labelClass}>{t("signup.passkey")}</label>
+              <input
+                className={`${inputClass} font-mono`}
+                value={passkey}
+                onChange={(e) => setPasskey(e.target.value)}
+                required
+              />
+              <div className="text-xs text-mine-400 mt-1">{t("signup.passkeyHint")}</div>
+            </div>
+          )}
           <div>
             <label className={labelClass}>{t("signup.fullName")}</label>
             <input
@@ -80,23 +157,6 @@ export default function Signup() {
             <div className="space-y-2">
               <label
                 className={`flex items-start gap-2 border rounded-md p-3 cursor-pointer ${
-                  role === "ADMIN" ? "border-mine-500 bg-mine-800/40" : "border-mine-800"
-                }`}
-              >
-                <input
-                  type="radio"
-                  name="role"
-                  className="mt-1"
-                  checked={role === "ADMIN"}
-                  onChange={() => setRole("ADMIN")}
-                />
-                <div>
-                  <div className="text-sm font-medium">{t("signup.admin")}</div>
-                  <div className="text-xs text-mine-400">{t("signup.adminDesc")}</div>
-                </div>
-              </label>
-              <label
-                className={`flex items-start gap-2 border rounded-md p-3 cursor-pointer ${
                   role === "EXECUTIVE" ? "border-mine-500 bg-mine-800/40" : "border-mine-800"
                 }`}
               >
@@ -112,6 +172,23 @@ export default function Signup() {
                   <div className="text-xs text-mine-400">{t("signup.executiveDesc")}</div>
                 </div>
               </label>
+              <label
+                className={`flex items-start gap-2 border rounded-md p-3 cursor-pointer ${
+                  role === "ADMIN" ? "border-mine-500 bg-mine-800/40" : "border-mine-800"
+                }`}
+              >
+                <input
+                  type="radio"
+                  name="role"
+                  className="mt-1"
+                  checked={role === "ADMIN"}
+                  onChange={() => setRole("ADMIN")}
+                />
+                <div>
+                  <div className="text-sm font-medium">{t("signup.admin")}</div>
+                  <div className="text-xs text-mine-400">{t("signup.adminDesc")}</div>
+                </div>
+              </label>
             </div>
           </div>
           {error && <div className="text-danger-400 text-sm">{error}</div>}
@@ -122,6 +199,10 @@ export default function Signup() {
             {t("signup.alreadyHaveAccount")}{" "}
             <Link to="/login" className="text-mine-300 underline hover:text-mine-100">
               {t("signup.signIn")}
+            </Link>
+            {" · "}
+            <Link to="/register-mine" className="text-mine-300 underline hover:text-mine-100">
+              {t("signup.registerNewMine")}
             </Link>
           </div>
         </form>

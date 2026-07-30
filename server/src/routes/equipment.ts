@@ -29,7 +29,7 @@ router.get("/", async (req, res) => {
   res.json(equipment);
 });
 
-router.post("/", requireRole("ADMIN", "SUPERVISOR"), async (req, res) => {
+router.post("/", requireRole("ADMIN", "SUPERVISOR", "EXECUTIVE"), async (req, res) => {
   const parsed = equipmentSchema.safeParse(req.body);
   if (!parsed.success) return res.status(400).json({ error: parsed.error.flatten() });
   const { lastMaintenance, ...rest } = parsed.data;
@@ -39,7 +39,7 @@ router.post("/", requireRole("ADMIN", "SUPERVISOR"), async (req, res) => {
   res.status(201).json(equipment);
 });
 
-router.put("/:id", requireRole("ADMIN", "SUPERVISOR"), async (req, res) => {
+router.put("/:id", requireRole("ADMIN", "SUPERVISOR", "EXECUTIVE"), async (req, res) => {
   const parsed = equipmentSchema.partial().safeParse(req.body);
   if (!parsed.success) return res.status(400).json({ error: parsed.error.flatten() });
   const { lastMaintenance, ...rest } = parsed.data;
@@ -59,7 +59,7 @@ router.put("/:id", requireRole("ADMIN", "SUPERVISOR"), async (req, res) => {
   }
 });
 
-router.delete("/:id", requireRole("ADMIN", "SUPERVISOR"), async (req, res) => {
+router.delete("/:id", requireRole("ADMIN", "SUPERVISOR", "EXECUTIVE"), async (req, res) => {
   try {
     await prisma.equipment.delete({ where: { id: req.params.id } });
     res.status(204).send();

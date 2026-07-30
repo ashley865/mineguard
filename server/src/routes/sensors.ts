@@ -79,14 +79,14 @@ router.post("/:id/readings", async (req, res) => {
   res.status(201).json(reading);
 });
 
-router.post("/", requireRole("ADMIN", "SUPERVISOR"), async (req, res) => {
+router.post("/", requireRole("ADMIN", "SUPERVISOR", "EXECUTIVE"), async (req, res) => {
   const parsed = sensorSchema.safeParse(req.body);
   if (!parsed.success) return res.status(400).json({ error: parsed.error.flatten() });
   const sensor = await prisma.sensor.create({ data: parsed.data });
   res.status(201).json(sensor);
 });
 
-router.put("/:id", requireRole("ADMIN", "SUPERVISOR"), async (req, res) => {
+router.put("/:id", requireRole("ADMIN", "SUPERVISOR", "EXECUTIVE"), async (req, res) => {
   const parsed = sensorSchema.partial().safeParse(req.body);
   if (!parsed.success) return res.status(400).json({ error: parsed.error.flatten() });
   try {
@@ -97,7 +97,7 @@ router.put("/:id", requireRole("ADMIN", "SUPERVISOR"), async (req, res) => {
   }
 });
 
-router.delete("/:id", requireRole("ADMIN"), async (req, res) => {
+router.delete("/:id", requireRole("ADMIN", "EXECUTIVE"), async (req, res) => {
   try {
     await prisma.sensor.delete({ where: { id: req.params.id } });
     res.status(204).send();

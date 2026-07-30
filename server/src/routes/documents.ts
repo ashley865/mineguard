@@ -72,7 +72,7 @@ router.get("/:id/download", async (req, res) => {
   res.send(Buffer.from(doc.fileData));
 });
 
-router.post("/", requireRole("ADMIN", "SUPERVISOR"), upload.single("file"), async (req, res) => {
+router.post("/", requireRole("ADMIN", "SUPERVISOR", "EXECUTIVE"), upload.single("file"), async (req, res) => {
   if (!req.file) return res.status(400).json({ error: "A file is required" });
   const parsed = metadataSchema.safeParse(req.body);
   if (!parsed.success) return res.status(400).json({ error: parsed.error.flatten() });
@@ -91,7 +91,7 @@ router.post("/", requireRole("ADMIN", "SUPERVISOR"), upload.single("file"), asyn
   res.status(201).json(item);
 });
 
-router.put("/:id", requireRole("ADMIN", "SUPERVISOR"), async (req, res) => {
+router.put("/:id", requireRole("ADMIN", "SUPERVISOR", "EXECUTIVE"), async (req, res) => {
   const parsed = metadataSchema.partial().safeParse(req.body);
   if (!parsed.success) return res.status(400).json({ error: parsed.error.flatten() });
   try {
@@ -106,7 +106,7 @@ router.put("/:id", requireRole("ADMIN", "SUPERVISOR"), async (req, res) => {
   }
 });
 
-router.delete("/:id", requireRole("ADMIN"), async (req, res) => {
+router.delete("/:id", requireRole("ADMIN", "EXECUTIVE"), async (req, res) => {
   try {
     await prisma.document.delete({ where: { id: req.params.id } });
     res.status(204).send();

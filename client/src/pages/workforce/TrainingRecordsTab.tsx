@@ -94,7 +94,7 @@ function TrainingForm({ workers, initial, onSubmit, onCancel }: {
 export default function TrainingRecordsTab({ workers }: { workers: Worker[] }) {
   const { t } = useTranslation();
   const { user } = useAuth();
-  const canEdit = user?.role === "ADMIN" || user?.role === "SUPERVISOR";
+  const canEdit = user?.role === "ADMIN" || user?.role === "SUPERVISOR" || user?.role === "EXECUTIVE";
   const [items, setItems] = useState<TrainingRecord[]>([]);
   const [loading, setLoading] = useState(true);
   const [modal, setModal] = useState<null | "create" | TrainingRecord>(null);

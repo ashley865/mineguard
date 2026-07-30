@@ -80,7 +80,7 @@ function EquipmentForm({ sites, zones, initial, onSubmit, onCancel }: {
 export default function Equipment() {
   const { t } = useTranslation();
   const { user } = useAuth();
-  const canEdit = user?.role === "ADMIN" || user?.role === "SUPERVISOR";
+  const canEdit = user?.role === "ADMIN" || user?.role === "SUPERVISOR" || user?.role === "EXECUTIVE";
   const [equipment, setEquipment] = useState<EquipmentItem[]>([]);
   const [sites, setSites] = useState<Site[]>([]);
   const [zones, setZones] = useState<Zone[]>([]);

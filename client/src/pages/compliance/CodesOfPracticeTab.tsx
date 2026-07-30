@@ -138,7 +138,7 @@ function CopForm({ sites, zones, initial, onSubmit, onCancel }: {
 export default function CodesOfPracticeTab({ sites, zones }: { sites: Site[]; zones: Zone[] }) {
   const { t } = useTranslation();
   const { user } = useAuth();
-  const canEdit = user?.role === "ADMIN" || user?.role === "SUPERVISOR";
+  const canEdit = user?.role === "ADMIN" || user?.role === "SUPERVISOR" || user?.role === "EXECUTIVE";
   const [items, setItems] = useState<CodeOfPractice[]>([]);
   const [loading, setLoading] = useState(true);
   const [modal, setModal] = useState<null | "create" | CodeOfPractice>(null);

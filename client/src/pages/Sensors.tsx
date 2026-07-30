@@ -157,7 +157,7 @@ function SensorChart({ sensor, onClose }: { sensor: Sensor; onClose: () => void 
 export default function Sensors() {
   const { t } = useTranslation();
   const { user } = useAuth();
-  const canEdit = user?.role === "ADMIN" || user?.role === "SUPERVISOR";
+  const canEdit = user?.role === "ADMIN" || user?.role === "SUPERVISOR" || user?.role === "EXECUTIVE";
   const [sensors, setSensors] = useState<Sensor[]>([]);
   const [zones, setZones] = useState<Zone[]>([]);
   const [loading, setLoading] = useState(true);

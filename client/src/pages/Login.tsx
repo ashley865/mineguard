@@ -66,6 +66,11 @@ export default function Login() {
           <Link to="/signup" className={`${buttonSecondary} w-full block text-center`}>
             {t("login.createAccount")}
           </Link>
+          <div className="text-xs text-mine-400 text-center pt-1">
+            <Link to="/register-mine" className="underline hover:text-mine-100">
+              {t("login.registerMine")}
+            </Link>
+          </div>
         </form>
       </div>
     </div>

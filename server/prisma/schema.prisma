@@ -150,6 +150,9 @@ model User {
   role         Role     @default(VIEWER)
   createdAt    DateTime @default(now())
 
+  mineId String?
+  mine   Mine?   @relation(fields: [mineId], references: [id], onDelete: SetNull)
+
   acknowledgedAlerts Alert[]    @relation("AlertAcknowledgedBy")
   reportedIncidents  Incident[] @relation("IncidentReportedBy")
   reviewedAlerts     Alert[]    @relation("AlertReviewedBy")
@@ -563,4 +566,17 @@ model InspectionVisit {
   relatedNotice   RegulatoryNotice? @relation(fields: [relatedNoticeId], references: [id], onDelete: SetNull)
 
   createdAt DateTime @default(now())
+}
+
+model Mine {
+  id                 String   @id @default(cuid())
+  name               String
+  location           String
+  registrationNumber String?
+  miningRightNumber  String?
+  description        String?
+  passkeyHash        String
+  createdAt          DateTime @default(now())
+
+  users User[]
 }

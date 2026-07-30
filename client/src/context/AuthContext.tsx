@@ -1,13 +1,32 @@
 import { createContext, useContext, useEffect, useState, ReactNode } from "react";
 import { api } from "../api/client";
-import { User } from "../api/types";
+import { Mine, User } from "../api/types";
+
+export interface RegisterMinePayload {
+  mineName: string;
+  location: string;
+  registrationNumber?: string;
+  miningRightNumber?: string;
+  description?: string;
+  adminName: string;
+  adminEmail: string;
+  adminPassword: string;
+}
 
 interface AuthContextValue {
   user: User | null;
   token: string | null;
   loading: boolean;
   login: (email: string, password: string) => Promise<void>;
-  register: (email: string, password: string, name: string, role: "ADMIN" | "EXECUTIVE") => Promise<void>;
+  register: (
+    email: string,
+    password: string,
+    name: string,
+    role: "ADMIN" | "EXECUTIVE",
+    mineId: string,
+    passkey: string
+  ) => Promise<void>;
+  registerMine: (payload: RegisterMinePayload) => Promise<{ mine: Mine; passkey: string }>;
   logout: () => void;
 }
 
@@ -53,9 +72,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     persist(res.data.token, res.data.user);
   }
 
-  async function register(email: string, password: string, name: string, role: "ADMIN" | "EXECUTIVE") {
-    const res = await api.post("/auth/register", { email, password, name, role });
+  async function register(
+    email: string,
+    password: string,
+    name: string,
+    role: "ADMIN" | "EXECUTIVE",
+    mineId: string,
+    passkey: string
+  ) {
+    const res = await api.post("/auth/register", { email, password, name, role, mineId, passkey });
     persist(res.data.token, res.data.user);
+  }
+
+  async function registerMine(payload: RegisterMinePayload) {
+    const res = await api.post("/mines/register", payload);
+    persist(res.data.token, res.data.user);
+    return { mine: res.data.mine as Mine, passkey: res.data.passkey as string };
   }
 
   function logout() {
@@ -66,7 +98,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }
 
   return (
-    <AuthContext.Provider value={{ user, token, loading, login, register, logout }}>
+    <AuthContext.Provider value={{ user, token, loading, login, register, registerMine, logout }}>
       {children}
     </AuthContext.Provider>
   );
