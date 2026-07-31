@@ -185,6 +185,7 @@ model User {
   ptwExecutiveDecisions  PermitToWork[]             @relation("PtwExecutiveDecision")
   createdInvites         ExecutiveInvite[]          @relation("InviteCreatedBy")
   acceptedInvite         ExecutiveInvite?           @relation("InviteAcceptedUser")
+  loggedDeliveries       Delivery[]
 }
 
 model Site {
@@ -214,6 +215,7 @@ model Site {
   executiveAssignments ExecutiveSiteAssignment[]
   visitors             Visitor[]
   permitsToWork        PermitToWork[]
+  deliveries           Delivery[]
 }
 
 model Zone {
@@ -309,6 +311,17 @@ model Worker {
   medicalRecords  MedicalSurveillance[]
   certificates    Certificate[]
   trainingRecords TrainingRecord[]
+  attendance      WorkerAttendance[]
+
+  createdAt DateTime @default(now())
+}
+
+model WorkerAttendance {
+  id         String    @id @default(cuid())
+  workerId   String
+  worker     Worker    @relation(fields: [workerId], references: [id], onDelete: Cascade)
+  checkInAt  DateTime  @default(now())
+  checkOutAt DateTime?
 
   createdAt DateTime @default(now())
 }
@@ -771,6 +784,49 @@ model PermitToWork {
   executiveDecidedAt   DateTime?
   executiveDecidedById String?
   executiveDecidedBy   User?     @relation("PtwExecutiveDecision", fields: [executiveDecidedById], references: [id], onDelete: SetNull)
+
+  createdAt DateTime @default(now())
+}
+
+model Truck {
+  id                  String   @id @default(cuid())
+  registrationNumber  String   @unique
+  vehicleType         String?
+  driverName          String
+  driverLicense       String?
+  driverPhone         String?
+  haulierCompany      String?
+  createdAt           DateTime @default(now())
+
+  deliveries Delivery[]
+}
+
+enum DeliveryDirection {
+  INBOUND
+  OUTBOUND
+}
+
+enum DeliveryStatus {
+  CHECKED_IN
+  CHECKED_OUT
+}
+
+model Delivery {
+  id           String            @id @default(cuid())
+  truckId      String
+  truck        Truck             @relation(fields: [truckId], references: [id], onDelete: Cascade)
+  siteId       String
+  site         Site              @relation(fields: [siteId], references: [id], onDelete: Cascade)
+  direction    DeliveryDirection
+  cargoType    String
+  quantity     Float?
+  unit         String?
+  notes        String?
+  status       DeliveryStatus    @default(CHECKED_IN)
+  checkInAt    DateTime          @default(now())
+  checkOutAt   DateTime?
+  loggedById   String?
+  loggedBy     User?             @relation(fields: [loggedById], references: [id], onDelete: SetNull)
 
   createdAt DateTime @default(now())
 }

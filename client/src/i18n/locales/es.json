@@ -158,7 +158,9 @@
     "pendingPermitsToWork": "Permisos de Trabajo Pendientes de Aprobación",
     "escalatedRisks": "Riesgos Escalados",
     "noSiteAccess": "Aún no se te han asignado sitios. Pide a un administrador que te dé acceso a un sitio para ver aquí la Gestión de Visitantes, el Permiso de Trabajo y el Registro de Riesgos.",
-    "complianceBreakdown": "Desglose de Cumplimiento"
+    "complianceBreakdown": "Desglose de Cumplimiento",
+    "peopleOnSite": "Personas Actualmente en la Mina",
+    "peopleOnSiteBreakdown": "{{visitors}} visitantes · {{staff}} personal en turno · {{drivers}} conductores de camión"
   },
   "sites": {
     "title": "Sitios y Zonas",
@@ -228,7 +230,12 @@
     "nextOfKin": "Contacto de Emergencia",
     "nextOfKinName": "Nombre del contacto",
     "nextOfKinRelationship": "Parentesco",
-    "nextOfKinPhone": "Teléfono del contacto"
+    "nextOfKinPhone": "Teléfono del contacto",
+    "showBadge": "Insignia QR",
+    "checkIn": "Registrar entrada",
+    "checkOut": "Registrar salida",
+    "badgeTitle": "Insignia de {{name}}",
+    "badgeHint": "Seguridad escanea este código en la puerta para registrar la entrada o salida de este trabajador en la página de Escáner."
   },
   "equipment": {
     "title": "Equipos",
@@ -760,7 +767,8 @@
     "inductionDeclaration": "Confirmo que he completado la charla de inducción de seguridad obligatoria del sitio, según lo exige la Ley de Salud y Seguridad Minera.",
     "popiaDeclaration": "Doy mi consentimiento para el tratamiento y almacenamiento de mis datos personales con fines de seguridad y control de acceso al sitio, conforme a la Ley de Protección de Información Personal (POPIA).",
     "indemnityDeclaration": "Reconozco el aviso de peligro del sitio y acepto los términos de indemnización del visitante durante la duración de mi visita.",
-    "submit": "Registrarse"
+    "submit": "Registrarse",
+    "qrHint": "Guarda este código. Muéstralo a seguridad cuando te vayas para que puedan registrar tu salida."
   },
   "permitToWork": {
     "nav": "Permiso de Trabajo",
@@ -853,5 +861,54 @@
         "OTHER": "Otro"
       }
     }
+  },
+  "trucks": {
+    "nav": "Registro de Camiones",
+    "title": "Registro de Camiones",
+    "subtitle": "Registra camiones y lleva el registro de cargas y entregas dentro y fuera del sitio",
+    "loading": "Cargando…",
+    "tabDeliveries": "Cargas y Entregas",
+    "tabTrucks": "Camiones Registrados",
+    "newDelivery": "+ Registrar Entrega",
+    "newDeliveryTitle": "Registrar Entrega",
+    "registerTruckFirst": "Registra un camión primero antes de registrar una entrega.",
+    "colTruck": "Camión",
+    "direction": "Dirección",
+    "inbound": "Entrante (entrega al sitio)",
+    "outbound": "Saliente (carga desde el sitio)",
+    "cargoType": "Carga / material",
+    "quantity": "Cantidad",
+    "unit": "Unidad",
+    "unitPlaceholder": "toneladas, litros, unidades…",
+    "notes": "Notas",
+    "checkOut": "Registrar salida",
+    "noneYet": "Aún no hay entregas registradas.",
+    "newTruck": "+ Registrar Camión",
+    "newTruckTitle": "Registrar Camión",
+    "editTruckTitle": "Editar Camión",
+    "registrationNumber": "Número de matrícula",
+    "driverName": "Nombre del conductor",
+    "driverLicense": "Número de licencia del conductor",
+    "haulierCompany": "Transportista / empresa",
+    "vehicleType": "Tipo de vehículo",
+    "vehicleTypePlaceholder": "Volquete, plataforma, cisterna…",
+    "noneYetTrucks": "Aún no hay camiones registrados.",
+    "confirmDeleteTruck": "¿Eliminar este camión? También se eliminará su historial de entregas.",
+    "confirmDeleteDelivery": "¿Eliminar este registro de entrega?"
+  },
+  "scanner": {
+    "nav": "Escáner",
+    "title": "Escáner de Seguridad",
+    "subtitle": "Escanea el código QR de un visitante o trabajador para registrar su entrada o salida",
+    "starting": "Iniciando cámara…",
+    "cameraError": "No se pudo acceder a la cámara. Verifica los permisos de cámara de tu navegador e inténtalo de nuevo.",
+    "lastResult": "Último Escaneo",
+    "noResultYet": "Aún no se han escaneado códigos.",
+    "hint": "Apunta la cámara al código QR de registro de un visitante (desde su teléfono) o al código QR de la insignia de un trabajador.",
+    "visitorCheckedOut": "{{name}} registró su salida.",
+    "workerCheckedIn": "{{name}} registró su entrada.",
+    "workerCheckedOut": "{{name}} registró su salida.",
+    "unknownCode": "Este código QR no es un código reconocido de Mine Guard.",
+    "actionFailed": "No se pudo procesar este escaneo."
   }
 }

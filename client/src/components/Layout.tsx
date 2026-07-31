@@ -25,6 +25,7 @@ export default function Layout() {
   const isAdmin = user?.role === "ADMIN";
   const isExecutiveWithSites = user?.role === "EXECUTIVE" && (assignedSiteIds?.length ?? 0) > 0;
   const canSeeExecutiveOps = isAdmin || isExecutiveWithSites;
+  const canUseScanner = user?.role === "ADMIN" || user?.role === "SUPERVISOR" || user?.role === "EXECUTIVE";
 
   const navItems = [
     ...(user?.role === "EXECUTIVE"
@@ -36,6 +37,7 @@ export default function Layout() {
     { to: "/workers", label: t("nav.workers") },
     { to: "/workforce", label: t("workforce.nav") },
     { to: "/contractors", label: t("contractors.nav") },
+    { to: "/trucks", label: t("trucks.nav") },
     { to: "/incidents", label: t("nav.incidents") },
     { to: "/equipment", label: t("nav.equipment") },
     { to: "/compliance", label: t("compliance.nav") },
@@ -49,6 +51,7 @@ export default function Layout() {
           { to: "/permits-to-work", label: t("permitToWork.nav") },
         ]
       : []),
+    ...(canUseScanner ? [{ to: "/scanner", label: t("scanner.nav") }] : []),
     { to: "/settings", label: t("settings.nav") },
   ];
 

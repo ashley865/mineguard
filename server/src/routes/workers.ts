@@ -64,4 +64,33 @@ router.delete("/:id", requireRole("ADMIN", "SUPERVISOR", "EXECUTIVE"), async (re
   }
 });
 
+router.post("/:id/toggle-attendance", requireRole("ADMIN", "SUPERVISOR", "EXECUTIVE"), async (req, res) => {
+  const worker = await prisma.worker.findUnique({ where: { id: req.params.id } });
+  if (!worker) return res.status(404).json({ error: "Worker not found" });
+
+  const openRecord = await prisma.workerAttendance.findFirst({
+    where: { workerId: worker.id, checkOutAt: null },
+    orderBy: { checkInAt: "desc" },
+  });
+
+  if (openRecord) {
+    await prisma.workerAttendance.update({ where: { id: openRecord.id }, data: { checkOutAt: new Date() } });
+    const updated = await prisma.worker.update({ where: { id: worker.id }, data: { status: "OFF_SHIFT" } });
+    return res.json({ worker: updated, action: "CHECKED_OUT" });
+  }
+
+  await prisma.workerAttendance.create({ data: { workerId: worker.id } });
+  const updated = await prisma.worker.update({ where: { id: worker.id }, data: { status: "ON_SHIFT" } });
+  res.json({ worker: updated, action: "CHECKED_IN" });
+});
+
+router.get("/:id/attendance", async (req, res) => {
+  const records = await prisma.workerAttendance.findMany({
+    where: { workerId: req.params.id },
+    orderBy: { checkInAt: "desc" },
+    take: 50,
+  });
+  res.json(records);
+});
+
 export default router;

@@ -1,11 +1,38 @@
 import { FormEvent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
+import QRCode from "qrcode";
 import { api } from "../api/client";
 import { useAuth } from "../context/AuthContext";
 import { Site, Worker, WorkerStatus, Zone } from "../api/types";
 import { StatusBadge } from "../components/Badges";
 import Modal from "../components/Modal";
 import { buttonDanger, buttonPrimary, buttonSecondary, cardClass, inputClass, labelClass } from "../components/ui";
+
+function WorkerQrModal({ worker, onClose }: { worker: Worker; onClose: () => void }) {
+  const { t } = useTranslation();
+  const [dataUrl, setDataUrl] = useState<string | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    QRCode.toDataURL(`worker:${worker.id}`, { width: 220, margin: 1 }).then((url) => {
+      if (!cancelled) setDataUrl(url);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [worker.id]);
+
+  return (
+    <Modal title={t("workers.badgeTitle", { name: worker.name })} onClose={onClose}>
+      <div className="flex flex-col items-center gap-3 text-center">
+        {dataUrl && <img src={dataUrl} alt="Worker QR badge" className="rounded-md border border-mine-800" />}
+        <div className="text-sm font-medium">{worker.name}</div>
+        <div className="text-xs text-mine-400">{worker.employeeId}</div>
+        <p className="text-xs text-mine-400 max-w-xs">{t("workers.badgeHint")}</p>
+      </div>
+    </Modal>
+  );
+}
 
 function WorkerForm({ sites, zones, initial, onSubmit, onCancel }: {
   sites: Site[];
@@ -134,6 +161,7 @@ export default function Workers() {
   const [zones, setZones] = useState<Zone[]>([]);
   const [loading, setLoading] = useState(true);
   const [modal, setModal] = useState<null | "create" | Worker>(null);
+  const [qrWorker, setQrWorker] = useState<Worker | null>(null);
 
   async function load() {
     setLoading(true);
@@ -167,6 +195,11 @@ export default function Workers() {
   async function deleteWorker(id: string) {
     if (!confirm(t("workers.confirmDelete"))) return;
     await api.delete(`/workers/${id}`);
+    await load();
+  }
+
+  async function toggleAttendance(id: string) {
+    await api.post(`/workers/${id}/toggle-attendance`);
     await load();
   }
 
@@ -207,12 +240,20 @@ export default function Workers() {
                 </td>
                 <td className="px-4 py-2"><StatusBadge status={w.status} /></td>
                 <td className="px-4 py-2 text-right">
-                  {canEdit && (
-                    <div className="flex justify-end gap-2">
+                  <div className="flex justify-end gap-2">
+                    <button className="text-xs text-mine-300 hover:text-mine-50" onClick={() => setQrWorker(w)}>{t("workers.showBadge")}</button>
+                    {canEdit && (
+                      <button className="text-xs text-mine-300 hover:text-mine-50" onClick={() => toggleAttendance(w.id)}>
+                        {w.status === "ON_SHIFT" ? t("workers.checkOut") : t("workers.checkIn")}
+                      </button>
+                    )}
+                    {canEdit && (
                       <button className="text-xs text-mine-300 hover:text-mine-50" onClick={() => setModal(w)}>{t("common.edit")}</button>
+                    )}
+                    {canEdit && (
                       <button className={buttonDanger} onClick={() => deleteWorker(w.id)}>{t("common.delete")}</button>
-                    </div>
-                  )}
+                    )}
+                  </div>
                 </td>
               </tr>
             ))}
@@ -234,6 +275,8 @@ export default function Workers() {
           />
         </Modal>
       )}
+
+      {qrWorker && <WorkerQrModal worker={qrWorker} onClose={() => setQrWorker(null)} />}
     </div>
   );
 }

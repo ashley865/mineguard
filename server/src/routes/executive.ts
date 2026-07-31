@@ -75,10 +75,14 @@ router.get("/summary", async (req, res) => {
 
   const assignedSiteIds = req.auth!.role === "EXECUTIVE" ? await getAssignedSiteIds(req.auth!.userId) : null;
   const siteFilter = assignedSiteIds ? { siteId: { in: assignedSiteIds } } : {};
-  const [visitorsOnSite, pendingPermitsToWork, escalatedRisks] = await Promise.all([
+  const [visitorsOnSite, pendingPermitsToWork, escalatedRisks, staffOnSite, truckDriversOnSite] = await Promise.all([
     prisma.visitor.count({ where: { status: "CHECKED_IN", ...siteFilter } }),
     prisma.permitToWork.count({ where: { status: "PENDING_EXECUTIVE", ...siteFilter } }),
     prisma.riskAssessment.count({ where: { escalated: true, mitigationStatus: { in: ["OPEN", "IN_PROGRESS"] }, ...siteFilter } }),
+    prisma.workerAttendance.count({
+      where: { checkOutAt: null, worker: assignedSiteIds ? { siteId: { in: assignedSiteIds } } : undefined },
+    }),
+    prisma.delivery.count({ where: { status: "CHECKED_IN", ...siteFilter } }),
   ]);
 
   res.json({
@@ -90,6 +94,12 @@ router.get("/summary", async (req, res) => {
       visitorsOnSite,
       pendingPermitsToWork,
       escalatedRisks,
+      peopleOnSite: {
+        visitors: visitorsOnSite,
+        staff: staffOnSite,
+        truckDrivers: truckDriversOnSite,
+        total: visitorsOnSite + staffOnSite + truckDriversOnSite,
+      },
     },
     incidents: {
       open: openIncidents,

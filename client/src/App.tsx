@@ -24,6 +24,8 @@ import VisitorCheckIn from "./pages/VisitorCheckIn";
 import PermitToWork from "./pages/PermitToWork";
 import Settings from "./pages/Settings";
 import AcceptExecutiveInvite from "./pages/AcceptExecutiveInvite";
+import TruckRegistration from "./pages/TruckRegistration";
+import Scanner from "./pages/Scanner";
 
 function HomeRoute() {
   const { user } = useAuth();
@@ -55,6 +57,8 @@ export default function App() {
         <Route path="/contractors" element={<Contractors />} />
         <Route path="/visitors" element={<VisitorManagement />} />
         <Route path="/permits-to-work" element={<PermitToWork />} />
+        <Route path="/trucks" element={<TruckRegistration />} />
+        <Route path="/scanner" element={<Scanner />} />
         <Route path="/settings" element={<Settings />} />
       </Route>
     </Routes>

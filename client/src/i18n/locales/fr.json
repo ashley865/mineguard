@@ -158,7 +158,9 @@
     "pendingPermitsToWork": "Permis de Travail en Attente d'Approbation",
     "escalatedRisks": "Risques Escaladés",
     "noSiteAccess": "Vous n'avez encore été affecté à aucun site. Demandez à un administrateur de vous accorder l'accès à un site pour voir ici la Gestion des Visiteurs, le Permis de Travail et le Registre des Risques.",
-    "complianceBreakdown": "Répartition de la Conformité"
+    "complianceBreakdown": "Répartition de la Conformité",
+    "peopleOnSite": "Personnes Actuellement dans la Mine",
+    "peopleOnSiteBreakdown": "{{visitors}} visiteurs · {{staff}} personnel en service · {{drivers}} chauffeurs de camion"
   },
   "sites": {
     "title": "Sites et zones",
@@ -228,7 +230,12 @@
     "nextOfKin": "Personne à Contacter",
     "nextOfKinName": "Nom du contact",
     "nextOfKinRelationship": "Lien de parenté",
-    "nextOfKinPhone": "Téléphone du contact"
+    "nextOfKinPhone": "Téléphone du contact",
+    "showBadge": "Badge QR",
+    "checkIn": "Enregistrer l'entrée",
+    "checkOut": "Enregistrer la sortie",
+    "badgeTitle": "Badge de {{name}}",
+    "badgeHint": "La sécurité scanne ce code au portail pour enregistrer l'entrée ou la sortie de ce travailleur sur la page Scanner."
   },
   "equipment": {
     "title": "Équipements",
@@ -760,7 +767,8 @@
     "inductionDeclaration": "Je confirme avoir suivi la séance d'induction de sécurité obligatoire du site, comme l'exige la Loi sur la Santé et la Sécurité Minière.",
     "popiaDeclaration": "Je consens au traitement et à la conservation de mes données personnelles à des fins de sécurité du site et de contrôle d'accès, conformément à la Loi sur la Protection des Informations Personnelles (POPIA).",
     "indemnityDeclaration": "Je reconnais l'avis de danger du site et j'accepte les conditions d'indemnisation des visiteurs pour la durée de ma visite.",
-    "submit": "S'enregistrer"
+    "submit": "S'enregistrer",
+    "qrHint": "Conservez ce code. Montrez-le à la sécurité à votre départ pour qu'elle puisse enregistrer votre sortie."
   },
   "permitToWork": {
     "nav": "Permis de Travail",
@@ -853,5 +861,54 @@
         "OTHER": "Autre"
       }
     }
+  },
+  "trucks": {
+    "nav": "Enregistrement des Camions",
+    "title": "Enregistrement des Camions",
+    "subtitle": "Enregistrez les camions et suivez les chargements et livraisons entrant et sortant du site",
+    "loading": "Chargement…",
+    "tabDeliveries": "Chargements et Livraisons",
+    "tabTrucks": "Camions Enregistrés",
+    "newDelivery": "+ Enregistrer une Livraison",
+    "newDeliveryTitle": "Enregistrer une Livraison",
+    "registerTruckFirst": "Enregistrez d'abord un camion avant de consigner une livraison.",
+    "colTruck": "Camion",
+    "direction": "Direction",
+    "inbound": "Entrant (livraison au site)",
+    "outbound": "Sortant (chargement depuis le site)",
+    "cargoType": "Cargaison / matériau",
+    "quantity": "Quantité",
+    "unit": "Unité",
+    "unitPlaceholder": "tonnes, litres, unités…",
+    "notes": "Notes",
+    "checkOut": "Enregistrer la sortie",
+    "noneYet": "Aucune livraison enregistrée pour le moment.",
+    "newTruck": "+ Enregistrer un Camion",
+    "newTruckTitle": "Enregistrer un Camion",
+    "editTruckTitle": "Modifier le Camion",
+    "registrationNumber": "Numéro d'immatriculation",
+    "driverName": "Nom du chauffeur",
+    "driverLicense": "Numéro de permis du chauffeur",
+    "haulierCompany": "Transporteur / entreprise",
+    "vehicleType": "Type de véhicule",
+    "vehicleTypePlaceholder": "Benne, plateau, citerne…",
+    "noneYetTrucks": "Aucun camion enregistré pour le moment.",
+    "confirmDeleteTruck": "Supprimer ce camion ? Son historique de livraisons sera également supprimé.",
+    "confirmDeleteDelivery": "Supprimer cet enregistrement de livraison ?"
+  },
+  "scanner": {
+    "nav": "Scanner",
+    "title": "Scanner de Sécurité",
+    "subtitle": "Scannez le code QR d'un visiteur ou d'un travailleur pour enregistrer son entrée ou sa sortie",
+    "starting": "Démarrage de la caméra…",
+    "cameraError": "Impossible d'accéder à la caméra. Vérifiez les autorisations de caméra de votre navigateur et réessayez.",
+    "lastResult": "Dernier Scan",
+    "noResultYet": "Aucun code scanné pour le moment.",
+    "hint": "Pointez la caméra vers le code QR d'enregistrement d'un visiteur (depuis son téléphone) ou le code QR du badge d'un travailleur.",
+    "visitorCheckedOut": "{{name}} a enregistré sa sortie.",
+    "workerCheckedIn": "{{name}} a enregistré son entrée.",
+    "workerCheckedOut": "{{name}} a enregistré sa sortie.",
+    "unknownCode": "Ce code QR n'est pas un code Mine Guard reconnu.",
+    "actionFailed": "Impossible de traiter ce scan."
   }
 }

@@ -153,6 +153,14 @@ export interface Worker {
   nextOfKinPhone?: string | null;
 }
 
+export interface WorkerAttendance {
+  id: string;
+  workerId: string;
+  checkInAt: string;
+  checkOutAt?: string | null;
+  createdAt: string;
+}
+
 export type IncidentStatus = "OPEN" | "INVESTIGATING" | "RESOLVED";
 
 export interface Incident {
@@ -214,6 +222,7 @@ export interface ExecutiveSummary {
     visitorsOnSite: number;
     pendingPermitsToWork: number;
     escalatedRisks: number;
+    peopleOnSite: { visitors: number; staff: number; truckDrivers: number; total: number };
   };
   incidents: { open: number; investigating: number; resolved: number };
   incidentTrend: { date: string; count: number }[];
@@ -588,5 +597,37 @@ export interface PermitToWork {
   executiveNote?: string | null;
   executiveDecidedAt?: string | null;
   executiveDecidedBy?: { id: string; name: string } | null;
+  createdAt: string;
+}
+
+export interface Truck {
+  id: string;
+  registrationNumber: string;
+  vehicleType?: string | null;
+  driverName: string;
+  driverLicense?: string | null;
+  driverPhone?: string | null;
+  haulierCompany?: string | null;
+  createdAt: string;
+}
+
+export type DeliveryDirection = "INBOUND" | "OUTBOUND";
+export type DeliveryStatus = "CHECKED_IN" | "CHECKED_OUT";
+
+export interface Delivery {
+  id: string;
+  truckId: string;
+  truck?: Truck;
+  siteId: string;
+  site?: { id: string; name: string };
+  direction: DeliveryDirection;
+  cargoType: string;
+  quantity?: number | null;
+  unit?: string | null;
+  notes?: string | null;
+  status: DeliveryStatus;
+  checkInAt: string;
+  checkOutAt?: string | null;
+  loggedBy?: { id: string; name: string } | null;
   createdAt: string;
 }

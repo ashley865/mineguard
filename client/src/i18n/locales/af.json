@@ -158,7 +158,9 @@
     "pendingPermitsToWork": "Werkpermitte wat Goedkeuring Wag",
     "escalatedRisks": "Geëskaleerde Risiko's",
     "noSiteAccess": "Jy is nog aan geen terreine toegewys nie. Vra 'n administrateur om jou terreintoegang te gee om hier Besoekersbestuur, Werkpermit en Risikoregister te sien.",
-    "complianceBreakdown": "Voldoeningsverdeling"
+    "complianceBreakdown": "Voldoeningsverdeling",
+    "peopleOnSite": "Mense Tans in die Myn",
+    "peopleOnSiteBreakdown": "{{visitors}} besoekers · {{staff}} personeel aan diens · {{drivers}} vragmotorbestuurders"
   },
   "sites": {
     "title": "Terreine & Sones",
@@ -228,7 +230,12 @@
     "nextOfKin": "Naaste Familielid",
     "nextOfKinName": "Naam van naaste familielid",
     "nextOfKinRelationship": "Verhouding",
-    "nextOfKinPhone": "Telefoon van naaste familielid"
+    "nextOfKinPhone": "Telefoon van naaste familielid",
+    "showBadge": "QR-kenteken",
+    "checkIn": "Meld aan",
+    "checkOut": "Meld af",
+    "badgeTitle": "{{name}} se kenteken",
+    "badgeHint": "Sekuriteit skandeer hierdie kode by die hek om hierdie werker op die Skandeerder-bladsy aan of af te meld."
   },
   "equipment": {
     "title": "Toerusting",
@@ -760,7 +767,8 @@
     "inductionDeclaration": "Ek bevestig dat ek die terrein se verpligte veiligheidsinduksie-sessie voltooi het, soos vereis ingevolge die Mynveiligheids- en -gesondheidswet.",
     "popiaDeclaration": "Ek stem in tot die verwerking en berging van my persoonlike inligting vir terreinveiligheid en toegangsbeheer, ooreenkomstig die Wet op Beskerming van Persoonlike Inligting (POPIA).",
     "indemnityDeclaration": "Ek erken die terrein se gevaarkennisgewing en aanvaar die besoeker-vrywaringsvoorwaardes vir die duur van my besoek.",
-    "submit": "Meld aan"
+    "submit": "Meld aan",
+    "qrHint": "Hou hierdie kode. Wys dit vir sekuriteit wanneer jy vertrek sodat hulle jou kan afmeld."
   },
   "permitToWork": {
     "nav": "Werkpermit",
@@ -853,5 +861,54 @@
         "OTHER": "Ander"
       }
     }
+  },
+  "trucks": {
+    "nav": "Vragmotorregistrasie",
+    "title": "Vragmotorregistrasie",
+    "subtitle": "Registreer vragmotors en teken ladings en afleweringas in en uit die terrein aan",
+    "loading": "Laai tans…",
+    "tabDeliveries": "Ladings & Afleweringe",
+    "tabTrucks": "Geregistreerde Vragmotors",
+    "newDelivery": "+ Teken Aflewering Aan",
+    "newDeliveryTitle": "Teken Aflewering Aan",
+    "registerTruckFirst": "Registreer eers 'n vragmotor voordat jy 'n aflewering aanteken.",
+    "colTruck": "Vragmotor",
+    "direction": "Rigting",
+    "inbound": "Inkomend (aflewering na terrein)",
+    "outbound": "Uitgaand (lading vanaf terrein)",
+    "cargoType": "Lading / materiaal",
+    "quantity": "Hoeveelheid",
+    "unit": "Eenheid",
+    "unitPlaceholder": "ton, liter, eenhede…",
+    "notes": "Notas",
+    "checkOut": "Meld af",
+    "noneYet": "Nog geen afleweringe aangeteken nie.",
+    "newTruck": "+ Registreer Vragmotor",
+    "newTruckTitle": "Registreer Vragmotor",
+    "editTruckTitle": "Wysig Vragmotor",
+    "registrationNumber": "Registrasienommer",
+    "driverName": "Bestuurder se naam",
+    "driverLicense": "Bestuurder se lisensienommer",
+    "haulierCompany": "Vervoerder / maatskappy",
+    "vehicleType": "Voertuigtipe",
+    "vehicleTypePlaceholder": "Tipper, plat-bak, tenkwa…",
+    "noneYetTrucks": "Nog geen vragmotors geregistreer nie.",
+    "confirmDeleteTruck": "Skrap hierdie vragmotor? Sy afleweringsgeskiedenis sal ook verwyder word.",
+    "confirmDeleteDelivery": "Skrap hierdie afleweringsrekord?"
+  },
+  "scanner": {
+    "nav": "Skandeerder",
+    "title": "Sekuriteitskandeerder",
+    "subtitle": "Skandeer 'n besoeker of werker se QR-kode om hulle aan of af te meld",
+    "starting": "Begin kamera…",
+    "cameraError": "Kon nie by die kamera uitkom nie. Kontroleer jou blaaier se kameratoestemmings en probeer weer.",
+    "lastResult": "Laaste Skandering",
+    "noResultYet": "Nog geen kodes geskandeer nie.",
+    "hint": "Rig die kamera op 'n besoeker se aanmeld-QR-kode (vanaf hul foon) of 'n werker se kenteken-QR-kode.",
+    "visitorCheckedOut": "{{name}} het afgemeld.",
+    "workerCheckedIn": "{{name}} het aangemeld.",
+    "workerCheckedOut": "{{name}} het afgemeld.",
+    "unknownCode": "Hierdie QR-kode is nie 'n herkende Mine Guard-kode nie.",
+    "actionFailed": "Kon nie hierdie skandering verwerk nie."
   }
 }

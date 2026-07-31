@@ -1,6 +1,7 @@
 import { FormEvent, useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
+import QRCode from "qrcode";
 import { api } from "../api/client";
 import { buttonPrimary, cardClass, inputClass, labelClass } from "../components/ui";
 
@@ -25,7 +26,8 @@ export default function VisitorCheckIn() {
 
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [done, setDone] = useState<{ checkInAt: string } | null>(null);
+  const [done, setDone] = useState<{ id: string; checkInAt: string } | null>(null);
+  const [qrDataUrl, setQrDataUrl] = useState<string | null>(null);
 
   useEffect(() => {
     if (!siteId) return;
@@ -65,7 +67,9 @@ export default function VisitorCheckIn() {
       const res = await api.post(`/visitors/checkin/${siteId}`, form, {
         headers: { "Content-Type": "multipart/form-data" },
       });
-      setDone({ checkInAt: res.data.checkInAt });
+      setDone({ id: res.data.id, checkInAt: res.data.checkInAt });
+      const dataUrl = await QRCode.toDataURL(`visitor:${res.data.id}`, { width: 220, margin: 1 });
+      setQrDataUrl(dataUrl);
     } catch {
       setError(t("visitorCheckin.submitError"));
     } finally {
@@ -85,11 +89,16 @@ export default function VisitorCheckIn() {
     return (
       <div className="min-h-screen flex items-center justify-center bg-mine-950 p-4">
         <div className={`${cardClass} p-8 max-w-md text-center space-y-3`}>
-          <div className="text-3xl">✅</div>
           <h1 className="text-lg font-bold">{t("visitorCheckin.successTitle")}</h1>
           <p className="text-mine-300 text-sm">
             {t("visitorCheckin.successBody", { time: new Date(done.checkInAt).toLocaleString() })}
           </p>
+          {qrDataUrl && (
+            <div className="flex flex-col items-center gap-2 pt-2">
+              <img src={qrDataUrl} alt="Your check-in QR code" className="rounded-md border border-mine-800" />
+              <p className="text-xs text-mine-400 max-w-xs">{t("visitorCheckin.qrHint")}</p>
+            </div>
+          )}
         </div>
       </div>
     );

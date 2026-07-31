@@ -158,7 +158,9 @@
     "pendingPermitsToWork": "Permits to Work Awaiting Approval",
     "escalatedRisks": "Escalated Risks",
     "noSiteAccess": "You haven't been assigned to any sites yet. Ask an administrator to grant you site access to see Visitor Management, Permit to Work, and Risk Register operations here.",
-    "complianceBreakdown": "Compliance Breakdown"
+    "complianceBreakdown": "Compliance Breakdown",
+    "peopleOnSite": "People Currently in the Mine",
+    "peopleOnSiteBreakdown": "{{visitors}} visitors · {{staff}} staff on shift · {{drivers}} truck drivers"
   },
   "sites": {
     "title": "Sites & Zones",
@@ -228,7 +230,12 @@
     "nextOfKin": "Next of Kin",
     "nextOfKinName": "Next of kin name",
     "nextOfKinRelationship": "Relationship",
-    "nextOfKinPhone": "Next of kin phone"
+    "nextOfKinPhone": "Next of kin phone",
+    "showBadge": "QR badge",
+    "checkIn": "Check in",
+    "checkOut": "Check out",
+    "badgeTitle": "{{name}}'s badge",
+    "badgeHint": "Security scans this code at the gate to check this worker in or out on the Scanner page."
   },
   "equipment": {
     "title": "Equipment",
@@ -760,7 +767,8 @@
     "inductionDeclaration": "I confirm I have completed the site's mandatory safety induction briefing, as required under the Mine Health and Safety Act.",
     "popiaDeclaration": "I consent to the processing and storage of my personal information for site safety and access-control purposes, in accordance with the Protection of Personal Information Act (POPIA).",
     "indemnityDeclaration": "I acknowledge the site's hazard notice and accept the visitor indemnity terms for the duration of my visit.",
-    "submit": "Check in"
+    "submit": "Check in",
+    "qrHint": "Keep this code. Show it to security when you leave so they can check you out."
   },
   "permitToWork": {
     "nav": "Permit to Work",
@@ -853,5 +861,54 @@
         "OTHER": "Other"
       }
     }
+  },
+  "trucks": {
+    "nav": "Truck Registration",
+    "title": "Truck Registration",
+    "subtitle": "Register trucks and log loads and deliveries in and out of site",
+    "loading": "Loading…",
+    "tabDeliveries": "Loads & Deliveries",
+    "tabTrucks": "Registered Trucks",
+    "newDelivery": "+ Log Delivery",
+    "newDeliveryTitle": "Log Delivery",
+    "registerTruckFirst": "Register a truck first before logging a delivery.",
+    "colTruck": "Truck",
+    "direction": "Direction",
+    "inbound": "Inbound (delivery to site)",
+    "outbound": "Outbound (load from site)",
+    "cargoType": "Cargo / material",
+    "quantity": "Quantity",
+    "unit": "Unit",
+    "unitPlaceholder": "tons, liters, units…",
+    "notes": "Notes",
+    "checkOut": "Check out",
+    "noneYet": "No deliveries logged yet.",
+    "newTruck": "+ Register Truck",
+    "newTruckTitle": "Register Truck",
+    "editTruckTitle": "Edit Truck",
+    "registrationNumber": "Registration number",
+    "driverName": "Driver name",
+    "driverLicense": "Driver license number",
+    "haulierCompany": "Haulier / company",
+    "vehicleType": "Vehicle type",
+    "vehicleTypePlaceholder": "Tipper, flatbed, tanker…",
+    "noneYetTrucks": "No trucks registered yet.",
+    "confirmDeleteTruck": "Delete this truck? Its delivery history will also be removed.",
+    "confirmDeleteDelivery": "Delete this delivery record?"
+  },
+  "scanner": {
+    "nav": "Scanner",
+    "title": "Security Scanner",
+    "subtitle": "Scan a visitor's or worker's QR code to check them in or out",
+    "starting": "Starting camera…",
+    "cameraError": "Could not access the camera. Check your browser's camera permissions and try again.",
+    "lastResult": "Last Scan",
+    "noResultYet": "No codes scanned yet.",
+    "hint": "Point the camera at a visitor's check-in QR code (from their phone) or a worker's badge QR code.",
+    "visitorCheckedOut": "{{name}} checked out.",
+    "workerCheckedIn": "{{name}} checked in.",
+    "workerCheckedOut": "{{name}} checked out.",
+    "unknownCode": "This QR code isn't a recognised Mine Guard code.",
+    "actionFailed": "Could not process this scan."
   }
 }

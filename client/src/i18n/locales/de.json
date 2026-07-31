@@ -158,7 +158,9 @@
     "pendingPermitsToWork": "Arbeitserlaubnisse, die auf Genehmigung warten",
     "escalatedRisks": "Eskalierte Risiken",
     "noSiteAccess": "Ihnen wurden noch keine Standorte zugewiesen. Bitten Sie einen Administrator, Ihnen Standortzugriff zu gewähren, um hier Besucherverwaltung, Arbeitserlaubnis und Risikoregister zu sehen.",
-    "complianceBreakdown": "Compliance-Aufschlüsselung"
+    "complianceBreakdown": "Compliance-Aufschlüsselung",
+    "peopleOnSite": "Personen Derzeit in der Mine",
+    "peopleOnSiteBreakdown": "{{visitors}} Besucher · {{staff}} Mitarbeiter im Dienst · {{drivers}} LKW-Fahrer"
   },
   "sites": {
     "title": "Standorte & Zonen",
@@ -228,7 +230,12 @@
     "nextOfKin": "Angehörige/r",
     "nextOfKinName": "Name der/des Angehörigen",
     "nextOfKinRelationship": "Beziehung",
-    "nextOfKinPhone": "Telefon der/des Angehörigen"
+    "nextOfKinPhone": "Telefon der/des Angehörigen",
+    "showBadge": "QR-Ausweis",
+    "checkIn": "Einchecken",
+    "checkOut": "Auschecken",
+    "badgeTitle": "Ausweis von {{name}}",
+    "badgeHint": "Der Sicherheitsdienst scannt diesen Code am Tor, um diesen Mitarbeiter auf der Scanner-Seite ein- oder auszuchecken."
   },
   "equipment": {
     "title": "Ausrüstung",
@@ -760,7 +767,8 @@
     "inductionDeclaration": "Ich bestätige, dass ich die verpflichtende Sicherheitseinweisung des Standorts absolviert habe, wie es das Bergbau-Gesundheits- und Sicherheitsgesetz vorschreibt.",
     "popiaDeclaration": "Ich stimme der Verarbeitung und Speicherung meiner personenbezogenen Daten zu Zwecken der Standortsicherheit und Zutrittskontrolle gemäß dem Gesetz zum Schutz personenbezogener Informationen (POPIA) zu.",
     "indemnityDeclaration": "Ich nehme den Gefahrenhinweis des Standorts zur Kenntnis und akzeptiere die Haftungsfreistellungsbedingungen für Besucher für die Dauer meines Besuchs.",
-    "submit": "Anmelden"
+    "submit": "Anmelden",
+    "qrHint": "Bewahren Sie diesen Code auf. Zeigen Sie ihn beim Verlassen dem Sicherheitsdienst, damit Sie ausgecheckt werden können."
   },
   "permitToWork": {
     "nav": "Arbeitserlaubnis",
@@ -853,5 +861,54 @@
         "OTHER": "Sonstiges"
       }
     }
+  },
+  "trucks": {
+    "nav": "LKW-Registrierung",
+    "title": "LKW-Registrierung",
+    "subtitle": "Registrieren Sie LKWs und erfassen Sie Ladungen und Lieferungen zum und vom Standort",
+    "loading": "Wird geladen…",
+    "tabDeliveries": "Ladungen & Lieferungen",
+    "tabTrucks": "Registrierte LKWs",
+    "newDelivery": "+ Lieferung erfassen",
+    "newDeliveryTitle": "Lieferung erfassen",
+    "registerTruckFirst": "Registrieren Sie zuerst einen LKW, bevor Sie eine Lieferung erfassen.",
+    "colTruck": "LKW",
+    "direction": "Richtung",
+    "inbound": "Eingehend (Lieferung zum Standort)",
+    "outbound": "Ausgehend (Ladung vom Standort)",
+    "cargoType": "Ladung / Material",
+    "quantity": "Menge",
+    "unit": "Einheit",
+    "unitPlaceholder": "Tonnen, Liter, Einheiten…",
+    "notes": "Notizen",
+    "checkOut": "Auschecken",
+    "noneYet": "Noch keine Lieferungen erfasst.",
+    "newTruck": "+ LKW registrieren",
+    "newTruckTitle": "LKW registrieren",
+    "editTruckTitle": "LKW bearbeiten",
+    "registrationNumber": "Kennzeichen",
+    "driverName": "Name des Fahrers",
+    "driverLicense": "Führerscheinnummer des Fahrers",
+    "haulierCompany": "Spediteur / Unternehmen",
+    "vehicleType": "Fahrzeugtyp",
+    "vehicleTypePlaceholder": "Kipper, Pritsche, Tankwagen…",
+    "noneYetTrucks": "Noch keine LKWs registriert.",
+    "confirmDeleteTruck": "Diesen LKW löschen? Sein Lieferverlauf wird ebenfalls entfernt.",
+    "confirmDeleteDelivery": "Diesen Lieferdatensatz löschen?"
+  },
+  "scanner": {
+    "nav": "Scanner",
+    "title": "Sicherheitsscanner",
+    "subtitle": "Scannen Sie den QR-Code eines Besuchers oder Mitarbeiters, um ihn ein- oder auszuchecken",
+    "starting": "Kamera wird gestartet…",
+    "cameraError": "Auf die Kamera konnte nicht zugegriffen werden. Überprüfen Sie die Kameraberechtigungen Ihres Browsers und versuchen Sie es erneut.",
+    "lastResult": "Letzter Scan",
+    "noResultYet": "Noch keine Codes gescannt.",
+    "hint": "Richten Sie die Kamera auf den Check-in-QR-Code eines Besuchers (von dessen Telefon) oder den Ausweis-QR-Code eines Mitarbeiters.",
+    "visitorCheckedOut": "{{name}} wurde ausgecheckt.",
+    "workerCheckedIn": "{{name}} wurde eingecheckt.",
+    "workerCheckedOut": "{{name}} wurde ausgecheckt.",
+    "unknownCode": "Dieser QR-Code ist kein erkannter Mine-Guard-Code.",
+    "actionFailed": "Dieser Scan konnte nicht verarbeitet werden."
   }
 }

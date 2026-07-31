@@ -132,21 +132,37 @@ export default function ExecutiveDashboard() {
       </div>
 
       {executiveOps.hasSiteAccess ? (
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-          <OpsCard label={t("executive.visitorsOnSite")} value={executiveOps.visitorsOnSite} to="/visitors" />
-          <OpsCard
-            label={t("executive.pendingPermitsToWork")}
-            value={executiveOps.pendingPermitsToWork}
-            to="/permits-to-work"
-            tone={executiveOps.pendingPermitsToWork > 0 ? "caution" : "positive"}
-          />
-          <OpsCard
-            label={t("executive.escalatedRisks")}
-            value={executiveOps.escalatedRisks}
-            to="/compliance"
-            tone={executiveOps.escalatedRisks > 0 ? "negative" : "positive"}
-          />
-        </div>
+        <>
+          <div className={`${cardClass} p-5 flex items-center justify-between flex-wrap gap-4`}>
+            <div>
+              <h2 className="text-sm font-semibold">{t("executive.peopleOnSite")}</h2>
+              <p className="text-xs text-mine-400 mt-0.5">
+                {t("executive.peopleOnSiteBreakdown", {
+                  visitors: executiveOps.peopleOnSite.visitors,
+                  staff: executiveOps.peopleOnSite.staff,
+                  drivers: executiveOps.peopleOnSite.truckDrivers,
+                })}
+              </p>
+            </div>
+            <div className="text-4xl font-bold text-mine-50">{executiveOps.peopleOnSite.total}</div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+            <OpsCard label={t("executive.visitorsOnSite")} value={executiveOps.visitorsOnSite} to="/visitors" />
+            <OpsCard
+              label={t("executive.pendingPermitsToWork")}
+              value={executiveOps.pendingPermitsToWork}
+              to="/permits-to-work"
+              tone={executiveOps.pendingPermitsToWork > 0 ? "caution" : "positive"}
+            />
+            <OpsCard
+              label={t("executive.escalatedRisks")}
+              value={executiveOps.escalatedRisks}
+              to="/compliance"
+              tone={executiveOps.escalatedRisks > 0 ? "negative" : "positive"}
+            />
+          </div>
+        </>
       ) : (
         <div className={`${cardClass} p-4 text-sm text-mine-300`}>{t("executive.noSiteAccess")}</div>
       )}
