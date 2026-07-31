@@ -8,6 +8,8 @@ import { requireAuth, requireRole } from "../middleware/auth";
 
 const router = Router();
 
+// "OTHER" is intentionally excluded here: every invited executive must be given a defined
+// position so their dashboard access can be scoped correctly.
 const executiveTitleEnum = z.enum([
   "GENERAL_MANAGER",
   "CFO",
@@ -18,7 +20,6 @@ const executiveTitleEnum = z.enum([
   "OPERATIONS_MANAGER",
   "COMPLIANCE_OFFICER",
   "IT_MANAGER",
-  "OTHER",
 ]);
 
 const createInviteSchema = z.object({

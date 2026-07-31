@@ -32,7 +32,8 @@
     "workers": "Trabajadores",
     "incidents": "Incidentes",
     "equipment": "Equipos",
-    "signOut": "Cerrar sesión"
+    "signOut": "Cerrar sesión",
+    "signedInAs": "Conectado como"
   },
   "language": {
     "label": "Idioma",
@@ -728,7 +729,19 @@
     "confirmDelete": "¿Eliminar este contratista?",
     "newTitle": "Nuevo Contratista",
     "editTitle": "Editar Contratista",
-    "loading": "Cargando…"
+    "loading": "Cargando…",
+    "shareLink": "Compartir Enlace de Registro",
+    "shareTitle": "Autorregistro de Contratistas",
+    "shareHint": "Comparte este enlace o código QR con un contratista para que su empresa pueda registrarse para este sitio."
+  },
+  "contractorRegister": {
+    "title": "Registro de Contratista",
+    "subtitle": "Registrándose para {{site}}",
+    "siteNotFound": "Este enlace de registro no es válido o no se pudo encontrar el sitio.",
+    "submitError": "El registro falló. Verifica tus datos e inténtalo de nuevo.",
+    "submit": "Registrar",
+    "successTitle": "Registro recibido",
+    "successBody": "Gracias. Tu empresa ha sido registrada. El equipo del sitio de la mina se pondrá en contacto si se necesita documentación adicional."
   },
   "visitors": {
     "nav": "Gestión de Visitantes",
@@ -910,5 +923,15 @@
     "workerCheckedOut": "{{name}} registró su salida.",
     "unknownCode": "Este código QR no es un código reconocido de Mine Guard.",
     "actionFailed": "No se pudo procesar este escaneo."
+  },
+  "messages": {
+    "nav": "Mensajes",
+    "title": "Mensajes",
+    "subtitle": "Mensajes directos entre Administradores y Ejecutivos",
+    "noContacts": "Aún no hay otros Administradores o Ejecutivos para enviar mensajes.",
+    "selectContact": "Selecciona a alguien de la lista para iniciar una conversación.",
+    "noMessagesYet": "Aún no hay mensajes. Saluda.",
+    "typePlaceholder": "Escribe un mensaje…",
+    "send": "Enviar"
   }
 }

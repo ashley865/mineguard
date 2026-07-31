@@ -32,7 +32,8 @@
     "workers": "Travailleurs",
     "incidents": "Incidents",
     "equipment": "Équipements",
-    "signOut": "Se déconnecter"
+    "signOut": "Se déconnecter",
+    "signedInAs": "Connecté en tant que"
   },
   "language": {
     "label": "Langue",
@@ -728,7 +729,19 @@
     "confirmDelete": "Supprimer ce sous-traitant ?",
     "newTitle": "Nouveau Sous-traitant",
     "editTitle": "Modifier le Sous-traitant",
-    "loading": "Chargement…"
+    "loading": "Chargement…",
+    "shareLink": "Partager le Lien d'Inscription",
+    "shareTitle": "Auto-inscription des Sous-traitants",
+    "shareHint": "Partagez ce lien ou ce code QR avec un sous-traitant afin que son entreprise puisse s'inscrire elle-même pour ce site."
+  },
+  "contractorRegister": {
+    "title": "Inscription Sous-traitant",
+    "subtitle": "Inscription pour {{site}}",
+    "siteNotFound": "Ce lien d'inscription est invalide ou le site est introuvable.",
+    "submitError": "L'inscription a échoué. Vérifiez vos informations et réessayez.",
+    "submit": "S'inscrire",
+    "successTitle": "Inscription reçue",
+    "successBody": "Merci. Votre entreprise a été inscrite. L'équipe du site minier vous contactera si des documents supplémentaires sont nécessaires."
   },
   "visitors": {
     "nav": "Gestion des Visiteurs",
@@ -910,5 +923,15 @@
     "workerCheckedOut": "{{name}} a enregistré sa sortie.",
     "unknownCode": "Ce code QR n'est pas un code Mine Guard reconnu.",
     "actionFailed": "Impossible de traiter ce scan."
+  },
+  "messages": {
+    "nav": "Messages",
+    "title": "Messages",
+    "subtitle": "Messages directs entre Administrateurs et Exécutifs",
+    "noContacts": "Aucun autre Administrateur ou Exécutif à qui envoyer un message pour le moment.",
+    "selectContact": "Sélectionnez quelqu'un dans la liste pour démarrer une conversation.",
+    "noMessagesYet": "Aucun message pour le moment. Dites bonjour.",
+    "typePlaceholder": "Écrivez un message…",
+    "send": "Envoyer"
   }
 }

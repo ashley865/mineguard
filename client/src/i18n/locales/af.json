@@ -32,7 +32,8 @@
     "workers": "Werkers",
     "incidents": "Voorvalle",
     "equipment": "Toerusting",
-    "signOut": "Meld af"
+    "signOut": "Meld af",
+    "signedInAs": "Aangemeld as"
   },
   "language": {
     "label": "Taal",
@@ -728,7 +729,19 @@
     "confirmDelete": "Skrap hierdie kontrakteur?",
     "newTitle": "Nuwe Kontrakteur",
     "editTitle": "Wysig Kontrakteur",
-    "loading": "Laai tans…"
+    "loading": "Laai tans…",
+    "shareLink": "Deel Registrasieskakel",
+    "shareTitle": "Kontrakteur Self-Registrasie",
+    "shareHint": "Deel hierdie skakel of QR-kode met 'n kontrakteur sodat hul maatskappy self vir hierdie terrein kan registreer."
+  },
+  "contractorRegister": {
+    "title": "Kontrakteurregistrasie",
+    "subtitle": "Registreer vir {{site}}",
+    "siteNotFound": "Hierdie registrasieskakel is ongeldig of die terrein kon nie gevind word nie.",
+    "submitError": "Registrasie het misluk. Kontroleer jou besonderhede en probeer weer.",
+    "submit": "Registreer",
+    "successTitle": "Registrasie ontvang",
+    "successBody": "Dankie. Jou maatskappy is geregistreer. Die myn se terreinspan sal kontak maak indien enige verdere dokumentasie benodig word."
   },
   "visitors": {
     "nav": "Besoekersbestuur",
@@ -910,5 +923,15 @@
     "workerCheckedOut": "{{name}} het afgemeld.",
     "unknownCode": "Hierdie QR-kode is nie 'n herkende Mine Guard-kode nie.",
     "actionFailed": "Kon nie hierdie skandering verwerk nie."
+  },
+  "messages": {
+    "nav": "Boodskappe",
+    "title": "Boodskappe",
+    "subtitle": "Direkte boodskappe tussen Administrateurs en Uitvoerende Beamptes",
+    "noContacts": "Nog geen ander Administrateurs of Uitvoerende Beamptes om te boodskap nie.",
+    "selectContact": "Kies iemand van die lys om 'n gesprek te begin.",
+    "noMessagesYet": "Nog geen boodskappe nie. Groet gerus.",
+    "typePlaceholder": "Tik 'n boodskap…",
+    "send": "Stuur"
   }
 }

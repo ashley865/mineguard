@@ -32,7 +32,8 @@
     "workers": "Mitarbeiter",
     "incidents": "Vorfälle",
     "equipment": "Ausrüstung",
-    "signOut": "Abmelden"
+    "signOut": "Abmelden",
+    "signedInAs": "Angemeldet als"
   },
   "language": {
     "label": "Sprache",
@@ -728,7 +729,19 @@
     "confirmDelete": "Diesen Auftragnehmer löschen?",
     "newTitle": "Neuer Auftragnehmer",
     "editTitle": "Auftragnehmer bearbeiten",
-    "loading": "Wird geladen…"
+    "loading": "Wird geladen…",
+    "shareLink": "Registrierungslink teilen",
+    "shareTitle": "Selbstregistrierung für Auftragnehmer",
+    "shareHint": "Teilen Sie diesen Link oder QR-Code mit einem Auftragnehmer, damit sich dessen Unternehmen selbst für diesen Standort registrieren kann."
+  },
+  "contractorRegister": {
+    "title": "Auftragnehmerregistrierung",
+    "subtitle": "Registrierung für {{site}}",
+    "siteNotFound": "Dieser Registrierungslink ist ungültig oder der Standort konnte nicht gefunden werden.",
+    "submitError": "Registrierung fehlgeschlagen. Bitte überprüfen Sie Ihre Angaben und versuchen Sie es erneut.",
+    "submit": "Registrieren",
+    "successTitle": "Registrierung erhalten",
+    "successBody": "Vielen Dank. Ihr Unternehmen wurde registriert. Das Standortteam der Mine wird sich melden, falls weitere Unterlagen benötigt werden."
   },
   "visitors": {
     "nav": "Besucherverwaltung",
@@ -910,5 +923,15 @@
     "workerCheckedOut": "{{name}} wurde ausgecheckt.",
     "unknownCode": "Dieser QR-Code ist kein erkannter Mine-Guard-Code.",
     "actionFailed": "Dieser Scan konnte nicht verarbeitet werden."
+  },
+  "messages": {
+    "nav": "Nachrichten",
+    "title": "Nachrichten",
+    "subtitle": "Direktnachrichten zwischen Administratoren und Führungskräften",
+    "noContacts": "Noch keine anderen Administratoren oder Führungskräfte zum Nachrichtenschreiben.",
+    "selectContact": "Wählen Sie jemanden aus der Liste, um eine Unterhaltung zu beginnen.",
+    "noMessagesYet": "Noch keine Nachrichten. Sagen Sie Hallo.",
+    "typePlaceholder": "Nachricht eingeben…",
+    "send": "Senden"
   }
 }

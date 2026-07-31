@@ -5,8 +5,10 @@ import { useAuth } from "../context/AuthContext";
 import { useAssignedSiteIds } from "../hooks/useAssignedSiteIds";
 import { api, API_URL } from "../api/client";
 import { Mine } from "../api/types";
+import { isModuleAllowed } from "../lib/executiveAccess";
 import LanguageSwitcher from "./LanguageSwitcher";
 import NotificationBell from "./NotificationBell";
+import MessagesBell from "./MessagesBell";
 
 export default function Layout() {
   const { t } = useTranslation();
@@ -26,6 +28,7 @@ export default function Layout() {
   const isExecutiveWithSites = user?.role === "EXECUTIVE" && (assignedSiteIds?.length ?? 0) > 0;
   const canSeeExecutiveOps = isAdmin || isExecutiveWithSites;
   const canUseScanner = user?.role === "ADMIN" || user?.role === "SUPERVISOR" || user?.role === "EXECUTIVE";
+  const canMessage = user?.role === "ADMIN" || user?.role === "EXECUTIVE";
 
   const navItems = [
     ...(user?.role === "EXECUTIVE"
@@ -52,8 +55,9 @@ export default function Layout() {
         ]
       : []),
     ...(canUseScanner ? [{ to: "/scanner", label: t("scanner.nav") }] : []),
+    ...(canMessage ? [{ to: "/messages", label: t("messages.nav") }] : []),
     { to: "/settings", label: t("settings.nav") },
-  ];
+  ].filter((item) => isModuleAllowed(user?.role, user?.title, item.to));
 
   return (
     <div className="min-h-screen md:flex">
@@ -120,7 +124,7 @@ export default function Layout() {
         </div>
       </aside>
       <div className="flex-1 flex flex-col min-w-0">
-        <header className="h-14 shrink-0 border-b border-mine-800 bg-mine-900/80 backdrop-blur flex items-center justify-between px-4 md:px-6 print:hidden">
+        <header className="h-14 shrink-0 border-b border-mine-800 bg-mine-900/80 backdrop-blur flex items-center gap-3 px-4 md:px-6 print:hidden">
           <button
             aria-label="Open menu"
             className="md:hidden p-2 -ml-2 rounded-lg text-mine-50 hover:bg-mine-800"
@@ -130,8 +134,17 @@ export default function Layout() {
               <path d="M3 6h18M3 12h18M3 18h18" strokeLinecap="round" />
             </svg>
           </button>
-          <div className="md:hidden font-semibold text-sm truncate">{mine?.name || "Mine Guard"}</div>
-          <NotificationBell />
+          <div className="md:hidden flex-1 font-semibold text-sm truncate">{mine?.name || "Mine Guard"}</div>
+          <div className="hidden md:flex items-center gap-1.5 text-xs text-mine-400">
+            <span>{t("nav.signedInAs")}</span>
+            <span className="font-semibold text-mine-100">
+              {user?.title ? t(`settings.invites.titles.${user.title}`) : user?.role}
+            </span>
+          </div>
+          <div className="ml-auto flex items-center gap-3">
+            {canMessage && <MessagesBell />}
+            <NotificationBell />
+          </div>
         </header>
         <main className="flex-1 bg-mine-950 overflow-y-auto">
           <div className="max-w-7xl mx-auto p-4 sm:p-6">

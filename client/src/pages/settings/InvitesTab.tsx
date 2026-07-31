@@ -15,7 +15,6 @@ const executiveTitles: ExecutiveTitle[] = [
   "OPERATIONS_MANAGER",
   "COMPLIANCE_OFFICER",
   "IT_MANAGER",
-  "OTHER",
 ];
 
 export default function InvitesTab() {

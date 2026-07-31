@@ -1,6 +1,8 @@
-import { Routes, Route } from "react-router-dom";
+import { ReactElement } from "react";
+import { Routes, Route, Navigate } from "react-router-dom";
 import ProtectedRoute from "./components/ProtectedRoute";
 import { useAuth } from "./context/AuthContext";
+import { isModuleAllowed, RestrictedModule } from "./lib/executiveAccess";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import RegisterMine from "./pages/RegisterMine";
@@ -19,6 +21,7 @@ import DocumentControl from "./pages/DocumentControl";
 import GovernmentInspection from "./pages/GovernmentInspection";
 import Reporting from "./pages/Reporting";
 import Contractors from "./pages/Contractors";
+import ContractorRegister from "./pages/ContractorRegister";
 import VisitorManagement from "./pages/VisitorManagement";
 import VisitorCheckIn from "./pages/VisitorCheckIn";
 import PermitToWork from "./pages/PermitToWork";
@@ -26,10 +29,17 @@ import Settings from "./pages/Settings";
 import AcceptExecutiveInvite from "./pages/AcceptExecutiveInvite";
 import TruckRegistration from "./pages/TruckRegistration";
 import Scanner from "./pages/Scanner";
+import Messages from "./pages/Messages";
 
 function HomeRoute() {
   const { user } = useAuth();
   return user?.role === "EXECUTIVE" ? <ExecutiveDashboard /> : <Dashboard />;
+}
+
+function ModuleRoute({ path, children }: { path: RestrictedModule; children: ReactElement }) {
+  const { user } = useAuth();
+  if (!isModuleAllowed(user?.role, user?.title, path)) return <Navigate to="/" replace />;
+  return children;
 }
 
 export default function App() {
@@ -39,26 +49,28 @@ export default function App() {
       <Route path="/signup" element={<Signup />} />
       <Route path="/register-mine" element={<RegisterMine />} />
       <Route path="/visit/:siteId" element={<VisitorCheckIn />} />
+      <Route path="/contractor-register/:siteId" element={<ContractorRegister />} />
       <Route path="/join-executive/:inviteId" element={<AcceptExecutiveInvite />} />
       <Route element={<ProtectedRoute />}>
         <Route path="/" element={<HomeRoute />} />
-        <Route path="/sites" element={<Sites />} />
-        <Route path="/sensors" element={<Sensors />} />
-        <Route path="/alerts" element={<Alerts />} />
-        <Route path="/workers" element={<Workers />} />
-        <Route path="/incidents" element={<Incidents />} />
-        <Route path="/equipment" element={<Equipment />} />
-        <Route path="/compliance" element={<SafetyCompliance />} />
-        <Route path="/permits" element={<Permits />} />
-        <Route path="/workforce" element={<WorkforceManagement />} />
-        <Route path="/documents" element={<DocumentControl />} />
-        <Route path="/inspection" element={<GovernmentInspection />} />
-        <Route path="/reporting" element={<Reporting />} />
-        <Route path="/contractors" element={<Contractors />} />
-        <Route path="/visitors" element={<VisitorManagement />} />
-        <Route path="/permits-to-work" element={<PermitToWork />} />
-        <Route path="/trucks" element={<TruckRegistration />} />
-        <Route path="/scanner" element={<Scanner />} />
+        <Route path="/sites" element={<ModuleRoute path="/sites"><Sites /></ModuleRoute>} />
+        <Route path="/sensors" element={<ModuleRoute path="/sensors"><Sensors /></ModuleRoute>} />
+        <Route path="/alerts" element={<ModuleRoute path="/alerts"><Alerts /></ModuleRoute>} />
+        <Route path="/workers" element={<ModuleRoute path="/workers"><Workers /></ModuleRoute>} />
+        <Route path="/incidents" element={<ModuleRoute path="/incidents"><Incidents /></ModuleRoute>} />
+        <Route path="/equipment" element={<ModuleRoute path="/equipment"><Equipment /></ModuleRoute>} />
+        <Route path="/compliance" element={<ModuleRoute path="/compliance"><SafetyCompliance /></ModuleRoute>} />
+        <Route path="/permits" element={<ModuleRoute path="/permits"><Permits /></ModuleRoute>} />
+        <Route path="/workforce" element={<ModuleRoute path="/workforce"><WorkforceManagement /></ModuleRoute>} />
+        <Route path="/documents" element={<ModuleRoute path="/documents"><DocumentControl /></ModuleRoute>} />
+        <Route path="/inspection" element={<ModuleRoute path="/inspection"><GovernmentInspection /></ModuleRoute>} />
+        <Route path="/reporting" element={<ModuleRoute path="/reporting"><Reporting /></ModuleRoute>} />
+        <Route path="/contractors" element={<ModuleRoute path="/contractors"><Contractors /></ModuleRoute>} />
+        <Route path="/visitors" element={<ModuleRoute path="/visitors"><VisitorManagement /></ModuleRoute>} />
+        <Route path="/permits-to-work" element={<ModuleRoute path="/permits-to-work"><PermitToWork /></ModuleRoute>} />
+        <Route path="/trucks" element={<ModuleRoute path="/trucks"><TruckRegistration /></ModuleRoute>} />
+        <Route path="/scanner" element={<ModuleRoute path="/scanner"><Scanner /></ModuleRoute>} />
+        <Route path="/messages" element={<Messages />} />
         <Route path="/settings" element={<Settings />} />
       </Route>
     </Routes>

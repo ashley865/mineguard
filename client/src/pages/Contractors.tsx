@@ -1,5 +1,6 @@
 import { FormEvent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
+import QRCode from "qrcode";
 import { api } from "../api/client";
 import { useAuth } from "../context/AuthContext";
 import { Contractor, ContractorStatus, Site } from "../api/types";
@@ -8,6 +9,56 @@ import Modal from "../components/Modal";
 import { buttonDanger, buttonPrimary, buttonSecondary, cardClass, inputClass, labelClass } from "../components/ui";
 
 const contractorStatuses: ContractorStatus[] = ["ACTIVE", "EXPIRED", "SUSPENDED", "TERMINATED"];
+
+function ShareRegistrationModal({ sites, onClose }: { sites: Site[]; onClose: () => void }) {
+  const { t } = useTranslation();
+  const [siteId, setSiteId] = useState(sites[0]?.id ?? "");
+  const [dataUrl, setDataUrl] = useState<string | null>(null);
+  const [copied, setCopied] = useState(false);
+  const link = siteId ? `${window.location.origin}/contractor-register/${siteId}` : "";
+
+  useEffect(() => {
+    if (!link) return;
+    let cancelled = false;
+    QRCode.toDataURL(link, { width: 220, margin: 1 }).then((url) => {
+      if (!cancelled) setDataUrl(url);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [link]);
+
+  function copyLink() {
+    navigator.clipboard.writeText(link);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  }
+
+  return (
+    <Modal title={t("contractors.shareTitle")} onClose={onClose}>
+      <div className="space-y-4">
+        <div>
+          <label className={labelClass}>{t("common.site")}</label>
+          <select className={inputClass} value={siteId} onChange={(e) => setSiteId(e.target.value)}>
+            {sites.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
+          </select>
+        </div>
+        {dataUrl && (
+          <div className="flex flex-col items-center gap-2">
+            <img src={dataUrl} alt="Contractor registration QR code" className="rounded-md border border-mine-800" />
+          </div>
+        )}
+        <div className="flex gap-2">
+          <input readOnly className={`${inputClass} font-mono text-xs`} value={link} onFocus={(e) => e.target.select()} />
+          <button type="button" className={buttonSecondary} onClick={copyLink}>
+            {copied ? t("registerMine.copied") : t("registerMine.copy")}
+          </button>
+        </div>
+        <p className="text-xs text-mine-400">{t("contractors.shareHint")}</p>
+      </div>
+    </Modal>
+  );
+}
 
 function ContractorForm({ sites, initial, onSubmit, onCancel }: {
   sites: Site[];
@@ -133,6 +184,7 @@ export default function Contractors() {
   const [sites, setSites] = useState<Site[]>([]);
   const [loading, setLoading] = useState(true);
   const [modal, setModal] = useState<null | "create" | Contractor>(null);
+  const [shareModal, setShareModal] = useState(false);
 
   async function load() {
     setLoading(true);
@@ -173,9 +225,14 @@ export default function Contractors() {
           <h1 className="text-xl font-bold">{t("contractors.title")}</h1>
           <p className="text-mine-300 text-sm">{t("contractors.subtitle")}</p>
         </div>
-        {canEdit && sites.length > 0 && (
-          <button className={buttonPrimary} onClick={() => setModal("create")}>{t("contractors.new")}</button>
-        )}
+        <div className="flex gap-2">
+          {canEdit && sites.length > 0 && (
+            <button className={buttonSecondary} onClick={() => setShareModal(true)}>{t("contractors.shareLink")}</button>
+          )}
+          {canEdit && sites.length > 0 && (
+            <button className={buttonPrimary} onClick={() => setModal("create")}>{t("contractors.new")}</button>
+          )}
+        </div>
       </div>
 
       <div className={`${cardClass} overflow-x-auto`}>
@@ -225,6 +282,8 @@ export default function Contractors() {
           />
         </Modal>
       )}
+
+      {shareModal && <ShareRegistrationModal sites={sites} onClose={() => setShareModal(false)} />}
     </div>
   );
 }

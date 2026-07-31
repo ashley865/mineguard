@@ -186,6 +186,8 @@ model User {
   createdInvites         ExecutiveInvite[]          @relation("InviteCreatedBy")
   acceptedInvite         ExecutiveInvite?           @relation("InviteAcceptedUser")
   loggedDeliveries       Delivery[]
+  sentMessages           Message[]                  @relation("MessageSender")
+  receivedMessages       Message[]                  @relation("MessageRecipient")
 }
 
 model Site {
@@ -829,4 +831,18 @@ model Delivery {
   loggedBy     User?             @relation(fields: [loggedById], references: [id], onDelete: SetNull)
 
   createdAt DateTime @default(now())
+}
+
+model Message {
+  id          String    @id @default(cuid())
+  senderId    String
+  sender      User      @relation("MessageSender", fields: [senderId], references: [id], onDelete: Cascade)
+  recipientId String
+  recipient   User      @relation("MessageRecipient", fields: [recipientId], references: [id], onDelete: Cascade)
+  body        String
+  readAt      DateTime?
+  createdAt   DateTime  @default(now())
+
+  @@index([senderId, recipientId])
+  @@index([recipientId, readAt])
 }

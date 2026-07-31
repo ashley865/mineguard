@@ -631,3 +631,23 @@ export interface Delivery {
   loggedBy?: { id: string; name: string } | null;
   createdAt: string;
 }
+
+export interface MessageContact {
+  id: string;
+  name: string;
+  email: string;
+  role: Role;
+  title?: ExecutiveTitle | null;
+  unreadCount: number;
+}
+
+export interface Message {
+  id: string;
+  senderId: string;
+  recipientId: string;
+  body: string;
+  readAt?: string | null;
+  createdAt: string;
+  sender: { id: string; name: string; email: string; role: Role; title?: ExecutiveTitle | null };
+  recipient: { id: string; name: string; email: string; role: Role; title?: ExecutiveTitle | null };
+}

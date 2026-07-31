@@ -32,7 +32,8 @@
     "workers": "Workers",
     "incidents": "Incidents",
     "equipment": "Equipment",
-    "signOut": "Sign out"
+    "signOut": "Sign out",
+    "signedInAs": "Signed in as"
   },
   "language": {
     "label": "Language",
@@ -728,7 +729,19 @@
     "confirmDelete": "Delete this contractor?",
     "newTitle": "New Contractor",
     "editTitle": "Edit Contractor",
-    "loading": "Loading…"
+    "loading": "Loading…",
+    "shareLink": "Share Registration Link",
+    "shareTitle": "Contractor Self-Registration",
+    "shareHint": "Share this link or QR code with a contractor so their company can register itself for this site."
+  },
+  "contractorRegister": {
+    "title": "Contractor Registration",
+    "subtitle": "Registering for {{site}}",
+    "siteNotFound": "This registration link is invalid or the site could not be found.",
+    "submitError": "Registration failed. Please check your details and try again.",
+    "submit": "Register",
+    "successTitle": "Registration received",
+    "successBody": "Thank you. Your company has been registered. The mine's site team will be in touch if any further documentation is needed."
   },
   "visitors": {
     "nav": "Visitor Management",
@@ -910,5 +923,15 @@
     "workerCheckedOut": "{{name}} checked out.",
     "unknownCode": "This QR code isn't a recognised Mine Guard code.",
     "actionFailed": "Could not process this scan."
+  },
+  "messages": {
+    "nav": "Messages",
+    "title": "Messages",
+    "subtitle": "Direct messages between Administrators and Executives",
+    "noContacts": "No other Administrators or Executives to message yet.",
+    "selectContact": "Select someone from the list to start a conversation.",
+    "noMessagesYet": "No messages yet. Say hello.",
+    "typePlaceholder": "Type a message…",
+    "send": "Send"
   }
 }

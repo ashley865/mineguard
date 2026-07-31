@@ -20,6 +20,31 @@ const contractorSchema = z.object({
   siteId: z.string().min(1),
 });
 
+const publicRegisterSchema = contractorSchema.omit({ status: true, siteId: true });
+
+// Public: lets a contractor self-register via a link or QR code shared for a specific site.
+router.get("/site/:siteId/info", async (req, res) => {
+  const site = await prisma.site.findUnique({
+    where: { id: req.params.siteId },
+    select: { id: true, name: true, location: true },
+  });
+  if (!site) return res.status(404).json({ error: "Site not found" });
+  res.json(site);
+});
+
+router.post("/register/:siteId", async (req, res) => {
+  const site = await prisma.site.findUnique({ where: { id: req.params.siteId } });
+  if (!site) return res.status(404).json({ error: "Site not found" });
+
+  const parsed = publicRegisterSchema.safeParse(req.body);
+  if (!parsed.success) return res.status(400).json({ error: parsed.error.flatten() });
+
+  const item = await prisma.contractor.create({
+    data: { ...parsed.data, contactEmail: parsed.data.contactEmail || undefined, siteId: site.id },
+  });
+  res.status(201).json(item);
+});
+
 router.use(requireAuth);
 
 router.get("/", async (req, res) => {
