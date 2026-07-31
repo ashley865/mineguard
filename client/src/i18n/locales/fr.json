@@ -587,7 +587,7 @@
     }
   },
   "documents": {
-    "nav": "Contrôle des Documents",
+    "nav": "Coffre des Documents",
     "title": "Contrôle des Documents",
     "subtitle": "Registre central des documents contrôlés : politiques, procédures et dossiers",
     "new": "+ Téléverser un Document",
@@ -623,6 +623,30 @@
       "DRAWING": "Plan",
       "CONTRACT": "Contrat",
       "OTHER": "Autre"
+    },
+    "vault": {
+      "title": "Coffre des Documents",
+      "subtitle": "Tous les documents téléversés ou téléchargés dans le système, organisés en un seul endroit",
+      "tabAll": "Tous les Documents",
+      "tabManage": "Documents Contrôlés",
+      "allSources": "Tous",
+      "sources": {
+        "DOCUMENT": "Document Contrôlé",
+        "VISITOR": "Téléversement Visiteur",
+        "BUYER": "Téléversement Acheteur"
+      },
+      "colFile": "Fichier",
+      "colSource": "Source",
+      "colRelatedTo": "Lié à",
+      "colUploadedBy": "Téléversé par",
+      "colDate": "Date",
+      "searchPlaceholder": "Rechercher par fichier, titre ou dossier lié…",
+      "noneFound": "Aucun document ne correspond à cette vue.",
+      "selfService": "Téléversement en libre-service",
+      "deleteTitle": "Confirmer la suppression",
+      "deleteHint": "La suppression de « {{name}} » est définitive. Saisissez votre mot de passe pour confirmer.",
+      "confirmPassword": "Votre mot de passe",
+      "deleteError": "Impossible de supprimer ce document"
     }
   },
   "inspection": {
@@ -1047,6 +1071,39 @@
     "noneYetBuyers": "Aucun acheteur dans cette catégorie.",
     "suspendBuyer": "Suspendre l'acheteur",
     "reviewNote": "Note d'examen",
-    "noDocuments": "Aucun document téléversé."
+    "noDocuments": "Aucun document téléversé.",
+    "packaging": "Conditionnement",
+    "certifications": "Certifications / référence d'analyse",
+    "images": "Photos",
+    "uploadImages": "Téléverser des Photos",
+    "imageUploadError": "Impossible de téléverser les images",
+    "imagesAfterSaveHint": "Enregistrez d'abord l'annonce, puis modifiez-la pour ajouter des photos."
+  },
+  "tenders": {
+    "nav": "Appels d'Offres et Contrats",
+    "subtitle": "Publiez des opportunités de contrats et gérez les offres des entrepreneurs",
+    "publicSubtitle": "Parcourez les appels d'offres ouverts et soumettez une offre — aucune inscription préalable requise",
+    "category": "Catégorie",
+    "allCategories": "Toutes",
+    "shareLink": "Partager la Page des Appels d'Offres",
+    "shareTitle": "Partager le Tableau des Appels d'Offres",
+    "shareHint": "Partagez ce lien ou ce code QR pour que les entrepreneurs puissent parcourir les appels d'offres ouverts et soumettre des offres sans s'inscrire.",
+    "categories": {
+      "TRUCKING_HAULAGE": "Camionnage et Transport",
+      "GEOLOGICAL_SERVICES": "Services Géologiques",
+      "DRILLING_BLASTING": "Forage et Dynamitage",
+      "EARTHMOVING_EXCAVATION": "Terrassement et Excavation",
+      "PLANT_EQUIPMENT_MAINTENANCE": "Maintenance des Installations et Équipements",
+      "ELECTRICAL_INSTRUMENTATION": "Électricité et Instrumentation",
+      "CIVIL_CONSTRUCTION": "Construction Civile",
+      "ENVIRONMENTAL_REHABILITATION": "Environnement et Réhabilitation",
+      "SECURITY_SERVICES": "Services de Sécurité",
+      "CATERING_ACCOMMODATION": "Restauration et Hébergement",
+      "TRANSPORT_LOGISTICS": "Transport et Logistique",
+      "CONSULTING_PROFESSIONAL": "Conseil et Services Professionnels",
+      "SUPPLY_EQUIPMENT_MATERIALS": "Fourniture d'Équipements et de Matériaux",
+      "IT_TELECOMMUNICATIONS": "Informatique et Télécommunications",
+      "OTHER": "Autre"
+    }
   }
 }

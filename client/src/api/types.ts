@@ -441,6 +441,22 @@ export interface MineDocument {
   createdAt: string;
 }
 
+export type VaultDocumentSource = "DOCUMENT" | "VISITOR" | "BUYER";
+
+export interface VaultDocument {
+  id: string;
+  source: VaultDocumentSource;
+  parentId: string;
+  title: string;
+  category: string;
+  fileName: string;
+  fileMimeType: string;
+  fileSize: number;
+  relatedTo: string;
+  uploadedBy: string | null;
+  createdAt: string;
+}
+
 export type InspectionOutcome = "NO_ACTION" | "VERBAL_WARNING" | "NOTICE_ISSUED" | "FOLLOW_UP_REQUIRED";
 
 export interface InspectionVisit {
@@ -701,6 +717,13 @@ export interface Buyer {
 
 export type MineralListingStatus = "AVAILABLE" | "SOLD" | "WITHDRAWN";
 
+export interface MineralListingImage {
+  id: string;
+  fileName: string;
+  fileMimeType: string;
+  fileSize: number;
+}
+
 export interface MineralListing {
   id: string;
   siteId: string;
@@ -712,8 +735,11 @@ export interface MineralListing {
   pricePerUnit?: number | null;
   currency: string;
   description?: string | null;
+  packaging?: string | null;
+  certifications?: string | null;
   status: MineralListingStatus;
   listedBy?: { id: string; name: string } | null;
+  images: MineralListingImage[];
   createdAt: string;
 }
 
@@ -734,10 +760,28 @@ export interface MineralBid {
 
 export type ContractOpportunityStatus = "OPEN" | "CLOSED" | "AWARDED" | "CANCELLED";
 
+export type ContractCategory =
+  | "TRUCKING_HAULAGE"
+  | "GEOLOGICAL_SERVICES"
+  | "DRILLING_BLASTING"
+  | "EARTHMOVING_EXCAVATION"
+  | "PLANT_EQUIPMENT_MAINTENANCE"
+  | "ELECTRICAL_INSTRUMENTATION"
+  | "CIVIL_CONSTRUCTION"
+  | "ENVIRONMENTAL_REHABILITATION"
+  | "SECURITY_SERVICES"
+  | "CATERING_ACCOMMODATION"
+  | "TRANSPORT_LOGISTICS"
+  | "CONSULTING_PROFESSIONAL"
+  | "SUPPLY_EQUIPMENT_MATERIALS"
+  | "IT_TELECOMMUNICATIONS"
+  | "OTHER";
+
 export interface ContractOpportunity {
   id: string;
   siteId: string;
   site?: { id: string; name: string };
+  category: ContractCategory;
   title: string;
   description: string;
   scopeOfWork: string;

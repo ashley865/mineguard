@@ -4,10 +4,9 @@ import { api } from "../api/client";
 import { Site } from "../api/types";
 import MineralListingsTab from "./marketplace/MineralListingsTab";
 import BuyersTab from "./marketplace/BuyersTab";
-import ContractOpportunitiesTab from "./marketplace/ContractOpportunitiesTab";
 import { buttonPrimary, buttonSecondary } from "../components/ui";
 
-type TabKey = "minerals" | "buyers" | "contracts";
+type TabKey = "minerals" | "buyers";
 
 export default function Marketplace() {
   const { t } = useTranslation();
@@ -25,7 +24,6 @@ export default function Marketplace() {
   const tabs: { key: TabKey; label: string }[] = [
     { key: "minerals", label: t("marketplace.tabMinerals") },
     { key: "buyers", label: t("marketplace.tabBuyers") },
-    { key: "contracts", label: t("marketplace.tabContracts") },
   ];
 
   if (loading) return <div className="text-mine-300">{t("common.loading")}</div>;
@@ -47,7 +45,6 @@ export default function Marketplace() {
 
       {tab === "minerals" && <MineralListingsTab sites={sites} />}
       {tab === "buyers" && <BuyersTab />}
-      {tab === "contracts" && <ContractOpportunitiesTab sites={sites} />}
     </div>
   );
 }

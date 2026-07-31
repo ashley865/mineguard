@@ -2,12 +2,30 @@ import { FormEvent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { api } from "../../api/client";
 import { useAuth } from "../../context/AuthContext";
-import { ContractBid, ContractOpportunity, ContractOpportunityStatus, Site } from "../../api/types";
+import { ContractBid, ContractCategory, ContractOpportunity, ContractOpportunityStatus, Site } from "../../api/types";
 import { StatusBadge } from "../../components/Badges";
 import Modal from "../../components/Modal";
 import { buttonDanger, buttonPrimary, buttonSecondary, cardClass, inputClass, labelClass } from "../../components/ui";
 
 const opportunityStatuses: ContractOpportunityStatus[] = ["OPEN", "CLOSED", "AWARDED", "CANCELLED"];
+
+export const contractCategories: ContractCategory[] = [
+  "TRUCKING_HAULAGE",
+  "GEOLOGICAL_SERVICES",
+  "DRILLING_BLASTING",
+  "EARTHMOVING_EXCAVATION",
+  "PLANT_EQUIPMENT_MAINTENANCE",
+  "ELECTRICAL_INSTRUMENTATION",
+  "CIVIL_CONSTRUCTION",
+  "ENVIRONMENTAL_REHABILITATION",
+  "SECURITY_SERVICES",
+  "CATERING_ACCOMMODATION",
+  "TRANSPORT_LOGISTICS",
+  "CONSULTING_PROFESSIONAL",
+  "SUPPLY_EQUIPMENT_MATERIALS",
+  "IT_TELECOMMUNICATIONS",
+  "OTHER",
+];
 
 function OpportunityForm({ sites, initial, onSubmit, onCancel }: {
   sites: Site[];
@@ -17,6 +35,7 @@ function OpportunityForm({ sites, initial, onSubmit, onCancel }: {
 }) {
   const { t } = useTranslation();
   const [siteId, setSiteId] = useState(initial?.siteId ?? sites[0]?.id ?? "");
+  const [category, setCategory] = useState<ContractCategory>(initial?.category ?? "OTHER");
   const [title, setTitle] = useState(initial?.title ?? "");
   const [description, setDescription] = useState(initial?.description ?? "");
   const [scopeOfWork, setScopeOfWork] = useState(initial?.scopeOfWork ?? "");
@@ -29,7 +48,7 @@ function OpportunityForm({ sites, initial, onSubmit, onCancel }: {
     e.preventDefault();
     setSaving(true);
     try {
-      await onSubmit({ siteId, title, description, scopeOfWork, budgetRange: budgetRange || undefined, submissionDeadline, status });
+      await onSubmit({ siteId, category, title, description, scopeOfWork, budgetRange: budgetRange || undefined, submissionDeadline, status });
     } finally {
       setSaving(false);
     }
@@ -50,6 +69,12 @@ function OpportunityForm({ sites, initial, onSubmit, onCancel }: {
             {opportunityStatuses.map((s) => <option key={s} value={s}>{t(`badges.status.${s}`)}</option>)}
           </select>
         </div>
+      </div>
+      <div>
+        <label className={labelClass}>{t("tenders.category")}</label>
+        <select className={inputClass} value={category} onChange={(e) => setCategory(e.target.value as ContractCategory)}>
+          {contractCategories.map((c) => <option key={c} value={c}>{t(`tenders.categories.${c}`)}</option>)}
+        </select>
       </div>
       <div>
         <label className={labelClass}>{t("marketplace.contractTitle")}</label>
@@ -186,6 +211,7 @@ export default function ContractOpportunitiesTab({ sites }: { sites: Site[] }) {
           <thead className="bg-mine-800/50 text-mine-300 text-xs uppercase">
             <tr>
               <th className="text-left px-4 py-2">{t("marketplace.contractTitle")}</th>
+              <th className="text-left px-4 py-2">{t("tenders.category")}</th>
               <th className="text-left px-4 py-2">{t("common.site")}</th>
               <th className="text-left px-4 py-2">{t("marketplace.submissionDeadline")}</th>
               <th className="text-left px-4 py-2">{t("common.status")}</th>
@@ -196,6 +222,7 @@ export default function ContractOpportunitiesTab({ sites }: { sites: Site[] }) {
             {items.map((item) => (
               <tr key={item.id} className="border-t border-mine-800 hover:bg-mine-800/30">
                 <td className="px-4 py-2 font-medium">{item.title}</td>
+                <td className="px-4 py-2 text-mine-300">{t(`tenders.categories.${item.category}`)}</td>
                 <td className="px-4 py-2 text-mine-300">{item.site?.name}</td>
                 <td className="px-4 py-2 text-mine-300">{new Date(item.submissionDeadline).toLocaleDateString()}</td>
                 <td className="px-4 py-2"><StatusBadge status={item.status} /></td>
@@ -213,7 +240,7 @@ export default function ContractOpportunitiesTab({ sites }: { sites: Site[] }) {
               </tr>
             ))}
             {items.length === 0 && (
-              <tr><td colSpan={5} className="px-4 py-6 text-center text-mine-400">{t("marketplace.noneYetOpportunities")}</td></tr>
+              <tr><td colSpan={6} className="px-4 py-6 text-center text-mine-400">{t("marketplace.noneYetOpportunities")}</td></tr>
             )}
           </tbody>
         </table>

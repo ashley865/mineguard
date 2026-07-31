@@ -587,7 +587,7 @@
     }
   },
   "documents": {
-    "nav": "Dokumentenkontrolle",
+    "nav": "Dokumententresor",
     "title": "Dokumentenkontrolle",
     "subtitle": "Zentrales Register kontrollierter Dokumente — Richtlinien, Verfahren und Aufzeichnungen",
     "new": "+ Dokument hochladen",
@@ -623,6 +623,30 @@
       "DRAWING": "Zeichnung",
       "CONTRACT": "Vertrag",
       "OTHER": "Sonstiges"
+    },
+    "vault": {
+      "title": "Dokumententresor",
+      "subtitle": "Jedes Dokument, das jemals im System hochgeladen oder heruntergeladen wurde, übersichtlich an einem Ort",
+      "tabAll": "Alle Dokumente",
+      "tabManage": "Kontrollierte Dokumente",
+      "allSources": "Alle",
+      "sources": {
+        "DOCUMENT": "Kontrolliertes Dokument",
+        "VISITOR": "Besucher-Upload",
+        "BUYER": "Käufer-Upload"
+      },
+      "colFile": "Datei",
+      "colSource": "Quelle",
+      "colRelatedTo": "Zugehörig zu",
+      "colUploadedBy": "Hochgeladen von",
+      "colDate": "Datum",
+      "searchPlaceholder": "Nach Datei, Titel oder zugehörigem Datensatz suchen…",
+      "noneFound": "Keine Dokumente entsprechen dieser Ansicht.",
+      "selfService": "Selbstbedienungs-Upload",
+      "deleteTitle": "Löschung bestätigen",
+      "deleteHint": "Das Löschen von „{{name}}“ ist endgültig. Geben Sie Ihr Passwort ein, um zu bestätigen.",
+      "confirmPassword": "Ihr Passwort",
+      "deleteError": "Dieses Dokument konnte nicht gelöscht werden"
     }
   },
   "inspection": {
@@ -1047,6 +1071,39 @@
     "noneYetBuyers": "Keine Käufer in dieser Kategorie.",
     "suspendBuyer": "Käufer sperren",
     "reviewNote": "Prüfnotiz",
-    "noDocuments": "Keine Dokumente hochgeladen."
+    "noDocuments": "Keine Dokumente hochgeladen.",
+    "packaging": "Verpackung",
+    "certifications": "Zertifizierungen / Analysenachweis",
+    "images": "Fotos",
+    "uploadImages": "Fotos hochladen",
+    "imageUploadError": "Bilder konnten nicht hochgeladen werden",
+    "imagesAfterSaveHint": "Speichern Sie das Angebot zuerst und bearbeiten Sie es anschließend, um Fotos hinzuzufügen."
+  },
+  "tenders": {
+    "nav": "Ausschreibungen & Verträge",
+    "subtitle": "Vertragsmöglichkeiten ausschreiben und Gebote von Auftragnehmern verwalten",
+    "publicSubtitle": "Offene Ausschreibungen durchsuchen und ein Gebot abgeben — keine vorherige Registrierung erforderlich",
+    "category": "Kategorie",
+    "allCategories": "Alle",
+    "shareLink": "Ausschreibungsseite teilen",
+    "shareTitle": "Ausschreibungsübersicht teilen",
+    "shareHint": "Teilen Sie diesen Link oder QR-Code, damit Auftragnehmer offene Ausschreibungen durchsuchen und Gebote abgeben können, ohne sich zu registrieren.",
+    "categories": {
+      "TRUCKING_HAULAGE": "Lkw-Transport & Frachtdienste",
+      "GEOLOGICAL_SERVICES": "Geologische Dienstleistungen",
+      "DRILLING_BLASTING": "Bohren & Sprengen",
+      "EARTHMOVING_EXCAVATION": "Erdbewegung & Aushub",
+      "PLANT_EQUIPMENT_MAINTENANCE": "Anlagen- & Gerätewartung",
+      "ELECTRICAL_INSTRUMENTATION": "Elektrik & Instrumentierung",
+      "CIVIL_CONSTRUCTION": "Hochbau & Tiefbau",
+      "ENVIRONMENTAL_REHABILITATION": "Umwelt & Rekultivierung",
+      "SECURITY_SERVICES": "Sicherheitsdienste",
+      "CATERING_ACCOMMODATION": "Verpflegung & Unterkunft",
+      "TRANSPORT_LOGISTICS": "Transport & Logistik",
+      "CONSULTING_PROFESSIONAL": "Beratung & Fachdienstleistungen",
+      "SUPPLY_EQUIPMENT_MATERIALS": "Lieferung von Ausrüstung & Material",
+      "IT_TELECOMMUNICATIONS": "IT & Telekommunikation",
+      "OTHER": "Sonstiges"
+    }
   }
 }

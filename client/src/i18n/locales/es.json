@@ -587,7 +587,7 @@
     }
   },
   "documents": {
-    "nav": "Control de Documentos",
+    "nav": "Bóveda de Documentos",
     "title": "Control de Documentos",
     "subtitle": "Registro central de documentos controlados: políticas, procedimientos y registros",
     "new": "+ Subir Documento",
@@ -623,6 +623,30 @@
       "DRAWING": "Plano",
       "CONTRACT": "Contrato",
       "OTHER": "Otro"
+    },
+    "vault": {
+      "title": "Bóveda de Documentos",
+      "subtitle": "Todos los documentos subidos o descargados en cualquier parte del sistema, organizados en un solo lugar",
+      "tabAll": "Todos los Documentos",
+      "tabManage": "Documentos Controlados",
+      "allSources": "Todos",
+      "sources": {
+        "DOCUMENT": "Documento Controlado",
+        "VISITOR": "Carga de Visitante",
+        "BUYER": "Carga de Comprador"
+      },
+      "colFile": "Archivo",
+      "colSource": "Origen",
+      "colRelatedTo": "Relacionado con",
+      "colUploadedBy": "Subido por",
+      "colDate": "Fecha",
+      "searchPlaceholder": "Buscar por archivo, título o registro relacionado…",
+      "noneFound": "Ningún documento coincide con esta vista.",
+      "selfService": "Carga de autoservicio",
+      "deleteTitle": "Confirmar eliminación",
+      "deleteHint": "Eliminar \"{{name}}\" es permanente. Ingresa tu contraseña para confirmar.",
+      "confirmPassword": "Tu contraseña",
+      "deleteError": "No se pudo eliminar este documento"
     }
   },
   "inspection": {
@@ -1047,6 +1071,39 @@
     "noneYetBuyers": "No hay compradores en esta categoría.",
     "suspendBuyer": "Suspender comprador",
     "reviewNote": "Nota de revisión",
-    "noDocuments": "No se han subido documentos."
+    "noDocuments": "No se han subido documentos.",
+    "packaging": "Embalaje",
+    "certifications": "Certificaciones / referencia de ensayo",
+    "images": "Fotos",
+    "uploadImages": "Subir Fotos",
+    "imageUploadError": "No se pudieron subir las imágenes",
+    "imagesAfterSaveHint": "Guarda la publicación primero y luego edítala para agregar fotos."
+  },
+  "tenders": {
+    "nav": "Licitaciones y Contratos",
+    "subtitle": "Anuncia oportunidades de contratos y gestiona las ofertas de los contratistas",
+    "publicSubtitle": "Explora licitaciones abiertas y presenta una oferta — no se requiere registro previo",
+    "category": "Categoría",
+    "allCategories": "Todas",
+    "shareLink": "Compartir Página de Licitaciones",
+    "shareTitle": "Compartir el Tablero de Licitaciones",
+    "shareHint": "Comparte este enlace o código QR para que los contratistas puedan explorar licitaciones abiertas y presentar ofertas sin registrarse.",
+    "categories": {
+      "TRUCKING_HAULAGE": "Transporte y Acarreo",
+      "GEOLOGICAL_SERVICES": "Servicios Geológicos",
+      "DRILLING_BLASTING": "Perforación y Voladura",
+      "EARTHMOVING_EXCAVATION": "Movimiento de Tierra y Excavación",
+      "PLANT_EQUIPMENT_MAINTENANCE": "Mantenimiento de Planta y Equipos",
+      "ELECTRICAL_INSTRUMENTATION": "Eléctrica e Instrumentación",
+      "CIVIL_CONSTRUCTION": "Construcción Civil",
+      "ENVIRONMENTAL_REHABILITATION": "Medio Ambiente y Rehabilitación",
+      "SECURITY_SERVICES": "Servicios de Seguridad",
+      "CATERING_ACCOMMODATION": "Catering y Alojamiento",
+      "TRANSPORT_LOGISTICS": "Transporte y Logística",
+      "CONSULTING_PROFESSIONAL": "Consultoría y Servicios Profesionales",
+      "SUPPLY_EQUIPMENT_MATERIALS": "Suministro de Equipos y Materiales",
+      "IT_TELECOMMUNICATIONS": "TI y Telecomunicaciones",
+      "OTHER": "Otro"
+    }
   }
 }

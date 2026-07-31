@@ -49,6 +49,7 @@ export default function Layout() {
     { to: "/inspection", label: t("inspection.nav") },
     { to: "/reporting", label: t("reporting.nav") },
     { to: "/marketplace", label: t("marketplace.nav") },
+    { to: "/tenders", label: t("tenders.nav") },
     ...(canSeeExecutiveOps
       ? [
           { to: "/visitors", label: t("visitors.nav") },

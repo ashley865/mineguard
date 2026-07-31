@@ -935,21 +935,36 @@ enum MineralListingStatus {
 }
 
 model MineralListing {
-  id           String               @id @default(cuid())
-  siteId       String
-  site         Site                 @relation(fields: [siteId], references: [id], onDelete: Cascade)
-  mineralType  String
-  grade        String?
-  quantity     Float
-  unit         String
-  pricePerUnit Float?
-  currency     String               @default("ZAR")
-  description  String?
-  status       MineralListingStatus @default(AVAILABLE)
-  listedById   String?
-  listedBy     User?                @relation(fields: [listedById], references: [id], onDelete: SetNull)
+  id            String               @id @default(cuid())
+  siteId        String
+  site          Site                 @relation(fields: [siteId], references: [id], onDelete: Cascade)
+  mineralType   String
+  grade         String?
+  quantity      Float
+  unit          String
+  pricePerUnit  Float?
+  currency      String               @default("ZAR")
+  description   String?
+  packaging     String?
+  certifications String?
+  status        MineralListingStatus @default(AVAILABLE)
+  listedById    String?
+  listedBy      User?                @relation(fields: [listedById], references: [id], onDelete: SetNull)
 
-  bids MineralBid[]
+  bids   MineralBid[]
+  images MineralListingImage[]
+
+  createdAt DateTime @default(now())
+}
+
+model MineralListingImage {
+  id           String          @id @default(cuid())
+  listingId    String
+  listing      MineralListing  @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  fileName     String
+  fileMimeType String
+  fileSize     Int
+  fileData     Bytes
 
   createdAt DateTime @default(now())
 }
@@ -982,10 +997,29 @@ enum ContractOpportunityStatus {
   CANCELLED
 }
 
+enum ContractCategory {
+  TRUCKING_HAULAGE
+  GEOLOGICAL_SERVICES
+  DRILLING_BLASTING
+  EARTHMOVING_EXCAVATION
+  PLANT_EQUIPMENT_MAINTENANCE
+  ELECTRICAL_INSTRUMENTATION
+  CIVIL_CONSTRUCTION
+  ENVIRONMENTAL_REHABILITATION
+  SECURITY_SERVICES
+  CATERING_ACCOMMODATION
+  TRANSPORT_LOGISTICS
+  CONSULTING_PROFESSIONAL
+  SUPPLY_EQUIPMENT_MATERIALS
+  IT_TELECOMMUNICATIONS
+  OTHER
+}
+
 model ContractOpportunity {
   id                 String                     @id @default(cuid())
   siteId             String
   site               Site                       @relation(fields: [siteId], references: [id], onDelete: Cascade)
+  category           ContractCategory           @default(OTHER)
   title              String
   description        String
   scopeOfWork        String

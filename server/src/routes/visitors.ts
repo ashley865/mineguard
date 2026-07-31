@@ -4,6 +4,7 @@ import { z } from "zod";
 import { prisma } from "../prisma";
 import { requireAuth, requireRole } from "../middleware/auth";
 import { getAssignedSiteIds } from "../services/executiveSites";
+import { verifyAdminPassword } from "../lib/verifyPassword";
 
 const router = Router();
 
@@ -167,6 +168,17 @@ router.delete("/:id", requireRole("ADMIN"), async (req, res) => {
   } catch {
     res.status(404).json({ error: "Visitor not found" });
   }
+});
+
+// Deleting a visitor's uploaded document is irreversible, so it requires the ADMIN role
+// plus re-confirming their password, not just a valid session token.
+router.delete("/:id/documents/:docId", requireRole("ADMIN"), async (req, res) => {
+  const passwordOk = await verifyAdminPassword(req.auth!.userId, req.body?.password);
+  if (!passwordOk) return res.status(401).json({ error: "Incorrect password" });
+  const doc = await prisma.visitorDocument.findUnique({ where: { id: req.params.docId } });
+  if (!doc || doc.visitorId !== req.params.id) return res.status(404).json({ error: "Document not found" });
+  await prisma.visitorDocument.delete({ where: { id: req.params.docId } });
+  res.status(204).send();
 });
 
 export default router;

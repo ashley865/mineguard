@@ -1,6 +1,6 @@
 import { FormEvent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { api } from "../../api/client";
+import { api, API_URL } from "../../api/client";
 import { useAuth } from "../../context/AuthContext";
 import { MineralBid, MineralListing, MineralListingStatus, Site } from "../../api/types";
 import { StatusBadge } from "../../components/Badges";
@@ -8,6 +8,83 @@ import Modal from "../../components/Modal";
 import { buttonDanger, buttonPrimary, buttonSecondary, cardClass, inputClass, labelClass } from "../../components/ui";
 
 const listingStatuses: MineralListingStatus[] = ["AVAILABLE", "SOLD", "WITHDRAWN"];
+
+function ImageManager({ listing, onChanged }: { listing: MineralListing; onChanged: (updated: MineralListing) => void }) {
+  const { t } = useTranslation();
+  const [pending, setPending] = useState<FileList | null>(null);
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  async function upload() {
+    if (!pending || pending.length === 0) return;
+    setBusy(true);
+    setError(null);
+    try {
+      const form = new FormData();
+      Array.from(pending).forEach((f) => form.append("images", f));
+      const res = await api.post<MineralListing>(`/minerals/${listing.id}/images`, form, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
+      onChanged(res.data);
+      setPending(null);
+    } catch (err: any) {
+      setError(err.response?.data?.error ?? t("marketplace.imageUploadError"));
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function remove(imageId: string) {
+    setBusy(true);
+    try {
+      await api.delete(`/minerals/${listing.id}/images/${imageId}`);
+      onChanged({ ...listing, images: listing.images.filter((img) => img.id !== imageId) });
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  return (
+    <div className="space-y-2 border border-mine-800 rounded-md p-3 bg-mine-900/40">
+      <div className="text-xs font-semibold text-mine-300 uppercase">{t("marketplace.images")}</div>
+      {listing.images.length > 0 && (
+        <div className="flex gap-2 flex-wrap">
+          {listing.images.map((img) => (
+            <div key={img.id} className="relative">
+              <img
+                src={`${API_URL}/api/minerals/${listing.id}/images/${img.id}`}
+                alt={img.fileName}
+                className="h-16 w-16 object-cover rounded-md border border-mine-800"
+              />
+              <button
+                type="button"
+                className="absolute -top-1.5 -right-1.5 bg-danger-500 text-white rounded-full w-5 h-5 text-xs leading-none"
+                onClick={() => remove(img.id)}
+                disabled={busy}
+                aria-label={t("common.delete") ?? ""}
+              >
+                ×
+              </button>
+            </div>
+          ))}
+        </div>
+      )}
+      <div className="flex gap-2">
+        <input
+          className={`${inputClass} text-xs`}
+          type="file"
+          multiple
+          accept="image/*"
+          onChange={(e) => setPending(e.target.files)}
+        />
+        <button type="button" className={`${buttonSecondary} text-xs px-3`} onClick={upload} disabled={busy || !pending}>
+          {t("marketplace.uploadImages")}
+        </button>
+      </div>
+      {error && <div className="text-danger-500 text-xs">{error}</div>}
+    </div>
+  );
+}
 
 function ListingForm({ sites, initial, onSubmit, onCancel }: {
   sites: Site[];
@@ -24,7 +101,10 @@ function ListingForm({ sites, initial, onSubmit, onCancel }: {
   const [pricePerUnit, setPricePerUnit] = useState(initial?.pricePerUnit?.toString() ?? "");
   const [currency, setCurrency] = useState(initial?.currency ?? "ZAR");
   const [description, setDescription] = useState(initial?.description ?? "");
+  const [packaging, setPackaging] = useState(initial?.packaging ?? "");
+  const [certifications, setCertifications] = useState(initial?.certifications ?? "");
   const [status, setStatus] = useState<MineralListingStatus>(initial?.status ?? "AVAILABLE");
+  const [listing, setListing] = useState(initial);
   const [saving, setSaving] = useState(false);
 
   async function handleSubmit(e: FormEvent) {
@@ -40,6 +120,8 @@ function ListingForm({ sites, initial, onSubmit, onCancel }: {
         pricePerUnit: pricePerUnit ? Number(pricePerUnit) : null,
         currency,
         description: description || undefined,
+        packaging: packaging || undefined,
+        certifications: certifications || undefined,
         status,
       });
     } finally {
@@ -95,6 +177,21 @@ function ListingForm({ sites, initial, onSubmit, onCancel }: {
         <label className={labelClass}>{t("common.description")}</label>
         <textarea className={inputClass} rows={2} value={description} onChange={(e) => setDescription(e.target.value)} />
       </div>
+      <div className="grid grid-cols-2 gap-3">
+        <div>
+          <label className={labelClass}>{t("marketplace.packaging")}</label>
+          <input className={inputClass} value={packaging} onChange={(e) => setPackaging(e.target.value)} />
+        </div>
+        <div>
+          <label className={labelClass}>{t("marketplace.certifications")}</label>
+          <input className={inputClass} value={certifications} onChange={(e) => setCertifications(e.target.value)} />
+        </div>
+      </div>
+      {listing ? (
+        <ImageManager listing={listing} onChanged={setListing} />
+      ) : (
+        <p className="text-xs text-mine-400">{t("marketplace.imagesAfterSaveHint")}</p>
+      )}
       <div className="flex justify-end gap-2 pt-2">
         <button type="button" className={buttonSecondary} onClick={onCancel}>{t("common.cancel")}</button>
         <button type="submit" className={buttonPrimary} disabled={saving}>{saving ? t("common.saving") : t("common.save")}</button>

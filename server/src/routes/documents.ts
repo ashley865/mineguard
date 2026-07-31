@@ -3,6 +3,7 @@ import multer from "multer";
 import { z } from "zod";
 import { prisma } from "../prisma";
 import { requireAuth, requireRole } from "../middleware/auth";
+import { verifyAdminPassword } from "../lib/verifyPassword";
 
 const router = Router();
 
@@ -106,13 +107,105 @@ router.put("/:id", requireRole("ADMIN", "SUPERVISOR", "EXECUTIVE"), async (req, 
   }
 });
 
-router.delete("/:id", requireRole("ADMIN", "EXECUTIVE"), async (req, res) => {
+// Deleting a controlled document is irreversible, so it requires the ADMIN role plus
+// re-confirming their password, not just a valid session token.
+router.delete("/:id", requireRole("ADMIN"), async (req, res) => {
+  const passwordOk = await verifyAdminPassword(req.auth!.userId, req.body?.password);
+  if (!passwordOk) return res.status(401).json({ error: "Incorrect password" });
   try {
     await prisma.document.delete({ where: { id: req.params.id } });
     res.status(204).send();
   } catch {
     res.status(404).json({ error: "Document not found" });
   }
+});
+
+// Aggregates every document ever uploaded anywhere in the system — controlled documents,
+// visitor check-in uploads, and buyer FICA/KYC uploads — into one organised, searchable view.
+router.get("/vault/all", async (_req, res) => {
+  const [documents, visitorDocs, buyerDocs] = await Promise.all([
+    prisma.document.findMany({
+      select: {
+        id: true,
+        title: true,
+        type: true,
+        fileName: true,
+        fileMimeType: true,
+        fileSize: true,
+        site: { select: { id: true, name: true } },
+        uploadedBy: { select: { id: true, name: true } },
+        createdAt: true,
+      },
+    }),
+    prisma.visitorDocument.findMany({
+      select: {
+        id: true,
+        visitorId: true,
+        docType: true,
+        fileName: true,
+        fileMimeType: true,
+        fileSize: true,
+        visitor: { select: { fullName: true, site: { select: { id: true, name: true } } } },
+        createdAt: true,
+      },
+    }),
+    prisma.buyerDocument.findMany({
+      select: {
+        id: true,
+        buyerId: true,
+        docType: true,
+        fileName: true,
+        fileMimeType: true,
+        fileSize: true,
+        buyer: { select: { legalName: true } },
+        createdAt: true,
+      },
+    }),
+  ]);
+
+  const items = [
+    ...documents.map((d) => ({
+      id: d.id,
+      source: "DOCUMENT" as const,
+      parentId: d.id,
+      title: d.title,
+      category: d.type,
+      fileName: d.fileName,
+      fileMimeType: d.fileMimeType,
+      fileSize: d.fileSize,
+      relatedTo: d.site?.name ?? "Company-wide",
+      uploadedBy: d.uploadedBy?.name ?? null,
+      createdAt: d.createdAt,
+    })),
+    ...visitorDocs.map((d) => ({
+      id: d.id,
+      source: "VISITOR" as const,
+      parentId: d.visitorId,
+      title: d.fileName,
+      category: d.docType,
+      fileName: d.fileName,
+      fileMimeType: d.fileMimeType,
+      fileSize: d.fileSize,
+      relatedTo: `${d.visitor.fullName} · ${d.visitor.site.name}`,
+      uploadedBy: null,
+      createdAt: d.createdAt,
+    })),
+    ...buyerDocs.map((d) => ({
+      id: d.id,
+      source: "BUYER" as const,
+      parentId: d.buyerId,
+      title: d.fileName,
+      category: d.docType,
+      fileName: d.fileName,
+      fileMimeType: d.fileMimeType,
+      fileSize: d.fileSize,
+      relatedTo: d.buyer.legalName,
+      uploadedBy: null,
+      createdAt: d.createdAt,
+    })),
+  ].sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+
+  res.json(items);
 });
 
 export default router;

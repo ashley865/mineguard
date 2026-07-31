@@ -3,6 +3,7 @@ import multer from "multer";
 import { z } from "zod";
 import { prisma } from "../prisma";
 import { requireAuth, requireRole } from "../middleware/auth";
+import { verifyAdminPassword } from "../lib/verifyPassword";
 
 const router = Router();
 
@@ -181,6 +182,17 @@ router.get("/:id/documents/:docId/download", async (req, res) => {
   res.setHeader("Content-Type", doc.fileMimeType);
   res.setHeader("Content-Disposition", `attachment; filename="${encodeURIComponent(doc.fileName)}"`);
   res.send(Buffer.from(doc.fileData));
+});
+
+// Deleting a compliance document is irreversible, so it requires the ADMIN role plus
+// re-confirming their password, not just a valid session token.
+router.delete("/:id/documents/:docId", requireRole("ADMIN"), async (req, res) => {
+  const passwordOk = await verifyAdminPassword(req.auth!.userId, req.body?.password);
+  if (!passwordOk) return res.status(401).json({ error: "Incorrect password" });
+  const doc = await prisma.buyerDocument.findUnique({ where: { id: req.params.docId } });
+  if (!doc || doc.buyerId !== req.params.id) return res.status(404).json({ error: "Document not found" });
+  await prisma.buyerDocument.delete({ where: { id: req.params.docId } });
+  res.status(204).send();
 });
 
 export default router;

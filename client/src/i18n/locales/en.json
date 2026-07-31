@@ -587,7 +587,7 @@
     }
   },
   "documents": {
-    "nav": "Document Control",
+    "nav": "Document Vault",
     "title": "Document Control",
     "subtitle": "Central register of controlled documents — policies, procedures, and records",
     "new": "+ Upload Document",
@@ -623,6 +623,30 @@
       "DRAWING": "Drawing",
       "CONTRACT": "Contract",
       "OTHER": "Other"
+    },
+    "vault": {
+      "title": "Document Vault",
+      "subtitle": "Every document uploaded or downloaded anywhere in the system, organised in one place",
+      "tabAll": "All Documents",
+      "tabManage": "Controlled Documents",
+      "allSources": "All",
+      "sources": {
+        "DOCUMENT": "Controlled Document",
+        "VISITOR": "Visitor Upload",
+        "BUYER": "Buyer Upload"
+      },
+      "colFile": "File",
+      "colSource": "Source",
+      "colRelatedTo": "Related To",
+      "colUploadedBy": "Uploaded By",
+      "colDate": "Date",
+      "searchPlaceholder": "Search by file, title, or related record…",
+      "noneFound": "No documents match this view.",
+      "selfService": "Self-service upload",
+      "deleteTitle": "Confirm deletion",
+      "deleteHint": "Deleting \"{{name}}\" is permanent. Enter your password to confirm.",
+      "confirmPassword": "Your password",
+      "deleteError": "Could not delete this document"
     }
   },
   "inspection": {
@@ -1047,6 +1071,39 @@
     "noneYetBuyers": "No buyers in this category.",
     "suspendBuyer": "Suspend buyer",
     "reviewNote": "Review note",
-    "noDocuments": "No documents uploaded."
+    "noDocuments": "No documents uploaded.",
+    "packaging": "Packaging",
+    "certifications": "Certifications / assay reference",
+    "images": "Photos",
+    "uploadImages": "Upload Photos",
+    "imageUploadError": "Could not upload images",
+    "imagesAfterSaveHint": "Save the listing first, then edit it to add photos."
+  },
+  "tenders": {
+    "nav": "Tenders & Contracts",
+    "subtitle": "Advertise contract opportunities and manage bids from contractors",
+    "publicSubtitle": "Browse open tenders and submit a bid — no prior registration required",
+    "category": "Category",
+    "allCategories": "All",
+    "shareLink": "Share Tender Page",
+    "shareTitle": "Share the Tender Board",
+    "shareHint": "Share this link or QR code so contractors can browse open tenders and submit bids without registering.",
+    "categories": {
+      "TRUCKING_HAULAGE": "Trucking & Haulage",
+      "GEOLOGICAL_SERVICES": "Geological Services",
+      "DRILLING_BLASTING": "Drilling & Blasting",
+      "EARTHMOVING_EXCAVATION": "Earthmoving & Excavation",
+      "PLANT_EQUIPMENT_MAINTENANCE": "Plant & Equipment Maintenance",
+      "ELECTRICAL_INSTRUMENTATION": "Electrical & Instrumentation",
+      "CIVIL_CONSTRUCTION": "Civil Construction",
+      "ENVIRONMENTAL_REHABILITATION": "Environmental & Rehabilitation",
+      "SECURITY_SERVICES": "Security Services",
+      "CATERING_ACCOMMODATION": "Catering & Accommodation",
+      "TRANSPORT_LOGISTICS": "Transport & Logistics",
+      "CONSULTING_PROFESSIONAL": "Consulting & Professional Services",
+      "SUPPLY_EQUIPMENT_MATERIALS": "Supply of Equipment & Materials",
+      "IT_TELECOMMUNICATIONS": "IT & Telecommunications",
+      "OTHER": "Other"
+    }
   }
 }

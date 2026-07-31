@@ -1,9 +1,15 @@
 import { Router } from "express";
+import multer from "multer";
 import { z } from "zod";
 import { prisma } from "../prisma";
 import { requireAuth, requireRole } from "../middleware/auth";
 
 const router = Router();
+
+const upload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 10 * 1024 * 1024 },
+});
 
 const listingSchema = z.object({
   siteId: z.string().min(1),
@@ -14,6 +20,8 @@ const listingSchema = z.object({
   pricePerUnit: z.coerce.number().positive().optional().nullable(),
   currency: z.string().optional(),
   description: z.string().optional(),
+  packaging: z.string().optional(),
+  certifications: z.string().optional(),
   status: z.enum(["AVAILABLE", "SOLD", "WITHDRAWN"]).optional(),
 });
 
@@ -37,8 +45,11 @@ const listingSelect = {
   pricePerUnit: true,
   currency: true,
   description: true,
+  packaging: true,
+  certifications: true,
   status: true,
   listedBy: { select: { id: true, name: true } },
+  images: { select: { id: true, fileName: true, fileMimeType: true, fileSize: true } },
   createdAt: true,
 } as const;
 
@@ -65,6 +76,14 @@ router.get("/", async (req, res) => {
     orderBy: { createdAt: "desc" },
   });
   res.json(listings);
+});
+
+// Public: listing photos are shown in the storefront, so serving them needs no auth.
+router.get("/:id/images/:imageId", async (req, res) => {
+  const image = await prisma.mineralListingImage.findUnique({ where: { id: req.params.imageId } });
+  if (!image || image.listingId !== req.params.id) return res.status(404).json({ error: "Image not found" });
+  res.setHeader("Content-Type", image.fileMimeType);
+  res.send(Buffer.from(image.fileData));
 });
 
 // Public: submit a bid, but only an APPROVED registered buyer may do so.
@@ -124,6 +143,35 @@ router.delete("/:id", requireRole("ADMIN", "EXECUTIVE"), async (req, res) => {
     res.status(204).send();
   } catch {
     res.status(404).json({ error: "Listing not found" });
+  }
+});
+
+router.post("/:id/images", requireRole("ADMIN", "SUPERVISOR", "EXECUTIVE"), upload.array("images", 6), async (req, res) => {
+  const listing = await prisma.mineralListing.findUnique({ where: { id: req.params.id } });
+  if (!listing) return res.status(404).json({ error: "Listing not found" });
+  const files = (req.files as Express.Multer.File[] | undefined) ?? [];
+  if (files.length === 0) return res.status(400).json({ error: "At least one image is required" });
+  await prisma.mineralListingImage.createMany({
+    data: files.map((f) => ({
+      listingId: listing.id,
+      fileName: f.originalname,
+      fileMimeType: f.mimetype,
+      fileSize: f.size,
+      fileData: Uint8Array.from(f.buffer),
+    })),
+  });
+  const updated = await prisma.mineralListing.findUnique({ where: { id: listing.id }, select: listingSelect });
+  res.status(201).json(updated);
+});
+
+router.delete("/:id/images/:imageId", requireRole("ADMIN", "SUPERVISOR", "EXECUTIVE"), async (req, res) => {
+  try {
+    const image = await prisma.mineralListingImage.findUnique({ where: { id: req.params.imageId } });
+    if (!image || image.listingId !== req.params.id) return res.status(404).json({ error: "Image not found" });
+    await prisma.mineralListingImage.delete({ where: { id: req.params.imageId } });
+    res.status(204).send();
+  } catch {
+    res.status(404).json({ error: "Image not found" });
   }
 });
 

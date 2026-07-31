@@ -17,7 +17,7 @@ import Equipment from "./pages/Equipment";
 import SafetyCompliance from "./pages/SafetyCompliance";
 import Permits from "./pages/Permits";
 import WorkforceManagement from "./pages/WorkforceManagement";
-import DocumentControl from "./pages/DocumentControl";
+import DocumentVault from "./pages/DocumentVault";
 import GovernmentInspection from "./pages/GovernmentInspection";
 import Reporting from "./pages/Reporting";
 import Contractors from "./pages/Contractors";
@@ -33,6 +33,8 @@ import Messages from "./pages/Messages";
 import Marketplace from "./pages/Marketplace";
 import MarketplaceBrowse from "./pages/MarketplaceBrowse";
 import BuyerRegister from "./pages/BuyerRegister";
+import Tenders from "./pages/Tenders";
+import TenderBoard from "./pages/TenderBoard";
 
 function HomeRoute() {
   const { user } = useAuth();
@@ -56,6 +58,7 @@ export default function App() {
       <Route path="/join-executive/:inviteId" element={<AcceptExecutiveInvite />} />
       <Route path="/buy" element={<MarketplaceBrowse />} />
       <Route path="/buyer-register" element={<BuyerRegister />} />
+      <Route path="/tender-board" element={<TenderBoard />} />
       <Route element={<ProtectedRoute />}>
         <Route path="/" element={<HomeRoute />} />
         <Route path="/sites" element={<ModuleRoute path="/sites"><Sites /></ModuleRoute>} />
@@ -67,7 +70,7 @@ export default function App() {
         <Route path="/compliance" element={<ModuleRoute path="/compliance"><SafetyCompliance /></ModuleRoute>} />
         <Route path="/permits" element={<ModuleRoute path="/permits"><Permits /></ModuleRoute>} />
         <Route path="/workforce" element={<ModuleRoute path="/workforce"><WorkforceManagement /></ModuleRoute>} />
-        <Route path="/documents" element={<ModuleRoute path="/documents"><DocumentControl /></ModuleRoute>} />
+        <Route path="/documents" element={<ModuleRoute path="/documents"><DocumentVault /></ModuleRoute>} />
         <Route path="/inspection" element={<ModuleRoute path="/inspection"><GovernmentInspection /></ModuleRoute>} />
         <Route path="/reporting" element={<ModuleRoute path="/reporting"><Reporting /></ModuleRoute>} />
         <Route path="/contractors" element={<ModuleRoute path="/contractors"><Contractors /></ModuleRoute>} />
@@ -76,6 +79,7 @@ export default function App() {
         <Route path="/trucks" element={<ModuleRoute path="/trucks"><TruckRegistration /></ModuleRoute>} />
         <Route path="/scanner" element={<ModuleRoute path="/scanner"><Scanner /></ModuleRoute>} />
         <Route path="/marketplace" element={<ModuleRoute path="/marketplace"><Marketplace /></ModuleRoute>} />
+        <Route path="/tenders" element={<ModuleRoute path="/tenders"><Tenders /></ModuleRoute>} />
         <Route path="/messages" element={<Messages />} />
         <Route path="/settings" element={<Settings />} />
       </Route>

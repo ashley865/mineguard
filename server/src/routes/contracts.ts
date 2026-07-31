@@ -5,8 +5,27 @@ import { requireAuth, requireRole } from "../middleware/auth";
 
 const router = Router();
 
+const contractCategoryEnum = z.enum([
+  "TRUCKING_HAULAGE",
+  "GEOLOGICAL_SERVICES",
+  "DRILLING_BLASTING",
+  "EARTHMOVING_EXCAVATION",
+  "PLANT_EQUIPMENT_MAINTENANCE",
+  "ELECTRICAL_INSTRUMENTATION",
+  "CIVIL_CONSTRUCTION",
+  "ENVIRONMENTAL_REHABILITATION",
+  "SECURITY_SERVICES",
+  "CATERING_ACCOMMODATION",
+  "TRANSPORT_LOGISTICS",
+  "CONSULTING_PROFESSIONAL",
+  "SUPPLY_EQUIPMENT_MATERIALS",
+  "IT_TELECOMMUNICATIONS",
+  "OTHER",
+]);
+
 const opportunitySchema = z.object({
   siteId: z.string().min(1),
+  category: contractCategoryEnum.optional(),
   title: z.string().min(1),
   description: z.string().min(1),
   scopeOfWork: z.string().min(1),
@@ -30,6 +49,7 @@ const opportunitySelect = {
   id: true,
   siteId: true,
   site: { select: { id: true, name: true } },
+  category: true,
   title: true,
   description: true,
   scopeOfWork: true,
@@ -58,8 +78,9 @@ const bidSelect = {
 router.get("/", async (req, res) => {
   const siteId = req.query.siteId as string | undefined;
   const status = req.query.status as string | undefined;
+  const category = req.query.category as string | undefined;
   const opportunities = await prisma.contractOpportunity.findMany({
-    where: { siteId: siteId || undefined, status: (status as any) || undefined },
+    where: { siteId: siteId || undefined, status: (status as any) || undefined, category: (category as any) || undefined },
     select: opportunitySelect,
     orderBy: { createdAt: "desc" },
   });

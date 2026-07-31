@@ -1,11 +1,11 @@
 import { FormEvent, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { api } from "../api/client";
-import { ContractOpportunity, MineralListing } from "../api/types";
+import { api, API_URL } from "../api/client";
+import { MineralListing } from "../api/types";
 import { StatusBadge } from "../components/Badges";
 import Modal from "../components/Modal";
-import { buttonPrimary, buttonSecondary, cardClass, inputClass, labelClass } from "../components/ui";
+import { buttonPrimary, cardClass, inputClass, labelClass } from "../components/ui";
 
 function MineralBidForm({ listing, onDone }: { listing: MineralListing; onDone: () => void }) {
   const { t } = useTranslation();
@@ -69,103 +69,16 @@ function MineralBidForm({ listing, onDone }: { listing: MineralListing; onDone: 
   );
 }
 
-function ContractBidForm({ opportunity, onDone }: { opportunity: ContractOpportunity; onDone: () => void }) {
-  const { t } = useTranslation();
-  const [companyName, setCompanyName] = useState("");
-  const [contactName, setContactName] = useState("");
-  const [contactPhone, setContactPhone] = useState("");
-  const [contactEmail, setContactEmail] = useState("");
-  const [bidAmount, setBidAmount] = useState("");
-  const [proposalNotes, setProposalNotes] = useState("");
-  const [submitting, setSubmitting] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [done, setDone] = useState(false);
-
-  async function handleSubmit(e: FormEvent) {
-    e.preventDefault();
-    setError(null);
-    setSubmitting(true);
-    try {
-      await api.post(`/contracts/${opportunity.id}/bids`, {
-        companyName,
-        contactName,
-        contactPhone,
-        contactEmail,
-        bidAmount,
-        proposalNotes: proposalNotes || undefined,
-      });
-      setDone(true);
-    } catch (err: any) {
-      setError(err.response?.data?.error ?? t("marketplace.bidError"));
-    } finally {
-      setSubmitting(false);
-    }
-  }
-
-  if (done) {
-    return (
-      <div className="text-center space-y-3 py-4">
-        <p className="text-sm text-mine-300">{t("marketplace.bidSubmitted")}</p>
-        <button className={buttonPrimary} onClick={onDone}>{t("common.close")}</button>
-      </div>
-    );
-  }
-
-  return (
-    <form onSubmit={handleSubmit} className="space-y-4">
-      <div className="grid grid-cols-2 gap-3">
-        <div>
-          <label className={labelClass}>{t("marketplace.companyName")}</label>
-          <input className={inputClass} value={companyName} onChange={(e) => setCompanyName(e.target.value)} required />
-        </div>
-        <div>
-          <label className={labelClass}>{t("contractors.contactName")}</label>
-          <input className={inputClass} value={contactName} onChange={(e) => setContactName(e.target.value)} required />
-        </div>
-      </div>
-      <div className="grid grid-cols-2 gap-3">
-        <div>
-          <label className={labelClass}>{t("common.phone")}</label>
-          <input className={inputClass} value={contactPhone} onChange={(e) => setContactPhone(e.target.value)} required />
-        </div>
-        <div>
-          <label className={labelClass}>{t("contractors.contactEmail")}</label>
-          <input className={inputClass} type="email" value={contactEmail} onChange={(e) => setContactEmail(e.target.value)} required />
-        </div>
-      </div>
-      <div>
-        <label className={labelClass}>{t("marketplace.bidAmount")}</label>
-        <input className={inputClass} type="number" step="any" value={bidAmount} onChange={(e) => setBidAmount(e.target.value)} required />
-      </div>
-      <div>
-        <label className={labelClass}>{t("marketplace.proposalNotes")}</label>
-        <textarea className={inputClass} rows={3} value={proposalNotes} onChange={(e) => setProposalNotes(e.target.value)} />
-      </div>
-      {error && <div className="text-danger-500 text-xs">{error}</div>}
-      <button type="submit" className={`${buttonPrimary} w-full`} disabled={submitting}>
-        {submitting ? t("common.saving") : t("marketplace.submitBid")}
-      </button>
-    </form>
-  );
-}
-
 export default function MarketplaceBrowse() {
   const { t } = useTranslation();
-  const [tab, setTab] = useState<"minerals" | "contracts">("minerals");
   const [listings, setListings] = useState<MineralListing[]>([]);
-  const [opportunities, setOpportunities] = useState<ContractOpportunity[]>([]);
   const [loading, setLoading] = useState(true);
   const [bidListing, setBidListing] = useState<MineralListing | null>(null);
-  const [bidOpportunity, setBidOpportunity] = useState<ContractOpportunity | null>(null);
 
   async function load() {
     setLoading(true);
-    const [l, o] = await Promise.all([
-      api.get<MineralListing[]>("/minerals", { params: { status: "AVAILABLE" } }),
-      api.get<ContractOpportunity[]>("/contracts", { params: { status: "OPEN" } }),
-    ]);
-    setListings(l.data);
-    setOpportunities(o.data);
+    const res = await api.get<MineralListing[]>("/minerals", { params: { status: "AVAILABLE" } });
+    setListings(res.data);
     setLoading(false);
   }
 
@@ -186,62 +99,45 @@ export default function MarketplaceBrowse() {
       </div>
 
       <div className="max-w-5xl mx-auto p-6 space-y-6">
-        <div className="flex gap-2">
-          <button className={tab === "minerals" ? buttonPrimary : buttonSecondary} onClick={() => setTab("minerals")}>
-            {t("marketplace.tabMinerals")}
-          </button>
-          <button className={tab === "contracts" ? buttonPrimary : buttonSecondary} onClick={() => setTab("contracts")}>
-            {t("marketplace.tabContracts")}
-          </button>
-        </div>
-
         {loading && <div className="text-mine-300">{t("common.loading")}</div>}
 
-        {!loading && tab === "minerals" && (
+        {!loading && (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {listings.map((l) => (
-              <div key={l.id} className={`${cardClass} p-5 space-y-2`}>
-                <div className="flex items-center justify-between">
-                  <h3 className="text-sm font-semibold">{l.mineralType}</h3>
-                  <StatusBadge status={l.status} />
+              <div key={l.id} className={`${cardClass} overflow-hidden`}>
+                {l.images.length > 0 && (
+                  <div className="flex gap-1 overflow-x-auto bg-mine-950">
+                    {l.images.map((img) => (
+                      <img
+                        key={img.id}
+                        src={`${API_URL}/api/minerals/${l.id}/images/${img.id}`}
+                        alt={l.mineralType}
+                        className="h-32 w-32 object-cover shrink-0"
+                      />
+                    ))}
+                  </div>
+                )}
+                <div className="p-5 space-y-2">
+                  <div className="flex items-center justify-between">
+                    <h3 className="text-sm font-semibold">{l.mineralType}</h3>
+                    <StatusBadge status={l.status} />
+                  </div>
+                  <div className="text-xs text-mine-400">{l.site?.name}{l.grade ? ` · ${t("marketplace.grade")}: ${l.grade}` : ""}</div>
+                  <div className="text-sm text-mine-300">
+                    {l.quantity} {l.unit}
+                    {l.pricePerUnit ? ` · ${l.currency} ${l.pricePerUnit} / ${l.unit}` : ""}
+                  </div>
+                  {l.description && <p className="text-xs text-mine-400">{l.description}</p>}
+                  {l.packaging && <div className="text-xs text-mine-400">{t("marketplace.packaging")}: {l.packaging}</div>}
+                  {l.certifications && <div className="text-xs text-mine-400">{t("marketplace.certifications")}: {l.certifications}</div>}
+                  <button className={`${buttonPrimary} text-xs px-3 py-1.5`} onClick={() => setBidListing(l)}>
+                    {t("marketplace.placeBid")}
+                  </button>
                 </div>
-                <div className="text-xs text-mine-400">{l.site?.name}{l.grade ? ` · ${t("marketplace.grade")}: ${l.grade}` : ""}</div>
-                <div className="text-sm text-mine-300">
-                  {l.quantity} {l.unit}
-                  {l.pricePerUnit ? ` · ${l.currency} ${l.pricePerUnit} / ${l.unit}` : ""}
-                </div>
-                {l.description && <p className="text-xs text-mine-400">{l.description}</p>}
-                <button className={`${buttonPrimary} text-xs px-3 py-1.5`} onClick={() => setBidListing(l)}>
-                  {t("marketplace.placeBid")}
-                </button>
               </div>
             ))}
             {listings.length === 0 && (
               <div className={`${cardClass} p-6 text-center text-mine-400 md:col-span-2`}>{t("marketplace.noListings")}</div>
-            )}
-          </div>
-        )}
-
-        {!loading && tab === "contracts" && (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {opportunities.map((o) => (
-              <div key={o.id} className={`${cardClass} p-5 space-y-2`}>
-                <div className="flex items-center justify-between">
-                  <h3 className="text-sm font-semibold">{o.title}</h3>
-                  <StatusBadge status={o.status} />
-                </div>
-                <div className="text-xs text-mine-400">
-                  {o.site?.name} · {t("marketplace.deadline")}: {new Date(o.submissionDeadline).toLocaleDateString()}
-                </div>
-                <p className="text-xs text-mine-400">{o.description}</p>
-                {o.budgetRange && <div className="text-xs text-mine-400">{t("marketplace.budgetRange")}: {o.budgetRange}</div>}
-                <button className={`${buttonPrimary} text-xs px-3 py-1.5`} onClick={() => setBidOpportunity(o)}>
-                  {t("marketplace.submitBid")}
-                </button>
-              </div>
-            ))}
-            {opportunities.length === 0 && (
-              <div className={`${cardClass} p-6 text-center text-mine-400 md:col-span-2`}>{t("marketplace.noOpportunities")}</div>
             )}
           </div>
         )}
@@ -250,12 +146,6 @@ export default function MarketplaceBrowse() {
       {bidListing && (
         <Modal title={t("marketplace.bidOn", { name: bidListing.mineralType })} onClose={() => setBidListing(null)}>
           <MineralBidForm listing={bidListing} onDone={() => setBidListing(null)} />
-        </Modal>
-      )}
-
-      {bidOpportunity && (
-        <Modal title={t("marketplace.bidOn", { name: bidOpportunity.title })} onClose={() => setBidOpportunity(null)}>
-          <ContractBidForm opportunity={bidOpportunity} onDone={() => setBidOpportunity(null)} />
         </Modal>
       )}
     </div>

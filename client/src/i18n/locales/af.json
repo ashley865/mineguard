@@ -587,7 +587,7 @@
     }
   },
   "documents": {
-    "nav": "Dokumentbeheer",
+    "nav": "Dokumentkluis",
     "title": "Dokumentbeheer",
     "subtitle": "Sentrale register van beheerde dokumente — beleide, prosedures en rekords",
     "new": "+ Laai Dokument Op",
@@ -623,6 +623,30 @@
       "DRAWING": "Tekening",
       "CONTRACT": "Kontrak",
       "OTHER": "Ander"
+    },
+    "vault": {
+      "title": "Dokumentkluis",
+      "subtitle": "Elke dokument wat ooit êrens in die stelsel opgelaai of afgelaai is, netjies op een plek georganiseer",
+      "tabAll": "Alle Dokumente",
+      "tabManage": "Beheerde Dokumente",
+      "allSources": "Almal",
+      "sources": {
+        "DOCUMENT": "Beheerde Dokument",
+        "VISITOR": "Besoeker-oplaai",
+        "BUYER": "Koper-oplaai"
+      },
+      "colFile": "Lêer",
+      "colSource": "Bron",
+      "colRelatedTo": "Verwant aan",
+      "colUploadedBy": "Opgelaai deur",
+      "colDate": "Datum",
+      "searchPlaceholder": "Soek volgens lêer, titel of verwante rekord…",
+      "noneFound": "Geen dokumente pas by hierdie aansig nie.",
+      "selfService": "Selfdiens-oplaai",
+      "deleteTitle": "Bevestig skrapping",
+      "deleteHint": "Om \"{{name}}\" te skrap is permanent. Voer jou wagwoord in om te bevestig.",
+      "confirmPassword": "Jou wagwoord",
+      "deleteError": "Kon nie hierdie dokument skrap nie"
     }
   },
   "inspection": {
@@ -1047,6 +1071,39 @@
     "noneYetBuyers": "Geen kopers in hierdie kategorie nie.",
     "suspendBuyer": "Skors koper",
     "reviewNote": "Hersieningsnota",
-    "noDocuments": "Geen dokumente opgelaai nie."
+    "noDocuments": "Geen dokumente opgelaai nie.",
+    "packaging": "Verpakking",
+    "certifications": "Sertifisering / analiseverwysing",
+    "images": "Foto's",
+    "uploadImages": "Laai Foto's Op",
+    "imageUploadError": "Kon nie beelde oplaai nie",
+    "imagesAfterSaveHint": "Stoor eers die lys, en wysig dit dan om foto's by te voeg."
+  },
+  "tenders": {
+    "nav": "Tenders & Kontrakte",
+    "subtitle": "Adverteer kontrakgeleenthede en bestuur biedinge van kontrakteurs",
+    "publicSubtitle": "Blaai deur oop tenders en dien 'n bod in — geen voorafregistrasie nodig nie",
+    "category": "Kategorie",
+    "allCategories": "Almal",
+    "shareLink": "Deel Tenderbladsy",
+    "shareTitle": "Deel die Tenderbord",
+    "shareHint": "Deel hierdie skakel of QR-kode sodat kontrakteurs oop tenders kan deurblaai en biedinge kan indien sonder om te registreer.",
+    "categories": {
+      "TRUCKING_HAULAGE": "Vragvervoer",
+      "GEOLOGICAL_SERVICES": "Geologiese Dienste",
+      "DRILLING_BLASTING": "Boor en Skiet",
+      "EARTHMOVING_EXCAVATION": "Grondverskuiwing en Uitgrawing",
+      "PLANT_EQUIPMENT_MAINTENANCE": "Aanleg- en Toerustingsonderhoud",
+      "ELECTRICAL_INSTRUMENTATION": "Elektries en Instrumentasie",
+      "CIVIL_CONSTRUCTION": "Siviele Konstruksie",
+      "ENVIRONMENTAL_REHABILITATION": "Omgewing en Rehabilitasie",
+      "SECURITY_SERVICES": "Sekuriteitsdienste",
+      "CATERING_ACCOMMODATION": "Spyseniering en Verblyf",
+      "TRANSPORT_LOGISTICS": "Vervoer en Logistiek",
+      "CONSULTING_PROFESSIONAL": "Konsultasie en Professionele Dienste",
+      "SUPPLY_EQUIPMENT_MATERIALS": "Verskaffing van Toerusting en Materiaal",
+      "IT_TELECOMMUNICATIONS": "IT en Telekommunikasie",
+      "OTHER": "Ander"
+    }
   }
 }
