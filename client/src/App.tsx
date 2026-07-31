@@ -30,6 +30,9 @@ import AcceptExecutiveInvite from "./pages/AcceptExecutiveInvite";
 import TruckRegistration from "./pages/TruckRegistration";
 import Scanner from "./pages/Scanner";
 import Messages from "./pages/Messages";
+import Marketplace from "./pages/Marketplace";
+import MarketplaceBrowse from "./pages/MarketplaceBrowse";
+import BuyerRegister from "./pages/BuyerRegister";
 
 function HomeRoute() {
   const { user } = useAuth();
@@ -51,6 +54,8 @@ export default function App() {
       <Route path="/visit/:siteId" element={<VisitorCheckIn />} />
       <Route path="/contractor-register/:siteId" element={<ContractorRegister />} />
       <Route path="/join-executive/:inviteId" element={<AcceptExecutiveInvite />} />
+      <Route path="/buy" element={<MarketplaceBrowse />} />
+      <Route path="/buyer-register" element={<BuyerRegister />} />
       <Route element={<ProtectedRoute />}>
         <Route path="/" element={<HomeRoute />} />
         <Route path="/sites" element={<ModuleRoute path="/sites"><Sites /></ModuleRoute>} />
@@ -70,6 +75,7 @@ export default function App() {
         <Route path="/permits-to-work" element={<ModuleRoute path="/permits-to-work"><PermitToWork /></ModuleRoute>} />
         <Route path="/trucks" element={<ModuleRoute path="/trucks"><TruckRegistration /></ModuleRoute>} />
         <Route path="/scanner" element={<ModuleRoute path="/scanner"><Scanner /></ModuleRoute>} />
+        <Route path="/marketplace" element={<ModuleRoute path="/marketplace"><Marketplace /></ModuleRoute>} />
         <Route path="/messages" element={<Messages />} />
         <Route path="/settings" element={<Settings />} />
       </Route>

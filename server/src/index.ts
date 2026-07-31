@@ -35,6 +35,9 @@ import permitsToWorkRoutes from "./routes/permitsToWork";
 import executiveInvitesRoutes from "./routes/executiveInvites";
 import trucksRoutes from "./routes/trucks";
 import messagesRoutes from "./routes/messages";
+import buyersRoutes from "./routes/buyers";
+import mineralsRoutes from "./routes/minerals";
+import contractsRoutes from "./routes/contracts";
 import { startSimulator } from "./services/simulator";
 import { scanCompliance } from "./services/complianceScanner";
 
@@ -84,6 +87,9 @@ app.use("/api/permits-to-work", permitsToWorkRoutes);
 app.use("/api/executive-invites", executiveInvitesRoutes);
 app.use("/api/trucks", trucksRoutes);
 app.use("/api/messages", messagesRoutes);
+app.use("/api/buyers", buyersRoutes);
+app.use("/api/minerals", mineralsRoutes);
+app.use("/api/contracts", contractsRoutes);
 
 app.use((err: any, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
   console.error(err);

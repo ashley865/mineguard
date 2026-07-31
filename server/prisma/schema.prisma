@@ -188,6 +188,9 @@ model User {
   loggedDeliveries       Delivery[]
   sentMessages           Message[]                  @relation("MessageSender")
   receivedMessages       Message[]                  @relation("MessageRecipient")
+  reviewedBuyers         Buyer[]
+  listedMinerals         MineralListing[]
+  postedContracts        ContractOpportunity[]
 }
 
 model Site {
@@ -218,6 +221,8 @@ model Site {
   visitors             Visitor[]
   permitsToWork        PermitToWork[]
   deliveries           Delivery[]
+  mineralListings      MineralListing[]
+  contractOpportunities ContractOpportunity[]
 }
 
 model Zone {
@@ -845,4 +850,175 @@ model Message {
 
   @@index([senderId, recipientId])
   @@index([recipientId, readAt])
+}
+
+enum BuyerType {
+  INDIVIDUAL
+  COMPANY
+  TRUST
+  PARTNERSHIP
+}
+
+enum BuyerStatus {
+  PENDING_REVIEW
+  APPROVED
+  REJECTED
+  SUSPENDED
+}
+
+// Buyer registration is deliberately strict / FICA-style: South African law requires
+// dealers in minerals, precious metals, and precious stones to identify and vet their
+// counterparties (FICA, the Precious Metals Act, and the Diamonds Act) before trading.
+model Buyer {
+  id                      String      @id @default(cuid())
+  buyerType               BuyerType
+  legalName               String
+  tradingName             String?
+  registrationNumber      String?
+  idNumber                String?
+  taxNumber               String
+  vatNumber               String?
+  dealerLicenseNumber     String?
+  dealerLicenseAuthority  String?
+  dealerLicenseExpiry     DateTime?
+  physicalAddress         String
+  postalAddress           String?
+  contactName             String
+  contactPhone            String
+  contactEmail            String      @unique
+  bankName                String?
+  bankAccountHolder       String?
+  bankAccountNumber       String?
+  bankBranchCode          String?
+  bbbeeLevel              String?
+  sourceOfFunds           String
+  popiaConsentAccepted    Boolean     @default(false)
+  ficaDeclarationAccepted Boolean     @default(false)
+  amlDeclarationAccepted  Boolean     @default(false)
+  status                  BuyerStatus @default(PENDING_REVIEW)
+  reviewNote              String?
+  reviewedAt              DateTime?
+  reviewedById            String?
+  reviewedBy              User?       @relation(fields: [reviewedById], references: [id], onDelete: SetNull)
+
+  documents BuyerDocument[]
+  bids      MineralBid[]
+
+  createdAt DateTime @default(now())
+}
+
+enum BuyerDocumentType {
+  ID_OR_REGISTRATION
+  PROOF_OF_ADDRESS
+  DEALER_LICENSE
+  TAX_CLEARANCE
+  OTHER
+}
+
+model BuyerDocument {
+  id           String            @id @default(cuid())
+  buyerId      String
+  buyer        Buyer             @relation(fields: [buyerId], references: [id], onDelete: Cascade)
+  docType      BuyerDocumentType @default(OTHER)
+  fileName     String
+  fileMimeType String
+  fileSize     Int
+  fileData     Bytes
+
+  createdAt DateTime @default(now())
+}
+
+enum MineralListingStatus {
+  AVAILABLE
+  SOLD
+  WITHDRAWN
+}
+
+model MineralListing {
+  id           String               @id @default(cuid())
+  siteId       String
+  site         Site                 @relation(fields: [siteId], references: [id], onDelete: Cascade)
+  mineralType  String
+  grade        String?
+  quantity     Float
+  unit         String
+  pricePerUnit Float?
+  currency     String               @default("ZAR")
+  description  String?
+  status       MineralListingStatus @default(AVAILABLE)
+  listedById   String?
+  listedBy     User?                @relation(fields: [listedById], references: [id], onDelete: SetNull)
+
+  bids MineralBid[]
+
+  createdAt DateTime @default(now())
+}
+
+enum MineralBidStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+  WITHDRAWN
+}
+
+model MineralBid {
+  id         String            @id @default(cuid())
+  listingId  String
+  listing    MineralListing    @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  buyerId    String
+  buyer      Buyer             @relation(fields: [buyerId], references: [id], onDelete: Cascade)
+  quantity   Float
+  offerPrice Float
+  notes      String?
+  status     MineralBidStatus  @default(PENDING)
+
+  createdAt DateTime @default(now())
+}
+
+enum ContractOpportunityStatus {
+  OPEN
+  CLOSED
+  AWARDED
+  CANCELLED
+}
+
+model ContractOpportunity {
+  id                 String                     @id @default(cuid())
+  siteId             String
+  site               Site                       @relation(fields: [siteId], references: [id], onDelete: Cascade)
+  title              String
+  description        String
+  scopeOfWork        String
+  budgetRange        String?
+  submissionDeadline DateTime
+  status             ContractOpportunityStatus  @default(OPEN)
+  postedById         String?
+  postedBy           User?                      @relation(fields: [postedById], references: [id], onDelete: SetNull)
+
+  bids ContractBid[]
+
+  createdAt DateTime @default(now())
+}
+
+enum ContractBidStatus {
+  SUBMITTED
+  SHORTLISTED
+  AWARDED
+  REJECTED
+  WITHDRAWN
+}
+
+model ContractBid {
+  id            String            @id @default(cuid())
+  opportunityId String
+  opportunity   ContractOpportunity @relation(fields: [opportunityId], references: [id], onDelete: Cascade)
+  companyName   String
+  contactName   String
+  contactPhone  String
+  contactEmail  String
+  bidAmount     Float
+  proposalNotes String?
+  status        ContractBidStatus @default(SUBMITTED)
+
+  createdAt DateTime @default(now())
 }

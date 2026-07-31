@@ -651,3 +651,115 @@ export interface Message {
   sender: { id: string; name: string; email: string; role: Role; title?: ExecutiveTitle | null };
   recipient: { id: string; name: string; email: string; role: Role; title?: ExecutiveTitle | null };
 }
+
+export type BuyerType = "INDIVIDUAL" | "COMPANY" | "TRUST" | "PARTNERSHIP";
+export type BuyerStatus = "PENDING_REVIEW" | "APPROVED" | "REJECTED" | "SUSPENDED";
+export type BuyerDocumentType = "ID_OR_REGISTRATION" | "PROOF_OF_ADDRESS" | "DEALER_LICENSE" | "TAX_CLEARANCE" | "OTHER";
+
+export interface BuyerDocument {
+  id: string;
+  docType: BuyerDocumentType;
+  fileName: string;
+  fileMimeType: string;
+  fileSize: number;
+  createdAt: string;
+}
+
+export interface Buyer {
+  id: string;
+  buyerType: BuyerType;
+  legalName: string;
+  tradingName?: string | null;
+  registrationNumber?: string | null;
+  idNumber?: string | null;
+  taxNumber: string;
+  vatNumber?: string | null;
+  dealerLicenseNumber?: string | null;
+  dealerLicenseAuthority?: string | null;
+  dealerLicenseExpiry?: string | null;
+  physicalAddress: string;
+  postalAddress?: string | null;
+  contactName: string;
+  contactPhone: string;
+  contactEmail: string;
+  bankName?: string | null;
+  bankAccountHolder?: string | null;
+  bankAccountNumber?: string | null;
+  bankBranchCode?: string | null;
+  bbbeeLevel?: string | null;
+  sourceOfFunds: string;
+  popiaConsentAccepted: boolean;
+  ficaDeclarationAccepted: boolean;
+  amlDeclarationAccepted: boolean;
+  status: BuyerStatus;
+  reviewNote?: string | null;
+  reviewedAt?: string | null;
+  reviewedBy?: { id: string; name: string } | null;
+  createdAt: string;
+  documents: BuyerDocument[];
+}
+
+export type MineralListingStatus = "AVAILABLE" | "SOLD" | "WITHDRAWN";
+
+export interface MineralListing {
+  id: string;
+  siteId: string;
+  site?: { id: string; name: string };
+  mineralType: string;
+  grade?: string | null;
+  quantity: number;
+  unit: string;
+  pricePerUnit?: number | null;
+  currency: string;
+  description?: string | null;
+  status: MineralListingStatus;
+  listedBy?: { id: string; name: string } | null;
+  createdAt: string;
+}
+
+export type MineralBidStatus = "PENDING" | "ACCEPTED" | "REJECTED" | "WITHDRAWN";
+
+export interface MineralBid {
+  id: string;
+  listingId: string;
+  listing?: { id: string; mineralType: string; unit: string; site?: { id: string; name: string } };
+  buyerId: string;
+  buyer?: { id: string; legalName: string; contactEmail: string; status: BuyerStatus };
+  quantity: number;
+  offerPrice: number;
+  notes?: string | null;
+  status: MineralBidStatus;
+  createdAt: string;
+}
+
+export type ContractOpportunityStatus = "OPEN" | "CLOSED" | "AWARDED" | "CANCELLED";
+
+export interface ContractOpportunity {
+  id: string;
+  siteId: string;
+  site?: { id: string; name: string };
+  title: string;
+  description: string;
+  scopeOfWork: string;
+  budgetRange?: string | null;
+  submissionDeadline: string;
+  status: ContractOpportunityStatus;
+  postedBy?: { id: string; name: string } | null;
+  createdAt: string;
+}
+
+export type ContractBidStatus = "SUBMITTED" | "SHORTLISTED" | "AWARDED" | "REJECTED" | "WITHDRAWN";
+
+export interface ContractBid {
+  id: string;
+  opportunityId: string;
+  opportunity?: { id: string; title: string };
+  companyName: string;
+  contactName: string;
+  contactPhone: string;
+  contactEmail: string;
+  bidAmount: number;
+  proposalNotes?: string | null;
+  status: ContractBidStatus;
+  createdAt: string;
+}
