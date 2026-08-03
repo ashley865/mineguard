@@ -18,9 +18,9 @@ function StatCard({
   const toneClass =
     tone === "danger" ? "text-danger-500" : tone === "hazard" ? "text-hazard-500" : tone === "success" ? "text-success-500" : "text-mine-50";
   return (
-    <div className={`${cardClass} px-5 py-4`}>
-      <div className="text-xs text-mine-300 uppercase tracking-wide">{label}</div>
-      <div className={`text-2xl font-bold mt-1 ${toneClass}`}>{value}</div>
+    <div className={`${cardClass} px-3 py-2.5`}>
+      <div className="text-[10px] text-mine-300 uppercase tracking-wide">{label}</div>
+      <div className={`text-lg font-bold mt-0.5 ${toneClass}`}>{value}</div>
     </div>
   );
 }
@@ -67,13 +67,13 @@ export default function Dashboard() {
     complianceScore >= 80 ? "text-success-500" : complianceScore >= 50 ? "text-hazard-500" : "text-danger-500";
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       <div>
-        <h1 className="text-xl font-bold">{t("dashboard.title")}</h1>
-        <p className="text-mine-300 text-sm">{t("dashboard.subtitle")}</p>
+        <h1 className="text-lg font-bold">{t("dashboard.title")}</h1>
+        <p className="text-mine-300 text-xs">{t("dashboard.subtitle")}</p>
       </div>
 
-      <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-3">
+      <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-2">
         <StatCard label={t("dashboard.sites")} value={counts.siteCount} />
         <StatCard label={t("dashboard.sensors")} value={counts.sensorCount} />
         <StatCard label={t("dashboard.openAlerts")} value={counts.openAlerts} tone={counts.openAlerts > 0 ? "hazard" : "success"} />
@@ -83,15 +83,15 @@ export default function Dashboard() {
         <StatCard label={t("dashboard.equipmentDown")} value={counts.equipmentDown} tone={counts.equipmentDown > 0 ? "danger" : "success"} />
       </div>
 
-      <div className={`${cardClass} p-5 flex items-center justify-between flex-wrap gap-4`}>
-        <h2 className="text-sm font-semibold">{t("dashboard.complianceScore")}</h2>
-        <div className={`text-3xl font-bold ${scoreTone}`}>{complianceScore}%</div>
+      <div className={`${cardClass} p-3 flex items-center justify-between flex-wrap gap-3`}>
+        <h2 className="text-xs font-semibold">{t("dashboard.complianceScore")}</h2>
+        <div className={`text-xl font-bold ${scoreTone}`}>{complianceScore}%</div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div className={`${cardClass} p-5`}>
-          <h2 className="text-sm font-semibold mb-4">{t("dashboard.workforceStatus")}</h2>
-          <div className="space-y-2 text-sm">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+        <div className={`${cardClass} p-3`}>
+          <h2 className="text-xs font-semibold mb-2">{t("dashboard.workforceStatus")}</h2>
+          <div className="space-y-1.5 text-xs">
             <div className="flex items-center justify-between">
               <span className="text-mine-300">{t("workers.onShift")}</span>
               <span className="font-semibold text-success-500">{workforce.byStatus.ON_SHIFT}</span>
@@ -104,16 +104,16 @@ export default function Dashboard() {
               <span className="text-mine-300">{t("workers.emergency")}</span>
               <span className={`font-semibold ${workforce.byStatus.EMERGENCY > 0 ? "text-danger-500" : ""}`}>{workforce.byStatus.EMERGENCY}</span>
             </div>
-            <div className="flex items-center justify-between pt-2 border-t border-mine-800">
+            <div className="flex items-center justify-between pt-1.5 border-t border-mine-800">
               <span className="text-mine-300">{t("workers.title")}</span>
               <span className="font-semibold">{workforce.total}</span>
             </div>
           </div>
         </div>
 
-        <div className={`${cardClass} p-5`}>
-          <h2 className="text-sm font-semibold mb-4">{t("dashboard.equipmentStatus")}</h2>
-          <div className="space-y-2 text-sm">
+        <div className={`${cardClass} p-3`}>
+          <h2 className="text-xs font-semibold mb-2">{t("dashboard.equipmentStatus")}</h2>
+          <div className="space-y-1.5 text-xs">
             <div className="flex items-center justify-between">
               <span className="text-mine-300">{t("equipment.operational")}</span>
               <span className="font-semibold text-success-500">{equipmentSummary.byStatus.OPERATIONAL}</span>
@@ -126,7 +126,7 @@ export default function Dashboard() {
               <span className="text-mine-300">{t("equipment.down")}</span>
               <span className={`font-semibold ${equipmentSummary.byStatus.DOWN > 0 ? "text-danger-500" : ""}`}>{equipmentSummary.byStatus.DOWN}</span>
             </div>
-            <div className="flex items-center justify-between pt-2 border-t border-mine-800">
+            <div className="flex items-center justify-between pt-1.5 border-t border-mine-800">
               <span className="text-mine-300">{t("equipment.title")}</span>
               <span className="font-semibold">{equipmentSummary.total}</span>
             </div>
@@ -134,20 +134,20 @@ export default function Dashboard() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className={`${cardClass} lg:col-span-2 p-5`}>
-          <h2 className="text-sm font-semibold mb-4">{t("dashboard.siteStatus")}</h2>
-          <div className="space-y-4">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
+        <div className={`${cardClass} lg:col-span-2 p-3`}>
+          <h2 className="text-xs font-semibold mb-2">{t("dashboard.siteStatus")}</h2>
+          <div className="space-y-2">
             {sites.map((site) => (
-              <div key={site.id} className="border border-mine-800 rounded-md p-4">
-                <div className="flex items-center justify-between mb-3">
+              <div key={site.id} className="border border-mine-800 rounded-md p-2.5">
+                <div className="flex items-center justify-between mb-2">
                   <div>
-                    <div className="font-semibold">{site.name}</div>
-                    <div className="text-xs text-mine-300">{site.location}</div>
+                    <div className="font-semibold text-sm">{site.name}</div>
+                    <div className="text-[10px] text-mine-300">{site.location}</div>
                   </div>
                   <StatusBadge status={site.status} />
                 </div>
-                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-1.5">
                   {site.zones?.flatMap((zone) =>
                     (zone.sensors ?? []).map((sensor) => {
                       const latest = sensor.readings?.[0];
@@ -156,7 +156,7 @@ export default function Dashboard() {
                       return (
                         <div
                           key={sensor.id}
-                          className={`rounded-md px-3 py-2 text-xs border ${
+                          className={`rounded-md px-2 py-1.5 text-[11px] border ${
                             outOfRange
                               ? "border-danger-500 bg-danger-500/10"
                               : "border-mine-700 bg-mine-800/50"
@@ -164,7 +164,7 @@ export default function Dashboard() {
                         >
                           <div className="font-medium truncate">{sensor.name}</div>
                           <div className="text-mine-300">{zone.name}</div>
-                          <div className={`font-bold mt-1 ${outOfRange ? "text-danger-400" : "text-mine-100"}`}>
+                          <div className={`font-bold mt-0.5 ${outOfRange ? "text-danger-400" : "text-mine-100"}`}>
                             {latest ? `${latest.value}${sensor.unit}` : "—"}
                           </div>
                         </div>
@@ -177,22 +177,22 @@ export default function Dashboard() {
           </div>
         </div>
 
-        <div className={`${cardClass} p-5`}>
-          <h2 className="text-sm font-semibold mb-4">{t("dashboard.activeAlerts")}</h2>
-          <div className="space-y-3 max-h-[560px] overflow-y-auto">
+        <div className={`${cardClass} p-3`}>
+          <h2 className="text-xs font-semibold mb-2">{t("dashboard.activeAlerts")}</h2>
+          <div className="space-y-2 max-h-[420px] overflow-y-auto">
             {recentAlerts.length === 0 && (
-              <div className="text-mine-400 text-sm">{t("dashboard.noOpenAlerts")}</div>
+              <div className="text-mine-400 text-xs">{t("dashboard.noOpenAlerts")}</div>
             )}
             {recentAlerts.map((alert: Alert) => (
-              <div key={alert.id} className="border border-mine-800 rounded-md p-3">
+              <div key={alert.id} className="border border-mine-800 rounded-md p-2">
                 <div className="flex items-center justify-between mb-1">
                   <SeverityBadge severity={alert.severity} />
-                  <span className="text-xs text-mine-400">
+                  <span className="text-[10px] text-mine-400">
                     {new Date(alert.createdAt).toLocaleTimeString()}
                   </span>
                 </div>
-                <div className="text-sm">{alert.message}</div>
-                <div className="text-xs text-mine-400 mt-1">
+                <div className="text-xs">{alert.message}</div>
+                <div className="text-[10px] text-mine-400 mt-0.5">
                   {alert.site?.name}
                   {alert.zone?.name ? ` · ${alert.zone.name}` : ""}
                 </div>

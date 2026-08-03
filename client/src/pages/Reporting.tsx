@@ -12,10 +12,10 @@ function RateCard({ label, numerator, denominator }: { label: string; numerator:
   const pct = denominator === 0 ? 100 : Math.round((numerator / denominator) * 100);
   const tone = pct >= 80 ? "text-success-500" : pct >= 50 ? "text-hazard-500" : "text-danger-500";
   return (
-    <div className={`${cardClass} px-4 py-3`}>
-      <div className="text-xs text-mine-300 uppercase tracking-wide">{label}</div>
-      <div className={`text-2xl font-bold mt-1 ${tone}`}>{pct}%</div>
-      <div className="text-xs text-mine-400 mt-0.5">{numerator} / {denominator}</div>
+    <div className={`${cardClass} px-3 py-2`}>
+      <div className="text-[10px] text-mine-300 uppercase tracking-wide">{label}</div>
+      <div className={`text-lg font-bold mt-0.5 ${tone}`}>{pct}%</div>
+      <div className="text-[10px] text-mine-400 mt-0.5">{numerator} / {denominator}</div>
     </div>
   );
 }
@@ -68,13 +68,13 @@ export default function Reporting() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       <div>
-        <h1 className="text-xl font-bold">{t("reporting.nav")}</h1>
-        <p className="text-mine-300 text-sm">{t("reporting.subtitle")}</p>
+        <h1 className="text-lg font-bold">{t("reporting.nav")}</h1>
+        <p className="text-mine-300 text-xs">{t("reporting.subtitle")}</p>
       </div>
 
-      <div className="flex flex-wrap items-center gap-3">
+      <div className="flex flex-wrap items-center gap-2">
         <select className={`${inputClass} max-w-xs`} value={siteId} onChange={(e) => setSiteId(e.target.value)}>
           <option value="">{t("reporting.allSites")}</option>
           {sites.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
@@ -92,17 +92,17 @@ export default function Reporting() {
         </div>
       </div>
 
-      {loading && <div className="text-mine-300">{t("reporting.loading")}</div>}
+      {loading && <div className="text-mine-300 text-sm">{t("reporting.loading")}</div>}
 
       {!loading && data && (
         <>
-          <div className={`${cardClass} p-5 flex items-center justify-between flex-wrap gap-4`}>
+          <div className={`${cardClass} p-3 flex items-center justify-between flex-wrap gap-3`}>
             <div>
-              <h2 className="text-sm font-semibold">{t("reporting.complianceScore")}</h2>
-              <p className="text-xs text-mine-400 mt-0.5">{t("reporting.complianceScoreNote")}</p>
+              <h2 className="text-xs font-semibold">{t("reporting.complianceScore")}</h2>
+              <p className="text-[10px] text-mine-400 mt-0.5">{t("reporting.complianceScoreNote")}</p>
             </div>
             <div
-              className={`text-4xl font-bold ${
+              className={`text-2xl font-bold ${
                 data.complianceScore >= 80
                   ? "text-success-500"
                   : data.complianceScore >= 50
@@ -114,7 +114,7 @@ export default function Reporting() {
             </div>
           </div>
 
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-7 gap-3">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-7 gap-2">
             <RateCard label={t("compliance.tabCop")} numerator={data.compliance.codesOfPractice.active} denominator={data.compliance.codesOfPractice.total} />
             <RateCard label={t("compliance.tabRisk")} numerator={data.compliance.riskAssessments.approved} denominator={data.compliance.riskAssessments.total} />
             <RateCard label={t("permits.nav")} numerator={data.compliance.permits.active} denominator={data.compliance.permits.total} />
@@ -124,15 +124,15 @@ export default function Reporting() {
             <RateCard label={t("contractors.nav")} numerator={data.compliance.contractors.active} denominator={data.compliance.contractors.total} />
           </div>
 
-          <div className={`${cardClass} p-5`}>
-            <h2 className="text-sm font-semibold mb-4">{t("reporting.trendTitle")}</h2>
-            <div className="h-64">
+          <div className={`${cardClass} p-3`}>
+            <h2 className="text-xs font-semibold mb-2">{t("reporting.trendTitle")}</h2>
+            <div className="h-44">
               <ResponsiveContainer width="100%" height="100%">
                 <LineChart data={data.trend}>
-                  <XAxis dataKey="date" tick={{ fontSize: 10, fill: "#52525b" }} tickFormatter={(d: string) => d.slice(5)} interval="preserveStartEnd" />
-                  <YAxis tick={{ fontSize: 10, fill: "#52525b" }} allowDecimals={false} />
-                  <Tooltip contentStyle={{ background: "#fafafa", border: "1px solid #e5e5e5", fontSize: 12 }} />
-                  <Legend wrapperStyle={{ fontSize: 12 }} />
+                  <XAxis dataKey="date" tick={{ fontSize: 9, fill: "#52525b" }} tickFormatter={(d: string) => d.slice(5)} interval="preserveStartEnd" />
+                  <YAxis tick={{ fontSize: 9, fill: "#52525b" }} allowDecimals={false} />
+                  <Tooltip contentStyle={{ background: "#fafafa", border: "1px solid #e5e5e5", fontSize: 11 }} />
+                  <Legend wrapperStyle={{ fontSize: 11 }} />
                   <Line type="monotone" dataKey="incidents" name={t("reporting.incidents")} stroke="#e13b2e" strokeWidth={2} dot={false} />
                   <Line type="monotone" dataKey="alerts" name={t("reporting.alerts")} stroke="#c48a1f" strokeWidth={2} dot={false} />
                 </LineChart>
@@ -140,12 +140,12 @@ export default function Reporting() {
             </div>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <div className={`${cardClass} p-5`}>
-              <h2 className="text-sm font-semibold mb-4">{t("reporting.alertsBySeverity")}</h2>
-              <div className="space-y-2">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
+            <div className={`${cardClass} p-3`}>
+              <h2 className="text-xs font-semibold mb-2">{t("reporting.alertsBySeverity")}</h2>
+              <div className="space-y-1.5">
                 {(["CRITICAL", "HIGH", "MEDIUM", "LOW"] as const).map((sev) => (
-                  <div key={sev} className="flex items-center justify-between text-sm">
+                  <div key={sev} className="flex items-center justify-between text-xs">
                     <SeverityBadge severity={sev} />
                     <span className="font-semibold">{data.alertsBySeverity[sev]}</span>
                   </div>
@@ -153,24 +153,24 @@ export default function Reporting() {
               </div>
             </div>
 
-            <div className={`${cardClass} p-5`}>
-              <h2 className="text-sm font-semibold mb-4">{t("reporting.expiryForecast")}</h2>
-              <div className="h-48">
+            <div className={`${cardClass} p-3`}>
+              <h2 className="text-xs font-semibold mb-2">{t("reporting.expiryForecast")}</h2>
+              <div className="h-36">
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart data={data.expiryForecast.map((f) => ({ ...f, label: t(`reporting.categories.${f.category}`) }))}>
-                    <XAxis dataKey="label" tick={{ fontSize: 10, fill: "#52525b" }} />
-                    <YAxis tick={{ fontSize: 10, fill: "#52525b" }} allowDecimals={false} />
-                    <Tooltip contentStyle={{ background: "#fafafa", border: "1px solid #e5e5e5", fontSize: 12 }} />
+                    <XAxis dataKey="label" tick={{ fontSize: 9, fill: "#52525b" }} />
+                    <YAxis tick={{ fontSize: 9, fill: "#52525b" }} allowDecimals={false} />
+                    <Tooltip contentStyle={{ background: "#fafafa", border: "1px solid #e5e5e5", fontSize: 11 }} />
                     <Bar dataKey="count" fill="#c48a1f" radius={[3, 3, 0, 0]} />
                   </BarChart>
                 </ResponsiveContainer>
               </div>
-              <div className="text-xs text-mine-400 mt-2">{t("reporting.expiryForecastNote")}</div>
+              <div className="text-[10px] text-mine-400 mt-1.5">{t("reporting.expiryForecastNote")}</div>
             </div>
           </div>
 
-          <div className={`${cardClass} p-5`}>
-            <h2 className="text-sm font-semibold mb-4">{t("reporting.exportTitle")}</h2>
+          <div className={`${cardClass} p-3`}>
+            <h2 className="text-xs font-semibold mb-2">{t("reporting.exportTitle")}</h2>
             <div className="flex flex-wrap gap-2">
               {exportableEntities.map((entity) => (
                 <button

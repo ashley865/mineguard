@@ -15,18 +15,18 @@ function toneText(tone?: Tone) {
 
 function OpsCard({ label, value, to, tone }: { label: string; value: number; to: string; tone?: Tone }) {
   return (
-    <Link to={to} className={`${cardClass} px-5 py-4 block hover:border-hazard-500 transition-colors`}>
-      <div className="text-xs text-mine-300 uppercase tracking-wide">{label}</div>
-      <div className={`text-2xl font-bold mt-1 ${toneText(tone)}`}>{value}</div>
+    <Link to={to} className={`${cardClass} px-3 py-2.5 block hover:border-hazard-500 transition-colors`}>
+      <div className="text-[10px] text-mine-300 uppercase tracking-wide">{label}</div>
+      <div className={`text-lg font-bold mt-0.5 ${toneText(tone)}`}>{value}</div>
     </Link>
   );
 }
 
 function StatCard({ label, value, tone }: { label: string; value: string | number; tone?: Tone }) {
   return (
-    <div className={`${cardClass} px-5 py-4`}>
-      <div className="text-xs text-mine-300 uppercase tracking-wide">{label}</div>
-      <div className={`text-2xl font-bold mt-1 ${toneText(tone)}`}>{value}</div>
+    <div className={`${cardClass} px-3 py-2.5`}>
+      <div className="text-[10px] text-mine-300 uppercase tracking-wide">{label}</div>
+      <div className={`text-lg font-bold mt-0.5 ${toneText(tone)}`}>{value}</div>
     </div>
   );
 }
@@ -35,7 +35,7 @@ function RateRow({ label, numerator, denominator }: { label: string; numerator: 
   const pct = denominator === 0 ? 100 : Math.round((numerator / denominator) * 100);
   const tone: Tone = pct >= 80 ? "positive" : pct >= 50 ? "caution" : "negative";
   return (
-    <div className="flex items-center justify-between text-sm">
+    <div className="flex items-center justify-between text-xs">
       <span className="text-mine-300">{label}</span>
       <span className={`font-semibold ${toneText(tone)}`}>{pct}%</span>
     </div>
@@ -112,19 +112,19 @@ export default function ExecutiveDashboard() {
     complianceScore >= 80 ? "text-success-500" : complianceScore >= 50 ? "text-hazard-500" : "text-danger-500";
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-start justify-between gap-4 flex-wrap">
+    <div className="space-y-4">
+      <div className="flex items-start justify-between gap-3 flex-wrap">
         <div>
-          <h1 className="text-xl font-bold">{t("executive.title")}</h1>
-          <p className="text-mine-300 text-sm">{t("executive.subtitle")}</p>
+          <h1 className="text-lg font-bold">{t("executive.title")}</h1>
+          <p className="text-mine-300 text-xs">{t("executive.subtitle")}</p>
         </div>
-        <div className={`${cardClass} px-5 py-3 text-right`}>
-          <div className="text-xs text-mine-300 uppercase tracking-wide">{t("executive.complianceScore")}</div>
-          <div className={`text-3xl font-bold ${scoreTone}`}>{complianceScore}%</div>
+        <div className={`${cardClass} px-3 py-2 text-right`}>
+          <div className="text-[10px] text-mine-300 uppercase tracking-wide">{t("executive.complianceScore")}</div>
+          <div className={`text-xl font-bold ${scoreTone}`}>{complianceScore}%</div>
         </div>
       </div>
 
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
         <StatCard label={t("executive.operational")} value={siteStatus.OPERATIONAL} tone="positive" />
         <StatCard label={t("executive.restricted")} value={siteStatus.RESTRICTED} tone={siteStatus.RESTRICTED > 0 ? "caution" : undefined} />
         <StatCard label={t("executive.shutDown")} value={siteStatus.SHUT_DOWN} tone={siteStatus.SHUT_DOWN > 0 ? "negative" : undefined} />
@@ -133,10 +133,10 @@ export default function ExecutiveDashboard() {
 
       {executiveOps.hasSiteAccess ? (
         <>
-          <div className={`${cardClass} p-5 flex items-center justify-between flex-wrap gap-4`}>
+          <div className={`${cardClass} p-3 flex items-center justify-between flex-wrap gap-3`}>
             <div>
-              <h2 className="text-sm font-semibold">{t("executive.peopleOnSite")}</h2>
-              <p className="text-xs text-mine-400 mt-0.5">
+              <h2 className="text-xs font-semibold">{t("executive.peopleOnSite")}</h2>
+              <p className="text-[10px] text-mine-400 mt-0.5">
                 {t("executive.peopleOnSiteBreakdown", {
                   visitors: executiveOps.peopleOnSite.visitors,
                   staff: executiveOps.peopleOnSite.staff,
@@ -144,10 +144,10 @@ export default function ExecutiveDashboard() {
                 })}
               </p>
             </div>
-            <div className="text-4xl font-bold text-mine-50">{executiveOps.peopleOnSite.total}</div>
+            <div className="text-2xl font-bold text-mine-50">{executiveOps.peopleOnSite.total}</div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
             <OpsCard label={t("executive.visitorsOnSite")} value={executiveOps.visitorsOnSite} to="/visitors" />
             <OpsCard
               label={t("executive.pendingPermitsToWork")}
@@ -164,13 +164,13 @@ export default function ExecutiveDashboard() {
           </div>
         </>
       ) : (
-        <div className={`${cardClass} p-4 text-sm text-mine-300`}>{t("executive.noSiteAccess")}</div>
+        <div className={`${cardClass} p-3 text-xs text-mine-300`}>{t("executive.noSiteAccess")}</div>
       )}
 
       {trends && (
-        <div className={`${cardClass} p-5`}>
-          <h2 className="text-sm font-semibold mb-4">{t("executive.complianceBreakdown")}</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-x-6 gap-y-2">
+        <div className={`${cardClass} p-3`}>
+          <h2 className="text-xs font-semibold mb-2">{t("executive.complianceBreakdown")}</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-x-4 gap-y-1.5">
             <RateRow label={t("compliance.tabCop")} numerator={trends.compliance.codesOfPractice.active} denominator={trends.compliance.codesOfPractice.total} />
             <RateRow label={t("compliance.tabRisk")} numerator={trends.compliance.riskAssessments.approved} denominator={trends.compliance.riskAssessments.total} />
             <RateRow label={t("permits.nav")} numerator={trends.compliance.permits.active} denominator={trends.compliance.permits.total} />
@@ -182,12 +182,12 @@ export default function ExecutiveDashboard() {
         </div>
       )}
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className={`${cardClass} p-5`}>
-          <h2 className="text-sm font-semibold mb-4">{t("executive.openAlertsBySeverity")}</h2>
-          <div className="space-y-2">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
+        <div className={`${cardClass} p-3`}>
+          <h2 className="text-xs font-semibold mb-2">{t("executive.openAlertsBySeverity")}</h2>
+          <div className="space-y-1.5">
             {(["CRITICAL", "HIGH", "MEDIUM", "LOW"] as const).map((sev) => (
-              <div key={sev} className="flex items-center justify-between text-sm">
+              <div key={sev} className="flex items-center justify-between text-xs">
                 <SeverityBadge severity={sev} />
                 <span className="font-semibold">{alertSeverity[sev]}</span>
               </div>
@@ -195,9 +195,9 @@ export default function ExecutiveDashboard() {
           </div>
         </div>
 
-        <div className={`${cardClass} p-5`}>
-          <h2 className="text-sm font-semibold mb-4">{t("executive.incidentOverview")}</h2>
-          <div className="space-y-2 text-sm">
+        <div className={`${cardClass} p-3`}>
+          <h2 className="text-xs font-semibold mb-2">{t("executive.incidentOverview")}</h2>
+          <div className="space-y-1.5 text-xs">
             <div className="flex items-center justify-between">
               <span className="text-mine-300">{t("executive.open")}</span>
               <span className="font-semibold">{incidents.open}</span>
@@ -213,9 +213,9 @@ export default function ExecutiveDashboard() {
           </div>
         </div>
 
-        <div className={`${cardClass} p-5`}>
-          <h2 className="text-sm font-semibold mb-4">{t("executive.workforce")}</h2>
-          <div className="space-y-2 text-sm">
+        <div className={`${cardClass} p-3`}>
+          <h2 className="text-xs font-semibold mb-2">{t("executive.workforce")}</h2>
+          <div className="space-y-1.5 text-xs">
             <div className="flex items-center justify-between">
               <span className="text-mine-300">{t("executive.totalWorkers")}</span>
               <span className="font-semibold">{workers.total}</span>
@@ -234,33 +234,33 @@ export default function ExecutiveDashboard() {
         </div>
       </div>
 
-      <div className={`${cardClass} p-5`}>
-        <h2 className="text-sm font-semibold mb-4">{t("executive.incidentTrend")}</h2>
-        <div className="h-56">
+      <div className={`${cardClass} p-3`}>
+        <h2 className="text-xs font-semibold mb-2">{t("executive.incidentTrend")}</h2>
+        <div className="h-40">
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={incidentTrend}>
               <XAxis
                 dataKey="date"
-                tick={{ fontSize: 10, fill: "#52525b" }}
+                tick={{ fontSize: 9, fill: "#52525b" }}
                 tickFormatter={(d: string) => d.slice(5)}
                 interval="preserveStartEnd"
               />
-              <YAxis tick={{ fontSize: 10, fill: "#52525b" }} allowDecimals={false} />
-              <Tooltip contentStyle={{ background: "#fafafa", border: "1px solid #e5e5e5", fontSize: 12 }} />
+              <YAxis tick={{ fontSize: 9, fill: "#52525b" }} allowDecimals={false} />
+              <Tooltip contentStyle={{ background: "#fafafa", border: "1px solid #e5e5e5", fontSize: 11 }} />
               <Bar dataKey="count" fill="#c48a1f" radius={[3, 3, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
         </div>
       </div>
 
-      <div className={`${cardClass} p-5`}>
-        <h2 className="text-sm font-semibold mb-4">{t("executive.pendingReviews")}</h2>
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className={`${cardClass} p-3`}>
+        <h2 className="text-xs font-semibold mb-2">{t("executive.pendingReviews")}</h2>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
           <div>
-            <h3 className="text-xs font-semibold text-mine-300 uppercase mb-2">{t("executive.pendingAlerts")}</h3>
-            <div className="space-y-2">
+            <h3 className="text-[10px] font-semibold text-mine-300 uppercase mb-1.5">{t("executive.pendingAlerts")}</h3>
+            <div className="space-y-1.5">
               {pendingReviews.alerts.length === 0 && (
-                <div className="text-mine-400 text-sm">{t("executive.noPendingAlerts")}</div>
+                <div className="text-mine-400 text-xs">{t("executive.noPendingAlerts")}</div>
               )}
               {pendingReviews.alerts.map((alert: Alert) => (
                 <ReviewRow
@@ -269,10 +269,10 @@ export default function ExecutiveDashboard() {
                     <div>
                       <div className="flex items-center gap-2 mb-1">
                         <SeverityBadge severity={alert.severity} />
-                        <span className="text-xs text-mine-400">{new Date(alert.createdAt).toLocaleString()}</span>
+                        <span className="text-[10px] text-mine-400">{new Date(alert.createdAt).toLocaleString()}</span>
                       </div>
-                      <div className="text-sm">{alert.message}</div>
-                      <div className="text-xs text-mine-400">
+                      <div className="text-xs">{alert.message}</div>
+                      <div className="text-[10px] text-mine-400">
                         {alert.site?.name}
                         {alert.zone?.name ? ` · ${alert.zone.name}` : ""}
                       </div>
@@ -286,10 +286,10 @@ export default function ExecutiveDashboard() {
           </div>
 
           <div>
-            <h3 className="text-xs font-semibold text-mine-300 uppercase mb-2">{t("executive.pendingIncidents")}</h3>
-            <div className="space-y-2">
+            <h3 className="text-[10px] font-semibold text-mine-300 uppercase mb-1.5">{t("executive.pendingIncidents")}</h3>
+            <div className="space-y-1.5">
               {pendingReviews.incidents.length === 0 && (
-                <div className="text-mine-400 text-sm">{t("executive.noPendingIncidents")}</div>
+                <div className="text-mine-400 text-xs">{t("executive.noPendingIncidents")}</div>
               )}
               {pendingReviews.incidents.map((incident: Incident) => (
                 <ReviewRow
@@ -298,10 +298,10 @@ export default function ExecutiveDashboard() {
                     <div>
                       <div className="flex items-center gap-2 mb-1">
                         <SeverityBadge severity={incident.severity} />
-                        <span className="text-xs text-mine-400">{new Date(incident.createdAt).toLocaleString()}</span>
+                        <span className="text-[10px] text-mine-400">{new Date(incident.createdAt).toLocaleString()}</span>
                       </div>
-                      <div className="text-sm font-medium">{incident.title}</div>
-                      <div className="text-xs text-mine-400">
+                      <div className="text-xs font-medium">{incident.title}</div>
+                      <div className="text-[10px] text-mine-400">
                         {incident.site?.name}
                         {incident.zone?.name ? ` · ${incident.zone.name}` : ""}
                       </div>
