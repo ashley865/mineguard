@@ -40,6 +40,9 @@ import MaintenanceScheduling from "./pages/MaintenanceScheduling";
 import FleetTracking from "./pages/FleetTracking";
 import InventoryManagement from "./pages/InventoryManagement";
 import WeatherMonitoring from "./pages/WeatherMonitoring";
+import SafetyObservations from "./pages/SafetyObservations";
+import SafetyObservationReport from "./pages/SafetyObservationReport";
+import ExplosivesRegister from "./pages/ExplosivesRegister";
 
 function HomeRoute() {
   const { user } = useAuth();
@@ -64,6 +67,7 @@ export default function App() {
       <Route path="/buy" element={<MarketplaceBrowse />} />
       <Route path="/buyer-register" element={<BuyerRegister />} />
       <Route path="/tender-board" element={<TenderBoard />} />
+      <Route path="/safety-report/:siteId" element={<SafetyObservationReport />} />
       <Route element={<ProtectedRoute />}>
         <Route path="/" element={<HomeRoute />} />
         <Route path="/sites" element={<ModuleRoute path="/sites"><Sites /></ModuleRoute>} />
@@ -90,6 +94,8 @@ export default function App() {
         <Route path="/fleet" element={<ModuleRoute path="/fleet"><FleetTracking /></ModuleRoute>} />
         <Route path="/inventory" element={<ModuleRoute path="/inventory"><InventoryManagement /></ModuleRoute>} />
         <Route path="/weather" element={<ModuleRoute path="/weather"><WeatherMonitoring /></ModuleRoute>} />
+        <Route path="/safety-observations" element={<ModuleRoute path="/safety-observations"><SafetyObservations /></ModuleRoute>} />
+        <Route path="/explosives" element={<ModuleRoute path="/explosives"><ExplosivesRegister /></ModuleRoute>} />
         <Route path="/messages" element={<Messages />} />
         <Route path="/settings" element={<Settings />} />
       </Route>

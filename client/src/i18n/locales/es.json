@@ -342,7 +342,8 @@
       "SUBMITTED": "Presentada",
       "SHORTLISTED": "Preseleccionada",
       "AWARDED": "Adjudicada",
-      "CANCELLED": "Cancelada"
+      "CANCELLED": "Cancelada",
+      "ACTION_REQUIRED": "Acción requerida"
     },
     "severity": {
       "LOW": "Baja",
@@ -1216,5 +1217,65 @@
     "recordedAt": "Registrado a las",
     "noneYet": "Aún no hay lecturas meteorológicas registradas.",
     "confirmDelete": "¿Eliminar esta lectura meteorológica?"
+  },
+  "safetyObservations": {
+    "nav": "Observaciones de Seguridad",
+    "subtitle": "Casi accidentes, actos/condiciones inseguras y observaciones positivas de seguridad en tus sitios",
+    "shareLink": "Compartir Enlace de Reporte",
+    "shareTitle": "Compartir Reporte de Observaciones",
+    "shareHint": "Comparte este enlace o código QR para que cualquier persona en el sitio pueda reportar un casi accidente o condición insegura — el reporte puede ser anónimo.",
+    "newObservation": "+ Nueva Observación",
+    "newObservationTitle": "Nueva Observación de Seguridad",
+    "type": "Tipo de observación",
+    "types": {
+      "NEAR_MISS": "Casi Accidente",
+      "UNSAFE_ACT": "Acto Inseguro",
+      "UNSAFE_CONDITION": "Condición Insegura",
+      "POSITIVE_OBSERVATION": "Observación Positiva"
+    },
+    "location": "Ubicación",
+    "actionTaken": "Acción tomada",
+    "reportedBy": "Reportado por",
+    "anonymous": "Anónimo",
+    "noneYet": "Aún no hay observaciones de seguridad.",
+    "confirmDelete": "¿Eliminar esta observación de seguridad?",
+    "reportTitle": "Reportar una Observación de Seguridad",
+    "reportSubtitle": "Reportando para {{site}}",
+    "anonymousNote": "No necesitas dar tu nombre. Los reportes se usan para mejorar la seguridad en el sitio y no se usan para acciones disciplinarias.",
+    "reporterNameOptional": "Tu nombre (opcional)",
+    "submit": "Enviar Reporte",
+    "submitError": "No se pudo enviar este reporte. Inténtalo de nuevo.",
+    "siteNotFound": "Este enlace de reporte no es válido o no se pudo encontrar el sitio.",
+    "successTitle": "Gracias",
+    "successBody": "Tu observación de seguridad ha sido enviada. El equipo de seguridad del sitio dará seguimiento si es necesario."
+  },
+  "explosives": {
+    "nav": "Registro de Explosivos y Polvorín",
+    "subtitle": "Licencias de polvorín, niveles de existencias y transacciones de emisión/devolución de explosivos, conforme a la Ley de Explosivos",
+    "magazineNumber": "Número de polvorín",
+    "licenseNumber": "Número de licencia",
+    "licenseExpiry": "Vencimiento de la licencia",
+    "capacity": "Capacidad",
+    "currentStock": "Existencias actuales",
+    "lastInspectionDate": "Fecha de la última inspección",
+    "nextInspectionDue": "Próxima inspección vencida",
+    "newMagazine": "+ Nuevo Polvorín",
+    "newMagazineTitle": "Nuevo Polvorín",
+    "editMagazineTitle": "Editar Polvorín",
+    "noneYet": "Aún no hay polvorines registrados.",
+    "confirmDelete": "¿Eliminar este registro de polvorín?",
+    "transactions": "Transacciones",
+    "transactionsFor": "Transacciones — {{name}}",
+    "transactionType": "Tipo de transacción",
+    "transactionTypes": {
+      "RECEIPT": "Recepción",
+      "ISSUE": "Emisión",
+      "RETURN": "Devolución",
+      "DESTRUCTION": "Destrucción"
+    },
+    "explosiveType": "Tipo de explosivo",
+    "issuedTo": "Emitido a",
+    "noTransactions": "Aún no hay transacciones registradas.",
+    "transactionError": "No se pudo registrar esta transacción"
   }
 }

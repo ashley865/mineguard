@@ -342,7 +342,8 @@
       "SUBMITTED": "Submitted",
       "SHORTLISTED": "Shortlisted",
       "AWARDED": "Awarded",
-      "CANCELLED": "Cancelled"
+      "CANCELLED": "Cancelled",
+      "ACTION_REQUIRED": "Action required"
     },
     "severity": {
       "LOW": "Low",
@@ -1216,5 +1217,65 @@
     "recordedAt": "Recorded at",
     "noneYet": "No weather readings logged yet.",
     "confirmDelete": "Delete this weather reading?"
+  },
+  "safetyObservations": {
+    "nav": "Safety Observations",
+    "subtitle": "Near-miss, unsafe act/condition, and positive safety observations across your sites",
+    "shareLink": "Share Report Link",
+    "shareTitle": "Share Observation Reporting",
+    "shareHint": "Share this link or QR code so anyone on site can report a near miss or unsafe condition — reporting can be anonymous.",
+    "newObservation": "+ New Observation",
+    "newObservationTitle": "New Safety Observation",
+    "type": "Observation type",
+    "types": {
+      "NEAR_MISS": "Near Miss",
+      "UNSAFE_ACT": "Unsafe Act",
+      "UNSAFE_CONDITION": "Unsafe Condition",
+      "POSITIVE_OBSERVATION": "Positive Observation"
+    },
+    "location": "Location",
+    "actionTaken": "Action taken",
+    "reportedBy": "Reported by",
+    "anonymous": "Anonymous",
+    "noneYet": "No safety observations yet.",
+    "confirmDelete": "Delete this safety observation?",
+    "reportTitle": "Report a Safety Observation",
+    "reportSubtitle": "Reporting for {{site}}",
+    "anonymousNote": "You do not need to give your name. Reports are used to improve safety on site and are not used for disciplinary action.",
+    "reporterNameOptional": "Your name (optional)",
+    "submit": "Submit Report",
+    "submitError": "Could not submit this report. Please try again.",
+    "siteNotFound": "This reporting link is invalid or the site could not be found.",
+    "successTitle": "Thank you",
+    "successBody": "Your safety observation has been submitted. The site safety team will follow up if needed."
+  },
+  "explosives": {
+    "nav": "Explosives & Magazine Register",
+    "subtitle": "Magazine licensing, stock levels, and issue/return transactions for explosives, in line with the Explosives Act",
+    "magazineNumber": "Magazine number",
+    "licenseNumber": "License number",
+    "licenseExpiry": "License expiry",
+    "capacity": "Capacity",
+    "currentStock": "Current stock",
+    "lastInspectionDate": "Last inspection date",
+    "nextInspectionDue": "Next inspection due",
+    "newMagazine": "+ New Magazine",
+    "newMagazineTitle": "New Magazine",
+    "editMagazineTitle": "Edit Magazine",
+    "noneYet": "No magazines registered yet.",
+    "confirmDelete": "Delete this magazine record?",
+    "transactions": "Transactions",
+    "transactionsFor": "Transactions — {{name}}",
+    "transactionType": "Transaction type",
+    "transactionTypes": {
+      "RECEIPT": "Receipt",
+      "ISSUE": "Issue",
+      "RETURN": "Return",
+      "DESTRUCTION": "Destruction"
+    },
+    "explosiveType": "Explosive type",
+    "issuedTo": "Issued to",
+    "noTransactions": "No transactions logged yet.",
+    "transactionError": "Could not log this transaction"
   }
 }

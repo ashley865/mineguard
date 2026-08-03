@@ -29,6 +29,8 @@ export const restrictedModules = [
   "/fleet",
   "/inventory",
   "/weather",
+  "/safety-observations",
+  "/explosives",
 ] as const;
 
 export type RestrictedModule = (typeof restrictedModules)[number];
@@ -42,7 +44,7 @@ export const executiveTitleModules: Partial<Record<ExecutiveTitle, RestrictedMod
   COO: fullAccess,
   CFO: ["/reporting", "/contractors", "/permits", "/documents", "/compliance", "/workforce", "/incidents", "/marketplace", "/tenders", "/production", "/inventory"],
   HR_MANAGER: ["/workers", "/workforce", "/visitors", "/documents", "/reporting"],
-  SECURITY_MANAGER: ["/visitors", "/scanner", "/trucks", "/incidents", "/alerts", "/workers", "/sites", "/fleet"],
+  SECURITY_MANAGER: ["/visitors", "/scanner", "/trucks", "/incidents", "/alerts", "/workers", "/sites", "/fleet", "/safety-observations"],
   SAFETY_MANAGER: [
     "/sites",
     "/sensors",
@@ -56,6 +58,8 @@ export const executiveTitleModules: Partial<Record<ExecutiveTitle, RestrictedMod
     "/reporting",
     "/maintenance",
     "/weather",
+    "/safety-observations",
+    "/explosives",
   ],
   OPERATIONS_MANAGER: [
     "/sites",
@@ -78,6 +82,8 @@ export const executiveTitleModules: Partial<Record<ExecutiveTitle, RestrictedMod
     "/fleet",
     "/inventory",
     "/weather",
+    "/safety-observations",
+    "/explosives",
   ],
   COMPLIANCE_OFFICER: [
     "/compliance",
@@ -91,6 +97,8 @@ export const executiveTitleModules: Partial<Record<ExecutiveTitle, RestrictedMod
     "/reporting",
     "/marketplace",
     "/tenders",
+    "/safety-observations",
+    "/explosives",
   ],
   IT_MANAGER: ["/sites", "/sensors", "/equipment", "/alerts", "/reporting"],
 };

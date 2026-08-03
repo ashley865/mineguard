@@ -908,3 +908,58 @@ export interface WeatherReading {
   recordedBy?: { id: string; name: string } | null;
   createdAt: string;
 }
+
+export type SafetyObservationType = "NEAR_MISS" | "UNSAFE_ACT" | "UNSAFE_CONDITION" | "POSITIVE_OBSERVATION";
+export type SafetyObservationStatus = "OPEN" | "ACTION_REQUIRED" | "CLOSED";
+
+export interface SafetyObservation {
+  id: string;
+  siteId: string;
+  site?: { id: string; name: string };
+  zoneId?: string | null;
+  zone?: { id: string; name: string } | null;
+  type: SafetyObservationType;
+  severity: AlertSeverity;
+  description: string;
+  location?: string | null;
+  actionTaken?: string | null;
+  status: SafetyObservationStatus;
+  reporterName?: string | null;
+  reportedBy?: { id: string; name: string } | null;
+  closedAt?: string | null;
+  createdAt: string;
+}
+
+export type ExplosivesMagazineStatus = "ACTIVE" | "SUSPENDED" | "EXPIRED";
+
+export interface ExplosivesMagazine {
+  id: string;
+  siteId: string;
+  site?: { id: string; name: string };
+  magazineNumber: string;
+  licenseNumber: string;
+  licenseExpiry: string;
+  capacity: number;
+  unit: string;
+  currentStock: number;
+  lastInspectionDate?: string | null;
+  nextInspectionDue?: string | null;
+  status: ExplosivesMagazineStatus;
+  createdAt: string;
+}
+
+export type ExplosivesTransactionType = "RECEIPT" | "ISSUE" | "RETURN" | "DESTRUCTION";
+
+export interface ExplosivesTransaction {
+  id: string;
+  magazineId: string;
+  magazine?: { id: string; magazineNumber: string; unit: string };
+  transactionType: ExplosivesTransactionType;
+  explosiveType: string;
+  quantity: number;
+  issuedTo?: string | null;
+  authorizedBy?: { id: string; name: string } | null;
+  transactionDate: string;
+  notes?: string | null;
+  createdAt: string;
+}

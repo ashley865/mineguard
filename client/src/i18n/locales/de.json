@@ -342,7 +342,8 @@
       "SUBMITTED": "Eingereicht",
       "SHORTLISTED": "In die engere Wahl gezogen",
       "AWARDED": "Vergeben",
-      "CANCELLED": "Storniert"
+      "CANCELLED": "Storniert",
+      "ACTION_REQUIRED": "Maßnahme erforderlich"
     },
     "severity": {
       "LOW": "Niedrig",
@@ -1216,5 +1217,65 @@
     "recordedAt": "Erfasst um",
     "noneYet": "Noch keine Wettermesswerte erfasst.",
     "confirmDelete": "Diesen Wettermesswert löschen?"
+  },
+  "safetyObservations": {
+    "nav": "Sicherheitsbeobachtungen",
+    "subtitle": "Beinaheunfälle, unsichere Handlungen/Zustände und positive Sicherheitsbeobachtungen an Ihren Standorten",
+    "shareLink": "Meldelink teilen",
+    "shareTitle": "Beobachtungsmeldung teilen",
+    "shareHint": "Teilen Sie diesen Link oder QR-Code, damit jeder vor Ort einen Beinaheunfall oder unsicheren Zustand melden kann — die Meldung kann anonym erfolgen.",
+    "newObservation": "+ Neue Beobachtung",
+    "newObservationTitle": "Neue Sicherheitsbeobachtung",
+    "type": "Beobachtungstyp",
+    "types": {
+      "NEAR_MISS": "Beinaheunfall",
+      "UNSAFE_ACT": "Unsichere Handlung",
+      "UNSAFE_CONDITION": "Unsicherer Zustand",
+      "POSITIVE_OBSERVATION": "Positive Beobachtung"
+    },
+    "location": "Ort",
+    "actionTaken": "Ergriffene Maßnahme",
+    "reportedBy": "Gemeldet von",
+    "anonymous": "Anonym",
+    "noneYet": "Noch keine Sicherheitsbeobachtungen.",
+    "confirmDelete": "Diese Sicherheitsbeobachtung löschen?",
+    "reportTitle": "Sicherheitsbeobachtung melden",
+    "reportSubtitle": "Meldung für {{site}}",
+    "anonymousNote": "Sie müssen Ihren Namen nicht angeben. Meldungen dienen der Verbesserung der Sicherheit vor Ort und werden nicht für Disziplinarmaßnahmen verwendet.",
+    "reporterNameOptional": "Ihr Name (optional)",
+    "submit": "Meldung absenden",
+    "submitError": "Diese Meldung konnte nicht übermittelt werden. Bitte versuchen Sie es erneut.",
+    "siteNotFound": "Dieser Meldelink ist ungültig oder der Standort konnte nicht gefunden werden.",
+    "successTitle": "Vielen Dank",
+    "successBody": "Ihre Sicherheitsbeobachtung wurde übermittelt. Das Sicherheitsteam vor Ort wird bei Bedarf nachfassen."
+  },
+  "explosives": {
+    "nav": "Sprengstoff- & Munitionslagerregister",
+    "subtitle": "Lagerlizenzierung, Bestandsmengen und Ausgabe-/Rückgabetransaktionen für Sprengstoffe, gemäß dem Explosives Act",
+    "magazineNumber": "Lagernummer",
+    "licenseNumber": "Lizenznummer",
+    "licenseExpiry": "Lizenzablauf",
+    "capacity": "Kapazität",
+    "currentStock": "Aktueller Bestand",
+    "lastInspectionDate": "Datum der letzten Inspektion",
+    "nextInspectionDue": "Nächste fällige Inspektion",
+    "newMagazine": "+ Neues Lager",
+    "newMagazineTitle": "Neues Lager",
+    "editMagazineTitle": "Lager bearbeiten",
+    "noneYet": "Noch keine Lager registriert.",
+    "confirmDelete": "Diesen Lagerdatensatz löschen?",
+    "transactions": "Transaktionen",
+    "transactionsFor": "Transaktionen — {{name}}",
+    "transactionType": "Transaktionstyp",
+    "transactionTypes": {
+      "RECEIPT": "Wareneingang",
+      "ISSUE": "Ausgabe",
+      "RETURN": "Rückgabe",
+      "DESTRUCTION": "Vernichtung"
+    },
+    "explosiveType": "Sprengstofftyp",
+    "issuedTo": "Ausgegeben an",
+    "noTransactions": "Noch keine Transaktionen erfasst.",
+    "transactionError": "Diese Transaktion konnte nicht erfasst werden"
   }
 }

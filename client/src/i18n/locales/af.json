@@ -342,7 +342,8 @@
       "SUBMITTED": "Ingedien",
       "SHORTLISTED": "Op kortlys",
       "AWARDED": "Toegeken",
-      "CANCELLED": "Gekanselleer"
+      "CANCELLED": "Gekanselleer",
+      "ACTION_REQUIRED": "Aksie vereis"
     },
     "severity": {
       "LOW": "Laag",
@@ -1216,5 +1217,65 @@
     "recordedAt": "Aangeteken om",
     "noneYet": "Nog geen weerlesings aangeteken nie.",
     "confirmDelete": "Skrap hierdie weerlesing?"
+  },
+  "safetyObservations": {
+    "nav": "Veiligheidswaarnemings",
+    "subtitle": "Byna-missers, onveilige optrede/toestande, en positiewe veiligheidswaarnemings oor jou terreine",
+    "shareLink": "Deel Verslagskakel",
+    "shareTitle": "Deel Waarnemingsverslagdoening",
+    "shareHint": "Deel hierdie skakel of QR-kode sodat enigiemand op die terrein 'n byna-misser of onveilige toestand kan rapporteer — verslagdoening kan anoniem wees.",
+    "newObservation": "+ Nuwe Waarneming",
+    "newObservationTitle": "Nuwe Veiligheidswaarneming",
+    "type": "Waarnemingstipe",
+    "types": {
+      "NEAR_MISS": "Byna-misser",
+      "UNSAFE_ACT": "Onveilige Optrede",
+      "UNSAFE_CONDITION": "Onveilige Toestand",
+      "POSITIVE_OBSERVATION": "Positiewe Waarneming"
+    },
+    "location": "Ligging",
+    "actionTaken": "Optrede geneem",
+    "reportedBy": "Gerapporteer deur",
+    "anonymous": "Anoniem",
+    "noneYet": "Nog geen veiligheidswaarnemings nie.",
+    "confirmDelete": "Skrap hierdie veiligheidswaarneming?",
+    "reportTitle": "Rapporteer 'n Veiligheidswaarneming",
+    "reportSubtitle": "Rapportering vir {{site}}",
+    "anonymousNote": "Jy hoef nie jou naam te gee nie. Verslae word gebruik om veiligheid op die terrein te verbeter en word nie vir dissiplinêre optrede gebruik nie.",
+    "reporterNameOptional": "Jou naam (opsioneel)",
+    "submit": "Dien Verslag In",
+    "submitError": "Kon nie hierdie verslag indien nie. Probeer asseblief weer.",
+    "siteNotFound": "Hierdie verslagskakel is ongeldig of die terrein kon nie gevind word nie.",
+    "successTitle": "Dankie",
+    "successBody": "Jou veiligheidswaarneming is ingedien. Die terrein se veiligheidspan sal opvolg indien nodig."
+  },
+  "explosives": {
+    "nav": "Plofstof- en Kruitmagasynregister",
+    "subtitle": "Kruitmagasynlisensiëring, voorraadvlakke, en uitreik-/terugkeertransaksies vir plofstof, in lyn met die Wet op Plofstof",
+    "magazineNumber": "Kruitmagasynnommer",
+    "licenseNumber": "Lisensienommer",
+    "licenseExpiry": "Lisensievervaldatum",
+    "capacity": "Kapasiteit",
+    "currentStock": "Huidige voorraad",
+    "lastInspectionDate": "Laaste inspeksiedatum",
+    "nextInspectionDue": "Volgende inspeksie verskuldig",
+    "newMagazine": "+ Nuwe Kruitmagasyn",
+    "newMagazineTitle": "Nuwe Kruitmagasyn",
+    "editMagazineTitle": "Wysig Kruitmagasyn",
+    "noneYet": "Nog geen kruitmagasyne geregistreer nie.",
+    "confirmDelete": "Skrap hierdie kruitmagasynrekord?",
+    "transactions": "Transaksies",
+    "transactionsFor": "Transaksies — {{name}}",
+    "transactionType": "Transaksietipe",
+    "transactionTypes": {
+      "RECEIPT": "Ontvangs",
+      "ISSUE": "Uitreiking",
+      "RETURN": "Teruggawe",
+      "DESTRUCTION": "Vernietiging"
+    },
+    "explosiveType": "Plofstoftipe",
+    "issuedTo": "Uitgereik aan",
+    "noTransactions": "Nog geen transaksies aangeteken nie.",
+    "transactionError": "Kon nie hierdie transaksie aanteken nie"
   }
 }

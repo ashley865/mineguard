@@ -342,7 +342,8 @@
       "SUBMITTED": "Soumise",
       "SHORTLISTED": "Présélectionnée",
       "AWARDED": "Attribuée",
-      "CANCELLED": "Annulée"
+      "CANCELLED": "Annulée",
+      "ACTION_REQUIRED": "Action requise"
     },
     "severity": {
       "LOW": "Faible",
@@ -1216,5 +1217,65 @@
     "recordedAt": "Enregistré à",
     "noneYet": "Aucun relevé météorologique enregistré pour le moment.",
     "confirmDelete": "Supprimer ce relevé météorologique ?"
+  },
+  "safetyObservations": {
+    "nav": "Observations de Sécurité",
+    "subtitle": "Presqu'accidents, actes/conditions dangereux et observations positives de sécurité sur vos sites",
+    "shareLink": "Partager le Lien de Signalement",
+    "shareTitle": "Partager le Signalement d'Observations",
+    "shareHint": "Partagez ce lien ou ce code QR afin que toute personne sur le site puisse signaler un presqu'accident ou une condition dangereuse — le signalement peut être anonyme.",
+    "newObservation": "+ Nouvelle Observation",
+    "newObservationTitle": "Nouvelle Observation de Sécurité",
+    "type": "Type d'observation",
+    "types": {
+      "NEAR_MISS": "Presqu'accident",
+      "UNSAFE_ACT": "Acte Dangereux",
+      "UNSAFE_CONDITION": "Condition Dangereuse",
+      "POSITIVE_OBSERVATION": "Observation Positive"
+    },
+    "location": "Emplacement",
+    "actionTaken": "Action entreprise",
+    "reportedBy": "Signalé par",
+    "anonymous": "Anonyme",
+    "noneYet": "Aucune observation de sécurité pour le moment.",
+    "confirmDelete": "Supprimer cette observation de sécurité ?",
+    "reportTitle": "Signaler une Observation de Sécurité",
+    "reportSubtitle": "Signalement pour {{site}}",
+    "anonymousNote": "Vous n'avez pas besoin de donner votre nom. Les signalements servent à améliorer la sécurité sur le site et ne sont pas utilisés à des fins disciplinaires.",
+    "reporterNameOptional": "Votre nom (facultatif)",
+    "submit": "Envoyer le Signalement",
+    "submitError": "Impossible d'envoyer ce signalement. Veuillez réessayer.",
+    "siteNotFound": "Ce lien de signalement est invalide ou le site n'a pas pu être trouvé.",
+    "successTitle": "Merci",
+    "successBody": "Votre observation de sécurité a été envoyée. L'équipe sécurité du site assurera un suivi si nécessaire."
+  },
+  "explosives": {
+    "nav": "Registre des Explosifs et de la Poudrière",
+    "subtitle": "Licences de poudrière, niveaux de stock et transactions d'émission/retour d'explosifs, conformément à la loi sur les explosifs",
+    "magazineNumber": "Numéro de poudrière",
+    "licenseNumber": "Numéro de licence",
+    "licenseExpiry": "Expiration de la licence",
+    "capacity": "Capacité",
+    "currentStock": "Stock actuel",
+    "lastInspectionDate": "Date de la dernière inspection",
+    "nextInspectionDue": "Prochaine inspection prévue",
+    "newMagazine": "+ Nouvelle Poudrière",
+    "newMagazineTitle": "Nouvelle Poudrière",
+    "editMagazineTitle": "Modifier la Poudrière",
+    "noneYet": "Aucune poudrière enregistrée pour le moment.",
+    "confirmDelete": "Supprimer cet enregistrement de poudrière ?",
+    "transactions": "Transactions",
+    "transactionsFor": "Transactions — {{name}}",
+    "transactionType": "Type de transaction",
+    "transactionTypes": {
+      "RECEIPT": "Réception",
+      "ISSUE": "Émission",
+      "RETURN": "Retour",
+      "DESTRUCTION": "Destruction"
+    },
+    "explosiveType": "Type d'explosif",
+    "issuedTo": "Émis à",
+    "noTransactions": "Aucune transaction enregistrée pour le moment.",
+    "transactionError": "Impossible d'enregistrer cette transaction"
   }
 }

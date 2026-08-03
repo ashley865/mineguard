@@ -196,6 +196,8 @@ model User {
   fleetPositions         FleetPosition[]        @relation("FleetPositionRecordedBy")
   inventoryMovements     InventoryMovement[]    @relation("InventoryMovementBy")
   weatherReadings        WeatherReading[]       @relation("WeatherRecordedBy")
+  safetyObservations     SafetyObservation[]    @relation("SafetyObservationReportedBy")
+  explosivesTransactions ExplosivesTransaction[] @relation("ExplosivesAuthorizedBy")
 }
 
 model Site {
@@ -232,6 +234,8 @@ model Site {
   fleetPositions       FleetPosition[]
   inventoryItems       InventoryItem[]
   weatherReadings      WeatherReading[]
+  safetyObservations   SafetyObservation[]
+  explosivesMagazines  ExplosivesMagazine[]
 }
 
 model Zone {
@@ -252,6 +256,7 @@ model Zone {
   regulatoryNotices RegulatoryNotice[]
   safetyInspections SafetyInspection[]
   productionRecords ProductionRecord[]
+  safetyObservations SafetyObservation[]
 
   createdAt DateTime @default(now())
 }
@@ -1205,6 +1210,87 @@ model WeatherReading {
   notes             String?
   recordedById      String?
   recordedBy        User?            @relation("WeatherRecordedBy", fields: [recordedById], references: [id], onDelete: SetNull)
+
+  createdAt DateTime @default(now())
+}
+
+enum SafetyObservationType {
+  NEAR_MISS
+  UNSAFE_ACT
+  UNSAFE_CONDITION
+  POSITIVE_OBSERVATION
+}
+
+enum SafetyObservationStatus {
+  OPEN
+  ACTION_REQUIRED
+  CLOSED
+}
+
+model SafetyObservation {
+  id           String                  @id @default(cuid())
+  siteId       String
+  site         Site                    @relation(fields: [siteId], references: [id], onDelete: Cascade)
+  zoneId       String?
+  zone         Zone?                   @relation(fields: [zoneId], references: [id], onDelete: SetNull)
+  type         SafetyObservationType
+  severity     AlertSeverity           @default(LOW)
+  description  String
+  location     String?
+  actionTaken  String?
+  status       SafetyObservationStatus @default(OPEN)
+  reporterName String?
+  reportedById String?
+  reportedBy   User?                   @relation("SafetyObservationReportedBy", fields: [reportedById], references: [id], onDelete: SetNull)
+  closedAt     DateTime?
+
+  createdAt DateTime @default(now())
+}
+
+enum ExplosivesMagazineStatus {
+  ACTIVE
+  SUSPENDED
+  EXPIRED
+}
+
+model ExplosivesMagazine {
+  id                 String                    @id @default(cuid())
+  siteId             String
+  site               Site                      @relation(fields: [siteId], references: [id], onDelete: Cascade)
+  magazineNumber     String
+  licenseNumber      String
+  licenseExpiry      DateTime
+  capacity           Float
+  unit               String
+  currentStock       Float                     @default(0)
+  lastInspectionDate DateTime?
+  nextInspectionDue  DateTime?
+  status             ExplosivesMagazineStatus  @default(ACTIVE)
+
+  transactions ExplosivesTransaction[]
+
+  createdAt DateTime @default(now())
+}
+
+enum ExplosivesTransactionType {
+  RECEIPT
+  ISSUE
+  RETURN
+  DESTRUCTION
+}
+
+model ExplosivesTransaction {
+  id              String                     @id @default(cuid())
+  magazineId      String
+  magazine        ExplosivesMagazine         @relation(fields: [magazineId], references: [id], onDelete: Cascade)
+  transactionType ExplosivesTransactionType
+  explosiveType   String
+  quantity        Float
+  issuedTo        String?
+  authorizedById  String?
+  authorizedBy    User?                      @relation("ExplosivesAuthorizedBy", fields: [authorizedById], references: [id], onDelete: SetNull)
+  transactionDate DateTime                   @default(now())
+  notes           String?
 
   createdAt DateTime @default(now())
 }
