@@ -1105,5 +1105,48 @@
       "IT_TELECOMMUNICATIONS": "TI y Telecomunicaciones",
       "OTHER": "Otro"
     }
+  },
+  "production": {
+    "nav": "Seguimiento de Producción",
+    "subtitle": "Registra el tonelaje por turno, la ley del mineral y la producción frente a los objetivos",
+    "shiftDate": "Fecha del turno",
+    "shift": "Turno",
+    "shifts": {
+      "DAY": "Día",
+      "AFTERNOON": "Tarde",
+      "NIGHT": "Noche"
+    },
+    "mineralType": "Tipo de mineral",
+    "tonnesMined": "Toneladas extraídas",
+    "targetTonnes": "Toneladas objetivo",
+    "oreGrade": "Ley del mineral",
+    "wasteRemoved": "Estéril removido",
+    "totalTonnes": "Total de toneladas (esta vista)",
+    "newRecord": "+ Nuevo Registro",
+    "newRecordTitle": "Nuevo Registro de Producción",
+    "editRecordTitle": "Editar Registro de Producción",
+    "noneYet": "Aún no hay registros de producción.",
+    "confirmDelete": "¿Eliminar este registro de producción?"
+  },
+  "maintenance": {
+    "nav": "Programación de Mantenimiento",
+    "subtitle": "Mantenimiento preventivo, correctivo y de inspección para los equipos",
+    "type": "Tipo de mantenimiento",
+    "types": {
+      "PREVENTIVE": "Preventivo",
+      "CORRECTIVE": "Correctivo",
+      "INSPECTION": "Inspección"
+    },
+    "scheduledDate": "Fecha programada",
+    "performedBy": "Realizado por",
+    "cost": "Costo",
+    "partsUsed": "Repuestos utilizados",
+    "findings": "Hallazgos",
+    "newSchedule": "+ Nueva Programación",
+    "newScheduleTitle": "Nueva Programación de Mantenimiento",
+    "editScheduleTitle": "Editar Programación de Mantenimiento",
+    "markComplete": "Marcar como Completado",
+    "noneYet": "Aún no hay programaciones de mantenimiento.",
+    "confirmDelete": "¿Eliminar esta programación de mantenimiento?"
   }
 }

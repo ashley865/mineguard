@@ -38,6 +38,8 @@ import messagesRoutes from "./routes/messages";
 import buyersRoutes from "./routes/buyers";
 import mineralsRoutes from "./routes/minerals";
 import contractsRoutes from "./routes/contracts";
+import productionRoutes from "./routes/production";
+import maintenanceRoutes from "./routes/maintenance";
 import { startSimulator } from "./services/simulator";
 import { scanCompliance } from "./services/complianceScanner";
 
@@ -90,6 +92,8 @@ app.use("/api/messages", messagesRoutes);
 app.use("/api/buyers", buyersRoutes);
 app.use("/api/minerals", mineralsRoutes);
 app.use("/api/contracts", contractsRoutes);
+app.use("/api/production", productionRoutes);
+app.use("/api/maintenance", maintenanceRoutes);
 
 app.use((err: any, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
   console.error(err);

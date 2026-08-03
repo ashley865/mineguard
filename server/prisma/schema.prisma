@@ -191,6 +191,8 @@ model User {
   reviewedBuyers         Buyer[]
   listedMinerals         MineralListing[]
   postedContracts        ContractOpportunity[]
+  productionRecords      ProductionRecord[]     @relation("ProductionRecordedBy")
+  maintenanceSchedules   MaintenanceSchedule[]  @relation("MaintenanceCreatedBy")
 }
 
 model Site {
@@ -223,6 +225,7 @@ model Site {
   deliveries           Delivery[]
   mineralListings      MineralListing[]
   contractOpportunities ContractOpportunity[]
+  productionRecords    ProductionRecord[]
 }
 
 model Zone {
@@ -242,6 +245,7 @@ model Zone {
   riskAssessments   RiskAssessment[]
   regulatoryNotices RegulatoryNotice[]
   safetyInspections SafetyInspection[]
+  productionRecords ProductionRecord[]
 
   createdAt DateTime @default(now())
 }
@@ -366,6 +370,8 @@ model Equipment {
   zoneId          String?
   zone            Zone?           @relation(fields: [zoneId], references: [id], onDelete: SetNull)
   lastMaintenance DateTime?
+
+  maintenanceSchedules MaintenanceSchedule[]
 
   createdAt DateTime @default(now())
 }
@@ -1053,6 +1059,64 @@ model ContractBid {
   bidAmount     Float
   proposalNotes String?
   status        ContractBidStatus @default(SUBMITTED)
+
+  createdAt DateTime @default(now())
+}
+
+enum ProductionShift {
+  DAY
+  AFTERNOON
+  NIGHT
+}
+
+model ProductionRecord {
+  id            String          @id @default(cuid())
+  siteId        String
+  site          Site            @relation(fields: [siteId], references: [id], onDelete: Cascade)
+  zoneId        String?
+  zone          Zone?           @relation(fields: [zoneId], references: [id], onDelete: SetNull)
+  shiftDate     DateTime
+  shift         ProductionShift
+  mineralType   String
+  tonnesMined   Float
+  oreGrade      Float?
+  wasteRemoved  Float?
+  targetTonnes  Float?
+  notes         String?
+  recordedById  String?
+  recordedBy    User?           @relation("ProductionRecordedBy", fields: [recordedById], references: [id], onDelete: SetNull)
+
+  createdAt DateTime @default(now())
+}
+
+enum MaintenanceType {
+  PREVENTIVE
+  CORRECTIVE
+  INSPECTION
+}
+
+enum MaintenanceScheduleStatus {
+  SCHEDULED
+  IN_PROGRESS
+  COMPLETED
+  OVERDUE
+  CANCELLED
+}
+
+model MaintenanceSchedule {
+  id              String                     @id @default(cuid())
+  equipmentId     String
+  equipment       Equipment                  @relation(fields: [equipmentId], references: [id], onDelete: Cascade)
+  maintenanceType MaintenanceType
+  scheduledDate   DateTime
+  completedDate   DateTime?
+  performedBy     String?
+  status          MaintenanceScheduleStatus  @default(SCHEDULED)
+  findings        String?
+  partsUsed       String?
+  cost            Float?
+  createdById     String?
+  createdBy       User?                      @relation("MaintenanceCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
 
   createdAt DateTime @default(now())
 }

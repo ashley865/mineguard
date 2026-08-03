@@ -43,6 +43,8 @@ export default function Layout() {
     { to: "/trucks", label: t("trucks.nav") },
     { to: "/incidents", label: t("nav.incidents") },
     { to: "/equipment", label: t("nav.equipment") },
+    { to: "/maintenance", label: t("maintenance.nav") },
+    { to: "/production", label: t("production.nav") },
     { to: "/compliance", label: t("compliance.nav") },
     { to: "/permits", label: t("permits.nav") },
     { to: "/documents", label: t("documents.nav") },

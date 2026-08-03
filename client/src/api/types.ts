@@ -807,3 +807,42 @@ export interface ContractBid {
   status: ContractBidStatus;
   createdAt: string;
 }
+
+export type ProductionShift = "DAY" | "AFTERNOON" | "NIGHT";
+
+export interface ProductionRecord {
+  id: string;
+  siteId: string;
+  site?: { id: string; name: string };
+  zoneId?: string | null;
+  zone?: { id: string; name: string } | null;
+  shiftDate: string;
+  shift: ProductionShift;
+  mineralType: string;
+  tonnesMined: number;
+  oreGrade?: number | null;
+  wasteRemoved?: number | null;
+  targetTonnes?: number | null;
+  notes?: string | null;
+  recordedBy?: { id: string; name: string } | null;
+  createdAt: string;
+}
+
+export type MaintenanceType = "PREVENTIVE" | "CORRECTIVE" | "INSPECTION";
+export type MaintenanceScheduleStatus = "SCHEDULED" | "IN_PROGRESS" | "COMPLETED" | "OVERDUE" | "CANCELLED";
+
+export interface MaintenanceSchedule {
+  id: string;
+  equipmentId: string;
+  equipment?: { id: string; name: string; type: string; site?: { id: string; name: string } };
+  maintenanceType: MaintenanceType;
+  scheduledDate: string;
+  completedDate?: string | null;
+  performedBy?: string | null;
+  status: MaintenanceScheduleStatus;
+  findings?: string | null;
+  partsUsed?: string | null;
+  cost?: number | null;
+  createdBy?: { id: string; name: string } | null;
+  createdAt: string;
+}

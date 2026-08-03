@@ -35,6 +35,8 @@ import MarketplaceBrowse from "./pages/MarketplaceBrowse";
 import BuyerRegister from "./pages/BuyerRegister";
 import Tenders from "./pages/Tenders";
 import TenderBoard from "./pages/TenderBoard";
+import ProductionTracking from "./pages/ProductionTracking";
+import MaintenanceScheduling from "./pages/MaintenanceScheduling";
 
 function HomeRoute() {
   const { user } = useAuth();
@@ -80,6 +82,8 @@ export default function App() {
         <Route path="/scanner" element={<ModuleRoute path="/scanner"><Scanner /></ModuleRoute>} />
         <Route path="/marketplace" element={<ModuleRoute path="/marketplace"><Marketplace /></ModuleRoute>} />
         <Route path="/tenders" element={<ModuleRoute path="/tenders"><Tenders /></ModuleRoute>} />
+        <Route path="/production" element={<ModuleRoute path="/production"><ProductionTracking /></ModuleRoute>} />
+        <Route path="/maintenance" element={<ModuleRoute path="/maintenance"><MaintenanceScheduling /></ModuleRoute>} />
         <Route path="/messages" element={<Messages />} />
         <Route path="/settings" element={<Settings />} />
       </Route>

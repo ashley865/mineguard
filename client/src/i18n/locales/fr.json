@@ -1105,5 +1105,48 @@
       "IT_TELECOMMUNICATIONS": "Informatique et Télécommunications",
       "OTHER": "Autre"
     }
+  },
+  "production": {
+    "nav": "Suivi de Production",
+    "subtitle": "Suivez le tonnage par équipe, la teneur du minerai et la production par rapport aux objectifs",
+    "shiftDate": "Date de l'équipe",
+    "shift": "Équipe",
+    "shifts": {
+      "DAY": "Jour",
+      "AFTERNOON": "Après-midi",
+      "NIGHT": "Nuit"
+    },
+    "mineralType": "Type de minéral",
+    "tonnesMined": "Tonnes extraites",
+    "targetTonnes": "Tonnes cibles",
+    "oreGrade": "Teneur du minerai",
+    "wasteRemoved": "Stérile enlevé",
+    "totalTonnes": "Total des tonnes (cette vue)",
+    "newRecord": "+ Nouvel Enregistrement",
+    "newRecordTitle": "Nouvel Enregistrement de Production",
+    "editRecordTitle": "Modifier l'Enregistrement de Production",
+    "noneYet": "Aucun enregistrement de production pour le moment.",
+    "confirmDelete": "Supprimer cet enregistrement de production ?"
+  },
+  "maintenance": {
+    "nav": "Planification de Maintenance",
+    "subtitle": "Maintenance préventive, corrective et d'inspection des équipements",
+    "type": "Type de maintenance",
+    "types": {
+      "PREVENTIVE": "Préventive",
+      "CORRECTIVE": "Corrective",
+      "INSPECTION": "Inspection"
+    },
+    "scheduledDate": "Date prévue",
+    "performedBy": "Réalisée par",
+    "cost": "Coût",
+    "partsUsed": "Pièces utilisées",
+    "findings": "Constatations",
+    "newSchedule": "+ Nouvelle Planification",
+    "newScheduleTitle": "Nouvelle Planification de Maintenance",
+    "editScheduleTitle": "Modifier la Planification de Maintenance",
+    "markComplete": "Marquer comme Terminée",
+    "noneYet": "Aucune planification de maintenance pour le moment.",
+    "confirmDelete": "Supprimer cette planification de maintenance ?"
   }
 }

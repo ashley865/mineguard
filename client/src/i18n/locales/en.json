@@ -1105,5 +1105,48 @@
       "IT_TELECOMMUNICATIONS": "IT & Telecommunications",
       "OTHER": "Other"
     }
+  },
+  "production": {
+    "nav": "Production Tracking",
+    "subtitle": "Track shift tonnage, ore grade, and production against targets",
+    "shiftDate": "Shift date",
+    "shift": "Shift",
+    "shifts": {
+      "DAY": "Day",
+      "AFTERNOON": "Afternoon",
+      "NIGHT": "Night"
+    },
+    "mineralType": "Mineral type",
+    "tonnesMined": "Tonnes mined",
+    "targetTonnes": "Target tonnes",
+    "oreGrade": "Ore grade",
+    "wasteRemoved": "Waste removed",
+    "totalTonnes": "Total tonnes (this view)",
+    "newRecord": "+ New Record",
+    "newRecordTitle": "New Production Record",
+    "editRecordTitle": "Edit Production Record",
+    "noneYet": "No production records yet.",
+    "confirmDelete": "Delete this production record?"
+  },
+  "maintenance": {
+    "nav": "Maintenance Scheduling",
+    "subtitle": "Preventive, corrective, and inspection maintenance for equipment",
+    "type": "Maintenance type",
+    "types": {
+      "PREVENTIVE": "Preventive",
+      "CORRECTIVE": "Corrective",
+      "INSPECTION": "Inspection"
+    },
+    "scheduledDate": "Scheduled date",
+    "performedBy": "Performed by",
+    "cost": "Cost",
+    "partsUsed": "Parts used",
+    "findings": "Findings",
+    "newSchedule": "+ New Schedule",
+    "newScheduleTitle": "New Maintenance Schedule",
+    "editScheduleTitle": "Edit Maintenance Schedule",
+    "markComplete": "Mark Complete",
+    "noneYet": "No maintenance schedules yet.",
+    "confirmDelete": "Delete this maintenance schedule?"
   }
 }

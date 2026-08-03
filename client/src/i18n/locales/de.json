@@ -1105,5 +1105,48 @@
       "IT_TELECOMMUNICATIONS": "IT & Telekommunikation",
       "OTHER": "Sonstiges"
     }
+  },
+  "production": {
+    "nav": "Produktionsverfolgung",
+    "subtitle": "Schichttonnage, Erzgehalt und Produktion gegenüber Zielen verfolgen",
+    "shiftDate": "Schichtdatum",
+    "shift": "Schicht",
+    "shifts": {
+      "DAY": "Tag",
+      "AFTERNOON": "Nachmittag",
+      "NIGHT": "Nacht"
+    },
+    "mineralType": "Mineralientyp",
+    "tonnesMined": "Geförderte Tonnen",
+    "targetTonnes": "Zieltonnen",
+    "oreGrade": "Erzgehalt",
+    "wasteRemoved": "Entferntes Abraum",
+    "totalTonnes": "Gesamttonnen (diese Ansicht)",
+    "newRecord": "+ Neuer Eintrag",
+    "newRecordTitle": "Neuer Produktionseintrag",
+    "editRecordTitle": "Produktionseintrag bearbeiten",
+    "noneYet": "Noch keine Produktionseinträge.",
+    "confirmDelete": "Diesen Produktionseintrag löschen?"
+  },
+  "maintenance": {
+    "nav": "Wartungsplanung",
+    "subtitle": "Vorbeugende, korrektive und Inspektionswartung für Anlagen",
+    "type": "Wartungstyp",
+    "types": {
+      "PREVENTIVE": "Vorbeugend",
+      "CORRECTIVE": "Korrektiv",
+      "INSPECTION": "Inspektion"
+    },
+    "scheduledDate": "Geplantes Datum",
+    "performedBy": "Durchgeführt von",
+    "cost": "Kosten",
+    "partsUsed": "Verwendete Ersatzteile",
+    "findings": "Befunde",
+    "newSchedule": "+ Neuer Wartungsplan",
+    "newScheduleTitle": "Neuer Wartungsplan",
+    "editScheduleTitle": "Wartungsplan bearbeiten",
+    "markComplete": "Als erledigt markieren",
+    "noneYet": "Noch keine Wartungspläne.",
+    "confirmDelete": "Diesen Wartungsplan löschen?"
   }
 }

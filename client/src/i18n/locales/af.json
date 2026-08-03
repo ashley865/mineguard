@@ -1105,5 +1105,48 @@
       "IT_TELECOMMUNICATIONS": "IT en Telekommunikasie",
       "OTHER": "Ander"
     }
+  },
+  "production": {
+    "nav": "Produksie-opsporing",
+    "subtitle": "Hou tonnemaat per skof, ertsgraad, en produksie teenoor teikens dop",
+    "shiftDate": "Skofdatum",
+    "shift": "Skof",
+    "shifts": {
+      "DAY": "Dag",
+      "AFTERNOON": "Middag",
+      "NIGHT": "Nag"
+    },
+    "mineralType": "Mineraaltipe",
+    "tonnesMined": "Tonne ontgin",
+    "targetTonnes": "Teikentonne",
+    "oreGrade": "Ertsgraad",
+    "wasteRemoved": "Afval verwyder",
+    "totalTonnes": "Totale tonne (hierdie aansig)",
+    "newRecord": "+ Nuwe Rekord",
+    "newRecordTitle": "Nuwe Produksierekord",
+    "editRecordTitle": "Wysig Produksierekord",
+    "noneYet": "Nog geen produksierekords nie.",
+    "confirmDelete": "Skrap hierdie produksierekord?"
+  },
+  "maintenance": {
+    "nav": "Onderhoudskedulering",
+    "subtitle": "Voorkomende, regstellende en inspeksie-onderhoud vir toerusting",
+    "type": "Onderhoudtipe",
+    "types": {
+      "PREVENTIVE": "Voorkomend",
+      "CORRECTIVE": "Regstellend",
+      "INSPECTION": "Inspeksie"
+    },
+    "scheduledDate": "Geskeduleerde datum",
+    "performedBy": "Uitgevoer deur",
+    "cost": "Koste",
+    "partsUsed": "Onderdele gebruik",
+    "findings": "Bevindinge",
+    "newSchedule": "+ Nuwe Skedule",
+    "newScheduleTitle": "Nuwe Onderhoudskedule",
+    "editScheduleTitle": "Wysig Onderhoudskedule",
+    "markComplete": "Merk as Voltooi",
+    "noneYet": "Nog geen onderhoudskedules nie.",
+    "confirmDelete": "Skrap hierdie onderhoudskedule?"
   }
 }
