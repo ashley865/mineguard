@@ -1277,5 +1277,65 @@
     "issuedTo": "Ausgegeben an",
     "noTransactions": "Noch keine Transaktionen erfasst.",
     "transactionError": "Diese Transaktion konnte nicht erfasst werden"
+  },
+  "environmental": {
+    "nav": "Umweltüberwachung",
+    "subtitle": "Wasser-, Luft-, Staub- und Lärmmesswerte sowie Absetzbeckenstände im Vergleich zu Standortgrenzwerten",
+    "parameterType": "Parameter",
+    "parameterTypes": {
+      "WATER_QUALITY": "Wasserqualität",
+      "AIR_QUALITY": "Luftqualität",
+      "DUST": "Staub",
+      "NOISE": "Lärm",
+      "TAILINGS_DAM_LEVEL": "Absetzbeckenstand"
+    },
+    "monitoringPoint": "Messpunkt",
+    "monitoringPointPlaceholder": "Absetzbecken 1, Bohrloch 3…",
+    "value": "Wert",
+    "thresholdMin": "Mindestgrenzwert",
+    "thresholdMax": "Höchstgrenzwert",
+    "withinLimits": "Innerhalb der Grenzwerte",
+    "outOfLimits": "Außerhalb der Grenzwerte",
+    "outOfLimitsOnly": "Nur außerhalb der Grenzwerte anzeigen",
+    "newReading": "+ Messwert erfassen",
+    "newReadingTitle": "Umweltmesswert erfassen",
+    "noneYet": "Noch keine Umweltmesswerte erfasst.",
+    "confirmDelete": "Diesen Umweltmesswert löschen?"
+  },
+  "emergency": {
+    "nav": "Notfallreaktion",
+    "subtitle": "Notfallkontaktverzeichnis und Evakuierungsübungsprotokolle",
+    "tabContacts": "Notfallkontakte",
+    "tabDrills": "Evakuierungsübungen",
+    "role": "Rolle",
+    "category": "Kategorie",
+    "categories": {
+      "MINE_RESCUE": "Grubenrettung",
+      "MEDICAL": "Medizinisch",
+      "FIRE": "Feuerwehr",
+      "POLICE": "Polizei",
+      "INTERNAL_MANAGEMENT": "Interne Leitung",
+      "OTHER": "Sonstiges"
+    },
+    "priority": "Priorität",
+    "newContact": "+ Neuer Kontakt",
+    "newContactTitle": "Neuer Notfallkontakt",
+    "noneYetContacts": "Noch keine Notfallkontakte.",
+    "confirmDeleteContact": "Diesen Notfallkontakt löschen?",
+    "drillType": "Übungstyp",
+    "drillTypes": {
+      "FIRE": "Feuer",
+      "GAS_LEAK": "Gasleck",
+      "SEISMIC": "Seismisch",
+      "GENERAL": "Allgemein"
+    },
+    "drillDate": "Übungsdatum",
+    "totalParticipants": "Gesamtteilnehmer",
+    "musterTimeSeconds": "Sammelzeit (Sekunden)",
+    "issuesIdentified": "Identifizierte Probleme",
+    "newDrill": "+ Neue Übung",
+    "newDrillTitle": "Neue Evakuierungsübung",
+    "noneYetDrills": "Noch keine Evakuierungsübungen erfasst.",
+    "confirmDeleteDrill": "Diese Evakuierungsübung löschen?"
   }
 }

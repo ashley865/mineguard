@@ -1277,5 +1277,65 @@
     "issuedTo": "Émis à",
     "noTransactions": "Aucune transaction enregistrée pour le moment.",
     "transactionError": "Impossible d'enregistrer cette transaction"
+  },
+  "environmental": {
+    "nav": "Surveillance Environnementale",
+    "subtitle": "Relevés de surveillance de l'eau, de l'air, des poussières et du bruit, ainsi que des niveaux du bassin à résidus, par rapport aux seuils du site",
+    "parameterType": "Paramètre",
+    "parameterTypes": {
+      "WATER_QUALITY": "Qualité de l'Eau",
+      "AIR_QUALITY": "Qualité de l'Air",
+      "DUST": "Poussière",
+      "NOISE": "Bruit",
+      "TAILINGS_DAM_LEVEL": "Niveau du Bassin à Résidus"
+    },
+    "monitoringPoint": "Point de surveillance",
+    "monitoringPointPlaceholder": "Bassin à résidus 1, Forage 3…",
+    "value": "Valeur",
+    "thresholdMin": "Seuil minimum",
+    "thresholdMax": "Seuil maximum",
+    "withinLimits": "Dans les limites",
+    "outOfLimits": "Hors limites",
+    "outOfLimitsOnly": "Afficher uniquement les valeurs hors limites",
+    "newReading": "+ Enregistrer un Relevé",
+    "newReadingTitle": "Enregistrer un Relevé Environnemental",
+    "noneYet": "Aucun relevé environnemental enregistré pour le moment.",
+    "confirmDelete": "Supprimer ce relevé environnemental ?"
+  },
+  "emergency": {
+    "nav": "Intervention d'Urgence",
+    "subtitle": "Répertoire des contacts d'urgence et registres des exercices d'évacuation",
+    "tabContacts": "Contacts d'Urgence",
+    "tabDrills": "Exercices d'Évacuation",
+    "role": "Fonction",
+    "category": "Catégorie",
+    "categories": {
+      "MINE_RESCUE": "Sauvetage Minier",
+      "MEDICAL": "Médical",
+      "FIRE": "Pompiers",
+      "POLICE": "Police",
+      "INTERNAL_MANAGEMENT": "Direction Interne",
+      "OTHER": "Autre"
+    },
+    "priority": "Priorité",
+    "newContact": "+ Nouveau Contact",
+    "newContactTitle": "Nouveau Contact d'Urgence",
+    "noneYetContacts": "Aucun contact d'urgence pour le moment.",
+    "confirmDeleteContact": "Supprimer ce contact d'urgence ?",
+    "drillType": "Type d'exercice",
+    "drillTypes": {
+      "FIRE": "Incendie",
+      "GAS_LEAK": "Fuite de Gaz",
+      "SEISMIC": "Sismique",
+      "GENERAL": "Général"
+    },
+    "drillDate": "Date de l'exercice",
+    "totalParticipants": "Total des participants",
+    "musterTimeSeconds": "Temps de rassemblement (secondes)",
+    "issuesIdentified": "Problèmes identifiés",
+    "newDrill": "+ Nouvel Exercice",
+    "newDrillTitle": "Nouvel Exercice d'Évacuation",
+    "noneYetDrills": "Aucun exercice d'évacuation enregistré pour le moment.",
+    "confirmDeleteDrill": "Supprimer cet exercice d'évacuation ?"
   }
 }

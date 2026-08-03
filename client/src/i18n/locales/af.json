@@ -1277,5 +1277,65 @@
     "issuedTo": "Uitgereik aan",
     "noTransactions": "Nog geen transaksies aangeteken nie.",
     "transactionError": "Kon nie hierdie transaksie aanteken nie"
+  },
+  "environmental": {
+    "nav": "Omgewingsmonitering",
+    "subtitle": "Water-, lug-, stof- en geraasmoniteringslesings, plus slikdamvlakke, teenoor terreindrempels",
+    "parameterType": "Parameter",
+    "parameterTypes": {
+      "WATER_QUALITY": "Watergehalte",
+      "AIR_QUALITY": "Lugkwaliteit",
+      "DUST": "Stof",
+      "NOISE": "Geraas",
+      "TAILINGS_DAM_LEVEL": "Slikdamvlak"
+    },
+    "monitoringPoint": "Moniteringspunt",
+    "monitoringPointPlaceholder": "Slikdam 1, Boorgat 3…",
+    "value": "Waarde",
+    "thresholdMin": "Minimum drempel",
+    "thresholdMax": "Maksimum drempel",
+    "withinLimits": "Binne perke",
+    "outOfLimits": "Buite perke",
+    "outOfLimitsOnly": "Wys slegs buite perke",
+    "newReading": "+ Teken Lesing Aan",
+    "newReadingTitle": "Teken Omgewingslesing Aan",
+    "noneYet": "Nog geen omgewingslesings aangeteken nie.",
+    "confirmDelete": "Skrap hierdie omgewingslesing?"
+  },
+  "emergency": {
+    "nav": "Noodreaksie",
+    "subtitle": "Noodkontakgids en ontruimingsoefeningsrekords",
+    "tabContacts": "Noodkontakte",
+    "tabDrills": "Ontruimingsoefeninge",
+    "role": "Rol",
+    "category": "Kategorie",
+    "categories": {
+      "MINE_RESCUE": "Mynredding",
+      "MEDICAL": "Mediese",
+      "FIRE": "Brandweer",
+      "POLICE": "Polisie",
+      "INTERNAL_MANAGEMENT": "Interne Bestuur",
+      "OTHER": "Ander"
+    },
+    "priority": "Prioriteit",
+    "newContact": "+ Nuwe Kontak",
+    "newContactTitle": "Nuwe Noodkontak",
+    "noneYetContacts": "Nog geen noodkontakte nie.",
+    "confirmDeleteContact": "Skrap hierdie noodkontak?",
+    "drillType": "Oefeningtipe",
+    "drillTypes": {
+      "FIRE": "Brand",
+      "GAS_LEAK": "Gaslekkasie",
+      "SEISMIC": "Seismies",
+      "GENERAL": "Algemeen"
+    },
+    "drillDate": "Oefeningdatum",
+    "totalParticipants": "Totale deelnemers",
+    "musterTimeSeconds": "Vergaderingstyd (sekondes)",
+    "issuesIdentified": "Kwessies geïdentifiseer",
+    "newDrill": "+ Nuwe Oefening",
+    "newDrillTitle": "Nuwe Ontruimingsoefening",
+    "noneYetDrills": "Nog geen ontruimingsoefeninge aangeteken nie.",
+    "confirmDeleteDrill": "Skrap hierdie ontruimingsoefening?"
   }
 }

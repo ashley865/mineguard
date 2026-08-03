@@ -963,3 +963,51 @@ export interface ExplosivesTransaction {
   notes?: string | null;
   createdAt: string;
 }
+
+export type EnvironmentalParameterType = "WATER_QUALITY" | "AIR_QUALITY" | "DUST" | "NOISE" | "TAILINGS_DAM_LEVEL";
+
+export interface EnvironmentalReading {
+  id: string;
+  siteId: string;
+  site?: { id: string; name: string };
+  monitoringPoint: string;
+  parameterType: EnvironmentalParameterType;
+  value: number;
+  unit: string;
+  thresholdMin?: number | null;
+  thresholdMax?: number | null;
+  withinLimits: boolean;
+  notes?: string | null;
+  recordedBy?: { id: string; name: string } | null;
+  recordedAt: string;
+  createdAt: string;
+}
+
+export type EmergencyContactCategory = "MINE_RESCUE" | "MEDICAL" | "FIRE" | "POLICE" | "INTERNAL_MANAGEMENT" | "OTHER";
+
+export interface EmergencyContact {
+  id: string;
+  siteId?: string | null;
+  site?: { id: string; name: string } | null;
+  name: string;
+  role: string;
+  phone: string;
+  category: EmergencyContactCategory;
+  priority: number;
+  createdAt: string;
+}
+
+export type EvacuationDrillType = "FIRE" | "GAS_LEAK" | "SEISMIC" | "GENERAL";
+
+export interface EvacuationDrill {
+  id: string;
+  siteId: string;
+  site?: { id: string; name: string };
+  drillDate: string;
+  drillType: EvacuationDrillType;
+  totalParticipants?: number | null;
+  musterTimeSeconds?: number | null;
+  issuesIdentified?: string | null;
+  conductedBy?: { id: string; name: string } | null;
+  createdAt: string;
+}

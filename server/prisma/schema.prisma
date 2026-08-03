@@ -198,6 +198,8 @@ model User {
   weatherReadings        WeatherReading[]       @relation("WeatherRecordedBy")
   safetyObservations     SafetyObservation[]    @relation("SafetyObservationReportedBy")
   explosivesTransactions ExplosivesTransaction[] @relation("ExplosivesAuthorizedBy")
+  environmentalReadings  EnvironmentalReading[]  @relation("EnvironmentalRecordedBy")
+  evacuationDrills       EvacuationDrill[]       @relation("DrillConductedBy")
 }
 
 model Site {
@@ -236,6 +238,9 @@ model Site {
   weatherReadings      WeatherReading[]
   safetyObservations   SafetyObservation[]
   explosivesMagazines  ExplosivesMagazine[]
+  environmentalReadings EnvironmentalReading[]
+  emergencyContacts    EmergencyContact[]
+  evacuationDrills     EvacuationDrill[]
 }
 
 model Zone {
@@ -1291,6 +1296,77 @@ model ExplosivesTransaction {
   authorizedBy    User?                      @relation("ExplosivesAuthorizedBy", fields: [authorizedById], references: [id], onDelete: SetNull)
   transactionDate DateTime                   @default(now())
   notes           String?
+
+  createdAt DateTime @default(now())
+}
+
+enum EnvironmentalParameterType {
+  WATER_QUALITY
+  AIR_QUALITY
+  DUST
+  NOISE
+  TAILINGS_DAM_LEVEL
+}
+
+model EnvironmentalReading {
+  id              String                     @id @default(cuid())
+  siteId          String
+  site            Site                       @relation(fields: [siteId], references: [id], onDelete: Cascade)
+  monitoringPoint String
+  parameterType   EnvironmentalParameterType
+  value           Float
+  unit            String
+  thresholdMin    Float?
+  thresholdMax    Float?
+  withinLimits    Boolean                    @default(true)
+  notes           String?
+  recordedById    String?
+  recordedBy      User?                      @relation("EnvironmentalRecordedBy", fields: [recordedById], references: [id], onDelete: SetNull)
+  recordedAt      DateTime                   @default(now())
+
+  createdAt DateTime @default(now())
+}
+
+enum EmergencyContactCategory {
+  MINE_RESCUE
+  MEDICAL
+  FIRE
+  POLICE
+  INTERNAL_MANAGEMENT
+  OTHER
+}
+
+model EmergencyContact {
+  id       String                    @id @default(cuid())
+  siteId   String?
+  site     Site?                     @relation(fields: [siteId], references: [id], onDelete: Cascade)
+  name     String
+  role     String
+  phone    String
+  category EmergencyContactCategory  @default(OTHER)
+  priority Int                       @default(0)
+
+  createdAt DateTime @default(now())
+}
+
+enum EvacuationDrillType {
+  FIRE
+  GAS_LEAK
+  SEISMIC
+  GENERAL
+}
+
+model EvacuationDrill {
+  id                String              @id @default(cuid())
+  siteId            String
+  site              Site                @relation(fields: [siteId], references: [id], onDelete: Cascade)
+  drillDate         DateTime
+  drillType         EvacuationDrillType
+  totalParticipants Int?
+  musterTimeSeconds Int?
+  issuesIdentified  String?
+  conductedById     String?
+  conductedBy       User?               @relation("DrillConductedBy", fields: [conductedById], references: [id], onDelete: SetNull)
 
   createdAt DateTime @default(now())
 }

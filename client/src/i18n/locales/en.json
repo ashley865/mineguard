@@ -1277,5 +1277,65 @@
     "issuedTo": "Issued to",
     "noTransactions": "No transactions logged yet.",
     "transactionError": "Could not log this transaction"
+  },
+  "environmental": {
+    "nav": "Environmental Monitoring",
+    "subtitle": "Water, air, dust, and noise monitoring readings, plus tailings dam levels, against site thresholds",
+    "parameterType": "Parameter",
+    "parameterTypes": {
+      "WATER_QUALITY": "Water Quality",
+      "AIR_QUALITY": "Air Quality",
+      "DUST": "Dust",
+      "NOISE": "Noise",
+      "TAILINGS_DAM_LEVEL": "Tailings Dam Level"
+    },
+    "monitoringPoint": "Monitoring point",
+    "monitoringPointPlaceholder": "Tailings Dam 1, Borehole 3…",
+    "value": "Value",
+    "thresholdMin": "Threshold min",
+    "thresholdMax": "Threshold max",
+    "withinLimits": "Within limits",
+    "outOfLimits": "Out of limits",
+    "outOfLimitsOnly": "Show out-of-limits only",
+    "newReading": "+ Log Reading",
+    "newReadingTitle": "Log Environmental Reading",
+    "noneYet": "No environmental readings logged yet.",
+    "confirmDelete": "Delete this environmental reading?"
+  },
+  "emergency": {
+    "nav": "Emergency Response",
+    "subtitle": "Emergency contact directory and evacuation drill records",
+    "tabContacts": "Emergency Contacts",
+    "tabDrills": "Evacuation Drills",
+    "role": "Role",
+    "category": "Category",
+    "categories": {
+      "MINE_RESCUE": "Mine Rescue",
+      "MEDICAL": "Medical",
+      "FIRE": "Fire",
+      "POLICE": "Police",
+      "INTERNAL_MANAGEMENT": "Internal Management",
+      "OTHER": "Other"
+    },
+    "priority": "Priority",
+    "newContact": "+ New Contact",
+    "newContactTitle": "New Emergency Contact",
+    "noneYetContacts": "No emergency contacts yet.",
+    "confirmDeleteContact": "Delete this emergency contact?",
+    "drillType": "Drill type",
+    "drillTypes": {
+      "FIRE": "Fire",
+      "GAS_LEAK": "Gas Leak",
+      "SEISMIC": "Seismic",
+      "GENERAL": "General"
+    },
+    "drillDate": "Drill date",
+    "totalParticipants": "Total participants",
+    "musterTimeSeconds": "Muster time (seconds)",
+    "issuesIdentified": "Issues identified",
+    "newDrill": "+ New Drill",
+    "newDrillTitle": "New Evacuation Drill",
+    "noneYetDrills": "No evacuation drills recorded yet.",
+    "confirmDeleteDrill": "Delete this evacuation drill?"
   }
 }

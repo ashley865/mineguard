@@ -45,6 +45,8 @@ import inventoryRoutes from "./routes/inventory";
 import weatherRoutes from "./routes/weather";
 import safetyObservationsRoutes from "./routes/safetyObservations";
 import explosivesRoutes from "./routes/explosives";
+import environmentalRoutes from "./routes/environmental";
+import emergencyRoutes from "./routes/emergency";
 import { startSimulator } from "./services/simulator";
 import { scanCompliance } from "./services/complianceScanner";
 
@@ -104,6 +106,8 @@ app.use("/api/inventory", inventoryRoutes);
 app.use("/api/weather", weatherRoutes);
 app.use("/api/safety-observations", safetyObservationsRoutes);
 app.use("/api/explosives", explosivesRoutes);
+app.use("/api/environmental", environmentalRoutes);
+app.use("/api/emergency", emergencyRoutes);
 
 app.use((err: any, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
   console.error(err);

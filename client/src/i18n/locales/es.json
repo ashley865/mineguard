@@ -1277,5 +1277,65 @@
     "issuedTo": "Emitido a",
     "noTransactions": "Aún no hay transacciones registradas.",
     "transactionError": "No se pudo registrar esta transacción"
+  },
+  "environmental": {
+    "nav": "Monitoreo Ambiental",
+    "subtitle": "Lecturas de monitoreo de agua, aire, polvo y ruido, además de niveles de la presa de relaves, frente a los umbrales del sitio",
+    "parameterType": "Parámetro",
+    "parameterTypes": {
+      "WATER_QUALITY": "Calidad del Agua",
+      "AIR_QUALITY": "Calidad del Aire",
+      "DUST": "Polvo",
+      "NOISE": "Ruido",
+      "TAILINGS_DAM_LEVEL": "Nivel de la Presa de Relaves"
+    },
+    "monitoringPoint": "Punto de monitoreo",
+    "monitoringPointPlaceholder": "Presa de Relaves 1, Pozo 3…",
+    "value": "Valor",
+    "thresholdMin": "Umbral mínimo",
+    "thresholdMax": "Umbral máximo",
+    "withinLimits": "Dentro de los límites",
+    "outOfLimits": "Fuera de los límites",
+    "outOfLimitsOnly": "Mostrar solo fuera de los límites",
+    "newReading": "+ Registrar Lectura",
+    "newReadingTitle": "Registrar Lectura Ambiental",
+    "noneYet": "Aún no hay lecturas ambientales registradas.",
+    "confirmDelete": "¿Eliminar esta lectura ambiental?"
+  },
+  "emergency": {
+    "nav": "Respuesta a Emergencias",
+    "subtitle": "Directorio de contactos de emergencia y registros de simulacros de evacuación",
+    "tabContacts": "Contactos de Emergencia",
+    "tabDrills": "Simulacros de Evacuación",
+    "role": "Función",
+    "category": "Categoría",
+    "categories": {
+      "MINE_RESCUE": "Rescate Minero",
+      "MEDICAL": "Médico",
+      "FIRE": "Bomberos",
+      "POLICE": "Policía",
+      "INTERNAL_MANAGEMENT": "Gerencia Interna",
+      "OTHER": "Otro"
+    },
+    "priority": "Prioridad",
+    "newContact": "+ Nuevo Contacto",
+    "newContactTitle": "Nuevo Contacto de Emergencia",
+    "noneYetContacts": "Aún no hay contactos de emergencia.",
+    "confirmDeleteContact": "¿Eliminar este contacto de emergencia?",
+    "drillType": "Tipo de simulacro",
+    "drillTypes": {
+      "FIRE": "Incendio",
+      "GAS_LEAK": "Fuga de Gas",
+      "SEISMIC": "Sísmico",
+      "GENERAL": "General"
+    },
+    "drillDate": "Fecha del simulacro",
+    "totalParticipants": "Total de participantes",
+    "musterTimeSeconds": "Tiempo de reunión (segundos)",
+    "issuesIdentified": "Problemas identificados",
+    "newDrill": "+ Nuevo Simulacro",
+    "newDrillTitle": "Nuevo Simulacro de Evacuación",
+    "noneYetDrills": "Aún no hay simulacros de evacuación registrados.",
+    "confirmDeleteDrill": "¿Eliminar este simulacro de evacuación?"
   }
 }

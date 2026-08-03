@@ -50,6 +50,8 @@ export default function Layout() {
     { to: "/weather", label: t("weather.nav") },
     { to: "/safety-observations", label: t("safetyObservations.nav") },
     { to: "/explosives", label: t("explosives.nav") },
+    { to: "/environmental", label: t("environmental.nav") },
+    { to: "/emergency", label: t("emergency.nav") },
     { to: "/compliance", label: t("compliance.nav") },
     { to: "/permits", label: t("permits.nav") },
     { to: "/documents", label: t("documents.nav") },

@@ -43,6 +43,8 @@ import WeatherMonitoring from "./pages/WeatherMonitoring";
 import SafetyObservations from "./pages/SafetyObservations";
 import SafetyObservationReport from "./pages/SafetyObservationReport";
 import ExplosivesRegister from "./pages/ExplosivesRegister";
+import EnvironmentalMonitoring from "./pages/EnvironmentalMonitoring";
+import EmergencyResponse from "./pages/EmergencyResponse";
 
 function HomeRoute() {
   const { user } = useAuth();
@@ -96,6 +98,8 @@ export default function App() {
         <Route path="/weather" element={<ModuleRoute path="/weather"><WeatherMonitoring /></ModuleRoute>} />
         <Route path="/safety-observations" element={<ModuleRoute path="/safety-observations"><SafetyObservations /></ModuleRoute>} />
         <Route path="/explosives" element={<ModuleRoute path="/explosives"><ExplosivesRegister /></ModuleRoute>} />
+        <Route path="/environmental" element={<ModuleRoute path="/environmental"><EnvironmentalMonitoring /></ModuleRoute>} />
+        <Route path="/emergency" element={<ModuleRoute path="/emergency"><EmergencyResponse /></ModuleRoute>} />
         <Route path="/messages" element={<Messages />} />
         <Route path="/settings" element={<Settings />} />
       </Route>
