@@ -846,3 +846,65 @@ export interface MaintenanceSchedule {
   createdBy?: { id: string; name: string } | null;
   createdAt: string;
 }
+
+export interface FleetPosition {
+  id: string;
+  truckId: string;
+  truck?: { id: string; registrationNumber: string; driverName: string; vehicleType?: string | null };
+  siteId: string;
+  site?: { id: string; name: string };
+  latitude: number;
+  longitude: number;
+  speedKmh?: number | null;
+  heading?: number | null;
+  recordedBy?: { id: string; name: string } | null;
+  createdAt: string;
+}
+
+export interface InventoryItem {
+  id: string;
+  siteId: string;
+  site?: { id: string; name: string };
+  partNumber?: string | null;
+  name: string;
+  category?: string | null;
+  quantityOnHand: number;
+  reorderPoint?: number | null;
+  unit: string;
+  unitCost?: number | null;
+  supplier?: string | null;
+  location?: string | null;
+  createdAt: string;
+}
+
+export type InventoryMovementDirection = "IN" | "OUT";
+
+export interface InventoryMovement {
+  id: string;
+  itemId: string;
+  item?: { id: string; name: string; unit: string };
+  direction: InventoryMovementDirection;
+  quantity: number;
+  reason?: string | null;
+  performedBy?: { id: string; name: string } | null;
+  createdAt: string;
+}
+
+export type WeatherCondition = "CLEAR" | "CLOUDY" | "RAIN" | "STORM" | "FOG" | "HIGH_WIND";
+
+export interface WeatherReading {
+  id: string;
+  siteId: string;
+  site?: { id: string; name: string };
+  recordedAt: string;
+  temperature?: number | null;
+  windSpeed?: number | null;
+  windDirection?: string | null;
+  precipitation?: number | null;
+  condition: WeatherCondition;
+  lightningDetected: boolean;
+  alertIssued: boolean;
+  notes?: string | null;
+  recordedBy?: { id: string; name: string } | null;
+  createdAt: string;
+}

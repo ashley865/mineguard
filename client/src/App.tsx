@@ -37,6 +37,9 @@ import Tenders from "./pages/Tenders";
 import TenderBoard from "./pages/TenderBoard";
 import ProductionTracking from "./pages/ProductionTracking";
 import MaintenanceScheduling from "./pages/MaintenanceScheduling";
+import FleetTracking from "./pages/FleetTracking";
+import InventoryManagement from "./pages/InventoryManagement";
+import WeatherMonitoring from "./pages/WeatherMonitoring";
 
 function HomeRoute() {
   const { user } = useAuth();
@@ -84,6 +87,9 @@ export default function App() {
         <Route path="/tenders" element={<ModuleRoute path="/tenders"><Tenders /></ModuleRoute>} />
         <Route path="/production" element={<ModuleRoute path="/production"><ProductionTracking /></ModuleRoute>} />
         <Route path="/maintenance" element={<ModuleRoute path="/maintenance"><MaintenanceScheduling /></ModuleRoute>} />
+        <Route path="/fleet" element={<ModuleRoute path="/fleet"><FleetTracking /></ModuleRoute>} />
+        <Route path="/inventory" element={<ModuleRoute path="/inventory"><InventoryManagement /></ModuleRoute>} />
+        <Route path="/weather" element={<ModuleRoute path="/weather"><WeatherMonitoring /></ModuleRoute>} />
         <Route path="/messages" element={<Messages />} />
         <Route path="/settings" element={<Settings />} />
       </Route>

@@ -40,6 +40,9 @@ import mineralsRoutes from "./routes/minerals";
 import contractsRoutes from "./routes/contracts";
 import productionRoutes from "./routes/production";
 import maintenanceRoutes from "./routes/maintenance";
+import fleetRoutes from "./routes/fleet";
+import inventoryRoutes from "./routes/inventory";
+import weatherRoutes from "./routes/weather";
 import { startSimulator } from "./services/simulator";
 import { scanCompliance } from "./services/complianceScanner";
 
@@ -94,6 +97,9 @@ app.use("/api/minerals", mineralsRoutes);
 app.use("/api/contracts", contractsRoutes);
 app.use("/api/production", productionRoutes);
 app.use("/api/maintenance", maintenanceRoutes);
+app.use("/api/fleet", fleetRoutes);
+app.use("/api/inventory", inventoryRoutes);
+app.use("/api/weather", weatherRoutes);
 
 app.use((err: any, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
   console.error(err);
