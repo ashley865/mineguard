@@ -4,6 +4,7 @@ import { z } from "zod";
 import { prisma } from "../prisma";
 import { requireAuth, requireRole } from "../middleware/auth";
 import { imageFileFilter } from "../lib/uploadFilters";
+import { requireMineId } from "../lib/mineScope";
 
 const router = Router();
 
@@ -52,9 +53,11 @@ function withHasPhoto<T extends { photoMimeType: string | null }>(worker: T) {
 router.use(requireAuth);
 
 router.get("/", async (req, res) => {
+  const mineId = requireMineId(req, res);
+  if (!mineId) return;
   const siteId = req.query.siteId as string | undefined;
   const workers = await prisma.worker.findMany({
-    where: siteId ? { siteId } : undefined,
+    where: { site: { mineId }, siteId: siteId || undefined },
     select: workerSelect,
     orderBy: { createdAt: "desc" },
   });
@@ -62,8 +65,12 @@ router.get("/", async (req, res) => {
 });
 
 router.post("/", requireRole("ADMIN", "SUPERVISOR", "EXECUTIVE"), async (req, res) => {
+  const mineId = requireMineId(req, res);
+  if (!mineId) return;
   const parsed = workerSchema.safeParse(req.body);
   if (!parsed.success) return res.status(400).json({ error: parsed.error.flatten() });
+  const site = await prisma.site.findFirst({ where: { id: parsed.data.siteId, mineId } });
+  if (!site) return res.status(404).json({ error: "Site not found" });
   try {
     const worker = await prisma.worker.create({ data: parsed.data, select: workerSelect });
     res.status(201).json(withHasPhoto(worker));
@@ -73,27 +80,37 @@ router.post("/", requireRole("ADMIN", "SUPERVISOR", "EXECUTIVE"), async (req, re
 });
 
 router.put("/:id", requireRole("ADMIN", "SUPERVISOR", "EXECUTIVE"), async (req, res) => {
+  const mineId = requireMineId(req, res);
+  if (!mineId) return;
   const parsed = workerSchema.partial().safeParse(req.body);
   if (!parsed.success) return res.status(400).json({ error: parsed.error.flatten() });
+  const existing = await prisma.worker.findFirst({ where: { id: req.params.id, site: { mineId } } });
+  if (!existing) return res.status(404).json({ error: "Worker not found" });
+  if (parsed.data.siteId) {
+    const site = await prisma.site.findFirst({ where: { id: parsed.data.siteId, mineId } });
+    if (!site) return res.status(404).json({ error: "Site not found" });
+  }
   try {
-    const worker = await prisma.worker.update({ where: { id: req.params.id }, data: parsed.data, select: workerSelect });
+    const worker = await prisma.worker.update({ where: { id: existing.id }, data: parsed.data, select: workerSelect });
     res.json(withHasPhoto(worker));
   } catch {
-    res.status(404).json({ error: "Worker not found" });
+    res.status(409).json({ error: "Employee ID already exists" });
   }
 });
 
 router.delete("/:id", requireRole("ADMIN", "SUPERVISOR", "EXECUTIVE"), async (req, res) => {
-  try {
-    await prisma.worker.delete({ where: { id: req.params.id } });
-    res.status(204).send();
-  } catch {
-    res.status(404).json({ error: "Worker not found" });
-  }
+  const mineId = requireMineId(req, res);
+  if (!mineId) return;
+  const existing = await prisma.worker.findFirst({ where: { id: req.params.id, site: { mineId } } });
+  if (!existing) return res.status(404).json({ error: "Worker not found" });
+  await prisma.worker.delete({ where: { id: existing.id } });
+  res.status(204).send();
 });
 
 router.post("/:id/toggle-attendance", requireRole("ADMIN", "SUPERVISOR", "EXECUTIVE"), async (req, res) => {
-  const worker = await prisma.worker.findUnique({ where: { id: req.params.id } });
+  const mineId = requireMineId(req, res);
+  if (!mineId) return;
+  const worker = await prisma.worker.findFirst({ where: { id: req.params.id, site: { mineId } } });
   if (!worker) return res.status(404).json({ error: "Worker not found" });
 
   const openRecord = await prisma.workerAttendance.findFirst({
@@ -113,8 +130,12 @@ router.post("/:id/toggle-attendance", requireRole("ADMIN", "SUPERVISOR", "EXECUT
 });
 
 router.get("/:id/attendance", async (req, res) => {
+  const mineId = requireMineId(req, res);
+  if (!mineId) return;
+  const worker = await prisma.worker.findFirst({ where: { id: req.params.id, site: { mineId } } });
+  if (!worker) return res.status(404).json({ error: "Worker not found" });
   const records = await prisma.workerAttendance.findMany({
-    where: { workerId: req.params.id },
+    where: { workerId: worker.id },
     orderBy: { checkInAt: "desc" },
     take: 50,
   });
@@ -122,27 +143,34 @@ router.get("/:id/attendance", async (req, res) => {
 });
 
 router.post("/:id/photo", requireRole("ADMIN", "SUPERVISOR", "EXECUTIVE"), upload.single("photo"), async (req, res) => {
+  const mineId = requireMineId(req, res);
+  if (!mineId) return;
   if (!req.file) return res.status(400).json({ error: "A photo file is required" });
-  try {
-    await prisma.worker.update({
-      where: { id: req.params.id },
-      data: { photoData: Uint8Array.from(req.file.buffer), photoMimeType: req.file.mimetype },
-    });
-    res.status(204).send();
-  } catch {
-    res.status(404).json({ error: "Worker not found" });
-  }
+  const worker = await prisma.worker.findFirst({ where: { id: req.params.id, site: { mineId } } });
+  if (!worker) return res.status(404).json({ error: "Worker not found" });
+  await prisma.worker.update({
+    where: { id: worker.id },
+    data: { photoData: Uint8Array.from(req.file.buffer), photoMimeType: req.file.mimetype },
+  });
+  res.status(204).send();
 });
 
 router.get("/:id/photo", async (req, res) => {
-  const worker = await prisma.worker.findUnique({ where: { id: req.params.id }, select: { photoData: true, photoMimeType: true } });
+  const mineId = requireMineId(req, res);
+  if (!mineId) return;
+  const worker = await prisma.worker.findFirst({
+    where: { id: req.params.id, site: { mineId } },
+    select: { photoData: true, photoMimeType: true },
+  });
   if (!worker?.photoData || !worker.photoMimeType) return res.status(404).json({ error: "No photo set" });
   res.setHeader("Content-Type", worker.photoMimeType);
   res.send(Buffer.from(worker.photoData));
 });
 
 router.get("/:id/profile", async (req, res) => {
-  const worker = await prisma.worker.findUnique({ where: { id: req.params.id }, select: workerSelect });
+  const mineId = requireMineId(req, res);
+  if (!mineId) return;
+  const worker = await prisma.worker.findFirst({ where: { id: req.params.id, site: { mineId } }, select: workerSelect });
   if (!worker) return res.status(404).json({ error: "Worker not found" });
 
   const since90 = new Date();

@@ -2,6 +2,7 @@ import { Router } from "express";
 import { z } from "zod";
 import { prisma } from "../prisma";
 import { requireAuth, requireRole } from "../middleware/auth";
+import { requireMineId } from "../lib/mineScope";
 
 const router = Router();
 
@@ -14,8 +15,11 @@ const siteSchema = z.object({
 
 router.use(requireAuth);
 
-router.get("/", async (_req, res) => {
+router.get("/", async (req, res) => {
+  const mineId = requireMineId(req, res);
+  if (!mineId) return;
   const sites = await prisma.site.findMany({
+    where: { mineId },
     include: {
       zones: true,
       _count: { select: { workers: true, incidents: true, equipment: true, alerts: true } },
@@ -26,8 +30,10 @@ router.get("/", async (_req, res) => {
 });
 
 router.get("/:id", async (req, res) => {
-  const site = await prisma.site.findUnique({
-    where: { id: req.params.id },
+  const mineId = requireMineId(req, res);
+  if (!mineId) return;
+  const site = await prisma.site.findFirst({
+    where: { id: req.params.id, mineId },
     include: { zones: { include: { sensors: true } }, workers: true, equipment: true },
   });
   if (!site) return res.status(404).json({ error: "Site not found" });
@@ -35,30 +41,32 @@ router.get("/:id", async (req, res) => {
 });
 
 router.post("/", requireRole("ADMIN", "SUPERVISOR", "EXECUTIVE"), async (req, res) => {
+  const mineId = requireMineId(req, res);
+  if (!mineId) return;
   const parsed = siteSchema.safeParse(req.body);
   if (!parsed.success) return res.status(400).json({ error: parsed.error.flatten() });
-  const site = await prisma.site.create({ data: parsed.data });
+  const site = await prisma.site.create({ data: { ...parsed.data, mineId } });
   res.status(201).json(site);
 });
 
 router.put("/:id", requireRole("ADMIN", "SUPERVISOR", "EXECUTIVE"), async (req, res) => {
+  const mineId = requireMineId(req, res);
+  if (!mineId) return;
   const parsed = siteSchema.partial().safeParse(req.body);
   if (!parsed.success) return res.status(400).json({ error: parsed.error.flatten() });
-  try {
-    const site = await prisma.site.update({ where: { id: req.params.id }, data: parsed.data });
-    res.json(site);
-  } catch {
-    res.status(404).json({ error: "Site not found" });
-  }
+  const existing = await prisma.site.findFirst({ where: { id: req.params.id, mineId } });
+  if (!existing) return res.status(404).json({ error: "Site not found" });
+  const site = await prisma.site.update({ where: { id: existing.id }, data: parsed.data });
+  res.json(site);
 });
 
 router.delete("/:id", requireRole("ADMIN", "EXECUTIVE"), async (req, res) => {
-  try {
-    await prisma.site.delete({ where: { id: req.params.id } });
-    res.status(204).send();
-  } catch {
-    res.status(404).json({ error: "Site not found" });
-  }
+  const mineId = requireMineId(req, res);
+  if (!mineId) return;
+  const existing = await prisma.site.findFirst({ where: { id: req.params.id, mineId } });
+  if (!existing) return res.status(404).json({ error: "Site not found" });
+  await prisma.site.delete({ where: { id: existing.id } });
+  res.status(204).send();
 });
 
 export default router;

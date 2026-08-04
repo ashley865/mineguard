@@ -221,6 +221,9 @@ model Site {
   createdAt   DateTime   @default(now())
   updatedAt   DateTime   @updatedAt
 
+  mineId String
+  mine   Mine   @relation(fields: [mineId], references: [id], onDelete: Cascade)
+
   zones     Zone[]
   workers   Worker[]
   incidents Incident[]
@@ -633,6 +636,8 @@ model Document {
   status      DocumentStatus @default(ACTIVE)
   description String?
   reviewDate  DateTime?
+  mineId      String
+  mine        Mine           @relation(fields: [mineId], references: [id], onDelete: Cascade)
   siteId      String?
   site        Site?          @relation(fields: [siteId], references: [id], onDelete: SetNull)
 
@@ -691,6 +696,11 @@ model Mine {
 
   users            User[]
   executiveInvites ExecutiveInvite[]
+  sites            Site[]
+  documents        Document[]
+  emergencyContacts EmergencyContact[]
+  trainingCourses  TrainingCourse[]
+  payees           Payee[]
 }
 
 enum InviteStatus {
@@ -1364,6 +1374,8 @@ enum EmergencyContactCategory {
 
 model EmergencyContact {
   id       String                    @id @default(cuid())
+  mineId   String
+  mine     Mine                      @relation(fields: [mineId], references: [id], onDelete: Cascade)
   siteId   String?
   site     Site?                     @relation(fields: [siteId], references: [id], onDelete: Cascade)
   name     String
@@ -1435,6 +1447,8 @@ model RosterAssignment {
 
 model TrainingCourse {
   id            String        @id @default(cuid())
+  mineId        String
+  mine          Mine          @relation(fields: [mineId], references: [id], onDelete: Cascade)
   siteId        String?
   site          Site?         @relation(fields: [siteId], references: [id], onDelete: SetNull)
   courseName    String
@@ -1664,6 +1678,8 @@ enum PayeeType {
 
 model Payee {
   id                 String    @id @default(cuid())
+  mineId             String
+  mine               Mine      @relation(fields: [mineId], references: [id], onDelete: Cascade)
   payeeType          PayeeType @default(COMPANY)
   name               String
   registrationNumber String?

@@ -2,6 +2,7 @@ import { Router } from "express";
 import { z } from "zod";
 import { prisma } from "../prisma";
 import { requireAuth, requireRole } from "../middleware/auth";
+import { requireMineId } from "../lib/mineScope";
 
 const router = Router();
 
@@ -51,9 +52,11 @@ const drillSelect = {
 router.use(requireAuth);
 
 router.get("/contacts", async (req, res) => {
+  const mineId = requireMineId(req, res);
+  if (!mineId) return;
   const siteId = req.query.siteId as string | undefined;
   const contacts = await prisma.emergencyContact.findMany({
-    where: siteId ? { OR: [{ siteId }, { siteId: null }] } : undefined,
+    where: { mineId, ...(siteId ? { OR: [{ siteId }, { siteId: null }] } : {}) },
     select: contactSelect,
     orderBy: { priority: "asc" },
   });
@@ -61,36 +64,48 @@ router.get("/contacts", async (req, res) => {
 });
 
 router.post("/contacts", requireRole("ADMIN", "SUPERVISOR", "EXECUTIVE"), async (req, res) => {
+  const mineId = requireMineId(req, res);
+  if (!mineId) return;
   const parsed = contactSchema.safeParse(req.body);
   if (!parsed.success) return res.status(400).json({ error: parsed.error.flatten() });
-  const contact = await prisma.emergencyContact.create({ data: parsed.data, select: contactSelect });
+  if (parsed.data.siteId) {
+    const site = await prisma.site.findFirst({ where: { id: parsed.data.siteId, mineId } });
+    if (!site) return res.status(404).json({ error: "Site not found" });
+  }
+  const contact = await prisma.emergencyContact.create({ data: { ...parsed.data, mineId }, select: contactSelect });
   res.status(201).json(contact);
 });
 
 router.put("/contacts/:id", requireRole("ADMIN", "SUPERVISOR", "EXECUTIVE"), async (req, res) => {
+  const mineId = requireMineId(req, res);
+  if (!mineId) return;
   const parsed = contactSchema.partial().safeParse(req.body);
   if (!parsed.success) return res.status(400).json({ error: parsed.error.flatten() });
-  try {
-    const contact = await prisma.emergencyContact.update({ where: { id: req.params.id }, data: parsed.data, select: contactSelect });
-    res.json(contact);
-  } catch {
-    res.status(404).json({ error: "Emergency contact not found" });
+  const existing = await prisma.emergencyContact.findFirst({ where: { id: req.params.id, mineId } });
+  if (!existing) return res.status(404).json({ error: "Emergency contact not found" });
+  if (parsed.data.siteId) {
+    const site = await prisma.site.findFirst({ where: { id: parsed.data.siteId, mineId } });
+    if (!site) return res.status(404).json({ error: "Site not found" });
   }
+  const contact = await prisma.emergencyContact.update({ where: { id: existing.id }, data: parsed.data, select: contactSelect });
+  res.json(contact);
 });
 
 router.delete("/contacts/:id", requireRole("ADMIN", "EXECUTIVE"), async (req, res) => {
-  try {
-    await prisma.emergencyContact.delete({ where: { id: req.params.id } });
-    res.status(204).send();
-  } catch {
-    res.status(404).json({ error: "Emergency contact not found" });
-  }
+  const mineId = requireMineId(req, res);
+  if (!mineId) return;
+  const existing = await prisma.emergencyContact.findFirst({ where: { id: req.params.id, mineId } });
+  if (!existing) return res.status(404).json({ error: "Emergency contact not found" });
+  await prisma.emergencyContact.delete({ where: { id: existing.id } });
+  res.status(204).send();
 });
 
 router.get("/drills", async (req, res) => {
+  const mineId = requireMineId(req, res);
+  if (!mineId) return;
   const siteId = req.query.siteId as string | undefined;
   const drills = await prisma.evacuationDrill.findMany({
-    where: { siteId: siteId || undefined },
+    where: { site: { mineId }, siteId: siteId || undefined },
     select: drillSelect,
     orderBy: { drillDate: "desc" },
   });
@@ -98,8 +113,12 @@ router.get("/drills", async (req, res) => {
 });
 
 router.post("/drills", requireRole("ADMIN", "SUPERVISOR", "EXECUTIVE"), async (req, res) => {
+  const mineId = requireMineId(req, res);
+  if (!mineId) return;
   const parsed = drillSchema.safeParse(req.body);
   if (!parsed.success) return res.status(400).json({ error: parsed.error.flatten() });
+  const site = await prisma.site.findFirst({ where: { id: parsed.data.siteId, mineId } });
+  if (!site) return res.status(404).json({ error: "Site not found" });
   const drill = await prisma.evacuationDrill.create({
     data: { ...parsed.data, conductedById: req.auth!.userId },
     select: drillSelect,
@@ -108,23 +127,23 @@ router.post("/drills", requireRole("ADMIN", "SUPERVISOR", "EXECUTIVE"), async (r
 });
 
 router.put("/drills/:id", requireRole("ADMIN", "SUPERVISOR", "EXECUTIVE"), async (req, res) => {
+  const mineId = requireMineId(req, res);
+  if (!mineId) return;
   const parsed = drillSchema.partial().safeParse(req.body);
   if (!parsed.success) return res.status(400).json({ error: parsed.error.flatten() });
-  try {
-    const drill = await prisma.evacuationDrill.update({ where: { id: req.params.id }, data: parsed.data, select: drillSelect });
-    res.json(drill);
-  } catch {
-    res.status(404).json({ error: "Evacuation drill not found" });
-  }
+  const existing = await prisma.evacuationDrill.findFirst({ where: { id: req.params.id, site: { mineId } } });
+  if (!existing) return res.status(404).json({ error: "Evacuation drill not found" });
+  const drill = await prisma.evacuationDrill.update({ where: { id: existing.id }, data: parsed.data, select: drillSelect });
+  res.json(drill);
 });
 
 router.delete("/drills/:id", requireRole("ADMIN", "EXECUTIVE"), async (req, res) => {
-  try {
-    await prisma.evacuationDrill.delete({ where: { id: req.params.id } });
-    res.status(204).send();
-  } catch {
-    res.status(404).json({ error: "Evacuation drill not found" });
-  }
+  const mineId = requireMineId(req, res);
+  if (!mineId) return;
+  const existing = await prisma.evacuationDrill.findFirst({ where: { id: req.params.id, site: { mineId } } });
+  if (!existing) return res.status(404).json({ error: "Evacuation drill not found" });
+  await prisma.evacuationDrill.delete({ where: { id: existing.id } });
+  res.status(204).send();
 });
 
 export default router;

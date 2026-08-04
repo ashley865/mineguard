@@ -5,6 +5,7 @@ import { prisma } from "../prisma";
 import { requireAuth, requireRole } from "../middleware/auth";
 import { verifyAdminPassword } from "../lib/verifyPassword";
 import { controlledDocumentFileFilter } from "../lib/uploadFilters";
+import { requireMineId } from "../lib/mineScope";
 
 const router = Router();
 
@@ -60,9 +61,11 @@ const documentSelect = {
 router.use(requireAuth);
 
 router.get("/", async (req, res) => {
+  const mineId = requireMineId(req, res);
+  if (!mineId) return;
   const siteId = req.query.siteId as string | undefined;
   const items = await prisma.document.findMany({
-    where: siteId ? { siteId } : undefined,
+    where: { mineId, siteId: siteId || undefined },
     select: documentSelect,
     orderBy: { createdAt: "desc" },
   });
@@ -70,7 +73,9 @@ router.get("/", async (req, res) => {
 });
 
 router.get("/:id/download", async (req, res) => {
-  const doc = await prisma.document.findUnique({ where: { id: req.params.id } });
+  const mineId = requireMineId(req, res);
+  if (!mineId) return;
+  const doc = await prisma.document.findFirst({ where: { id: req.params.id, mineId } });
   if (!doc) return res.status(404).json({ error: "Document not found" });
   res.setHeader("Content-Type", doc.fileMimeType);
   res.setHeader("Content-Disposition", `attachment; filename="${encodeURIComponent(doc.fileName)}"`);
@@ -78,13 +83,20 @@ router.get("/:id/download", async (req, res) => {
 });
 
 router.post("/", requireRole("ADMIN", "SUPERVISOR", "EXECUTIVE"), upload.single("file"), async (req, res) => {
+  const mineId = requireMineId(req, res);
+  if (!mineId) return;
   if (!req.file) return res.status(400).json({ error: "A file is required" });
   const parsed = metadataSchema.safeParse(req.body);
   if (!parsed.success) return res.status(400).json({ error: parsed.error.flatten() });
+  if (parsed.data.siteId) {
+    const site = await prisma.site.findFirst({ where: { id: parsed.data.siteId, mineId } });
+    if (!site) return res.status(404).json({ error: "Site not found" });
+  }
 
   const item = await prisma.document.create({
     data: {
       ...parsed.data,
+      mineId,
       fileName: req.file.originalname,
       fileMimeType: req.file.mimetype,
       fileSize: req.file.size,
@@ -97,38 +109,45 @@ router.post("/", requireRole("ADMIN", "SUPERVISOR", "EXECUTIVE"), upload.single(
 });
 
 router.put("/:id", requireRole("ADMIN", "SUPERVISOR", "EXECUTIVE"), async (req, res) => {
+  const mineId = requireMineId(req, res);
+  if (!mineId) return;
   const parsed = metadataSchema.partial().safeParse(req.body);
   if (!parsed.success) return res.status(400).json({ error: parsed.error.flatten() });
-  try {
-    const item = await prisma.document.update({
-      where: { id: req.params.id },
-      data: parsed.data,
-      select: documentSelect,
-    });
-    res.json(item);
-  } catch {
-    res.status(404).json({ error: "Document not found" });
+  const existing = await prisma.document.findFirst({ where: { id: req.params.id, mineId } });
+  if (!existing) return res.status(404).json({ error: "Document not found" });
+  if (parsed.data.siteId) {
+    const site = await prisma.site.findFirst({ where: { id: parsed.data.siteId, mineId } });
+    if (!site) return res.status(404).json({ error: "Site not found" });
   }
+  const item = await prisma.document.update({
+    where: { id: existing.id },
+    data: parsed.data,
+    select: documentSelect,
+  });
+  res.json(item);
 });
 
 // Deleting a controlled document is irreversible, so it requires the ADMIN role plus
 // re-confirming their password, not just a valid session token.
 router.delete("/:id", requireRole("ADMIN"), async (req, res) => {
+  const mineId = requireMineId(req, res);
+  if (!mineId) return;
   const passwordOk = await verifyAdminPassword(req.auth!.userId, req.body?.password);
   if (!passwordOk) return res.status(401).json({ error: "Incorrect password" });
-  try {
-    await prisma.document.delete({ where: { id: req.params.id } });
-    res.status(204).send();
-  } catch {
-    res.status(404).json({ error: "Document not found" });
-  }
+  const existing = await prisma.document.findFirst({ where: { id: req.params.id, mineId } });
+  if (!existing) return res.status(404).json({ error: "Document not found" });
+  await prisma.document.delete({ where: { id: existing.id } });
+  res.status(204).send();
 });
 
 // Aggregates every document ever uploaded anywhere in the system — controlled documents,
 // visitor check-in uploads, and buyer FICA/KYC uploads — into one organised, searchable view.
-router.get("/vault/all", async (_req, res) => {
+router.get("/vault/all", async (req, res) => {
+  const mineId = requireMineId(req, res);
+  if (!mineId) return;
   const [documents, visitorDocs, buyerDocs] = await Promise.all([
     prisma.document.findMany({
+      where: { mineId },
       select: {
         id: true,
         title: true,
@@ -142,6 +161,7 @@ router.get("/vault/all", async (_req, res) => {
       },
     }),
     prisma.visitorDocument.findMany({
+      where: { visitor: { site: { mineId } } },
       select: {
         id: true,
         visitorId: true,

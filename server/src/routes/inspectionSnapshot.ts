@@ -1,15 +1,18 @@
 import { Router } from "express";
 import { prisma } from "../prisma";
 import { requireAuth, requireRole } from "../middleware/auth";
+import { requireMineId } from "../lib/mineScope";
 
 const router = Router();
 
 router.use(requireAuth, requireRole("ADMIN", "SUPERVISOR", "EXECUTIVE"));
 
 router.get("/:siteId", async (req, res) => {
+  const mineId = requireMineId(req, res);
+  if (!mineId) return;
   const { siteId } = req.params;
 
-  const site = await prisma.site.findUnique({ where: { id: siteId } });
+  const site = await prisma.site.findFirst({ where: { id: siteId, mineId } });
   if (!site) return res.status(404).json({ error: "Site not found" });
 
   const [

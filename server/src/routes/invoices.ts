@@ -3,6 +3,7 @@ import { z } from "zod";
 import { prisma } from "../prisma";
 import { requireAuth, requireRole } from "../middleware/auth";
 import { renderInvoiceHtml } from "../lib/invoiceHtml";
+import { requireMineId } from "../lib/mineScope";
 
 const router = Router();
 
@@ -52,10 +53,12 @@ const invoiceSelect = {
 router.use(requireAuth);
 
 router.get("/", async (req, res) => {
+  const mineId = requireMineId(req, res);
+  if (!mineId) return;
   const siteId = req.query.siteId as string | undefined;
   const status = req.query.status as string | undefined;
   const invoices = await prisma.invoice.findMany({
-    where: { siteId: siteId || undefined, status: (status as any) || undefined },
+    where: { site: { mineId }, siteId: siteId || undefined, status: (status as any) || undefined },
     select: invoiceSelect,
     orderBy: { createdAt: "desc" },
   });
@@ -63,14 +66,20 @@ router.get("/", async (req, res) => {
 });
 
 router.get("/:id", async (req, res) => {
-  const invoice = await prisma.invoice.findUnique({ where: { id: req.params.id }, select: invoiceSelect });
+  const mineId = requireMineId(req, res);
+  if (!mineId) return;
+  const invoice = await prisma.invoice.findFirst({ where: { id: req.params.id, site: { mineId } }, select: invoiceSelect });
   if (!invoice) return res.status(404).json({ error: "Invoice not found" });
   res.json(invoice);
 });
 
 router.post("/", requireRole("ADMIN", "SUPERVISOR", "EXECUTIVE"), async (req, res) => {
+  const mineId = requireMineId(req, res);
+  if (!mineId) return;
   const parsed = invoiceSchema.safeParse(req.body);
   if (!parsed.success) return res.status(400).json({ error: parsed.error.flatten() });
+  const site = await prisma.site.findFirst({ where: { id: parsed.data.siteId, mineId } });
+  if (!site) return res.status(404).json({ error: "Site not found" });
   const { lines, clientEmail, ...invoiceData } = parsed.data;
   const invoice = await prisma.invoice.create({
     data: {
@@ -83,8 +92,7 @@ router.post("/", requireRole("ADMIN", "SUPERVISOR", "EXECUTIVE"), async (req, re
   });
 
   try {
-    const user = await prisma.user.findUnique({ where: { id: req.auth!.userId }, select: { mineId: true } });
-    const mine = user?.mineId ? await prisma.mine.findUnique({ where: { id: user.mineId }, select: { name: true } }) : null;
+    const mine = await prisma.mine.findUnique({ where: { id: mineId }, select: { name: true } });
     const html = renderInvoiceHtml(invoice, mine?.name ?? "Mine Guard", invoice.site.name);
     const document = await prisma.document.create({
       data: {
@@ -93,6 +101,7 @@ router.post("/", requireRole("ADMIN", "SUPERVISOR", "EXECUTIVE"), async (req, re
         version: "1.0",
         status: "ACTIVE",
         description: `Auto-generated invoice document for ${invoice.clientName}`,
+        mineId,
         siteId: invoice.siteId,
         fileName: `Invoice-${invoice.invoiceNumber}.html`,
         fileMimeType: "text/html",
@@ -112,28 +121,28 @@ router.post("/", requireRole("ADMIN", "SUPERVISOR", "EXECUTIVE"), async (req, re
 });
 
 router.put("/:id", requireRole("ADMIN", "SUPERVISOR", "EXECUTIVE"), async (req, res) => {
+  const mineId = requireMineId(req, res);
+  if (!mineId) return;
   const parsed = invoiceSchema.partial().safeParse(req.body);
   if (!parsed.success) return res.status(400).json({ error: parsed.error.flatten() });
+  const existing = await prisma.invoice.findFirst({ where: { id: req.params.id, site: { mineId } } });
+  if (!existing) return res.status(404).json({ error: "Invoice not found" });
   const { lines, clientEmail, ...invoiceData } = parsed.data;
-  try {
-    const invoice = await prisma.invoice.update({
-      where: { id: req.params.id },
-      data: { ...invoiceData, clientEmail: clientEmail || undefined },
-      select: invoiceSelect,
-    });
-    res.json(invoice);
-  } catch {
-    res.status(404).json({ error: "Invoice not found" });
-  }
+  const invoice = await prisma.invoice.update({
+    where: { id: existing.id },
+    data: { ...invoiceData, clientEmail: clientEmail || undefined },
+    select: invoiceSelect,
+  });
+  res.json(invoice);
 });
 
 router.delete("/:id", requireRole("ADMIN", "EXECUTIVE"), async (req, res) => {
-  try {
-    await prisma.invoice.delete({ where: { id: req.params.id } });
-    res.status(204).send();
-  } catch {
-    res.status(404).json({ error: "Invoice not found" });
-  }
+  const mineId = requireMineId(req, res);
+  if (!mineId) return;
+  const existing = await prisma.invoice.findFirst({ where: { id: req.params.id, site: { mineId } } });
+  if (!existing) return res.status(404).json({ error: "Invoice not found" });
+  await prisma.invoice.delete({ where: { id: existing.id } });
+  res.status(204).send();
 });
 
 export default router;

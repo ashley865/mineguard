@@ -2,6 +2,7 @@ import { Router } from "express";
 import { z } from "zod";
 import { prisma } from "../prisma";
 import { requireAuth, requireRole } from "../middleware/auth";
+import { requireMineId } from "../lib/mineScope";
 
 const router = Router();
 
@@ -80,9 +81,11 @@ const enrollmentSelect = {
 router.use(requireAuth);
 
 router.get("/courses", async (req, res) => {
+  const mineId = requireMineId(req, res);
+  if (!mineId) return;
   const siteId = req.query.siteId as string | undefined;
   const courses = await prisma.trainingCourse.findMany({
-    where: siteId ? { OR: [{ siteId }, { siteId: null }] } : undefined,
+    where: { mineId, ...(siteId ? { OR: [{ siteId }, { siteId: null }] } : {}) },
     select: courseSelect,
     orderBy: { createdAt: "desc" },
   });
@@ -90,36 +93,48 @@ router.get("/courses", async (req, res) => {
 });
 
 router.post("/courses", requireRole("ADMIN", "SUPERVISOR", "EXECUTIVE"), async (req, res) => {
+  const mineId = requireMineId(req, res);
+  if (!mineId) return;
   const parsed = courseSchema.safeParse(req.body);
   if (!parsed.success) return res.status(400).json({ error: parsed.error.flatten() });
-  const course = await prisma.trainingCourse.create({ data: parsed.data, select: courseSelect });
+  if (parsed.data.siteId) {
+    const site = await prisma.site.findFirst({ where: { id: parsed.data.siteId, mineId } });
+    if (!site) return res.status(404).json({ error: "Site not found" });
+  }
+  const course = await prisma.trainingCourse.create({ data: { ...parsed.data, mineId }, select: courseSelect });
   res.status(201).json(course);
 });
 
 router.put("/courses/:id", requireRole("ADMIN", "SUPERVISOR", "EXECUTIVE"), async (req, res) => {
+  const mineId = requireMineId(req, res);
+  if (!mineId) return;
   const parsed = courseSchema.partial().safeParse(req.body);
   if (!parsed.success) return res.status(400).json({ error: parsed.error.flatten() });
-  try {
-    const course = await prisma.trainingCourse.update({ where: { id: req.params.id }, data: parsed.data, select: courseSelect });
-    res.json(course);
-  } catch {
-    res.status(404).json({ error: "Course not found" });
+  const existing = await prisma.trainingCourse.findFirst({ where: { id: req.params.id, mineId } });
+  if (!existing) return res.status(404).json({ error: "Course not found" });
+  if (parsed.data.siteId) {
+    const site = await prisma.site.findFirst({ where: { id: parsed.data.siteId, mineId } });
+    if (!site) return res.status(404).json({ error: "Site not found" });
   }
+  const course = await prisma.trainingCourse.update({ where: { id: existing.id }, data: parsed.data, select: courseSelect });
+  res.json(course);
 });
 
 router.delete("/courses/:id", requireRole("ADMIN", "EXECUTIVE"), async (req, res) => {
-  try {
-    await prisma.trainingCourse.delete({ where: { id: req.params.id } });
-    res.status(204).send();
-  } catch {
-    res.status(404).json({ error: "Course not found" });
-  }
+  const mineId = requireMineId(req, res);
+  if (!mineId) return;
+  const existing = await prisma.trainingCourse.findFirst({ where: { id: req.params.id, mineId } });
+  if (!existing) return res.status(404).json({ error: "Course not found" });
+  await prisma.trainingCourse.delete({ where: { id: existing.id } });
+  res.status(204).send();
 });
 
 router.get("/sessions", async (req, res) => {
+  const mineId = requireMineId(req, res);
+  if (!mineId) return;
   const courseId = req.query.courseId as string | undefined;
   const sessions = await prisma.trainingSession.findMany({
-    where: { courseId: courseId || undefined },
+    where: { course: { mineId }, courseId: courseId || undefined },
     select: sessionSelect,
     orderBy: { scheduledDate: "desc" },
   });
@@ -127,35 +142,43 @@ router.get("/sessions", async (req, res) => {
 });
 
 router.post("/sessions", requireRole("ADMIN", "SUPERVISOR", "EXECUTIVE"), async (req, res) => {
+  const mineId = requireMineId(req, res);
+  if (!mineId) return;
   const parsed = sessionSchema.safeParse(req.body);
   if (!parsed.success) return res.status(400).json({ error: parsed.error.flatten() });
+  const course = await prisma.trainingCourse.findFirst({ where: { id: parsed.data.courseId, mineId } });
+  if (!course) return res.status(404).json({ error: "Course not found" });
   const session = await prisma.trainingSession.create({ data: parsed.data, select: sessionSelect });
   res.status(201).json(session);
 });
 
 router.put("/sessions/:id", requireRole("ADMIN", "SUPERVISOR", "EXECUTIVE"), async (req, res) => {
+  const mineId = requireMineId(req, res);
+  if (!mineId) return;
   const parsed = sessionSchema.partial().safeParse(req.body);
   if (!parsed.success) return res.status(400).json({ error: parsed.error.flatten() });
-  try {
-    const session = await prisma.trainingSession.update({ where: { id: req.params.id }, data: parsed.data, select: sessionSelect });
-    res.json(session);
-  } catch {
-    res.status(404).json({ error: "Session not found" });
-  }
+  const existing = await prisma.trainingSession.findFirst({ where: { id: req.params.id, course: { mineId } } });
+  if (!existing) return res.status(404).json({ error: "Session not found" });
+  const session = await prisma.trainingSession.update({ where: { id: existing.id }, data: parsed.data, select: sessionSelect });
+  res.json(session);
 });
 
 router.delete("/sessions/:id", requireRole("ADMIN", "EXECUTIVE"), async (req, res) => {
-  try {
-    await prisma.trainingSession.delete({ where: { id: req.params.id } });
-    res.status(204).send();
-  } catch {
-    res.status(404).json({ error: "Session not found" });
-  }
+  const mineId = requireMineId(req, res);
+  if (!mineId) return;
+  const existing = await prisma.trainingSession.findFirst({ where: { id: req.params.id, course: { mineId } } });
+  if (!existing) return res.status(404).json({ error: "Session not found" });
+  await prisma.trainingSession.delete({ where: { id: existing.id } });
+  res.status(204).send();
 });
 
 router.get("/sessions/:id/enrollments", async (req, res) => {
+  const mineId = requireMineId(req, res);
+  if (!mineId) return;
+  const session = await prisma.trainingSession.findFirst({ where: { id: req.params.id, course: { mineId } } });
+  if (!session) return res.status(404).json({ error: "Session not found" });
   const enrollments = await prisma.trainingEnrollment.findMany({
-    where: { sessionId: req.params.id },
+    where: { sessionId: session.id },
     select: enrollmentSelect,
     orderBy: { createdAt: "asc" },
   });
@@ -163,10 +186,14 @@ router.get("/sessions/:id/enrollments", async (req, res) => {
 });
 
 router.post("/sessions/:id/enrollments", requireRole("ADMIN", "SUPERVISOR", "EXECUTIVE"), async (req, res) => {
+  const mineId = requireMineId(req, res);
+  if (!mineId) return;
   const parsed = enrollmentSchema.safeParse(req.body);
   if (!parsed.success) return res.status(400).json({ error: parsed.error.flatten() });
-  const session = await prisma.trainingSession.findUnique({ where: { id: req.params.id } });
+  const session = await prisma.trainingSession.findFirst({ where: { id: req.params.id, course: { mineId } } });
   if (!session) return res.status(404).json({ error: "Session not found" });
+  const worker = await prisma.worker.findFirst({ where: { id: parsed.data.workerId, site: { mineId } } });
+  if (!worker) return res.status(404).json({ error: "Worker not found" });
   try {
     const enrollment = await prisma.trainingEnrollment.create({
       data: { sessionId: session.id, workerId: parsed.data.workerId },
@@ -179,30 +206,30 @@ router.post("/sessions/:id/enrollments", requireRole("ADMIN", "SUPERVISOR", "EXE
 });
 
 router.put("/enrollments/:id", requireRole("ADMIN", "SUPERVISOR", "EXECUTIVE"), async (req, res) => {
+  const mineId = requireMineId(req, res);
+  if (!mineId) return;
   const parsed = enrollmentUpdateSchema.safeParse(req.body);
   if (!parsed.success) return res.status(400).json({ error: parsed.error.flatten() });
-  try {
-    const enrollment = await prisma.trainingEnrollment.update({
-      where: { id: req.params.id },
-      data: {
-        ...parsed.data,
-        completionDate: parsed.data.attendanceStatus === "COMPLETED" ? (parsed.data.completionDate ?? new Date()) : parsed.data.completionDate,
-      },
-      select: enrollmentSelect,
-    });
-    res.json(enrollment);
-  } catch {
-    res.status(404).json({ error: "Enrollment not found" });
-  }
+  const existing = await prisma.trainingEnrollment.findFirst({ where: { id: req.params.id, session: { course: { mineId } } } });
+  if (!existing) return res.status(404).json({ error: "Enrollment not found" });
+  const enrollment = await prisma.trainingEnrollment.update({
+    where: { id: existing.id },
+    data: {
+      ...parsed.data,
+      completionDate: parsed.data.attendanceStatus === "COMPLETED" ? (parsed.data.completionDate ?? new Date()) : parsed.data.completionDate,
+    },
+    select: enrollmentSelect,
+  });
+  res.json(enrollment);
 });
 
 router.delete("/enrollments/:id", requireRole("ADMIN", "SUPERVISOR", "EXECUTIVE"), async (req, res) => {
-  try {
-    await prisma.trainingEnrollment.delete({ where: { id: req.params.id } });
-    res.status(204).send();
-  } catch {
-    res.status(404).json({ error: "Enrollment not found" });
-  }
+  const mineId = requireMineId(req, res);
+  if (!mineId) return;
+  const existing = await prisma.trainingEnrollment.findFirst({ where: { id: req.params.id, session: { course: { mineId } } } });
+  if (!existing) return res.status(404).json({ error: "Enrollment not found" });
+  await prisma.trainingEnrollment.delete({ where: { id: existing.id } });
+  res.status(204).send();
 });
 
 export default router;

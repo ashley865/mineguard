@@ -4,6 +4,7 @@ import { z } from "zod";
 import { prisma } from "../prisma";
 import { requireAuth, requireRole } from "../middleware/auth";
 import { documentFileFilter } from "../lib/uploadFilters";
+import { requireMineId } from "../lib/mineScope";
 
 const router = Router();
 
@@ -66,11 +67,14 @@ const expenseSelect = {
 router.use(requireAuth);
 
 router.get("/", async (req, res) => {
+  const mineId = requireMineId(req, res);
+  if (!mineId) return;
   const siteId = req.query.siteId as string | undefined;
   const status = req.query.status as string | undefined;
   const category = req.query.category as string | undefined;
   const expenses = await prisma.expense.findMany({
     where: {
+      site: { mineId },
       siteId: siteId || undefined,
       status: (status as any) || undefined,
       category: (category as any) || undefined,
@@ -82,8 +86,15 @@ router.get("/", async (req, res) => {
 });
 
 router.post("/", requireRole("ADMIN", "SUPERVISOR", "EXECUTIVE"), upload.single("receipt"), async (req, res) => {
+  const mineId = requireMineId(req, res);
+  if (!mineId) return;
   const parsed = expenseSchema.safeParse(req.body);
   if (!parsed.success) return res.status(400).json({ error: parsed.error.flatten() });
+
+  const site = await prisma.site.findFirst({ where: { id: parsed.data.siteId, mineId } });
+  if (!site) return res.status(404).json({ error: "Site not found" });
+  const payee = await prisma.payee.findFirst({ where: { id: parsed.data.payeeId, mineId } });
+  if (!payee) return res.status(404).json({ error: "Payee not found" });
 
   let documentId: string | undefined;
   if (req.file) {
@@ -94,6 +105,7 @@ router.post("/", requireRole("ADMIN", "SUPERVISOR", "EXECUTIVE"), upload.single(
         version: "1.0",
         status: "ACTIVE",
         description: parsed.data.description,
+        mineId,
         siteId: parsed.data.siteId,
         fileName: req.file.originalname,
         fileMimeType: req.file.mimetype,
@@ -113,11 +125,21 @@ router.post("/", requireRole("ADMIN", "SUPERVISOR", "EXECUTIVE"), upload.single(
 });
 
 router.put("/:id", requireRole("ADMIN", "SUPERVISOR", "EXECUTIVE"), upload.single("receipt"), async (req, res) => {
+  const mineId = requireMineId(req, res);
+  if (!mineId) return;
   const parsed = expenseSchema.partial().safeParse(req.body);
   if (!parsed.success) return res.status(400).json({ error: parsed.error.flatten() });
 
-  const existing = await prisma.expense.findUnique({ where: { id: req.params.id } });
+  const existing = await prisma.expense.findFirst({ where: { id: req.params.id, site: { mineId } } });
   if (!existing) return res.status(404).json({ error: "Expense not found" });
+  if (parsed.data.siteId) {
+    const site = await prisma.site.findFirst({ where: { id: parsed.data.siteId, mineId } });
+    if (!site) return res.status(404).json({ error: "Site not found" });
+  }
+  if (parsed.data.payeeId) {
+    const payee = await prisma.payee.findFirst({ where: { id: parsed.data.payeeId, mineId } });
+    if (!payee) return res.status(404).json({ error: "Payee not found" });
+  }
 
   let documentId = existing.documentId ?? undefined;
   if (req.file) {
@@ -128,6 +150,7 @@ router.put("/:id", requireRole("ADMIN", "SUPERVISOR", "EXECUTIVE"), upload.singl
         version: "1.0",
         status: "ACTIVE",
         description: parsed.data.description ?? existing.description,
+        mineId,
         siteId: parsed.data.siteId ?? existing.siteId,
         fileName: req.file.originalname,
         fileMimeType: req.file.mimetype,
@@ -139,25 +162,21 @@ router.put("/:id", requireRole("ADMIN", "SUPERVISOR", "EXECUTIVE"), upload.singl
     documentId = document.id;
   }
 
-  try {
-    const expense = await prisma.expense.update({
-      where: { id: req.params.id },
-      data: { ...parsed.data, documentId },
-      select: expenseSelect,
-    });
-    res.json(expense);
-  } catch {
-    res.status(404).json({ error: "Expense not found" });
-  }
+  const expense = await prisma.expense.update({
+    where: { id: existing.id },
+    data: { ...parsed.data, documentId },
+    select: expenseSelect,
+  });
+  res.json(expense);
 });
 
 router.delete("/:id", requireRole("ADMIN", "EXECUTIVE"), async (req, res) => {
-  try {
-    await prisma.expense.delete({ where: { id: req.params.id } });
-    res.status(204).send();
-  } catch {
-    res.status(404).json({ error: "Expense not found" });
-  }
+  const mineId = requireMineId(req, res);
+  if (!mineId) return;
+  const existing = await prisma.expense.findFirst({ where: { id: req.params.id, site: { mineId } } });
+  if (!existing) return res.status(404).json({ error: "Expense not found" });
+  await prisma.expense.delete({ where: { id: existing.id } });
+  res.status(204).send();
 });
 
 export default router;

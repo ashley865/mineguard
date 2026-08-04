@@ -4,6 +4,7 @@ import { z } from "zod";
 import { prisma } from "../prisma";
 import { requireAuth, requireRole } from "../middleware/auth";
 import { documentFileFilter } from "../lib/uploadFilters";
+import { requireMineId } from "../lib/mineScope";
 
 const router = Router();
 
@@ -68,10 +69,12 @@ const payslipSelect = {
 router.use(requireAuth);
 
 router.get("/leave", async (req, res) => {
+  const mineId = requireMineId(req, res);
+  if (!mineId) return;
   const workerId = req.query.workerId as string | undefined;
   const status = req.query.status as string | undefined;
   const requests = await prisma.leaveRequest.findMany({
-    where: { workerId: workerId || undefined, status: (status as any) || undefined },
+    where: { worker: { site: { mineId } }, workerId: workerId || undefined, status: (status as any) || undefined },
     select: leaveSelect,
     orderBy: { createdAt: "desc" },
   });
@@ -79,40 +82,46 @@ router.get("/leave", async (req, res) => {
 });
 
 router.post("/leave", requireRole("ADMIN", "SUPERVISOR", "EXECUTIVE"), async (req, res) => {
+  const mineId = requireMineId(req, res);
+  if (!mineId) return;
   const parsed = leaveSchema.safeParse(req.body);
   if (!parsed.success) return res.status(400).json({ error: parsed.error.flatten() });
+  const worker = await prisma.worker.findFirst({ where: { id: parsed.data.workerId, site: { mineId } } });
+  if (!worker) return res.status(404).json({ error: "Worker not found" });
   const request = await prisma.leaveRequest.create({ data: parsed.data, select: leaveSelect });
   res.status(201).json(request);
 });
 
 router.post("/leave/:id/review", requireRole("ADMIN", "SUPERVISOR", "EXECUTIVE"), async (req, res) => {
+  const mineId = requireMineId(req, res);
+  if (!mineId) return;
   const parsed = leaveReviewSchema.safeParse(req.body);
   if (!parsed.success) return res.status(400).json({ error: parsed.error.flatten() });
-  try {
-    const request = await prisma.leaveRequest.update({
-      where: { id: req.params.id },
-      data: { status: parsed.data.decision, approvedById: req.auth!.userId, approvedAt: new Date() },
-      select: leaveSelect,
-    });
-    res.json(request);
-  } catch {
-    res.status(404).json({ error: "Leave request not found" });
-  }
+  const existing = await prisma.leaveRequest.findFirst({ where: { id: req.params.id, worker: { site: { mineId } } } });
+  if (!existing) return res.status(404).json({ error: "Leave request not found" });
+  const request = await prisma.leaveRequest.update({
+    where: { id: existing.id },
+    data: { status: parsed.data.decision, approvedById: req.auth!.userId, approvedAt: new Date() },
+    select: leaveSelect,
+  });
+  res.json(request);
 });
 
 router.delete("/leave/:id", requireRole("ADMIN", "EXECUTIVE"), async (req, res) => {
-  try {
-    await prisma.leaveRequest.delete({ where: { id: req.params.id } });
-    res.status(204).send();
-  } catch {
-    res.status(404).json({ error: "Leave request not found" });
-  }
+  const mineId = requireMineId(req, res);
+  if (!mineId) return;
+  const existing = await prisma.leaveRequest.findFirst({ where: { id: req.params.id, worker: { site: { mineId } } } });
+  if (!existing) return res.status(404).json({ error: "Leave request not found" });
+  await prisma.leaveRequest.delete({ where: { id: existing.id } });
+  res.status(204).send();
 });
 
 router.get("/payslips", async (req, res) => {
+  const mineId = requireMineId(req, res);
+  if (!mineId) return;
   const workerId = req.query.workerId as string | undefined;
   const payslips = await prisma.payslip.findMany({
-    where: { workerId: workerId || undefined },
+    where: { worker: { site: { mineId } }, workerId: workerId || undefined },
     select: payslipSelect,
     orderBy: { issuedAt: "desc" },
   });
@@ -120,8 +129,12 @@ router.get("/payslips", async (req, res) => {
 });
 
 router.post("/payslips", requireRole("ADMIN", "SUPERVISOR", "EXECUTIVE"), upload.single("file"), async (req, res) => {
+  const mineId = requireMineId(req, res);
+  if (!mineId) return;
   const parsed = payslipMetaSchema.safeParse(req.body);
   if (!parsed.success) return res.status(400).json({ error: parsed.error.flatten() });
+  const worker = await prisma.worker.findFirst({ where: { id: parsed.data.workerId, site: { mineId } } });
+  if (!worker) return res.status(404).json({ error: "Worker not found" });
   const payslip = await prisma.payslip.create({
     data: {
       ...parsed.data,
@@ -137,7 +150,9 @@ router.post("/payslips", requireRole("ADMIN", "SUPERVISOR", "EXECUTIVE"), upload
 });
 
 router.get("/payslips/:id/download", async (req, res) => {
-  const payslip = await prisma.payslip.findUnique({ where: { id: req.params.id } });
+  const mineId = requireMineId(req, res);
+  if (!mineId) return;
+  const payslip = await prisma.payslip.findFirst({ where: { id: req.params.id, worker: { site: { mineId } } } });
   if (!payslip || !payslip.fileData) return res.status(404).json({ error: "Payslip file not found" });
   res.setHeader("Content-Type", payslip.fileMimeType || "application/octet-stream");
   res.setHeader("Content-Disposition", `attachment; filename="${encodeURIComponent(payslip.fileName || "payslip")}"`);
@@ -145,12 +160,12 @@ router.get("/payslips/:id/download", async (req, res) => {
 });
 
 router.delete("/payslips/:id", requireRole("ADMIN", "EXECUTIVE"), async (req, res) => {
-  try {
-    await prisma.payslip.delete({ where: { id: req.params.id } });
-    res.status(204).send();
-  } catch {
-    res.status(404).json({ error: "Payslip not found" });
-  }
+  const mineId = requireMineId(req, res);
+  if (!mineId) return;
+  const existing = await prisma.payslip.findFirst({ where: { id: req.params.id, worker: { site: { mineId } } } });
+  if (!existing) return res.status(404).json({ error: "Payslip not found" });
+  await prisma.payslip.delete({ where: { id: existing.id } });
+  res.status(204).send();
 });
 
 export default router;

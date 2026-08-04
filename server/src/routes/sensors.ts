@@ -3,6 +3,7 @@ import { z } from "zod";
 import { prisma } from "../prisma";
 import { requireAuth, requireRole } from "../middleware/auth";
 import { evaluateReading } from "../services/alertEngine";
+import { requireMineId } from "../lib/mineScope";
 
 const router = Router();
 
@@ -31,9 +32,11 @@ const readingSchema = z.object({
 router.use(requireAuth);
 
 router.get("/", async (req, res) => {
+  const mineId = requireMineId(req, res);
+  if (!mineId) return;
   const zoneId = req.query.zoneId as string | undefined;
   const sensors = await prisma.sensor.findMany({
-    where: zoneId ? { zoneId } : undefined,
+    where: { zone: { site: { mineId } }, zoneId: zoneId || undefined },
     include: {
       zone: { select: { id: true, name: true, siteId: true } },
       readings: { orderBy: { recordedAt: "desc" }, take: 1 },
@@ -44,15 +47,21 @@ router.get("/", async (req, res) => {
 });
 
 router.get("/:id", async (req, res) => {
-  const sensor = await prisma.sensor.findUnique({ where: { id: req.params.id } });
+  const mineId = requireMineId(req, res);
+  if (!mineId) return;
+  const sensor = await prisma.sensor.findFirst({ where: { id: req.params.id, zone: { site: { mineId } } } });
   if (!sensor) return res.status(404).json({ error: "Sensor not found" });
   res.json(sensor);
 });
 
 router.get("/:id/readings", async (req, res) => {
+  const mineId = requireMineId(req, res);
+  if (!mineId) return;
+  const sensor = await prisma.sensor.findFirst({ where: { id: req.params.id, zone: { site: { mineId } } } });
+  if (!sensor) return res.status(404).json({ error: "Sensor not found" });
   const limit = Math.min(Number(req.query.limit) || 50, 500);
   const readings = await prisma.sensorReading.findMany({
-    where: { sensorId: req.params.id },
+    where: { sensorId: sensor.id },
     orderBy: { recordedAt: "desc" },
     take: limit,
   });
@@ -60,10 +69,12 @@ router.get("/:id/readings", async (req, res) => {
 });
 
 router.post("/:id/readings", async (req, res) => {
+  const mineId = requireMineId(req, res);
+  if (!mineId) return;
   const parsed = readingSchema.safeParse(req.body);
   if (!parsed.success) return res.status(400).json({ error: parsed.error.flatten() });
 
-  const sensor = await prisma.sensor.findUnique({ where: { id: req.params.id } });
+  const sensor = await prisma.sensor.findFirst({ where: { id: req.params.id, zone: { site: { mineId } } } });
   if (!sensor) return res.status(404).json({ error: "Sensor not found" });
 
   const reading = await prisma.sensorReading.create({
@@ -80,30 +91,38 @@ router.post("/:id/readings", async (req, res) => {
 });
 
 router.post("/", requireRole("ADMIN", "SUPERVISOR", "EXECUTIVE"), async (req, res) => {
+  const mineId = requireMineId(req, res);
+  if (!mineId) return;
   const parsed = sensorSchema.safeParse(req.body);
   if (!parsed.success) return res.status(400).json({ error: parsed.error.flatten() });
+  const zone = await prisma.zone.findFirst({ where: { id: parsed.data.zoneId, site: { mineId } } });
+  if (!zone) return res.status(404).json({ error: "Zone not found" });
   const sensor = await prisma.sensor.create({ data: parsed.data });
   res.status(201).json(sensor);
 });
 
 router.put("/:id", requireRole("ADMIN", "SUPERVISOR", "EXECUTIVE"), async (req, res) => {
+  const mineId = requireMineId(req, res);
+  if (!mineId) return;
   const parsed = sensorSchema.partial().safeParse(req.body);
   if (!parsed.success) return res.status(400).json({ error: parsed.error.flatten() });
-  try {
-    const sensor = await prisma.sensor.update({ where: { id: req.params.id }, data: parsed.data });
-    res.json(sensor);
-  } catch {
-    res.status(404).json({ error: "Sensor not found" });
+  const existing = await prisma.sensor.findFirst({ where: { id: req.params.id, zone: { site: { mineId } } } });
+  if (!existing) return res.status(404).json({ error: "Sensor not found" });
+  if (parsed.data.zoneId) {
+    const zone = await prisma.zone.findFirst({ where: { id: parsed.data.zoneId, site: { mineId } } });
+    if (!zone) return res.status(404).json({ error: "Zone not found" });
   }
+  const sensor = await prisma.sensor.update({ where: { id: existing.id }, data: parsed.data });
+  res.json(sensor);
 });
 
 router.delete("/:id", requireRole("ADMIN", "EXECUTIVE"), async (req, res) => {
-  try {
-    await prisma.sensor.delete({ where: { id: req.params.id } });
-    res.status(204).send();
-  } catch {
-    res.status(404).json({ error: "Sensor not found" });
-  }
+  const mineId = requireMineId(req, res);
+  if (!mineId) return;
+  const existing = await prisma.sensor.findFirst({ where: { id: req.params.id, zone: { site: { mineId } } } });
+  if (!existing) return res.status(404).json({ error: "Sensor not found" });
+  await prisma.sensor.delete({ where: { id: existing.id } });
+  res.status(204).send();
 });
 
 export default router;
