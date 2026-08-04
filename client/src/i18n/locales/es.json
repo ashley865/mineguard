@@ -1290,9 +1290,10 @@
     "totalEarnings": "Ingresos Totales",
     "totalExpenses": "Gastos Totales",
     "netMargin": "Margen Neto",
-    "earningsVsExpenses": "Ingresos vs Gastos vs Toneladas Extraídas",
+    "earningsVsExpenses": "Ingresos vs Gastos",
     "earnings": "Ingresos",
-    "expenses": "Gastos"
+    "expenses": "Gastos",
+    "tonnesByMineral": "Toneladas Extraídas por Mineral"
   },
   "maintenance": {
     "nav": "Programación de Mantenimiento",

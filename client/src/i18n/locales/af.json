@@ -1290,9 +1290,10 @@
     "totalEarnings": "Totale Inkomste",
     "totalExpenses": "Totale Uitgawes",
     "netMargin": "Netto Marge",
-    "earningsVsExpenses": "Inkomste vs Uitgawes vs Ton Ontgin",
+    "earningsVsExpenses": "Inkomste vs Uitgawes",
     "earnings": "Inkomste",
-    "expenses": "Uitgawes"
+    "expenses": "Uitgawes",
+    "tonnesByMineral": "Ton Ontgin volgens Mineraal"
   },
   "maintenance": {
     "nav": "Onderhoudskedulering",

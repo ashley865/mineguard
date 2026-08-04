@@ -1290,9 +1290,10 @@
     "totalEarnings": "Gesamteinnahmen",
     "totalExpenses": "Gesamtausgaben",
     "netMargin": "Nettomarge",
-    "earningsVsExpenses": "Einnahmen vs. Ausgaben vs. Geförderte Tonnen",
+    "earningsVsExpenses": "Einnahmen vs. Ausgaben",
     "earnings": "Einnahmen",
-    "expenses": "Ausgaben"
+    "expenses": "Ausgaben",
+    "tonnesByMineral": "Geförderte Tonnen nach Mineral"
   },
   "maintenance": {
     "nav": "Wartungsplanung",

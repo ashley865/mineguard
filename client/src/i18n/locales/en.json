@@ -1290,7 +1290,8 @@
     "totalEarnings": "Total Earnings",
     "totalExpenses": "Total Expenses",
     "netMargin": "Net Margin",
-    "earningsVsExpenses": "Earnings vs Expenses vs Tonnes Mined",
+    "earningsVsExpenses": "Earnings vs Expenses",
+    "tonnesByMineral": "Tonnes Mined by Mineral",
     "earnings": "Earnings",
     "expenses": "Expenses"
   },

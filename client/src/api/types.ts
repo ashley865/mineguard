@@ -1389,7 +1389,8 @@ export interface Expense {
 }
 
 export interface ProductionFinancialSummary {
-  months: { month: string; tonnesMined: number; earnings: number; expenses: number }[];
+  months: { month: string; earnings: number; expenses: number; tonnesByMineral: Record<string, number> }[];
+  minerals: string[];
   totals: { totalTonnes: number; totalEarnings: number; totalExpenses: number; netMargin: number };
   expensesByCategory: { category: ExpenseCategory; amount: number }[];
 }

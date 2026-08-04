@@ -105,7 +105,7 @@ router.get("/financial-summary", async (req, res) => {
   const [records, invoices, expenses] = await Promise.all([
     prisma.productionRecord.findMany({
       where: { site: { mineId }, siteId: siteId || undefined, shiftDate: { gte: start } },
-      select: { shiftDate: true, tonnesMined: true },
+      select: { shiftDate: true, tonnesMined: true, mineralType: true },
     }),
     prisma.invoice.findMany({
       where: { site: { mineId }, siteId: siteId || undefined, status: "PAID", issueDate: { gte: start } },
@@ -124,13 +124,21 @@ router.get("/financial-summary", async (req, res) => {
     monthKeys.push(d.toISOString().slice(0, 7));
   }
 
-  const byMonth: Record<string, { tonnesMined: number; earnings: number; expenses: number }> = {};
-  for (const key of monthKeys) byMonth[key] = { tonnesMined: 0, earnings: 0, expenses: 0 };
+  const byMonth: Record<string, { earnings: number; expenses: number; tonnesByMineral: Record<string, number> }> = {};
+  for (const key of monthKeys) byMonth[key] = { earnings: 0, expenses: 0, tonnesByMineral: {} };
 
+  const mineralTotals: Record<string, number> = {};
   for (const r of records) {
     const key = r.shiftDate.toISOString().slice(0, 7);
-    if (byMonth[key]) byMonth[key].tonnesMined += r.tonnesMined;
+    mineralTotals[r.mineralType] = (mineralTotals[r.mineralType] ?? 0) + r.tonnesMined;
+    if (byMonth[key]) {
+      byMonth[key].tonnesByMineral[r.mineralType] = (byMonth[key].tonnesByMineral[r.mineralType] ?? 0) + r.tonnesMined;
+    }
   }
+  const minerals = Object.entries(mineralTotals)
+    .sort((a, b) => b[1] - a[1])
+    .map(([mineralType]) => mineralType);
+
   for (const inv of invoices) {
     const key = inv.issueDate.toISOString().slice(0, 7);
     if (!byMonth[key]) continue;
@@ -152,7 +160,8 @@ router.get("/financial-summary", async (req, res) => {
   const totalExpenses = Object.values(byMonth).reduce((sum, m) => sum + m.expenses, 0);
 
   res.json({
-    months: monthKeys.map((key) => ({ month: key, ...byMonth[key] })),
+    months: monthKeys.map((key) => ({ month: key, earnings: byMonth[key].earnings, expenses: byMonth[key].expenses, tonnesByMineral: byMonth[key].tonnesByMineral })),
+    minerals,
     totals: {
       totalTonnes,
       totalEarnings,

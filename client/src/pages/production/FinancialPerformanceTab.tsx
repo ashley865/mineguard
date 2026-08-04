@@ -1,9 +1,8 @@
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
-  ComposedChart,
+  BarChart,
   Bar,
-  Line,
   XAxis,
   YAxis,
   Tooltip,
@@ -20,6 +19,7 @@ import { cardClass, selectClass } from "../../components/ui";
 const CHART_TOOLTIP_STYLE = { background: "#fafafa", border: "1px solid #e5e5e5", fontSize: 11 };
 const CHART_TICK_STYLE = { fontSize: 10, fill: "#52525b" };
 const CATEGORY_COLORS = ["#c48a1f", "#8a9ab5", "#16a34a", "#e13b2e", "#f3665b", "#5b7092", "#d9a441", "#3f5a7d", "#7a8a5a", "#9a6b3f", "#6b6b6b"];
+const MINERAL_COLORS = ["#c48a1f", "#8a9ab5", "#16a34a", "#e13b2e", "#5b7092", "#d9a441", "#3f5a7d", "#7a8a5a"];
 
 function StatCard({ label, value }: { label: string; value: string }) {
   return (
@@ -79,21 +79,42 @@ export default function FinancialPerformanceTab({ sites }: { sites: Site[] }) {
             <StatCard label={t("production.totalTonnes")} value={summary.totals.totalTonnes.toLocaleString()} />
           </div>
 
-          <div className={`${cardClass} p-4`}>
-            <h3 className="text-sm font-semibold mb-3">{t("production.earningsVsExpenses")}</h3>
-            <div className="h-64">
-              <ResponsiveContainer width="100%" height="100%">
-                <ComposedChart data={summary.months}>
-                  <XAxis dataKey="month" tick={CHART_TICK_STYLE} tickFormatter={(m: string) => m.slice(2)} />
-                  <YAxis yAxisId="money" tick={CHART_TICK_STYLE} />
-                  <YAxis yAxisId="tonnes" orientation="right" tick={CHART_TICK_STYLE} />
-                  <Tooltip contentStyle={CHART_TOOLTIP_STYLE} />
-                  <Legend wrapperStyle={{ fontSize: 11 }} />
-                  <Bar yAxisId="money" dataKey="earnings" name={t("production.earnings")} fill="#16a34a" radius={[3, 3, 0, 0]} />
-                  <Bar yAxisId="money" dataKey="expenses" name={t("production.expenses")} fill="#e13b2e" radius={[3, 3, 0, 0]} />
-                  <Line yAxisId="tonnes" type="monotone" dataKey="tonnesMined" name={t("production.tonnesMined")} stroke="#c48a1f" strokeWidth={2} dot={false} />
-                </ComposedChart>
-              </ResponsiveContainer>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
+            <div className={`${cardClass} p-4`}>
+              <h3 className="text-sm font-semibold mb-3">{t("production.earningsVsExpenses")}</h3>
+              <div className="h-64">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={summary.months}>
+                    <XAxis dataKey="month" tick={CHART_TICK_STYLE} tickFormatter={(m: string) => m.slice(2)} />
+                    <YAxis tick={CHART_TICK_STYLE} />
+                    <Tooltip contentStyle={CHART_TOOLTIP_STYLE} />
+                    <Legend wrapperStyle={{ fontSize: 11 }} />
+                    <Bar dataKey="earnings" name={t("production.earnings")} fill="#16a34a" radius={[3, 3, 0, 0]} />
+                    <Bar dataKey="expenses" name={t("production.expenses")} fill="#e13b2e" radius={[3, 3, 0, 0]} />
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+            </div>
+
+            <div className={`${cardClass} p-4`}>
+              <h3 className="text-sm font-semibold mb-3">{t("production.tonnesByMineral")}</h3>
+              {summary.minerals.length === 0 ? (
+                <div className="text-mine-400 text-xs h-64 flex items-center justify-center">{t("production.noneYet")}</div>
+              ) : (
+                <div className="h-64">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart data={summary.months.map((m) => ({ month: m.month, ...m.tonnesByMineral }))}>
+                      <XAxis dataKey="month" tick={CHART_TICK_STYLE} tickFormatter={(m: string) => m.slice(2)} />
+                      <YAxis tick={CHART_TICK_STYLE} />
+                      <Tooltip contentStyle={CHART_TOOLTIP_STYLE} />
+                      <Legend wrapperStyle={{ fontSize: 11 }} />
+                      {summary.minerals.map((mineral, i) => (
+                        <Bar key={mineral} dataKey={mineral} name={mineral} stackId="tonnes" fill={MINERAL_COLORS[i % MINERAL_COLORS.length]} radius={i === summary.minerals.length - 1 ? [3, 3, 0, 0] : undefined} />
+                      ))}
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
+              )}
             </div>
           </div>
 
