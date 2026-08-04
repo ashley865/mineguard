@@ -64,14 +64,23 @@ export interface ExecutiveInvite {
 
 export interface ReviewNotification {
   id: string;
-  kind: "alert" | "incident";
+  kind: "alert" | "incident" | "certification" | "contract";
   title: string;
   severity: AlertSeverity;
-  reviewStatus: ExecReviewStatus;
+  reviewStatus: ExecReviewStatus | "OVERDUE" | "SCHEDULED";
   reviewNote?: string | null;
   reviewedAt: string;
   reviewedBy?: { id: string; name: string } | null;
   site?: { id: string; name: string } | null;
+}
+
+export interface HrWorkforceSnapshot {
+  totalWorkers: number;
+  onShiftWorkers: number;
+  onShiftPct: number;
+  byCategory: { category: StaffCategory; total: number; onShift: number; onShiftPct: number }[];
+  pendingLeaveRequests: number;
+  onLeaveToday: number;
 }
 
 export type SiteStatus = "OPERATIONAL" | "RESTRICTED" | "SHUT_DOWN";

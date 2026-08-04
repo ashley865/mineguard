@@ -1,11 +1,11 @@
-import { FormEvent, useEffect, useState } from "react";
+import { FormEvent, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { api } from "../api/client";
 import { useAuth } from "../context/AuthContext";
-import { useSocket } from "../context/SocketContext";
+import { useEvacuation } from "../context/EvacuationContext";
 import { EmergencyEvacuation, Site } from "../api/types";
 import Modal from "./Modal";
-import { buttonDanger, buttonPrimary, buttonSecondary, inputClass, labelClass, selectClass } from "./ui";
+import { buttonDanger, buttonSecondary, inputClass, labelClass, selectClass } from "./ui";
 
 function TriggerForm({ sites, activeSiteIds, onSubmit, onCancel }: {
   sites: Site[];
@@ -78,8 +78,9 @@ function TriggerForm({ sites, activeSiteIds, onSubmit, onCancel }: {
   );
 }
 
-function CancelPanel({ active, onCancel, onClose }: {
+function DetailsPanel({ active, canCancel, onCancel, onClose }: {
   active: EmergencyEvacuation[];
+  canCancel: boolean;
   onCancel: (id: string) => Promise<void>;
   onClose: () => void;
 }) {
@@ -97,17 +98,27 @@ function CancelPanel({ active, onCancel, onClose }: {
   }
 
   return (
-    <Modal title={t("emergency.deactivateEvacuationTitle")} onClose={onClose}>
+    <Modal title={t(canCancel ? "emergency.deactivateEvacuationTitle" : "emergency.evacuationDetailsTitle")} onClose={onClose}>
       <div className="space-y-3">
         {active.map((e) => (
-          <div key={e.id} className="border border-mine-800 rounded-lg p-3 flex items-center justify-between gap-3">
-            <div className="min-w-0">
-              <div className="text-sm font-semibold truncate">{e.site?.name}</div>
-              <div className="text-xs text-mine-400 truncate">{e.assemblyPoint}</div>
+          <div key={e.id} className="border border-mine-800 rounded-lg p-3 space-y-2">
+            <div className="flex items-start justify-between gap-3">
+              <div className="min-w-0">
+                <div className="text-sm font-semibold truncate">{e.site?.name}</div>
+                <div className="text-xs text-mine-400 truncate">{e.assemblyPoint}</div>
+              </div>
+              {canCancel && (
+                <button className={`${buttonDanger} text-xs px-3 py-1.5 shrink-0`} disabled={cancellingId === e.id} onClick={() => handleCancel(e.id)}>
+                  {cancellingId === e.id ? t("common.saving") : t("emergency.cancelEvacuation")}
+                </button>
+              )}
             </div>
-            <button className={buttonDanger} disabled={cancellingId === e.id} onClick={() => handleCancel(e.id)}>
-              {cancellingId === e.id ? t("common.saving") : t("emergency.cancelEvacuation")}
-            </button>
+            {e.message && <div className="text-xs text-mine-300">{e.message}</div>}
+            <div className="text-[10px] text-mine-500">
+              {t("emergency.triggeredBy", { name: e.triggeredBy?.name ?? t("common.unknown") })}
+              {" · "}
+              {new Date(e.triggeredAt).toLocaleString()}
+            </div>
           </div>
         ))}
       </div>
@@ -118,37 +129,11 @@ function CancelPanel({ active, onCancel, onClose }: {
 export default function EvacuationSystem() {
   const { t } = useTranslation();
   const { user } = useAuth();
-  const socket = useSocket();
+  const { active, trigger, cancel } = useEvacuation();
   const canCancel = user?.role === "ADMIN" || user?.role === "SUPERVISOR" || user?.role === "EXECUTIVE";
-  const [active, setActive] = useState<EmergencyEvacuation[]>([]);
   const [triggerModal, setTriggerModal] = useState(false);
-  const [cancelPanel, setCancelPanel] = useState(false);
+  const [detailsPanel, setDetailsPanel] = useState(false);
   const [sites, setSites] = useState<Site[]>([]);
-
-  async function loadActive() {
-    try {
-      const res = await api.get<EmergencyEvacuation[]>("/emergency/evacuations/active");
-      setActive(res.data);
-    } catch {
-      // Not a member of a mine yet, or not authenticated — nothing to show.
-    }
-  }
-
-  useEffect(() => {
-    loadActive();
-  }, []);
-
-  useEffect(() => {
-    if (!socket) return;
-    const onNew = (evacuation: EmergencyEvacuation) => setActive((prev) => [evacuation, ...prev]);
-    const onCancelled = ({ id }: { id: string }) => setActive((prev) => prev.filter((e) => e.id !== id));
-    socket.on("emergency:evacuation", onNew);
-    socket.on("emergency:evacuation-cancelled", onCancelled);
-    return () => {
-      socket.off("emergency:evacuation", onNew);
-      socket.off("emergency:evacuation-cancelled", onCancelled);
-    };
-  }, [socket]);
 
   async function openTrigger() {
     if (sites.length === 0) {
@@ -158,13 +143,9 @@ export default function EvacuationSystem() {
     setTriggerModal(true);
   }
 
-  async function trigger(data: { siteId: string; assemblyPoint: string; message?: string }) {
-    await api.post("/emergency/evacuations", data);
+  async function handleTrigger(data: { siteId: string; assemblyPoint: string; message?: string }) {
+    await trigger(data);
     setTriggerModal(false);
-  }
-
-  async function cancelEvacuation(id: string) {
-    await api.post(`/emergency/evacuations/${id}/cancel`);
   }
 
   const activeSiteIds = new Set(active.map((e) => e.siteId));
@@ -178,65 +159,25 @@ export default function EvacuationSystem() {
         >
           {t("emergency.evacuateButton")}
         </button>
-        {active.length > 0 && canCancel && (
+        {active.length > 0 && (
           <button
-            onClick={() => setCancelPanel(true)}
-            className="px-3 py-1.5 rounded-lg bg-white text-danger-600 border-2 border-danger-500 active:scale-[0.98] text-xs font-bold uppercase tracking-wide animate-evac-blink-subtle transition-all"
+            type="button"
+            onClick={() => setDetailsPanel(true)}
+            className="px-3 py-1.5 rounded-lg bg-white hover:bg-danger-50 text-danger-700 border border-white active:scale-[0.98] text-xs font-bold uppercase tracking-wide shadow-md transition-all"
           >
-            {t("emergency.deactivateEvacuation")}
+            {t(canCancel ? "emergency.deactivateEvacuation" : "emergency.viewEvacuationDetails")}
           </button>
         )}
       </div>
 
       {triggerModal && (
         <Modal title={t("emergency.triggerEvacuationTitle")} onClose={() => setTriggerModal(false)}>
-          <TriggerForm sites={sites} activeSiteIds={activeSiteIds} onSubmit={trigger} onCancel={() => setTriggerModal(false)} />
+          <TriggerForm sites={sites} activeSiteIds={activeSiteIds} onSubmit={handleTrigger} onCancel={() => setTriggerModal(false)} />
         </Modal>
       )}
 
-      {cancelPanel && (
-        <CancelPanel active={active} onCancel={cancelEvacuation} onClose={() => setCancelPanel(false)} />
-      )}
-
-      {active.length > 0 && (
-        <div className="fixed inset-0 z-[100] animate-evac-blink animate-evac-border flex items-center justify-center p-4 overflow-y-auto">
-          <div className="max-w-lg w-full text-white text-center space-y-4 py-8">
-            <div className="text-5xl">🚨</div>
-            <h1 className="text-2xl sm:text-3xl font-extrabold uppercase tracking-wide">
-              {t("emergency.evacuationActiveTitle")}
-            </h1>
-            {active.map((e) => (
-              <div key={e.id} className="bg-black/25 rounded-xl p-4 space-y-2 text-left">
-                <div className="text-sm font-semibold uppercase tracking-wide">{e.site?.name}</div>
-                <div>
-                  <div className="text-xs uppercase text-white/70">{t("emergency.assemblyPoint")}</div>
-                  <div className="text-lg font-bold">{e.assemblyPoint}</div>
-                </div>
-                {e.message && (
-                  <div>
-                    <div className="text-xs uppercase text-white/70">{t("emergency.evacuationMessage")}</div>
-                    <div className="text-sm">{e.message}</div>
-                  </div>
-                )}
-                <div className="text-xs text-white/70">
-                  {t("emergency.triggeredBy", { name: e.triggeredBy?.name ?? t("common.unknown") })}
-                  {" · "}
-                  {new Date(e.triggeredAt).toLocaleTimeString()}
-                </div>
-                {canCancel && (
-                  <div className="flex justify-end pt-1">
-                    <button
-                      className={`${buttonPrimary} !bg-white !text-danger-600 hover:!bg-white/90`}
-                      onClick={() => cancelEvacuation(e.id)}
-                    >
-                      {t("emergency.cancelEvacuation")}
-                    </button>
-                  </div>
-                )}
-              </div>
-            ))}
-          </div>
-        </div>
+      {detailsPanel && (
+        <DetailsPanel active={active} canCancel={canCancel} onCancel={cancel} onClose={() => setDetailsPanel(false)} />
       )}
     </>
   );

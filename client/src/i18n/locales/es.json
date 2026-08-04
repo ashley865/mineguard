@@ -185,7 +185,11 @@
       "lowCompliance": "El puntaje general de cumplimiento es del {{pct}}% — revisa el desglose a continuación para detectar áreas débiles.",
       "trainingExpiring": "{{count}} registro(s) de capacitación vencen pronto.",
       "allClear": "No se detectaron problemas urgentes. Todo parece estar en orden."
-    }
+    },
+    "hrWorkforceTitle": "Panorama de Personal (RR. HH.)",
+    "spotsToFillToday": "Puestos por Cubrir Hoy",
+    "pendingLeaveRequests": "Solicitudes de Permiso Pendientes",
+    "onShiftByCategory": "% en Turno por Categoría de Personal"
   },
   "sites": {
     "title": "Sitios y Zonas",
@@ -869,7 +873,10 @@
     "title": "Notificaciones",
     "empty": "Aún no hay aprobaciones ni rechazos.",
     "alertLabel": "Alerta",
-    "incidentLabel": "Incidente"
+    "incidentLabel": "Incidente",
+    "certificationLabel": "Certificación",
+    "contractLabel": "Contrato",
+    "dueOn": "Vence el {{date}}"
   },
   "contractors": {
     "nav": "Contratistas",
@@ -1503,7 +1510,7 @@
     "evacuateButton": "Evacuar",
     "triggerEvacuationTitle": "Activar Evacuación de Emergencia",
     "triggerEvacuation": "Activar Evacuación",
-    "evacuationTriggerWarning": "Esto alertará inmediatamente a todas las pantallas conectadas de esta mina con una advertencia de emergencia a pantalla completa. Úselo solo para una evacuación real.",
+    "evacuationTriggerWarning": "Esto alertará inmediatamente a todas las pantallas conectadas en esta mina con una barra de advertencia roja parpadeante en la parte superior. Úselo solo para una evacuación real.",
     "evacuationTriggerError": "No se pudo activar la evacuación",
     "assemblyPoint": "Punto de reunión / encuentro",
     "assemblyPointPlaceholder": "ej. Estacionamiento de la puerta principal, Punto de encuentro B…",
@@ -1516,7 +1523,9 @@
     "deactivateEvacuation": "Desactivar Evacuación",
     "deactivateEvacuationTitle": "Desactivar Evacuaciones Activas",
     "sitesAlreadyEvacuatingHint": "Los sitios con una evacuación activa se ocultan de esta lista. Desactívala primero para activar una nueva para ese sitio.",
-    "allSitesEvacuating": "Todos los sitios ya tienen una evacuación activa."
+    "allSitesEvacuating": "Todos los sitios ya tienen una evacuación activa.",
+    "viewEvacuationDetails": "Ver Detalles de la Evacuación",
+    "evacuationDetailsTitle": "Evacuaciones Activas"
   },
   "roster": {
     "nav": "Programación de Turnos",

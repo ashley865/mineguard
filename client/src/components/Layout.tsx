@@ -6,6 +6,7 @@ import { useAssignedSiteIds } from "../hooks/useAssignedSiteIds";
 import { api, API_URL } from "../api/client";
 import { Mine } from "../api/types";
 import { isModuleAllowed } from "../lib/executiveAccess";
+import { useEvacuation } from "../context/EvacuationContext";
 import LanguageSwitcher from "./LanguageSwitcher";
 import NotificationBell from "./NotificationBell";
 import MessagesBell from "./MessagesBell";
@@ -15,8 +16,10 @@ export default function Layout() {
   const { t } = useTranslation();
   const { user, logout } = useAuth();
   const { siteIds: assignedSiteIds } = useAssignedSiteIds();
+  const { active: activeEvacuations } = useEvacuation();
   const [mine, setMine] = useState<Mine | null>(null);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const isEvacuating = activeEvacuations.length > 0;
 
   useEffect(() => {
     api
@@ -230,24 +233,41 @@ export default function Layout() {
         </div>
       </aside>
       <div className="flex-1 flex flex-col min-w-0">
-        <header className="h-14 shrink-0 border-b border-mine-800 bg-mine-900/80 backdrop-blur flex items-center gap-3 px-4 md:px-6 print:hidden">
+        <header
+          className={`h-14 shrink-0 border-b flex items-center gap-3 px-4 md:px-6 print:hidden ${
+            isEvacuating ? "border-black animate-siren-bar text-white" : "border-mine-800 bg-mine-900/80 backdrop-blur"
+          }`}
+        >
           <button
             aria-label="Open menu"
-            className="md:hidden p-2 -ml-2 rounded-lg text-mine-50 hover:bg-mine-800"
+            className={`md:hidden p-2 -ml-2 rounded-lg hover:bg-black/20 ${isEvacuating ? "text-white" : "text-mine-50 hover:bg-mine-800"}`}
             onClick={() => setMobileOpen(true)}
           >
             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <path d="M3 6h18M3 12h18M3 18h18" strokeLinecap="round" />
             </svg>
           </button>
-          <div className="md:hidden flex-1 font-semibold text-sm truncate">{mine?.name || "Mine Guard"}</div>
-          <div className="hidden md:flex items-center gap-1.5 text-xs text-mine-400">
-            <span>{t("nav.signedInAs")}</span>
-            <span className="font-semibold text-mine-100">
-              {user?.title ? t(`settings.invites.titles.${user.title}`) : user?.role}
-            </span>
-          </div>
-          <div className="ml-auto flex items-center gap-3">
+          {isEvacuating ? (
+            <div className="flex-1 min-w-0 flex items-center gap-2 font-extrabold text-xs sm:text-sm uppercase tracking-wide">
+              <span className="text-lg shrink-0">🚨</span>
+              <span className="truncate">
+                {t("emergency.evacuationActiveTitle")}
+                {" — "}
+                {activeEvacuations.map((e) => `${e.site?.name ?? ""}: ${e.assemblyPoint}`).join(" · ")}
+              </span>
+            </div>
+          ) : (
+            <>
+              <div className="md:hidden flex-1 font-semibold text-sm truncate">{mine?.name || "Mine Guard"}</div>
+              <div className="hidden md:flex items-center gap-1.5 text-xs text-mine-400">
+                <span>{t("nav.signedInAs")}</span>
+                <span className="font-semibold text-mine-100">
+                  {user?.title ? t(`settings.invites.titles.${user.title}`) : user?.role}
+                </span>
+              </div>
+            </>
+          )}
+          <div className="ml-auto flex items-center gap-3 shrink-0">
             <EvacuationSystem />
             {canMessage && <MessagesBell />}
             <NotificationBell />

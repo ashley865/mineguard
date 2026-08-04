@@ -185,7 +185,11 @@
       "lowCompliance": "Le score de conformité global est de {{pct}}% — consultez la répartition ci-dessous pour identifier les points faibles.",
       "trainingExpiring": "{{count}} dossier(s) de formation expirent bientôt.",
       "allClear": "Aucun problème urgent détecté. Tout semble en ordre."
-    }
+    },
+    "hrWorkforceTitle": "Aperçu des Effectifs (RH)",
+    "spotsToFillToday": "Postes à Pourvoir Aujourd'hui",
+    "pendingLeaveRequests": "Demandes de Congé en Attente",
+    "onShiftByCategory": "% en Service par Catégorie de Personnel"
   },
   "sites": {
     "title": "Sites et zones",
@@ -869,7 +873,10 @@
     "title": "Notifications",
     "empty": "Aucune approbation ou rejet pour le moment.",
     "alertLabel": "Alerte",
-    "incidentLabel": "Incident"
+    "incidentLabel": "Incident",
+    "certificationLabel": "Certification",
+    "contractLabel": "Contrat",
+    "dueOn": "Échéance {{date}}"
   },
   "contractors": {
     "nav": "Sous-traitants",
@@ -1503,7 +1510,7 @@
     "evacuateButton": "Évacuer",
     "triggerEvacuationTitle": "Déclencher une Évacuation d'Urgence",
     "triggerEvacuation": "Déclencher l'Évacuation",
-    "evacuationTriggerWarning": "Cela alertera immédiatement tous les écrans connectés de cette mine avec un avertissement d'urgence en plein écran. À utiliser uniquement pour une véritable évacuation.",
+    "evacuationTriggerWarning": "Cette action alertera immédiatement tous les écrans connectés de cette mine avec une barre d'avertissement rouge clignotante en haut de l'écran. À utiliser uniquement pour une évacuation réelle.",
     "evacuationTriggerError": "Impossible de déclencher l'évacuation",
     "assemblyPoint": "Point de rassemblement",
     "assemblyPointPlaceholder": "ex. Parking de l'entrée principale, Point de rassemblement B…",
@@ -1516,7 +1523,9 @@
     "deactivateEvacuation": "Désactiver l'Évacuation",
     "deactivateEvacuationTitle": "Désactiver les Évacuations Actives",
     "sitesAlreadyEvacuatingHint": "Les sites ayant une évacuation active sont masqués de cette liste. Désactivez-la d'abord pour en déclencher une nouvelle pour ce site.",
-    "allSitesEvacuating": "Tous les sites ont déjà une évacuation active."
+    "allSitesEvacuating": "Tous les sites ont déjà une évacuation active.",
+    "viewEvacuationDetails": "Voir les Détails de l'Évacuation",
+    "evacuationDetailsTitle": "Évacuations Actives"
   },
   "roster": {
     "nav": "Planification des Équipes",

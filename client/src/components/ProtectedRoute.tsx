@@ -2,6 +2,7 @@ import { Navigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useAuth } from "../context/AuthContext";
 import { SocketProvider } from "../context/SocketContext";
+import { EvacuationProvider } from "../context/EvacuationContext";
 import Layout from "./Layout";
 
 export default function ProtectedRoute() {

@@ -185,7 +185,11 @@
       "lowCompliance": "Overall compliance score is {{pct}}% — check the breakdown below for weak areas.",
       "trainingExpiring": "{{count}} training record(s) are expiring soon.",
       "allClear": "No urgent issues detected. Everything looks on track."
-    }
+    },
+    "hrWorkforceTitle": "HR Workforce Snapshot",
+    "spotsToFillToday": "Spots to Fill Today",
+    "pendingLeaveRequests": "Pending Leave Requests",
+    "onShiftByCategory": "On Shift % by Staff Category"
   },
   "sites": {
     "title": "Sites & Zones",
@@ -869,7 +873,10 @@
     "title": "Notifications",
     "empty": "No approvals or rejections yet.",
     "alertLabel": "Alert",
-    "incidentLabel": "Incident"
+    "incidentLabel": "Incident",
+    "certificationLabel": "Certification",
+    "contractLabel": "Contract",
+    "dueOn": "Due {{date}}"
   },
   "contractors": {
     "nav": "Contractors",
@@ -1503,7 +1510,7 @@
     "evacuateButton": "Evacuate",
     "triggerEvacuationTitle": "Trigger Emergency Evacuation",
     "triggerEvacuation": "Trigger Evacuation",
-    "evacuationTriggerWarning": "This will immediately alert every connected screen at this mine with a full-screen emergency warning. Only use this for a genuine evacuation.",
+    "evacuationTriggerWarning": "This will immediately alert every connected screen at this mine with a flashing red warning bar across the top of the screen. Only use this for a genuine evacuation.",
     "evacuationTriggerError": "Could not trigger the evacuation",
     "assemblyPoint": "Assembly / muster point",
     "assemblyPointPlaceholder": "e.g. Main Gate car park, Muster Point B…",
@@ -1515,6 +1522,8 @@
     "confirmCancelEvacuation": "Cancel this evacuation? Every connected screen will be cleared.",
     "deactivateEvacuation": "Deactivate Evacuation",
     "deactivateEvacuationTitle": "Deactivate Active Evacuations",
+    "viewEvacuationDetails": "View Evacuation Details",
+    "evacuationDetailsTitle": "Active Evacuations",
     "sitesAlreadyEvacuatingHint": "Sites with an active evacuation are hidden from this list. Deactivate it first to trigger a new one for that site.",
     "allSitesEvacuating": "Every site already has an active evacuation."
   },

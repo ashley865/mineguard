@@ -185,7 +185,11 @@
       "lowCompliance": "Der Gesamt-Compliance-Score liegt bei {{pct}}% — prüfen Sie die Aufschlüsselung unten auf Schwachstellen.",
       "trainingExpiring": "{{count}} Schulungsdatensatz/-sätze laufen bald ab.",
       "allClear": "Keine dringenden Probleme festgestellt. Alles sieht gut aus."
-    }
+    },
+    "hrWorkforceTitle": "HR-Personalübersicht",
+    "spotsToFillToday": "Heute zu Besetzende Stellen",
+    "pendingLeaveRequests": "Ausstehende Urlaubsanträge",
+    "onShiftByCategory": "% im Dienst nach Personalkategorie"
   },
   "sites": {
     "title": "Standorte & Zonen",
@@ -869,7 +873,10 @@
     "title": "Benachrichtigungen",
     "empty": "Noch keine Genehmigungen oder Ablehnungen.",
     "alertLabel": "Alarm",
-    "incidentLabel": "Vorfall"
+    "incidentLabel": "Vorfall",
+    "certificationLabel": "Zertifizierung",
+    "contractLabel": "Vertrag",
+    "dueOn": "Fällig am {{date}}"
   },
   "contractors": {
     "nav": "Auftragnehmer",
@@ -1503,7 +1510,7 @@
     "evacuateButton": "Evakuieren",
     "triggerEvacuationTitle": "Notfall-Evakuierung Auslösen",
     "triggerEvacuation": "Evakuierung Auslösen",
-    "evacuationTriggerWarning": "Dies alarmiert sofort jeden verbundenen Bildschirm dieser Mine mit einer Vollbild-Notfallwarnung. Nur bei einer echten Evakuierung verwenden.",
+    "evacuationTriggerWarning": "Dadurch werden sofort alle verbundenen Bildschirme dieser Mine mit einem blinkenden roten Warnbalken am oberen Bildschirmrand alarmiert. Nur bei einer echten Evakuierung verwenden.",
     "evacuationTriggerError": "Die Evakuierung konnte nicht ausgelöst werden",
     "assemblyPoint": "Sammelpunkt",
     "assemblyPointPlaceholder": "z. B. Parkplatz Haupttor, Sammelpunkt B…",
@@ -1516,7 +1523,9 @@
     "deactivateEvacuation": "Evakuierung Deaktivieren",
     "deactivateEvacuationTitle": "Aktive Evakuierungen Deaktivieren",
     "sitesAlreadyEvacuatingHint": "Standorte mit einer aktiven Evakuierung werden in dieser Liste ausgeblendet. Deaktivieren Sie sie zuerst, um eine neue für diesen Standort auszulösen.",
-    "allSitesEvacuating": "Jeder Standort hat bereits eine aktive Evakuierung."
+    "allSitesEvacuating": "Jeder Standort hat bereits eine aktive Evakuierung.",
+    "viewEvacuationDetails": "Evakuierungsdetails Anzeigen",
+    "evacuationDetailsTitle": "Aktive Evakuierungen"
   },
   "roster": {
     "nav": "Schichtplanung",

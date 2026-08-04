@@ -87,7 +87,7 @@ export default function NotificationBell() {
               <div key={n.id} className="px-4 py-3">
                 <div className="flex items-center gap-2 mb-1 flex-wrap">
                   <span className="text-[10px] uppercase tracking-wide text-mine-400">
-                    {n.kind === "alert" ? t("notifications.alertLabel") : t("notifications.incidentLabel")}
+                    {t(`notifications.${n.kind}Label`)}
                   </span>
                   <SeverityBadge severity={n.severity} />
                   <StatusBadge status={n.reviewStatus} />
@@ -98,7 +98,11 @@ export default function NotificationBell() {
                   {n.reviewedBy?.name ? ` · ${t("common.reviewedBy", { name: n.reviewedBy.name })}` : ""}
                 </div>
                 {n.reviewNote && <div className="text-xs text-mine-400 mt-1 italic">"{n.reviewNote}"</div>}
-                <div className="text-[10px] text-mine-500 mt-1">{new Date(n.reviewedAt).toLocaleString()}</div>
+                <div className="text-[10px] text-mine-500 mt-1">
+                  {(n.kind === "certification" || n.kind === "contract") && n.reviewStatus === "SCHEDULED"
+                    ? t("notifications.dueOn", { date: new Date(n.reviewedAt).toLocaleDateString() })
+                    : new Date(n.reviewedAt).toLocaleString()}
+                </div>
               </div>
             ))}
           </div>

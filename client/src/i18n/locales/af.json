@@ -185,7 +185,11 @@
       "lowCompliance": "Algehele nakomingstelling is {{pct}}% — kyk na die uiteensetting hieronder vir swak areas.",
       "trainingExpiring": "{{count}} opleidingsrekord(s) verval binnekort.",
       "allClear": "Geen dringende kwessies opgespoor nie. Alles lyk op koers."
-    }
+    },
+    "hrWorkforceTitle": "MH-Werksmag-oorsig",
+    "spotsToFillToday": "Poste om Vandag te Vul",
+    "pendingLeaveRequests": "Hangende Verlofaansoeke",
+    "onShiftByCategory": "% op Diens volgens Personeelkategorie"
   },
   "sites": {
     "title": "Terreine & Sones",
@@ -869,7 +873,10 @@
     "title": "Kennisgewings",
     "empty": "Nog geen goedkeurings of verwerpings nie.",
     "alertLabel": "Waarskuwing",
-    "incidentLabel": "Voorval"
+    "incidentLabel": "Voorval",
+    "certificationLabel": "Sertifisering",
+    "contractLabel": "Kontrak",
+    "dueOn": "Verval {{date}}"
   },
   "contractors": {
     "nav": "Kontrakteurs",
@@ -1503,7 +1510,7 @@
     "evacuateButton": "Evakueer",
     "triggerEvacuationTitle": "Aktiveer Noodevakuasie",
     "triggerEvacuation": "Aktiveer Evakuasie",
-    "evacuationTriggerWarning": "Dit sal onmiddellik elke gekoppelde skerm by hierdie myn waarsku met 'n volskerm-noodwaarskuwing. Gebruik dit slegs vir 'n werklike evakuasie.",
+    "evacuationTriggerWarning": "Dit sal onmiddellik elke gekoppelde skerm by hierdie myn waarsku met 'n knipperende rooi waarskuwingsbalk oor die boonste deel van die skerm. Gebruik dit slegs vir 'n werklike ontruiming.",
     "evacuationTriggerError": "Kon nie die evakuasie aktiveer nie",
     "assemblyPoint": "Samelpunt",
     "assemblyPointPlaceholder": "bv. Hoofhek parkeerarea, Samelpunt B…",
@@ -1516,7 +1523,9 @@
     "deactivateEvacuation": "Deaktiveer Evakuasie",
     "deactivateEvacuationTitle": "Deaktiveer Aktiewe Evakuasies",
     "sitesAlreadyEvacuatingHint": "Myne met 'n aktiewe evakuasie word van hierdie lys weggesteek. Deaktiveer dit eers om 'n nuwe een vir daardie myn te aktiveer.",
-    "allSitesEvacuating": "Elke myn het reeds 'n aktiewe evakuasie."
+    "allSitesEvacuating": "Elke myn het reeds 'n aktiewe evakuasie.",
+    "viewEvacuationDetails": "Bekyk Ontruimingsbesonderhede",
+    "evacuationDetailsTitle": "Aktiewe Ontruimings"
   },
   "roster": {
     "nav": "Skofrooster",

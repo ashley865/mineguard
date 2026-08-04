@@ -9,6 +9,61 @@ const router = Router();
 
 router.use(requireAuth, requireRole("EXECUTIVE", "ADMIN"));
 
+router.get("/hr-workforce", async (req, res) => {
+  const mineId = requireMineId(req, res);
+  if (!mineId) return;
+
+  const workers = await prisma.worker.findMany({
+    where: { site: { mineId } },
+    select: { category: true, status: true },
+  });
+
+  const byCategoryMap = new Map<string, { total: number; onShift: number }>();
+  for (const w of workers) {
+    const entry = byCategoryMap.get(w.category) ?? { total: 0, onShift: 0 };
+    entry.total += 1;
+    if (w.status === "ON_SHIFT") entry.onShift += 1;
+    byCategoryMap.set(w.category, entry);
+  }
+  const byCategory = Array.from(byCategoryMap.entries())
+    .map(([category, { total, onShift }]) => ({
+      category,
+      total,
+      onShift,
+      onShiftPct: total === 0 ? 0 : Math.round((onShift / total) * 1000) / 10,
+    }))
+    .sort((a, b) => b.total - a.total);
+
+  const todayStart = new Date();
+  todayStart.setHours(0, 0, 0, 0);
+  const todayEnd = new Date();
+  todayEnd.setHours(23, 59, 59, 999);
+
+  const [pendingLeaveRequests, onLeaveToday] = await Promise.all([
+    prisma.leaveRequest.count({ where: { status: "PENDING", worker: { site: { mineId } } } }),
+    prisma.leaveRequest.count({
+      where: {
+        status: "APPROVED",
+        worker: { site: { mineId } },
+        startDate: { lte: todayEnd },
+        endDate: { gte: todayStart },
+      },
+    }),
+  ]);
+
+  const totalWorkers = workers.length;
+  const onShiftWorkers = workers.filter((w) => w.status === "ON_SHIFT").length;
+
+  res.json({
+    totalWorkers,
+    onShiftWorkers,
+    onShiftPct: totalWorkers === 0 ? 0 : Math.round((onShiftWorkers / totalWorkers) * 1000) / 10,
+    byCategory,
+    pendingLeaveRequests,
+    onLeaveToday,
+  });
+});
+
 router.get("/summary", async (req, res) => {
   const mineId = requireMineId(req, res);
   if (!mineId) return;

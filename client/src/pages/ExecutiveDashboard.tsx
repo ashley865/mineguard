@@ -8,6 +8,7 @@ import { Alert, ExecutiveSummary, Incident, ReportTrends } from "../api/types";
 import { SeverityBadge } from "../components/Badges";
 import { buttonPrimary, buttonSecondary, cardClass } from "../components/ui";
 import FinancialSummaryWidget from "../components/FinancialSummaryWidget";
+import HrWorkforceWidget from "../components/HrWorkforceWidget";
 
 type Tone = "positive" | "negative" | "caution";
 
@@ -117,6 +118,7 @@ export default function ExecutiveDashboard() {
   const { t } = useTranslation();
   const { user } = useAuth();
   const canSeeFinancials = user?.title === "CFO" || user?.title === "GENERAL_MANAGER";
+  const canSeeHrWorkforce = user?.title === "HR_MANAGER";
   const [summary, setSummary] = useState<ExecutiveSummary | null>(null);
   const [trends, setTrends] = useState<ReportTrends | null>(null);
 
@@ -261,6 +263,7 @@ export default function ExecutiveDashboard() {
       )}
 
       {canSeeFinancials && <FinancialSummaryWidget />}
+      {canSeeHrWorkforce && <HrWorkforceWidget />}
 
       <div className={`${cardClass} p-3`}>
         <h2 className="text-xs font-semibold mb-2">{t("executive.suggestionsTitle")}</h2>
