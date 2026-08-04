@@ -250,12 +250,8 @@ export default function ExplosivesRegister() {
   if (loading) return <div className="text-mine-300">{t("common.loading")}</div>;
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between flex-wrap gap-3">
-        <div>
-          <h1 className="text-xl font-bold">{t("explosives.nav")}</h1>
-          <p className="text-mine-300 text-sm">{t("explosives.subtitle")}</p>
-        </div>
+    <div className="space-y-4">
+      <div className="flex items-center justify-end flex-wrap gap-3">
         {canEdit && sites.length > 0 && (
           <button className={buttonPrimary} onClick={() => setModal("create")}>{t("explosives.newMagazine")}</button>
         )}

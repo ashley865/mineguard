@@ -33,7 +33,15 @@
     "incidents": "Vorfälle",
     "equipment": "Ausrüstung",
     "signOut": "Abmelden",
-    "signedInAs": "Angemeldet als"
+    "signedInAs": "Angemeldet als",
+    "sectionOperations": "Betrieb",
+    "sectionSafety": "Sicherheit & Compliance",
+    "sectionWorkforce": "Belegschaft",
+    "sectionLogistics": "Logistik",
+    "sectionCommercial": "Kommerziell",
+    "sectionReports": "Berichte & Dokumente",
+    "sectionSiteOps": "Standortbetrieb",
+    "sectionTools": "Werkzeuge"
   },
   "language": {
     "label": "Sprache",
@@ -161,7 +169,20 @@
     "noSiteAccess": "Ihnen wurden noch keine Standorte zugewiesen. Bitten Sie einen Administrator, Ihnen Standortzugriff zu gewähren, um hier Besucherverwaltung, Arbeitserlaubnis und Risikoregister zu sehen.",
     "complianceBreakdown": "Compliance-Aufschlüsselung",
     "peopleOnSite": "Personen Derzeit in der Mine",
-    "peopleOnSiteBreakdown": "{{visitors}} Besucher · {{staff}} Mitarbeiter im Dienst · {{drivers}} LKW-Fahrer"
+    "peopleOnSiteBreakdown": "{{visitors}} Besucher · {{staff}} Mitarbeiter im Dienst · {{drivers}} LKW-Fahrer",
+    "suggestionsTitle": "Erkenntnisse & Vorschläge",
+    "suggestions": {
+      "sitesShutDown": "{{count}} Standort(e) sind stillgelegt — prüfen Sie die Ursache und den Wiedereröffnungsplan.",
+      "criticalAlerts": "{{count}} kritische(r) Alarm(e) erfordern sofortige Aufmerksamkeit.",
+      "pendingAlertReviews": "{{count}} Alarm(e) warten auf Ihre Prüfung.",
+      "pendingIncidentReviews": "{{count}} Vorfall/Vorfälle warten auf Ihre Prüfung.",
+      "escalatedRisks": "{{count}} eskalierte(s) Risiko(s) erfordern Nachverfolgung.",
+      "pendingPermits": "{{count}} Arbeitserlaubnis(se) warten auf Genehmigung.",
+      "lowUptime": "Die Anlagenverfügbarkeit liegt bei {{pct}}% — erwägen Sie eine Überprüfung der Wartungspläne.",
+      "lowCompliance": "Der Gesamt-Compliance-Score liegt bei {{pct}}% — prüfen Sie die Aufschlüsselung unten auf Schwachstellen.",
+      "trainingExpiring": "{{count}} Schulungsdatensatz/-sätze laufen bald ab.",
+      "allClear": "Keine dringenden Probleme festgestellt. Alles sieht gut aus."
+    }
   },
   "sites": {
     "title": "Standorte & Zonen",
@@ -1281,6 +1302,7 @@
   "environmental": {
     "nav": "Umweltüberwachung",
     "subtitle": "Wasser-, Luft-, Staub- und Lärmmesswerte sowie Absetzbeckenstände im Vergleich zu Standortgrenzwerten",
+    "tabReadings": "Messwerte",
     "parameterType": "Parameter",
     "parameterTypes": {
       "WATER_QUALITY": "Wasserqualität",
@@ -1446,5 +1468,31 @@
     "createError": "Diese Bestellung konnte nicht erstellt werden",
     "noneYetOrders": "Noch keine Bestellungen.",
     "confirmDeleteOrder": "Diese Bestellung löschen?"
+  },
+  "invoices": {
+    "nav": "Rechnungen",
+    "subtitle": "Steuerrechnungen für Käufer, Auftragnehmer und Kunden erstellen und verwalten",
+    "newInvoice": "+ Neue Rechnung",
+    "newInvoiceTitle": "Neue Rechnung",
+    "invoiceNumber": "Rechnungsnummer",
+    "clientName": "Kundenname",
+    "clientAddress": "Kundenadresse",
+    "clientEmail": "Kunden-E-Mail",
+    "clientTaxNumber": "Kunden-Steuer- / USt-IdNr.",
+    "issueDate": "Ausstellungsdatum",
+    "dueDate": "Fälligkeitsdatum",
+    "vatRate": "MwSt.-Satz (%)",
+    "notes": "Notizen",
+    "lineItems": "Positionen",
+    "subtotal": "Zwischensumme",
+    "vatAmount": "MwSt.",
+    "total": "Gesamt",
+    "billTo": "Rechnung An",
+    "confirmDelete": "Diese Rechnung löschen?",
+    "noneYet": "Noch keine Rechnungen erstellt.",
+    "viewInvoice": "Ansehen",
+    "backToList": "Zurück zu Rechnungen",
+    "print": "Drucken",
+    "createError": "Diese Rechnung konnte nicht erstellt werden"
   }
 }

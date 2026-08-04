@@ -1149,3 +1149,33 @@ export interface PurchaseOrder {
   lines: PurchaseOrderLine[];
   createdAt: string;
 }
+
+export type InvoiceStatus = "DRAFT" | "SENT" | "PAID" | "OVERDUE" | "CANCELLED";
+
+export interface InvoiceLine {
+  id: string;
+  description: string;
+  quantity: number;
+  unitPrice: number;
+  lineTotal: number;
+}
+
+export interface Invoice {
+  id: string;
+  siteId: string;
+  site?: { id: string; name: string };
+  invoiceNumber: string;
+  clientName: string;
+  clientAddress?: string | null;
+  clientEmail?: string | null;
+  clientTaxNumber?: string | null;
+  issueDate: string;
+  dueDate: string;
+  currency: string;
+  vatRate: number;
+  notes?: string | null;
+  status: InvoiceStatus;
+  createdBy?: { id: string; name: string } | null;
+  lines: InvoiceLine[];
+  createdAt: string;
+}

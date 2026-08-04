@@ -51,6 +51,7 @@ import rosterRoutes from "./routes/roster";
 import trainingLmsRoutes from "./routes/trainingLms";
 import payrollRoutes from "./routes/payroll";
 import procurementRoutes from "./routes/procurement";
+import invoicesRoutes from "./routes/invoices";
 import { startSimulator } from "./services/simulator";
 import { scanCompliance } from "./services/complianceScanner";
 
@@ -116,6 +117,7 @@ app.use("/api/roster", rosterRoutes);
 app.use("/api/training-lms", trainingLmsRoutes);
 app.use("/api/payroll", payrollRoutes);
 app.use("/api/procurement", procurementRoutes);
+app.use("/api/invoices", invoicesRoutes);
 
 app.use((err: any, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
   console.error(err);

@@ -3,6 +3,10 @@ import { ExecutiveTitle, Role } from "../api/types";
 /**
  * Modules whose visibility depends on an Executive's title. Anything not listed here
  * (dashboard, messages, settings) is always visible to every Executive.
+ *
+ * Fleet tracking lives inside /trucks, weather inside /environmental, the explosives
+ * register inside /compliance, and rostering/training-LMS inside /workforce — those
+ * merged sub-features are governed by access to their host module, not a separate entry.
  */
 export const restrictedModules = [
   "/sites",
@@ -26,17 +30,13 @@ export const restrictedModules = [
   "/tenders",
   "/production",
   "/maintenance",
-  "/fleet",
   "/inventory",
-  "/weather",
   "/safety-observations",
-  "/explosives",
   "/environmental",
   "/emergency",
-  "/roster",
-  "/training-lms",
   "/payroll",
   "/procurement",
+  "/invoices",
 ] as const;
 
 export type RestrictedModule = (typeof restrictedModules)[number];
@@ -48,9 +48,9 @@ const fullAccess: RestrictedModule[] = [...restrictedModules];
 export const executiveTitleModules: Partial<Record<ExecutiveTitle, RestrictedModule[]>> = {
   GENERAL_MANAGER: fullAccess,
   COO: fullAccess,
-  CFO: ["/reporting", "/contractors", "/permits", "/documents", "/compliance", "/workforce", "/incidents", "/marketplace", "/tenders", "/production", "/inventory", "/payroll", "/procurement"],
-  HR_MANAGER: ["/workers", "/workforce", "/visitors", "/documents", "/reporting", "/emergency", "/roster", "/training-lms", "/payroll"],
-  SECURITY_MANAGER: ["/visitors", "/scanner", "/trucks", "/incidents", "/alerts", "/workers", "/sites", "/fleet", "/safety-observations", "/emergency"],
+  CFO: ["/reporting", "/contractors", "/permits", "/documents", "/compliance", "/workforce", "/incidents", "/marketplace", "/tenders", "/production", "/inventory", "/payroll", "/procurement", "/invoices"],
+  HR_MANAGER: ["/workers", "/workforce", "/visitors", "/documents", "/reporting", "/emergency", "/payroll"],
+  SECURITY_MANAGER: ["/visitors", "/scanner", "/trucks", "/incidents", "/alerts", "/workers", "/sites", "/safety-observations", "/emergency"],
   SAFETY_MANAGER: [
     "/sites",
     "/sensors",
@@ -63,12 +63,9 @@ export const executiveTitleModules: Partial<Record<ExecutiveTitle, RestrictedMod
     "/documents",
     "/reporting",
     "/maintenance",
-    "/weather",
     "/safety-observations",
-    "/explosives",
     "/environmental",
     "/emergency",
-    "/training-lms",
   ],
   OPERATIONS_MANAGER: [
     "/sites",
@@ -88,16 +85,12 @@ export const executiveTitleModules: Partial<Record<ExecutiveTitle, RestrictedMod
     "/tenders",
     "/production",
     "/maintenance",
-    "/fleet",
     "/inventory",
-    "/weather",
     "/safety-observations",
-    "/explosives",
     "/environmental",
     "/emergency",
-    "/roster",
-    "/training-lms",
     "/procurement",
+    "/invoices",
   ],
   COMPLIANCE_OFFICER: [
     "/compliance",
@@ -112,7 +105,6 @@ export const executiveTitleModules: Partial<Record<ExecutiveTitle, RestrictedMod
     "/marketplace",
     "/tenders",
     "/safety-observations",
-    "/explosives",
     "/environmental",
   ],
   IT_MANAGER: ["/sites", "/sensors", "/equipment", "/alerts", "/reporting"],

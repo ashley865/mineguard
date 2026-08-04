@@ -5,6 +5,7 @@ import { useAuth } from "../context/AuthContext";
 import { EnvironmentalParameterType, EnvironmentalReading, Site } from "../api/types";
 import Modal from "../components/Modal";
 import { buttonDanger, buttonPrimary, buttonSecondary, cardClass, inputClass, labelClass } from "../components/ui";
+import WeatherMonitoring from "./WeatherMonitoring";
 
 const parameterTypes: EnvironmentalParameterType[] = ["WATER_QUALITY", "AIR_QUALITY", "DUST", "NOISE", "TAILINGS_DAM_LEVEL"];
 
@@ -106,6 +107,7 @@ export default function EnvironmentalMonitoring() {
   const { user } = useAuth();
   const canEdit = user?.role === "ADMIN" || user?.role === "SUPERVISOR" || user?.role === "EXECUTIVE";
   const canDelete = user?.role === "ADMIN" || user?.role === "EXECUTIVE";
+  const [tab, setTab] = useState<"readings" | "weather">("readings");
   const [readings, setReadings] = useState<EnvironmentalReading[]>([]);
   const [sites, setSites] = useState<Site[]>([]);
   const [loading, setLoading] = useState(true);
@@ -144,11 +146,25 @@ export default function EnvironmentalMonitoring() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between flex-wrap gap-3">
-        <div>
-          <h1 className="text-xl font-bold">{t("environmental.nav")}</h1>
-          <p className="text-mine-300 text-sm">{t("environmental.subtitle")}</p>
-        </div>
+      <div>
+        <h1 className="text-xl font-bold">{t("environmental.nav")}</h1>
+        <p className="text-mine-300 text-sm">{t("environmental.subtitle")}</p>
+      </div>
+
+      <div className="flex gap-2 flex-wrap">
+        <button className={tab === "readings" ? buttonPrimary : buttonSecondary} onClick={() => setTab("readings")}>
+          {t("environmental.tabReadings")}
+        </button>
+        <button className={tab === "weather" ? buttonPrimary : buttonSecondary} onClick={() => setTab("weather")}>
+          {t("weather.nav")}
+        </button>
+      </div>
+
+      {tab === "weather" && <WeatherMonitoring />}
+
+      {tab === "readings" && (
+      <div className="space-y-4">
+      <div className="flex items-center justify-end flex-wrap gap-3">
         {canEdit && sites.length > 0 && (
           <button className={buttonPrimary} onClick={() => setModal(true)}>{t("environmental.newReading")}</button>
         )}
@@ -201,6 +217,8 @@ export default function EnvironmentalMonitoring() {
         <Modal title={t("environmental.newReadingTitle")} onClose={() => setModal(false)}>
           <ReadingForm sites={sites} onSubmit={create} onCancel={() => setModal(false)} />
         </Modal>
+      )}
+      </div>
       )}
     </div>
   );

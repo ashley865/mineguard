@@ -6,8 +6,9 @@ import { Delivery, DeliveryDirection, Site, Truck } from "../api/types";
 import { StatusBadge } from "../components/Badges";
 import Modal from "../components/Modal";
 import { buttonDanger, buttonPrimary, buttonSecondary, cardClass, inputClass, labelClass } from "../components/ui";
+import FleetTracking from "./FleetTracking";
 
-type TabKey = "trucks" | "deliveries";
+type TabKey = "trucks" | "deliveries" | "fleet";
 
 function TruckForm({ initial, onSubmit, onCancel }: {
   initial?: Truck;
@@ -234,6 +235,7 @@ export default function TruckRegistration() {
   const tabs: { key: TabKey; label: string }[] = [
     { key: "deliveries", label: t("trucks.tabDeliveries") },
     { key: "trucks", label: t("trucks.tabTrucks") },
+    { key: "fleet", label: t("fleet.nav") },
   ];
 
   return (
@@ -354,6 +356,8 @@ export default function TruckRegistration() {
           </div>
         </div>
       )}
+
+      {tab === "fleet" && <FleetTracking />}
 
       {truckModal && (
         <Modal title={truckModal === "create" ? t("trucks.newTruckTitle") : t("trucks.editTruckTitle")} onClose={() => setTruckModal(null)}>

@@ -1,13 +1,16 @@
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
-import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from "recharts";
 import { api } from "../api/client";
 import { Alert, ExecutiveSummary, Incident, ReportTrends } from "../api/types";
 import { SeverityBadge } from "../components/Badges";
 import { buttonPrimary, buttonSecondary, cardClass } from "../components/ui";
 
 type Tone = "positive" | "negative" | "caution";
+
+const CHART_TOOLTIP_STYLE = { background: "#fafafa", border: "1px solid #e5e5e5", fontSize: 11 };
+const CHART_TICK_STYLE = { fontSize: 9, fill: "#52525b" };
 
 function toneText(tone?: Tone) {
   return tone === "positive" ? "text-success-500" : tone === "negative" ? "text-danger-500" : tone === "caution" ? "text-hazard-500" : "text-mine-50";
@@ -38,6 +41,40 @@ function RateRow({ label, numerator, denominator }: { label: string; numerator: 
     <div className="flex items-center justify-between text-xs">
       <span className="text-mine-300">{label}</span>
       <span className={`font-semibold ${toneText(tone)}`}>{pct}%</span>
+    </div>
+  );
+}
+
+function MiniPie({ data, emptyLabel }: { data: { name: string; value: number; color: string }[]; emptyLabel: string }) {
+  const total = data.reduce((sum, d) => sum + d.value, 0);
+  if (total === 0) {
+    return <div className="text-mine-400 text-xs h-32 flex items-center justify-center">{emptyLabel}</div>;
+  }
+  return (
+    <div className="h-32 flex items-center gap-2">
+      <div className="w-24 h-24 shrink-0">
+        <ResponsiveContainer width="100%" height="100%">
+          <PieChart>
+            <Pie data={data} dataKey="value" nameKey="name" innerRadius={22} outerRadius={40} paddingAngle={2}>
+              {data.map((d, i) => (
+                <Cell key={i} fill={d.color} />
+              ))}
+            </Pie>
+            <Tooltip contentStyle={CHART_TOOLTIP_STYLE} />
+          </PieChart>
+        </ResponsiveContainer>
+      </div>
+      <div className="space-y-1 text-xs flex-1 min-w-0">
+        {data.filter((d) => d.value > 0).map((d) => (
+          <div key={d.name} className="flex items-center justify-between gap-2">
+            <span className="flex items-center gap-1.5 text-mine-300 truncate">
+              <span className="w-2 h-2 rounded-full shrink-0" style={{ background: d.color }} />
+              {d.name}
+            </span>
+            <span className="font-semibold text-mine-50">{d.value}</span>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }
@@ -111,6 +148,43 @@ export default function ExecutiveDashboard() {
   const scoreTone =
     complianceScore >= 80 ? "text-success-500" : complianceScore >= 50 ? "text-hazard-500" : "text-danger-500";
 
+  const suggestions: { text: string; tone: Tone }[] = [];
+  if (siteStatus.SHUT_DOWN > 0) {
+    suggestions.push({ text: t("executive.suggestions.sitesShutDown", { count: siteStatus.SHUT_DOWN }), tone: "negative" });
+  }
+  if (alertSeverity.CRITICAL > 0) {
+    suggestions.push({ text: t("executive.suggestions.criticalAlerts", { count: alertSeverity.CRITICAL }), tone: "negative" });
+  }
+  if (pendingReviews.alerts.length > 0) {
+    suggestions.push({ text: t("executive.suggestions.pendingAlertReviews", { count: pendingReviews.alerts.length }), tone: "caution" });
+  }
+  if (pendingReviews.incidents.length > 0) {
+    suggestions.push({ text: t("executive.suggestions.pendingIncidentReviews", { count: pendingReviews.incidents.length }), tone: "caution" });
+  }
+  if (executiveOps.hasSiteAccess && executiveOps.escalatedRisks > 0) {
+    suggestions.push({ text: t("executive.suggestions.escalatedRisks", { count: executiveOps.escalatedRisks }), tone: "negative" });
+  }
+  if (executiveOps.hasSiteAccess && executiveOps.pendingPermitsToWork > 0) {
+    suggestions.push({ text: t("executive.suggestions.pendingPermits", { count: executiveOps.pendingPermitsToWork }), tone: "caution" });
+  }
+  if (equipment.uptimePct < 80) {
+    suggestions.push({ text: t("executive.suggestions.lowUptime", { pct: equipment.uptimePct }), tone: "caution" });
+  }
+  if (complianceScore < 80) {
+    suggestions.push({ text: t("executive.suggestions.lowCompliance", { pct: complianceScore }), tone: "caution" });
+  }
+  if (trends && trends.compliance.trainingRecords.expiringSoon > 0) {
+    suggestions.push({ text: t("executive.suggestions.trainingExpiring", { count: trends.compliance.trainingRecords.expiringSoon }), tone: "caution" });
+  }
+  if (suggestions.length === 0) {
+    suggestions.push({ text: t("executive.suggestions.allClear"), tone: "positive" });
+  }
+  const suggestionDot: Record<Tone, string> = {
+    positive: "bg-success-500",
+    caution: "bg-hazard-500",
+    negative: "bg-danger-500",
+  };
+
   return (
     <div className="space-y-4">
       <div className="flex items-start justify-between gap-3 flex-wrap">
@@ -182,35 +256,42 @@ export default function ExecutiveDashboard() {
         </div>
       )}
 
+      <div className={`${cardClass} p-3`}>
+        <h2 className="text-xs font-semibold mb-2">{t("executive.suggestionsTitle")}</h2>
+        <ul className="space-y-1.5">
+          {suggestions.map((s, i) => (
+            <li key={i} className="flex items-start gap-2 text-xs text-mine-200">
+              <span className={`w-1.5 h-1.5 rounded-full shrink-0 mt-1 ${suggestionDot[s.tone]}`} />
+              {s.text}
+            </li>
+          ))}
+        </ul>
+      </div>
+
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
         <div className={`${cardClass} p-3`}>
           <h2 className="text-xs font-semibold mb-2">{t("executive.openAlertsBySeverity")}</h2>
-          <div className="space-y-1.5">
-            {(["CRITICAL", "HIGH", "MEDIUM", "LOW"] as const).map((sev) => (
-              <div key={sev} className="flex items-center justify-between text-xs">
-                <SeverityBadge severity={sev} />
-                <span className="font-semibold">{alertSeverity[sev]}</span>
-              </div>
-            ))}
-          </div>
+          <MiniPie
+            emptyLabel={t("dashboard.noOpenAlerts")}
+            data={[
+              { name: t("badges.severity.CRITICAL"), value: alertSeverity.CRITICAL, color: "#e13b2e" },
+              { name: t("badges.severity.HIGH"), value: alertSeverity.HIGH, color: "#f3665b" },
+              { name: t("badges.severity.MEDIUM"), value: alertSeverity.MEDIUM, color: "#d9a441" },
+              { name: t("badges.severity.LOW"), value: alertSeverity.LOW, color: "#8a9ab5" },
+            ]}
+          />
         </div>
 
         <div className={`${cardClass} p-3`}>
           <h2 className="text-xs font-semibold mb-2">{t("executive.incidentOverview")}</h2>
-          <div className="space-y-1.5 text-xs">
-            <div className="flex items-center justify-between">
-              <span className="text-mine-300">{t("executive.open")}</span>
-              <span className="font-semibold">{incidents.open}</span>
-            </div>
-            <div className="flex items-center justify-between">
-              <span className="text-mine-300">{t("executive.investigating")}</span>
-              <span className="font-semibold">{incidents.investigating}</span>
-            </div>
-            <div className="flex items-center justify-between">
-              <span className="text-mine-300">{t("executive.resolved")}</span>
-              <span className="font-semibold">{incidents.resolved}</span>
-            </div>
-          </div>
+          <MiniPie
+            emptyLabel={t("executive.noPendingIncidents")}
+            data={[
+              { name: t("executive.open"), value: incidents.open, color: "#e13b2e" },
+              { name: t("executive.investigating"), value: incidents.investigating, color: "#c48a1f" },
+              { name: t("executive.resolved"), value: incidents.resolved, color: "#16a34a" },
+            ]}
+          />
         </div>
 
         <div className={`${cardClass} p-3`}>

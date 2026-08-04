@@ -33,7 +33,15 @@
     "incidents": "Voorvalle",
     "equipment": "Toerusting",
     "signOut": "Meld af",
-    "signedInAs": "Aangemeld as"
+    "signedInAs": "Aangemeld as",
+    "sectionOperations": "Bedrywighede",
+    "sectionSafety": "Veiligheid & Nakoming",
+    "sectionWorkforce": "Werksmag",
+    "sectionLogistics": "Logistiek",
+    "sectionCommercial": "Kommersieel",
+    "sectionReports": "Verslae & Dokumente",
+    "sectionSiteOps": "Terreinbedrywighede",
+    "sectionTools": "Nutsmiddels"
   },
   "language": {
     "label": "Taal",
@@ -161,7 +169,20 @@
     "noSiteAccess": "Jy is nog aan geen terreine toegewys nie. Vra 'n administrateur om jou terreintoegang te gee om hier Besoekersbestuur, Werkpermit en Risikoregister te sien.",
     "complianceBreakdown": "Voldoeningsverdeling",
     "peopleOnSite": "Mense Tans in die Myn",
-    "peopleOnSiteBreakdown": "{{visitors}} besoekers · {{staff}} personeel aan diens · {{drivers}} vragmotorbestuurders"
+    "peopleOnSiteBreakdown": "{{visitors}} besoekers · {{staff}} personeel aan diens · {{drivers}} vragmotorbestuurders",
+    "suggestionsTitle": "Insigte & Voorstelle",
+    "suggestions": {
+      "sitesShutDown": "{{count}} terrein(e) is afgeskakel — hersien die oorsaak en heropeningsplan.",
+      "criticalAlerts": "{{count}} kritieke waarskuwing(s) benodig onmiddellike aandag.",
+      "pendingAlertReviews": "{{count}} waarskuwing(s) wag vir jou hersiening.",
+      "pendingIncidentReviews": "{{count}} voorval(le) wag vir jou hersiening.",
+      "escalatedRisks": "{{count}} geëskaleerde risiko('s) benodig opvolg.",
+      "pendingPermits": "{{count}} werkpermit(te) wag vir goedkeuring.",
+      "lowUptime": "Toerustingbedryfstyd is {{pct}}% — oorweeg om onderhoudskedules te hersien.",
+      "lowCompliance": "Algehele nakomingstelling is {{pct}}% — kyk na die uiteensetting hieronder vir swak areas.",
+      "trainingExpiring": "{{count}} opleidingsrekord(s) verval binnekort.",
+      "allClear": "Geen dringende kwessies opgespoor nie. Alles lyk op koers."
+    }
   },
   "sites": {
     "title": "Terreine & Sones",
@@ -1281,6 +1302,7 @@
   "environmental": {
     "nav": "Omgewingsmonitering",
     "subtitle": "Water-, lug-, stof- en geraasmoniteringslesings, plus slikdamvlakke, teenoor terreindrempels",
+    "tabReadings": "Lesings",
     "parameterType": "Parameter",
     "parameterTypes": {
       "WATER_QUALITY": "Watergehalte",
@@ -1446,5 +1468,31 @@
     "createError": "Kon nie hierdie aankooporder skep nie",
     "noneYetOrders": "Nog geen aankooporders nie.",
     "confirmDeleteOrder": "Skrap hierdie aankooporder?"
+  },
+  "invoices": {
+    "nav": "Fakture",
+    "subtitle": "Skep en bestuur belastingfakture vir kopers, kontrakteurs en kliënte",
+    "newInvoice": "+ Nuwe Faktuur",
+    "newInvoiceTitle": "Nuwe Faktuur",
+    "invoiceNumber": "Fakturnommer",
+    "clientName": "Kliëntnaam",
+    "clientAddress": "Kliëntadres",
+    "clientEmail": "Kliënt-e-pos",
+    "clientTaxNumber": "Kliënt belasting- / BTW-nommer",
+    "issueDate": "Uitreikingsdatum",
+    "dueDate": "Vervaldatum",
+    "vatRate": "BTW-koers (%)",
+    "notes": "Notas",
+    "lineItems": "Lynitems",
+    "subtotal": "Subtotaal",
+    "vatAmount": "BTW",
+    "total": "Totaal",
+    "billTo": "Faktureer Aan",
+    "confirmDelete": "Skrap hierdie faktuur?",
+    "noneYet": "Nog geen fakture geskep nie.",
+    "viewInvoice": "Bekyk",
+    "backToList": "Terug na Fakture",
+    "print": "Druk",
+    "createError": "Kon nie hierdie faktuur skep nie"
   }
 }

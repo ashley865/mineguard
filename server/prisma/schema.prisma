@@ -205,6 +205,7 @@ model User {
   payslipsUploaded       Payslip[]               @relation("PayslipUploadedBy")
   poRequests             PurchaseOrder[]         @relation("PORequestedBy")
   poApprovals            PurchaseOrder[]         @relation("POApprovedBy")
+  invoicesCreated        Invoice[]               @relation("InvoiceCreatedBy")
 }
 
 model Site {
@@ -249,6 +250,7 @@ model Site {
   shiftRosters         ShiftRoster[]
   trainingCourses      TrainingCourse[]
   purchaseOrders       PurchaseOrder[]
+  invoices             Invoice[]
 }
 
 model Zone {
@@ -1592,6 +1594,49 @@ model PurchaseOrderLine {
   quantity        Float
   unitPrice       Float
   lineTotal       Float
+
+  createdAt DateTime @default(now())
+}
+
+enum InvoiceStatus {
+  DRAFT
+  SENT
+  PAID
+  OVERDUE
+  CANCELLED
+}
+
+model Invoice {
+  id              String        @id @default(cuid())
+  siteId          String
+  site            Site          @relation(fields: [siteId], references: [id], onDelete: Cascade)
+  invoiceNumber   String
+  clientName      String
+  clientAddress   String?
+  clientEmail     String?
+  clientTaxNumber String?
+  issueDate       DateTime      @default(now())
+  dueDate         DateTime
+  currency        String        @default("ZAR")
+  vatRate         Float         @default(15)
+  notes           String?
+  status          InvoiceStatus @default(DRAFT)
+  createdById     String?
+  createdBy       User?         @relation("InvoiceCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+
+  lines InvoiceLine[]
+
+  createdAt DateTime @default(now())
+}
+
+model InvoiceLine {
+  id          String  @id @default(cuid())
+  invoiceId   String
+  invoice     Invoice @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+  description String
+  quantity    Float
+  unitPrice   Float
+  lineTotal   Float
 
   createdAt DateTime @default(now())
 }

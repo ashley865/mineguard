@@ -7,9 +7,10 @@ import RiskAssessmentsTab from "./compliance/RiskAssessmentsTab";
 import RegulatoryNoticesTab from "./compliance/RegulatoryNoticesTab";
 import MedicalSurveillanceTab from "./compliance/MedicalSurveillanceTab";
 import SafetyInspectionsTab from "./compliance/SafetyInspectionsTab";
+import ExplosivesRegister from "./ExplosivesRegister";
 import { buttonPrimary, buttonSecondary } from "../components/ui";
 
-type TabKey = "cop" | "risk" | "notices" | "medical" | "inspections";
+type TabKey = "cop" | "risk" | "notices" | "medical" | "inspections" | "explosives";
 
 export default function SafetyCompliance() {
   const { t } = useTranslation();
@@ -40,6 +41,7 @@ export default function SafetyCompliance() {
     { key: "notices", label: t("compliance.tabNotices") },
     { key: "medical", label: t("compliance.tabMedical") },
     { key: "inspections", label: t("compliance.tabInspections") },
+    { key: "explosives", label: t("explosives.nav") },
   ];
 
   if (loading) return <div className="text-mine-300">{t("compliance.loading")}</div>;
@@ -68,6 +70,7 @@ export default function SafetyCompliance() {
       {tab === "notices" && <RegulatoryNoticesTab sites={sites} zones={zones} />}
       {tab === "medical" && <MedicalSurveillanceTab workers={workers} />}
       {tab === "inspections" && <SafetyInspectionsTab sites={sites} zones={zones} />}
+      {tab === "explosives" && <ExplosivesRegister />}
     </div>
   );
 }

@@ -33,7 +33,15 @@
     "incidents": "Incidents",
     "equipment": "Equipment",
     "signOut": "Sign out",
-    "signedInAs": "Signed in as"
+    "signedInAs": "Signed in as",
+    "sectionOperations": "Operations",
+    "sectionSafety": "Safety & Compliance",
+    "sectionWorkforce": "Workforce",
+    "sectionLogistics": "Logistics",
+    "sectionCommercial": "Commercial",
+    "sectionReports": "Reports & Documents",
+    "sectionSiteOps": "Site Operations",
+    "sectionTools": "Tools"
   },
   "language": {
     "label": "Language",
@@ -161,7 +169,20 @@
     "noSiteAccess": "You haven't been assigned to any sites yet. Ask an administrator to grant you site access to see Visitor Management, Permit to Work, and Risk Register operations here.",
     "complianceBreakdown": "Compliance Breakdown",
     "peopleOnSite": "People Currently in the Mine",
-    "peopleOnSiteBreakdown": "{{visitors}} visitors · {{staff}} staff on shift · {{drivers}} truck drivers"
+    "peopleOnSiteBreakdown": "{{visitors}} visitors · {{staff}} staff on shift · {{drivers}} truck drivers",
+    "suggestionsTitle": "Insights & Suggestions",
+    "suggestions": {
+      "sitesShutDown": "{{count}} site(s) are shut down — review the cause and reopening plan.",
+      "criticalAlerts": "{{count}} critical alert(s) need immediate attention.",
+      "pendingAlertReviews": "{{count}} alert(s) are awaiting your review.",
+      "pendingIncidentReviews": "{{count}} incident(s) are awaiting your review.",
+      "escalatedRisks": "{{count}} escalated risk(s) need follow-up.",
+      "pendingPermits": "{{count}} permit(s) to work are awaiting approval.",
+      "lowUptime": "Equipment uptime is at {{pct}}% — consider reviewing maintenance schedules.",
+      "lowCompliance": "Overall compliance score is {{pct}}% — check the breakdown below for weak areas.",
+      "trainingExpiring": "{{count}} training record(s) are expiring soon.",
+      "allClear": "No urgent issues detected. Everything looks on track."
+    }
   },
   "sites": {
     "title": "Sites & Zones",
@@ -1281,6 +1302,7 @@
   "environmental": {
     "nav": "Environmental Monitoring",
     "subtitle": "Water, air, dust, and noise monitoring readings, plus tailings dam levels, against site thresholds",
+    "tabReadings": "Readings",
     "parameterType": "Parameter",
     "parameterTypes": {
       "WATER_QUALITY": "Water Quality",
@@ -1446,5 +1468,31 @@
     "createError": "Could not create this purchase order",
     "noneYetOrders": "No purchase orders yet.",
     "confirmDeleteOrder": "Delete this purchase order?"
+  },
+  "invoices": {
+    "nav": "Invoices",
+    "subtitle": "Create and manage tax invoices for buyers, contractors, and clients",
+    "newInvoice": "+ New Invoice",
+    "newInvoiceTitle": "New Invoice",
+    "invoiceNumber": "Invoice number",
+    "clientName": "Client name",
+    "clientAddress": "Client address",
+    "clientEmail": "Client email",
+    "clientTaxNumber": "Client tax / VAT number",
+    "issueDate": "Issue date",
+    "dueDate": "Due date",
+    "vatRate": "VAT rate (%)",
+    "notes": "Notes",
+    "lineItems": "Line Items",
+    "subtotal": "Subtotal",
+    "vatAmount": "VAT",
+    "total": "Total",
+    "billTo": "Bill To",
+    "confirmDelete": "Delete this invoice?",
+    "noneYet": "No invoices created yet.",
+    "viewInvoice": "View",
+    "backToList": "Back to Invoices",
+    "print": "Print",
+    "createError": "Could not create this invoice"
   }
 }

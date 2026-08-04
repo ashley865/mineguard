@@ -33,7 +33,15 @@
     "incidents": "Incidentes",
     "equipment": "Equipos",
     "signOut": "Cerrar sesión",
-    "signedInAs": "Conectado como"
+    "signedInAs": "Conectado como",
+    "sectionOperations": "Operaciones",
+    "sectionSafety": "Seguridad y Cumplimiento",
+    "sectionWorkforce": "Fuerza Laboral",
+    "sectionLogistics": "Logística",
+    "sectionCommercial": "Comercial",
+    "sectionReports": "Informes y Documentos",
+    "sectionSiteOps": "Operaciones del Sitio",
+    "sectionTools": "Herramientas"
   },
   "language": {
     "label": "Idioma",
@@ -161,7 +169,20 @@
     "noSiteAccess": "Aún no se te han asignado sitios. Pide a un administrador que te dé acceso a un sitio para ver aquí la Gestión de Visitantes, el Permiso de Trabajo y el Registro de Riesgos.",
     "complianceBreakdown": "Desglose de Cumplimiento",
     "peopleOnSite": "Personas Actualmente en la Mina",
-    "peopleOnSiteBreakdown": "{{visitors}} visitantes · {{staff}} personal en turno · {{drivers}} conductores de camión"
+    "peopleOnSiteBreakdown": "{{visitors}} visitantes · {{staff}} personal en turno · {{drivers}} conductores de camión",
+    "suggestionsTitle": "Perspectivas y Sugerencias",
+    "suggestions": {
+      "sitesShutDown": "{{count}} sitio(s) están cerrados — revisa la causa y el plan de reapertura.",
+      "criticalAlerts": "{{count}} alerta(s) crítica(s) requieren atención inmediata.",
+      "pendingAlertReviews": "{{count}} alerta(s) esperan tu revisión.",
+      "pendingIncidentReviews": "{{count}} incidente(s) esperan tu revisión.",
+      "escalatedRisks": "{{count}} riesgo(s) escalado(s) requieren seguimiento.",
+      "pendingPermits": "{{count}} permiso(s) de trabajo esperan aprobación.",
+      "lowUptime": "El tiempo de actividad de los equipos es del {{pct}}% — considera revisar los programas de mantenimiento.",
+      "lowCompliance": "El puntaje general de cumplimiento es del {{pct}}% — revisa el desglose a continuación para detectar áreas débiles.",
+      "trainingExpiring": "{{count}} registro(s) de capacitación vencen pronto.",
+      "allClear": "No se detectaron problemas urgentes. Todo parece estar en orden."
+    }
   },
   "sites": {
     "title": "Sitios y Zonas",
@@ -1281,6 +1302,7 @@
   "environmental": {
     "nav": "Monitoreo Ambiental",
     "subtitle": "Lecturas de monitoreo de agua, aire, polvo y ruido, además de niveles de la presa de relaves, frente a los umbrales del sitio",
+    "tabReadings": "Lecturas",
     "parameterType": "Parámetro",
     "parameterTypes": {
       "WATER_QUALITY": "Calidad del Agua",
@@ -1446,5 +1468,31 @@
     "createError": "No se pudo crear esta orden de compra",
     "noneYetOrders": "Aún no hay órdenes de compra.",
     "confirmDeleteOrder": "¿Eliminar esta orden de compra?"
+  },
+  "invoices": {
+    "nav": "Facturas",
+    "subtitle": "Crea y gestiona facturas fiscales para compradores, contratistas y clientes",
+    "newInvoice": "+ Nueva Factura",
+    "newInvoiceTitle": "Nueva Factura",
+    "invoiceNumber": "Número de factura",
+    "clientName": "Nombre del cliente",
+    "clientAddress": "Dirección del cliente",
+    "clientEmail": "Correo electrónico del cliente",
+    "clientTaxNumber": "Número fiscal / IVA del cliente",
+    "issueDate": "Fecha de emisión",
+    "dueDate": "Fecha de vencimiento",
+    "vatRate": "Tasa de IVA (%)",
+    "notes": "Notas",
+    "lineItems": "Partidas",
+    "subtotal": "Subtotal",
+    "vatAmount": "IVA",
+    "total": "Total",
+    "billTo": "Facturar A",
+    "confirmDelete": "¿Eliminar esta factura?",
+    "noneYet": "Aún no se han creado facturas.",
+    "viewInvoice": "Ver",
+    "backToList": "Volver a Facturas",
+    "print": "Imprimir",
+    "createError": "No se pudo crear esta factura"
   }
 }

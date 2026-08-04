@@ -37,18 +37,14 @@ import Tenders from "./pages/Tenders";
 import TenderBoard from "./pages/TenderBoard";
 import ProductionTracking from "./pages/ProductionTracking";
 import MaintenanceScheduling from "./pages/MaintenanceScheduling";
-import FleetTracking from "./pages/FleetTracking";
 import InventoryManagement from "./pages/InventoryManagement";
-import WeatherMonitoring from "./pages/WeatherMonitoring";
 import SafetyObservations from "./pages/SafetyObservations";
 import SafetyObservationReport from "./pages/SafetyObservationReport";
-import ExplosivesRegister from "./pages/ExplosivesRegister";
 import EnvironmentalMonitoring from "./pages/EnvironmentalMonitoring";
 import EmergencyResponse from "./pages/EmergencyResponse";
-import ShiftRostering from "./pages/ShiftRostering";
-import TrainingLms from "./pages/TrainingLms";
 import PayrollLeave from "./pages/PayrollLeave";
 import Procurement from "./pages/Procurement";
+import Invoices from "./pages/Invoices";
 
 function HomeRoute() {
   const { user } = useAuth();
@@ -97,17 +93,13 @@ export default function App() {
         <Route path="/tenders" element={<ModuleRoute path="/tenders"><Tenders /></ModuleRoute>} />
         <Route path="/production" element={<ModuleRoute path="/production"><ProductionTracking /></ModuleRoute>} />
         <Route path="/maintenance" element={<ModuleRoute path="/maintenance"><MaintenanceScheduling /></ModuleRoute>} />
-        <Route path="/fleet" element={<ModuleRoute path="/fleet"><FleetTracking /></ModuleRoute>} />
         <Route path="/inventory" element={<ModuleRoute path="/inventory"><InventoryManagement /></ModuleRoute>} />
-        <Route path="/weather" element={<ModuleRoute path="/weather"><WeatherMonitoring /></ModuleRoute>} />
         <Route path="/safety-observations" element={<ModuleRoute path="/safety-observations"><SafetyObservations /></ModuleRoute>} />
-        <Route path="/explosives" element={<ModuleRoute path="/explosives"><ExplosivesRegister /></ModuleRoute>} />
         <Route path="/environmental" element={<ModuleRoute path="/environmental"><EnvironmentalMonitoring /></ModuleRoute>} />
         <Route path="/emergency" element={<ModuleRoute path="/emergency"><EmergencyResponse /></ModuleRoute>} />
-        <Route path="/roster" element={<ModuleRoute path="/roster"><ShiftRostering /></ModuleRoute>} />
-        <Route path="/training-lms" element={<ModuleRoute path="/training-lms"><TrainingLms /></ModuleRoute>} />
         <Route path="/payroll" element={<ModuleRoute path="/payroll"><PayrollLeave /></ModuleRoute>} />
         <Route path="/procurement" element={<ModuleRoute path="/procurement"><Procurement /></ModuleRoute>} />
+        <Route path="/invoices" element={<ModuleRoute path="/invoices"><Invoices /></ModuleRoute>} />
         <Route path="/messages" element={<Messages />} />
         <Route path="/settings" element={<Settings />} />
       </Route>

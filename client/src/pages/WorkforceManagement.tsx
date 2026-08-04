@@ -4,9 +4,11 @@ import { api } from "../api/client";
 import { Worker } from "../api/types";
 import CertificatesTab from "./workforce/CertificatesTab";
 import TrainingRecordsTab from "./workforce/TrainingRecordsTab";
+import ShiftRostering from "./ShiftRostering";
+import TrainingLms from "./TrainingLms";
 import { buttonPrimary, buttonSecondary } from "../components/ui";
 
-type TabKey = "certificates" | "training";
+type TabKey = "certificates" | "training" | "roster" | "lms";
 
 export default function WorkforceManagement() {
   const { t } = useTranslation();
@@ -26,6 +28,8 @@ export default function WorkforceManagement() {
   const tabs: { key: TabKey; label: string }[] = [
     { key: "certificates", label: t("workforce.tabCertificates") },
     { key: "training", label: t("workforce.tabTraining") },
+    { key: "roster", label: t("roster.nav") },
+    { key: "lms", label: t("trainingLms.nav") },
   ];
 
   if (loading) return <div className="text-mine-300">{t("workforce.loading")}</div>;
@@ -51,6 +55,8 @@ export default function WorkforceManagement() {
 
       {tab === "certificates" && <CertificatesTab workers={workers} />}
       {tab === "training" && <TrainingRecordsTab workers={workers} />}
+      {tab === "roster" && <ShiftRostering />}
+      {tab === "lms" && <TrainingLms />}
     </div>
   );
 }

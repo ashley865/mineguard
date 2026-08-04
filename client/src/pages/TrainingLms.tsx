@@ -444,12 +444,7 @@ export default function TrainingLms() {
   if (loading) return <div className="text-mine-300">{t("common.loading")}</div>;
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-xl font-bold">{t("trainingLms.nav")}</h1>
-        <p className="text-mine-300 text-sm">{t("trainingLms.subtitle")}</p>
-      </div>
-
+    <div className="space-y-4">
       <div className="flex gap-2 flex-wrap">
         <button className={tab === "courses" ? buttonPrimary : buttonSecondary} onClick={() => setTab("courses")}>
           {t("trainingLms.tabCourses")}

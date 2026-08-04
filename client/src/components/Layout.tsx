@@ -30,49 +30,98 @@ export default function Layout() {
   const canUseScanner = user?.role === "ADMIN" || user?.role === "SUPERVISOR" || user?.role === "EXECUTIVE";
   const canMessage = user?.role === "ADMIN" || user?.role === "EXECUTIVE";
 
-  const navItems = [
-    ...(user?.role === "EXECUTIVE"
-      ? [{ to: "/", label: t("nav.executiveDashboard"), end: true }]
-      : [{ to: "/", label: t("nav.dashboard"), end: true }]),
-    { to: "/sites", label: t("nav.sitesZones") },
-    { to: "/sensors", label: t("nav.sensors") },
+  const pinnedItems = [
+    user?.role === "EXECUTIVE"
+      ? { to: "/", label: t("nav.executiveDashboard"), end: true }
+      : { to: "/", label: t("nav.dashboard"), end: true },
     { to: "/alerts", label: t("nav.alerts") },
-    { to: "/workers", label: t("nav.workers") },
-    { to: "/workforce", label: t("workforce.nav") },
-    { to: "/contractors", label: t("contractors.nav") },
-    { to: "/trucks", label: t("trucks.nav") },
     { to: "/incidents", label: t("nav.incidents") },
-    { to: "/equipment", label: t("nav.equipment") },
-    { to: "/maintenance", label: t("maintenance.nav") },
-    { to: "/production", label: t("production.nav") },
-    { to: "/fleet", label: t("fleet.nav") },
-    { to: "/inventory", label: t("inventory.nav") },
-    { to: "/weather", label: t("weather.nav") },
-    { to: "/safety-observations", label: t("safetyObservations.nav") },
-    { to: "/explosives", label: t("explosives.nav") },
-    { to: "/environmental", label: t("environmental.nav") },
-    { to: "/emergency", label: t("emergency.nav") },
-    { to: "/roster", label: t("roster.nav") },
-    { to: "/training-lms", label: t("trainingLms.nav") },
-    { to: "/payroll", label: t("payroll.nav") },
-    { to: "/procurement", label: t("procurement.nav") },
-    { to: "/compliance", label: t("compliance.nav") },
-    { to: "/permits", label: t("permits.nav") },
-    { to: "/documents", label: t("documents.nav") },
-    { to: "/inspection", label: t("inspection.nav") },
-    { to: "/reporting", label: t("reporting.nav") },
-    { to: "/marketplace", label: t("marketplace.nav") },
-    { to: "/tenders", label: t("tenders.nav") },
-    ...(canSeeExecutiveOps
-      ? [
-          { to: "/visitors", label: t("visitors.nav") },
-          { to: "/permits-to-work", label: t("permitToWork.nav") },
-        ]
-      : []),
-    ...(canUseScanner ? [{ to: "/scanner", label: t("scanner.nav") }] : []),
-    ...(canMessage ? [{ to: "/messages", label: t("messages.nav") }] : []),
-    { to: "/settings", label: t("settings.nav") },
-  ].filter((item) => isModuleAllowed(user?.role, user?.title, item.to));
+  ];
+
+  const sections: { key: string; label: string; items: { to: string; label: string }[] }[] = [
+    {
+      key: "operations",
+      label: t("nav.sectionOperations"),
+      items: [
+        { to: "/sites", label: t("nav.sitesZones") },
+        { to: "/sensors", label: t("nav.sensors") },
+        { to: "/equipment", label: t("nav.equipment") },
+        { to: "/maintenance", label: t("maintenance.nav") },
+        { to: "/production", label: t("production.nav") },
+      ],
+    },
+    {
+      key: "safety",
+      label: t("nav.sectionSafety"),
+      items: [
+        { to: "/compliance", label: t("compliance.nav") },
+        { to: "/safety-observations", label: t("safetyObservations.nav") },
+        { to: "/environmental", label: t("environmental.nav") },
+        { to: "/emergency", label: t("emergency.nav") },
+        { to: "/permits", label: t("permits.nav") },
+        { to: "/inspection", label: t("inspection.nav") },
+      ],
+    },
+    {
+      key: "workforce",
+      label: t("nav.sectionWorkforce"),
+      items: [
+        { to: "/workers", label: t("nav.workers") },
+        { to: "/workforce", label: t("workforce.nav") },
+        { to: "/payroll", label: t("payroll.nav") },
+      ],
+    },
+    {
+      key: "logistics",
+      label: t("nav.sectionLogistics"),
+      items: [
+        { to: "/trucks", label: t("trucks.nav") },
+        { to: "/inventory", label: t("inventory.nav") },
+      ],
+    },
+    {
+      key: "commercial",
+      label: t("nav.sectionCommercial"),
+      items: [
+        { to: "/contractors", label: t("contractors.nav") },
+        { to: "/marketplace", label: t("marketplace.nav") },
+        { to: "/tenders", label: t("tenders.nav") },
+        { to: "/procurement", label: t("procurement.nav") },
+        { to: "/invoices", label: t("invoices.nav") },
+      ],
+    },
+    {
+      key: "reports",
+      label: t("nav.sectionReports"),
+      items: [
+        { to: "/reporting", label: t("reporting.nav") },
+        { to: "/documents", label: t("documents.nav") },
+      ],
+    },
+    {
+      key: "siteOps",
+      label: t("nav.sectionSiteOps"),
+      items: canSeeExecutiveOps
+        ? [
+            { to: "/visitors", label: t("visitors.nav") },
+            { to: "/permits-to-work", label: t("permitToWork.nav") },
+          ]
+        : [],
+    },
+    {
+      key: "tools",
+      label: t("nav.sectionTools"),
+      items: [
+        ...(canUseScanner ? [{ to: "/scanner", label: t("scanner.nav") }] : []),
+        ...(canMessage ? [{ to: "/messages", label: t("messages.nav") }] : []),
+      ],
+    },
+  ];
+
+  const filteredPinned = pinnedItems.filter((item) => isModuleAllowed(user?.role, user?.title, item.to));
+  const filteredSections = sections
+    .map((s) => ({ ...s, items: s.items.filter((item) => isModuleAllowed(user?.role, user?.title, item.to)) }))
+    .filter((s) => s.items.length > 0);
 
   return (
     <div className="min-h-screen md:flex">
@@ -103,15 +152,15 @@ export default function Layout() {
           </div>
           <div className="text-xs text-mine-600 mt-0.5">Safety Monitoring</div>
         </div>
-        <nav className="flex-1 px-2 py-4 space-y-0.5 overflow-y-auto">
-          {navItems.map((item) => (
+        <nav className="flex-1 px-2 py-3 space-y-0.5 overflow-y-auto">
+          {filteredPinned.map((item) => (
             <NavLink
               key={item.to}
               to={item.to}
               end={item.end}
               onClick={() => setMobileOpen(false)}
               className={({ isActive }) =>
-                `block pl-3 pr-3 py-2 rounded-lg text-sm font-medium border-l-[3px] transition-colors ${
+                `block pl-3 pr-3 py-1.5 rounded-lg text-xs font-semibold border-l-[3px] transition-colors ${
                   isActive
                     ? "bg-mine-800 border-hazard-500 text-mine-50"
                     : "border-transparent text-mine-300 hover:bg-mine-800/60 hover:text-mine-50"
@@ -121,6 +170,46 @@ export default function Layout() {
               {item.label}
             </NavLink>
           ))}
+
+          {filteredSections.map((section) => (
+            <div key={section.key} className="pt-2.5">
+              <div className="px-3 pb-1 text-[10px] font-semibold uppercase tracking-wider text-mine-500">
+                {section.label}
+              </div>
+              {section.items.map((item) => (
+                <NavLink
+                  key={item.to}
+                  to={item.to}
+                  onClick={() => setMobileOpen(false)}
+                  className={({ isActive }) =>
+                    `block pl-3 pr-3 py-1.5 rounded-lg text-xs font-medium border-l-[3px] transition-colors ${
+                      isActive
+                        ? "bg-mine-800 border-hazard-500 text-mine-50"
+                        : "border-transparent text-mine-300 hover:bg-mine-800/60 hover:text-mine-50"
+                    }`
+                  }
+                >
+                  {item.label}
+                </NavLink>
+              ))}
+            </div>
+          ))}
+
+          <div className="pt-2.5">
+            <NavLink
+              to="/settings"
+              onClick={() => setMobileOpen(false)}
+              className={({ isActive }) =>
+                `block pl-3 pr-3 py-1.5 rounded-lg text-xs font-medium border-l-[3px] transition-colors ${
+                  isActive
+                    ? "bg-mine-800 border-hazard-500 text-mine-50"
+                    : "border-transparent text-mine-300 hover:bg-mine-800/60 hover:text-mine-50"
+                }`
+              }
+            >
+              {t("settings.nav")}
+            </NavLink>
+          </div>
         </nav>
         <div className="px-4 py-4 border-t border-mine-800 space-y-3">
           <LanguageSwitcher className="w-full" />
