@@ -88,6 +88,7 @@ export default function Layout() {
         { to: "/tenders", label: t("tenders.nav") },
         { to: "/procurement", label: t("procurement.nav") },
         { to: "/invoices", label: t("invoices.nav") },
+        { to: "/expenses", label: t("expenses.nav") },
       ],
     },
     {

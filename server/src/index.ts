@@ -52,6 +52,8 @@ import trainingLmsRoutes from "./routes/trainingLms";
 import payrollRoutes from "./routes/payroll";
 import procurementRoutes from "./routes/procurement";
 import invoicesRoutes from "./routes/invoices";
+import payeesRoutes from "./routes/payees";
+import expensesRoutes from "./routes/expenses";
 import { sanitizeBody } from "./middleware/sanitize";
 import { startSimulator } from "./services/simulator";
 import { scanCompliance } from "./services/complianceScanner";
@@ -120,6 +122,8 @@ app.use("/api/training-lms", trainingLmsRoutes);
 app.use("/api/payroll", payrollRoutes);
 app.use("/api/procurement", procurementRoutes);
 app.use("/api/invoices", invoicesRoutes);
+app.use("/api/payees", payeesRoutes);
+app.use("/api/expenses", expensesRoutes);
 
 app.use((err: any, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
   if (err?.message === "UNSUPPORTED_FILE_TYPE") {

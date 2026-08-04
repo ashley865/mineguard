@@ -175,6 +175,16 @@ function InvoiceView({ invoice, mine, onBack, onStatusChange }: {
           >
             {invoiceStatuses.map((s) => <option key={s} value={s}>{t(`badges.status.${s}`)}</option>)}
           </select>
+          {invoice.documentId && (
+            <a
+              className={buttonSecondary}
+              href={`${API_URL}/api/documents/${invoice.documentId}/download`}
+              target="_blank"
+              rel="noreferrer"
+            >
+              {t("invoices.viewDocument")}
+            </a>
+          )}
           <button className={buttonPrimary} onClick={() => window.print()}>{t("invoices.print")}</button>
         </div>
       </div>

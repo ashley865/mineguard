@@ -45,6 +45,7 @@ import EmergencyResponse from "./pages/EmergencyResponse";
 import PayrollLeave from "./pages/PayrollLeave";
 import Procurement from "./pages/Procurement";
 import Invoices from "./pages/Invoices";
+import Expenses from "./pages/Expenses";
 
 function HomeRoute() {
   const { user } = useAuth();
@@ -100,6 +101,7 @@ export default function App() {
         <Route path="/payroll" element={<ModuleRoute path="/payroll"><PayrollLeave /></ModuleRoute>} />
         <Route path="/procurement" element={<ModuleRoute path="/procurement"><Procurement /></ModuleRoute>} />
         <Route path="/invoices" element={<ModuleRoute path="/invoices"><Invoices /></ModuleRoute>} />
+        <Route path="/expenses" element={<ModuleRoute path="/expenses"><Expenses /></ModuleRoute>} />
         <Route path="/messages" element={<Messages />} />
         <Route path="/settings" element={<Settings />} />
       </Route>

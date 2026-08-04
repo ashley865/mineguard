@@ -83,4 +83,74 @@ router.delete("/:id", requireRole("ADMIN", "EXECUTIVE"), async (req, res) => {
   }
 });
 
+router.get("/financial-summary", async (req, res) => {
+  const siteId = req.query.siteId as string | undefined;
+  const months = Math.min(Math.max(Number(req.query.months) || 6, 1), 24);
+
+  const start = new Date();
+  start.setDate(1);
+  start.setHours(0, 0, 0, 0);
+  start.setMonth(start.getMonth() - (months - 1));
+
+  const [records, invoices, expenses] = await Promise.all([
+    prisma.productionRecord.findMany({
+      where: { siteId: siteId || undefined, shiftDate: { gte: start } },
+      select: { shiftDate: true, tonnesMined: true },
+    }),
+    prisma.invoice.findMany({
+      where: { siteId: siteId || undefined, status: "PAID", issueDate: { gte: start } },
+      select: { issueDate: true, vatRate: true, lines: { select: { lineTotal: true } } },
+    }),
+    prisma.expense.findMany({
+      where: { siteId: siteId || undefined, status: "PAID", expenseDate: { gte: start } },
+      select: { expenseDate: true, amount: true, category: true },
+    }),
+  ]);
+
+  const monthKeys: string[] = [];
+  for (let i = 0; i < months; i++) {
+    const d = new Date(start);
+    d.setMonth(d.getMonth() + i);
+    monthKeys.push(d.toISOString().slice(0, 7));
+  }
+
+  const byMonth: Record<string, { tonnesMined: number; earnings: number; expenses: number }> = {};
+  for (const key of monthKeys) byMonth[key] = { tonnesMined: 0, earnings: 0, expenses: 0 };
+
+  for (const r of records) {
+    const key = r.shiftDate.toISOString().slice(0, 7);
+    if (byMonth[key]) byMonth[key].tonnesMined += r.tonnesMined;
+  }
+  for (const inv of invoices) {
+    const key = inv.issueDate.toISOString().slice(0, 7);
+    if (!byMonth[key]) continue;
+    const subtotal = inv.lines.reduce((sum, l) => sum + l.lineTotal, 0);
+    byMonth[key].earnings += subtotal * (1 + inv.vatRate / 100);
+  }
+  for (const exp of expenses) {
+    const key = exp.expenseDate.toISOString().slice(0, 7);
+    if (byMonth[key]) byMonth[key].expenses += exp.amount;
+  }
+
+  const categoryTotals: Record<string, number> = {};
+  for (const exp of expenses) {
+    categoryTotals[exp.category] = (categoryTotals[exp.category] ?? 0) + exp.amount;
+  }
+
+  const totalTonnes = records.reduce((sum, r) => sum + r.tonnesMined, 0);
+  const totalEarnings = Object.values(byMonth).reduce((sum, m) => sum + m.earnings, 0);
+  const totalExpenses = Object.values(byMonth).reduce((sum, m) => sum + m.expenses, 0);
+
+  res.json({
+    months: monthKeys.map((key) => ({ month: key, ...byMonth[key] })),
+    totals: {
+      totalTonnes,
+      totalEarnings,
+      totalExpenses,
+      netMargin: totalEarnings - totalExpenses,
+    },
+    expensesByCategory: Object.entries(categoryTotals).map(([category, amount]) => ({ category, amount })),
+  });
+});
+
 export default router;

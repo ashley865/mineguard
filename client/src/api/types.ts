@@ -188,10 +188,19 @@ export interface WorkerProfile {
     totalCertificates: number;
     trainingCompleted: number;
     latestMedicalResult: string | null;
+    leaveDaysTakenThisYear: number;
   };
   recentAttendance: WorkerAttendance[];
+  dailyHoursLast30: { date: string; hours: number }[];
   certificates: Certificate[];
   trainingRecords: TrainingRecord[];
+  medicalRecords: MedicalSurveillance[];
+  leaveDaysByType: Record<string, number>;
+  recentLeaveRequests: LeaveRequest[];
+  payslips: Pick<
+    Payslip,
+    "id" | "payPeriodStart" | "payPeriodEnd" | "grossPay" | "deductions" | "netPay" | "issuedAt" | "fileName" | "fileMimeType"
+  >[];
 }
 
 export type IncidentStatus = "OPEN" | "INVESTIGATING" | "RESOLVED";
@@ -453,6 +462,8 @@ export type DocumentType =
   | "PROCEDURE"
   | "DRAWING"
   | "CONTRACT"
+  | "INVOICE"
+  | "EXPENSE_RECEIPT"
   | "OTHER";
 export type DocumentStatus = "DRAFT" | "ACTIVE" | "UNDER_REVIEW" | "ARCHIVED" | "WITHDRAWN";
 
@@ -1244,5 +1255,70 @@ export interface Invoice {
   status: InvoiceStatus;
   createdBy?: { id: string; name: string } | null;
   lines: InvoiceLine[];
+  documentId?: string | null;
   createdAt: string;
+}
+
+export type PayeeType = "COMPANY" | "INDIVIDUAL" | "BUYER" | "CONTRACTOR";
+
+export interface Payee {
+  id: string;
+  payeeType: PayeeType;
+  name: string;
+  registrationNumber?: string | null;
+  taxNumber?: string | null;
+  contactName?: string | null;
+  contactEmail?: string | null;
+  contactPhone?: string | null;
+  bankName?: string | null;
+  bankAccountHolder?: string | null;
+  bankAccountNumber?: string | null;
+  bankBranchCode?: string | null;
+  notes?: string | null;
+  createdBy?: { id: string; name: string } | null;
+  createdAt: string;
+  _count?: { expenses: number };
+}
+
+export type ExpenseCategory =
+  | "OPERATIONS"
+  | "MAINTENANCE"
+  | "SALARIES_WAGES"
+  | "TRANSPORT_LOGISTICS"
+  | "UTILITIES"
+  | "PROFESSIONAL_SERVICES"
+  | "EQUIPMENT_SUPPLIES"
+  | "RENT_LEASE"
+  | "INSURANCE"
+  | "TAXES_LEVIES"
+  | "OTHER";
+
+export type ExpenseStatus = "PENDING" | "PAID" | "CANCELLED";
+export type PaymentMethod = "EFT" | "CASH" | "CHEQUE" | "CARD" | "OTHER";
+
+export interface Expense {
+  id: string;
+  siteId: string;
+  site?: { id: string; name: string };
+  payeeId: string;
+  payee?: { id: string; name: string; payeeType: PayeeType };
+  expenseNumber: string;
+  category: ExpenseCategory;
+  description: string;
+  amount: number;
+  currency: string;
+  expenseDate: string;
+  paymentMethod: PaymentMethod;
+  status: ExpenseStatus;
+  referenceNumber?: string | null;
+  notes?: string | null;
+  documentId?: string | null;
+  createdBy?: { id: string; name: string } | null;
+  createdAt: string;
+}
+
+export interface ProductionFinancialSummary {
+  months: { month: string; tonnesMined: number; earnings: number; expenses: number }[];
+  totals: { totalTonnes: number; totalEarnings: number; totalExpenses: number; netMargin: number };
+  expensesByCategory: { category: ExpenseCategory; amount: number }[];
 }

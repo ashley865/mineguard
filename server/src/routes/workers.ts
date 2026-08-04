@@ -148,14 +148,37 @@ router.get("/:id/profile", async (req, res) => {
   const since90 = new Date();
   since90.setDate(since90.getDate() - 90);
 
-  const [attendance90, certificates, trainingRecords, medicalRecords] = await Promise.all([
+  const yearStart = new Date(new Date().getFullYear(), 0, 1);
+
+  const [attendance90, attendance30, certificates, trainingRecords, medicalRecords, leaveRequests, payslips] = await Promise.all([
     prisma.workerAttendance.findMany({
       where: { workerId: worker.id, checkInAt: { gte: since90 } },
       orderBy: { checkInAt: "desc" },
     }),
+    prisma.workerAttendance.findMany({
+      where: { workerId: worker.id, checkInAt: { gte: new Date(Date.now() - 30 * 86400000) } },
+      orderBy: { checkInAt: "asc" },
+    }),
     prisma.certificate.findMany({ where: { workerId: worker.id }, orderBy: { issueDate: "desc" } }),
     prisma.trainingRecord.findMany({ where: { workerId: worker.id }, orderBy: { completionDate: "desc" } }),
-    prisma.medicalSurveillance.findMany({ where: { workerId: worker.id }, orderBy: { examDate: "desc" }, take: 1 }),
+    prisma.medicalSurveillance.findMany({ where: { workerId: worker.id }, orderBy: { examDate: "desc" } }),
+    prisma.leaveRequest.findMany({ where: { workerId: worker.id }, orderBy: { startDate: "desc" } }),
+    prisma.payslip.findMany({
+      where: { workerId: worker.id },
+      select: {
+        id: true,
+        payPeriodStart: true,
+        payPeriodEnd: true,
+        grossPay: true,
+        deductions: true,
+        netPay: true,
+        issuedAt: true,
+        fileName: true,
+        fileMimeType: true,
+      },
+      orderBy: { payPeriodEnd: "desc" },
+      take: 12,
+    }),
   ]);
 
   const daysWorkedSet = new Set(attendance90.map((a) => a.checkInAt.toISOString().slice(0, 10)));
@@ -164,6 +187,23 @@ router.get("/:id/profile", async (req, res) => {
     const hours = (a.checkOutAt!.getTime() - a.checkInAt.getTime()) / (1000 * 60 * 60);
     return sum + hours;
   }, 0);
+
+  const dailyHoursMap = new Map<string, number>();
+  for (const a of attendance30) {
+    if (!a.checkOutAt) continue;
+    const key = a.checkInAt.toISOString().slice(0, 10);
+    const hours = (a.checkOutAt.getTime() - a.checkInAt.getTime()) / (1000 * 60 * 60);
+    dailyHoursMap.set(key, (dailyHoursMap.get(key) ?? 0) + hours);
+  }
+  const dailyHoursLast30 = Array.from(dailyHoursMap.entries())
+    .map(([date, hours]) => ({ date, hours: Math.round(hours * 10) / 10 }))
+    .sort((a, b) => a.date.localeCompare(b.date));
+
+  const leaveThisYear = leaveRequests.filter((l) => l.status === "APPROVED" && l.startDate >= yearStart);
+  const leaveDaysByType: Record<string, number> = {};
+  for (const l of leaveThisYear) {
+    leaveDaysByType[l.leaveType] = (leaveDaysByType[l.leaveType] ?? 0) + l.daysRequested;
+  }
 
   res.json({
     worker: withHasPhoto(worker),
@@ -175,10 +215,16 @@ router.get("/:id/profile", async (req, res) => {
       totalCertificates: certificates.length,
       trainingCompleted: trainingRecords.length,
       latestMedicalResult: medicalRecords[0]?.result ?? null,
+      leaveDaysTakenThisYear: Object.values(leaveDaysByType).reduce((sum, d) => sum + d, 0),
     },
     recentAttendance: attendance90.slice(0, 10),
+    dailyHoursLast30,
     certificates,
     trainingRecords,
+    medicalRecords,
+    leaveDaysByType,
+    recentLeaveRequests: leaveRequests.slice(0, 10),
+    payslips,
   });
 });
 

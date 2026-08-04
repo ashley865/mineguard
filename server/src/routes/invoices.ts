@@ -2,6 +2,7 @@ import { Router } from "express";
 import { z } from "zod";
 import { prisma } from "../prisma";
 import { requireAuth, requireRole } from "../middleware/auth";
+import { renderInvoiceHtml } from "../lib/invoiceHtml";
 
 const router = Router();
 
@@ -42,6 +43,7 @@ const invoiceSelect = {
   vatRate: true,
   notes: true,
   status: true,
+  documentId: true,
   createdBy: { select: { id: true, name: true } },
   lines: { select: { id: true, description: true, quantity: true, unitPrice: true, lineTotal: true } },
   createdAt: true,
@@ -77,9 +79,36 @@ router.post("/", requireRole("ADMIN", "SUPERVISOR", "EXECUTIVE"), async (req, re
       createdById: req.auth!.userId,
       lines: { create: lines.map((l) => ({ ...l, lineTotal: l.quantity * l.unitPrice })) },
     },
-    select: invoiceSelect,
+    include: { site: { select: { id: true, name: true } }, lines: true },
   });
-  res.status(201).json(invoice);
+
+  try {
+    const user = await prisma.user.findUnique({ where: { id: req.auth!.userId }, select: { mineId: true } });
+    const mine = user?.mineId ? await prisma.mine.findUnique({ where: { id: user.mineId }, select: { name: true } }) : null;
+    const html = renderInvoiceHtml(invoice, mine?.name ?? "Mine Guard", invoice.site.name);
+    const document = await prisma.document.create({
+      data: {
+        title: `Invoice ${invoice.invoiceNumber} — ${invoice.clientName}`,
+        type: "INVOICE",
+        version: "1.0",
+        status: "ACTIVE",
+        description: `Auto-generated invoice document for ${invoice.clientName}`,
+        siteId: invoice.siteId,
+        fileName: `Invoice-${invoice.invoiceNumber}.html`,
+        fileMimeType: "text/html",
+        fileSize: Buffer.byteLength(html),
+        fileData: Buffer.from(html),
+        uploadedById: req.auth!.userId,
+      },
+    });
+    await prisma.invoice.update({ where: { id: invoice.id }, data: { documentId: document.id } });
+  } catch {
+    // Document Vault entry is a convenience mirror of the invoice; the invoice itself
+    // has already been created successfully, so a failure here must not fail the request.
+  }
+
+  const full = await prisma.invoice.findUnique({ where: { id: invoice.id }, select: invoiceSelect });
+  res.status(201).json(full);
 });
 
 router.put("/:id", requireRole("ADMIN", "SUPERVISOR", "EXECUTIVE"), async (req, res) => {

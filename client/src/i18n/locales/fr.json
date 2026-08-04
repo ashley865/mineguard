@@ -21,7 +21,8 @@
     "reject": "Rejeter",
     "reviewNotePlaceholder": "Note facultative…",
     "reviewedBy": "Révisé par {{name}}",
-    "copy": "Copier"
+    "copy": "Copier",
+    "notes": "Notes"
   },
   "nav": {
     "dashboard": "Tableau de bord",
@@ -269,7 +270,24 @@
     "lastMedical": "Dernier Examen Médical",
     "recentAttendance": "Présence Récente",
     "noAttendance": "Aucune présence enregistrée au cours des 90 derniers jours.",
-    "stillOnShift": "Encore en service"
+    "stillOnShift": "Encore en service",
+    "leaveDaysYear": "Jours de Congé (Année)",
+    "contactInfo": "Coordonnées",
+    "hoursLast30": "Heures Travaillées (30 derniers jours)",
+    "certificatesSection": "Certificats de Compétence",
+    "noCertificates": "Aucun certificat enregistré.",
+    "trainingSection": "Registres de Formation",
+    "noTrainingRecords": "Aucun registre de formation.",
+    "medicalHistory": "Historique de Surveillance Médicale",
+    "noMedical": "Aucun registre de surveillance médicale.",
+    "leaveSummary": "Congés Pris Cette Année",
+    "noLeaveThisYear": "Aucun congé approuvé pris cette année.",
+    "recentLeave": "Demandes de Congé Récentes",
+    "noLeaveRequests": "Aucune demande de congé enregistrée.",
+    "payslipsSection": "Fiches de Paie Récentes",
+    "noPayslips": "Aucune fiche de paie enregistrée.",
+    "downloadPayslip": "Télécharger",
+    "netPay": "Salaire Net"
   },
   "equipment": {
     "title": "Équipements",
@@ -376,7 +394,8 @@
       "SHORTLISTED": "Présélectionnée",
       "AWARDED": "Attribuée",
       "CANCELLED": "Annulée",
-      "ACTION_REQUIRED": "Action requise"
+      "ACTION_REQUIRED": "Action requise",
+      "PAID": "Payé"
     },
     "severity": {
       "LOW": "Faible",
@@ -656,7 +675,9 @@
       "PROCEDURE": "Procédure",
       "DRAWING": "Plan",
       "CONTRACT": "Contrat",
-      "OTHER": "Autre"
+      "OTHER": "Autre",
+      "INVOICE": "Facture",
+      "EXPENSE_RECEIPT": "Reçu de Dépense"
     },
     "vault": {
       "title": "Coffre des Documents",
@@ -1195,7 +1216,17 @@
     "newRecordTitle": "Nouvel Enregistrement de Production",
     "editRecordTitle": "Modifier l'Enregistrement de Production",
     "noneYet": "Aucun enregistrement de production pour le moment.",
-    "confirmDelete": "Supprimer cet enregistrement de production ?"
+    "confirmDelete": "Supprimer cet enregistrement de production ?",
+    "tabRecords": "Registres de Production",
+    "tabFinancial": "Performance Financière",
+    "allSites": "Tous les Sites",
+    "lastNMonths": "{{count}} derniers mois",
+    "totalEarnings": "Revenus Totaux",
+    "totalExpenses": "Dépenses Totales",
+    "netMargin": "Marge Nette",
+    "earningsVsExpenses": "Revenus vs Dépenses vs Tonnes Extraites",
+    "earnings": "Revenus",
+    "expenses": "Dépenses"
   },
   "maintenance": {
     "nav": "Planification de Maintenance",
@@ -1540,6 +1571,67 @@
     "viewInvoice": "Voir",
     "backToList": "Retour aux Factures",
     "print": "Imprimer",
-    "createError": "Impossible de créer cette facture"
+    "createError": "Impossible de créer cette facture",
+    "viewDocument": "Voir dans le Coffre de Documents"
+  },
+  "expenses": {
+    "nav": "Dépenses",
+    "subtitle": "Enregistrez les dépenses payées et tenez un registre des acheteurs et entreprises pouvant être payés",
+    "tabExpenses": "Dépenses",
+    "tabPayees": "Bénéficiaires",
+    "newExpense": "+ Nouvelle Dépense",
+    "newExpenseTitle": "Nouvelle Dépense",
+    "newPayee": "+ Nouveau Bénéficiaire",
+    "newPayeeTitle": "Nouveau Bénéficiaire",
+    "editPayeeTitle": "Modifier le Bénéficiaire",
+    "expenseNumber": "Numéro de dépense",
+    "payee": "Bénéficiaire",
+    "category": "Catégorie",
+    "amount": "Montant",
+    "expenseDate": "Date de la dépense",
+    "paymentMethod": "Mode de paiement",
+    "referenceNumber": "Numéro de référence",
+    "receipt": "Reçu",
+    "receiptHint": "Facultatif. Formats acceptés : images et PDF.",
+    "totalPaid": "Total Payé",
+    "viewReceipt": "Voir le Reçu",
+    "noneYet": "Aucune dépense enregistrée pour le moment.",
+    "confirmDelete": "Supprimer cette dépense ?",
+    "createError": "Impossible de créer cette dépense",
+    "registerPayeeFirst": "Enregistrez un bénéficiaire avant de saisir une dépense.",
+    "payeeType": "Type de bénéficiaire",
+    "payeeName": "Nom du bénéficiaire / de l'entreprise",
+    "bankingDetails": "Coordonnées Bancaires",
+    "noPayeesYet": "Aucun bénéficiaire enregistré pour le moment.",
+    "confirmDeletePayee": "Supprimer ce bénéficiaire ?",
+    "deletePayeeError": "Impossible de supprimer ce bénéficiaire",
+    "expenseCount": "Dépenses",
+    "byCategory": "Dépenses par Catégorie",
+    "categories": {
+      "OPERATIONS": "Opérations",
+      "MAINTENANCE": "Maintenance",
+      "SALARIES_WAGES": "Salaires et Traitements",
+      "TRANSPORT_LOGISTICS": "Transport et Logistique",
+      "UTILITIES": "Services Publics",
+      "PROFESSIONAL_SERVICES": "Services Professionnels",
+      "EQUIPMENT_SUPPLIES": "Équipements et Fournitures",
+      "RENT_LEASE": "Loyer et Location",
+      "INSURANCE": "Assurance",
+      "TAXES_LEVIES": "Taxes et Prélèvements",
+      "OTHER": "Autre"
+    },
+    "paymentMethods": {
+      "EFT": "Virement (EFT)",
+      "CASH": "Espèces",
+      "CHEQUE": "Chèque",
+      "CARD": "Carte",
+      "OTHER": "Autre"
+    },
+    "payeeTypes": {
+      "COMPANY": "Entreprise",
+      "INDIVIDUAL": "Particulier",
+      "BUYER": "Acheteur",
+      "CONTRACTOR": "Entrepreneur"
+    }
   }
 }

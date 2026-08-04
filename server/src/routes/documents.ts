@@ -23,6 +23,8 @@ const documentTypeEnum = z.enum([
   "PROCEDURE",
   "DRAWING",
   "CONTRACT",
+  "INVOICE",
+  "EXPENSE_RECEIPT",
   "OTHER",
 ]);
 const documentStatusEnum = z.enum(["DRAFT", "ACTIVE", "UNDER_REVIEW", "ARCHIVED", "WITHDRAWN"]);

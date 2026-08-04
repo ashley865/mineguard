@@ -21,7 +21,8 @@
     "reject": "Ablehnen",
     "reviewNotePlaceholder": "Optionale Anmerkung…",
     "reviewedBy": "Geprüft von {{name}}",
-    "copy": "Kopieren"
+    "copy": "Kopieren",
+    "notes": "Notizen"
   },
   "nav": {
     "dashboard": "Übersicht",
@@ -269,7 +270,24 @@
     "lastMedical": "Letzte Untersuchung",
     "recentAttendance": "Letzte Anwesenheit",
     "noAttendance": "In den letzten 90 Tagen keine Anwesenheit erfasst.",
-    "stillOnShift": "Noch im Dienst"
+    "stillOnShift": "Noch im Dienst",
+    "leaveDaysYear": "Urlaubstage (Jahr)",
+    "contactInfo": "Kontaktinformationen",
+    "hoursLast30": "Gearbeitete Stunden (Letzte 30 Tage)",
+    "certificatesSection": "Befähigungszertifikate",
+    "noCertificates": "Keine Zertifikate erfasst.",
+    "trainingSection": "Schulungsnachweise",
+    "noTrainingRecords": "Keine Schulungsnachweise vorhanden.",
+    "medicalHistory": "Verlauf der Arbeitsmedizinischen Vorsorge",
+    "noMedical": "Keine arbeitsmedizinischen Vorsorgeuntersuchungen erfasst.",
+    "leaveSummary": "Dieses Jahr Genommener Urlaub",
+    "noLeaveThisYear": "Dieses Jahr kein genehmigter Urlaub genommen.",
+    "recentLeave": "Aktuelle Urlaubsanträge",
+    "noLeaveRequests": "Keine Urlaubsanträge erfasst.",
+    "payslipsSection": "Aktuelle Gehaltsabrechnungen",
+    "noPayslips": "Keine Gehaltsabrechnungen erfasst.",
+    "downloadPayslip": "Herunterladen",
+    "netPay": "Nettolohn"
   },
   "equipment": {
     "title": "Ausrüstung",
@@ -376,7 +394,8 @@
       "SHORTLISTED": "In die engere Wahl gezogen",
       "AWARDED": "Vergeben",
       "CANCELLED": "Storniert",
-      "ACTION_REQUIRED": "Maßnahme erforderlich"
+      "ACTION_REQUIRED": "Maßnahme erforderlich",
+      "PAID": "Bezahlt"
     },
     "severity": {
       "LOW": "Niedrig",
@@ -656,7 +675,9 @@
       "PROCEDURE": "Verfahren",
       "DRAWING": "Zeichnung",
       "CONTRACT": "Vertrag",
-      "OTHER": "Sonstiges"
+      "OTHER": "Sonstiges",
+      "INVOICE": "Rechnung",
+      "EXPENSE_RECEIPT": "Ausgabenbeleg"
     },
     "vault": {
       "title": "Dokumententresor",
@@ -1195,7 +1216,17 @@
     "newRecordTitle": "Neuer Produktionseintrag",
     "editRecordTitle": "Produktionseintrag bearbeiten",
     "noneYet": "Noch keine Produktionseinträge.",
-    "confirmDelete": "Diesen Produktionseintrag löschen?"
+    "confirmDelete": "Diesen Produktionseintrag löschen?",
+    "tabRecords": "Produktionsaufzeichnungen",
+    "tabFinancial": "Finanzielle Leistung",
+    "allSites": "Alle Standorte",
+    "lastNMonths": "Letzte {{count}} Monate",
+    "totalEarnings": "Gesamteinnahmen",
+    "totalExpenses": "Gesamtausgaben",
+    "netMargin": "Nettomarge",
+    "earningsVsExpenses": "Einnahmen vs. Ausgaben vs. Geförderte Tonnen",
+    "earnings": "Einnahmen",
+    "expenses": "Ausgaben"
   },
   "maintenance": {
     "nav": "Wartungsplanung",
@@ -1540,6 +1571,67 @@
     "viewInvoice": "Ansehen",
     "backToList": "Zurück zu Rechnungen",
     "print": "Drucken",
-    "createError": "Diese Rechnung konnte nicht erstellt werden"
+    "createError": "Diese Rechnung konnte nicht erstellt werden",
+    "viewDocument": "Im Dokumententresor Ansehen"
+  },
+  "expenses": {
+    "nav": "Ausgaben",
+    "subtitle": "Erfassen Sie bezahlte Ausgaben und führen Sie ein Register von Käufern und Unternehmen, die bezahlt werden können",
+    "tabExpenses": "Ausgaben",
+    "tabPayees": "Zahlungsempfänger",
+    "newExpense": "+ Neue Ausgabe",
+    "newExpenseTitle": "Neue Ausgabe",
+    "newPayee": "+ Neuer Zahlungsempfänger",
+    "newPayeeTitle": "Neuer Zahlungsempfänger",
+    "editPayeeTitle": "Zahlungsempfänger Bearbeiten",
+    "expenseNumber": "Ausgabennummer",
+    "payee": "Zahlungsempfänger",
+    "category": "Kategorie",
+    "amount": "Betrag",
+    "expenseDate": "Ausgabendatum",
+    "paymentMethod": "Zahlungsmethode",
+    "referenceNumber": "Referenznummer",
+    "receipt": "Beleg",
+    "receiptHint": "Optional. Akzeptierte Formate: Bilder und PDF.",
+    "totalPaid": "Gesamt Bezahlt",
+    "viewReceipt": "Beleg Ansehen",
+    "noneYet": "Noch keine Ausgaben erfasst.",
+    "confirmDelete": "Diese Ausgabe löschen?",
+    "createError": "Diese Ausgabe konnte nicht erstellt werden",
+    "registerPayeeFirst": "Registrieren Sie zuerst einen Zahlungsempfänger, bevor Sie eine Ausgabe erfassen.",
+    "payeeType": "Art des Zahlungsempfängers",
+    "payeeName": "Name des Zahlungsempfängers / Unternehmens",
+    "bankingDetails": "Bankverbindung",
+    "noPayeesYet": "Noch keine Zahlungsempfänger registriert.",
+    "confirmDeletePayee": "Diesen Zahlungsempfänger löschen?",
+    "deletePayeeError": "Dieser Zahlungsempfänger konnte nicht gelöscht werden",
+    "expenseCount": "Ausgaben",
+    "byCategory": "Ausgaben nach Kategorie",
+    "categories": {
+      "OPERATIONS": "Betrieb",
+      "MAINTENANCE": "Wartung",
+      "SALARIES_WAGES": "Gehälter und Löhne",
+      "TRANSPORT_LOGISTICS": "Transport und Logistik",
+      "UTILITIES": "Nebenkosten",
+      "PROFESSIONAL_SERVICES": "Professionelle Dienstleistungen",
+      "EQUIPMENT_SUPPLIES": "Ausrüstung und Verbrauchsmaterial",
+      "RENT_LEASE": "Miete und Pacht",
+      "INSURANCE": "Versicherung",
+      "TAXES_LEVIES": "Steuern und Abgaben",
+      "OTHER": "Sonstiges"
+    },
+    "paymentMethods": {
+      "EFT": "Überweisung (EFT)",
+      "CASH": "Bargeld",
+      "CHEQUE": "Scheck",
+      "CARD": "Karte",
+      "OTHER": "Sonstiges"
+    },
+    "payeeTypes": {
+      "COMPANY": "Unternehmen",
+      "INDIVIDUAL": "Einzelperson",
+      "BUYER": "Käufer",
+      "CONTRACTOR": "Auftragnehmer"
+    }
   }
 }

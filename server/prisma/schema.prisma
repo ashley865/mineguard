@@ -208,6 +208,8 @@ model User {
   poRequests             PurchaseOrder[]         @relation("PORequestedBy")
   poApprovals            PurchaseOrder[]         @relation("POApprovedBy")
   invoicesCreated        Invoice[]               @relation("InvoiceCreatedBy")
+  payeesCreated          Payee[]                 @relation("PayeeCreatedBy")
+  expensesCreated        Expense[]               @relation("ExpenseCreatedBy")
 }
 
 model Site {
@@ -253,6 +255,7 @@ model Site {
   trainingCourses      TrainingCourse[]
   purchaseOrders       PurchaseOrder[]
   invoices             Invoice[]
+  expenses             Expense[]
 }
 
 model Zone {
@@ -609,6 +612,8 @@ enum DocumentType {
   PROCEDURE
   DRAWING
   CONTRACT
+  INVOICE
+  EXPENSE_RECEIPT
   OTHER
 }
 
@@ -638,6 +643,9 @@ model Document {
 
   uploadedById String?
   uploadedBy   User?   @relation(fields: [uploadedById], references: [id], onDelete: SetNull)
+
+  invoices Invoice[]
+  expenses Expense[]
 
   createdAt DateTime @default(now())
 }
@@ -1627,6 +1635,8 @@ model Invoice {
   status          InvoiceStatus @default(DRAFT)
   createdById     String?
   createdBy       User?         @relation("InvoiceCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+  documentId      String?
+  document        Document?     @relation(fields: [documentId], references: [id], onDelete: SetNull)
 
   lines InvoiceLine[]
 
@@ -1641,6 +1651,87 @@ model InvoiceLine {
   quantity    Float
   unitPrice   Float
   lineTotal   Float
+
+  createdAt DateTime @default(now())
+}
+
+enum PayeeType {
+  COMPANY
+  INDIVIDUAL
+  BUYER
+  CONTRACTOR
+}
+
+model Payee {
+  id                 String    @id @default(cuid())
+  payeeType          PayeeType @default(COMPANY)
+  name               String
+  registrationNumber String?
+  taxNumber          String?
+  contactName        String?
+  contactEmail       String?
+  contactPhone       String?
+  bankName           String?
+  bankAccountHolder  String?
+  bankAccountNumber  String?
+  bankBranchCode     String?
+  notes              String?
+  createdById        String?
+  createdBy          User?     @relation("PayeeCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+
+  expenses Expense[]
+
+  createdAt DateTime @default(now())
+}
+
+enum ExpenseCategory {
+  OPERATIONS
+  MAINTENANCE
+  SALARIES_WAGES
+  TRANSPORT_LOGISTICS
+  UTILITIES
+  PROFESSIONAL_SERVICES
+  EQUIPMENT_SUPPLIES
+  RENT_LEASE
+  INSURANCE
+  TAXES_LEVIES
+  OTHER
+}
+
+enum ExpenseStatus {
+  PENDING
+  PAID
+  CANCELLED
+}
+
+enum PaymentMethod {
+  EFT
+  CASH
+  CHEQUE
+  CARD
+  OTHER
+}
+
+model Expense {
+  id             String          @id @default(cuid())
+  siteId         String
+  site           Site            @relation(fields: [siteId], references: [id], onDelete: Cascade)
+  payeeId        String
+  payee          Payee           @relation(fields: [payeeId], references: [id], onDelete: Restrict)
+  expenseNumber  String
+  category       ExpenseCategory @default(OTHER)
+  description    String
+  amount         Float
+  currency       String          @default("ZAR")
+  expenseDate    DateTime        @default(now())
+  paymentMethod  PaymentMethod   @default(EFT)
+  status         ExpenseStatus   @default(PAID)
+  referenceNumber String?
+  notes          String?
+  documentId     String?
+  document       Document?       @relation(fields: [documentId], references: [id], onDelete: SetNull)
+  createdById    String?
+  createdBy      User?           @relation("ExpenseCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
 
   createdAt DateTime @default(now())
 }

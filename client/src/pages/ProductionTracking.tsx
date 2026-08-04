@@ -6,8 +6,10 @@ import { ProductionRecord, ProductionShift, Site, Zone } from "../api/types";
 import Modal from "../components/Modal";
 import { buttonDanger, buttonPrimary, buttonSecondary, cardClass, inputClass, labelClass, selectClass } from "../components/ui";
 import DateField from "../components/DateField";
+import FinancialPerformanceTab from "./production/FinancialPerformanceTab";
 
 const shifts: ProductionShift[] = ["DAY", "AFTERNOON", "NIGHT"];
+type TabKey = "records" | "financial";
 
 function ProductionForm({ sites, zones, initial, onSubmit, onCancel }: {
   sites: Site[];
@@ -125,6 +127,7 @@ export default function ProductionTracking() {
   const [zones, setZones] = useState<Zone[]>([]);
   const [loading, setLoading] = useState(true);
   const [modal, setModal] = useState<null | "create" | ProductionRecord>(null);
+  const [tab, setTab] = useState<TabKey>("records");
 
   async function load() {
     setLoading(true);
@@ -172,11 +175,24 @@ export default function ProductionTracking() {
           <h1 className="text-xl font-bold">{t("production.nav")}</h1>
           <p className="text-mine-300 text-sm">{t("production.subtitle")}</p>
         </div>
-        {canEdit && sites.length > 0 && (
+        {canEdit && tab === "records" && sites.length > 0 && (
           <button className={buttonPrimary} onClick={() => setModal("create")}>{t("production.newRecord")}</button>
         )}
       </div>
 
+      <div className="flex gap-2 flex-wrap">
+        <button className={tab === "records" ? buttonPrimary : buttonSecondary} onClick={() => setTab("records")}>
+          {t("production.tabRecords")}
+        </button>
+        <button className={tab === "financial" ? buttonPrimary : buttonSecondary} onClick={() => setTab("financial")}>
+          {t("production.tabFinancial")}
+        </button>
+      </div>
+
+      {tab === "financial" && <FinancialPerformanceTab sites={sites} />}
+
+      {tab === "records" && (
+      <>
       <div className={`${cardClass} p-4 flex items-center gap-2`}>
         <span className="text-mine-400 text-xs uppercase">{t("production.totalTonnes")}</span>
         <span className="text-lg font-bold">{totalTonnes.toLocaleString()}</span>
@@ -224,6 +240,8 @@ export default function ProductionTracking() {
           </tbody>
         </table>
       </div>
+      </>
+      )}
 
       {modal && (
         <Modal title={modal === "create" ? t("production.newRecordTitle") : t("production.editRecordTitle")} onClose={() => setModal(null)}>

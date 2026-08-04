@@ -21,7 +21,8 @@
     "reject": "Reject",
     "reviewNotePlaceholder": "Optional note…",
     "reviewedBy": "Reviewed by {{name}}",
-    "copy": "Copy"
+    "copy": "Copy",
+    "notes": "Notes"
   },
   "nav": {
     "dashboard": "Dashboard",
@@ -269,7 +270,24 @@
     "lastMedical": "Last Medical",
     "recentAttendance": "Recent Attendance",
     "noAttendance": "No attendance recorded in the last 90 days.",
-    "stillOnShift": "Still on shift"
+    "stillOnShift": "Still on shift",
+    "leaveDaysYear": "Leave Days (Year)",
+    "contactInfo": "Contact Information",
+    "hoursLast30": "Hours Worked (Last 30 Days)",
+    "certificatesSection": "Certificates of Competency",
+    "noCertificates": "No certificates on record.",
+    "trainingSection": "Training Records",
+    "noTrainingRecords": "No training records on record.",
+    "medicalHistory": "Medical Surveillance History",
+    "noMedical": "No medical surveillance records on record.",
+    "leaveSummary": "Leave Taken This Year",
+    "noLeaveThisYear": "No approved leave taken this year.",
+    "recentLeave": "Recent Leave Requests",
+    "noLeaveRequests": "No leave requests on record.",
+    "payslipsSection": "Recent Payslips",
+    "noPayslips": "No payslips on record.",
+    "downloadPayslip": "Download",
+    "netPay": "Net Pay"
   },
   "equipment": {
     "title": "Equipment",
@@ -376,7 +394,8 @@
       "SHORTLISTED": "Shortlisted",
       "AWARDED": "Awarded",
       "CANCELLED": "Cancelled",
-      "ACTION_REQUIRED": "Action required"
+      "ACTION_REQUIRED": "Action required",
+      "PAID": "Paid"
     },
     "severity": {
       "LOW": "Low",
@@ -656,6 +675,8 @@
       "PROCEDURE": "Procedure",
       "DRAWING": "Drawing",
       "CONTRACT": "Contract",
+      "INVOICE": "Invoice",
+      "EXPENSE_RECEIPT": "Expense Receipt",
       "OTHER": "Other"
     },
     "vault": {
@@ -1195,7 +1216,17 @@
     "newRecordTitle": "New Production Record",
     "editRecordTitle": "Edit Production Record",
     "noneYet": "No production records yet.",
-    "confirmDelete": "Delete this production record?"
+    "confirmDelete": "Delete this production record?",
+    "tabRecords": "Production Records",
+    "tabFinancial": "Financial Performance",
+    "allSites": "All Sites",
+    "lastNMonths": "Last {{count}} months",
+    "totalEarnings": "Total Earnings",
+    "totalExpenses": "Total Expenses",
+    "netMargin": "Net Margin",
+    "earningsVsExpenses": "Earnings vs Expenses vs Tonnes Mined",
+    "earnings": "Earnings",
+    "expenses": "Expenses"
   },
   "maintenance": {
     "nav": "Maintenance Scheduling",
@@ -1540,6 +1571,67 @@
     "viewInvoice": "View",
     "backToList": "Back to Invoices",
     "print": "Print",
-    "createError": "Could not create this invoice"
+    "createError": "Could not create this invoice",
+    "viewDocument": "View in Document Vault"
+  },
+  "expenses": {
+    "nav": "Expenses",
+    "subtitle": "Log paid expenses and maintain a registry of buyers and companies that can be paid",
+    "tabExpenses": "Expenses",
+    "tabPayees": "Payees",
+    "newExpense": "+ New Expense",
+    "newExpenseTitle": "New Expense",
+    "newPayee": "+ New Payee",
+    "newPayeeTitle": "New Payee",
+    "editPayeeTitle": "Edit Payee",
+    "expenseNumber": "Expense number",
+    "payee": "Payee",
+    "category": "Category",
+    "amount": "Amount",
+    "expenseDate": "Expense date",
+    "paymentMethod": "Payment method",
+    "referenceNumber": "Reference number",
+    "receipt": "Receipt",
+    "receiptHint": "Optional. Accepted formats: images and PDF.",
+    "totalPaid": "Total Paid",
+    "viewReceipt": "View Receipt",
+    "noneYet": "No expenses recorded yet.",
+    "confirmDelete": "Delete this expense?",
+    "createError": "Could not create this expense",
+    "registerPayeeFirst": "Register a payee first before logging an expense.",
+    "payeeType": "Payee type",
+    "payeeName": "Payee / company name",
+    "bankingDetails": "Banking Details",
+    "noPayeesYet": "No payees registered yet.",
+    "confirmDeletePayee": "Delete this payee?",
+    "deletePayeeError": "Could not delete this payee",
+    "expenseCount": "Expenses",
+    "byCategory": "Expenses by Category",
+    "categories": {
+      "OPERATIONS": "Operations",
+      "MAINTENANCE": "Maintenance",
+      "SALARIES_WAGES": "Salaries & Wages",
+      "TRANSPORT_LOGISTICS": "Transport & Logistics",
+      "UTILITIES": "Utilities",
+      "PROFESSIONAL_SERVICES": "Professional Services",
+      "EQUIPMENT_SUPPLIES": "Equipment & Supplies",
+      "RENT_LEASE": "Rent & Lease",
+      "INSURANCE": "Insurance",
+      "TAXES_LEVIES": "Taxes & Levies",
+      "OTHER": "Other"
+    },
+    "paymentMethods": {
+      "EFT": "EFT",
+      "CASH": "Cash",
+      "CHEQUE": "Cheque",
+      "CARD": "Card",
+      "OTHER": "Other"
+    },
+    "payeeTypes": {
+      "COMPANY": "Company",
+      "INDIVIDUAL": "Individual",
+      "BUYER": "Buyer",
+      "CONTRACTOR": "Contractor"
+    }
   }
 }

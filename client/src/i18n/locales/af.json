@@ -21,7 +21,8 @@
     "reject": "Verwerp",
     "reviewNotePlaceholder": "Opsionele nota…",
     "reviewedBy": "Nagegaan deur {{name}}",
-    "copy": "Kopieer"
+    "copy": "Kopieer",
+    "notes": "Notas"
   },
   "nav": {
     "dashboard": "Oorsig",
@@ -269,7 +270,24 @@
     "lastMedical": "Laaste Mediese Ondersoek",
     "recentAttendance": "Onlangse Bywoning",
     "noAttendance": "Geen bywoning in die afgelope 90 dae aangeteken nie.",
-    "stillOnShift": "Steeds aan diens"
+    "stillOnShift": "Steeds aan diens",
+    "leaveDaysYear": "Verlofdae (Jaar)",
+    "contactInfo": "Kontakbesonderhede",
+    "hoursLast30": "Ure Gewerk (Laaste 30 Dae)",
+    "certificatesSection": "Bevoegdheidsertifikate",
+    "noCertificates": "Geen sertifikate aangeteken nie.",
+    "trainingSection": "Opleidingsrekords",
+    "noTrainingRecords": "Geen opleidingsrekords nie.",
+    "medicalHistory": "Mediese Toesighistorie",
+    "noMedical": "Geen mediese toesigrekords nie.",
+    "leaveSummary": "Verlof Geneem Vanjaar",
+    "noLeaveThisYear": "Geen goedgekeurde verlof vanjaar geneem nie.",
+    "recentLeave": "Onlangse Verlofaansoeke",
+    "noLeaveRequests": "Geen verlofaansoeke aangeteken nie.",
+    "payslipsSection": "Onlangse Salarisstrokies",
+    "noPayslips": "Geen salarisstrokies aangeteken nie.",
+    "downloadPayslip": "Laai af",
+    "netPay": "Netto Betaling"
   },
   "equipment": {
     "title": "Toerusting",
@@ -376,7 +394,8 @@
       "SHORTLISTED": "Op kortlys",
       "AWARDED": "Toegeken",
       "CANCELLED": "Gekanselleer",
-      "ACTION_REQUIRED": "Aksie vereis"
+      "ACTION_REQUIRED": "Aksie vereis",
+      "PAID": "Betaal"
     },
     "severity": {
       "LOW": "Laag",
@@ -656,7 +675,9 @@
       "PROCEDURE": "Prosedure",
       "DRAWING": "Tekening",
       "CONTRACT": "Kontrak",
-      "OTHER": "Ander"
+      "OTHER": "Ander",
+      "INVOICE": "Faktuur",
+      "EXPENSE_RECEIPT": "Uitgawekwitansie"
     },
     "vault": {
       "title": "Dokumentkluis",
@@ -1195,7 +1216,17 @@
     "newRecordTitle": "Nuwe Produksierekord",
     "editRecordTitle": "Wysig Produksierekord",
     "noneYet": "Nog geen produksierekords nie.",
-    "confirmDelete": "Skrap hierdie produksierekord?"
+    "confirmDelete": "Skrap hierdie produksierekord?",
+    "tabRecords": "Produksierekords",
+    "tabFinancial": "Finansiële Prestasie",
+    "allSites": "Alle Myne",
+    "lastNMonths": "Laaste {{count}} maande",
+    "totalEarnings": "Totale Inkomste",
+    "totalExpenses": "Totale Uitgawes",
+    "netMargin": "Netto Marge",
+    "earningsVsExpenses": "Inkomste vs Uitgawes vs Ton Ontgin",
+    "earnings": "Inkomste",
+    "expenses": "Uitgawes"
   },
   "maintenance": {
     "nav": "Onderhoudskedulering",
@@ -1540,6 +1571,67 @@
     "viewInvoice": "Bekyk",
     "backToList": "Terug na Fakture",
     "print": "Druk",
-    "createError": "Kon nie hierdie faktuur skep nie"
+    "createError": "Kon nie hierdie faktuur skep nie",
+    "viewDocument": "Bekyk in Dokumentkluis"
+  },
+  "expenses": {
+    "nav": "Uitgawes",
+    "subtitle": "Teken betaalde uitgawes aan en hou 'n register van kopers en maatskappye wat betaal kan word",
+    "tabExpenses": "Uitgawes",
+    "tabPayees": "Betalingsontvangers",
+    "newExpense": "+ Nuwe Uitgawe",
+    "newExpenseTitle": "Nuwe Uitgawe",
+    "newPayee": "+ Nuwe Betalingsontvanger",
+    "newPayeeTitle": "Nuwe Betalingsontvanger",
+    "editPayeeTitle": "Wysig Betalingsontvanger",
+    "expenseNumber": "Uitgawenommer",
+    "payee": "Betalingsontvanger",
+    "category": "Kategorie",
+    "amount": "Bedrag",
+    "expenseDate": "Uitgawedatum",
+    "paymentMethod": "Betaalmetode",
+    "referenceNumber": "Verwysingsnommer",
+    "receipt": "Kwitansie",
+    "receiptHint": "Opsioneel. Aanvaarde formate: beelde en PDF.",
+    "totalPaid": "Totaal Betaal",
+    "viewReceipt": "Bekyk Kwitansie",
+    "noneYet": "Nog geen uitgawes aangeteken nie.",
+    "confirmDelete": "Verwyder hierdie uitgawe?",
+    "createError": "Kon nie hierdie uitgawe skep nie",
+    "registerPayeeFirst": "Registreer eers 'n betalingsontvanger voordat jy 'n uitgawe aanteken.",
+    "payeeType": "Tipe betalingsontvanger",
+    "payeeName": "Naam van betalingsontvanger / maatskappy",
+    "bankingDetails": "Bankbesonderhede",
+    "noPayeesYet": "Nog geen betalingsontvangers geregistreer nie.",
+    "confirmDeletePayee": "Verwyder hierdie betalingsontvanger?",
+    "deletePayeeError": "Kon nie hierdie betalingsontvanger verwyder nie",
+    "expenseCount": "Uitgawes",
+    "byCategory": "Uitgawes volgens Kategorie",
+    "categories": {
+      "OPERATIONS": "Bedrywighede",
+      "MAINTENANCE": "Instandhouding",
+      "SALARIES_WAGES": "Salarisse en Lone",
+      "TRANSPORT_LOGISTICS": "Vervoer en Logistiek",
+      "UTILITIES": "Nutsdienste",
+      "PROFESSIONAL_SERVICES": "Professionele Dienste",
+      "EQUIPMENT_SUPPLIES": "Toerusting en Voorrade",
+      "RENT_LEASE": "Huur en Verhuring",
+      "INSURANCE": "Versekering",
+      "TAXES_LEVIES": "Belasting en Heffings",
+      "OTHER": "Ander"
+    },
+    "paymentMethods": {
+      "EFT": "EFT",
+      "CASH": "Kontant",
+      "CHEQUE": "Tjek",
+      "CARD": "Kaart",
+      "OTHER": "Ander"
+    },
+    "payeeTypes": {
+      "COMPANY": "Maatskappy",
+      "INDIVIDUAL": "Individu",
+      "BUYER": "Koper",
+      "CONTRACTOR": "Kontrakteur"
+    }
   }
 }

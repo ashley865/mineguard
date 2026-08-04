@@ -21,7 +21,8 @@
     "reject": "Rechazar",
     "reviewNotePlaceholder": "Nota opcional…",
     "reviewedBy": "Revisado por {{name}}",
-    "copy": "Copiar"
+    "copy": "Copiar",
+    "notes": "Notas"
   },
   "nav": {
     "dashboard": "Panel",
@@ -269,7 +270,24 @@
     "lastMedical": "Último Examen Médico",
     "recentAttendance": "Asistencia Reciente",
     "noAttendance": "No se registró asistencia en los últimos 90 días.",
-    "stillOnShift": "Aún en turno"
+    "stillOnShift": "Aún en turno",
+    "leaveDaysYear": "Días de Licencia (Año)",
+    "contactInfo": "Información de Contacto",
+    "hoursLast30": "Horas Trabajadas (Últimos 30 Días)",
+    "certificatesSection": "Certificados de Competencia",
+    "noCertificates": "No hay certificados registrados.",
+    "trainingSection": "Registros de Capacitación",
+    "noTrainingRecords": "No hay registros de capacitación.",
+    "medicalHistory": "Historial de Vigilancia Médica",
+    "noMedical": "No hay registros de vigilancia médica.",
+    "leaveSummary": "Licencia Tomada Este Año",
+    "noLeaveThisYear": "No se ha tomado licencia aprobada este año.",
+    "recentLeave": "Solicitudes de Licencia Recientes",
+    "noLeaveRequests": "No hay solicitudes de licencia registradas.",
+    "payslipsSection": "Recibos de Pago Recientes",
+    "noPayslips": "No hay recibos de pago registrados.",
+    "downloadPayslip": "Descargar",
+    "netPay": "Pago Neto"
   },
   "equipment": {
     "title": "Equipos",
@@ -376,7 +394,8 @@
       "SHORTLISTED": "Preseleccionada",
       "AWARDED": "Adjudicada",
       "CANCELLED": "Cancelada",
-      "ACTION_REQUIRED": "Acción requerida"
+      "ACTION_REQUIRED": "Acción requerida",
+      "PAID": "Pagado"
     },
     "severity": {
       "LOW": "Baja",
@@ -656,7 +675,9 @@
       "PROCEDURE": "Procedimiento",
       "DRAWING": "Plano",
       "CONTRACT": "Contrato",
-      "OTHER": "Otro"
+      "OTHER": "Otro",
+      "INVOICE": "Factura",
+      "EXPENSE_RECEIPT": "Recibo de Gasto"
     },
     "vault": {
       "title": "Bóveda de Documentos",
@@ -1195,7 +1216,17 @@
     "newRecordTitle": "Nuevo Registro de Producción",
     "editRecordTitle": "Editar Registro de Producción",
     "noneYet": "Aún no hay registros de producción.",
-    "confirmDelete": "¿Eliminar este registro de producción?"
+    "confirmDelete": "¿Eliminar este registro de producción?",
+    "tabRecords": "Registros de Producción",
+    "tabFinancial": "Desempeño Financiero",
+    "allSites": "Todos los Sitios",
+    "lastNMonths": "Últimos {{count}} meses",
+    "totalEarnings": "Ingresos Totales",
+    "totalExpenses": "Gastos Totales",
+    "netMargin": "Margen Neto",
+    "earningsVsExpenses": "Ingresos vs Gastos vs Toneladas Extraídas",
+    "earnings": "Ingresos",
+    "expenses": "Gastos"
   },
   "maintenance": {
     "nav": "Programación de Mantenimiento",
@@ -1540,6 +1571,67 @@
     "viewInvoice": "Ver",
     "backToList": "Volver a Facturas",
     "print": "Imprimir",
-    "createError": "No se pudo crear esta factura"
+    "createError": "No se pudo crear esta factura",
+    "viewDocument": "Ver en el Repositorio de Documentos"
+  },
+  "expenses": {
+    "nav": "Gastos",
+    "subtitle": "Registra gastos pagados y mantén un registro de compradores y empresas a las que se les puede pagar",
+    "tabExpenses": "Gastos",
+    "tabPayees": "Beneficiarios",
+    "newExpense": "+ Nuevo Gasto",
+    "newExpenseTitle": "Nuevo Gasto",
+    "newPayee": "+ Nuevo Beneficiario",
+    "newPayeeTitle": "Nuevo Beneficiario",
+    "editPayeeTitle": "Editar Beneficiario",
+    "expenseNumber": "Número de gasto",
+    "payee": "Beneficiario",
+    "category": "Categoría",
+    "amount": "Monto",
+    "expenseDate": "Fecha del gasto",
+    "paymentMethod": "Método de pago",
+    "referenceNumber": "Número de referencia",
+    "receipt": "Recibo",
+    "receiptHint": "Opcional. Formatos aceptados: imágenes y PDF.",
+    "totalPaid": "Total Pagado",
+    "viewReceipt": "Ver Recibo",
+    "noneYet": "Aún no se han registrado gastos.",
+    "confirmDelete": "¿Eliminar este gasto?",
+    "createError": "No se pudo crear este gasto",
+    "registerPayeeFirst": "Registra un beneficiario antes de registrar un gasto.",
+    "payeeType": "Tipo de beneficiario",
+    "payeeName": "Nombre del beneficiario / empresa",
+    "bankingDetails": "Datos Bancarios",
+    "noPayeesYet": "Aún no hay beneficiarios registrados.",
+    "confirmDeletePayee": "¿Eliminar este beneficiario?",
+    "deletePayeeError": "No se pudo eliminar este beneficiario",
+    "expenseCount": "Gastos",
+    "byCategory": "Gastos por Categoría",
+    "categories": {
+      "OPERATIONS": "Operaciones",
+      "MAINTENANCE": "Mantenimiento",
+      "SALARIES_WAGES": "Salarios y Sueldos",
+      "TRANSPORT_LOGISTICS": "Transporte y Logística",
+      "UTILITIES": "Servicios Públicos",
+      "PROFESSIONAL_SERVICES": "Servicios Profesionales",
+      "EQUIPMENT_SUPPLIES": "Equipos y Suministros",
+      "RENT_LEASE": "Alquiler y Arrendamiento",
+      "INSURANCE": "Seguros",
+      "TAXES_LEVIES": "Impuestos y Gravámenes",
+      "OTHER": "Otro"
+    },
+    "paymentMethods": {
+      "EFT": "Transferencia (EFT)",
+      "CASH": "Efectivo",
+      "CHEQUE": "Cheque",
+      "CARD": "Tarjeta",
+      "OTHER": "Otro"
+    },
+    "payeeTypes": {
+      "COMPANY": "Empresa",
+      "INDIVIDUAL": "Individuo",
+      "BUYER": "Comprador",
+      "CONTRACTOR": "Contratista"
+    }
   }
 }
