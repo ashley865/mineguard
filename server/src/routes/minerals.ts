@@ -4,6 +4,7 @@ import { z } from "zod";
 import { prisma } from "../prisma";
 import { requireAuth, requireRole } from "../middleware/auth";
 import { imageFileFilter } from "../lib/uploadFilters";
+import { requireMineId } from "../lib/mineScope";
 
 const router = Router();
 
@@ -68,7 +69,8 @@ const bidSelect = {
   createdAt: true,
 } as const;
 
-// Public: anyone can browse listings (this is a marketplace storefront).
+// Public: anyone can browse listings (this is a marketplace storefront) — intentionally
+// not mine-scoped, unlike every authenticated management route below it.
 router.get("/", async (req, res) => {
   const siteId = req.query.siteId as string | undefined;
   const status = req.query.status as string | undefined;
@@ -119,8 +121,12 @@ router.post("/:id/bids", async (req, res) => {
 router.use(requireAuth);
 
 router.post("/", requireRole("ADMIN", "SUPERVISOR", "EXECUTIVE"), async (req, res) => {
+  const mineId = requireMineId(req, res);
+  if (!mineId) return;
   const parsed = listingSchema.safeParse(req.body);
   if (!parsed.success) return res.status(400).json({ error: parsed.error.flatten() });
+  const site = await prisma.site.findFirst({ where: { id: parsed.data.siteId, mineId } });
+  if (!site) return res.status(404).json({ error: "Site not found" });
   const listing = await prisma.mineralListing.create({
     data: { ...parsed.data, listedById: req.auth!.userId },
     select: listingSelect,
@@ -129,27 +135,29 @@ router.post("/", requireRole("ADMIN", "SUPERVISOR", "EXECUTIVE"), async (req, re
 });
 
 router.put("/:id", requireRole("ADMIN", "SUPERVISOR", "EXECUTIVE"), async (req, res) => {
+  const mineId = requireMineId(req, res);
+  if (!mineId) return;
   const parsed = listingSchema.partial().safeParse(req.body);
   if (!parsed.success) return res.status(400).json({ error: parsed.error.flatten() });
-  try {
-    const listing = await prisma.mineralListing.update({ where: { id: req.params.id }, data: parsed.data, select: listingSelect });
-    res.json(listing);
-  } catch {
-    res.status(404).json({ error: "Listing not found" });
-  }
+  const existing = await prisma.mineralListing.findFirst({ where: { id: req.params.id, site: { mineId } } });
+  if (!existing) return res.status(404).json({ error: "Listing not found" });
+  const listing = await prisma.mineralListing.update({ where: { id: existing.id }, data: parsed.data, select: listingSelect });
+  res.json(listing);
 });
 
 router.delete("/:id", requireRole("ADMIN", "EXECUTIVE"), async (req, res) => {
-  try {
-    await prisma.mineralListing.delete({ where: { id: req.params.id } });
-    res.status(204).send();
-  } catch {
-    res.status(404).json({ error: "Listing not found" });
-  }
+  const mineId = requireMineId(req, res);
+  if (!mineId) return;
+  const existing = await prisma.mineralListing.findFirst({ where: { id: req.params.id, site: { mineId } } });
+  if (!existing) return res.status(404).json({ error: "Listing not found" });
+  await prisma.mineralListing.delete({ where: { id: existing.id } });
+  res.status(204).send();
 });
 
 router.post("/:id/images", requireRole("ADMIN", "SUPERVISOR", "EXECUTIVE"), upload.array("images", 6), async (req, res) => {
-  const listing = await prisma.mineralListing.findUnique({ where: { id: req.params.id } });
+  const mineId = requireMineId(req, res);
+  if (!mineId) return;
+  const listing = await prisma.mineralListing.findFirst({ where: { id: req.params.id, site: { mineId } } });
   if (!listing) return res.status(404).json({ error: "Listing not found" });
   const files = (req.files as Express.Multer.File[] | undefined) ?? [];
   if (files.length === 0) return res.status(400).json({ error: "At least one image is required" });
@@ -167,20 +175,22 @@ router.post("/:id/images", requireRole("ADMIN", "SUPERVISOR", "EXECUTIVE"), uplo
 });
 
 router.delete("/:id/images/:imageId", requireRole("ADMIN", "SUPERVISOR", "EXECUTIVE"), async (req, res) => {
-  try {
-    const image = await prisma.mineralListingImage.findUnique({ where: { id: req.params.imageId } });
-    if (!image || image.listingId !== req.params.id) return res.status(404).json({ error: "Image not found" });
-    await prisma.mineralListingImage.delete({ where: { id: req.params.imageId } });
-    res.status(204).send();
-  } catch {
-    res.status(404).json({ error: "Image not found" });
-  }
+  const mineId = requireMineId(req, res);
+  if (!mineId) return;
+  const image = await prisma.mineralListingImage.findFirst({
+    where: { id: req.params.imageId, listingId: req.params.id, listing: { site: { mineId } } },
+  });
+  if (!image) return res.status(404).json({ error: "Image not found" });
+  await prisma.mineralListingImage.delete({ where: { id: image.id } });
+  res.status(204).send();
 });
 
 router.get("/bids/list", requireRole("ADMIN", "SUPERVISOR", "EXECUTIVE"), async (req, res) => {
+  const mineId = requireMineId(req, res);
+  if (!mineId) return;
   const listingId = req.query.listingId as string | undefined;
   const bids = await prisma.mineralBid.findMany({
-    where: { listingId: listingId || undefined },
+    where: { listing: { site: { mineId } }, listingId: listingId || undefined },
     select: bidSelect,
     orderBy: { createdAt: "desc" },
   });
@@ -188,17 +198,17 @@ router.get("/bids/list", requireRole("ADMIN", "SUPERVISOR", "EXECUTIVE"), async 
 });
 
 router.post("/bids/:id/review", requireRole("ADMIN", "SUPERVISOR", "EXECUTIVE"), async (req, res) => {
+  const mineId = requireMineId(req, res);
+  if (!mineId) return;
   const parsed = bidReviewSchema.safeParse(req.body);
   if (!parsed.success) return res.status(400).json({ error: parsed.error.flatten() });
-  try {
-    const bid = await prisma.mineralBid.update({ where: { id: req.params.id }, data: { status: parsed.data.decision }, select: bidSelect });
-    if (parsed.data.decision === "ACCEPTED") {
-      await prisma.mineralListing.update({ where: { id: bid.listingId }, data: { status: "SOLD" } });
-    }
-    res.json(bid);
-  } catch {
-    res.status(404).json({ error: "Bid not found" });
+  const existing = await prisma.mineralBid.findFirst({ where: { id: req.params.id, listing: { site: { mineId } } } });
+  if (!existing) return res.status(404).json({ error: "Bid not found" });
+  const bid = await prisma.mineralBid.update({ where: { id: existing.id }, data: { status: parsed.data.decision }, select: bidSelect });
+  if (parsed.data.decision === "ACCEPTED") {
+    await prisma.mineralListing.update({ where: { id: bid.listingId }, data: { status: "SOLD" } });
   }
+  res.json(bid);
 });
 
 export default router;

@@ -3,6 +3,7 @@ import { z } from "zod";
 import { prisma } from "../prisma";
 import { requireAuth, requireRole } from "../middleware/auth";
 import { getAssignedSiteIds } from "../services/executiveSites";
+import { requireMineId } from "../lib/mineScope";
 
 const router = Router();
 
@@ -61,6 +62,8 @@ router.use(requireAuth);
 router.use(requireRole("ADMIN", "SUPERVISOR", "EXECUTIVE"));
 
 router.get("/", async (req, res) => {
+  const mineId = requireMineId(req, res);
+  if (!mineId) return;
   const siteId = req.query.siteId as string | undefined;
   let allowedSiteIds: string[] | null = null;
   if (req.auth!.role === "EXECUTIVE") {
@@ -70,7 +73,10 @@ router.get("/", async (req, res) => {
     }
   }
   const items = await prisma.permitToWork.findMany({
-    where: { siteId: siteId ?? (allowedSiteIds ? { in: allowedSiteIds } : undefined) },
+    where: {
+      site: { mineId },
+      siteId: siteId ?? (allowedSiteIds ? { in: allowedSiteIds } : undefined),
+    },
     select: ptwSelect,
     orderBy: { createdAt: "desc" },
   });
@@ -78,19 +84,27 @@ router.get("/", async (req, res) => {
 });
 
 router.post("/", async (req, res) => {
+  const mineId = requireMineId(req, res);
+  if (!mineId) return;
   const parsed = ptwSchema.safeParse(req.body);
   if (!parsed.success) return res.status(400).json({ error: parsed.error.flatten() });
   if (!(await assertSiteAccess(req, res, parsed.data.siteId))) return;
+  const site = await prisma.site.findFirst({ where: { id: parsed.data.siteId, mineId } });
+  if (!site) return res.status(404).json({ error: "Site not found" });
+  const contractor = await prisma.contractor.findFirst({ where: { id: parsed.data.contractorId, site: { mineId } } });
+  if (!contractor) return res.status(404).json({ error: "Contractor not found" });
 
   const item = await prisma.permitToWork.create({ data: parsed.data, select: ptwSelect });
   res.status(201).json(item);
 });
 
 router.post("/:id/supervisor-decision", async (req, res) => {
+  const mineId = requireMineId(req, res);
+  if (!mineId) return;
   const parsed = decisionSchema.safeParse(req.body);
   if (!parsed.success) return res.status(400).json({ error: parsed.error.flatten() });
 
-  const ptw = await prisma.permitToWork.findUnique({ where: { id: req.params.id } });
+  const ptw = await prisma.permitToWork.findFirst({ where: { id: req.params.id, site: { mineId } } });
   if (!ptw) return res.status(404).json({ error: "Permit to work not found" });
   if (ptw.status !== "PENDING_SUPERVISOR") {
     return res.status(409).json({ error: "This permit is not awaiting a supervisor decision" });
@@ -111,10 +125,12 @@ router.post("/:id/supervisor-decision", async (req, res) => {
 });
 
 router.post("/:id/executive-decision", requireRole("ADMIN", "EXECUTIVE"), async (req, res) => {
+  const mineId = requireMineId(req, res);
+  if (!mineId) return;
   const parsed = decisionSchema.safeParse(req.body);
   if (!parsed.success) return res.status(400).json({ error: parsed.error.flatten() });
 
-  const ptw = await prisma.permitToWork.findUnique({ where: { id: req.params.id } });
+  const ptw = await prisma.permitToWork.findFirst({ where: { id: req.params.id, site: { mineId } } });
   if (!ptw) return res.status(404).json({ error: "Permit to work not found" });
   if (ptw.status !== "PENDING_EXECUTIVE") {
     return res.status(409).json({ error: "This permit is not awaiting an executive decision" });
@@ -135,7 +151,9 @@ router.post("/:id/executive-decision", requireRole("ADMIN", "EXECUTIVE"), async 
 });
 
 router.post("/:id/close", async (req, res) => {
-  const ptw = await prisma.permitToWork.findUnique({ where: { id: req.params.id } });
+  const mineId = requireMineId(req, res);
+  if (!mineId) return;
+  const ptw = await prisma.permitToWork.findFirst({ where: { id: req.params.id, site: { mineId } } });
   if (!ptw) return res.status(404).json({ error: "Permit to work not found" });
   if (ptw.status !== "APPROVED") {
     return res.status(409).json({ error: "Only approved permits can be closed" });
@@ -151,12 +169,12 @@ router.post("/:id/close", async (req, res) => {
 });
 
 router.delete("/:id", requireRole("ADMIN", "EXECUTIVE"), async (req, res) => {
-  try {
-    await prisma.permitToWork.delete({ where: { id: req.params.id } });
-    res.status(204).send();
-  } catch {
-    res.status(404).json({ error: "Permit to work not found" });
-  }
+  const mineId = requireMineId(req, res);
+  if (!mineId) return;
+  const existing = await prisma.permitToWork.findFirst({ where: { id: req.params.id, site: { mineId } } });
+  if (!existing) return res.status(404).json({ error: "Permit to work not found" });
+  await prisma.permitToWork.delete({ where: { id: existing.id } });
+  res.status(204).send();
 });
 
 export default router;

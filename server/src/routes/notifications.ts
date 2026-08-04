@@ -1,15 +1,18 @@
 import { Router } from "express";
 import { prisma } from "../prisma";
 import { requireAuth } from "../middleware/auth";
+import { requireMineId } from "../lib/mineScope";
 
 const router = Router();
 
 router.use(requireAuth);
 
-router.get("/", async (_req, res) => {
+router.get("/", async (req, res) => {
+  const mineId = requireMineId(req, res);
+  if (!mineId) return;
   const [reviewedAlerts, reviewedIncidents] = await Promise.all([
     prisma.alert.findMany({
-      where: { reviewStatus: { in: ["APPROVED", "REJECTED"] } },
+      where: { reviewStatus: { in: ["APPROVED", "REJECTED"] }, site: { mineId } },
       include: {
         site: { select: { id: true, name: true } },
         reviewedBy: { select: { id: true, name: true } },
@@ -18,7 +21,7 @@ router.get("/", async (_req, res) => {
       take: 30,
     }),
     prisma.incident.findMany({
-      where: { reviewStatus: { in: ["APPROVED", "REJECTED"] } },
+      where: { reviewStatus: { in: ["APPROVED", "REJECTED"] }, site: { mineId } },
       include: {
         site: { select: { id: true, name: true } },
         reviewedBy: { select: { id: true, name: true } },

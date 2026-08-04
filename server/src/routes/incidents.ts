@@ -103,7 +103,7 @@ router.post("/:id/review", requireRole("EXECUTIVE"), async (req, res) => {
     include: { reviewedBy: { select: { id: true, name: true } } },
   });
   const io = req.app.get("io");
-  io?.emit("incident:updated", incident);
+  io?.to(`mine:${mineId}`).emit("incident:updated", incident);
   res.json(incident);
 });
 

@@ -2,6 +2,7 @@ import { Router } from "express";
 import { z } from "zod";
 import { prisma } from "../prisma";
 import { requireAuth, requireRole } from "../middleware/auth";
+import { requireMineId } from "../lib/mineScope";
 
 const router = Router();
 
@@ -38,11 +39,14 @@ const readingSelect = {
 router.use(requireAuth);
 
 router.get("/", async (req, res) => {
+  const mineId = requireMineId(req, res);
+  if (!mineId) return;
   const siteId = req.query.siteId as string | undefined;
   const parameterType = req.query.parameterType as string | undefined;
   const outOfLimitsOnly = req.query.outOfLimitsOnly === "true";
   const readings = await prisma.environmentalReading.findMany({
     where: {
+      site: { mineId },
       siteId: siteId || undefined,
       parameterType: (parameterType as any) || undefined,
       withinLimits: outOfLimitsOnly ? false : undefined,
@@ -55,8 +59,12 @@ router.get("/", async (req, res) => {
 });
 
 router.post("/", requireRole("ADMIN", "SUPERVISOR", "EXECUTIVE"), async (req, res) => {
+  const mineId = requireMineId(req, res);
+  if (!mineId) return;
   const parsed = readingSchema.safeParse(req.body);
   if (!parsed.success) return res.status(400).json({ error: parsed.error.flatten() });
+  const site = await prisma.site.findFirst({ where: { id: parsed.data.siteId, mineId } });
+  if (!site) return res.status(404).json({ error: "Site not found" });
   const reading = await prisma.environmentalReading.create({
     data: { ...parsed.data, recordedById: req.auth!.userId },
     select: readingSelect,
@@ -65,23 +73,23 @@ router.post("/", requireRole("ADMIN", "SUPERVISOR", "EXECUTIVE"), async (req, re
 });
 
 router.put("/:id", requireRole("ADMIN", "SUPERVISOR", "EXECUTIVE"), async (req, res) => {
+  const mineId = requireMineId(req, res);
+  if (!mineId) return;
   const parsed = readingSchema.partial().safeParse(req.body);
   if (!parsed.success) return res.status(400).json({ error: parsed.error.flatten() });
-  try {
-    const reading = await prisma.environmentalReading.update({ where: { id: req.params.id }, data: parsed.data, select: readingSelect });
-    res.json(reading);
-  } catch {
-    res.status(404).json({ error: "Environmental reading not found" });
-  }
+  const existing = await prisma.environmentalReading.findFirst({ where: { id: req.params.id, site: { mineId } } });
+  if (!existing) return res.status(404).json({ error: "Environmental reading not found" });
+  const reading = await prisma.environmentalReading.update({ where: { id: existing.id }, data: parsed.data, select: readingSelect });
+  res.json(reading);
 });
 
 router.delete("/:id", requireRole("ADMIN", "EXECUTIVE"), async (req, res) => {
-  try {
-    await prisma.environmentalReading.delete({ where: { id: req.params.id } });
-    res.status(204).send();
-  } catch {
-    res.status(404).json({ error: "Environmental reading not found" });
-  }
+  const mineId = requireMineId(req, res);
+  if (!mineId) return;
+  const existing = await prisma.environmentalReading.findFirst({ where: { id: req.params.id, site: { mineId } } });
+  if (!existing) return res.status(404).json({ error: "Environmental reading not found" });
+  await prisma.environmentalReading.delete({ where: { id: existing.id } });
+  res.status(204).send();
 });
 
 export default router;

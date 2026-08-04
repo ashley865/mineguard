@@ -57,6 +57,8 @@ import expensesRoutes from "./routes/expenses";
 import { sanitizeBody } from "./middleware/sanitize";
 import { startSimulator } from "./services/simulator";
 import { scanCompliance } from "./services/complianceScanner";
+import { verifyAuthToken } from "./lib/jwt";
+import { prisma } from "./prisma";
 
 const app = express();
 const httpServer = createServer(app);
@@ -67,6 +69,25 @@ const io = new SocketServer(httpServer, {
   cors: { origin: clientOrigin },
 });
 app.set("io", io);
+
+// Every socket must authenticate with the same JWT used for REST calls, and is placed
+// into a room scoped to its mine (never trusting a client-supplied mineId). Every emit
+// in this codebase targets that room instead of broadcasting globally, so a user from
+// one mine can never observe another mine's real-time alerts, incidents, or messages.
+io.use(async (socket, next) => {
+  try {
+    const token = socket.handshake.auth?.token as string | undefined;
+    if (!token) return next(new Error("Unauthorized"));
+    const { userId } = verifyAuthToken(token);
+    const user = await prisma.user.findUnique({ where: { id: userId }, select: { id: true, mineId: true } });
+    if (!user) return next(new Error("Unauthorized"));
+    socket.data.userId = user.id;
+    socket.data.mineId = user.mineId;
+    next();
+  } catch {
+    next(new Error("Unauthorized"));
+  }
+});
 // Render sits in front of the app behind a reverse proxy; without this, every
 // request appears to originate from the proxy's IP and per-IP rate limiting
 // (see middleware/rateLimit.ts) would be meaningless.
@@ -141,6 +162,8 @@ app.use((err: any, _req: express.Request, res: express.Response, _next: express.
 });
 
 io.on("connection", (socket) => {
+  if (socket.data.mineId) socket.join(`mine:${socket.data.mineId}`);
+  socket.join(`user:${socket.data.userId}`);
   socket.on("disconnect", () => {});
 });
 

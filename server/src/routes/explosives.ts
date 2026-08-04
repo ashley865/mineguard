@@ -2,6 +2,7 @@ import { Router } from "express";
 import { z } from "zod";
 import { prisma } from "../prisma";
 import { requireAuth, requireRole } from "../middleware/auth";
+import { requireMineId } from "../lib/mineScope";
 
 const router = Router();
 
@@ -60,9 +61,11 @@ const transactionSelect = {
 router.use(requireAuth);
 
 router.get("/magazines", async (req, res) => {
+  const mineId = requireMineId(req, res);
+  if (!mineId) return;
   const siteId = req.query.siteId as string | undefined;
   const magazines = await prisma.explosivesMagazine.findMany({
-    where: { siteId: siteId || undefined },
+    where: { site: { mineId }, siteId: siteId || undefined },
     select: magazineSelect,
     orderBy: { createdAt: "desc" },
   });
@@ -70,36 +73,42 @@ router.get("/magazines", async (req, res) => {
 });
 
 router.post("/magazines", requireRole("ADMIN", "SUPERVISOR", "EXECUTIVE"), async (req, res) => {
+  const mineId = requireMineId(req, res);
+  if (!mineId) return;
   const parsed = magazineSchema.safeParse(req.body);
   if (!parsed.success) return res.status(400).json({ error: parsed.error.flatten() });
+  const site = await prisma.site.findFirst({ where: { id: parsed.data.siteId, mineId } });
+  if (!site) return res.status(404).json({ error: "Site not found" });
   const magazine = await prisma.explosivesMagazine.create({ data: parsed.data, select: magazineSelect });
   res.status(201).json(magazine);
 });
 
 router.put("/magazines/:id", requireRole("ADMIN", "SUPERVISOR", "EXECUTIVE"), async (req, res) => {
+  const mineId = requireMineId(req, res);
+  if (!mineId) return;
   const parsed = magazineSchema.partial().safeParse(req.body);
   if (!parsed.success) return res.status(400).json({ error: parsed.error.flatten() });
-  try {
-    const magazine = await prisma.explosivesMagazine.update({ where: { id: req.params.id }, data: parsed.data, select: magazineSelect });
-    res.json(magazine);
-  } catch {
-    res.status(404).json({ error: "Magazine not found" });
-  }
+  const existing = await prisma.explosivesMagazine.findFirst({ where: { id: req.params.id, site: { mineId } } });
+  if (!existing) return res.status(404).json({ error: "Magazine not found" });
+  const magazine = await prisma.explosivesMagazine.update({ where: { id: existing.id }, data: parsed.data, select: magazineSelect });
+  res.json(magazine);
 });
 
 router.delete("/magazines/:id", requireRole("ADMIN", "EXECUTIVE"), async (req, res) => {
-  try {
-    await prisma.explosivesMagazine.delete({ where: { id: req.params.id } });
-    res.status(204).send();
-  } catch {
-    res.status(404).json({ error: "Magazine not found" });
-  }
+  const mineId = requireMineId(req, res);
+  if (!mineId) return;
+  const existing = await prisma.explosivesMagazine.findFirst({ where: { id: req.params.id, site: { mineId } } });
+  if (!existing) return res.status(404).json({ error: "Magazine not found" });
+  await prisma.explosivesMagazine.delete({ where: { id: existing.id } });
+  res.status(204).send();
 });
 
 router.get("/transactions", async (req, res) => {
+  const mineId = requireMineId(req, res);
+  if (!mineId) return;
   const magazineId = req.query.magazineId as string | undefined;
   const transactions = await prisma.explosivesTransaction.findMany({
-    where: { magazineId: magazineId || undefined },
+    where: { magazine: { site: { mineId } }, magazineId: magazineId || undefined },
     select: transactionSelect,
     orderBy: { transactionDate: "desc" },
   });
@@ -107,9 +116,11 @@ router.get("/transactions", async (req, res) => {
 });
 
 router.post("/transactions", requireRole("ADMIN", "SUPERVISOR", "EXECUTIVE"), async (req, res) => {
+  const mineId = requireMineId(req, res);
+  if (!mineId) return;
   const parsed = transactionSchema.safeParse(req.body);
   if (!parsed.success) return res.status(400).json({ error: parsed.error.flatten() });
-  const magazine = await prisma.explosivesMagazine.findUnique({ where: { id: parsed.data.magazineId } });
+  const magazine = await prisma.explosivesMagazine.findFirst({ where: { id: parsed.data.magazineId, site: { mineId } } });
   if (!magazine) return res.status(404).json({ error: "Magazine not found" });
 
   const increases = parsed.data.transactionType === "RECEIPT" || parsed.data.transactionType === "RETURN";

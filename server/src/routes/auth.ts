@@ -150,7 +150,10 @@ router.post("/me/photo", requireAuth, upload.single("photo"), async (req, res) =
 });
 
 router.get("/users/:id/photo", requireAuth, async (req, res) => {
-  const user = await prisma.user.findUnique({ where: { id: req.params.id }, select: { photoData: true, photoMimeType: true } });
+  const user = await prisma.user.findFirst({
+    where: { id: req.params.id, mineId: req.auth!.mineId ?? undefined },
+    select: { photoData: true, photoMimeType: true },
+  });
   if (!user?.photoData || !user.photoMimeType) return res.status(404).json({ error: "No photo set" });
   res.setHeader("Content-Type", user.photoMimeType);
   res.send(Buffer.from(user.photoData));

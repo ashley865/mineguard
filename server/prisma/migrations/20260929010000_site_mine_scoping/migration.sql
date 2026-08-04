@@ -58,3 +58,11 @@ ALTER TABLE "Payee" ADD COLUMN "mineId" TEXT;
 UPDATE "Payee" SET "mineId" = (SELECT "id" FROM "Mine" ORDER BY "createdAt" ASC LIMIT 1) WHERE "mineId" IS NULL;
 ALTER TABLE "Payee" ALTER COLUMN "mineId" SET NOT NULL;
 ALTER TABLE "Payee" ADD CONSTRAINT "Payee_mineId_fkey" FOREIGN KEY ("mineId") REFERENCES "Mine"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- Supplier is the same shape as Payee: a flat vendor registry with no Site relation.
+
+-- AlterTable
+ALTER TABLE "Supplier" ADD COLUMN "mineId" TEXT;
+UPDATE "Supplier" SET "mineId" = (SELECT "id" FROM "Mine" ORDER BY "createdAt" ASC LIMIT 1) WHERE "mineId" IS NULL;
+ALTER TABLE "Supplier" ALTER COLUMN "mineId" SET NOT NULL;
+ALTER TABLE "Supplier" ADD CONSTRAINT "Supplier_mineId_fkey" FOREIGN KEY ("mineId") REFERENCES "Mine"("id") ON DELETE CASCADE ON UPDATE CASCADE;

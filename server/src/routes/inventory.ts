@@ -2,6 +2,7 @@ import { Router } from "express";
 import { z } from "zod";
 import { prisma } from "../prisma";
 import { requireAuth, requireRole } from "../middleware/auth";
+import { requireMineId } from "../lib/mineScope";
 
 const router = Router();
 
@@ -55,10 +56,12 @@ const movementSelect = {
 router.use(requireAuth);
 
 router.get("/items", async (req, res) => {
+  const mineId = requireMineId(req, res);
+  if (!mineId) return;
   const siteId = req.query.siteId as string | undefined;
   const lowStock = req.query.lowStock === "true";
   const items = await prisma.inventoryItem.findMany({
-    where: { siteId: siteId || undefined },
+    where: { site: { mineId }, siteId: siteId || undefined },
     select: itemSelect,
     orderBy: { name: "asc" },
   });
@@ -67,36 +70,42 @@ router.get("/items", async (req, res) => {
 });
 
 router.post("/items", requireRole("ADMIN", "SUPERVISOR", "EXECUTIVE"), async (req, res) => {
+  const mineId = requireMineId(req, res);
+  if (!mineId) return;
   const parsed = itemSchema.safeParse(req.body);
   if (!parsed.success) return res.status(400).json({ error: parsed.error.flatten() });
+  const site = await prisma.site.findFirst({ where: { id: parsed.data.siteId, mineId } });
+  if (!site) return res.status(404).json({ error: "Site not found" });
   const item = await prisma.inventoryItem.create({ data: parsed.data, select: itemSelect });
   res.status(201).json(item);
 });
 
 router.put("/items/:id", requireRole("ADMIN", "SUPERVISOR", "EXECUTIVE"), async (req, res) => {
+  const mineId = requireMineId(req, res);
+  if (!mineId) return;
   const parsed = itemSchema.partial().safeParse(req.body);
   if (!parsed.success) return res.status(400).json({ error: parsed.error.flatten() });
-  try {
-    const item = await prisma.inventoryItem.update({ where: { id: req.params.id }, data: parsed.data, select: itemSelect });
-    res.json(item);
-  } catch {
-    res.status(404).json({ error: "Inventory item not found" });
-  }
+  const existing = await prisma.inventoryItem.findFirst({ where: { id: req.params.id, site: { mineId } } });
+  if (!existing) return res.status(404).json({ error: "Inventory item not found" });
+  const item = await prisma.inventoryItem.update({ where: { id: existing.id }, data: parsed.data, select: itemSelect });
+  res.json(item);
 });
 
 router.delete("/items/:id", requireRole("ADMIN", "EXECUTIVE"), async (req, res) => {
-  try {
-    await prisma.inventoryItem.delete({ where: { id: req.params.id } });
-    res.status(204).send();
-  } catch {
-    res.status(404).json({ error: "Inventory item not found" });
-  }
+  const mineId = requireMineId(req, res);
+  if (!mineId) return;
+  const existing = await prisma.inventoryItem.findFirst({ where: { id: req.params.id, site: { mineId } } });
+  if (!existing) return res.status(404).json({ error: "Inventory item not found" });
+  await prisma.inventoryItem.delete({ where: { id: existing.id } });
+  res.status(204).send();
 });
 
 router.get("/movements", async (req, res) => {
+  const mineId = requireMineId(req, res);
+  if (!mineId) return;
   const itemId = req.query.itemId as string | undefined;
   const movements = await prisma.inventoryMovement.findMany({
-    where: { itemId: itemId || undefined },
+    where: { item: { site: { mineId } }, itemId: itemId || undefined },
     select: movementSelect,
     orderBy: { createdAt: "desc" },
   });
@@ -104,9 +113,11 @@ router.get("/movements", async (req, res) => {
 });
 
 router.post("/movements", requireRole("ADMIN", "SUPERVISOR", "EXECUTIVE"), async (req, res) => {
+  const mineId = requireMineId(req, res);
+  if (!mineId) return;
   const parsed = movementSchema.safeParse(req.body);
   if (!parsed.success) return res.status(400).json({ error: parsed.error.flatten() });
-  const item = await prisma.inventoryItem.findUnique({ where: { id: parsed.data.itemId } });
+  const item = await prisma.inventoryItem.findFirst({ where: { id: parsed.data.itemId, site: { mineId } } });
   if (!item) return res.status(404).json({ error: "Inventory item not found" });
   if (parsed.data.direction === "OUT" && item.quantityOnHand < parsed.data.quantity) {
     return res.status(409).json({ error: "Not enough stock on hand for this movement" });

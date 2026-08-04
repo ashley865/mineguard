@@ -11,7 +11,7 @@ export function SocketProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     if (!token) return;
-    const s = io(API_URL, { transports: ["websocket"] });
+    const s = io(API_URL, { transports: ["websocket"], auth: { token } });
     setSocket(s);
     return () => {
       s.disconnect();

@@ -135,11 +135,13 @@ router.post("/", async (req, res) => {
 });
 
 router.post("/:id/revoke", async (req, res) => {
-  const invite = await prisma.executiveInvite.findUnique({ where: { id: req.params.id } });
+  const admin = await prisma.user.findUnique({ where: { id: req.auth!.userId } });
+  if (!admin?.mineId) return res.status(404).json({ error: "Not a member of a mine" });
+  const invite = await prisma.executiveInvite.findFirst({ where: { id: req.params.id, mineId: admin.mineId } });
   if (!invite) return res.status(404).json({ error: "Invite not found" });
   if (invite.status !== "PENDING") return res.status(409).json({ error: "Only pending invites can be revoked" });
   const updated = await prisma.executiveInvite.update({
-    where: { id: req.params.id },
+    where: { id: invite.id },
     data: { status: "REVOKED" },
     select: inviteSelect,
   });

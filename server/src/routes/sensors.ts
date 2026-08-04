@@ -82,10 +82,10 @@ router.post("/:id/readings", async (req, res) => {
   });
 
   const io = req.app.get("io");
-  io?.emit("sensor:reading", { sensorId: sensor.id, value: reading.value, recordedAt: reading.recordedAt });
+  io?.to(`mine:${mineId}`).emit("sensor:reading", { sensorId: sensor.id, value: reading.value, recordedAt: reading.recordedAt });
 
   const alert = await evaluateReading(sensor, reading.value);
-  if (alert) io?.emit("alert:new", alert);
+  if (alert) io?.to(`mine:${mineId}`).emit("alert:new", alert);
 
   res.status(201).json(reading);
 });

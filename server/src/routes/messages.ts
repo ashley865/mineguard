@@ -2,6 +2,7 @@ import { Router } from "express";
 import { z } from "zod";
 import { prisma } from "../prisma";
 import { requireAuth, requireRole } from "../middleware/auth";
+import { requireMineId } from "../lib/mineScope";
 
 const router = Router();
 
@@ -32,8 +33,10 @@ const messageSelect = {
 router.use(requireAuth, requireRole("ADMIN", "EXECUTIVE"));
 
 router.get("/contacts", async (req, res) => {
+  const mineId = requireMineId(req, res);
+  if (!mineId) return;
   const contacts = await prisma.user.findMany({
-    where: { role: { in: ["ADMIN", "EXECUTIVE"] }, id: { not: req.auth!.userId } },
+    where: { role: { in: ["ADMIN", "EXECUTIVE"] }, mineId, id: { not: req.auth!.userId } },
     select: contactSelect,
     orderBy: { name: "asc" },
   });
@@ -54,7 +57,12 @@ router.get("/unread-count", async (req, res) => {
 });
 
 router.get("/thread/:userId", async (req, res) => {
+  const mineId = requireMineId(req, res);
+  if (!mineId) return;
   const otherId = req.params.userId;
+  const other = await prisma.user.findFirst({ where: { id: otherId, mineId } });
+  if (!other) return res.status(404).json({ error: "User not found" });
+
   const messages = await prisma.message.findMany({
     where: {
       OR: [
@@ -76,10 +84,12 @@ router.get("/thread/:userId", async (req, res) => {
 });
 
 router.post("/", async (req, res) => {
+  const mineId = requireMineId(req, res);
+  if (!mineId) return;
   const parsed = sendSchema.safeParse(req.body);
   if (!parsed.success) return res.status(400).json({ error: parsed.error.flatten() });
 
-  const recipient = await prisma.user.findUnique({ where: { id: parsed.data.recipientId } });
+  const recipient = await prisma.user.findFirst({ where: { id: parsed.data.recipientId, mineId } });
   if (!recipient || !["ADMIN", "EXECUTIVE"].includes(recipient.role)) {
     return res.status(400).json({ error: "Recipient must be an Admin or Executive" });
   }
@@ -93,7 +103,7 @@ router.post("/", async (req, res) => {
   });
 
   const io = req.app.get("io");
-  if (io) io.emit("message:new", message);
+  if (io) io.to(`user:${recipient.id}`).to(`user:${req.auth!.userId}`).emit("message:new", message);
 
   res.status(201).json(message);
 });

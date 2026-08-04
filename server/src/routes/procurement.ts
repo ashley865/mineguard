@@ -2,6 +2,7 @@ import { Router } from "express";
 import { z } from "zod";
 import { prisma } from "../prisma";
 import { requireAuth, requireRole } from "../middleware/auth";
+import { requireMineId } from "../lib/mineScope";
 
 const router = Router();
 
@@ -69,9 +70,11 @@ const orderSelect = {
 router.use(requireAuth);
 
 router.get("/suppliers", async (req, res) => {
+  const mineId = requireMineId(req, res);
+  if (!mineId) return;
   const status = req.query.status as string | undefined;
   const suppliers = await prisma.supplier.findMany({
-    where: { status: (status as any) || undefined },
+    where: { mineId, status: (status as any) || undefined },
     select: supplierSelect,
     orderBy: { name: "asc" },
   });
@@ -79,44 +82,48 @@ router.get("/suppliers", async (req, res) => {
 });
 
 router.post("/suppliers", requireRole("ADMIN", "SUPERVISOR", "EXECUTIVE"), async (req, res) => {
+  const mineId = requireMineId(req, res);
+  if (!mineId) return;
   const parsed = supplierSchema.safeParse(req.body);
   if (!parsed.success) return res.status(400).json({ error: parsed.error.flatten() });
   const supplier = await prisma.supplier.create({
-    data: { ...parsed.data, contactEmail: parsed.data.contactEmail || undefined },
+    data: { ...parsed.data, mineId, contactEmail: parsed.data.contactEmail || undefined },
     select: supplierSelect,
   });
   res.status(201).json(supplier);
 });
 
 router.put("/suppliers/:id", requireRole("ADMIN", "SUPERVISOR", "EXECUTIVE"), async (req, res) => {
+  const mineId = requireMineId(req, res);
+  if (!mineId) return;
   const parsed = supplierSchema.partial().safeParse(req.body);
   if (!parsed.success) return res.status(400).json({ error: parsed.error.flatten() });
-  try {
-    const supplier = await prisma.supplier.update({
-      where: { id: req.params.id },
-      data: { ...parsed.data, contactEmail: parsed.data.contactEmail || undefined },
-      select: supplierSelect,
-    });
-    res.json(supplier);
-  } catch {
-    res.status(404).json({ error: "Supplier not found" });
-  }
+  const existing = await prisma.supplier.findFirst({ where: { id: req.params.id, mineId } });
+  if (!existing) return res.status(404).json({ error: "Supplier not found" });
+  const supplier = await prisma.supplier.update({
+    where: { id: existing.id },
+    data: { ...parsed.data, contactEmail: parsed.data.contactEmail || undefined },
+    select: supplierSelect,
+  });
+  res.json(supplier);
 });
 
 router.delete("/suppliers/:id", requireRole("ADMIN", "EXECUTIVE"), async (req, res) => {
-  try {
-    await prisma.supplier.delete({ where: { id: req.params.id } });
-    res.status(204).send();
-  } catch {
-    res.status(404).json({ error: "Supplier not found" });
-  }
+  const mineId = requireMineId(req, res);
+  if (!mineId) return;
+  const existing = await prisma.supplier.findFirst({ where: { id: req.params.id, mineId } });
+  if (!existing) return res.status(404).json({ error: "Supplier not found" });
+  await prisma.supplier.delete({ where: { id: existing.id } });
+  res.status(204).send();
 });
 
 router.get("/orders", async (req, res) => {
+  const mineId = requireMineId(req, res);
+  if (!mineId) return;
   const siteId = req.query.siteId as string | undefined;
   const status = req.query.status as string | undefined;
   const orders = await prisma.purchaseOrder.findMany({
-    where: { siteId: siteId || undefined, status: (status as any) || undefined },
+    where: { site: { mineId }, siteId: siteId || undefined, status: (status as any) || undefined },
     select: orderSelect,
     orderBy: { createdAt: "desc" },
   });
@@ -124,8 +131,14 @@ router.get("/orders", async (req, res) => {
 });
 
 router.post("/orders", requireRole("ADMIN", "SUPERVISOR", "EXECUTIVE"), async (req, res) => {
+  const mineId = requireMineId(req, res);
+  if (!mineId) return;
   const parsed = orderSchema.safeParse(req.body);
   if (!parsed.success) return res.status(400).json({ error: parsed.error.flatten() });
+  const site = await prisma.site.findFirst({ where: { id: parsed.data.siteId, mineId } });
+  if (!site) return res.status(404).json({ error: "Site not found" });
+  const supplier = await prisma.supplier.findFirst({ where: { id: parsed.data.supplierId, mineId } });
+  if (!supplier) return res.status(404).json({ error: "Supplier not found" });
   const { lines, ...orderData } = parsed.data;
   const totalAmount = lines.reduce((sum, l) => sum + l.quantity * l.unitPrice, 0);
   const order = await prisma.purchaseOrder.create({
@@ -141,41 +154,41 @@ router.post("/orders", requireRole("ADMIN", "SUPERVISOR", "EXECUTIVE"), async (r
 });
 
 router.put("/orders/:id", requireRole("ADMIN", "SUPERVISOR", "EXECUTIVE"), async (req, res) => {
+  const mineId = requireMineId(req, res);
+  if (!mineId) return;
   const parsed = orderSchema.partial().safeParse(req.body);
   if (!parsed.success) return res.status(400).json({ error: parsed.error.flatten() });
+  const existing = await prisma.purchaseOrder.findFirst({ where: { id: req.params.id, site: { mineId } } });
+  if (!existing) return res.status(404).json({ error: "Purchase order not found" });
   const { lines, ...orderData } = parsed.data;
-  try {
-    const order = await prisma.purchaseOrder.update({
-      where: { id: req.params.id },
-      data: orderData,
-      select: orderSelect,
-    });
-    res.json(order);
-  } catch {
-    res.status(404).json({ error: "Purchase order not found" });
-  }
+  const order = await prisma.purchaseOrder.update({
+    where: { id: existing.id },
+    data: orderData,
+    select: orderSelect,
+  });
+  res.json(order);
 });
 
 router.post("/orders/:id/approve", requireRole("ADMIN", "EXECUTIVE"), async (req, res) => {
-  try {
-    const order = await prisma.purchaseOrder.update({
-      where: { id: req.params.id },
-      data: { status: "APPROVED", approvedById: req.auth!.userId, approvedAt: new Date() },
-      select: orderSelect,
-    });
-    res.json(order);
-  } catch {
-    res.status(404).json({ error: "Purchase order not found" });
-  }
+  const mineId = requireMineId(req, res);
+  if (!mineId) return;
+  const existing = await prisma.purchaseOrder.findFirst({ where: { id: req.params.id, site: { mineId } } });
+  if (!existing) return res.status(404).json({ error: "Purchase order not found" });
+  const order = await prisma.purchaseOrder.update({
+    where: { id: existing.id },
+    data: { status: "APPROVED", approvedById: req.auth!.userId, approvedAt: new Date() },
+    select: orderSelect,
+  });
+  res.json(order);
 });
 
 router.delete("/orders/:id", requireRole("ADMIN", "EXECUTIVE"), async (req, res) => {
-  try {
-    await prisma.purchaseOrder.delete({ where: { id: req.params.id } });
-    res.status(204).send();
-  } catch {
-    res.status(404).json({ error: "Purchase order not found" });
-  }
+  const mineId = requireMineId(req, res);
+  if (!mineId) return;
+  const existing = await prisma.purchaseOrder.findFirst({ where: { id: req.params.id, site: { mineId } } });
+  if (!existing) return res.status(404).json({ error: "Purchase order not found" });
+  await prisma.purchaseOrder.delete({ where: { id: existing.id } });
+  res.status(204).send();
 });
 
 export default router;

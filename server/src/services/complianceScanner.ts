@@ -27,6 +27,7 @@ async function raiseAlertIfMissing(params: {
       severity: params.severity,
       message: params.message,
     },
+    include: { site: { select: { mineId: true } } },
   });
 }
 
@@ -238,7 +239,7 @@ export async function scanCompliance(io?: Server) {
   }
 
   if (io) {
-    for (const alert of newAlerts) io.emit("alert:new", alert);
+    for (const alert of newAlerts) io.to(`mine:${alert.site.mineId}`).emit("alert:new", alert);
   }
 
   return newAlerts;

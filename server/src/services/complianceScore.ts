@@ -19,9 +19,9 @@ function rate(numerator: number, denominator: number): number {
   return denominator === 0 ? 1 : numerator / denominator;
 }
 
-export async function computeComplianceScore(siteId?: string): Promise<ComplianceScoreResult> {
-  const siteFilter = siteId ? { siteId } : {};
-  const workerSiteFilter = siteId ? { worker: { siteId } } : {};
+export async function computeComplianceScore(mineId: string, siteId?: string): Promise<ComplianceScoreResult> {
+  const siteFilter = siteId ? { siteId } : { site: { mineId } };
+  const workerSiteFilter = siteId ? { worker: { siteId } } : { worker: { site: { mineId } } };
 
   const [
     copActive,

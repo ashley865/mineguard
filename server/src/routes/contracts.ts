@@ -2,6 +2,7 @@ import { Router } from "express";
 import { z } from "zod";
 import { prisma } from "../prisma";
 import { requireAuth, requireRole } from "../middleware/auth";
+import { requireMineId } from "../lib/mineScope";
 
 const router = Router();
 
@@ -74,7 +75,8 @@ const bidSelect = {
   createdAt: true,
 } as const;
 
-// Public: anyone can browse advertised contract opportunities.
+// Public: anyone can browse advertised contract opportunities — intentionally not
+// mine-scoped, unlike every authenticated management route below it.
 router.get("/", async (req, res) => {
   const siteId = req.query.siteId as string | undefined;
   const status = req.query.status as string | undefined;
@@ -110,8 +112,12 @@ router.post("/:id/bids", async (req, res) => {
 router.use(requireAuth);
 
 router.post("/", requireRole("ADMIN", "SUPERVISOR", "EXECUTIVE"), async (req, res) => {
+  const mineId = requireMineId(req, res);
+  if (!mineId) return;
   const parsed = opportunitySchema.safeParse(req.body);
   if (!parsed.success) return res.status(400).json({ error: parsed.error.flatten() });
+  const site = await prisma.site.findFirst({ where: { id: parsed.data.siteId, mineId } });
+  if (!site) return res.status(404).json({ error: "Site not found" });
   const opportunity = await prisma.contractOpportunity.create({
     data: { ...parsed.data, postedById: req.auth!.userId },
     select: opportunitySelect,
@@ -120,29 +126,31 @@ router.post("/", requireRole("ADMIN", "SUPERVISOR", "EXECUTIVE"), async (req, re
 });
 
 router.put("/:id", requireRole("ADMIN", "SUPERVISOR", "EXECUTIVE"), async (req, res) => {
+  const mineId = requireMineId(req, res);
+  if (!mineId) return;
   const parsed = opportunitySchema.partial().safeParse(req.body);
   if (!parsed.success) return res.status(400).json({ error: parsed.error.flatten() });
-  try {
-    const opportunity = await prisma.contractOpportunity.update({ where: { id: req.params.id }, data: parsed.data, select: opportunitySelect });
-    res.json(opportunity);
-  } catch {
-    res.status(404).json({ error: "Opportunity not found" });
-  }
+  const existing = await prisma.contractOpportunity.findFirst({ where: { id: req.params.id, site: { mineId } } });
+  if (!existing) return res.status(404).json({ error: "Opportunity not found" });
+  const opportunity = await prisma.contractOpportunity.update({ where: { id: existing.id }, data: parsed.data, select: opportunitySelect });
+  res.json(opportunity);
 });
 
 router.delete("/:id", requireRole("ADMIN", "EXECUTIVE"), async (req, res) => {
-  try {
-    await prisma.contractOpportunity.delete({ where: { id: req.params.id } });
-    res.status(204).send();
-  } catch {
-    res.status(404).json({ error: "Opportunity not found" });
-  }
+  const mineId = requireMineId(req, res);
+  if (!mineId) return;
+  const existing = await prisma.contractOpportunity.findFirst({ where: { id: req.params.id, site: { mineId } } });
+  if (!existing) return res.status(404).json({ error: "Opportunity not found" });
+  await prisma.contractOpportunity.delete({ where: { id: existing.id } });
+  res.status(204).send();
 });
 
 router.get("/bids/list", requireRole("ADMIN", "SUPERVISOR", "EXECUTIVE"), async (req, res) => {
+  const mineId = requireMineId(req, res);
+  if (!mineId) return;
   const opportunityId = req.query.opportunityId as string | undefined;
   const bids = await prisma.contractBid.findMany({
-    where: { opportunityId: opportunityId || undefined },
+    where: { opportunity: { site: { mineId } }, opportunityId: opportunityId || undefined },
     select: bidSelect,
     orderBy: { bidAmount: "asc" },
   });
@@ -150,17 +158,17 @@ router.get("/bids/list", requireRole("ADMIN", "SUPERVISOR", "EXECUTIVE"), async 
 });
 
 router.post("/bids/:id/review", requireRole("ADMIN", "SUPERVISOR", "EXECUTIVE"), async (req, res) => {
+  const mineId = requireMineId(req, res);
+  if (!mineId) return;
   const parsed = bidReviewSchema.safeParse(req.body);
   if (!parsed.success) return res.status(400).json({ error: parsed.error.flatten() });
-  try {
-    const bid = await prisma.contractBid.update({ where: { id: req.params.id }, data: { status: parsed.data.decision }, select: bidSelect });
-    if (parsed.data.decision === "AWARDED") {
-      await prisma.contractOpportunity.update({ where: { id: bid.opportunityId }, data: { status: "AWARDED" } });
-    }
-    res.json(bid);
-  } catch {
-    res.status(404).json({ error: "Bid not found" });
+  const existing = await prisma.contractBid.findFirst({ where: { id: req.params.id, opportunity: { site: { mineId } } } });
+  if (!existing) return res.status(404).json({ error: "Bid not found" });
+  const bid = await prisma.contractBid.update({ where: { id: existing.id }, data: { status: parsed.data.decision }, select: bidSelect });
+  if (parsed.data.decision === "AWARDED") {
+    await prisma.contractOpportunity.update({ where: { id: bid.opportunityId }, data: { status: "AWARDED" } });
   }
+  res.json(bid);
 });
 
 export default router;

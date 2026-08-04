@@ -29,25 +29,29 @@ export function startSimulator(io: SocketServer) {
     try {
       const sensors = await prisma.sensor.findMany({
         where: { status: "ACTIVE" },
-        include: { readings: { orderBy: { recordedAt: "desc" }, take: 1 } },
+        include: {
+          readings: { orderBy: { recordedAt: "desc" }, take: 1 },
+          zone: { select: { site: { select: { mineId: true } } } },
+        },
       });
 
       for (const sensor of sensors) {
         const previous = sensor.readings[0]?.value ?? null;
         const value = nextValue(previous, sensor.minSafe, sensor.maxSafe);
+        const mineRoom = `mine:${sensor.zone.site.mineId}`;
 
         const reading = await prisma.sensorReading.create({
           data: { sensorId: sensor.id, value },
         });
 
-        io.emit("sensor:reading", {
+        io.to(mineRoom).emit("sensor:reading", {
           sensorId: sensor.id,
           value: reading.value,
           recordedAt: reading.recordedAt,
         });
 
         const alert = await evaluateReading(sensor, value);
-        if (alert) io.emit("alert:new", alert);
+        if (alert) io.to(mineRoom).emit("alert:new", alert);
       }
     } catch (err) {
       console.error("Simulator tick failed:", err);

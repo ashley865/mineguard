@@ -3,12 +3,16 @@ import { prisma } from "../prisma";
 import { requireAuth, requireRole } from "../middleware/auth";
 import { computeComplianceScore } from "../services/complianceScore";
 import { getAssignedSiteIds } from "../services/executiveSites";
+import { requireMineId } from "../lib/mineScope";
 
 const router = Router();
 
 router.use(requireAuth, requireRole("EXECUTIVE", "ADMIN"));
 
 router.get("/summary", async (req, res) => {
+  const mineId = requireMineId(req, res);
+  if (!mineId) return;
+
   const [
     sitesByStatus,
     openAlertsBySeverity,
@@ -22,23 +26,23 @@ router.get("/summary", async (req, res) => {
     pendingAlerts,
     pendingIncidents,
   ] = await Promise.all([
-    prisma.site.groupBy({ by: ["status"], _count: true }),
-    prisma.alert.groupBy({ by: ["severity"], where: { status: "OPEN" }, _count: true }),
-    prisma.incident.count({ where: { status: "OPEN" } }),
-    prisma.incident.count({ where: { status: "INVESTIGATING" } }),
-    prisma.incident.count({ where: { status: "RESOLVED" } }),
-    prisma.worker.count(),
-    prisma.worker.count({ where: { status: "ON_SHIFT" } }),
-    prisma.equipment.count(),
-    prisma.equipment.count({ where: { status: "OPERATIONAL" } }),
+    prisma.site.groupBy({ by: ["status"], _count: true, where: { mineId } }),
+    prisma.alert.groupBy({ by: ["severity"], where: { status: "OPEN", site: { mineId } }, _count: true }),
+    prisma.incident.count({ where: { status: "OPEN", site: { mineId } } }),
+    prisma.incident.count({ where: { status: "INVESTIGATING", site: { mineId } } }),
+    prisma.incident.count({ where: { status: "RESOLVED", site: { mineId } } }),
+    prisma.worker.count({ where: { site: { mineId } } }),
+    prisma.worker.count({ where: { status: "ON_SHIFT", site: { mineId } } }),
+    prisma.equipment.count({ where: { site: { mineId } } }),
+    prisma.equipment.count({ where: { status: "OPERATIONAL", site: { mineId } } }),
     prisma.alert.findMany({
-      where: { reviewStatus: "PENDING", severity: { in: ["HIGH", "CRITICAL"] } },
+      where: { reviewStatus: "PENDING", severity: { in: ["HIGH", "CRITICAL"] }, site: { mineId } },
       include: { site: { select: { id: true, name: true } }, zone: { select: { id: true, name: true } } },
       orderBy: { createdAt: "desc" },
       take: 20,
     }),
     prisma.incident.findMany({
-      where: { reviewStatus: "PENDING" },
+      where: { reviewStatus: "PENDING", site: { mineId } },
       include: { site: { select: { id: true, name: true } }, zone: { select: { id: true, name: true } } },
       orderBy: { createdAt: "desc" },
       take: 20,
@@ -50,7 +54,7 @@ router.get("/summary", async (req, res) => {
   fourteenDaysAgo.setHours(0, 0, 0, 0);
 
   const recentIncidents = await prisma.incident.findMany({
-    where: { createdAt: { gte: fourteenDaysAgo } },
+    where: { createdAt: { gte: fourteenDaysAgo }, site: { mineId } },
     select: { createdAt: true },
   });
 
@@ -71,16 +75,19 @@ router.get("/summary", async (req, res) => {
   const alertSeverity = { LOW: 0, MEDIUM: 0, HIGH: 0, CRITICAL: 0 } as Record<string, number>;
   for (const row of openAlertsBySeverity) alertSeverity[row.severity] = row._count;
 
-  const { score: complianceScore } = await computeComplianceScore();
+  const { score: complianceScore } = await computeComplianceScore(mineId);
 
   const assignedSiteIds = req.auth!.role === "EXECUTIVE" ? await getAssignedSiteIds(req.auth!.userId) : null;
-  const siteFilter = assignedSiteIds ? { siteId: { in: assignedSiteIds } } : {};
+  const siteFilter = assignedSiteIds ? { siteId: { in: assignedSiteIds } } : { site: { mineId } };
   const [visitorsOnSite, pendingPermitsToWork, escalatedRisks, staffOnSite, truckDriversOnSite] = await Promise.all([
     prisma.visitor.count({ where: { status: "CHECKED_IN", ...siteFilter } }),
     prisma.permitToWork.count({ where: { status: "PENDING_EXECUTIVE", ...siteFilter } }),
     prisma.riskAssessment.count({ where: { escalated: true, mitigationStatus: { in: ["OPEN", "IN_PROGRESS"] }, ...siteFilter } }),
     prisma.workerAttendance.count({
-      where: { checkOutAt: null, worker: assignedSiteIds ? { siteId: { in: assignedSiteIds } } : undefined },
+      where: {
+        checkOutAt: null,
+        worker: assignedSiteIds ? { siteId: { in: assignedSiteIds } } : { site: { mineId } },
+      },
     }),
     prisma.delivery.count({ where: { status: "CHECKED_IN", ...siteFilter } }),
   ]);

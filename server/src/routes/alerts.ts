@@ -51,7 +51,7 @@ router.post("/:id/acknowledge", async (req, res) => {
     },
   });
   const io = req.app.get("io");
-  io?.emit("alert:updated", alert);
+  io?.to(`mine:${mineId}`).emit("alert:updated", alert);
   res.json(alert);
 });
 
@@ -65,7 +65,7 @@ router.post("/:id/resolve", async (req, res) => {
     data: { status: "RESOLVED", resolvedAt: new Date() },
   });
   const io = req.app.get("io");
-  io?.emit("alert:updated", alert);
+  io?.to(`mine:${mineId}`).emit("alert:updated", alert);
   res.json(alert);
 });
 
@@ -87,7 +87,7 @@ router.post("/:id/review", requireRole("EXECUTIVE"), async (req, res) => {
     include: { reviewedBy: { select: { id: true, name: true } } },
   });
   const io = req.app.get("io");
-  io?.emit("alert:updated", alert);
+  io?.to(`mine:${mineId}`).emit("alert:updated", alert);
   res.json(alert);
 });
 

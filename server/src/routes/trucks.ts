@@ -2,6 +2,7 @@ import { Router } from "express";
 import { z } from "zod";
 import { prisma } from "../prisma";
 import { requireAuth, requireRole } from "../middleware/auth";
+import { requireMineId } from "../lib/mineScope";
 
 const router = Router();
 
@@ -55,6 +56,8 @@ const deliverySelect = {
 
 router.use(requireAuth);
 
+// Trucks are a shared registry across mines (a haulier's fleet can serve more than one
+// site) — see deliveries and fleet positions below for the mine-scoped operational data.
 router.get("/", async (req, res) => {
   const q = (req.query.q as string | undefined)?.trim();
   const trucks = await prisma.truck.findMany({
@@ -104,10 +107,13 @@ router.delete("/:id", requireRole("ADMIN", "EXECUTIVE"), async (req, res) => {
 });
 
 router.get("/deliveries/list", async (req, res) => {
+  const mineId = requireMineId(req, res);
+  if (!mineId) return;
   const siteId = req.query.siteId as string | undefined;
   const status = req.query.status as string | undefined;
   const deliveries = await prisma.delivery.findMany({
     where: {
+      site: { mineId },
       siteId: siteId || undefined,
       status: status === "CHECKED_IN" || status === "CHECKED_OUT" ? status : undefined,
     },
@@ -118,8 +124,12 @@ router.get("/deliveries/list", async (req, res) => {
 });
 
 router.post("/deliveries", requireRole("ADMIN", "SUPERVISOR", "EXECUTIVE"), async (req, res) => {
+  const mineId = requireMineId(req, res);
+  if (!mineId) return;
   const parsed = deliverySchema.safeParse(req.body);
   if (!parsed.success) return res.status(400).json({ error: parsed.error.flatten() });
+  const site = await prisma.site.findFirst({ where: { id: parsed.data.siteId, mineId } });
+  if (!site) return res.status(404).json({ error: "Site not found" });
   const delivery = await prisma.delivery.create({
     data: { ...parsed.data, loggedById: req.auth!.userId },
     select: deliverySelect,
@@ -128,11 +138,13 @@ router.post("/deliveries", requireRole("ADMIN", "SUPERVISOR", "EXECUTIVE"), asyn
 });
 
 router.post("/deliveries/:id/checkout", requireRole("ADMIN", "SUPERVISOR", "EXECUTIVE"), async (req, res) => {
-  const delivery = await prisma.delivery.findUnique({ where: { id: req.params.id } });
+  const mineId = requireMineId(req, res);
+  if (!mineId) return;
+  const delivery = await prisma.delivery.findFirst({ where: { id: req.params.id, site: { mineId } } });
   if (!delivery) return res.status(404).json({ error: "Delivery not found" });
   if (delivery.status === "CHECKED_OUT") return res.status(409).json({ error: "Already checked out" });
   const updated = await prisma.delivery.update({
-    where: { id: req.params.id },
+    where: { id: delivery.id },
     data: { status: "CHECKED_OUT", checkOutAt: new Date() },
     select: deliverySelect,
   });
@@ -140,12 +152,12 @@ router.post("/deliveries/:id/checkout", requireRole("ADMIN", "SUPERVISOR", "EXEC
 });
 
 router.delete("/deliveries/:id", requireRole("ADMIN", "EXECUTIVE"), async (req, res) => {
-  try {
-    await prisma.delivery.delete({ where: { id: req.params.id } });
-    res.status(204).send();
-  } catch {
-    res.status(404).json({ error: "Delivery not found" });
-  }
+  const mineId = requireMineId(req, res);
+  if (!mineId) return;
+  const existing = await prisma.delivery.findFirst({ where: { id: req.params.id, site: { mineId } } });
+  if (!existing) return res.status(404).json({ error: "Delivery not found" });
+  await prisma.delivery.delete({ where: { id: existing.id } });
+  res.status(204).send();
 });
 
 export default router;

@@ -2,6 +2,7 @@ import { Router } from "express";
 import { z } from "zod";
 import { prisma } from "../prisma";
 import { requireAuth, requireRole } from "../middleware/auth";
+import { requireMineId } from "../lib/mineScope";
 
 const router = Router();
 
@@ -39,11 +40,14 @@ const recordSelect = {
 router.use(requireAuth);
 
 router.get("/", async (req, res) => {
+  const mineId = requireMineId(req, res);
+  if (!mineId) return;
   const siteId = req.query.siteId as string | undefined;
   const from = req.query.from as string | undefined;
   const to = req.query.to as string | undefined;
   const records = await prisma.productionRecord.findMany({
     where: {
+      site: { mineId },
       siteId: siteId || undefined,
       shiftDate: from || to ? { gte: from ? new Date(from) : undefined, lte: to ? new Date(to) : undefined } : undefined,
     },
@@ -54,8 +58,12 @@ router.get("/", async (req, res) => {
 });
 
 router.post("/", requireRole("ADMIN", "SUPERVISOR", "EXECUTIVE"), async (req, res) => {
+  const mineId = requireMineId(req, res);
+  if (!mineId) return;
   const parsed = recordSchema.safeParse(req.body);
   if (!parsed.success) return res.status(400).json({ error: parsed.error.flatten() });
+  const site = await prisma.site.findFirst({ where: { id: parsed.data.siteId, mineId } });
+  if (!site) return res.status(404).json({ error: "Site not found" });
   const record = await prisma.productionRecord.create({
     data: { ...parsed.data, recordedById: req.auth!.userId },
     select: recordSelect,
@@ -64,26 +72,28 @@ router.post("/", requireRole("ADMIN", "SUPERVISOR", "EXECUTIVE"), async (req, re
 });
 
 router.put("/:id", requireRole("ADMIN", "SUPERVISOR", "EXECUTIVE"), async (req, res) => {
+  const mineId = requireMineId(req, res);
+  if (!mineId) return;
   const parsed = recordSchema.partial().safeParse(req.body);
   if (!parsed.success) return res.status(400).json({ error: parsed.error.flatten() });
-  try {
-    const record = await prisma.productionRecord.update({ where: { id: req.params.id }, data: parsed.data, select: recordSelect });
-    res.json(record);
-  } catch {
-    res.status(404).json({ error: "Production record not found" });
-  }
+  const existing = await prisma.productionRecord.findFirst({ where: { id: req.params.id, site: { mineId } } });
+  if (!existing) return res.status(404).json({ error: "Production record not found" });
+  const record = await prisma.productionRecord.update({ where: { id: existing.id }, data: parsed.data, select: recordSelect });
+  res.json(record);
 });
 
 router.delete("/:id", requireRole("ADMIN", "EXECUTIVE"), async (req, res) => {
-  try {
-    await prisma.productionRecord.delete({ where: { id: req.params.id } });
-    res.status(204).send();
-  } catch {
-    res.status(404).json({ error: "Production record not found" });
-  }
+  const mineId = requireMineId(req, res);
+  if (!mineId) return;
+  const existing = await prisma.productionRecord.findFirst({ where: { id: req.params.id, site: { mineId } } });
+  if (!existing) return res.status(404).json({ error: "Production record not found" });
+  await prisma.productionRecord.delete({ where: { id: existing.id } });
+  res.status(204).send();
 });
 
 router.get("/financial-summary", async (req, res) => {
+  const mineId = requireMineId(req, res);
+  if (!mineId) return;
   const siteId = req.query.siteId as string | undefined;
   const months = Math.min(Math.max(Number(req.query.months) || 6, 1), 24);
 
@@ -94,15 +104,15 @@ router.get("/financial-summary", async (req, res) => {
 
   const [records, invoices, expenses] = await Promise.all([
     prisma.productionRecord.findMany({
-      where: { siteId: siteId || undefined, shiftDate: { gte: start } },
+      where: { site: { mineId }, siteId: siteId || undefined, shiftDate: { gte: start } },
       select: { shiftDate: true, tonnesMined: true },
     }),
     prisma.invoice.findMany({
-      where: { siteId: siteId || undefined, status: "PAID", issueDate: { gte: start } },
+      where: { site: { mineId }, siteId: siteId || undefined, status: "PAID", issueDate: { gte: start } },
       select: { issueDate: true, vatRate: true, lines: { select: { lineTotal: true } } },
     }),
     prisma.expense.findMany({
-      where: { siteId: siteId || undefined, status: "PAID", expenseDate: { gte: start } },
+      where: { site: { mineId }, siteId: siteId || undefined, status: "PAID", expenseDate: { gte: start } },
       select: { expenseDate: true, amount: true, category: true },
     }),
   ]);

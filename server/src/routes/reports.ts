@@ -2,6 +2,7 @@ import { Router } from "express";
 import { prisma } from "../prisma";
 import { requireAuth, requireRole } from "../middleware/auth";
 import { computeComplianceScore } from "../services/complianceScore";
+import { requireMineId } from "../lib/mineScope";
 
 const router = Router();
 
@@ -20,6 +21,8 @@ function toCsv(rows: Record<string, any>[], columns: { key: string; label: strin
 }
 
 router.get("/trends", async (req, res) => {
+  const mineId = requireMineId(req, res);
+  if (!mineId) return;
   const siteId = req.query.siteId as string | undefined;
   const days = Math.min(Number(req.query.days) || 90, 365);
 
@@ -27,8 +30,8 @@ router.get("/trends", async (req, res) => {
   since.setDate(since.getDate() - (days - 1));
   since.setHours(0, 0, 0, 0);
 
-  const siteFilter = siteId ? { siteId } : {};
-  const workerSiteFilter = siteId ? { worker: { siteId } } : {};
+  const siteFilter = siteId ? { siteId, site: { mineId } } : { site: { mineId } };
+  const workerSiteFilter = siteId ? { worker: { siteId, site: { mineId } } } : { worker: { site: { mineId } } };
 
   const [incidents, alerts, alertsBySeverity, permits, certificates, cops, medicalRecords, { score: complianceScore, breakdown }] =
     await Promise.all([
@@ -39,7 +42,7 @@ router.get("/trends", async (req, res) => {
       prisma.certificate.findMany({ where: workerSiteFilter, select: { expiryDate: true, status: true } }),
       prisma.codeOfPractice.findMany({ where: { ...siteFilter, status: "ACTIVE" }, select: { reviewDate: true } }),
       prisma.medicalSurveillance.findMany({ where: workerSiteFilter, select: { nextExamDue: true } }),
-      computeComplianceScore(siteId),
+      computeComplianceScore(mineId, siteId),
     ]);
 
   const dayBuckets = new Map<string, { incidents: number; alerts: number }>();
@@ -83,7 +86,10 @@ router.get("/trends", async (req, res) => {
   });
 });
 
-const exportConfigs: Record<string, { columns: { key: string; label: string }[]; query: (siteId?: string) => Promise<any[]> }> = {
+const exportConfigs: Record<
+  string,
+  { columns: { key: string; label: string }[]; query: (mineId: string, siteId?: string) => Promise<any[]> }
+> = {
   incidents: {
     columns: [
       { key: "title", label: "Title" },
@@ -94,9 +100,9 @@ const exportConfigs: Record<string, { columns: { key: string; label: string }[];
       { key: "createdAt", label: "Created At" },
       { key: "resolvedAt", label: "Resolved At" },
     ],
-    query: async (siteId) => {
+    query: async (mineId, siteId) => {
       const rows = await prisma.incident.findMany({
-        where: siteId ? { siteId } : undefined,
+        where: siteId ? { siteId, site: { mineId } } : { site: { mineId } },
         include: { site: { select: { name: true } }, zone: { select: { name: true } } },
         orderBy: { createdAt: "desc" },
       });
@@ -113,9 +119,9 @@ const exportConfigs: Record<string, { columns: { key: string; label: string }[];
       { key: "createdAt", label: "Created At" },
       { key: "resolvedAt", label: "Resolved At" },
     ],
-    query: async (siteId) => {
+    query: async (mineId, siteId) => {
       const rows = await prisma.alert.findMany({
-        where: siteId ? { siteId } : undefined,
+        where: siteId ? { siteId, site: { mineId } } : { site: { mineId } },
         include: { site: { select: { name: true } }, zone: { select: { name: true } } },
         orderBy: { createdAt: "desc" },
       });
@@ -132,9 +138,9 @@ const exportConfigs: Record<string, { columns: { key: string; label: string }[];
       { key: "issueDate", label: "Issue Date" },
       { key: "expiryDate", label: "Expiry Date" },
     ],
-    query: async (siteId) => {
+    query: async (mineId, siteId) => {
       const rows = await prisma.permit.findMany({
-        where: siteId ? { siteId } : undefined,
+        where: siteId ? { siteId, site: { mineId } } : { site: { mineId } },
         include: { site: { select: { name: true } } },
         orderBy: { expiryDate: "asc" },
       });
@@ -151,9 +157,9 @@ const exportConfigs: Record<string, { columns: { key: string; label: string }[];
       { key: "issueDate", label: "Issue Date" },
       { key: "expiryDate", label: "Expiry Date" },
     ],
-    query: async (siteId) => {
+    query: async (mineId, siteId) => {
       const rows = await prisma.certificate.findMany({
-        where: siteId ? { worker: { siteId } } : undefined,
+        where: siteId ? { worker: { siteId, site: { mineId } } } : { worker: { site: { mineId } } },
         include: { worker: { select: { name: true } } },
         orderBy: { issueDate: "desc" },
       });
@@ -169,9 +175,9 @@ const exportConfigs: Record<string, { columns: { key: string; label: string }[];
       { key: "completionDate", label: "Completion Date" },
       { key: "expiryDate", label: "Refresher Due" },
     ],
-    query: async (siteId) => {
+    query: async (mineId, siteId) => {
       const rows = await prisma.trainingRecord.findMany({
-        where: siteId ? { worker: { siteId } } : undefined,
+        where: siteId ? { worker: { siteId, site: { mineId } } } : { worker: { site: { mineId } } },
         include: { worker: { select: { name: true } } },
         orderBy: { completionDate: "desc" },
       });
@@ -188,9 +194,9 @@ const exportConfigs: Record<string, { columns: { key: string; label: string }[];
       { key: "completedDate", label: "Completed Date" },
       { key: "inspector", label: "Inspector" },
     ],
-    query: async (siteId) => {
+    query: async (mineId, siteId) => {
       const rows = await prisma.safetyInspection.findMany({
-        where: siteId ? { siteId } : undefined,
+        where: siteId ? { siteId, site: { mineId } } : { site: { mineId } },
         include: { site: { select: { name: true } } },
         orderBy: { scheduledDate: "desc" },
       });
@@ -207,9 +213,9 @@ const exportConfigs: Record<string, { columns: { key: string; label: string }[];
       { key: "issuedDate", label: "Issued Date" },
       { key: "complianceDeadline", label: "Compliance Deadline" },
     ],
-    query: async (siteId) => {
+    query: async (mineId, siteId) => {
       const rows = await prisma.regulatoryNotice.findMany({
-        where: siteId ? { siteId } : undefined,
+        where: siteId ? { siteId, site: { mineId } } : { site: { mineId } },
         include: { site: { select: { name: true } } },
         orderBy: { issuedDate: "desc" },
       });
@@ -227,9 +233,9 @@ const exportConfigs: Record<string, { columns: { key: string; label: string }[];
       { key: "goodStandingExpiry", label: "Good Standing Expiry" },
       { key: "insuranceExpiry", label: "Insurance Expiry" },
     ],
-    query: async (siteId) => {
+    query: async (mineId, siteId) => {
       const rows = await prisma.contractor.findMany({
-        where: siteId ? { siteId } : undefined,
+        where: siteId ? { siteId, site: { mineId } } : { site: { mineId } },
         include: { site: { select: { name: true } } },
         orderBy: { contractEndDate: "asc" },
       });
@@ -239,10 +245,12 @@ const exportConfigs: Record<string, { columns: { key: string; label: string }[];
 };
 
 router.get("/export/:entity", async (req, res) => {
+  const mineId = requireMineId(req, res);
+  if (!mineId) return;
   const config = exportConfigs[req.params.entity];
   if (!config) return res.status(404).json({ error: "Unknown export entity" });
   const siteId = req.query.siteId as string | undefined;
-  const rows = await config.query(siteId);
+  const rows = await config.query(mineId, siteId);
   const csv = toCsv(rows, config.columns);
   res.setHeader("Content-Type", "text/csv");
   res.setHeader("Content-Disposition", `attachment; filename="${req.params.entity}.csv"`);

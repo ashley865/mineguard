@@ -7,6 +7,7 @@ import { getAssignedSiteIds } from "../services/executiveSites";
 import { verifyAdminPassword } from "../lib/verifyPassword";
 import { isValidIdOrPassport } from "../lib/saId";
 import { documentFileFilter } from "../lib/uploadFilters";
+import { requireMineId } from "../lib/mineScope";
 
 const router = Router();
 
@@ -124,6 +125,8 @@ router.post("/checkin/:siteId", upload.array("documents", 5), async (req, res) =
 router.use(requireAuth);
 
 router.get("/", requireRole("ADMIN", "EXECUTIVE"), async (req, res) => {
+  const mineId = requireMineId(req, res);
+  if (!mineId) return;
   const siteId = req.query.siteId as string | undefined;
   let allowedSiteIds: string[] | null = null;
   if (req.auth!.role === "EXECUTIVE") {
@@ -133,7 +136,10 @@ router.get("/", requireRole("ADMIN", "EXECUTIVE"), async (req, res) => {
     }
   }
   const items = await prisma.visitor.findMany({
-    where: { siteId: siteId ?? (allowedSiteIds ? { in: allowedSiteIds } : undefined) },
+    where: {
+      site: { mineId },
+      siteId: siteId ?? (allowedSiteIds ? { in: allowedSiteIds } : undefined),
+    },
     select: visitorSelect,
     orderBy: { checkInAt: "desc" },
   });
@@ -141,7 +147,9 @@ router.get("/", requireRole("ADMIN", "EXECUTIVE"), async (req, res) => {
 });
 
 router.post("/:id/checkout", requireRole("ADMIN", "EXECUTIVE"), async (req, res) => {
-  const visitor = await prisma.visitor.findUnique({ where: { id: req.params.id } });
+  const mineId = requireMineId(req, res);
+  if (!mineId) return;
+  const visitor = await prisma.visitor.findFirst({ where: { id: req.params.id, site: { mineId } } });
   if (!visitor) return res.status(404).json({ error: "Visitor not found" });
   if (!(await assertSiteAccess(req, res, visitor.siteId))) return;
 
@@ -154,11 +162,15 @@ router.post("/:id/checkout", requireRole("ADMIN", "EXECUTIVE"), async (req, res)
 });
 
 router.get("/:id/documents/:docId/download", requireRole("ADMIN", "EXECUTIVE"), async (req, res) => {
+  const mineId = requireMineId(req, res);
+  if (!mineId) return;
   const doc = await prisma.visitorDocument.findUnique({
     where: { id: req.params.docId },
-    include: { visitor: { select: { id: true, siteId: true } } },
+    include: { visitor: { select: { id: true, siteId: true, site: { select: { mineId: true } } } } },
   });
-  if (!doc || doc.visitor.id !== req.params.id) return res.status(404).json({ error: "Document not found" });
+  if (!doc || doc.visitor.id !== req.params.id || doc.visitor.site.mineId !== mineId) {
+    return res.status(404).json({ error: "Document not found" });
+  }
   if (!(await assertSiteAccess(req, res, doc.visitor.siteId))) return;
 
   res.setHeader("Content-Type", doc.fileMimeType);
@@ -167,22 +179,26 @@ router.get("/:id/documents/:docId/download", requireRole("ADMIN", "EXECUTIVE"), 
 });
 
 router.delete("/:id", requireRole("ADMIN"), async (req, res) => {
-  try {
-    await prisma.visitor.delete({ where: { id: req.params.id } });
-    res.status(204).send();
-  } catch {
-    res.status(404).json({ error: "Visitor not found" });
-  }
+  const mineId = requireMineId(req, res);
+  if (!mineId) return;
+  const existing = await prisma.visitor.findFirst({ where: { id: req.params.id, site: { mineId } } });
+  if (!existing) return res.status(404).json({ error: "Visitor not found" });
+  await prisma.visitor.delete({ where: { id: existing.id } });
+  res.status(204).send();
 });
 
 // Deleting a visitor's uploaded document is irreversible, so it requires the ADMIN role
 // plus re-confirming their password, not just a valid session token.
 router.delete("/:id/documents/:docId", requireRole("ADMIN"), async (req, res) => {
+  const mineId = requireMineId(req, res);
+  if (!mineId) return;
   const passwordOk = await verifyAdminPassword(req.auth!.userId, req.body?.password);
   if (!passwordOk) return res.status(401).json({ error: "Incorrect password" });
-  const doc = await prisma.visitorDocument.findUnique({ where: { id: req.params.docId } });
-  if (!doc || doc.visitorId !== req.params.id) return res.status(404).json({ error: "Document not found" });
-  await prisma.visitorDocument.delete({ where: { id: req.params.docId } });
+  const doc = await prisma.visitorDocument.findFirst({
+    where: { id: req.params.docId, visitorId: req.params.id, visitor: { site: { mineId } } },
+  });
+  if (!doc) return res.status(404).json({ error: "Document not found" });
+  await prisma.visitorDocument.delete({ where: { id: doc.id } });
   res.status(204).send();
 });
 

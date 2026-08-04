@@ -701,6 +701,7 @@ model Mine {
   emergencyContacts EmergencyContact[]
   trainingCourses  TrainingCourse[]
   payees           Payee[]
+  suppliers        Supplier[]
 }
 
 enum InviteStatus {
@@ -1565,6 +1566,8 @@ enum SupplierStatus {
 
 model Supplier {
   id                 String         @id @default(cuid())
+  mineId             String
+  mine               Mine           @relation(fields: [mineId], references: [id], onDelete: Cascade)
   name               String
   registrationNumber String?
   contactName        String?
