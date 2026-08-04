@@ -11,8 +11,16 @@ const contactSchema = z.object({
   name: z.string().min(1),
   role: z.string().min(1),
   phone: z.string().min(1),
-  category: z.enum(["MINE_RESCUE", "MEDICAL", "FIRE", "POLICE", "INTERNAL_MANAGEMENT", "OTHER"]).optional(),
+  category: z
+    .enum(["MINE_RESCUE", "MEDICAL", "AMBULANCE", "FIRE", "POLICE", "SECURITY", "INTERNAL_MANAGEMENT", "OTHER"])
+    .optional(),
   priority: z.coerce.number().optional(),
+});
+
+const evacuationSchema = z.object({
+  siteId: z.string().min(1),
+  assemblyPoint: z.string().min(1),
+  message: z.string().optional(),
 });
 
 const drillSchema = z.object({
@@ -47,6 +55,19 @@ const drillSelect = {
   issuesIdentified: true,
   conductedBy: { select: { id: true, name: true } },
   createdAt: true,
+} as const;
+
+const evacuationSelect = {
+  id: true,
+  siteId: true,
+  site: { select: { id: true, name: true } },
+  assemblyPoint: true,
+  message: true,
+  status: true,
+  triggeredBy: { select: { id: true, name: true } },
+  triggeredAt: true,
+  cancelledBy: { select: { id: true, name: true } },
+  cancelledAt: true,
 } as const;
 
 router.use(requireAuth);
@@ -144,6 +165,68 @@ router.delete("/drills/:id", requireRole("ADMIN", "EXECUTIVE"), async (req, res)
   if (!existing) return res.status(404).json({ error: "Evacuation drill not found" });
   await prisma.evacuationDrill.delete({ where: { id: existing.id } });
   res.status(204).send();
+});
+
+// Anyone can raise the alarm — a genuine evacuation is not the moment to gate on role.
+router.post("/evacuations", async (req, res) => {
+  const mineId = requireMineId(req, res);
+  if (!mineId) return;
+  const parsed = evacuationSchema.safeParse(req.body);
+  if (!parsed.success) return res.status(400).json({ error: parsed.error.flatten() });
+  const site = await prisma.site.findFirst({ where: { id: parsed.data.siteId, mineId } });
+  if (!site) return res.status(404).json({ error: "Site not found" });
+
+  const evacuation = await prisma.emergencyEvacuation.create({
+    data: { ...parsed.data, mineId, triggeredById: req.auth!.userId },
+    select: evacuationSelect,
+  });
+
+  const io = req.app.get("io");
+  io?.to(`mine:${mineId}`).emit("emergency:evacuation", evacuation);
+
+  res.status(201).json(evacuation);
+});
+
+router.get("/evacuations/active", async (req, res) => {
+  const mineId = requireMineId(req, res);
+  if (!mineId) return;
+  const evacuations = await prisma.emergencyEvacuation.findMany({
+    where: { mineId, status: "ACTIVE" },
+    select: evacuationSelect,
+    orderBy: { triggeredAt: "desc" },
+  });
+  res.json(evacuations);
+});
+
+router.get("/evacuations", async (req, res) => {
+  const mineId = requireMineId(req, res);
+  if (!mineId) return;
+  const evacuations = await prisma.emergencyEvacuation.findMany({
+    where: { mineId },
+    select: evacuationSelect,
+    orderBy: { triggeredAt: "desc" },
+    take: 50,
+  });
+  res.json(evacuations);
+});
+
+router.post("/evacuations/:id/cancel", requireRole("ADMIN", "SUPERVISOR", "EXECUTIVE"), async (req, res) => {
+  const mineId = requireMineId(req, res);
+  if (!mineId) return;
+  const existing = await prisma.emergencyEvacuation.findFirst({ where: { id: req.params.id, mineId } });
+  if (!existing) return res.status(404).json({ error: "Evacuation not found" });
+  if (existing.status !== "ACTIVE") return res.status(409).json({ error: "This evacuation has already been cancelled" });
+
+  const evacuation = await prisma.emergencyEvacuation.update({
+    where: { id: existing.id },
+    data: { status: "CANCELLED", cancelledById: req.auth!.userId, cancelledAt: new Date() },
+    select: evacuationSelect,
+  });
+
+  const io = req.app.get("io");
+  io?.to(`mine:${mineId}`).emit("emergency:evacuation-cancelled", { id: evacuation.id });
+
+  res.json(evacuation);
 });
 
 export default router;

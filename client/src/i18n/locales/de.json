@@ -22,7 +22,8 @@
     "reviewNotePlaceholder": "Optionale Anmerkung…",
     "reviewedBy": "Geprüft von {{name}}",
     "copy": "Kopieren",
-    "notes": "Notizen"
+    "notes": "Notizen",
+    "unknown": "Unbekannt"
   },
   "nav": {
     "dashboard": "Übersicht",
@@ -137,7 +138,8 @@
     "loading": "Dashboard wird geladen…",
     "complianceScore": "Compliance-Bewertung",
     "workforceStatus": "Belegschaftsstatus",
-    "equipmentStatus": "Ausrüstungsstatus"
+    "equipmentStatus": "Ausrüstungsstatus",
+    "financialPerformance": "Finanzielle Leistung"
   },
   "executive": {
     "title": "Führungskräfte-Dashboard",
@@ -287,7 +289,24 @@
     "payslipsSection": "Aktuelle Gehaltsabrechnungen",
     "noPayslips": "Keine Gehaltsabrechnungen erfasst.",
     "downloadPayslip": "Herunterladen",
-    "netPay": "Nettolohn"
+    "netPay": "Nettolohn",
+    "category": "Personalkategorie",
+    "colCategory": "Kategorie",
+    "allCategories": "Alle Kategorien",
+    "categories": {
+      "MINING_OPERATIONS": "Bergbaubetrieb",
+      "ENGINEERING_TECHNICAL": "Technik",
+      "DRIVER": "Fahrer",
+      "CLEANER": "Reinigungskraft",
+      "SECURITY": "Sicherheit",
+      "ADMINISTRATION": "Verwaltung",
+      "EXECUTIVE": "Führungskraft",
+      "MEDICAL": "Medizinisch",
+      "SAFETY_HEALTH": "Arbeitssicherheit",
+      "MAINTENANCE": "Wartung",
+      "CATERING": "Verpflegung",
+      "OTHER": "Sonstiges"
+    }
   },
   "equipment": {
     "title": "Ausrüstung",
@@ -1415,7 +1434,9 @@
       "FIRE": "Feuerwehr",
       "POLICE": "Polizei",
       "INTERNAL_MANAGEMENT": "Interne Leitung",
-      "OTHER": "Sonstiges"
+      "OTHER": "Sonstiges",
+      "AMBULANCE": "Krankenwagen",
+      "SECURITY": "Sicherheit"
     },
     "priority": "Priorität",
     "newContact": "+ Neuer Kontakt",
@@ -1436,7 +1457,22 @@
     "newDrill": "+ Neue Übung",
     "newDrillTitle": "Neue Evakuierungsübung",
     "noneYetDrills": "Noch keine Evakuierungsübungen erfasst.",
-    "confirmDeleteDrill": "Diese Evakuierungsübung löschen?"
+    "confirmDeleteDrill": "Diese Evakuierungsübung löschen?",
+    "tabEvacuations": "Evakuierungen",
+    "noneYetEvacuations": "Es wurden noch keine Evakuierungen ausgelöst.",
+    "evacuateButton": "Evakuieren",
+    "triggerEvacuationTitle": "Notfall-Evakuierung Auslösen",
+    "triggerEvacuation": "Evakuierung Auslösen",
+    "evacuationTriggerWarning": "Dies alarmiert sofort jeden verbundenen Bildschirm dieser Mine mit einer Vollbild-Notfallwarnung. Nur bei einer echten Evakuierung verwenden.",
+    "evacuationTriggerError": "Die Evakuierung konnte nicht ausgelöst werden",
+    "assemblyPoint": "Sammelpunkt",
+    "assemblyPointPlaceholder": "z. B. Parkplatz Haupttor, Sammelpunkt B…",
+    "evacuationMessage": "Nachricht (optional)",
+    "evacuationActiveTitle": "Notfall-Evakuierung Läuft",
+    "triggeredBy": "Ausgelöst von {{name}}",
+    "triggeredAt": "Ausgelöst",
+    "cancelEvacuation": "Evakuierung Abbrechen",
+    "confirmCancelEvacuation": "Diese Evakuierung abbrechen? Jeder verbundene Bildschirm wird zurückgesetzt."
   },
   "roster": {
     "nav": "Schichtplanung",

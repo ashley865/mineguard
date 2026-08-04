@@ -14,10 +14,26 @@ const upload = multer({
   fileFilter: imageFileFilter,
 });
 
+const staffCategoryEnum = z.enum([
+  "MINING_OPERATIONS",
+  "ENGINEERING_TECHNICAL",
+  "DRIVER",
+  "CLEANER",
+  "SECURITY",
+  "ADMINISTRATION",
+  "EXECUTIVE",
+  "MEDICAL",
+  "SAFETY_HEALTH",
+  "MAINTENANCE",
+  "CATERING",
+  "OTHER",
+]);
+
 const workerSchema = z.object({
   name: z.string().min(1),
   employeeId: z.string().min(1),
   role: z.string().min(1),
+  category: staffCategoryEnum.optional(),
   phone: z.string().optional(),
   status: z.enum(["ON_SHIFT", "OFF_SHIFT", "EMERGENCY"]).optional(),
   siteId: z.string().min(1),
@@ -32,6 +48,7 @@ const workerSelect = {
   name: true,
   employeeId: true,
   role: true,
+  category: true,
   phone: true,
   status: true,
   siteId: true,
@@ -56,8 +73,9 @@ router.get("/", async (req, res) => {
   const mineId = requireMineId(req, res);
   if (!mineId) return;
   const siteId = req.query.siteId as string | undefined;
+  const category = req.query.category as string | undefined;
   const workers = await prisma.worker.findMany({
-    where: { site: { mineId }, siteId: siteId || undefined },
+    where: { site: { mineId }, siteId: siteId || undefined, category: (category as any) || undefined },
     select: workerSelect,
     orderBy: { createdAt: "desc" },
   });

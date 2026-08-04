@@ -22,7 +22,8 @@
     "reviewNotePlaceholder": "Optional note…",
     "reviewedBy": "Reviewed by {{name}}",
     "copy": "Copy",
-    "notes": "Notes"
+    "notes": "Notes",
+    "unknown": "Unknown"
   },
   "nav": {
     "dashboard": "Dashboard",
@@ -137,7 +138,8 @@
     "loading": "Loading dashboard…",
     "complianceScore": "Compliance Score",
     "workforceStatus": "Workforce Status",
-    "equipmentStatus": "Equipment Status"
+    "equipmentStatus": "Equipment Status",
+    "financialPerformance": "Financial Performance"
   },
   "executive": {
     "title": "Executive Dashboard",
@@ -287,7 +289,24 @@
     "payslipsSection": "Recent Payslips",
     "noPayslips": "No payslips on record.",
     "downloadPayslip": "Download",
-    "netPay": "Net Pay"
+    "netPay": "Net Pay",
+    "category": "Staff category",
+    "colCategory": "Category",
+    "allCategories": "All Categories",
+    "categories": {
+      "MINING_OPERATIONS": "Mining Operations",
+      "ENGINEERING_TECHNICAL": "Engineering & Technical",
+      "DRIVER": "Driver",
+      "CLEANER": "Cleaner",
+      "SECURITY": "Security",
+      "ADMINISTRATION": "Administration",
+      "EXECUTIVE": "Executive",
+      "MEDICAL": "Medical",
+      "SAFETY_HEALTH": "Safety & Health",
+      "MAINTENANCE": "Maintenance",
+      "CATERING": "Catering",
+      "OTHER": "Other"
+    }
   },
   "equipment": {
     "title": "Equipment",
@@ -1412,8 +1431,10 @@
     "categories": {
       "MINE_RESCUE": "Mine Rescue",
       "MEDICAL": "Medical",
+      "AMBULANCE": "Ambulance",
       "FIRE": "Fire",
       "POLICE": "Police",
+      "SECURITY": "Security",
       "INTERNAL_MANAGEMENT": "Internal Management",
       "OTHER": "Other"
     },
@@ -1436,7 +1457,22 @@
     "newDrill": "+ New Drill",
     "newDrillTitle": "New Evacuation Drill",
     "noneYetDrills": "No evacuation drills recorded yet.",
-    "confirmDeleteDrill": "Delete this evacuation drill?"
+    "confirmDeleteDrill": "Delete this evacuation drill?",
+    "tabEvacuations": "Evacuations",
+    "noneYetEvacuations": "No evacuations have been triggered.",
+    "evacuateButton": "Evacuate",
+    "triggerEvacuationTitle": "Trigger Emergency Evacuation",
+    "triggerEvacuation": "Trigger Evacuation",
+    "evacuationTriggerWarning": "This will immediately alert every connected screen at this mine with a full-screen emergency warning. Only use this for a genuine evacuation.",
+    "evacuationTriggerError": "Could not trigger the evacuation",
+    "assemblyPoint": "Assembly / muster point",
+    "assemblyPointPlaceholder": "e.g. Main Gate car park, Muster Point B…",
+    "evacuationMessage": "Message (optional)",
+    "evacuationActiveTitle": "Emergency Evacuation In Progress",
+    "triggeredBy": "Triggered by {{name}}",
+    "triggeredAt": "Triggered",
+    "cancelEvacuation": "Cancel Evacuation",
+    "confirmCancelEvacuation": "Cancel this evacuation? Every connected screen will be cleared."
   },
   "roster": {
     "nav": "Shift Rostering",

@@ -1,10 +1,12 @@
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { api } from "../api/client";
+import { useAuth } from "../context/AuthContext";
 import { useSocket } from "../context/SocketContext";
 import { Alert, DashboardSummary } from "../api/types";
 import { SeverityBadge, StatusBadge } from "../components/Badges";
 import { cardClass } from "../components/ui";
+import FinancialSummaryWidget from "../components/FinancialSummaryWidget";
 
 function StatCard({
   label,
@@ -27,6 +29,7 @@ function StatCard({
 
 export default function Dashboard() {
   const { t } = useTranslation();
+  const { user } = useAuth();
   const [summary, setSummary] = useState<DashboardSummary | null>(null);
   const socket = useSocket();
 
@@ -87,6 +90,8 @@ export default function Dashboard() {
         <h2 className="text-xs font-semibold">{t("dashboard.complianceScore")}</h2>
         <div className={`text-xl font-bold ${scoreTone}`}>{complianceScore}%</div>
       </div>
+
+      {user?.role === "ADMIN" && <FinancialSummaryWidget />}
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
         <div className={`${cardClass} p-3`}>

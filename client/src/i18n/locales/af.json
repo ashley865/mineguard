@@ -22,7 +22,8 @@
     "reviewNotePlaceholder": "Opsionele nota…",
     "reviewedBy": "Nagegaan deur {{name}}",
     "copy": "Kopieer",
-    "notes": "Notas"
+    "notes": "Notas",
+    "unknown": "Onbekend"
   },
   "nav": {
     "dashboard": "Oorsig",
@@ -137,7 +138,8 @@
     "loading": "Laai dashboard tans…",
     "complianceScore": "Voldoeningstelling",
     "workforceStatus": "Arbeidsmagstatus",
-    "equipmentStatus": "Toerustingstatus"
+    "equipmentStatus": "Toerustingstatus",
+    "financialPerformance": "Finansiële Prestasie"
   },
   "executive": {
     "title": "Uitvoerende Dashboard",
@@ -287,7 +289,24 @@
     "payslipsSection": "Onlangse Salarisstrokies",
     "noPayslips": "Geen salarisstrokies aangeteken nie.",
     "downloadPayslip": "Laai af",
-    "netPay": "Netto Betaling"
+    "netPay": "Netto Betaling",
+    "category": "Personeelkategorie",
+    "colCategory": "Kategorie",
+    "allCategories": "Alle Kategorieë",
+    "categories": {
+      "MINING_OPERATIONS": "Mynbedrywighede",
+      "ENGINEERING_TECHNICAL": "Ingenieurswese en Tegnies",
+      "DRIVER": "Bestuurder",
+      "CLEANER": "Skoonmaker",
+      "SECURITY": "Sekuriteit",
+      "ADMINISTRATION": "Administrasie",
+      "EXECUTIVE": "Uitvoerend",
+      "MEDICAL": "Mediese",
+      "SAFETY_HEALTH": "Veiligheid en Gesondheid",
+      "MAINTENANCE": "Instandhouding",
+      "CATERING": "Spyseniering",
+      "OTHER": "Ander"
+    }
   },
   "equipment": {
     "title": "Toerusting",
@@ -1415,7 +1434,9 @@
       "FIRE": "Brandweer",
       "POLICE": "Polisie",
       "INTERNAL_MANAGEMENT": "Interne Bestuur",
-      "OTHER": "Ander"
+      "OTHER": "Ander",
+      "AMBULANCE": "Ambulans",
+      "SECURITY": "Sekuriteit"
     },
     "priority": "Prioriteit",
     "newContact": "+ Nuwe Kontak",
@@ -1436,7 +1457,22 @@
     "newDrill": "+ Nuwe Oefening",
     "newDrillTitle": "Nuwe Ontruimingsoefening",
     "noneYetDrills": "Nog geen ontruimingsoefeninge aangeteken nie.",
-    "confirmDeleteDrill": "Skrap hierdie ontruimingsoefening?"
+    "confirmDeleteDrill": "Skrap hierdie ontruimingsoefening?",
+    "tabEvacuations": "Evakuasies",
+    "noneYetEvacuations": "Geen evakuasies is nog geaktiveer nie.",
+    "evacuateButton": "Evakueer",
+    "triggerEvacuationTitle": "Aktiveer Noodevakuasie",
+    "triggerEvacuation": "Aktiveer Evakuasie",
+    "evacuationTriggerWarning": "Dit sal onmiddellik elke gekoppelde skerm by hierdie myn waarsku met 'n volskerm-noodwaarskuwing. Gebruik dit slegs vir 'n werklike evakuasie.",
+    "evacuationTriggerError": "Kon nie die evakuasie aktiveer nie",
+    "assemblyPoint": "Samelpunt",
+    "assemblyPointPlaceholder": "bv. Hoofhek parkeerarea, Samelpunt B…",
+    "evacuationMessage": "Boodskap (opsioneel)",
+    "evacuationActiveTitle": "Noodevakuasie Aan Die Gang",
+    "triggeredBy": "Geaktiveer deur {{name}}",
+    "triggeredAt": "Geaktiveer",
+    "cancelEvacuation": "Kanselleer Evakuasie",
+    "confirmCancelEvacuation": "Kanselleer hierdie evakuasie? Elke gekoppelde skerm sal skoongemaak word."
   },
   "roster": {
     "nav": "Skofrooster",

@@ -22,7 +22,8 @@
     "reviewNotePlaceholder": "Note facultative…",
     "reviewedBy": "Révisé par {{name}}",
     "copy": "Copier",
-    "notes": "Notes"
+    "notes": "Notes",
+    "unknown": "Inconnu"
   },
   "nav": {
     "dashboard": "Tableau de bord",
@@ -137,7 +138,8 @@
     "loading": "Chargement du tableau de bord…",
     "complianceScore": "Score de Conformité",
     "workforceStatus": "État du Personnel",
-    "equipmentStatus": "État des Équipements"
+    "equipmentStatus": "État des Équipements",
+    "financialPerformance": "Performance Financière"
   },
   "executive": {
     "title": "Tableau de bord exécutif",
@@ -287,7 +289,24 @@
     "payslipsSection": "Fiches de Paie Récentes",
     "noPayslips": "Aucune fiche de paie enregistrée.",
     "downloadPayslip": "Télécharger",
-    "netPay": "Salaire Net"
+    "netPay": "Salaire Net",
+    "category": "Catégorie de personnel",
+    "colCategory": "Catégorie",
+    "allCategories": "Toutes les Catégories",
+    "categories": {
+      "MINING_OPERATIONS": "Opérations Minières",
+      "ENGINEERING_TECHNICAL": "Ingénierie et Technique",
+      "DRIVER": "Chauffeur",
+      "CLEANER": "Nettoyage",
+      "SECURITY": "Sécurité",
+      "ADMINISTRATION": "Administration",
+      "EXECUTIVE": "Cadre",
+      "MEDICAL": "Médical",
+      "SAFETY_HEALTH": "Santé et Sécurité",
+      "MAINTENANCE": "Maintenance",
+      "CATERING": "Restauration",
+      "OTHER": "Autre"
+    }
   },
   "equipment": {
     "title": "Équipements",
@@ -1415,7 +1434,9 @@
       "FIRE": "Pompiers",
       "POLICE": "Police",
       "INTERNAL_MANAGEMENT": "Direction Interne",
-      "OTHER": "Autre"
+      "OTHER": "Autre",
+      "AMBULANCE": "Ambulance",
+      "SECURITY": "Sécurité"
     },
     "priority": "Priorité",
     "newContact": "+ Nouveau Contact",
@@ -1436,7 +1457,22 @@
     "newDrill": "+ Nouvel Exercice",
     "newDrillTitle": "Nouvel Exercice d'Évacuation",
     "noneYetDrills": "Aucun exercice d'évacuation enregistré pour le moment.",
-    "confirmDeleteDrill": "Supprimer cet exercice d'évacuation ?"
+    "confirmDeleteDrill": "Supprimer cet exercice d'évacuation ?",
+    "tabEvacuations": "Évacuations",
+    "noneYetEvacuations": "Aucune évacuation n'a été déclenchée.",
+    "evacuateButton": "Évacuer",
+    "triggerEvacuationTitle": "Déclencher une Évacuation d'Urgence",
+    "triggerEvacuation": "Déclencher l'Évacuation",
+    "evacuationTriggerWarning": "Cela alertera immédiatement tous les écrans connectés de cette mine avec un avertissement d'urgence en plein écran. À utiliser uniquement pour une véritable évacuation.",
+    "evacuationTriggerError": "Impossible de déclencher l'évacuation",
+    "assemblyPoint": "Point de rassemblement",
+    "assemblyPointPlaceholder": "ex. Parking de l'entrée principale, Point de rassemblement B…",
+    "evacuationMessage": "Message (facultatif)",
+    "evacuationActiveTitle": "Évacuation d'Urgence en Cours",
+    "triggeredBy": "Déclenché par {{name}}",
+    "triggeredAt": "Déclenché",
+    "cancelEvacuation": "Annuler l'Évacuation",
+    "confirmCancelEvacuation": "Annuler cette évacuation ? Tous les écrans connectés seront effacés."
   },
   "roster": {
     "nav": "Planification des Équipes",

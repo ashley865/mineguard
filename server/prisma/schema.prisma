@@ -210,6 +210,8 @@ model User {
   invoicesCreated        Invoice[]               @relation("InvoiceCreatedBy")
   payeesCreated          Payee[]                 @relation("PayeeCreatedBy")
   expensesCreated        Expense[]               @relation("ExpenseCreatedBy")
+  evacuationsTriggered   EmergencyEvacuation[]   @relation("EvacuationTriggeredBy")
+  evacuationsCancelled   EmergencyEvacuation[]   @relation("EvacuationCancelledBy")
 }
 
 model Site {
@@ -259,6 +261,7 @@ model Site {
   purchaseOrders       PurchaseOrder[]
   invoices             Invoice[]
   expenses             Expense[]
+  evacuations          EmergencyEvacuation[]
 }
 
 model Zone {
@@ -337,11 +340,27 @@ model Alert {
   @@index([status])
 }
 
+enum StaffCategory {
+  MINING_OPERATIONS
+  ENGINEERING_TECHNICAL
+  DRIVER
+  CLEANER
+  SECURITY
+  ADMINISTRATION
+  EXECUTIVE
+  MEDICAL
+  SAFETY_HEALTH
+  MAINTENANCE
+  CATERING
+  OTHER
+}
+
 model Worker {
-  id            String       @id @default(cuid())
+  id            String        @id @default(cuid())
   name          String
-  employeeId    String       @unique
+  employeeId    String        @unique
   role          String
+  category      StaffCategory @default(OTHER)
   phone         String?
   status        WorkerStatus @default(OFF_SHIFT)
   photoData     Bytes?
@@ -702,6 +721,7 @@ model Mine {
   trainingCourses  TrainingCourse[]
   payees           Payee[]
   suppliers        Supplier[]
+  evacuations      EmergencyEvacuation[]
 }
 
 enum InviteStatus {
@@ -1367,8 +1387,10 @@ model EnvironmentalReading {
 enum EmergencyContactCategory {
   MINE_RESCUE
   MEDICAL
+  AMBULANCE
   FIRE
   POLICE
+  SECURITY
   INTERNAL_MANAGEMENT
   OTHER
 }
@@ -1406,6 +1428,30 @@ model EvacuationDrill {
   issuesIdentified  String?
   conductedById     String?
   conductedBy       User?               @relation("DrillConductedBy", fields: [conductedById], references: [id], onDelete: SetNull)
+
+  createdAt DateTime @default(now())
+}
+
+enum EvacuationStatus {
+  ACTIVE
+  CANCELLED
+}
+
+model EmergencyEvacuation {
+  id             String           @id @default(cuid())
+  mineId         String
+  mine           Mine             @relation(fields: [mineId], references: [id], onDelete: Cascade)
+  siteId         String
+  site           Site             @relation(fields: [siteId], references: [id], onDelete: Cascade)
+  assemblyPoint  String
+  message        String?
+  status         EvacuationStatus @default(ACTIVE)
+  triggeredById  String?
+  triggeredBy    User?            @relation("EvacuationTriggeredBy", fields: [triggeredById], references: [id], onDelete: SetNull)
+  triggeredAt    DateTime         @default(now())
+  cancelledById  String?
+  cancelledBy    User?            @relation("EvacuationCancelledBy", fields: [cancelledById], references: [id], onDelete: SetNull)
+  cancelledAt    DateTime?
 
   createdAt DateTime @default(now())
 }

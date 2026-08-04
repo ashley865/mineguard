@@ -2,12 +2,22 @@ import { FormEvent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { api } from "../api/client";
 import { useAuth } from "../context/AuthContext";
-import { EmergencyContact, EmergencyContactCategory, EvacuationDrill, EvacuationDrillType, Site } from "../api/types";
+import { EmergencyContact, EmergencyContactCategory, EmergencyEvacuation, EvacuationDrill, EvacuationDrillType, Site } from "../api/types";
 import Modal from "../components/Modal";
+import { StatusBadge } from "../components/Badges";
 import { buttonDanger, buttonPrimary, buttonSecondary, cardClass, inputClass, labelClass, selectClass } from "../components/ui";
 import DateField from "../components/DateField";
 
-const categories: EmergencyContactCategory[] = ["MINE_RESCUE", "MEDICAL", "FIRE", "POLICE", "INTERNAL_MANAGEMENT", "OTHER"];
+const categories: EmergencyContactCategory[] = [
+  "MINE_RESCUE",
+  "MEDICAL",
+  "AMBULANCE",
+  "FIRE",
+  "POLICE",
+  "SECURITY",
+  "INTERNAL_MANAGEMENT",
+  "OTHER",
+];
 const drillTypes: EvacuationDrillType[] = ["FIRE", "GAS_LEAK", "SEISMIC", "GENERAL"];
 
 function ContactForm({ sites, onSubmit, onCancel }: {
@@ -308,12 +318,58 @@ function DrillsTab({ sites, canEdit, canDelete }: { sites: Site[]; canEdit: bool
   );
 }
 
+function EvacuationsTab() {
+  const { t } = useTranslation();
+  const [evacuations, setEvacuations] = useState<EmergencyEvacuation[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    api.get<EmergencyEvacuation[]>("/emergency/evacuations").then((res) => {
+      setEvacuations(res.data);
+      setLoading(false);
+    });
+  }, []);
+
+  if (loading) return <div className="text-mine-300">{t("common.loading")}</div>;
+
+  return (
+    <div className={`${cardClass} overflow-x-auto`}>
+      <table className="w-full text-sm">
+        <thead className="bg-mine-800/50 text-mine-300 text-xs uppercase">
+          <tr>
+            <th className="text-left px-4 py-2">{t("common.site")}</th>
+            <th className="text-left px-4 py-2">{t("emergency.assemblyPoint")}</th>
+            <th className="text-left px-4 py-2">{t("emergency.triggeredAt")}</th>
+            <th className="text-left px-4 py-2">{t("common.status")}</th>
+          </tr>
+        </thead>
+        <tbody>
+          {evacuations.map((e) => (
+            <tr key={e.id} className="border-t border-mine-800 hover:bg-mine-800/30">
+              <td className="px-4 py-2 font-medium">{e.site?.name}</td>
+              <td className="px-4 py-2 text-mine-300">{e.assemblyPoint}</td>
+              <td className="px-4 py-2 text-mine-300">
+                {new Date(e.triggeredAt).toLocaleString()}
+                {e.triggeredBy?.name ? ` · ${e.triggeredBy.name}` : ""}
+              </td>
+              <td className="px-4 py-2"><StatusBadge status={e.status} /></td>
+            </tr>
+          ))}
+          {evacuations.length === 0 && (
+            <tr><td colSpan={4} className="px-4 py-6 text-center text-mine-400">{t("emergency.noneYetEvacuations")}</td></tr>
+          )}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
 export default function EmergencyResponse() {
   const { t } = useTranslation();
   const { user } = useAuth();
   const canEdit = user?.role === "ADMIN" || user?.role === "SUPERVISOR" || user?.role === "EXECUTIVE";
   const canDelete = user?.role === "ADMIN" || user?.role === "EXECUTIVE";
-  const [tab, setTab] = useState<"contacts" | "drills">("contacts");
+  const [tab, setTab] = useState<"contacts" | "drills" | "evacuations">("contacts");
   const [sites, setSites] = useState<Site[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -340,10 +396,14 @@ export default function EmergencyResponse() {
         <button className={tab === "drills" ? buttonPrimary : buttonSecondary} onClick={() => setTab("drills")}>
           {t("emergency.tabDrills")}
         </button>
+        <button className={tab === "evacuations" ? buttonPrimary : buttonSecondary} onClick={() => setTab("evacuations")}>
+          {t("emergency.tabEvacuations")}
+        </button>
       </div>
 
       {tab === "contacts" && <ContactsTab sites={sites} canEdit={canEdit} canDelete={canDelete} />}
       {tab === "drills" && <DrillsTab sites={sites} canEdit={canEdit} canDelete={canDelete} />}
+      {tab === "evacuations" && <EvacuationsTab />}
     </div>
   );
 }

@@ -153,11 +153,26 @@ export interface Alert {
 
 export type WorkerStatus = "ON_SHIFT" | "OFF_SHIFT" | "EMERGENCY";
 
+export type StaffCategory =
+  | "MINING_OPERATIONS"
+  | "ENGINEERING_TECHNICAL"
+  | "DRIVER"
+  | "CLEANER"
+  | "SECURITY"
+  | "ADMINISTRATION"
+  | "EXECUTIVE"
+  | "MEDICAL"
+  | "SAFETY_HEALTH"
+  | "MAINTENANCE"
+  | "CATERING"
+  | "OTHER";
+
 export interface Worker {
   id: string;
   name: string;
   employeeId: string;
   role: string;
+  category: StaffCategory;
   phone?: string | null;
   status: WorkerStatus;
   hasPhoto?: boolean;
@@ -1061,7 +1076,15 @@ export interface EnvironmentalReading {
   createdAt: string;
 }
 
-export type EmergencyContactCategory = "MINE_RESCUE" | "MEDICAL" | "FIRE" | "POLICE" | "INTERNAL_MANAGEMENT" | "OTHER";
+export type EmergencyContactCategory =
+  | "MINE_RESCUE"
+  | "MEDICAL"
+  | "AMBULANCE"
+  | "FIRE"
+  | "POLICE"
+  | "SECURITY"
+  | "INTERNAL_MANAGEMENT"
+  | "OTHER";
 
 export interface EmergencyContact {
   id: string;
@@ -1088,6 +1111,21 @@ export interface EvacuationDrill {
   issuesIdentified?: string | null;
   conductedBy?: { id: string; name: string } | null;
   createdAt: string;
+}
+
+export type EvacuationStatus = "ACTIVE" | "CANCELLED";
+
+export interface EmergencyEvacuation {
+  id: string;
+  siteId: string;
+  site?: { id: string; name: string };
+  assemblyPoint: string;
+  message?: string | null;
+  status: EvacuationStatus;
+  triggeredBy?: { id: string; name: string } | null;
+  triggeredAt: string;
+  cancelledBy?: { id: string; name: string } | null;
+  cancelledAt?: string | null;
 }
 
 export type ShiftType = "DAY" | "AFTERNOON" | "NIGHT";

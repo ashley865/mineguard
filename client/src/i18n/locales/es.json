@@ -22,7 +22,8 @@
     "reviewNotePlaceholder": "Nota opcional…",
     "reviewedBy": "Revisado por {{name}}",
     "copy": "Copiar",
-    "notes": "Notas"
+    "notes": "Notas",
+    "unknown": "Desconocido"
   },
   "nav": {
     "dashboard": "Panel",
@@ -137,7 +138,8 @@
     "loading": "Cargando panel…",
     "complianceScore": "Puntaje de Cumplimiento",
     "workforceStatus": "Estado del Personal",
-    "equipmentStatus": "Estado de Equipos"
+    "equipmentStatus": "Estado de Equipos",
+    "financialPerformance": "Desempeño Financiero"
   },
   "executive": {
     "title": "Panel Ejecutivo",
@@ -287,7 +289,24 @@
     "payslipsSection": "Recibos de Pago Recientes",
     "noPayslips": "No hay recibos de pago registrados.",
     "downloadPayslip": "Descargar",
-    "netPay": "Pago Neto"
+    "netPay": "Pago Neto",
+    "category": "Categoría de personal",
+    "colCategory": "Categoría",
+    "allCategories": "Todas las Categorías",
+    "categories": {
+      "MINING_OPERATIONS": "Operaciones Mineras",
+      "ENGINEERING_TECHNICAL": "Ingeniería y Técnico",
+      "DRIVER": "Conductor",
+      "CLEANER": "Limpieza",
+      "SECURITY": "Seguridad",
+      "ADMINISTRATION": "Administración",
+      "EXECUTIVE": "Ejecutivo",
+      "MEDICAL": "Médico",
+      "SAFETY_HEALTH": "Seguridad y Salud",
+      "MAINTENANCE": "Mantenimiento",
+      "CATERING": "Catering",
+      "OTHER": "Otro"
+    }
   },
   "equipment": {
     "title": "Equipos",
@@ -1415,7 +1434,9 @@
       "FIRE": "Bomberos",
       "POLICE": "Policía",
       "INTERNAL_MANAGEMENT": "Gerencia Interna",
-      "OTHER": "Otro"
+      "OTHER": "Otro",
+      "AMBULANCE": "Ambulancia",
+      "SECURITY": "Seguridad"
     },
     "priority": "Prioridad",
     "newContact": "+ Nuevo Contacto",
@@ -1436,7 +1457,22 @@
     "newDrill": "+ Nuevo Simulacro",
     "newDrillTitle": "Nuevo Simulacro de Evacuación",
     "noneYetDrills": "Aún no hay simulacros de evacuación registrados.",
-    "confirmDeleteDrill": "¿Eliminar este simulacro de evacuación?"
+    "confirmDeleteDrill": "¿Eliminar este simulacro de evacuación?",
+    "tabEvacuations": "Evacuaciones",
+    "noneYetEvacuations": "No se han activado evacuaciones.",
+    "evacuateButton": "Evacuar",
+    "triggerEvacuationTitle": "Activar Evacuación de Emergencia",
+    "triggerEvacuation": "Activar Evacuación",
+    "evacuationTriggerWarning": "Esto alertará inmediatamente a todas las pantallas conectadas de esta mina con una advertencia de emergencia a pantalla completa. Úselo solo para una evacuación real.",
+    "evacuationTriggerError": "No se pudo activar la evacuación",
+    "assemblyPoint": "Punto de reunión / encuentro",
+    "assemblyPointPlaceholder": "ej. Estacionamiento de la puerta principal, Punto de encuentro B…",
+    "evacuationMessage": "Mensaje (opcional)",
+    "evacuationActiveTitle": "Evacuación de Emergencia en Curso",
+    "triggeredBy": "Activado por {{name}}",
+    "triggeredAt": "Activado",
+    "cancelEvacuation": "Cancelar Evacuación",
+    "confirmCancelEvacuation": "¿Cancelar esta evacuación? Se despejarán todas las pantallas conectadas."
   },
   "roster": {
     "nav": "Programación de Turnos",

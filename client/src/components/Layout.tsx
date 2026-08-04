@@ -9,6 +9,7 @@ import { isModuleAllowed } from "../lib/executiveAccess";
 import LanguageSwitcher from "./LanguageSwitcher";
 import NotificationBell from "./NotificationBell";
 import MessagesBell from "./MessagesBell";
+import EvacuationSystem from "./EvacuationSystem";
 
 export default function Layout() {
   const { t } = useTranslation();
@@ -247,6 +248,7 @@ export default function Layout() {
             </span>
           </div>
           <div className="ml-auto flex items-center gap-3">
+            <EvacuationSystem />
             {canMessage && <MessagesBell />}
             <NotificationBell />
           </div>

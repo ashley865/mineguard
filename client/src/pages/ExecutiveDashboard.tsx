@@ -3,9 +3,11 @@ import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from "recharts";
 import { api } from "../api/client";
+import { useAuth } from "../context/AuthContext";
 import { Alert, ExecutiveSummary, Incident, ReportTrends } from "../api/types";
 import { SeverityBadge } from "../components/Badges";
 import { buttonPrimary, buttonSecondary, cardClass } from "../components/ui";
+import FinancialSummaryWidget from "../components/FinancialSummaryWidget";
 
 type Tone = "positive" | "negative" | "caution";
 
@@ -113,6 +115,8 @@ function ReviewRow({
 
 export default function ExecutiveDashboard() {
   const { t } = useTranslation();
+  const { user } = useAuth();
+  const canSeeFinancials = user?.title === "CFO" || user?.title === "GENERAL_MANAGER";
   const [summary, setSummary] = useState<ExecutiveSummary | null>(null);
   const [trends, setTrends] = useState<ReportTrends | null>(null);
 
@@ -255,6 +259,8 @@ export default function ExecutiveDashboard() {
           </div>
         </div>
       )}
+
+      {canSeeFinancials && <FinancialSummaryWidget />}
 
       <div className={`${cardClass} p-3`}>
         <h2 className="text-xs font-semibold mb-2">{t("executive.suggestionsTitle")}</h2>

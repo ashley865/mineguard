@@ -3,12 +3,27 @@ import { useTranslation } from "react-i18next";
 import QRCode from "qrcode";
 import { api, API_URL } from "../api/client";
 import { useAuth } from "../context/AuthContext";
-import { Site, Worker, WorkerStatus, Zone } from "../api/types";
+import { Site, StaffCategory, Worker, WorkerStatus, Zone } from "../api/types";
 import { StatusBadge } from "../components/Badges";
 import Modal from "../components/Modal";
 import Avatar from "../components/Avatar";
 import WorkerProfileModal from "../components/WorkerProfileModal";
 import { buttonDanger, buttonPrimary, buttonSecondary, cardClass, inputClass, labelClass, selectClass } from "../components/ui";
+
+const staffCategories: StaffCategory[] = [
+  "MINING_OPERATIONS",
+  "ENGINEERING_TECHNICAL",
+  "DRIVER",
+  "CLEANER",
+  "SECURITY",
+  "ADMINISTRATION",
+  "EXECUTIVE",
+  "MEDICAL",
+  "SAFETY_HEALTH",
+  "MAINTENANCE",
+  "CATERING",
+  "OTHER",
+];
 
 function WorkerQrModal({ worker, onClose }: { worker: Worker; onClose: () => void }) {
   const { t } = useTranslation();
@@ -47,6 +62,7 @@ function WorkerForm({ sites, zones, initial, onSubmit, onCancel }: {
   const [name, setName] = useState(initial?.name ?? "");
   const [employeeId, setEmployeeId] = useState(initial?.employeeId ?? "");
   const [role, setRole] = useState(initial?.role ?? "");
+  const [category, setCategory] = useState<StaffCategory>(initial?.category ?? "OTHER");
   const [phone, setPhone] = useState(initial?.phone ?? "");
   const [status, setStatus] = useState<WorkerStatus>(initial?.status ?? "OFF_SHIFT");
   const [siteId, setSiteId] = useState(initial?.siteId ?? sites[0]?.id ?? "");
@@ -68,6 +84,7 @@ function WorkerForm({ sites, zones, initial, onSubmit, onCancel }: {
         name,
         employeeId,
         role,
+        category,
         phone,
         status,
         siteId,
@@ -101,9 +118,15 @@ function WorkerForm({ sites, zones, initial, onSubmit, onCancel }: {
           <input className={inputClass} value={role} onChange={(e) => setRole(e.target.value)} required />
         </div>
         <div>
-          <label className={labelClass}>{t("common.phone")}</label>
-          <input className={inputClass} value={phone} onChange={(e) => setPhone(e.target.value)} />
+          <label className={labelClass}>{t("workers.category")}</label>
+          <select className={selectClass} value={category} onChange={(e) => setCategory(e.target.value as StaffCategory)}>
+            {staffCategories.map((c) => <option key={c} value={c}>{t(`workers.categories.${c}`)}</option>)}
+          </select>
         </div>
+      </div>
+      <div>
+        <label className={labelClass}>{t("common.phone")}</label>
+        <input className={inputClass} value={phone} onChange={(e) => setPhone(e.target.value)} />
       </div>
       <div className="grid grid-cols-2 gap-3">
         <div>
@@ -165,6 +188,7 @@ export default function Workers() {
   const [modal, setModal] = useState<null | "create" | Worker>(null);
   const [qrWorker, setQrWorker] = useState<Worker | null>(null);
   const [profileWorker, setProfileWorker] = useState<Worker | null>(null);
+  const [categoryFilter, setCategoryFilter] = useState("");
 
   async function load() {
     setLoading(true);
@@ -220,6 +244,13 @@ export default function Workers() {
         )}
       </div>
 
+      <div className="flex items-center gap-2">
+        <select className={`${selectClass} max-w-xs`} value={categoryFilter} onChange={(e) => setCategoryFilter(e.target.value)}>
+          <option value="">{t("workers.allCategories")}</option>
+          {staffCategories.map((c) => <option key={c} value={c}>{t(`workers.categories.${c}`)}</option>)}
+        </select>
+      </div>
+
       <div className={`${cardClass} overflow-x-auto`}>
         <table className="w-full text-sm">
           <thead className="bg-mine-800/50 text-mine-300 text-xs uppercase">
@@ -227,13 +258,14 @@ export default function Workers() {
               <th className="text-left px-4 py-2">{t("workers.colName")}</th>
               <th className="text-left px-4 py-2">{t("workers.colEmployeeId")}</th>
               <th className="text-left px-4 py-2">{t("workers.colRole")}</th>
+              <th className="text-left px-4 py-2">{t("workers.colCategory")}</th>
               <th className="text-left px-4 py-2">{t("workers.colSiteZone")}</th>
               <th className="text-left px-4 py-2">{t("workers.colStatus")}</th>
               <th className="px-4 py-2"></th>
             </tr>
           </thead>
           <tbody>
-            {workers.map((w) => (
+            {workers.filter((w) => !categoryFilter || w.category === categoryFilter).map((w) => (
               <tr key={w.id} className="border-t border-mine-800 hover:bg-mine-800/30">
                 <td className="px-4 py-2 font-medium">
                   <button className="flex items-center gap-2 hover:underline" onClick={() => setProfileWorker(w)}>
@@ -243,6 +275,7 @@ export default function Workers() {
                 </td>
                 <td className="px-4 py-2 text-mine-300">{w.employeeId}</td>
                 <td className="px-4 py-2 text-mine-300">{w.role}</td>
+                <td className="px-4 py-2 text-mine-300">{t(`workers.categories.${w.category}`)}</td>
                 <td className="px-4 py-2 text-mine-300">
                   {w.site?.name}{w.zone?.name ? ` · ${w.zone.name}` : ""}
                 </td>
@@ -267,7 +300,7 @@ export default function Workers() {
               </tr>
             ))}
             {workers.length === 0 && (
-              <tr><td colSpan={6} className="px-4 py-6 text-center text-mine-400">{t("workers.noWorkersYet")}</td></tr>
+              <tr><td colSpan={7} className="px-4 py-6 text-center text-mine-400">{t("workers.noWorkersYet")}</td></tr>
             )}
           </tbody>
         </table>
