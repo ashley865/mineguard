@@ -200,6 +200,7 @@ model User {
   explosivesTransactions ExplosivesTransaction[] @relation("ExplosivesAuthorizedBy")
   environmentalReadings  EnvironmentalReading[]  @relation("EnvironmentalRecordedBy")
   evacuationDrills       EvacuationDrill[]       @relation("DrillConductedBy")
+  shiftRosters           ShiftRoster[]           @relation("RosterCreatedBy")
 }
 
 model Site {
@@ -241,6 +242,8 @@ model Site {
   environmentalReadings EnvironmentalReading[]
   emergencyContacts    EmergencyContact[]
   evacuationDrills     EvacuationDrill[]
+  shiftRosters         ShiftRoster[]
+  trainingCourses      TrainingCourse[]
 }
 
 model Zone {
@@ -339,6 +342,8 @@ model Worker {
   certificates    Certificate[]
   trainingRecords TrainingRecord[]
   attendance      WorkerAttendance[]
+  rosterAssignments   RosterAssignment[]
+  trainingEnrollments TrainingEnrollment[]
 
   createdAt DateTime @default(now())
 }
@@ -1369,4 +1374,97 @@ model EvacuationDrill {
   conductedBy       User?               @relation("DrillConductedBy", fields: [conductedById], references: [id], onDelete: SetNull)
 
   createdAt DateTime @default(now())
+}
+
+enum ShiftType {
+  DAY
+  AFTERNOON
+  NIGHT
+}
+
+model ShiftRoster {
+  id          String    @id @default(cuid())
+  siteId      String
+  site        Site      @relation(fields: [siteId], references: [id], onDelete: Cascade)
+  shiftDate   DateTime
+  shiftType   ShiftType
+  notes       String?
+  createdById String?
+  createdBy   User?     @relation("RosterCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+
+  assignments RosterAssignment[]
+
+  createdAt DateTime @default(now())
+
+  @@unique([siteId, shiftDate, shiftType])
+}
+
+model RosterAssignment {
+  id       String      @id @default(cuid())
+  rosterId String
+  roster   ShiftRoster @relation(fields: [rosterId], references: [id], onDelete: Cascade)
+  workerId String
+  worker   Worker      @relation(fields: [workerId], references: [id], onDelete: Cascade)
+  position String?
+
+  createdAt DateTime @default(now())
+
+  @@unique([rosterId, workerId])
+}
+
+model TrainingCourse {
+  id            String        @id @default(cuid())
+  siteId        String?
+  site          Site?         @relation(fields: [siteId], references: [id], onDelete: SetNull)
+  courseName    String
+  courseType    TrainingType
+  description   String?
+  durationHours Float?
+  provider      String?
+
+  sessions TrainingSession[]
+
+  createdAt DateTime @default(now())
+}
+
+enum TrainingSessionStatus {
+  SCHEDULED
+  COMPLETED
+  CANCELLED
+}
+
+model TrainingSession {
+  id            String                 @id @default(cuid())
+  courseId      String
+  course        TrainingCourse         @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  scheduledDate DateTime
+  location      String?
+  instructor    String?
+  capacity      Int?
+  status        TrainingSessionStatus  @default(SCHEDULED)
+
+  enrollments TrainingEnrollment[]
+
+  createdAt DateTime @default(now())
+}
+
+enum TrainingAttendanceStatus {
+  ENROLLED
+  ATTENDED
+  NO_SHOW
+  COMPLETED
+}
+
+model TrainingEnrollment {
+  id               String                    @id @default(cuid())
+  sessionId        String
+  session          TrainingSession           @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  workerId         String
+  worker           Worker                    @relation(fields: [workerId], references: [id], onDelete: Cascade)
+  attendanceStatus TrainingAttendanceStatus  @default(ENROLLED)
+  completionDate   DateTime?
+
+  createdAt DateTime @default(now())
+
+  @@unique([sessionId, workerId])
 }

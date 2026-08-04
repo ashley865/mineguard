@@ -1011,3 +1011,61 @@ export interface EvacuationDrill {
   conductedBy?: { id: string; name: string } | null;
   createdAt: string;
 }
+
+export type ShiftType = "DAY" | "AFTERNOON" | "NIGHT";
+
+export interface RosterAssignment {
+  id: string;
+  position?: string | null;
+  worker: { id: string; name: string; employeeId: string; role: string };
+}
+
+export interface ShiftRoster {
+  id: string;
+  siteId: string;
+  site?: { id: string; name: string };
+  shiftDate: string;
+  shiftType: ShiftType;
+  notes?: string | null;
+  createdBy?: { id: string; name: string } | null;
+  assignments: RosterAssignment[];
+  createdAt: string;
+}
+
+export interface TrainingCourse {
+  id: string;
+  siteId?: string | null;
+  site?: { id: string; name: string } | null;
+  courseName: string;
+  courseType: TrainingType;
+  description?: string | null;
+  durationHours?: number | null;
+  provider?: string | null;
+  createdAt: string;
+}
+
+export type TrainingSessionStatus = "SCHEDULED" | "COMPLETED" | "CANCELLED";
+
+export interface TrainingSession {
+  id: string;
+  courseId: string;
+  course?: { id: string; courseName: string; courseType: TrainingType };
+  scheduledDate: string;
+  location?: string | null;
+  instructor?: string | null;
+  capacity?: number | null;
+  status: TrainingSessionStatus;
+  _count: { enrollments: number };
+  createdAt: string;
+}
+
+export type TrainingAttendanceStatus = "ENROLLED" | "ATTENDED" | "NO_SHOW" | "COMPLETED";
+
+export interface TrainingEnrollment {
+  id: string;
+  sessionId: string;
+  worker: { id: string; name: string; employeeId: string; role: string };
+  attendanceStatus: TrainingAttendanceStatus;
+  completionDate?: string | null;
+  createdAt: string;
+}
