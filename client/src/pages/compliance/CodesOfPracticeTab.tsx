@@ -5,7 +5,8 @@ import { useAuth } from "../../context/AuthContext";
 import { CodeOfPractice, CopCategory, CopStatus, Site, Zone } from "../../api/types";
 import { StatusBadge } from "../../components/Badges";
 import Modal from "../../components/Modal";
-import { buttonDanger, buttonPrimary, buttonSecondary, cardClass, inputClass, labelClass } from "../../components/ui";
+import { buttonDanger, buttonPrimary, buttonSecondary, cardClass, inputClass, labelClass, selectClass } from "../../components/ui";
+import DateField from "../../components/DateField";
 
 const categories: CopCategory[] = [
   "ROCK_ENGINEERING",
@@ -73,7 +74,7 @@ function CopForm({ sites, zones, initial, onSubmit, onCancel }: {
       <div className="grid grid-cols-2 gap-3">
         <div>
           <label className={labelClass}>{t("compliance.cop.category")}</label>
-          <select className={inputClass} value={category} onChange={(e) => setCategory(e.target.value as CopCategory)}>
+          <select className={selectClass} value={category} onChange={(e) => setCategory(e.target.value as CopCategory)}>
             {categories.map((c) => (
               <option key={c} value={c}>{t(`compliance.cop.categories.${c}`)}</option>
             ))}
@@ -87,17 +88,17 @@ function CopForm({ sites, zones, initial, onSubmit, onCancel }: {
       <div className="grid grid-cols-2 gap-3">
         <div>
           <label className={labelClass}>{t("compliance.cop.effectiveDate")}</label>
-          <input className={inputClass} type="date" value={effectiveDate} onChange={(e) => setEffectiveDate(e.target.value)} required />
+          <DateField value={effectiveDate} onChange={setEffectiveDate} required />
         </div>
         <div>
           <label className={labelClass}>{t("compliance.cop.reviewDate")}</label>
-          <input className={inputClass} type="date" value={reviewDate} onChange={(e) => setReviewDate(e.target.value)} required />
+          <DateField value={reviewDate} onChange={setReviewDate} required />
         </div>
       </div>
       <div className="grid grid-cols-2 gap-3">
         <div>
           <label className={labelClass}>{t("common.status")}</label>
-          <select className={inputClass} value={status} onChange={(e) => setStatus(e.target.value as CopStatus)}>
+          <select className={selectClass} value={status} onChange={(e) => setStatus(e.target.value as CopStatus)}>
             {statuses.map((s) => (
               <option key={s} value={s}>{t(`badges.status.${s}`)}</option>
             ))}
@@ -111,13 +112,13 @@ function CopForm({ sites, zones, initial, onSubmit, onCancel }: {
       <div className="grid grid-cols-2 gap-3">
         <div>
           <label className={labelClass}>{t("common.site")}</label>
-          <select className={inputClass} value={siteId} onChange={(e) => { setSiteId(e.target.value); setZoneId(""); }}>
+          <select className={selectClass} value={siteId} onChange={(e) => { setSiteId(e.target.value); setZoneId(""); }}>
             {sites.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
           </select>
         </div>
         <div>
           <label className={labelClass}>{t("common.zone")}</label>
-          <select className={inputClass} value={zoneId} onChange={(e) => setZoneId(e.target.value)}>
+          <select className={selectClass} value={zoneId} onChange={(e) => setZoneId(e.target.value)}>
             <option value="">{t("common.unassigned")}</option>
             {zonesForSite.map((z) => <option key={z.id} value={z.id}>{z.name}</option>)}
           </select>

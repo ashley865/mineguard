@@ -6,7 +6,8 @@ import { useAuth } from "../context/AuthContext";
 import { Contractor, ContractorStatus, Site } from "../api/types";
 import { StatusBadge } from "../components/Badges";
 import Modal from "../components/Modal";
-import { buttonDanger, buttonPrimary, buttonSecondary, cardClass, inputClass, labelClass } from "../components/ui";
+import { buttonDanger, buttonPrimary, buttonSecondary, cardClass, inputClass, labelClass, selectClass } from "../components/ui";
+import DateField from "../components/DateField";
 
 const contractorStatuses: ContractorStatus[] = ["ACTIVE", "EXPIRED", "SUSPENDED", "TERMINATED"];
 
@@ -39,7 +40,7 @@ function ShareRegistrationModal({ sites, onClose }: { sites: Site[]; onClose: ()
       <div className="space-y-4">
         <div>
           <label className={labelClass}>{t("common.site")}</label>
-          <select className={inputClass} value={siteId} onChange={(e) => setSiteId(e.target.value)}>
+          <select className={selectClass} value={siteId} onChange={(e) => setSiteId(e.target.value)}>
             {sites.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
           </select>
         </div>
@@ -137,33 +138,33 @@ function ContractorForm({ sites, initial, onSubmit, onCancel }: {
       <div className="grid grid-cols-2 gap-3">
         <div>
           <label className={labelClass}>{t("contractors.contractStartDate")}</label>
-          <input className={inputClass} type="date" value={contractStartDate} onChange={(e) => setContractStartDate(e.target.value)} required />
+          <DateField value={contractStartDate} onChange={setContractStartDate} required />
         </div>
         <div>
           <label className={labelClass}>{t("contractors.contractEndDate")}</label>
-          <input className={inputClass} type="date" value={contractEndDate} onChange={(e) => setContractEndDate(e.target.value)} required />
+          <DateField value={contractEndDate} onChange={setContractEndDate} required />
         </div>
       </div>
       <div className="grid grid-cols-2 gap-3">
         <div>
           <label className={labelClass}>{t("contractors.goodStandingExpiry")}</label>
-          <input className={inputClass} type="date" value={goodStandingExpiry} onChange={(e) => setGoodStandingExpiry(e.target.value)} />
+          <DateField value={goodStandingExpiry} onChange={setGoodStandingExpiry} />
         </div>
         <div>
           <label className={labelClass}>{t("contractors.insuranceExpiry")}</label>
-          <input className={inputClass} type="date" value={insuranceExpiry} onChange={(e) => setInsuranceExpiry(e.target.value)} />
+          <DateField value={insuranceExpiry} onChange={setInsuranceExpiry} />
         </div>
       </div>
       <div className="grid grid-cols-2 gap-3">
         <div>
           <label className={labelClass}>{t("common.status")}</label>
-          <select className={inputClass} value={status} onChange={(e) => setStatus(e.target.value as ContractorStatus)}>
+          <select className={selectClass} value={status} onChange={(e) => setStatus(e.target.value as ContractorStatus)}>
             {contractorStatuses.map((s) => <option key={s} value={s}>{t(`badges.status.${s}`)}</option>)}
           </select>
         </div>
         <div>
           <label className={labelClass}>{t("common.site")}</label>
-          <select className={inputClass} value={siteId} onChange={(e) => setSiteId(e.target.value)}>
+          <select className={selectClass} value={siteId} onChange={(e) => setSiteId(e.target.value)}>
             {sites.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
           </select>
         </div>

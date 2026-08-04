@@ -5,7 +5,7 @@ import { api } from "../api/client";
 import { Site, Visitor } from "../api/types";
 import { useAssignedSiteIds } from "../hooks/useAssignedSiteIds";
 import { StatusBadge } from "../components/Badges";
-import { buttonPrimary, buttonSecondary, cardClass, inputClass, labelClass } from "../components/ui";
+import { buttonPrimary, buttonSecondary, cardClass, inputClass, labelClass, selectClass } from "../components/ui";
 
 function QrPanel({ site }: { site: Site }) {
   const { t } = useTranslation();
@@ -106,7 +106,7 @@ export default function VisitorManagement() {
         </div>
         <div className="w-56">
           <label className={labelClass}>{t("common.site")}</label>
-          <select className={inputClass} value={siteId} onChange={(e) => setSiteId(e.target.value)}>
+          <select className={selectClass} value={siteId} onChange={(e) => setSiteId(e.target.value)}>
             {availableSites.map((s) => (
               <option key={s.id} value={s.id}>
                 {s.name}

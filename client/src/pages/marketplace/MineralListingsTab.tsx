@@ -5,7 +5,7 @@ import { useAuth } from "../../context/AuthContext";
 import { MineralBid, MineralListing, MineralListingStatus, Site } from "../../api/types";
 import { StatusBadge } from "../../components/Badges";
 import Modal from "../../components/Modal";
-import { buttonDanger, buttonPrimary, buttonSecondary, cardClass, inputClass, labelClass } from "../../components/ui";
+import { buttonDanger, buttonPrimary, buttonSecondary, cardClass, inputClass, labelClass, selectClass } from "../../components/ui";
 
 const listingStatuses: MineralListingStatus[] = ["AVAILABLE", "SOLD", "WITHDRAWN"];
 
@@ -134,7 +134,7 @@ function ListingForm({ sites, initial, onSubmit, onCancel }: {
       <div className="grid grid-cols-2 gap-3">
         <div>
           <label className={labelClass}>{t("common.site")}</label>
-          <select className={inputClass} value={siteId} onChange={(e) => setSiteId(e.target.value)}>
+          <select className={selectClass} value={siteId} onChange={(e) => setSiteId(e.target.value)}>
             {sites.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
           </select>
         </div>
@@ -150,7 +150,7 @@ function ListingForm({ sites, initial, onSubmit, onCancel }: {
         </div>
         <div>
           <label className={labelClass}>{t("common.status")}</label>
-          <select className={inputClass} value={status} onChange={(e) => setStatus(e.target.value as MineralListingStatus)}>
+          <select className={selectClass} value={status} onChange={(e) => setStatus(e.target.value as MineralListingStatus)}>
             {listingStatuses.map((s) => <option key={s} value={s}>{t(`badges.status.${s}`)}</option>)}
           </select>
         </div>

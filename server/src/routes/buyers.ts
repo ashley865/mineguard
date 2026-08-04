@@ -4,12 +4,15 @@ import { z } from "zod";
 import { prisma } from "../prisma";
 import { requireAuth, requireRole } from "../middleware/auth";
 import { verifyAdminPassword } from "../lib/verifyPassword";
+import { isValidIdOrPassport } from "../lib/saId";
+import { documentFileFilter } from "../lib/uploadFilters";
 
 const router = Router();
 
 const upload = multer({
   storage: multer.memoryStorage(),
   limits: { fileSize: 10 * 1024 * 1024 },
+  fileFilter: documentFileFilter,
 });
 
 const registerSchema = z.object({
@@ -44,6 +47,10 @@ const registerSchema = z.object({
   })
   .refine((d) => d.buyerType !== "INDIVIDUAL" || !!d.idNumber, {
     message: "ID or passport number is required for individuals",
+    path: ["idNumber"],
+  })
+  .refine((d) => !d.idNumber || isValidIdOrPassport(d.idNumber), {
+    message: "This does not look like a valid South African ID number or passport number",
     path: ["idNumber"],
   });
 

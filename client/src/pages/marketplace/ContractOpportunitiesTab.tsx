@@ -5,7 +5,8 @@ import { useAuth } from "../../context/AuthContext";
 import { ContractBid, ContractCategory, ContractOpportunity, ContractOpportunityStatus, Site } from "../../api/types";
 import { StatusBadge } from "../../components/Badges";
 import Modal from "../../components/Modal";
-import { buttonDanger, buttonPrimary, buttonSecondary, cardClass, inputClass, labelClass } from "../../components/ui";
+import { buttonDanger, buttonPrimary, buttonSecondary, cardClass, inputClass, labelClass, selectClass } from "../../components/ui";
+import DateField from "../../components/DateField";
 
 const opportunityStatuses: ContractOpportunityStatus[] = ["OPEN", "CLOSED", "AWARDED", "CANCELLED"];
 
@@ -59,20 +60,20 @@ function OpportunityForm({ sites, initial, onSubmit, onCancel }: {
       <div className="grid grid-cols-2 gap-3">
         <div>
           <label className={labelClass}>{t("common.site")}</label>
-          <select className={inputClass} value={siteId} onChange={(e) => setSiteId(e.target.value)}>
+          <select className={selectClass} value={siteId} onChange={(e) => setSiteId(e.target.value)}>
             {sites.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
           </select>
         </div>
         <div>
           <label className={labelClass}>{t("common.status")}</label>
-          <select className={inputClass} value={status} onChange={(e) => setStatus(e.target.value as ContractOpportunityStatus)}>
+          <select className={selectClass} value={status} onChange={(e) => setStatus(e.target.value as ContractOpportunityStatus)}>
             {opportunityStatuses.map((s) => <option key={s} value={s}>{t(`badges.status.${s}`)}</option>)}
           </select>
         </div>
       </div>
       <div>
         <label className={labelClass}>{t("tenders.category")}</label>
-        <select className={inputClass} value={category} onChange={(e) => setCategory(e.target.value as ContractCategory)}>
+        <select className={selectClass} value={category} onChange={(e) => setCategory(e.target.value as ContractCategory)}>
           {contractCategories.map((c) => <option key={c} value={c}>{t(`tenders.categories.${c}`)}</option>)}
         </select>
       </div>
@@ -95,7 +96,7 @@ function OpportunityForm({ sites, initial, onSubmit, onCancel }: {
         </div>
         <div>
           <label className={labelClass}>{t("marketplace.submissionDeadline")}</label>
-          <input className={inputClass} type="date" value={submissionDeadline} onChange={(e) => setSubmissionDeadline(e.target.value)} required />
+          <DateField value={submissionDeadline} onChange={setSubmissionDeadline} required />
         </div>
       </div>
       <div className="flex justify-end gap-2 pt-2">

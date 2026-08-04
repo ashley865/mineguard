@@ -5,7 +5,7 @@ import { useAuth } from "../context/AuthContext";
 import { Delivery, DeliveryDirection, Site, Truck } from "../api/types";
 import { StatusBadge } from "../components/Badges";
 import Modal from "../components/Modal";
-import { buttonDanger, buttonPrimary, buttonSecondary, cardClass, inputClass, labelClass } from "../components/ui";
+import { buttonDanger, buttonPrimary, buttonSecondary, cardClass, inputClass, labelClass, selectClass } from "../components/ui";
 import FleetTracking from "./FleetTracking";
 
 type TabKey = "trucks" | "deliveries" | "fleet";
@@ -120,20 +120,20 @@ function DeliveryForm({ trucks, sites, onSubmit, onCancel }: {
       <div className="grid grid-cols-2 gap-3">
         <div>
           <label className={labelClass}>{t("trucks.nav")}</label>
-          <select className={inputClass} value={truckId} onChange={(e) => setTruckId(e.target.value)} required>
+          <select className={selectClass} value={truckId} onChange={(e) => setTruckId(e.target.value)} required>
             {trucks.map((tr) => <option key={tr.id} value={tr.id}>{tr.registrationNumber} — {tr.driverName}</option>)}
           </select>
         </div>
         <div>
           <label className={labelClass}>{t("common.site")}</label>
-          <select className={inputClass} value={siteId} onChange={(e) => setSiteId(e.target.value)} required>
+          <select className={selectClass} value={siteId} onChange={(e) => setSiteId(e.target.value)} required>
             {sites.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
           </select>
         </div>
       </div>
       <div>
         <label className={labelClass}>{t("trucks.direction")}</label>
-        <select className={inputClass} value={direction} onChange={(e) => setDirection(e.target.value as DeliveryDirection)}>
+        <select className={selectClass} value={direction} onChange={(e) => setDirection(e.target.value as DeliveryDirection)}>
           <option value="INBOUND">{t("trucks.inbound")}</option>
           <option value="OUTBOUND">{t("trucks.outbound")}</option>
         </select>

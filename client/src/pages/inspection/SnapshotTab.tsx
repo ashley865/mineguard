@@ -74,6 +74,48 @@ export default function SnapshotTab({ sites }: { sites: Site[] }) {
             </div>
           </div>
 
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+            <div className={`${cardClass} px-4 py-3`}>
+              <div className="text-xs text-mine-300 uppercase">{t("inspection.snapshot.documentsTotal")}</div>
+              <div className="text-2xl font-bold mt-1">{snapshot.documents.total}</div>
+            </div>
+            <div className={`${cardClass} px-4 py-3`}>
+              <div className="text-xs text-mine-300 uppercase">{t("inspection.snapshot.buyersTotal")}</div>
+              <div className="text-2xl font-bold mt-1">{snapshot.buyers.total}</div>
+            </div>
+            <div className={`${cardClass} px-4 py-3`}>
+              <div className="text-xs text-mine-300 uppercase">{t("inspection.snapshot.contractsAwarded")}</div>
+              <div className="text-2xl font-bold mt-1">
+                {snapshot.contracts.awarded} / {snapshot.contracts.total}
+              </div>
+            </div>
+            <div className={`${cardClass} px-4 py-3`}>
+              <div className="text-xs text-mine-300 uppercase">{t("inspection.snapshot.safetyObservationsOpen")}</div>
+              <div className="text-2xl font-bold mt-1">
+                {snapshot.safetyObservations.open} / {snapshot.safetyObservations.total}
+              </div>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+            <div className={`${cardClass} px-4 py-3`}>
+              <div className="text-xs text-mine-300 uppercase">{t("inspection.snapshot.explosivesExpiring")}</div>
+              <div className="text-2xl font-bold mt-1">
+                {snapshot.explosives.expiringSoon} / {snapshot.explosives.total}
+              </div>
+            </div>
+            <div className={`${cardClass} px-4 py-3`}>
+              <div className="text-xs text-mine-300 uppercase">{t("inspection.snapshot.environmentalOutOfLimits")}</div>
+              <div className="text-2xl font-bold mt-1">
+                {snapshot.environmental.outOfLimits} / {snapshot.environmental.readingsCount}
+              </div>
+            </div>
+            <div className={`${cardClass} px-4 py-3`}>
+              <div className="text-xs text-mine-300 uppercase">{t("inspection.snapshot.productionTonnes30d")}</div>
+              <div className="text-2xl font-bold mt-1">{snapshot.production.tonnesLast30Days.toLocaleString()}</div>
+            </div>
+          </div>
+
           <div className={`${cardClass} p-5`}>
             <h3 className="text-sm font-semibold mb-3">{t("inspection.snapshot.permits")}</h3>
             <table className="w-full text-sm">
@@ -173,6 +215,152 @@ export default function SnapshotTab({ sites }: { sites: Site[] }) {
                 ))}
                 {snapshot.recentVisits.length === 0 && (
                   <tr><td colSpan={3} className="py-3 text-center text-mine-400">{t("inspection.visit.noneYet")}</td></tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+
+          <div className={`${cardClass} p-5`}>
+            <h3 className="text-sm font-semibold mb-3">{t("inspection.snapshot.documentsSection")}</h3>
+            <table className="w-full text-sm">
+              <thead className="text-mine-300 text-xs uppercase">
+                <tr>
+                  <th className="text-left py-1">{t("documents.colTitle")}</th>
+                  <th className="text-left py-1">{t("documents.colType")}</th>
+                  <th className="text-left py-1">{t("documents.reviewDate")}</th>
+                  <th className="text-left py-1">{t("documents.colStatus")}</th>
+                </tr>
+              </thead>
+              <tbody>
+                {snapshot.documents.items.map((d) => (
+                  <tr key={d.id} className="border-t border-mine-800">
+                    <td className="py-1">{d.title}</td>
+                    <td className="py-1 text-mine-300">{t(`documents.types.${d.type}`)}</td>
+                    <td className="py-1 text-mine-300">{d.reviewDate ? new Date(d.reviewDate).toLocaleDateString() : "—"}</td>
+                    <td className="py-1"><StatusBadge status={d.status} /></td>
+                  </tr>
+                ))}
+                {snapshot.documents.items.length === 0 && (
+                  <tr><td colSpan={4} className="py-3 text-center text-mine-400">{t("inspection.snapshot.noDocuments")}</td></tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+
+          <div className={`${cardClass} p-5`}>
+            <h3 className="text-sm font-semibold mb-1">{t("inspection.snapshot.buyersSection")}</h3>
+            <p className="text-xs text-mine-400 mb-3">{t("inspection.snapshot.buyersHint")}</p>
+            <table className="w-full text-sm">
+              <thead className="text-mine-300 text-xs uppercase">
+                <tr>
+                  <th className="text-left py-1">{t("buyerRegister.legalName")}</th>
+                  <th className="text-left py-1">{t("buyerRegister.buyerType")}</th>
+                  <th className="text-left py-1">{t("buyerRegister.contactEmail")}</th>
+                  <th className="text-left py-1">{t("buyerRegister.contactPhone")}</th>
+                  <th className="text-left py-1">{t("buyerRegister.taxNumber")}</th>
+                </tr>
+              </thead>
+              <tbody>
+                {snapshot.buyers.items.map((b) => (
+                  <tr key={b.id} className="border-t border-mine-800">
+                    <td className="py-1">{b.legalName}</td>
+                    <td className="py-1 text-mine-300">{t(`buyerRegister.types.${b.buyerType}`)}</td>
+                    <td className="py-1 text-mine-300">{b.contactEmail}</td>
+                    <td className="py-1 text-mine-300">{b.contactPhone}</td>
+                    <td className="py-1 text-mine-300">{b.taxNumber}</td>
+                  </tr>
+                ))}
+                {snapshot.buyers.items.length === 0 && (
+                  <tr><td colSpan={5} className="py-3 text-center text-mine-400">{t("inspection.snapshot.noBuyers")}</td></tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+
+          <div className={`${cardClass} p-5`}>
+            <h3 className="text-sm font-semibold mb-3">{t("inspection.snapshot.contractsSection")}</h3>
+            <table className="w-full text-sm">
+              <thead className="text-mine-300 text-xs uppercase">
+                <tr>
+                  <th className="text-left py-1">{t("marketplace.contractTitle")}</th>
+                  <th className="text-left py-1">{t("tenders.category")}</th>
+                  <th className="text-left py-1">{t("marketplace.deadline")}</th>
+                  <th className="text-left py-1">{t("documents.colStatus")}</th>
+                  <th className="text-left py-1">{t("inspection.snapshot.colAwardedTo")}</th>
+                </tr>
+              </thead>
+              <tbody>
+                {snapshot.contracts.items.map((c) => (
+                  <tr key={c.id} className="border-t border-mine-800">
+                    <td className="py-1">{c.title}</td>
+                    <td className="py-1 text-mine-300">{t(`tenders.categories.${c.category}`)}</td>
+                    <td className="py-1 text-mine-300">{new Date(c.submissionDeadline).toLocaleDateString()}</td>
+                    <td className="py-1"><StatusBadge status={c.status} /></td>
+                    <td className="py-1 text-mine-300">{c.bids[0]?.companyName ?? t("inspection.snapshot.notAwarded")}</td>
+                  </tr>
+                ))}
+                {snapshot.contracts.items.length === 0 && (
+                  <tr><td colSpan={5} className="py-3 text-center text-mine-400">{t("inspection.snapshot.noContracts")}</td></tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+
+          <div className={`${cardClass} p-5`}>
+            <h3 className="text-sm font-semibold mb-3">{t("inspection.snapshot.explosivesSection")}</h3>
+            <table className="w-full text-sm">
+              <thead className="text-mine-300 text-xs uppercase">
+                <tr>
+                  <th className="text-left py-1">{t("explosives.magazineNumber")}</th>
+                  <th className="text-left py-1">{t("explosives.licenseNumber")}</th>
+                  <th className="text-left py-1">{t("explosives.licenseExpiry")}</th>
+                  <th className="text-left py-1">{t("explosives.currentStock")}</th>
+                  <th className="text-left py-1">{t("documents.colStatus")}</th>
+                </tr>
+              </thead>
+              <tbody>
+                {snapshot.explosives.items.map((m) => (
+                  <tr key={m.id} className="border-t border-mine-800">
+                    <td className="py-1">{m.magazineNumber}</td>
+                    <td className="py-1 text-mine-300">{m.licenseNumber}</td>
+                    <td className="py-1 text-mine-300">{new Date(m.licenseExpiry).toLocaleDateString()}</td>
+                    <td className="py-1 text-mine-300">{m.currentStock} {m.unit}</td>
+                    <td className="py-1"><StatusBadge status={m.status} /></td>
+                  </tr>
+                ))}
+                {snapshot.explosives.items.length === 0 && (
+                  <tr><td colSpan={5} className="py-3 text-center text-mine-400">{t("inspection.snapshot.noExplosives")}</td></tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+
+          <div className={`${cardClass} p-5`}>
+            <h3 className="text-sm font-semibold mb-3">{t("inspection.snapshot.environmentalSection")}</h3>
+            <table className="w-full text-sm">
+              <thead className="text-mine-300 text-xs uppercase">
+                <tr>
+                  <th className="text-left py-1">{t("environmental.monitoringPoint")}</th>
+                  <th className="text-left py-1">{t("environmental.parameterType")}</th>
+                  <th className="text-left py-1">{t("environmental.value")}</th>
+                  <th className="text-left py-1">{t("environmental.withinLimits")}</th>
+                </tr>
+              </thead>
+              <tbody>
+                {snapshot.environmental.items.map((r) => (
+                  <tr key={r.id} className="border-t border-mine-800">
+                    <td className="py-1">{r.monitoringPoint}</td>
+                    <td className="py-1 text-mine-300">{t(`environmental.parameterTypes.${r.parameterType}`)}</td>
+                    <td className="py-1 text-mine-300">{r.value} {r.unit}</td>
+                    <td className="py-1">
+                      <span className={r.withinLimits ? "text-success-500" : "text-danger-400 font-semibold"}>
+                        {r.withinLimits ? t("environmental.withinLimits") : t("environmental.outOfLimits")}
+                      </span>
+                    </td>
+                  </tr>
+                ))}
+                {snapshot.environmental.items.length === 0 && (
+                  <tr><td colSpan={4} className="py-3 text-center text-mine-400">{t("inspection.snapshot.noEnvironmental")}</td></tr>
                 )}
               </tbody>
             </table>

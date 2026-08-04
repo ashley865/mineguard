@@ -169,6 +169,8 @@ model User {
   name         String
   role         Role            @default(VIEWER)
   title        ExecutiveTitle?
+  photoData    Bytes?
+  photoMimeType String?
   createdAt    DateTime        @default(now())
 
   mineId String?
@@ -330,16 +332,18 @@ model Alert {
 }
 
 model Worker {
-  id         String       @id @default(cuid())
-  name       String
-  employeeId String       @unique
-  role       String
-  phone      String?
-  status     WorkerStatus @default(OFF_SHIFT)
-  siteId     String
-  site       Site         @relation(fields: [siteId], references: [id], onDelete: Cascade)
-  zoneId     String?
-  zone       Zone?        @relation(fields: [zoneId], references: [id], onDelete: SetNull)
+  id            String       @id @default(cuid())
+  name          String
+  employeeId    String       @unique
+  role          String
+  phone         String?
+  status        WorkerStatus @default(OFF_SHIFT)
+  photoData     Bytes?
+  photoMimeType String?
+  siteId        String
+  site          Site         @relation(fields: [siteId], references: [id], onDelete: Cascade)
+  zoneId        String?
+  zone          Zone?        @relation(fields: [zoneId], references: [id], onDelete: SetNull)
 
   nextOfKinName         String?
   nextOfKinRelationship String?

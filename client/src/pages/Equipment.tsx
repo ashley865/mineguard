@@ -5,7 +5,7 @@ import { useAuth } from "../context/AuthContext";
 import { Equipment as EquipmentItem, EquipmentStatus, Site, Zone } from "../api/types";
 import { StatusBadge } from "../components/Badges";
 import Modal from "../components/Modal";
-import { buttonDanger, buttonPrimary, buttonSecondary, cardClass, inputClass, labelClass } from "../components/ui";
+import { buttonDanger, buttonPrimary, buttonSecondary, cardClass, inputClass, labelClass, selectClass } from "../components/ui";
 
 function EquipmentForm({ sites, zones, initial, onSubmit, onCancel }: {
   sites: Site[];
@@ -49,13 +49,13 @@ function EquipmentForm({ sites, zones, initial, onSubmit, onCancel }: {
       <div className="grid grid-cols-2 gap-3">
         <div>
           <label className={labelClass}>{t("common.site")}</label>
-          <select className={inputClass} value={siteId} onChange={(e) => { setSiteId(e.target.value); setZoneId(""); }}>
+          <select className={selectClass} value={siteId} onChange={(e) => { setSiteId(e.target.value); setZoneId(""); }}>
             {sites.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
           </select>
         </div>
         <div>
           <label className={labelClass}>{t("common.zone")}</label>
-          <select className={inputClass} value={zoneId} onChange={(e) => setZoneId(e.target.value)}>
+          <select className={selectClass} value={zoneId} onChange={(e) => setZoneId(e.target.value)}>
             <option value="">{t("common.unassigned")}</option>
             {zonesForSite.map((z) => <option key={z.id} value={z.id}>{z.name}</option>)}
           </select>
@@ -63,7 +63,7 @@ function EquipmentForm({ sites, zones, initial, onSubmit, onCancel }: {
       </div>
       <div>
         <label className={labelClass}>{t("common.status")}</label>
-        <select className={inputClass} value={status} onChange={(e) => setStatus(e.target.value as EquipmentStatus)}>
+        <select className={selectClass} value={status} onChange={(e) => setStatus(e.target.value as EquipmentStatus)}>
           <option value="OPERATIONAL">{t("equipment.operational")}</option>
           <option value="MAINTENANCE">{t("equipment.maintenance")}</option>
           <option value="DOWN">{t("equipment.down")}</option>

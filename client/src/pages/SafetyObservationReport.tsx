@@ -3,7 +3,7 @@ import { useParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { api } from "../api/client";
 import { SafetyObservationType } from "../api/types";
-import { buttonPrimary, cardClass, inputClass, labelClass } from "../components/ui";
+import { buttonPrimary, cardClass, inputClass, labelClass, selectClass } from "../components/ui";
 import LanguageSwitcher from "../components/LanguageSwitcher";
 
 const types: SafetyObservationType[] = ["NEAR_MISS", "UNSAFE_ACT", "UNSAFE_CONDITION", "POSITIVE_OBSERVATION"];
@@ -90,7 +90,7 @@ export default function SafetyObservationReport() {
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label className={labelClass}>{t("safetyObservations.type")}</label>
-            <select className={inputClass} value={type} onChange={(e) => setType(e.target.value as SafetyObservationType)}>
+            <select className={selectClass} value={type} onChange={(e) => setType(e.target.value as SafetyObservationType)}>
               {types.map((ty) => <option key={ty} value={ty}>{t(`safetyObservations.types.${ty}`)}</option>)}
             </select>
           </div>

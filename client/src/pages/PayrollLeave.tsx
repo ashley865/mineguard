@@ -5,7 +5,9 @@ import { useAuth } from "../context/AuthContext";
 import { LeaveRequest, LeaveType, Payslip, Worker } from "../api/types";
 import { StatusBadge } from "../components/Badges";
 import Modal from "../components/Modal";
-import { buttonDanger, buttonPrimary, buttonSecondary, cardClass, inputClass, labelClass } from "../components/ui";
+import { buttonDanger, buttonPrimary, buttonSecondary, cardClass, inputClass, labelClass, selectClass } from "../components/ui";
+import DateField from "../components/DateField";
+import FileDropzone from "../components/FileDropzone";
 
 const leaveTypes: LeaveType[] = ["ANNUAL", "SICK", "FAMILY_RESPONSIBILITY", "UNPAID", "STUDY", "MATERNITY_PATERNITY", "OTHER"];
 
@@ -38,13 +40,13 @@ function LeaveForm({ workers, onSubmit, onCancel }: {
       <div className="grid grid-cols-2 gap-3">
         <div>
           <label className={labelClass}>{t("workers.title")}</label>
-          <select className={inputClass} value={workerId} onChange={(e) => setWorkerId(e.target.value)}>
+          <select className={selectClass} value={workerId} onChange={(e) => setWorkerId(e.target.value)}>
             {workers.map((w) => <option key={w.id} value={w.id}>{w.name}</option>)}
           </select>
         </div>
         <div>
           <label className={labelClass}>{t("payroll.leaveType")}</label>
-          <select className={inputClass} value={leaveType} onChange={(e) => setLeaveType(e.target.value as LeaveType)}>
+          <select className={selectClass} value={leaveType} onChange={(e) => setLeaveType(e.target.value as LeaveType)}>
             {leaveTypes.map((lt) => <option key={lt} value={lt}>{t(`payroll.leaveTypes.${lt}`)}</option>)}
           </select>
         </div>
@@ -52,11 +54,11 @@ function LeaveForm({ workers, onSubmit, onCancel }: {
       <div className="grid grid-cols-3 gap-3">
         <div>
           <label className={labelClass}>{t("payroll.startDate")}</label>
-          <input className={inputClass} type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} required />
+          <DateField value={startDate} onChange={setStartDate} required />
         </div>
         <div>
           <label className={labelClass}>{t("payroll.endDate")}</label>
-          <input className={inputClass} type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)} required />
+          <DateField value={endDate} onChange={setEndDate} required />
         </div>
         <div>
           <label className={labelClass}>{t("payroll.daysRequested")}</label>
@@ -112,18 +114,18 @@ function PayslipForm({ workers, onSubmit, onCancel }: {
     <form onSubmit={handleSubmit} className="space-y-4">
       <div>
         <label className={labelClass}>{t("workers.title")}</label>
-        <select className={inputClass} value={workerId} onChange={(e) => setWorkerId(e.target.value)}>
+        <select className={selectClass} value={workerId} onChange={(e) => setWorkerId(e.target.value)}>
           {workers.map((w) => <option key={w.id} value={w.id}>{w.name}</option>)}
         </select>
       </div>
       <div className="grid grid-cols-2 gap-3">
         <div>
           <label className={labelClass}>{t("payroll.payPeriodStart")}</label>
-          <input className={inputClass} type="date" value={payPeriodStart} onChange={(e) => setPayPeriodStart(e.target.value)} required />
+          <DateField value={payPeriodStart} onChange={setPayPeriodStart} required />
         </div>
         <div>
           <label className={labelClass}>{t("payroll.payPeriodEnd")}</label>
-          <input className={inputClass} type="date" value={payPeriodEnd} onChange={(e) => setPayPeriodEnd(e.target.value)} required />
+          <DateField value={payPeriodEnd} onChange={setPayPeriodEnd} required />
         </div>
       </div>
       <div className="grid grid-cols-3 gap-3">
@@ -142,7 +144,7 @@ function PayslipForm({ workers, onSubmit, onCancel }: {
       </div>
       <div>
         <label className={labelClass}>{t("payroll.payslipFile")}</label>
-        <input className={inputClass} type="file" onChange={(e) => setFile(e.target.files?.[0] ?? null)} />
+        <FileDropzone accept="image/*,.pdf" onFiles={(files) => setFile(files.item(0))} />
       </div>
       <div className="flex justify-end gap-2 pt-2">
         <button type="button" className={buttonSecondary} onClick={onCancel}>{t("common.cancel")}</button>

@@ -257,7 +257,19 @@
     "checkIn": "Einchecken",
     "checkOut": "Auschecken",
     "badgeTitle": "Ausweis von {{name}}",
-    "badgeHint": "Der Sicherheitsdienst scannt diesen Code am Tor, um diesen Mitarbeiter auf der Scanner-Seite ein- oder auszuchecken."
+    "badgeHint": "Der Sicherheitsdienst scannt diesen Code am Tor, um diesen Mitarbeiter auf der Scanner-Seite ein- oder auszuchecken.",
+    "viewProfile": "Profil",
+    "profileTitle": "Profil von {{name}}",
+    "changePhoto": "Foto ändern",
+    "daysWorked90": "Gearbeitete Tage (90T)",
+    "shifts90": "Schichten (90T)",
+    "avgHours": "Ø Stunden/Schicht",
+    "activeCerts": "Aktive Zertifikate",
+    "trainingCompleted": "Schulung Abgeschlossen",
+    "lastMedical": "Letzte Untersuchung",
+    "recentAttendance": "Letzte Anwesenheit",
+    "noAttendance": "In den letzten 90 Tagen keine Anwesenheit erfasst.",
+    "stillOnShift": "Noch im Dienst"
   },
   "equipment": {
     "title": "Ausrüstung",
@@ -717,7 +729,28 @@
       "codesOfPractice": "Verhaltenskodizes",
       "openNoticesList": "Offene behördliche Bescheide",
       "noOpenNotices": "Keine offenen Bescheide.",
-      "recentVisits": "Aktuelle Inspektionsbesuche"
+      "recentVisits": "Aktuelle Inspektionsbesuche",
+      "documentsTotal": "Kontrollierte Dokumente",
+      "buyersTotal": "Genehmigte Käufer",
+      "contractsAwarded": "Vergebene Verträge",
+      "safetyObservationsOpen": "Offene Sicherheitsbeobachtungen",
+      "explosivesExpiring": "Bald ablaufende Sprengstofflizenzen",
+      "environmentalOutOfLimits": "Messwerte außerhalb der Grenzwerte",
+      "productionTonnes30d": "Geförderte Tonnen (30 Tage)",
+      "documentsSection": "Kontrollierte Dokumente",
+      "noDocuments": "Keine Dokumente erfasst.",
+      "buyersSection": "Genehmigte Käufer",
+      "buyersHint": "Käufer, die zum Handel mit Mineralien dieser Mine zugelassen sind",
+      "noBuyers": "Noch keine genehmigten Käufer für diese Mine.",
+      "contractsSection": "Vertragsmöglichkeiten",
+      "noContracts": "Noch keine Vertragsmöglichkeiten für diese Mine.",
+      "colAwardedTo": "Vergeben An",
+      "colAmount": "Betrag",
+      "notAwarded": "—",
+      "explosivesSection": "Sprengstoffmagazine",
+      "noExplosives": "Keine Sprengstoffmagazine für diese Mine registriert.",
+      "environmentalSection": "Umweltmesswerte (Aktuell)",
+      "noEnvironmental": "Keine Umweltmesswerte für diese Mine erfasst."
     }
   },
   "reporting": {
@@ -814,6 +847,7 @@
   },
   "visitorCheckin": {
     "declarationsRequired": "Bitte bestätigen Sie die Erklärungen zu Sicherheitseinweisung, POPIA-Einwilligung und Haftungsfreistellung, bevor Sie sich anmelden.",
+    "idNumberInvalid": "Dies sieht nicht wie eine gültige Ausweis- oder Passnummer aus.",
     "submitError": "Anmeldung fehlgeschlagen. Bitte überprüfen Sie Ihre Angaben und versuchen Sie es erneut.",
     "siteNotFound": "Dieser Anmeldelink ist ungültig oder der Standort konnte nicht gefunden werden.",
     "successTitle": "Sie sind angemeldet",
@@ -878,8 +912,10 @@
     "tabMine": "Minendetails",
     "tabAccess": "Zugriff für Führungskräfte",
     "tabInvites": "Führungskräfte einladen",
+    "tabTeam": "Team",
     "profile": {
       "title": "Profil",
+      "changePhoto": "Foto ändern",
       "name": "Vollständiger Name",
       "email": "E-Mail",
       "saveError": "Ihr Profil konnte nicht aktualisiert werden",
@@ -927,6 +963,16 @@
         "IT_MANAGER": "IT-Leiter",
         "OTHER": "Sonstiges"
       }
+    },
+    "team": {
+      "title": "Führungsteam",
+      "subtitle": "Administratoren und Führungskräfte mit Zugriff auf diese Mine",
+      "loading": "Wird geladen…",
+      "noneYet": "Noch keine weiteren Teammitglieder.",
+      "joined": "Beigetreten",
+      "alertsReviewed": "Geprüfte Warnungen",
+      "incidentsReviewed": "Geprüfte Vorfälle",
+      "messagesSent": "Gesendete Nachrichten"
     }
   },
   "trucks": {
@@ -1038,6 +1084,7 @@
     "declarationsRequired": "Bitte akzeptieren Sie alle drei Erklärungen, bevor Sie absenden.",
     "registrationNumberRequired": "Für diesen Käufertyp ist eine Handelsregisternummer erforderlich.",
     "idNumberRequired": "Für Einzelkäufer ist eine Ausweis- / Passnummer erforderlich.",
+    "idNumberInvalid": "Dies sieht nicht wie eine gültige südafrikanische Ausweis- oder Passnummer aus.",
     "documentsRequired": "Bitte laden Sie mindestens ein Belegdokument hoch."
   },
   "marketplace": {

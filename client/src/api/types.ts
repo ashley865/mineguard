@@ -20,6 +20,22 @@ export interface User {
   role: Role;
   title?: ExecutiveTitle | null;
   mineId?: string | null;
+  hasPhoto?: boolean;
+}
+
+export interface TeamMember {
+  id: string;
+  name: string;
+  email: string;
+  role: Role;
+  title?: ExecutiveTitle | null;
+  hasPhoto: boolean;
+  createdAt: string;
+  stats: {
+    alertsReviewed: number;
+    incidentsReviewed: number;
+    messagesSent: number;
+  };
 }
 
 export interface Mine {
@@ -144,6 +160,7 @@ export interface Worker {
   role: string;
   phone?: string | null;
   status: WorkerStatus;
+  hasPhoto?: boolean;
   siteId: string;
   site?: { id: string; name: string };
   zoneId?: string | null;
@@ -159,6 +176,22 @@ export interface WorkerAttendance {
   checkInAt: string;
   checkOutAt?: string | null;
   createdAt: string;
+}
+
+export interface WorkerProfile {
+  worker: Worker;
+  stats: {
+    daysWorkedLast90: number;
+    shiftsLast90: number;
+    avgHoursPerShift: number | null;
+    activeCertificates: number;
+    totalCertificates: number;
+    trainingCompleted: number;
+    latestMedicalResult: string | null;
+  };
+  recentAttendance: WorkerAttendance[];
+  certificates: Certificate[];
+  trainingRecords: TrainingRecord[];
 }
 
 export type IncidentStatus = "OPEN" | "INVESTIGATING" | "RESOLVED";
@@ -492,6 +525,40 @@ export interface ComplianceSnapshot {
     trainingExpiringSoon: number;
   };
   recentVisits: InspectionVisit[];
+  documents: {
+    total: number;
+    items: Pick<MineDocument, "id" | "title" | "type" | "version" | "status" | "reviewDate" | "fileName" | "createdAt">[];
+  };
+  buyers: {
+    total: number;
+    items: {
+      id: string;
+      legalName: string;
+      buyerType: BuyerType;
+      contactName: string;
+      contactEmail: string;
+      contactPhone: string;
+      taxNumber: string;
+      status: BuyerStatus;
+    }[];
+  };
+  contracts: {
+    total: number;
+    awarded: number;
+    items: (ContractOpportunity & { bids: { id: string; companyName: string; bidAmount: number }[] })[];
+  };
+  explosives: {
+    total: number;
+    expiringSoon: number;
+    items: ExplosivesMagazine[];
+  };
+  environmental: {
+    readingsCount: number;
+    outOfLimits: number;
+    items: EnvironmentalReading[];
+  };
+  safetyObservations: { total: number; open: number };
+  production: { tonnesLast30Days: number; recordsLast30Days: number };
 }
 
 export interface ReportTrends {

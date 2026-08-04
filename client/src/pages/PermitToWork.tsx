@@ -6,7 +6,8 @@ import { useAssignedSiteIds } from "../hooks/useAssignedSiteIds";
 import { Contractor, PermitToWork as PermitToWorkType, Site } from "../api/types";
 import { StatusBadge } from "../components/Badges";
 import Modal from "../components/Modal";
-import { buttonDanger, buttonPrimary, buttonSecondary, cardClass, inputClass, labelClass } from "../components/ui";
+import { buttonDanger, buttonPrimary, buttonSecondary, cardClass, inputClass, labelClass, selectClass } from "../components/ui";
+import DateField from "../components/DateField";
 
 function PtwForm({
   sites,
@@ -58,13 +59,13 @@ function PtwForm({
       <div className="grid grid-cols-2 gap-3">
         <div>
           <label className={labelClass}>{t("common.site")}</label>
-          <select className={inputClass} value={siteId} onChange={(e) => { setSiteId(e.target.value); setContractorId(""); }}>
+          <select className={selectClass} value={siteId} onChange={(e) => { setSiteId(e.target.value); setContractorId(""); }}>
             {sites.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
           </select>
         </div>
         <div>
           <label className={labelClass}>{t("permitToWork.contractor")}</label>
-          <select className={inputClass} value={contractorId} onChange={(e) => setContractorId(e.target.value)} required>
+          <select className={selectClass} value={contractorId} onChange={(e) => setContractorId(e.target.value)} required>
             <option value="">{t("permitToWork.selectContractor")}</option>
             {contractorsForSite.map((c) => <option key={c.id} value={c.id}>{c.companyName}</option>)}
           </select>
@@ -95,11 +96,11 @@ function PtwForm({
       <div className="grid grid-cols-2 gap-3">
         <div>
           <label className={labelClass}>{t("permitToWork.startDate")}</label>
-          <input className={inputClass} type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} required />
+          <DateField value={startDate} onChange={setStartDate} required />
         </div>
         <div>
           <label className={labelClass}>{t("permitToWork.endDate")}</label>
-          <input className={inputClass} type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)} required />
+          <DateField value={endDate} onChange={setEndDate} required />
         </div>
       </div>
       <div className="flex justify-end gap-2 pt-2">

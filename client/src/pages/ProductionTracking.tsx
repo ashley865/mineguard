@@ -4,7 +4,8 @@ import { api } from "../api/client";
 import { useAuth } from "../context/AuthContext";
 import { ProductionRecord, ProductionShift, Site, Zone } from "../api/types";
 import Modal from "../components/Modal";
-import { buttonDanger, buttonPrimary, buttonSecondary, cardClass, inputClass, labelClass } from "../components/ui";
+import { buttonDanger, buttonPrimary, buttonSecondary, cardClass, inputClass, labelClass, selectClass } from "../components/ui";
+import DateField from "../components/DateField";
 
 const shifts: ProductionShift[] = ["DAY", "AFTERNOON", "NIGHT"];
 
@@ -56,13 +57,13 @@ function ProductionForm({ sites, zones, initial, onSubmit, onCancel }: {
       <div className="grid grid-cols-2 gap-3">
         <div>
           <label className={labelClass}>{t("common.site")}</label>
-          <select className={inputClass} value={siteId} onChange={(e) => { setSiteId(e.target.value); setZoneId(""); }}>
+          <select className={selectClass} value={siteId} onChange={(e) => { setSiteId(e.target.value); setZoneId(""); }}>
             {sites.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
           </select>
         </div>
         <div>
           <label className={labelClass}>{t("common.zone")}</label>
-          <select className={inputClass} value={zoneId} onChange={(e) => setZoneId(e.target.value)}>
+          <select className={selectClass} value={zoneId} onChange={(e) => setZoneId(e.target.value)}>
             <option value="">{t("common.unassigned")}</option>
             {zonesForSite.map((z) => <option key={z.id} value={z.id}>{z.name}</option>)}
           </select>
@@ -71,11 +72,11 @@ function ProductionForm({ sites, zones, initial, onSubmit, onCancel }: {
       <div className="grid grid-cols-2 gap-3">
         <div>
           <label className={labelClass}>{t("production.shiftDate")}</label>
-          <input className={inputClass} type="date" value={shiftDate} onChange={(e) => setShiftDate(e.target.value)} required />
+          <DateField value={shiftDate} onChange={setShiftDate} required />
         </div>
         <div>
           <label className={labelClass}>{t("production.shift")}</label>
-          <select className={inputClass} value={shift} onChange={(e) => setShift(e.target.value as ProductionShift)}>
+          <select className={selectClass} value={shift} onChange={(e) => setShift(e.target.value as ProductionShift)}>
             {shifts.map((s) => <option key={s} value={s}>{t(`production.shifts.${s}`)}</option>)}
           </select>
         </div>

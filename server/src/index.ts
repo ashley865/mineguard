@@ -52,6 +52,7 @@ import trainingLmsRoutes from "./routes/trainingLms";
 import payrollRoutes from "./routes/payroll";
 import procurementRoutes from "./routes/procurement";
 import invoicesRoutes from "./routes/invoices";
+import { sanitizeBody } from "./middleware/sanitize";
 import { startSimulator } from "./services/simulator";
 import { scanCompliance } from "./services/complianceScanner";
 
@@ -67,6 +68,7 @@ app.set("io", io);
 
 app.use(cors({ origin: clientOrigin }));
 app.use(express.json());
+app.use(sanitizeBody);
 
 app.get("/api/health", (_req, res) => res.json({ status: "ok" }));
 
@@ -120,6 +122,12 @@ app.use("/api/procurement", procurementRoutes);
 app.use("/api/invoices", invoicesRoutes);
 
 app.use((err: any, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
+  if (err?.message === "UNSUPPORTED_FILE_TYPE") {
+    return res.status(400).json({ error: "This file type is not supported" });
+  }
+  if (err?.code === "LIMIT_FILE_SIZE") {
+    return res.status(400).json({ error: "File is too large" });
+  }
   console.error(err);
   res.status(500).json({ error: "Internal server error" });
 });

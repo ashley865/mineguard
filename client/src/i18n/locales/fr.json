@@ -257,7 +257,19 @@
     "checkIn": "Enregistrer l'entrée",
     "checkOut": "Enregistrer la sortie",
     "badgeTitle": "Badge de {{name}}",
-    "badgeHint": "La sécurité scanne ce code au portail pour enregistrer l'entrée ou la sortie de ce travailleur sur la page Scanner."
+    "badgeHint": "La sécurité scanne ce code au portail pour enregistrer l'entrée ou la sortie de ce travailleur sur la page Scanner.",
+    "viewProfile": "Profil",
+    "profileTitle": "Profil de {{name}}",
+    "changePhoto": "Changer la photo",
+    "daysWorked90": "Jours Travaillés (90j)",
+    "shifts90": "Équipes (90j)",
+    "avgHours": "Heures Moy./Équipe",
+    "activeCerts": "Certificats Actifs",
+    "trainingCompleted": "Formations Terminées",
+    "lastMedical": "Dernier Examen Médical",
+    "recentAttendance": "Présence Récente",
+    "noAttendance": "Aucune présence enregistrée au cours des 90 derniers jours.",
+    "stillOnShift": "Encore en service"
   },
   "equipment": {
     "title": "Équipements",
@@ -717,7 +729,28 @@
       "codesOfPractice": "Codes de Pratique",
       "openNoticesList": "Avis Réglementaires Ouverts",
       "noOpenNotices": "Aucun avis ouvert.",
-      "recentVisits": "Visites d'Inspection Récentes"
+      "recentVisits": "Visites d'Inspection Récentes",
+      "documentsTotal": "Documents Contrôlés",
+      "buyersTotal": "Acheteurs Approuvés",
+      "contractsAwarded": "Contrats Attribués",
+      "safetyObservationsOpen": "Observations de Sécurité Ouvertes",
+      "explosivesExpiring": "Licences d'Explosifs Expirant Bientôt",
+      "environmentalOutOfLimits": "Relevés Hors Limites",
+      "productionTonnes30d": "Tonnes Extraites (30 jours)",
+      "documentsSection": "Documents Contrôlés",
+      "noDocuments": "Aucun document enregistré.",
+      "buyersSection": "Acheteurs Approuvés",
+      "buyersHint": "Acheteurs approuvés pour négocier les minéraux de ce site",
+      "noBuyers": "Aucun acheteur approuvé pour ce site pour le moment.",
+      "contractsSection": "Opportunités de Contrat",
+      "noContracts": "Aucune opportunité de contrat pour ce site pour le moment.",
+      "colAwardedTo": "Attribué À",
+      "colAmount": "Montant",
+      "notAwarded": "—",
+      "explosivesSection": "Dépôts d'Explosifs",
+      "noExplosives": "Aucun dépôt d'explosifs enregistré pour ce site.",
+      "environmentalSection": "Relevés Environnementaux (Récents)",
+      "noEnvironmental": "Aucun relevé environnemental enregistré pour ce site."
     }
   },
   "reporting": {
@@ -814,6 +847,7 @@
   },
   "visitorCheckin": {
     "declarationsRequired": "Veuillez confirmer les déclarations d'induction de sécurité, de consentement POPIA et d'indemnisation avant de vous enregistrer.",
+    "idNumberInvalid": "Ceci ne ressemble pas à un numéro d'identité ou de passeport valide.",
     "submitError": "L'enregistrement a échoué. Vérifiez vos informations et réessayez.",
     "siteNotFound": "Ce lien d'enregistrement est invalide ou le site est introuvable.",
     "successTitle": "Vous êtes enregistré",
@@ -878,8 +912,10 @@
     "tabMine": "Détails de la Mine",
     "tabAccess": "Accès Exécutif",
     "tabInvites": "Inviter des Exécutifs",
+    "tabTeam": "Équipe",
     "profile": {
       "title": "Profil",
+      "changePhoto": "Changer la photo",
       "name": "Nom complet",
       "email": "E-mail",
       "saveError": "Impossible de mettre à jour votre profil",
@@ -927,6 +963,16 @@
         "IT_MANAGER": "Responsable Informatique",
         "OTHER": "Autre"
       }
+    },
+    "team": {
+      "title": "Équipe de direction",
+      "subtitle": "Administrateurs et cadres ayant accès à cette mine",
+      "loading": "Chargement…",
+      "noneYet": "Aucun autre membre de l'équipe pour le moment.",
+      "joined": "A rejoint",
+      "alertsReviewed": "Alertes examinées",
+      "incidentsReviewed": "Incidents examinés",
+      "messagesSent": "Messages envoyés"
     }
   },
   "trucks": {
@@ -1038,6 +1084,7 @@
     "declarationsRequired": "Veuillez accepter les trois déclarations avant de soumettre.",
     "registrationNumberRequired": "Le numéro d'immatriculation de l'entreprise est requis pour ce type d'acheteur.",
     "idNumberRequired": "Le numéro d'identité / passeport est requis pour les acheteurs particuliers.",
+    "idNumberInvalid": "Ceci ne ressemble pas à un numéro d'identité sud-africain ou de passeport valide.",
     "documentsRequired": "Veuillez téléverser au moins un document justificatif."
   },
   "marketplace": {

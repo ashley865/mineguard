@@ -4,7 +4,7 @@ import { api } from "../api/client";
 import { useAuth } from "../context/AuthContext";
 import { FleetPosition, Site, Truck } from "../api/types";
 import Modal from "../components/Modal";
-import { buttonDanger, buttonPrimary, buttonSecondary, cardClass, inputClass, labelClass } from "../components/ui";
+import { buttonDanger, buttonPrimary, buttonSecondary, cardClass, inputClass, labelClass, selectClass } from "../components/ui";
 
 function PositionForm({ trucks, sites, onSubmit, onCancel }: {
   trucks: Truck[];
@@ -43,13 +43,13 @@ function PositionForm({ trucks, sites, onSubmit, onCancel }: {
       <div className="grid grid-cols-2 gap-3">
         <div>
           <label className={labelClass}>{t("fleet.truck")}</label>
-          <select className={inputClass} value={truckId} onChange={(e) => setTruckId(e.target.value)}>
+          <select className={selectClass} value={truckId} onChange={(e) => setTruckId(e.target.value)}>
             {trucks.map((tr) => <option key={tr.id} value={tr.id}>{tr.registrationNumber} — {tr.driverName}</option>)}
           </select>
         </div>
         <div>
           <label className={labelClass}>{t("common.site")}</label>
-          <select className={inputClass} value={siteId} onChange={(e) => setSiteId(e.target.value)}>
+          <select className={selectClass} value={siteId} onChange={(e) => setSiteId(e.target.value)}>
             {sites.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
           </select>
         </div>

@@ -5,7 +5,8 @@ import { useAuth } from "../context/AuthContext";
 import { PurchaseOrder, PurchaseOrderStatus, Site, Supplier, SupplierStatus } from "../api/types";
 import { StatusBadge } from "../components/Badges";
 import Modal from "../components/Modal";
-import { buttonDanger, buttonPrimary, buttonSecondary, cardClass, inputClass, labelClass } from "../components/ui";
+import { buttonDanger, buttonPrimary, buttonSecondary, cardClass, inputClass, labelClass, selectClass } from "../components/ui";
+import DateField from "../components/DateField";
 
 const supplierStatuses: SupplierStatus[] = ["ACTIVE", "INACTIVE", "BLACKLISTED"];
 const orderStatuses: PurchaseOrderStatus[] = ["DRAFT", "SUBMITTED", "APPROVED", "ORDERED", "RECEIVED", "CANCELLED"];
@@ -84,7 +85,7 @@ function SupplierForm({ initial, onSubmit, onCancel }: {
         </div>
         <div>
           <label className={labelClass}>{t("common.status")}</label>
-          <select className={inputClass} value={status} onChange={(e) => setStatus(e.target.value as SupplierStatus)}>
+          <select className={selectClass} value={status} onChange={(e) => setStatus(e.target.value as SupplierStatus)}>
             {supplierStatuses.map((s) => <option key={s} value={s}>{t(`badges.status.${s}`)}</option>)}
           </select>
         </div>
@@ -152,13 +153,13 @@ function OrderForm({ sites, suppliers, onSubmit, onCancel }: {
       <div className="grid grid-cols-2 gap-3">
         <div>
           <label className={labelClass}>{t("common.site")}</label>
-          <select className={inputClass} value={siteId} onChange={(e) => setSiteId(e.target.value)}>
+          <select className={selectClass} value={siteId} onChange={(e) => setSiteId(e.target.value)}>
             {sites.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
           </select>
         </div>
         <div>
           <label className={labelClass}>{t("procurement.supplier")}</label>
-          <select className={inputClass} value={supplierId} onChange={(e) => setSupplierId(e.target.value)}>
+          <select className={selectClass} value={supplierId} onChange={(e) => setSupplierId(e.target.value)}>
             {suppliers.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
           </select>
         </div>
@@ -170,7 +171,7 @@ function OrderForm({ sites, suppliers, onSubmit, onCancel }: {
         </div>
         <div>
           <label className={labelClass}>{t("procurement.expectedDeliveryDate")}</label>
-          <input className={inputClass} type="date" value={expectedDeliveryDate} onChange={(e) => setExpectedDeliveryDate(e.target.value)} />
+          <DateField value={expectedDeliveryDate} onChange={setExpectedDeliveryDate} />
         </div>
       </div>
       <div>

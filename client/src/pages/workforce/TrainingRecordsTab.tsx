@@ -4,7 +4,8 @@ import { api } from "../../api/client";
 import { useAuth } from "../../context/AuthContext";
 import { TrainingRecord, TrainingType, Worker } from "../../api/types";
 import Modal from "../../components/Modal";
-import { buttonDanger, buttonPrimary, buttonSecondary, cardClass, inputClass, labelClass } from "../../components/ui";
+import { buttonDanger, buttonPrimary, buttonSecondary, cardClass, inputClass, labelClass, selectClass } from "../../components/ui";
+import DateField from "../../components/DateField";
 
 const trainingTypes: TrainingType[] = [
   "INDUCTION",
@@ -53,7 +54,7 @@ function TrainingForm({ workers, initial, onSubmit, onCancel }: {
     <form onSubmit={handleSubmit} className="space-y-4">
       <div>
         <label className={labelClass}>{t("workforce.training.worker")}</label>
-        <select className={inputClass} value={workerId} onChange={(e) => setWorkerId(e.target.value)} required>
+        <select className={selectClass} value={workerId} onChange={(e) => setWorkerId(e.target.value)} required>
           {workers.map((w) => <option key={w.id} value={w.id}>{w.name} ({w.employeeId})</option>)}
         </select>
       </div>
@@ -64,7 +65,7 @@ function TrainingForm({ workers, initial, onSubmit, onCancel }: {
         </div>
         <div>
           <label className={labelClass}>{t("workforce.training.trainingType")}</label>
-          <select className={inputClass} value={trainingType} onChange={(e) => setTrainingType(e.target.value as TrainingType)}>
+          <select className={selectClass} value={trainingType} onChange={(e) => setTrainingType(e.target.value as TrainingType)}>
             {trainingTypes.map((tt) => <option key={tt} value={tt}>{t(`workforce.training.types.${tt}`)}</option>)}
           </select>
         </div>
@@ -72,11 +73,11 @@ function TrainingForm({ workers, initial, onSubmit, onCancel }: {
       <div className="grid grid-cols-2 gap-3">
         <div>
           <label className={labelClass}>{t("workforce.training.completionDate")}</label>
-          <input className={inputClass} type="date" value={completionDate} onChange={(e) => setCompletionDate(e.target.value)} required />
+          <DateField value={completionDate} onChange={setCompletionDate} required />
         </div>
         <div>
           <label className={labelClass}>{t("workforce.training.expiryDate")}</label>
-          <input className={inputClass} type="date" value={expiryDate} onChange={(e) => setExpiryDate(e.target.value)} />
+          <DateField value={expiryDate} onChange={setExpiryDate} />
         </div>
       </div>
       <div>

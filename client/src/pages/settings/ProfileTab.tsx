@@ -1,16 +1,36 @@
-import { FormEvent, useState } from "react";
+import { FormEvent, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { api, API_URL } from "../../api/client";
 import { useAuth } from "../../context/AuthContext";
-import { buttonPrimary, cardClass, inputClass, labelClass } from "../../components/ui";
+import Avatar from "../../components/Avatar";
+import { buttonPrimary, buttonSecondary, cardClass, inputClass, labelClass } from "../../components/ui";
 
 export default function ProfileTab() {
   const { t } = useTranslation();
-  const { user, updateProfile, changePassword } = useAuth();
+  const { user, updateProfile, changePassword, refreshUser } = useAuth();
 
   const [name, setName] = useState(user?.name ?? "");
   const [savingProfile, setSavingProfile] = useState(false);
   const [profileSaved, setProfileSaved] = useState(false);
   const [profileError, setProfileError] = useState<string | null>(null);
+  const [uploadingPhoto, setUploadingPhoto] = useState(false);
+  const [photoVersion, setPhotoVersion] = useState(0);
+  const photoInputRef = useRef<HTMLInputElement>(null);
+
+  async function handlePhoto(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploadingPhoto(true);
+    try {
+      const form = new FormData();
+      form.append("photo", file);
+      await api.post("/auth/me/photo", form, { headers: { "Content-Type": "multipart/form-data" } });
+      setPhotoVersion((v) => v + 1);
+      await refreshUser();
+    } finally {
+      setUploadingPhoto(false);
+    }
+  }
 
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
@@ -60,6 +80,24 @@ export default function ProfileTab() {
     <div className="space-y-6 max-w-lg">
       <form onSubmit={saveProfile} className={`${cardClass} p-5 space-y-4`}>
         <h2 className="text-sm font-semibold">{t("settings.profile.title")}</h2>
+        <div className="flex items-center gap-4">
+          <Avatar
+            size={64}
+            name={user?.name ?? "?"}
+            src={user?.hasPhoto || photoVersion > 0 ? `${API_URL}/api/auth/users/${user?.id}/photo?v=${photoVersion}` : null}
+          />
+          <div>
+            <button
+              type="button"
+              className={buttonSecondary}
+              onClick={() => photoInputRef.current?.click()}
+              disabled={uploadingPhoto}
+            >
+              {uploadingPhoto ? t("common.saving") : t("settings.profile.changePhoto")}
+            </button>
+            <input ref={photoInputRef} type="file" accept="image/*" className="hidden" onChange={handlePhoto} />
+          </div>
+        </div>
         <div>
           <label className={labelClass}>{t("settings.profile.name")}</label>
           <input className={inputClass} value={name} onChange={(e) => setName(e.target.value)} required />

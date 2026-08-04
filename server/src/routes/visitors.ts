@@ -5,17 +5,22 @@ import { prisma } from "../prisma";
 import { requireAuth, requireRole } from "../middleware/auth";
 import { getAssignedSiteIds } from "../services/executiveSites";
 import { verifyAdminPassword } from "../lib/verifyPassword";
+import { isValidIdOrPassport } from "../lib/saId";
+import { documentFileFilter } from "../lib/uploadFilters";
 
 const router = Router();
 
 const upload = multer({
   storage: multer.memoryStorage(),
   limits: { fileSize: 10 * 1024 * 1024 },
+  fileFilter: documentFileFilter,
 });
 
 const checkinSchema = z.object({
   fullName: z.string().min(1),
-  idNumber: z.string().min(1),
+  idNumber: z.string().min(1).refine(isValidIdOrPassport, {
+    message: "This does not look like a valid ID or passport number",
+  }),
   company: z.string().optional(),
   contactPhone: z.string().min(1),
   contactEmail: z.string().email().optional().or(z.literal("")),

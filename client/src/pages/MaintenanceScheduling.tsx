@@ -5,7 +5,8 @@ import { useAuth } from "../context/AuthContext";
 import { Equipment, MaintenanceSchedule, MaintenanceScheduleStatus, MaintenanceType } from "../api/types";
 import { StatusBadge } from "../components/Badges";
 import Modal from "../components/Modal";
-import { buttonDanger, buttonPrimary, buttonSecondary, cardClass, inputClass, labelClass } from "../components/ui";
+import { buttonDanger, buttonPrimary, buttonSecondary, cardClass, inputClass, labelClass, selectClass } from "../components/ui";
+import DateField from "../components/DateField";
 
 const maintenanceTypes: MaintenanceType[] = ["PREVENTIVE", "CORRECTIVE", "INSPECTION"];
 const scheduleStatuses: MaintenanceScheduleStatus[] = ["SCHEDULED", "IN_PROGRESS", "COMPLETED", "OVERDUE", "CANCELLED"];
@@ -50,27 +51,27 @@ function ScheduleForm({ equipment, initial, onSubmit, onCancel }: {
     <form onSubmit={handleSubmit} className="space-y-4">
       <div>
         <label className={labelClass}>{t("nav.equipment")}</label>
-        <select className={inputClass} value={equipmentId} onChange={(e) => setEquipmentId(e.target.value)}>
+        <select className={selectClass} value={equipmentId} onChange={(e) => setEquipmentId(e.target.value)}>
           {equipment.map((eq) => <option key={eq.id} value={eq.id}>{eq.name} ({eq.site?.name})</option>)}
         </select>
       </div>
       <div className="grid grid-cols-2 gap-3">
         <div>
           <label className={labelClass}>{t("maintenance.type")}</label>
-          <select className={inputClass} value={maintenanceType} onChange={(e) => setMaintenanceType(e.target.value as MaintenanceType)}>
+          <select className={selectClass} value={maintenanceType} onChange={(e) => setMaintenanceType(e.target.value as MaintenanceType)}>
             {maintenanceTypes.map((mt) => <option key={mt} value={mt}>{t(`maintenance.types.${mt}`)}</option>)}
           </select>
         </div>
         <div>
           <label className={labelClass}>{t("common.status")}</label>
-          <select className={inputClass} value={status} onChange={(e) => setStatus(e.target.value as MaintenanceScheduleStatus)}>
+          <select className={selectClass} value={status} onChange={(e) => setStatus(e.target.value as MaintenanceScheduleStatus)}>
             {scheduleStatuses.map((s) => <option key={s} value={s}>{t(`badges.status.${s}`)}</option>)}
           </select>
         </div>
       </div>
       <div>
         <label className={labelClass}>{t("maintenance.scheduledDate")}</label>
-        <input className={inputClass} type="date" value={scheduledDate} onChange={(e) => setScheduledDate(e.target.value)} required />
+        <DateField value={scheduledDate} onChange={setScheduledDate} required />
       </div>
       <div className="grid grid-cols-2 gap-3">
         <div>

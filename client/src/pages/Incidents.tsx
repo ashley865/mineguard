@@ -5,7 +5,7 @@ import { useAuth } from "../context/AuthContext";
 import { AlertSeverity, Incident, IncidentStatus, Site, Zone } from "../api/types";
 import { SeverityBadge, StatusBadge } from "../components/Badges";
 import Modal from "../components/Modal";
-import { buttonPrimary, buttonSecondary, cardClass, inputClass, labelClass } from "../components/ui";
+import { buttonPrimary, buttonSecondary, cardClass, inputClass, labelClass, selectClass } from "../components/ui";
 
 function IncidentForm({ sites, zones, onSubmit, onCancel }: {
   sites: Site[];
@@ -46,7 +46,7 @@ function IncidentForm({ sites, zones, onSubmit, onCancel }: {
       <div className="grid grid-cols-2 gap-3">
         <div>
           <label className={labelClass}>{t("incidents.severity")}</label>
-          <select className={inputClass} value={severity} onChange={(e) => setSeverity(e.target.value as AlertSeverity)}>
+          <select className={selectClass} value={severity} onChange={(e) => setSeverity(e.target.value as AlertSeverity)}>
             <option value="LOW">{t("incidents.low")}</option>
             <option value="MEDIUM">{t("incidents.medium")}</option>
             <option value="HIGH">{t("incidents.high")}</option>
@@ -55,14 +55,14 @@ function IncidentForm({ sites, zones, onSubmit, onCancel }: {
         </div>
         <div>
           <label className={labelClass}>{t("common.site")}</label>
-          <select className={inputClass} value={siteId} onChange={(e) => { setSiteId(e.target.value); setZoneId(""); }}>
+          <select className={selectClass} value={siteId} onChange={(e) => { setSiteId(e.target.value); setZoneId(""); }}>
             {sites.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
           </select>
         </div>
       </div>
       <div>
         <label className={labelClass}>{t("incidents.zoneOptional")}</label>
-        <select className={inputClass} value={zoneId} onChange={(e) => setZoneId(e.target.value)}>
+        <select className={selectClass} value={zoneId} onChange={(e) => setZoneId(e.target.value)}>
           <option value="">{t("incidents.wholeSite")}</option>
           {zonesForSite.map((z) => <option key={z.id} value={z.id}>{z.name}</option>)}
         </select>

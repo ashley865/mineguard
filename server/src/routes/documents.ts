@@ -4,12 +4,14 @@ import { z } from "zod";
 import { prisma } from "../prisma";
 import { requireAuth, requireRole } from "../middleware/auth";
 import { verifyAdminPassword } from "../lib/verifyPassword";
+import { controlledDocumentFileFilter } from "../lib/uploadFilters";
 
 const router = Router();
 
 const upload = multer({
   storage: multer.memoryStorage(),
   limits: { fileSize: 15 * 1024 * 1024 },
+  fileFilter: controlledDocumentFileFilter,
 });
 
 const documentTypeEnum = z.enum([

@@ -5,7 +5,8 @@ import { useAuth } from "../../context/AuthContext";
 import { RiskAssessment, RiskAssessmentStatus, RiskLevel, RiskMitigationStatus, Site, Zone } from "../../api/types";
 import { SeverityBadge, StatusBadge } from "../../components/Badges";
 import Modal from "../../components/Modal";
-import { buttonDanger, buttonPrimary, buttonSecondary, cardClass, inputClass, labelClass } from "../../components/ui";
+import { buttonDanger, buttonPrimary, buttonSecondary, cardClass, inputClass, labelClass, selectClass } from "../../components/ui";
+import DateField from "../../components/DateField";
 
 const riskLevels: RiskLevel[] = ["LOW", "MEDIUM", "HIGH", "CRITICAL"];
 const statuses: RiskAssessmentStatus[] = ["DRAFT", "APPROVED", "UNDER_REVIEW", "EXPIRED"];
@@ -80,13 +81,13 @@ function RiskForm({ sites, zones, initial, onSubmit, onCancel }: {
       <div className="grid grid-cols-2 gap-3">
         <div>
           <label className={labelClass}>{t("compliance.risk.initialRisk")}</label>
-          <select className={inputClass} value={initialRiskLevel} onChange={(e) => setInitialRiskLevel(e.target.value as RiskLevel)}>
+          <select className={selectClass} value={initialRiskLevel} onChange={(e) => setInitialRiskLevel(e.target.value as RiskLevel)}>
             {riskLevels.map((r) => <option key={r} value={r}>{t(`badges.severity.${r}`)}</option>)}
           </select>
         </div>
         <div>
           <label className={labelClass}>{t("compliance.risk.residualRisk")}</label>
-          <select className={inputClass} value={residualRiskLevel} onChange={(e) => setResidualRiskLevel(e.target.value as RiskLevel)}>
+          <select className={selectClass} value={residualRiskLevel} onChange={(e) => setResidualRiskLevel(e.target.value as RiskLevel)}>
             {riskLevels.map((r) => <option key={r} value={r}>{t(`badges.severity.${r}`)}</option>)}
           </select>
         </div>
@@ -102,7 +103,7 @@ function RiskForm({ sites, zones, initial, onSubmit, onCancel }: {
         </div>
         <div>
           <label className={labelClass}>{t("common.status")}</label>
-          <select className={inputClass} value={status} onChange={(e) => setStatus(e.target.value as RiskAssessmentStatus)}>
+          <select className={selectClass} value={status} onChange={(e) => setStatus(e.target.value as RiskAssessmentStatus)}>
             {statuses.map((s) => <option key={s} value={s}>{t(`badges.status.${s}`)}</option>)}
           </select>
         </div>
@@ -110,23 +111,23 @@ function RiskForm({ sites, zones, initial, onSubmit, onCancel }: {
       <div className="grid grid-cols-2 gap-3">
         <div>
           <label className={labelClass}>{t("compliance.risk.assessmentDate")}</label>
-          <input className={inputClass} type="date" value={assessmentDate} onChange={(e) => setAssessmentDate(e.target.value)} required />
+          <DateField value={assessmentDate} onChange={setAssessmentDate} required />
         </div>
         <div>
           <label className={labelClass}>{t("compliance.risk.reviewDate")}</label>
-          <input className={inputClass} type="date" value={reviewDate} onChange={(e) => setReviewDate(e.target.value)} required />
+          <DateField value={reviewDate} onChange={setReviewDate} required />
         </div>
       </div>
       <div className="grid grid-cols-2 gap-3">
         <div>
           <label className={labelClass}>{t("common.site")}</label>
-          <select className={inputClass} value={siteId} onChange={(e) => { setSiteId(e.target.value); setZoneId(""); }}>
+          <select className={selectClass} value={siteId} onChange={(e) => { setSiteId(e.target.value); setZoneId(""); }}>
             {sites.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
           </select>
         </div>
         <div>
           <label className={labelClass}>{t("common.zone")}</label>
-          <select className={inputClass} value={zoneId} onChange={(e) => setZoneId(e.target.value)}>
+          <select className={selectClass} value={zoneId} onChange={(e) => setZoneId(e.target.value)}>
             <option value="">{t("common.unassigned")}</option>
             {zonesForSite.map((z) => <option key={z.id} value={z.id}>{z.name}</option>)}
           </select>
@@ -138,13 +139,13 @@ function RiskForm({ sites, zones, initial, onSubmit, onCancel }: {
         <div className="grid grid-cols-3 gap-3">
           <div>
             <label className={labelClass}>{t("compliance.risk.likelihood")}</label>
-            <select className={inputClass} value={likelihood} onChange={(e) => setLikelihood(Number(e.target.value))}>
+            <select className={selectClass} value={likelihood} onChange={(e) => setLikelihood(Number(e.target.value))}>
               {ratingScale.map((n) => <option key={n} value={n}>{n}</option>)}
             </select>
           </div>
           <div>
             <label className={labelClass}>{t("compliance.risk.severityScore")}</label>
-            <select className={inputClass} value={severity} onChange={(e) => setSeverity(Number(e.target.value))}>
+            <select className={selectClass} value={severity} onChange={(e) => setSeverity(Number(e.target.value))}>
               {ratingScale.map((n) => <option key={n} value={n}>{n}</option>)}
             </select>
           </div>
@@ -160,14 +161,14 @@ function RiskForm({ sites, zones, initial, onSubmit, onCancel }: {
           </div>
           <div>
             <label className={labelClass}>{t("compliance.risk.mitigationStatus")}</label>
-            <select className={inputClass} value={mitigationStatus} onChange={(e) => setMitigationStatus(e.target.value as RiskMitigationStatus)}>
+            <select className={selectClass} value={mitigationStatus} onChange={(e) => setMitigationStatus(e.target.value as RiskMitigationStatus)}>
               {mitigationStatuses.map((s) => <option key={s} value={s}>{t(`badges.status.${s}`)}</option>)}
             </select>
           </div>
         </div>
         <div>
           <label className={labelClass}>{t("compliance.risk.mitigationDueDate")}</label>
-          <input className={inputClass} type="date" value={mitigationDueDate} onChange={(e) => setMitigationDueDate(e.target.value)} />
+          <DateField value={mitigationDueDate} onChange={setMitigationDueDate} />
         </div>
       </div>
 

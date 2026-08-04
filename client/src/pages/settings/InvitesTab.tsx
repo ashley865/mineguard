@@ -3,7 +3,7 @@ import { useTranslation } from "react-i18next";
 import { api } from "../../api/client";
 import { ExecutiveInvite, ExecutiveTitle } from "../../api/types";
 import { StatusBadge } from "../../components/Badges";
-import { buttonDanger, buttonPrimary, buttonSecondary, cardClass, inputClass, labelClass } from "../../components/ui";
+import { buttonDanger, buttonPrimary, buttonSecondary, cardClass, inputClass, labelClass, selectClass } from "../../components/ui";
 
 const executiveTitles: ExecutiveTitle[] = [
   "GENERAL_MANAGER",
@@ -99,7 +99,7 @@ export default function InvitesTab() {
         </div>
         <div>
           <label className={labelClass}>{t("settings.invites.titleField")}</label>
-          <select className={inputClass} value={title} onChange={(e) => setTitle(e.target.value as ExecutiveTitle)}>
+          <select className={selectClass} value={title} onChange={(e) => setTitle(e.target.value as ExecutiveTitle)}>
             {executiveTitles.map((ti) => (
               <option key={ti} value={ti}>{t(`settings.invites.titles.${ti}`)}</option>
             ))}

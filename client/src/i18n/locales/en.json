@@ -257,7 +257,19 @@
     "checkIn": "Check in",
     "checkOut": "Check out",
     "badgeTitle": "{{name}}'s badge",
-    "badgeHint": "Security scans this code at the gate to check this worker in or out on the Scanner page."
+    "badgeHint": "Security scans this code at the gate to check this worker in or out on the Scanner page.",
+    "viewProfile": "Profile",
+    "profileTitle": "{{name}}'s Profile",
+    "changePhoto": "Change photo",
+    "daysWorked90": "Days Worked (90d)",
+    "shifts90": "Shifts (90d)",
+    "avgHours": "Avg Hours/Shift",
+    "activeCerts": "Active Certs",
+    "trainingCompleted": "Training Done",
+    "lastMedical": "Last Medical",
+    "recentAttendance": "Recent Attendance",
+    "noAttendance": "No attendance recorded in the last 90 days.",
+    "stillOnShift": "Still on shift"
   },
   "equipment": {
     "title": "Equipment",
@@ -717,7 +729,28 @@
       "codesOfPractice": "Codes of Practice",
       "openNoticesList": "Open Regulatory Notices",
       "noOpenNotices": "No open notices.",
-      "recentVisits": "Recent Inspection Visits"
+      "recentVisits": "Recent Inspection Visits",
+      "documentsTotal": "Controlled Documents",
+      "buyersTotal": "Approved Buyers",
+      "contractsAwarded": "Contracts Awarded",
+      "safetyObservationsOpen": "Open Safety Observations",
+      "explosivesExpiring": "Explosive Licenses Expiring",
+      "environmentalOutOfLimits": "Readings Out of Limits",
+      "productionTonnes30d": "Tonnes Mined (30 days)",
+      "documentsSection": "Controlled Documents",
+      "noDocuments": "No documents on record.",
+      "buyersSection": "Approved Buyers",
+      "buyersHint": "Buyers approved to trade minerals from this site",
+      "noBuyers": "No approved buyers for this site yet.",
+      "contractsSection": "Contract Opportunities",
+      "noContracts": "No contract opportunities for this site yet.",
+      "colAwardedTo": "Awarded To",
+      "colAmount": "Amount",
+      "notAwarded": "—",
+      "explosivesSection": "Explosives Magazines",
+      "noExplosives": "No explosives magazines registered for this site.",
+      "environmentalSection": "Environmental Readings (Recent)",
+      "noEnvironmental": "No environmental readings logged for this site."
     }
   },
   "reporting": {
@@ -814,6 +847,7 @@
   },
   "visitorCheckin": {
     "declarationsRequired": "Please acknowledge the safety induction, POPIA consent, and indemnity declarations before checking in.",
+    "idNumberInvalid": "This does not look like a valid ID or passport number.",
     "submitError": "Check-in failed. Please check your details and try again.",
     "siteNotFound": "This check-in link is invalid or the site could not be found.",
     "successTitle": "You're checked in",
@@ -878,8 +912,10 @@
     "tabMine": "Mine Details",
     "tabAccess": "Executive Access",
     "tabInvites": "Invite Executives",
+    "tabTeam": "Team",
     "profile": {
       "title": "Profile",
+      "changePhoto": "Change photo",
       "name": "Full name",
       "email": "Email",
       "saveError": "Could not update your profile",
@@ -927,6 +963,16 @@
         "IT_MANAGER": "IT Manager",
         "OTHER": "Other"
       }
+    },
+    "team": {
+      "title": "Executive Team",
+      "subtitle": "Admins and executives with access to this mine",
+      "loading": "Loading…",
+      "noneYet": "No other team members yet.",
+      "joined": "Joined",
+      "alertsReviewed": "Alerts reviewed",
+      "incidentsReviewed": "Incidents reviewed",
+      "messagesSent": "Messages sent"
     }
   },
   "trucks": {
@@ -1038,6 +1084,7 @@
     "declarationsRequired": "Please accept all three declarations before submitting.",
     "registrationNumberRequired": "Company registration number is required for this buyer type.",
     "idNumberRequired": "ID / passport number is required for individual buyers.",
+    "idNumberInvalid": "This does not look like a valid South African ID number or passport number.",
     "documentsRequired": "Please upload at least one supporting document."
   },
   "marketplace": {

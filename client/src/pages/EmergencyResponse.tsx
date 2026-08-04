@@ -4,7 +4,8 @@ import { api } from "../api/client";
 import { useAuth } from "../context/AuthContext";
 import { EmergencyContact, EmergencyContactCategory, EvacuationDrill, EvacuationDrillType, Site } from "../api/types";
 import Modal from "../components/Modal";
-import { buttonDanger, buttonPrimary, buttonSecondary, cardClass, inputClass, labelClass } from "../components/ui";
+import { buttonDanger, buttonPrimary, buttonSecondary, cardClass, inputClass, labelClass, selectClass } from "../components/ui";
+import DateField from "../components/DateField";
 
 const categories: EmergencyContactCategory[] = ["MINE_RESCUE", "MEDICAL", "FIRE", "POLICE", "INTERNAL_MANAGEMENT", "OTHER"];
 const drillTypes: EvacuationDrillType[] = ["FIRE", "GAS_LEAK", "SEISMIC", "GENERAL"];
@@ -37,7 +38,7 @@ function ContactForm({ sites, onSubmit, onCancel }: {
     <form onSubmit={handleSubmit} className="space-y-4">
       <div>
         <label className={labelClass}>{t("common.site")}</label>
-        <select className={inputClass} value={siteId} onChange={(e) => setSiteId(e.target.value)}>
+        <select className={selectClass} value={siteId} onChange={(e) => setSiteId(e.target.value)}>
           <option value="">{t("documents.companyWide")}</option>
           {sites.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
         </select>
@@ -59,7 +60,7 @@ function ContactForm({ sites, onSubmit, onCancel }: {
         </div>
         <div>
           <label className={labelClass}>{t("emergency.category")}</label>
-          <select className={inputClass} value={category} onChange={(e) => setCategory(e.target.value as EmergencyContactCategory)}>
+          <select className={selectClass} value={category} onChange={(e) => setCategory(e.target.value as EmergencyContactCategory)}>
             {categories.map((c) => <option key={c} value={c}>{t(`emergency.categories.${c}`)}</option>)}
           </select>
         </div>
@@ -112,20 +113,20 @@ function DrillForm({ sites, onSubmit, onCancel }: {
       <div className="grid grid-cols-2 gap-3">
         <div>
           <label className={labelClass}>{t("common.site")}</label>
-          <select className={inputClass} value={siteId} onChange={(e) => setSiteId(e.target.value)}>
+          <select className={selectClass} value={siteId} onChange={(e) => setSiteId(e.target.value)}>
             {sites.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
           </select>
         </div>
         <div>
           <label className={labelClass}>{t("emergency.drillType")}</label>
-          <select className={inputClass} value={drillType} onChange={(e) => setDrillType(e.target.value as EvacuationDrillType)}>
+          <select className={selectClass} value={drillType} onChange={(e) => setDrillType(e.target.value as EvacuationDrillType)}>
             {drillTypes.map((d) => <option key={d} value={d}>{t(`emergency.drillTypes.${d}`)}</option>)}
           </select>
         </div>
       </div>
       <div>
         <label className={labelClass}>{t("emergency.drillDate")}</label>
-        <input className={inputClass} type="date" value={drillDate} onChange={(e) => setDrillDate(e.target.value)} required />
+        <DateField value={drillDate} onChange={setDrillDate} required />
       </div>
       <div className="grid grid-cols-2 gap-3">
         <div>

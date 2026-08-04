@@ -5,14 +5,16 @@ import ProfileTab from "./settings/ProfileTab";
 import MineDetailsTab from "./settings/MineDetailsTab";
 import ExecutiveAccessTab from "./settings/ExecutiveAccessTab";
 import InvitesTab from "./settings/InvitesTab";
+import TeamTab from "./settings/TeamTab";
 import { buttonPrimary, buttonSecondary } from "../components/ui";
 
-type TabKey = "profile" | "mine" | "access" | "invites";
+type TabKey = "profile" | "mine" | "access" | "invites" | "team";
 
 export default function Settings() {
   const { t } = useTranslation();
   const { user } = useAuth();
   const isAdmin = user?.role === "ADMIN";
+  const isAdminOrExec = isAdmin || user?.role === "EXECUTIVE";
   const [tab, setTab] = useState<TabKey>("profile");
 
   const tabs: { key: TabKey; label: string }[] = [
@@ -24,6 +26,7 @@ export default function Settings() {
           { key: "invites" as TabKey, label: t("settings.tabInvites") },
         ]
       : []),
+    ...(isAdminOrExec ? [{ key: "team" as TabKey, label: t("settings.tabTeam") }] : []),
   ];
 
   return (
@@ -51,6 +54,7 @@ export default function Settings() {
       {tab === "mine" && isAdmin && <MineDetailsTab />}
       {tab === "access" && isAdmin && <ExecutiveAccessTab />}
       {tab === "invites" && isAdmin && <InvitesTab />}
+      {tab === "team" && isAdminOrExec && <TeamTab />}
     </div>
   );
 }

@@ -4,7 +4,8 @@ import { api } from "../../api/client";
 import { useAuth } from "../../context/AuthContext";
 import { InspectionOutcome, InspectionVisit, RegulatoryNotice, Site } from "../../api/types";
 import Modal from "../../components/Modal";
-import { buttonDanger, buttonPrimary, buttonSecondary, cardClass, inputClass, labelClass } from "../../components/ui";
+import { buttonDanger, buttonPrimary, buttonSecondary, cardClass, inputClass, labelClass, selectClass } from "../../components/ui";
+import DateField from "../../components/DateField";
 
 const outcomes: InspectionOutcome[] = ["NO_ACTION", "VERBAL_WARNING", "NOTICE_ISSUED", "FOLLOW_UP_REQUIRED"];
 
@@ -56,11 +57,11 @@ function VisitForm({ sites, notices, initial, onSubmit, onCancel }: {
       <div className="grid grid-cols-2 gap-3">
         <div>
           <label className={labelClass}>{t("inspection.visit.visitDate")}</label>
-          <input className={inputClass} type="date" value={visitDate} onChange={(e) => setVisitDate(e.target.value)} required />
+          <DateField value={visitDate} onChange={setVisitDate} required />
         </div>
         <div>
           <label className={labelClass}>{t("common.site")}</label>
-          <select className={inputClass} value={siteId} onChange={(e) => { setSiteId(e.target.value); setRelatedNoticeId(""); }}>
+          <select className={selectClass} value={siteId} onChange={(e) => { setSiteId(e.target.value); setRelatedNoticeId(""); }}>
             {sites.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
           </select>
         </div>
@@ -94,13 +95,13 @@ function VisitForm({ sites, notices, initial, onSubmit, onCancel }: {
       <div className="grid grid-cols-2 gap-3">
         <div>
           <label className={labelClass}>{t("inspection.visit.outcome")}</label>
-          <select className={inputClass} value={outcome} onChange={(e) => setOutcome(e.target.value as InspectionOutcome)}>
+          <select className={selectClass} value={outcome} onChange={(e) => setOutcome(e.target.value as InspectionOutcome)}>
             {outcomes.map((o) => <option key={o} value={o}>{t(`inspection.visit.outcomes.${o}`)}</option>)}
           </select>
         </div>
         <div>
           <label className={labelClass}>{t("inspection.visit.relatedNotice")}</label>
-          <select className={inputClass} value={relatedNoticeId} onChange={(e) => setRelatedNoticeId(e.target.value)}>
+          <select className={selectClass} value={relatedNoticeId} onChange={(e) => setRelatedNoticeId(e.target.value)}>
             <option value="">{t("inspection.visit.noNotice")}</option>
             {noticesForSite.map((n) => <option key={n.id} value={n.id}>{n.noticeNumber}</option>)}
           </select>

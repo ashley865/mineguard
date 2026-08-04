@@ -5,7 +5,8 @@ import { useAuth } from "../context/AuthContext";
 import { Invoice, InvoiceStatus, Mine, Site } from "../api/types";
 import { StatusBadge } from "../components/Badges";
 import Modal from "../components/Modal";
-import { buttonDanger, buttonPrimary, buttonSecondary, cardClass, inputClass, labelClass } from "../components/ui";
+import { buttonDanger, buttonPrimary, buttonSecondary, cardClass, inputClass, labelClass, selectClass } from "../components/ui";
+import DateField from "../components/DateField";
 
 const invoiceStatuses: InvoiceStatus[] = ["DRAFT", "SENT", "PAID", "OVERDUE", "CANCELLED"];
 
@@ -70,7 +71,7 @@ function InvoiceForm({ sites, onSubmit, onCancel }: {
       <div className="grid grid-cols-2 gap-3">
         <div>
           <label className={labelClass}>{t("common.site")}</label>
-          <select className={inputClass} value={siteId} onChange={(e) => setSiteId(e.target.value)}>
+          <select className={selectClass} value={siteId} onChange={(e) => setSiteId(e.target.value)}>
             {sites.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
           </select>
         </div>
@@ -100,7 +101,7 @@ function InvoiceForm({ sites, onSubmit, onCancel }: {
         </div>
         <div>
           <label className={labelClass}>{t("invoices.dueDate")}</label>
-          <input className={inputClass} type="date" value={dueDate} onChange={(e) => setDueDate(e.target.value)} required />
+          <DateField value={dueDate} onChange={setDueDate} required />
         </div>
         <div>
           <label className={labelClass}>{t("invoices.vatRate")}</label>

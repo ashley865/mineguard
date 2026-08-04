@@ -7,7 +7,7 @@ import { useSocket } from "../context/SocketContext";
 import { Sensor, SensorReading, SensorType, Zone } from "../api/types";
 import { StatusBadge } from "../components/Badges";
 import Modal from "../components/Modal";
-import { buttonDanger, buttonPrimary, buttonSecondary, cardClass, inputClass, labelClass } from "../components/ui";
+import { buttonDanger, buttonPrimary, buttonSecondary, cardClass, inputClass, labelClass, selectClass } from "../components/ui";
 
 const sensorTypes: SensorType[] = [
   "METHANE",
@@ -62,7 +62,7 @@ function SensorForm({ zones, initial, onSubmit, onCancel }: {
       <div className="grid grid-cols-2 gap-3">
         <div>
           <label className={labelClass}>{t("common.type")}</label>
-          <select className={inputClass} value={type} onChange={(e) => setType(e.target.value as SensorType)}>
+          <select className={selectClass} value={type} onChange={(e) => setType(e.target.value as SensorType)}>
             {sensorTypes.map((sensorType) => (
               <option key={sensorType} value={sensorType}>{sensorType.replace(/_/g, " ")}</option>
             ))}
@@ -85,7 +85,7 @@ function SensorForm({ zones, initial, onSubmit, onCancel }: {
       </div>
       <div>
         <label className={labelClass}>{t("common.zone")}</label>
-        <select className={inputClass} value={zoneId} onChange={(e) => setZoneId(e.target.value)} required>
+        <select className={selectClass} value={zoneId} onChange={(e) => setZoneId(e.target.value)} required>
           {zones.map((z) => (
             <option key={z.id} value={z.id}>{z.site?.name} · {z.name}</option>
           ))}
@@ -93,7 +93,7 @@ function SensorForm({ zones, initial, onSubmit, onCancel }: {
       </div>
       <div>
         <label className={labelClass}>{t("common.status")}</label>
-        <select className={inputClass} value={status} onChange={(e) => setStatus(e.target.value as any)}>
+        <select className={selectClass} value={status} onChange={(e) => setStatus(e.target.value as any)}>
           <option value="ACTIVE">{t("sensors.active")}</option>
           <option value="INACTIVE">{t("sensors.inactive")}</option>
           <option value="FAULT">{t("sensors.fault")}</option>

@@ -5,7 +5,8 @@ import { useAuth } from "../../context/AuthContext";
 import { Certificate, CertificateStatus, CertificateType, Worker } from "../../api/types";
 import { StatusBadge } from "../../components/Badges";
 import Modal from "../../components/Modal";
-import { buttonDanger, buttonPrimary, buttonSecondary, cardClass, inputClass, labelClass } from "../../components/ui";
+import { buttonDanger, buttonPrimary, buttonSecondary, cardClass, inputClass, labelClass, selectClass } from "../../components/ui";
+import DateField from "../../components/DateField";
 
 const certTypes: CertificateType[] = [
   "MINE_MANAGER",
@@ -58,14 +59,14 @@ function CertificateForm({ workers, initial, onSubmit, onCancel }: {
     <form onSubmit={handleSubmit} className="space-y-4">
       <div>
         <label className={labelClass}>{t("workforce.cert.worker")}</label>
-        <select className={inputClass} value={workerId} onChange={(e) => setWorkerId(e.target.value)} required>
+        <select className={selectClass} value={workerId} onChange={(e) => setWorkerId(e.target.value)} required>
           {workers.map((w) => <option key={w.id} value={w.id}>{w.name} ({w.employeeId})</option>)}
         </select>
       </div>
       <div className="grid grid-cols-2 gap-3">
         <div>
           <label className={labelClass}>{t("workforce.cert.type")}</label>
-          <select className={inputClass} value={type} onChange={(e) => setType(e.target.value as CertificateType)}>
+          <select className={selectClass} value={type} onChange={(e) => setType(e.target.value as CertificateType)}>
             {certTypes.map((ct) => <option key={ct} value={ct}>{t(`workforce.cert.types.${ct}`)}</option>)}
           </select>
         </div>
@@ -81,16 +82,16 @@ function CertificateForm({ workers, initial, onSubmit, onCancel }: {
       <div className="grid grid-cols-2 gap-3">
         <div>
           <label className={labelClass}>{t("workforce.cert.issueDate")}</label>
-          <input className={inputClass} type="date" value={issueDate} onChange={(e) => setIssueDate(e.target.value)} required />
+          <DateField value={issueDate} onChange={setIssueDate} required />
         </div>
         <div>
           <label className={labelClass}>{t("workforce.cert.expiryDate")}</label>
-          <input className={inputClass} type="date" value={expiryDate} onChange={(e) => setExpiryDate(e.target.value)} />
+          <DateField value={expiryDate} onChange={setExpiryDate} />
         </div>
       </div>
       <div>
         <label className={labelClass}>{t("common.status")}</label>
-        <select className={inputClass} value={status} onChange={(e) => setStatus(e.target.value as CertificateStatus)}>
+        <select className={selectClass} value={status} onChange={(e) => setStatus(e.target.value as CertificateStatus)}>
           {certStatuses.map((s) => <option key={s} value={s}>{t(`badges.status.${s}`)}</option>)}
         </select>
       </div>

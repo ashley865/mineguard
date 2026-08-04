@@ -2,7 +2,7 @@ import { FormEvent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { api } from "../../api/client";
 import { ExecutiveSiteAssignment, ExecutiveTitle, Site } from "../../api/types";
-import { buttonDanger, buttonPrimary, cardClass, inputClass, labelClass } from "../../components/ui";
+import { buttonDanger, buttonPrimary, cardClass, inputClass, labelClass, selectClass } from "../../components/ui";
 
 interface ExecutiveOption {
   id: string;
@@ -69,7 +69,7 @@ export default function ExecutiveAccessTab() {
           <form onSubmit={assign} className="flex flex-wrap items-end gap-3">
             <div className="w-56">
               <label className={labelClass}>{t("executiveAccess.executive")}</label>
-              <select className={inputClass} value={userId} onChange={(e) => setUserId(e.target.value)}>
+              <select className={selectClass} value={userId} onChange={(e) => setUserId(e.target.value)}>
                 {executives.map((ex) => (
                   <option key={ex.id} value={ex.id}>
                     {ex.name}{ex.title ? ` — ${t(`settings.invites.titles.${ex.title}`)}` : ""} ({ex.email})
@@ -79,7 +79,7 @@ export default function ExecutiveAccessTab() {
             </div>
             <div className="w-56">
               <label className={labelClass}>{t("common.site")}</label>
-              <select className={inputClass} value={siteId} onChange={(e) => setSiteId(e.target.value)}>
+              <select className={selectClass} value={siteId} onChange={(e) => setSiteId(e.target.value)}>
                 {sites.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
               </select>
             </div>

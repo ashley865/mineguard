@@ -1,12 +1,14 @@
 import { FormEvent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import QRCode from "qrcode";
-import { api } from "../api/client";
+import { api, API_URL } from "../api/client";
 import { useAuth } from "../context/AuthContext";
 import { Site, Worker, WorkerStatus, Zone } from "../api/types";
 import { StatusBadge } from "../components/Badges";
 import Modal from "../components/Modal";
-import { buttonDanger, buttonPrimary, buttonSecondary, cardClass, inputClass, labelClass } from "../components/ui";
+import Avatar from "../components/Avatar";
+import WorkerProfileModal from "../components/WorkerProfileModal";
+import { buttonDanger, buttonPrimary, buttonSecondary, cardClass, inputClass, labelClass, selectClass } from "../components/ui";
 
 function WorkerQrModal({ worker, onClose }: { worker: Worker; onClose: () => void }) {
   const { t } = useTranslation();
@@ -106,13 +108,13 @@ function WorkerForm({ sites, zones, initial, onSubmit, onCancel }: {
       <div className="grid grid-cols-2 gap-3">
         <div>
           <label className={labelClass}>{t("common.site")}</label>
-          <select className={inputClass} value={siteId} onChange={(e) => { setSiteId(e.target.value); setZoneId(""); }}>
+          <select className={selectClass} value={siteId} onChange={(e) => { setSiteId(e.target.value); setZoneId(""); }}>
             {sites.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
           </select>
         </div>
         <div>
           <label className={labelClass}>{t("common.zone")}</label>
-          <select className={inputClass} value={zoneId} onChange={(e) => setZoneId(e.target.value)}>
+          <select className={selectClass} value={zoneId} onChange={(e) => setZoneId(e.target.value)}>
             <option value="">{t("common.unassigned")}</option>
             {zonesForSite.map((z) => <option key={z.id} value={z.id}>{z.name}</option>)}
           </select>
@@ -120,7 +122,7 @@ function WorkerForm({ sites, zones, initial, onSubmit, onCancel }: {
       </div>
       <div>
         <label className={labelClass}>{t("common.status")}</label>
-        <select className={inputClass} value={status} onChange={(e) => setStatus(e.target.value as WorkerStatus)}>
+        <select className={selectClass} value={status} onChange={(e) => setStatus(e.target.value as WorkerStatus)}>
           <option value="ON_SHIFT">{t("workers.onShift")}</option>
           <option value="OFF_SHIFT">{t("workers.offShift")}</option>
           <option value="EMERGENCY">{t("workers.emergency")}</option>
@@ -162,6 +164,7 @@ export default function Workers() {
   const [loading, setLoading] = useState(true);
   const [modal, setModal] = useState<null | "create" | Worker>(null);
   const [qrWorker, setQrWorker] = useState<Worker | null>(null);
+  const [profileWorker, setProfileWorker] = useState<Worker | null>(null);
 
   async function load() {
     setLoading(true);
@@ -232,7 +235,12 @@ export default function Workers() {
           <tbody>
             {workers.map((w) => (
               <tr key={w.id} className="border-t border-mine-800 hover:bg-mine-800/30">
-                <td className="px-4 py-2 font-medium">{w.name}</td>
+                <td className="px-4 py-2 font-medium">
+                  <button className="flex items-center gap-2 hover:underline" onClick={() => setProfileWorker(w)}>
+                    <Avatar size={28} name={w.name} src={w.hasPhoto ? `${API_URL}/api/workers/${w.id}/photo` : null} />
+                    {w.name}
+                  </button>
+                </td>
                 <td className="px-4 py-2 text-mine-300">{w.employeeId}</td>
                 <td className="px-4 py-2 text-mine-300">{w.role}</td>
                 <td className="px-4 py-2 text-mine-300">
@@ -241,6 +249,7 @@ export default function Workers() {
                 <td className="px-4 py-2"><StatusBadge status={w.status} /></td>
                 <td className="px-4 py-2 text-right">
                   <div className="flex justify-end gap-2">
+                    <button className="text-xs text-mine-300 hover:text-mine-50" onClick={() => setProfileWorker(w)}>{t("workers.viewProfile")}</button>
                     <button className="text-xs text-mine-300 hover:text-mine-50" onClick={() => setQrWorker(w)}>{t("workers.showBadge")}</button>
                     {canEdit && (
                       <button className="text-xs text-mine-300 hover:text-mine-50" onClick={() => toggleAttendance(w.id)}>
@@ -277,6 +286,15 @@ export default function Workers() {
       )}
 
       {qrWorker && <WorkerQrModal worker={qrWorker} onClose={() => setQrWorker(null)} />}
+
+      {profileWorker && (
+        <WorkerProfileModal
+          worker={profileWorker}
+          canEdit={canEdit}
+          onClose={() => setProfileWorker(null)}
+          onPhotoChanged={load}
+        />
+      )}
     </div>
   );
 }

@@ -257,7 +257,19 @@
     "checkIn": "Meld aan",
     "checkOut": "Meld af",
     "badgeTitle": "{{name}} se kenteken",
-    "badgeHint": "Sekuriteit skandeer hierdie kode by die hek om hierdie werker op die Skandeerder-bladsy aan of af te meld."
+    "badgeHint": "Sekuriteit skandeer hierdie kode by die hek om hierdie werker op die Skandeerder-bladsy aan of af te meld.",
+    "viewProfile": "Profiel",
+    "profileTitle": "{{name}} se Profiel",
+    "changePhoto": "Verander foto",
+    "daysWorked90": "Dae Gewerk (90d)",
+    "shifts90": "Skofte (90d)",
+    "avgHours": "Gem. Ure/Skof",
+    "activeCerts": "Aktiewe Sertifikate",
+    "trainingCompleted": "Opleiding Voltooi",
+    "lastMedical": "Laaste Mediese Ondersoek",
+    "recentAttendance": "Onlangse Bywoning",
+    "noAttendance": "Geen bywoning in die afgelope 90 dae aangeteken nie.",
+    "stillOnShift": "Steeds aan diens"
   },
   "equipment": {
     "title": "Toerusting",
@@ -717,7 +729,28 @@
       "codesOfPractice": "Gedragskodes",
       "openNoticesList": "Oop Regulatoriese Kennisgewings",
       "noOpenNotices": "Geen oop kennisgewings nie.",
-      "recentVisits": "Onlangse Inspeksiebesoeke"
+      "recentVisits": "Onlangse Inspeksiebesoeke",
+      "documentsTotal": "Beheerde Dokumente",
+      "buyersTotal": "Goedgekeurde Kopers",
+      "contractsAwarded": "Toegekende Kontrakte",
+      "safetyObservationsOpen": "Oop Veiligheidswaarnemings",
+      "explosivesExpiring": "Plofstoflisensies Verval Binnekort",
+      "environmentalOutOfLimits": "Lesings Buite Perke",
+      "productionTonnes30d": "Ton Ontgin (30 dae)",
+      "documentsSection": "Beheerde Dokumente",
+      "noDocuments": "Geen dokumente aangeteken nie.",
+      "buyersSection": "Goedgekeurde Kopers",
+      "buyersHint": "Kopers goedgekeur om minerale van hierdie myn te verhandel",
+      "noBuyers": "Nog geen goedgekeurde kopers vir hierdie myn nie.",
+      "contractsSection": "Kontrakgeleenthede",
+      "noContracts": "Nog geen kontrakgeleenthede vir hierdie myn nie.",
+      "colAwardedTo": "Toegeken Aan",
+      "colAmount": "Bedrag",
+      "notAwarded": "—",
+      "explosivesSection": "Plofstofmagasyne",
+      "noExplosives": "Geen plofstofmagasyne geregistreer vir hierdie myn nie.",
+      "environmentalSection": "Omgewingslesings (Onlangs)",
+      "noEnvironmental": "Geen omgewingslesings aangeteken vir hierdie myn nie."
     }
   },
   "reporting": {
@@ -814,6 +847,7 @@
   },
   "visitorCheckin": {
     "declarationsRequired": "Bevestig asseblief die veiligheidsinduksie-, POPIA-toestemmings- en vrywaringsverklarings voordat jy aanmeld.",
+    "idNumberInvalid": "Dit lyk nie na 'n geldige ID- of paspoortnommer nie.",
     "submitError": "Aanmelding het misluk. Kontroleer jou besonderhede en probeer weer.",
     "siteNotFound": "Hierdie aanmeldskakel is ongeldig of die terrein kon nie gevind word nie.",
     "successTitle": "Jy is aangemeld",
@@ -878,8 +912,10 @@
     "tabMine": "Myn-besonderhede",
     "tabAccess": "Uitvoerende Toegang",
     "tabInvites": "Nooi Uitvoerende Beamptes",
+    "tabTeam": "Span",
     "profile": {
       "title": "Profiel",
+      "changePhoto": "Verander foto",
       "name": "Volle naam",
       "email": "E-pos",
       "saveError": "Kon nie jou profiel opdateer nie",
@@ -927,6 +963,16 @@
         "IT_MANAGER": "IT-bestuurder",
         "OTHER": "Ander"
       }
+    },
+    "team": {
+      "title": "Uitvoerende Span",
+      "subtitle": "Administrateurs en uitvoerende beamptes met toegang tot hierdie myn",
+      "loading": "Laai tans…",
+      "noneYet": "Nog geen ander spanlede nie.",
+      "joined": "Aangesluit",
+      "alertsReviewed": "Waarskuwings hersien",
+      "incidentsReviewed": "Voorvalle hersien",
+      "messagesSent": "Boodskappe gestuur"
     }
   },
   "trucks": {
@@ -1038,6 +1084,7 @@
     "declarationsRequired": "Aanvaar asseblief al drie verklarings voor jy indien.",
     "registrationNumberRequired": "Maatskappyregistrasienommer word vereis vir hierdie kopertipe.",
     "idNumberRequired": "ID- / paspoortnommer word vereis vir individuele kopers.",
+    "idNumberInvalid": "Dit lyk nie na 'n geldige Suid-Afrikaanse ID- of paspoortnommer nie.",
     "documentsRequired": "Laai asseblief ten minste een stawende dokument op."
   },
   "marketplace": {

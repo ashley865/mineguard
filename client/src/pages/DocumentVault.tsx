@@ -5,7 +5,9 @@ import { useAuth } from "../context/AuthContext";
 import { DocumentStatus, DocumentType, MineDocument, Site, VaultDocument, VaultDocumentSource } from "../api/types";
 import { StatusBadge } from "../components/Badges";
 import Modal from "../components/Modal";
-import { buttonDanger, buttonPrimary, buttonSecondary, cardClass, inputClass, labelClass } from "../components/ui";
+import { buttonDanger, buttonPrimary, buttonSecondary, cardClass, inputClass, labelClass, selectClass } from "../components/ui";
+import DateField from "../components/DateField";
+import FileDropzone from "../components/FileDropzone";
 
 const docTypes: DocumentType[] = [
   "POLICY",
@@ -144,7 +146,7 @@ function DocumentForm({ sites, initial, onSubmit, onCancel }: {
       <div className="grid grid-cols-2 gap-3">
         <div>
           <label className={labelClass}>{t("documents.type")}</label>
-          <select className={inputClass} value={type} onChange={(e) => setType(e.target.value as DocumentType)}>
+          <select className={selectClass} value={type} onChange={(e) => setType(e.target.value as DocumentType)}>
             {docTypes.map((dt) => <option key={dt} value={dt}>{t(`documents.types.${dt}`)}</option>)}
           </select>
         </div>
@@ -156,18 +158,18 @@ function DocumentForm({ sites, initial, onSubmit, onCancel }: {
       <div className="grid grid-cols-2 gap-3">
         <div>
           <label className={labelClass}>{t("common.status")}</label>
-          <select className={inputClass} value={status} onChange={(e) => setStatus(e.target.value as DocumentStatus)}>
+          <select className={selectClass} value={status} onChange={(e) => setStatus(e.target.value as DocumentStatus)}>
             {docStatuses.map((s) => <option key={s} value={s}>{t(`badges.status.${s}`)}</option>)}
           </select>
         </div>
         <div>
           <label className={labelClass}>{t("documents.reviewDate")}</label>
-          <input className={inputClass} type="date" value={reviewDate} onChange={(e) => setReviewDate(e.target.value)} />
+          <DateField value={reviewDate} onChange={setReviewDate} />
         </div>
       </div>
       <div>
         <label className={labelClass}>{t("documents.site")}</label>
-        <select className={inputClass} value={siteId} onChange={(e) => setSiteId(e.target.value)}>
+        <select className={selectClass} value={siteId} onChange={(e) => setSiteId(e.target.value)}>
           <option value="">{t("documents.companyWide")}</option>
           {sites.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
         </select>
@@ -179,12 +181,7 @@ function DocumentForm({ sites, initial, onSubmit, onCancel }: {
       {!isEdit && (
         <div>
           <label className={labelClass}>{t("documents.file")}</label>
-          <input
-            className={inputClass}
-            type="file"
-            onChange={(e) => setFile(e.target.files?.[0] ?? null)}
-            required
-          />
+          <FileDropzone onFiles={(files) => setFile(files.item(0))} />
         </div>
       )}
       {isEdit && (

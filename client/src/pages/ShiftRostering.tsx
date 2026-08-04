@@ -4,7 +4,8 @@ import { api } from "../api/client";
 import { useAuth } from "../context/AuthContext";
 import { ShiftRoster, ShiftType, Site, Worker } from "../api/types";
 import Modal from "../components/Modal";
-import { buttonDanger, buttonPrimary, buttonSecondary, cardClass, inputClass, labelClass } from "../components/ui";
+import { buttonDanger, buttonPrimary, buttonSecondary, cardClass, inputClass, labelClass, selectClass } from "../components/ui";
+import DateField from "../components/DateField";
 
 const shiftTypes: ShiftType[] = ["DAY", "AFTERNOON", "NIGHT"];
 
@@ -39,20 +40,20 @@ function RosterForm({ sites, onSubmit, onCancel }: {
       <div className="grid grid-cols-2 gap-3">
         <div>
           <label className={labelClass}>{t("common.site")}</label>
-          <select className={inputClass} value={siteId} onChange={(e) => setSiteId(e.target.value)}>
+          <select className={selectClass} value={siteId} onChange={(e) => setSiteId(e.target.value)}>
             {sites.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
           </select>
         </div>
         <div>
           <label className={labelClass}>{t("roster.shiftType")}</label>
-          <select className={inputClass} value={shiftType} onChange={(e) => setShiftType(e.target.value as ShiftType)}>
+          <select className={selectClass} value={shiftType} onChange={(e) => setShiftType(e.target.value as ShiftType)}>
             {shiftTypes.map((s) => <option key={s} value={s}>{t(`production.shifts.${s}`)}</option>)}
           </select>
         </div>
       </div>
       <div>
         <label className={labelClass}>{t("roster.shiftDate")}</label>
-        <input className={inputClass} type="date" value={shiftDate} onChange={(e) => setShiftDate(e.target.value)} required />
+        <DateField value={shiftDate} onChange={setShiftDate} required />
       </div>
       <div>
         <label className={labelClass}>{t("common.description")}</label>
@@ -109,7 +110,7 @@ function AssignmentsModal({ roster, workers, onClose, onChanged }: {
           <form onSubmit={addWorker} className="flex gap-2 items-end flex-wrap border border-mine-800 rounded-md p-3">
             <div className="flex-1 min-w-[160px]">
               <label className={labelClass}>{t("workers.title")}</label>
-              <select className={inputClass} value={workerId} onChange={(e) => setWorkerId(e.target.value)}>
+              <select className={selectClass} value={workerId} onChange={(e) => setWorkerId(e.target.value)}>
                 {availableWorkers.map((w) => <option key={w.id} value={w.id}>{w.name}</option>)}
               </select>
             </div>

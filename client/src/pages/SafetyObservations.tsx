@@ -6,7 +6,7 @@ import { useAuth } from "../context/AuthContext";
 import { AlertSeverity, SafetyObservation, SafetyObservationStatus, SafetyObservationType, Site, Zone } from "../api/types";
 import { StatusBadge, SeverityBadge } from "../components/Badges";
 import Modal from "../components/Modal";
-import { buttonDanger, buttonPrimary, buttonSecondary, cardClass, inputClass, labelClass } from "../components/ui";
+import { buttonDanger, buttonPrimary, buttonSecondary, cardClass, inputClass, labelClass, selectClass } from "../components/ui";
 
 const types: SafetyObservationType[] = ["NEAR_MISS", "UNSAFE_ACT", "UNSAFE_CONDITION", "POSITIVE_OBSERVATION"];
 const severities: AlertSeverity[] = ["LOW", "MEDIUM", "HIGH", "CRITICAL"];
@@ -41,7 +41,7 @@ function ShareModal({ sites, onClose }: { sites: Site[]; onClose: () => void }) 
       <div className="space-y-4">
         <div>
           <label className={labelClass}>{t("common.site")}</label>
-          <select className={inputClass} value={siteId} onChange={(e) => setSiteId(e.target.value)}>
+          <select className={selectClass} value={siteId} onChange={(e) => setSiteId(e.target.value)}>
             {sites.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
           </select>
         </div>
@@ -94,13 +94,13 @@ function ObservationForm({ sites, zones, onSubmit, onCancel }: {
       <div className="grid grid-cols-2 gap-3">
         <div>
           <label className={labelClass}>{t("common.site")}</label>
-          <select className={inputClass} value={siteId} onChange={(e) => { setSiteId(e.target.value); setZoneId(""); }}>
+          <select className={selectClass} value={siteId} onChange={(e) => { setSiteId(e.target.value); setZoneId(""); }}>
             {sites.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
           </select>
         </div>
         <div>
           <label className={labelClass}>{t("common.zone")}</label>
-          <select className={inputClass} value={zoneId} onChange={(e) => setZoneId(e.target.value)}>
+          <select className={selectClass} value={zoneId} onChange={(e) => setZoneId(e.target.value)}>
             <option value="">{t("common.unassigned")}</option>
             {zonesForSite.map((z) => <option key={z.id} value={z.id}>{z.name}</option>)}
           </select>
@@ -109,13 +109,13 @@ function ObservationForm({ sites, zones, onSubmit, onCancel }: {
       <div className="grid grid-cols-2 gap-3">
         <div>
           <label className={labelClass}>{t("safetyObservations.type")}</label>
-          <select className={inputClass} value={type} onChange={(e) => setType(e.target.value as SafetyObservationType)}>
+          <select className={selectClass} value={type} onChange={(e) => setType(e.target.value as SafetyObservationType)}>
             {types.map((ty) => <option key={ty} value={ty}>{t(`safetyObservations.types.${ty}`)}</option>)}
           </select>
         </div>
         <div>
           <label className={labelClass}>{t("incidents.severity")}</label>
-          <select className={inputClass} value={severity} onChange={(e) => setSeverity(e.target.value as AlertSeverity)}>
+          <select className={selectClass} value={severity} onChange={(e) => setSeverity(e.target.value as AlertSeverity)}>
             {severities.map((s) => <option key={s} value={s}>{t(`incidents.${s.toLowerCase()}`)}</option>)}
           </select>
         </div>
@@ -169,7 +169,7 @@ function DetailModal({ observation, onClose, onChanged }: { observation: SafetyO
         </div>
         <div className="border-t border-mine-800 pt-3 space-y-2">
           <label className={labelClass}>{t("common.status")}</label>
-          <select className={inputClass} value={status} onChange={(e) => setStatus(e.target.value as SafetyObservationStatus)}>
+          <select className={selectClass} value={status} onChange={(e) => setStatus(e.target.value as SafetyObservationStatus)}>
             {statuses.map((s) => <option key={s} value={s}>{t(`badges.status.${s}`)}</option>)}
           </select>
           <label className={labelClass}>{t("safetyObservations.actionTaken")}</label>

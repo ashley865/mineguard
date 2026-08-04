@@ -1,11 +1,19 @@
 import { Router } from "express";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
+import multer from "multer";
 import { z } from "zod";
 import { prisma } from "../prisma";
 import { requireAuth } from "../middleware/auth";
+import { imageFileFilter } from "../lib/uploadFilters";
 
 const router = Router();
+
+const upload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 5 * 1024 * 1024 },
+  fileFilter: imageFileFilter,
+});
 
 const registerSchema = z.object({
   email: z.string().email(),
@@ -96,7 +104,15 @@ router.get("/me", requireAuth, async (req, res) => {
   if (!user) {
     return res.status(404).json({ error: "User not found" });
   }
-  res.json({ id: user.id, email: user.email, name: user.name, role: user.role, title: user.title, mineId: user.mineId });
+  res.json({
+    id: user.id,
+    email: user.email,
+    name: user.name,
+    role: user.role,
+    title: user.title,
+    mineId: user.mineId,
+    hasPhoto: !!user.photoData,
+  });
 });
 
 router.put("/me", requireAuth, async (req, res) => {
@@ -106,7 +122,15 @@ router.put("/me", requireAuth, async (req, res) => {
     where: { id: req.auth!.userId },
     data: { name: parsed.data.name },
   });
-  res.json({ id: user.id, email: user.email, name: user.name, role: user.role, title: user.title, mineId: user.mineId });
+  res.json({
+    id: user.id,
+    email: user.email,
+    name: user.name,
+    role: user.role,
+    title: user.title,
+    mineId: user.mineId,
+    hasPhoto: !!user.photoData,
+  });
 });
 
 router.post("/change-password", requireAuth, async (req, res) => {
@@ -119,6 +143,56 @@ router.post("/change-password", requireAuth, async (req, res) => {
   const passwordHash = await bcrypt.hash(parsed.data.newPassword, 10);
   await prisma.user.update({ where: { id: user.id }, data: { passwordHash } });
   res.status(204).send();
+});
+
+router.post("/me/photo", requireAuth, upload.single("photo"), async (req, res) => {
+  if (!req.file) return res.status(400).json({ error: "A photo file is required" });
+  await prisma.user.update({
+    where: { id: req.auth!.userId },
+    data: { photoData: Uint8Array.from(req.file.buffer), photoMimeType: req.file.mimetype },
+  });
+  res.status(204).send();
+});
+
+router.get("/users/:id/photo", requireAuth, async (req, res) => {
+  const user = await prisma.user.findUnique({ where: { id: req.params.id }, select: { photoData: true, photoMimeType: true } });
+  if (!user?.photoData || !user.photoMimeType) return res.status(404).json({ error: "No photo set" });
+  res.setHeader("Content-Type", user.photoMimeType);
+  res.send(Buffer.from(user.photoData));
+});
+
+router.get("/team", requireAuth, async (req, res) => {
+  const me = await prisma.user.findUnique({ where: { id: req.auth!.userId }, select: { mineId: true } });
+  const users = await prisma.user.findMany({
+    where: { mineId: me?.mineId ?? undefined, role: { in: ["ADMIN", "EXECUTIVE"] } },
+    select: {
+      id: true,
+      name: true,
+      email: true,
+      role: true,
+      title: true,
+      photoMimeType: true,
+      createdAt: true,
+      _count: { select: { reviewedAlerts: true, reviewedIncidents: true, sentMessages: true } },
+    },
+    orderBy: { name: "asc" },
+  });
+  res.json(
+    users.map((u) => ({
+      id: u.id,
+      name: u.name,
+      email: u.email,
+      role: u.role,
+      title: u.title,
+      hasPhoto: !!u.photoMimeType,
+      createdAt: u.createdAt,
+      stats: {
+        alertsReviewed: u._count.reviewedAlerts,
+        incidentsReviewed: u._count.reviewedIncidents,
+        messagesSent: u._count.sentMessages,
+      },
+    }))
+  );
 });
 
 export default router;

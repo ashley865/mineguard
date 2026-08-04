@@ -4,7 +4,7 @@ import { api } from "../api/client";
 import { useAuth } from "../context/AuthContext";
 import { EnvironmentalParameterType, EnvironmentalReading, Site } from "../api/types";
 import Modal from "../components/Modal";
-import { buttonDanger, buttonPrimary, buttonSecondary, cardClass, inputClass, labelClass } from "../components/ui";
+import { buttonDanger, buttonPrimary, buttonSecondary, cardClass, inputClass, labelClass, selectClass } from "../components/ui";
 import WeatherMonitoring from "./WeatherMonitoring";
 
 const parameterTypes: EnvironmentalParameterType[] = ["WATER_QUALITY", "AIR_QUALITY", "DUST", "NOISE", "TAILINGS_DAM_LEVEL"];
@@ -51,13 +51,13 @@ function ReadingForm({ sites, onSubmit, onCancel }: {
       <div className="grid grid-cols-2 gap-3">
         <div>
           <label className={labelClass}>{t("common.site")}</label>
-          <select className={inputClass} value={siteId} onChange={(e) => setSiteId(e.target.value)}>
+          <select className={selectClass} value={siteId} onChange={(e) => setSiteId(e.target.value)}>
             {sites.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
           </select>
         </div>
         <div>
           <label className={labelClass}>{t("environmental.parameterType")}</label>
-          <select className={inputClass} value={parameterType} onChange={(e) => setParameterType(e.target.value as EnvironmentalParameterType)}>
+          <select className={selectClass} value={parameterType} onChange={(e) => setParameterType(e.target.value as EnvironmentalParameterType)}>
             {parameterTypes.map((p) => <option key={p} value={p}>{t(`environmental.parameterTypes.${p}`)}</option>)}
           </select>
         </div>

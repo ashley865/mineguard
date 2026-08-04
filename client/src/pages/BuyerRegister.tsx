@@ -2,8 +2,11 @@ import { FormEvent, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { api } from "../api/client";
 import { BuyerType } from "../api/types";
-import { buttonPrimary, cardClass, inputClass, labelClass } from "../components/ui";
+import { buttonPrimary, cardClass, inputClass, labelClass, selectClass } from "../components/ui";
 import LanguageSwitcher from "../components/LanguageSwitcher";
+import DateField from "../components/DateField";
+import FileDropzone from "../components/FileDropzone";
+import { isValidIdOrPassport } from "../lib/saId";
 
 const buyerTypes: BuyerType[] = ["INDIVIDUAL", "COMPANY", "TRUST", "PARTNERSHIP"];
 
@@ -54,6 +57,10 @@ export default function BuyerRegister() {
     }
     if (buyerType === "INDIVIDUAL" && !idNumber) {
       setError(t("buyerRegister.idNumberRequired"));
+      return;
+    }
+    if (buyerType === "INDIVIDUAL" && idNumber && !isValidIdOrPassport(idNumber)) {
+      setError(t("buyerRegister.idNumberInvalid"));
       return;
     }
     if (!documents || documents.length === 0) {
@@ -132,7 +139,7 @@ export default function BuyerRegister() {
           <div className="text-xs font-semibold text-mine-300 uppercase pt-2">{t("buyerRegister.sectionIdentity")}</div>
           <div>
             <label className={labelClass}>{t("buyerRegister.buyerType")}</label>
-            <select className={inputClass} value={buyerType} onChange={(e) => setBuyerType(e.target.value as BuyerType)}>
+            <select className={selectClass} value={buyerType} onChange={(e) => setBuyerType(e.target.value as BuyerType)}>
               {buyerTypes.map((bt) => <option key={bt} value={bt}>{t(`buyerRegister.types.${bt}`)}</option>)}
             </select>
           </div>
@@ -191,7 +198,7 @@ export default function BuyerRegister() {
           </div>
           <div>
             <label className={labelClass}>{t("buyerRegister.dealerLicenseExpiry")}</label>
-            <input className={inputClass} type="date" value={dealerLicenseExpiry} onChange={(e) => setDealerLicenseExpiry(e.target.value)} />
+            <DateField value={dealerLicenseExpiry} onChange={setDealerLicenseExpiry} />
           </div>
 
           <div className="text-xs font-semibold text-mine-300 uppercase pt-2 border-t border-mine-800">
@@ -253,14 +260,7 @@ export default function BuyerRegister() {
           </div>
           <div>
             <label className={labelClass}>{t("buyerRegister.documents")}</label>
-            <input
-              className={inputClass}
-              type="file"
-              multiple
-              accept="image/*,.pdf"
-              onChange={(e) => setDocuments(e.target.files)}
-            />
-            <p className="text-xs text-mine-400 mt-1">{t("buyerRegister.documentsHint")}</p>
+            <FileDropzone multiple accept="image/*,.pdf" hint={t("buyerRegister.documentsHint")} onFiles={setDocuments} />
           </div>
 
           <div className="space-y-2 border border-mine-800 rounded-md p-3 bg-mine-900/40">

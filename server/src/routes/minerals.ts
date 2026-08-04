@@ -3,12 +3,14 @@ import multer from "multer";
 import { z } from "zod";
 import { prisma } from "../prisma";
 import { requireAuth, requireRole } from "../middleware/auth";
+import { imageFileFilter } from "../lib/uploadFilters";
 
 const router = Router();
 
 const upload = multer({
   storage: multer.memoryStorage(),
   limits: { fileSize: 10 * 1024 * 1024 },
+  fileFilter: imageFileFilter,
 });
 
 const listingSchema = z.object({

@@ -5,7 +5,7 @@ import { useAuth } from "../context/AuthContext";
 import { Site, SiteStatus, Zone } from "../api/types";
 import { StatusBadge } from "../components/Badges";
 import Modal from "../components/Modal";
-import { buttonDanger, buttonPrimary, buttonSecondary, cardClass, inputClass, labelClass } from "../components/ui";
+import { buttonDanger, buttonPrimary, buttonSecondary, cardClass, inputClass, labelClass, selectClass } from "../components/ui";
 
 function SiteForm({ initial, onSubmit, onCancel }: {
   initial?: Partial<Site>;
@@ -45,7 +45,7 @@ function SiteForm({ initial, onSubmit, onCancel }: {
       </div>
       <div>
         <label className={labelClass}>{t("common.status")}</label>
-        <select className={inputClass} value={status} onChange={(e) => setStatus(e.target.value as SiteStatus)}>
+        <select className={selectClass} value={status} onChange={(e) => setStatus(e.target.value as SiteStatus)}>
           <option value="OPERATIONAL">{t("sites.operational")}</option>
           <option value="RESTRICTED">{t("sites.restricted")}</option>
           <option value="SHUT_DOWN">{t("sites.shutDown")}</option>

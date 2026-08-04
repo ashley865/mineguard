@@ -5,7 +5,8 @@ import { useAuth } from "../../context/AuthContext";
 import { ExamType, FitnessResult, MedicalSurveillance, Worker } from "../../api/types";
 import { StatusBadge } from "../../components/Badges";
 import Modal from "../../components/Modal";
-import { buttonDanger, buttonPrimary, buttonSecondary, cardClass, inputClass, labelClass } from "../../components/ui";
+import { buttonDanger, buttonPrimary, buttonSecondary, cardClass, inputClass, labelClass, selectClass } from "../../components/ui";
+import DateField from "../../components/DateField";
 
 const examTypes: ExamType[] = ["PRE_EMPLOYMENT", "PERIODICAL", "EXIT", "RETURN_TO_WORK"];
 const results: FitnessResult[] = ["FIT", "FIT_WITH_RESTRICTION", "TEMPORARILY_UNFIT", "UNFIT"];
@@ -48,32 +49,32 @@ function MedicalForm({ workers, initial, onSubmit, onCancel }: {
     <form onSubmit={handleSubmit} className="space-y-4">
       <div>
         <label className={labelClass}>{t("compliance.medical.worker")}</label>
-        <select className={inputClass} value={workerId} onChange={(e) => setWorkerId(e.target.value)} required>
+        <select className={selectClass} value={workerId} onChange={(e) => setWorkerId(e.target.value)} required>
           {workers.map((w) => <option key={w.id} value={w.id}>{w.name} ({w.employeeId})</option>)}
         </select>
       </div>
       <div className="grid grid-cols-2 gap-3">
         <div>
           <label className={labelClass}>{t("compliance.medical.examType")}</label>
-          <select className={inputClass} value={examType} onChange={(e) => setExamType(e.target.value as ExamType)}>
+          <select className={selectClass} value={examType} onChange={(e) => setExamType(e.target.value as ExamType)}>
             {examTypes.map((et) => <option key={et} value={et}>{t(`compliance.medical.examTypes.${et}`)}</option>)}
           </select>
         </div>
         <div>
           <label className={labelClass}>{t("compliance.medical.examDate")}</label>
-          <input className={inputClass} type="date" value={examDate} onChange={(e) => setExamDate(e.target.value)} required />
+          <DateField value={examDate} onChange={setExamDate} required />
         </div>
       </div>
       <div className="grid grid-cols-2 gap-3">
         <div>
           <label className={labelClass}>{t("compliance.medical.result")}</label>
-          <select className={inputClass} value={result} onChange={(e) => setResult(e.target.value as FitnessResult)}>
+          <select className={selectClass} value={result} onChange={(e) => setResult(e.target.value as FitnessResult)}>
             {results.map((r) => <option key={r} value={r}>{t(`badges.status.${r}`)}</option>)}
           </select>
         </div>
         <div>
           <label className={labelClass}>{t("compliance.medical.nextExamDue")}</label>
-          <input className={inputClass} type="date" value={nextExamDue} onChange={(e) => setNextExamDue(e.target.value)} required />
+          <DateField value={nextExamDue} onChange={setNextExamDue} required />
         </div>
       </div>
       <div>

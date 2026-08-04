@@ -4,7 +4,7 @@ import { api } from "../api/client";
 import { useAuth } from "../context/AuthContext";
 import { InventoryItem, InventoryMovement, InventoryMovementDirection, Site } from "../api/types";
 import Modal from "../components/Modal";
-import { buttonDanger, buttonPrimary, buttonSecondary, cardClass, inputClass, labelClass } from "../components/ui";
+import { buttonDanger, buttonPrimary, buttonSecondary, cardClass, inputClass, labelClass, selectClass } from "../components/ui";
 
 function ItemForm({ sites, initial, onSubmit, onCancel }: {
   sites: Site[];
@@ -51,7 +51,7 @@ function ItemForm({ sites, initial, onSubmit, onCancel }: {
       <div className="grid grid-cols-2 gap-3">
         <div>
           <label className={labelClass}>{t("common.site")}</label>
-          <select className={inputClass} value={siteId} onChange={(e) => setSiteId(e.target.value)}>
+          <select className={selectClass} value={siteId} onChange={(e) => setSiteId(e.target.value)}>
             {sites.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
           </select>
         </div>
@@ -153,7 +153,7 @@ function MovementsModal({ item, onClose, onChanged }: { item: InventoryItem; onC
         <form onSubmit={handleSubmit} className="flex gap-2 items-end flex-wrap border border-mine-800 rounded-md p-3">
           <div>
             <label className={labelClass}>{t("inventory.direction")}</label>
-            <select className={inputClass} value={direction} onChange={(e) => setDirection(e.target.value as InventoryMovementDirection)}>
+            <select className={selectClass} value={direction} onChange={(e) => setDirection(e.target.value as InventoryMovementDirection)}>
               <option value="IN">{t("inventory.stockIn")}</option>
               <option value="OUT">{t("inventory.stockOut")}</option>
             </select>

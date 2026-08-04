@@ -5,7 +5,8 @@ import { useAuth } from "../context/AuthContext";
 import { ExplosivesMagazine, ExplosivesMagazineStatus, ExplosivesTransaction, ExplosivesTransactionType, Site } from "../api/types";
 import { StatusBadge } from "../components/Badges";
 import Modal from "../components/Modal";
-import { buttonDanger, buttonPrimary, buttonSecondary, cardClass, inputClass, labelClass } from "../components/ui";
+import { buttonDanger, buttonPrimary, buttonSecondary, cardClass, inputClass, labelClass, selectClass } from "../components/ui";
+import DateField from "../components/DateField";
 
 const magazineStatuses: ExplosivesMagazineStatus[] = ["ACTIVE", "SUSPENDED", "EXPIRED"];
 const transactionTypes: ExplosivesTransactionType[] = ["RECEIPT", "ISSUE", "RETURN", "DESTRUCTION"];
@@ -53,7 +54,7 @@ function MagazineForm({ sites, initial, onSubmit, onCancel }: {
       <div className="grid grid-cols-2 gap-3">
         <div>
           <label className={labelClass}>{t("common.site")}</label>
-          <select className={inputClass} value={siteId} onChange={(e) => setSiteId(e.target.value)}>
+          <select className={selectClass} value={siteId} onChange={(e) => setSiteId(e.target.value)}>
             {sites.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
           </select>
         </div>
@@ -69,7 +70,7 @@ function MagazineForm({ sites, initial, onSubmit, onCancel }: {
         </div>
         <div>
           <label className={labelClass}>{t("explosives.licenseExpiry")}</label>
-          <input className={inputClass} type="date" value={licenseExpiry} onChange={(e) => setLicenseExpiry(e.target.value)} required />
+          <DateField value={licenseExpiry} onChange={setLicenseExpiry} required />
         </div>
       </div>
       <div className="grid grid-cols-3 gap-3">
@@ -83,7 +84,7 @@ function MagazineForm({ sites, initial, onSubmit, onCancel }: {
         </div>
         <div>
           <label className={labelClass}>{t("common.status")}</label>
-          <select className={inputClass} value={status} onChange={(e) => setStatus(e.target.value as ExplosivesMagazineStatus)}>
+          <select className={selectClass} value={status} onChange={(e) => setStatus(e.target.value as ExplosivesMagazineStatus)}>
             {magazineStatuses.map((s) => <option key={s} value={s}>{t(`badges.status.${s}`)}</option>)}
           </select>
         </div>
@@ -91,11 +92,11 @@ function MagazineForm({ sites, initial, onSubmit, onCancel }: {
       <div className="grid grid-cols-2 gap-3">
         <div>
           <label className={labelClass}>{t("explosives.lastInspectionDate")}</label>
-          <input className={inputClass} type="date" value={lastInspectionDate} onChange={(e) => setLastInspectionDate(e.target.value)} />
+          <DateField value={lastInspectionDate} onChange={setLastInspectionDate} />
         </div>
         <div>
           <label className={labelClass}>{t("explosives.nextInspectionDue")}</label>
-          <input className={inputClass} type="date" value={nextInspectionDue} onChange={(e) => setNextInspectionDue(e.target.value)} />
+          <DateField value={nextInspectionDue} onChange={setNextInspectionDue} />
         </div>
       </div>
       <div className="flex justify-end gap-2 pt-2">
@@ -163,7 +164,7 @@ function TransactionsModal({ magazine, onClose, onChanged }: { magazine: Explosi
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className={labelClass}>{t("explosives.transactionType")}</label>
-              <select className={inputClass} value={transactionType} onChange={(e) => setTransactionType(e.target.value as ExplosivesTransactionType)}>
+              <select className={selectClass} value={transactionType} onChange={(e) => setTransactionType(e.target.value as ExplosivesTransactionType)}>
                 {transactionTypes.map((tt) => <option key={tt} value={tt}>{t(`explosives.transactionTypes.${tt}`)}</option>)}
               </select>
             </div>

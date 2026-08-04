@@ -23,6 +23,7 @@ interface AuthContextValue {
   acceptExecutiveInvite: (inviteId: string, key: string, password: string) => Promise<void>;
   updateProfile: (name: string) => Promise<void>;
   changePassword: (currentPassword: string, newPassword: string) => Promise<void>;
+  refreshUser: () => Promise<void>;
   logout: () => void;
 }
 
@@ -95,6 +96,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     await api.post("/auth/change-password", { currentPassword, newPassword });
   }
 
+  async function refreshUser() {
+    const res = await api.get<User>("/auth/me");
+    localStorage.setItem("mineguard_user", JSON.stringify(res.data));
+    setUser(res.data);
+  }
+
   function logout() {
     localStorage.removeItem("mineguard_token");
     localStorage.removeItem("mineguard_user");
@@ -114,6 +121,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         acceptExecutiveInvite,
         updateProfile,
         changePassword,
+        refreshUser,
         logout,
       }}
     >

@@ -14,7 +14,8 @@ import {
 } from "../api/types";
 import { StatusBadge } from "../components/Badges";
 import Modal from "../components/Modal";
-import { buttonDanger, buttonPrimary, buttonSecondary, cardClass, inputClass, labelClass } from "../components/ui";
+import { buttonDanger, buttonPrimary, buttonSecondary, cardClass, inputClass, labelClass, selectClass } from "../components/ui";
+import DateField from "../components/DateField";
 
 const trainingTypes: TrainingType[] = [
   "INDUCTION",
@@ -64,7 +65,7 @@ function CourseForm({ sites, onSubmit, onCancel }: {
     <form onSubmit={handleSubmit} className="space-y-4">
       <div>
         <label className={labelClass}>{t("common.site")}</label>
-        <select className={inputClass} value={siteId} onChange={(e) => setSiteId(e.target.value)}>
+        <select className={selectClass} value={siteId} onChange={(e) => setSiteId(e.target.value)}>
           <option value="">{t("documents.companyWide")}</option>
           {sites.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
         </select>
@@ -76,7 +77,7 @@ function CourseForm({ sites, onSubmit, onCancel }: {
         </div>
         <div>
           <label className={labelClass}>{t("workforce.training.trainingType")}</label>
-          <select className={inputClass} value={courseType} onChange={(e) => setCourseType(e.target.value as TrainingType)}>
+          <select className={selectClass} value={courseType} onChange={(e) => setCourseType(e.target.value as TrainingType)}>
             {trainingTypes.map((tt) => <option key={tt} value={tt}>{t(`workforce.training.types.${tt}`)}</option>)}
           </select>
         </div>
@@ -130,13 +131,13 @@ function SessionForm({ courses, onSubmit, onCancel }: {
     <form onSubmit={handleSubmit} className="space-y-4">
       <div>
         <label className={labelClass}>{t("trainingLms.course")}</label>
-        <select className={inputClass} value={courseId} onChange={(e) => setCourseId(e.target.value)}>
+        <select className={selectClass} value={courseId} onChange={(e) => setCourseId(e.target.value)}>
           {courses.map((c) => <option key={c.id} value={c.id}>{c.courseName}</option>)}
         </select>
       </div>
       <div>
         <label className={labelClass}>{t("trainingLms.scheduledDate")}</label>
-        <input className={inputClass} type="date" value={scheduledDate} onChange={(e) => setScheduledDate(e.target.value)} required />
+        <DateField value={scheduledDate} onChange={setScheduledDate} required />
       </div>
       <div className="grid grid-cols-2 gap-3">
         <div>
@@ -220,7 +221,7 @@ function EnrollmentsModal({ session, workers, onClose, onChanged }: {
           <form onSubmit={enroll} className="flex gap-2 items-end">
             <div className="flex-1">
               <label className={labelClass}>{t("workers.title")}</label>
-              <select className={inputClass} value={workerId} onChange={(e) => setWorkerId(e.target.value)}>
+              <select className={selectClass} value={workerId} onChange={(e) => setWorkerId(e.target.value)}>
                 <option value="">—</option>
                 {availableWorkers.map((w) => <option key={w.id} value={w.id}>{w.name}</option>)}
               </select>

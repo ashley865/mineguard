@@ -4,7 +4,7 @@ import { api } from "../api/client";
 import { useAuth } from "../context/AuthContext";
 import { Site, WeatherCondition, WeatherReading } from "../api/types";
 import Modal from "../components/Modal";
-import { buttonDanger, buttonPrimary, buttonSecondary, cardClass, inputClass, labelClass } from "../components/ui";
+import { buttonDanger, buttonPrimary, buttonSecondary, cardClass, inputClass, labelClass, selectClass } from "../components/ui";
 
 const conditions: WeatherCondition[] = ["CLEAR", "CLOUDY", "RAIN", "STORM", "FOG", "HIGH_WIND"];
 
@@ -50,13 +50,13 @@ function ReadingForm({ sites, onSubmit, onCancel }: {
       <div className="grid grid-cols-2 gap-3">
         <div>
           <label className={labelClass}>{t("common.site")}</label>
-          <select className={inputClass} value={siteId} onChange={(e) => setSiteId(e.target.value)}>
+          <select className={selectClass} value={siteId} onChange={(e) => setSiteId(e.target.value)}>
             {sites.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
           </select>
         </div>
         <div>
           <label className={labelClass}>{t("weather.condition")}</label>
-          <select className={inputClass} value={condition} onChange={(e) => setCondition(e.target.value as WeatherCondition)}>
+          <select className={selectClass} value={condition} onChange={(e) => setCondition(e.target.value as WeatherCondition)}>
             {conditions.map((c) => <option key={c} value={c}>{t(`weather.conditions.${c}`)}</option>)}
           </select>
         </div>

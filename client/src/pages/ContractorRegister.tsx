@@ -3,6 +3,7 @@ import { useParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { api } from "../api/client";
 import { buttonPrimary, cardClass, inputClass, labelClass } from "../components/ui";
+import DateField from "../components/DateField";
 
 export default function ContractorRegister() {
   const { t } = useTranslation();
@@ -121,21 +122,21 @@ export default function ContractorRegister() {
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className={labelClass}>{t("contractors.contractStartDate")}</label>
-              <input className={inputClass} type="date" value={contractStartDate} onChange={(e) => setContractStartDate(e.target.value)} required />
+              <DateField value={contractStartDate} onChange={setContractStartDate} required />
             </div>
             <div>
               <label className={labelClass}>{t("contractors.contractEndDate")}</label>
-              <input className={inputClass} type="date" value={contractEndDate} onChange={(e) => setContractEndDate(e.target.value)} required />
+              <DateField value={contractEndDate} onChange={setContractEndDate} required />
             </div>
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className={labelClass}>{t("contractors.goodStandingExpiry")}</label>
-              <input className={inputClass} type="date" value={goodStandingExpiry} onChange={(e) => setGoodStandingExpiry(e.target.value)} />
+              <DateField value={goodStandingExpiry} onChange={setGoodStandingExpiry} />
             </div>
             <div>
               <label className={labelClass}>{t("contractors.insuranceExpiry")}</label>
-              <input className={inputClass} type="date" value={insuranceExpiry} onChange={(e) => setInsuranceExpiry(e.target.value)} />
+              <DateField value={insuranceExpiry} onChange={setInsuranceExpiry} />
             </div>
           </div>
 

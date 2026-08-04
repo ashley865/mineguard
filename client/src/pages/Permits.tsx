@@ -5,7 +5,8 @@ import { useAuth } from "../context/AuthContext";
 import { Permit, PermitStatus, PermitType, Site } from "../api/types";
 import { StatusBadge } from "../components/Badges";
 import Modal from "../components/Modal";
-import { buttonDanger, buttonPrimary, buttonSecondary, cardClass, inputClass, labelClass } from "../components/ui";
+import { buttonDanger, buttonPrimary, buttonSecondary, cardClass, inputClass, labelClass, selectClass } from "../components/ui";
+import DateField from "../components/DateField";
 
 const permitTypes: PermitType[] = [
   "MINING_RIGHT",
@@ -67,7 +68,7 @@ function PermitForm({ sites, initial, onSubmit, onCancel }: {
         </div>
         <div>
           <label className={labelClass}>{t("permits.type")}</label>
-          <select className={inputClass} value={type} onChange={(e) => setType(e.target.value as PermitType)}>
+          <select className={selectClass} value={type} onChange={(e) => setType(e.target.value as PermitType)}>
             {permitTypes.map((pt) => <option key={pt} value={pt}>{t(`permits.types.${pt}`)}</option>)}
           </select>
         </div>
@@ -83,23 +84,23 @@ function PermitForm({ sites, initial, onSubmit, onCancel }: {
       <div className="grid grid-cols-2 gap-3">
         <div>
           <label className={labelClass}>{t("permits.issueDate")}</label>
-          <input className={inputClass} type="date" value={issueDate} onChange={(e) => setIssueDate(e.target.value)} required />
+          <DateField value={issueDate} onChange={setIssueDate} required />
         </div>
         <div>
           <label className={labelClass}>{t("permits.expiryDate")}</label>
-          <input className={inputClass} type="date" value={expiryDate} onChange={(e) => setExpiryDate(e.target.value)} required />
+          <DateField value={expiryDate} onChange={setExpiryDate} required />
         </div>
       </div>
       <div className="grid grid-cols-2 gap-3">
         <div>
           <label className={labelClass}>{t("common.status")}</label>
-          <select className={inputClass} value={status} onChange={(e) => setStatus(e.target.value as PermitStatus)}>
+          <select className={selectClass} value={status} onChange={(e) => setStatus(e.target.value as PermitStatus)}>
             {permitStatuses.map((s) => <option key={s} value={s}>{t(`badges.status.${s}`)}</option>)}
           </select>
         </div>
         <div>
           <label className={labelClass}>{t("common.site")}</label>
-          <select className={inputClass} value={siteId} onChange={(e) => setSiteId(e.target.value)}>
+          <select className={selectClass} value={siteId} onChange={(e) => setSiteId(e.target.value)}>
             {sites.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
           </select>
         </div>

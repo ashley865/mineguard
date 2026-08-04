@@ -4,6 +4,8 @@ import { useTranslation } from "react-i18next";
 import QRCode from "qrcode";
 import { api } from "../api/client";
 import { buttonPrimary, cardClass, inputClass, labelClass } from "../components/ui";
+import { isValidIdOrPassport } from "../lib/saId";
+import FileDropzone from "../components/FileDropzone";
 
 export default function VisitorCheckIn() {
   const { t } = useTranslation();
@@ -44,6 +46,10 @@ export default function VisitorCheckIn() {
 
     if (!inductionAcknowledged || !popiaConsentAccepted || !indemnityAccepted) {
       setError(t("visitorCheckin.declarationsRequired"));
+      return;
+    }
+    if (!isValidIdOrPassport(idNumber)) {
+      setError(t("visitorCheckin.idNumberInvalid"));
       return;
     }
 
@@ -156,14 +162,7 @@ export default function VisitorCheckIn() {
           </div>
           <div>
             <label className={labelClass}>{t("visitorCheckin.documents")}</label>
-            <input
-              className={inputClass}
-              type="file"
-              multiple
-              accept="image/*,.pdf"
-              onChange={(e) => setDocuments(e.target.files)}
-            />
-            <p className="text-xs text-mine-400 mt-1">{t("visitorCheckin.documentsHint")}</p>
+            <FileDropzone multiple accept="image/*,.pdf" hint={t("visitorCheckin.documentsHint")} onFiles={setDocuments} />
           </div>
 
           <div className="space-y-2 border border-mine-800 rounded-md p-3 bg-mine-900/40">
