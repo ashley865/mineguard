@@ -201,6 +201,10 @@ model User {
   environmentalReadings  EnvironmentalReading[]  @relation("EnvironmentalRecordedBy")
   evacuationDrills       EvacuationDrill[]       @relation("DrillConductedBy")
   shiftRosters           ShiftRoster[]           @relation("RosterCreatedBy")
+  leaveApprovals         LeaveRequest[]          @relation("LeaveApprovedBy")
+  payslipsUploaded       Payslip[]               @relation("PayslipUploadedBy")
+  poRequests             PurchaseOrder[]         @relation("PORequestedBy")
+  poApprovals            PurchaseOrder[]         @relation("POApprovedBy")
 }
 
 model Site {
@@ -244,6 +248,7 @@ model Site {
   evacuationDrills     EvacuationDrill[]
   shiftRosters         ShiftRoster[]
   trainingCourses      TrainingCourse[]
+  purchaseOrders       PurchaseOrder[]
 }
 
 model Zone {
@@ -344,6 +349,8 @@ model Worker {
   attendance      WorkerAttendance[]
   rosterAssignments   RosterAssignment[]
   trainingEnrollments TrainingEnrollment[]
+  leaveRequests   LeaveRequest[]
+  payslips        Payslip[]
 
   createdAt DateTime @default(now())
 }
@@ -1467,4 +1474,124 @@ model TrainingEnrollment {
   createdAt DateTime @default(now())
 
   @@unique([sessionId, workerId])
+}
+
+enum LeaveType {
+  ANNUAL
+  SICK
+  FAMILY_RESPONSIBILITY
+  UNPAID
+  STUDY
+  MATERNITY_PATERNITY
+  OTHER
+}
+
+enum LeaveStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+model LeaveRequest {
+  id            String      @id @default(cuid())
+  workerId      String
+  worker        Worker      @relation(fields: [workerId], references: [id], onDelete: Cascade)
+  leaveType     LeaveType
+  startDate     DateTime
+  endDate       DateTime
+  daysRequested Float
+  reason        String?
+  status        LeaveStatus @default(PENDING)
+  approvedById  String?
+  approvedBy    User?       @relation("LeaveApprovedBy", fields: [approvedById], references: [id], onDelete: SetNull)
+  approvedAt    DateTime?
+
+  createdAt DateTime @default(now())
+}
+
+model Payslip {
+  id             String   @id @default(cuid())
+  workerId       String
+  worker         Worker   @relation(fields: [workerId], references: [id], onDelete: Cascade)
+  payPeriodStart DateTime
+  payPeriodEnd   DateTime
+  grossPay       Float
+  deductions     Float
+  netPay         Float
+  issuedAt       DateTime @default(now())
+  fileName       String?
+  fileMimeType   String?
+  fileSize       Int?
+  fileData       Bytes?
+  uploadedById   String?
+  uploadedBy     User?    @relation("PayslipUploadedBy", fields: [uploadedById], references: [id], onDelete: SetNull)
+
+  createdAt DateTime @default(now())
+}
+
+enum SupplierStatus {
+  ACTIVE
+  INACTIVE
+  BLACKLISTED
+}
+
+model Supplier {
+  id                 String         @id @default(cuid())
+  name               String
+  registrationNumber String?
+  contactName        String?
+  contactEmail       String?
+  contactPhone       String?
+  category           String?
+  bbbeeLevel         String?
+  status             SupplierStatus @default(ACTIVE)
+
+  purchaseOrders PurchaseOrder[]
+
+  createdAt DateTime @default(now())
+}
+
+enum PurchaseOrderStatus {
+  DRAFT
+  SUBMITTED
+  APPROVED
+  ORDERED
+  RECEIVED
+  CANCELLED
+}
+
+model PurchaseOrder {
+  id                   String              @id @default(cuid())
+  siteId               String
+  site                 Site                @relation(fields: [siteId], references: [id], onDelete: Cascade)
+  supplierId           String
+  supplier             Supplier            @relation(fields: [supplierId], references: [id], onDelete: Cascade)
+  orderNumber          String
+  description          String
+  totalAmount          Float
+  currency             String              @default("ZAR")
+  status               PurchaseOrderStatus @default(DRAFT)
+  requestedById        String?
+  requestedBy          User?               @relation("PORequestedBy", fields: [requestedById], references: [id], onDelete: SetNull)
+  approvedById         String?
+  approvedBy           User?               @relation("POApprovedBy", fields: [approvedById], references: [id], onDelete: SetNull)
+  approvedAt           DateTime?
+  orderDate            DateTime            @default(now())
+  expectedDeliveryDate DateTime?
+
+  lines PurchaseOrderLine[]
+
+  createdAt DateTime @default(now())
+}
+
+model PurchaseOrderLine {
+  id              String        @id @default(cuid())
+  orderId         String
+  order           PurchaseOrder @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  itemDescription String
+  quantity        Float
+  unitPrice       Float
+  lineTotal       Float
+
+  createdAt DateTime @default(now())
 }

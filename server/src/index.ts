@@ -49,6 +49,8 @@ import environmentalRoutes from "./routes/environmental";
 import emergencyRoutes from "./routes/emergency";
 import rosterRoutes from "./routes/roster";
 import trainingLmsRoutes from "./routes/trainingLms";
+import payrollRoutes from "./routes/payroll";
+import procurementRoutes from "./routes/procurement";
 import { startSimulator } from "./services/simulator";
 import { scanCompliance } from "./services/complianceScanner";
 
@@ -112,6 +114,8 @@ app.use("/api/environmental", environmentalRoutes);
 app.use("/api/emergency", emergencyRoutes);
 app.use("/api/roster", rosterRoutes);
 app.use("/api/training-lms", trainingLmsRoutes);
+app.use("/api/payroll", payrollRoutes);
+app.use("/api/procurement", procurementRoutes);
 
 app.use((err: any, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
   console.error(err);

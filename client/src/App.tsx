@@ -47,6 +47,8 @@ import EnvironmentalMonitoring from "./pages/EnvironmentalMonitoring";
 import EmergencyResponse from "./pages/EmergencyResponse";
 import ShiftRostering from "./pages/ShiftRostering";
 import TrainingLms from "./pages/TrainingLms";
+import PayrollLeave from "./pages/PayrollLeave";
+import Procurement from "./pages/Procurement";
 
 function HomeRoute() {
   const { user } = useAuth();
@@ -104,6 +106,8 @@ export default function App() {
         <Route path="/emergency" element={<ModuleRoute path="/emergency"><EmergencyResponse /></ModuleRoute>} />
         <Route path="/roster" element={<ModuleRoute path="/roster"><ShiftRostering /></ModuleRoute>} />
         <Route path="/training-lms" element={<ModuleRoute path="/training-lms"><TrainingLms /></ModuleRoute>} />
+        <Route path="/payroll" element={<ModuleRoute path="/payroll"><PayrollLeave /></ModuleRoute>} />
+        <Route path="/procurement" element={<ModuleRoute path="/procurement"><Procurement /></ModuleRoute>} />
         <Route path="/messages" element={<Messages />} />
         <Route path="/settings" element={<Settings />} />
       </Route>

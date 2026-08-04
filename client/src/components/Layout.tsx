@@ -54,6 +54,8 @@ export default function Layout() {
     { to: "/emergency", label: t("emergency.nav") },
     { to: "/roster", label: t("roster.nav") },
     { to: "/training-lms", label: t("trainingLms.nav") },
+    { to: "/payroll", label: t("payroll.nav") },
+    { to: "/procurement", label: t("procurement.nav") },
     { to: "/compliance", label: t("compliance.nav") },
     { to: "/permits", label: t("permits.nav") },
     { to: "/documents", label: t("documents.nav") },

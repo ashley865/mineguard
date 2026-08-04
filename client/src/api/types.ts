@@ -1069,3 +1069,83 @@ export interface TrainingEnrollment {
   completionDate?: string | null;
   createdAt: string;
 }
+
+export type LeaveType = "ANNUAL" | "SICK" | "FAMILY_RESPONSIBILITY" | "UNPAID" | "STUDY" | "MATERNITY_PATERNITY" | "OTHER";
+export type LeaveStatus = "PENDING" | "APPROVED" | "REJECTED";
+
+export interface LeaveRequest {
+  id: string;
+  workerId: string;
+  worker?: { id: string; name: string; employeeId: string; site?: { id: string; name: string } };
+  leaveType: LeaveType;
+  startDate: string;
+  endDate: string;
+  daysRequested: number;
+  reason?: string | null;
+  status: LeaveStatus;
+  approvedBy?: { id: string; name: string } | null;
+  approvedAt?: string | null;
+  createdAt: string;
+}
+
+export interface Payslip {
+  id: string;
+  workerId: string;
+  worker?: { id: string; name: string; employeeId: string };
+  payPeriodStart: string;
+  payPeriodEnd: string;
+  grossPay: number;
+  deductions: number;
+  netPay: number;
+  issuedAt: string;
+  fileName?: string | null;
+  fileMimeType?: string | null;
+  fileSize?: number | null;
+  uploadedBy?: { id: string; name: string } | null;
+  createdAt: string;
+}
+
+export type SupplierStatus = "ACTIVE" | "INACTIVE" | "BLACKLISTED";
+
+export interface Supplier {
+  id: string;
+  name: string;
+  registrationNumber?: string | null;
+  contactName?: string | null;
+  contactEmail?: string | null;
+  contactPhone?: string | null;
+  category?: string | null;
+  bbbeeLevel?: string | null;
+  status: SupplierStatus;
+  createdAt: string;
+}
+
+export type PurchaseOrderStatus = "DRAFT" | "SUBMITTED" | "APPROVED" | "ORDERED" | "RECEIVED" | "CANCELLED";
+
+export interface PurchaseOrderLine {
+  id: string;
+  itemDescription: string;
+  quantity: number;
+  unitPrice: number;
+  lineTotal: number;
+}
+
+export interface PurchaseOrder {
+  id: string;
+  siteId: string;
+  site?: { id: string; name: string };
+  supplierId: string;
+  supplier?: { id: string; name: string };
+  orderNumber: string;
+  description: string;
+  totalAmount: number;
+  currency: string;
+  status: PurchaseOrderStatus;
+  requestedBy?: { id: string; name: string } | null;
+  approvedBy?: { id: string; name: string } | null;
+  approvedAt?: string | null;
+  orderDate: string;
+  expectedDeliveryDate?: string | null;
+  lines: PurchaseOrderLine[];
+  createdAt: string;
+}
