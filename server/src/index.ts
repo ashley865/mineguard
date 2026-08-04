@@ -67,6 +67,10 @@ const io = new SocketServer(httpServer, {
   cors: { origin: clientOrigin },
 });
 app.set("io", io);
+// Render sits in front of the app behind a reverse proxy; without this, every
+// request appears to originate from the proxy's IP and per-IP rate limiting
+// (see middleware/rateLimit.ts) would be meaningless.
+app.set("trust proxy", 1);
 
 app.use(cors({ origin: clientOrigin }));
 app.use(express.json());

@@ -1,12 +1,13 @@
 import { Router } from "express";
 import crypto from "crypto";
 import bcrypt from "bcryptjs";
-import jwt from "jsonwebtoken";
 import multer from "multer";
 import { z } from "zod";
 import { prisma } from "../prisma";
 import { requireAuth, requireRole } from "../middleware/auth";
 import { imageFileFilter } from "../lib/uploadFilters";
+import { signAuthToken } from "../lib/jwt";
+import { authLimiter } from "../middleware/rateLimit";
 
 const router = Router();
 
@@ -34,12 +35,6 @@ const registerMineSchema = z.object({
   adminEmail: z.string().email(),
   adminPassword: z.string().min(8),
 });
-
-function signToken(userId: string, role: string) {
-  return jwt.sign({ userId, role }, process.env.JWT_SECRET as string, {
-    expiresIn: process.env.JWT_EXPIRES_IN || "7d",
-  } as jwt.SignOptions);
-}
 
 router.get("/search", async (req, res) => {
   const q = (req.query.q as string | undefined)?.trim();
@@ -129,7 +124,7 @@ router.get("/:id", async (req, res) => {
   res.json({ id: mine.id, name: mine.name, location: mine.location, hasLogo: !!mine.logoData });
 });
 
-router.post("/register", async (req, res) => {
+router.post("/register", authLimiter, async (req, res) => {
   const parsed = registerMineSchema.safeParse(req.body);
   if (!parsed.success) return res.status(400).json({ error: parsed.error.flatten() });
   const { mineName, location, registrationNumber, miningRightNumber, description, adminName, adminEmail, adminPassword } =
@@ -165,7 +160,7 @@ router.post("/register", async (req, res) => {
     },
   });
 
-  const token = signToken(user.id, user.role);
+  const token = signAuthToken(user.id);
   res.status(201).json({
     token,
     user: { id: user.id, email: user.email, name: user.name, role: user.role, mineId: mine.id },

@@ -1,10 +1,11 @@
 import { Router } from "express";
 import crypto from "crypto";
 import bcrypt from "bcryptjs";
-import jwt from "jsonwebtoken";
 import { z } from "zod";
 import { prisma } from "../prisma";
 import { requireAuth, requireRole } from "../middleware/auth";
+import { signAuthToken } from "../lib/jwt";
+import { authLimiter } from "../middleware/rateLimit";
 
 const router = Router();
 
@@ -33,12 +34,6 @@ const acceptInviteSchema = z.object({
   password: z.string().min(8),
 });
 
-function signToken(userId: string, role: string) {
-  return jwt.sign({ userId, role }, process.env.JWT_SECRET as string, {
-    expiresIn: process.env.JWT_EXPIRES_IN || "7d",
-  } as jwt.SignOptions);
-}
-
 const inviteSelect = {
   id: true,
   name: true,
@@ -63,7 +58,7 @@ router.get("/:id/info", async (req, res) => {
   res.json({ name: invite.name, email: invite.email, title: invite.title, mine: invite.mine });
 });
 
-router.post("/:id/accept", async (req, res) => {
+router.post("/:id/accept", authLimiter, async (req, res) => {
   const parsed = acceptInviteSchema.safeParse(req.body);
   if (!parsed.success) return res.status(400).json({ error: parsed.error.flatten() });
 
@@ -93,7 +88,7 @@ router.post("/:id/accept", async (req, res) => {
     data: { status: "ACCEPTED", acceptedAt: new Date(), acceptedUserId: user.id },
   });
 
-  const token = signToken(user.id, user.role);
+  const token = signAuthToken(user.id);
   res.status(201).json({
     token,
     user: { id: user.id, email: user.email, name: user.name, role: user.role, title: user.title, mineId: user.mineId },

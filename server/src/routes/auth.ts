@@ -1,11 +1,12 @@
 import { Router } from "express";
 import bcrypt from "bcryptjs";
-import jwt from "jsonwebtoken";
 import multer from "multer";
 import { z } from "zod";
 import { prisma } from "../prisma";
 import { requireAuth } from "../middleware/auth";
 import { imageFileFilter } from "../lib/uploadFilters";
+import { signAuthToken } from "../lib/jwt";
+import { authLimiter, passwordChangeLimiter } from "../middleware/rateLimit";
 
 const router = Router();
 
@@ -37,13 +38,7 @@ const changePasswordSchema = z.object({
   newPassword: z.string().min(8),
 });
 
-function signToken(userId: string, role: string) {
-  return jwt.sign({ userId, role }, process.env.JWT_SECRET as string, {
-    expiresIn: process.env.JWT_EXPIRES_IN || "7d",
-  } as jwt.SignOptions);
-}
-
-router.post("/register", async (req, res) => {
+router.post("/register", authLimiter, async (req, res) => {
   const parsed = registerSchema.safeParse(req.body);
   if (!parsed.success) {
     return res.status(400).json({ error: parsed.error.flatten() });
@@ -69,14 +64,14 @@ router.post("/register", async (req, res) => {
     data: { email, passwordHash, name, role: "ADMIN", mineId: mine.id },
   });
 
-  const token = signToken(user.id, user.role);
+  const token = signAuthToken(user.id);
   res.status(201).json({
     token,
     user: { id: user.id, email: user.email, name: user.name, role: user.role, title: user.title, mineId: user.mineId },
   });
 });
 
-router.post("/login", async (req, res) => {
+router.post("/login", authLimiter, async (req, res) => {
   const parsed = loginSchema.safeParse(req.body);
   if (!parsed.success) {
     return res.status(400).json({ error: parsed.error.flatten() });
@@ -92,7 +87,7 @@ router.post("/login", async (req, res) => {
     return res.status(401).json({ error: "Invalid email or password" });
   }
 
-  const token = signToken(user.id, user.role);
+  const token = signAuthToken(user.id);
   res.json({
     token,
     user: { id: user.id, email: user.email, name: user.name, role: user.role, title: user.title, mineId: user.mineId },
@@ -133,7 +128,7 @@ router.put("/me", requireAuth, async (req, res) => {
   });
 });
 
-router.post("/change-password", requireAuth, async (req, res) => {
+router.post("/change-password", requireAuth, passwordChangeLimiter, async (req, res) => {
   const parsed = changePasswordSchema.safeParse(req.body);
   if (!parsed.success) return res.status(400).json({ error: parsed.error.flatten() });
   const user = await prisma.user.findUnique({ where: { id: req.auth!.userId } });
@@ -162,9 +157,8 @@ router.get("/users/:id/photo", requireAuth, async (req, res) => {
 });
 
 router.get("/team", requireAuth, async (req, res) => {
-  const me = await prisma.user.findUnique({ where: { id: req.auth!.userId }, select: { mineId: true } });
   const users = await prisma.user.findMany({
-    where: { mineId: me?.mineId ?? undefined, role: { in: ["ADMIN", "EXECUTIVE"] } },
+    where: { mineId: req.auth!.mineId ?? undefined, role: { in: ["ADMIN", "EXECUTIVE"] } },
     select: {
       id: true,
       name: true,
