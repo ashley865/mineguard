@@ -145,7 +145,7 @@ router.delete("/:id", requireRole("ADMIN"), async (req, res) => {
 router.get("/vault/all", async (req, res) => {
   const mineId = requireMineId(req, res);
   if (!mineId) return;
-  const [documents, visitorDocs, buyerDocs] = await Promise.all([
+  const [documents, visitorDocs, buyerDocs, permitDocs, contractorDocs] = await Promise.all([
     prisma.document.findMany({
       where: { mineId },
       select: {
@@ -182,6 +182,32 @@ router.get("/vault/all", async (req, res) => {
         fileMimeType: true,
         fileSize: true,
         buyer: { select: { legalName: true } },
+        createdAt: true,
+      },
+    }),
+    prisma.permitDocument.findMany({
+      where: { permit: { site: { mineId } } },
+      select: {
+        id: true,
+        permitId: true,
+        docType: true,
+        fileName: true,
+        fileMimeType: true,
+        fileSize: true,
+        permit: { select: { permitNumber: true, site: { select: { id: true, name: true } } } },
+        createdAt: true,
+      },
+    }),
+    prisma.contractorDocument.findMany({
+      where: { contractor: { site: { mineId } } },
+      select: {
+        id: true,
+        contractorId: true,
+        docType: true,
+        fileName: true,
+        fileMimeType: true,
+        fileSize: true,
+        contractor: { select: { companyName: true, site: { select: { id: true, name: true } } } },
         createdAt: true,
       },
     }),
@@ -224,6 +250,32 @@ router.get("/vault/all", async (req, res) => {
       fileMimeType: d.fileMimeType,
       fileSize: d.fileSize,
       relatedTo: d.buyer.legalName,
+      uploadedBy: null,
+      createdAt: d.createdAt,
+    })),
+    ...permitDocs.map((d) => ({
+      id: d.id,
+      source: "PERMIT" as const,
+      parentId: d.permitId,
+      title: d.fileName,
+      category: d.docType,
+      fileName: d.fileName,
+      fileMimeType: d.fileMimeType,
+      fileSize: d.fileSize,
+      relatedTo: `${d.permit.permitNumber} · ${d.permit.site.name}`,
+      uploadedBy: null,
+      createdAt: d.createdAt,
+    })),
+    ...contractorDocs.map((d) => ({
+      id: d.id,
+      source: "CONTRACTOR" as const,
+      parentId: d.contractorId,
+      title: d.fileName,
+      category: d.docType,
+      fileName: d.fileName,
+      fileMimeType: d.fileMimeType,
+      fileSize: d.fileSize,
+      relatedTo: `${d.contractor.companyName} · ${d.contractor.site.name}`,
       uploadedBy: null,
       createdAt: d.createdAt,
     })),

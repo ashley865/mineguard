@@ -409,6 +409,17 @@ export type PermitType =
   | "OTHER";
 export type PermitStatus = "ACTIVE" | "PENDING_RENEWAL" | "EXPIRED" | "SUSPENDED" | "WITHDRAWN";
 
+export type PermitDocumentType = "PERMIT_CERTIFICATE" | "RENEWAL_APPROVAL" | "INSPECTION_REPORT" | "CORRESPONDENCE" | "OTHER";
+
+export interface PermitDocument {
+  id: string;
+  docType: PermitDocumentType;
+  fileName: string;
+  fileMimeType: string;
+  fileSize: number;
+  createdAt: string;
+}
+
 export interface Permit {
   id: string;
   permitNumber: string;
@@ -421,6 +432,7 @@ export interface Permit {
   conditions?: string | null;
   siteId: string;
   site?: { id: string; name: string };
+  documents: PermitDocument[];
 }
 
 export type CertificateType =
@@ -500,7 +512,7 @@ export interface MineDocument {
   createdAt: string;
 }
 
-export type VaultDocumentSource = "DOCUMENT" | "VISITOR" | "BUYER";
+export type VaultDocumentSource = "DOCUMENT" | "VISITOR" | "BUYER" | "PERMIT" | "CONTRACTOR";
 
 export interface VaultDocument {
   id: string;
@@ -618,6 +630,17 @@ export type ExportableEntity = (typeof exportableEntities)[number];
 
 export type ContractorStatus = "ACTIVE" | "EXPIRED" | "SUSPENDED" | "TERMINATED";
 
+export type ContractorDocumentType = "INSURANCE_CERTIFICATE" | "GOOD_STANDING_CERTIFICATE" | "CONTRACT_AGREEMENT" | "SAFETY_FILE" | "OTHER";
+
+export interface ContractorDocument {
+  id: string;
+  docType: ContractorDocumentType;
+  fileName: string;
+  fileMimeType: string;
+  fileSize: number;
+  createdAt: string;
+}
+
 export interface Contractor {
   id: string;
   companyName: string;
@@ -633,6 +656,7 @@ export interface Contractor {
   status: ContractorStatus;
   siteId: string;
   site?: { id: string; name: string };
+  documents: ContractorDocument[];
 }
 
 export interface ExecutiveSiteAssignment {

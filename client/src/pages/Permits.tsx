@@ -2,11 +2,21 @@ import { FormEvent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { api } from "../api/client";
 import { useAuth } from "../context/AuthContext";
-import { Permit, PermitStatus, PermitType, Site } from "../api/types";
+import { Permit, PermitDocumentType, PermitStatus, PermitType, Site } from "../api/types";
 import { StatusBadge } from "../components/Badges";
 import Modal from "../components/Modal";
+import EntityDocumentsPanel from "../components/EntityDocumentsPanel";
+import PasswordConfirmModal from "../components/PasswordConfirmModal";
 import { buttonDanger, buttonPrimary, buttonSecondary, cardClass, inputClass, labelClass, selectClass } from "../components/ui";
 import DateField from "../components/DateField";
+
+const permitDocTypes: PermitDocumentType[] = [
+  "PERMIT_CERTIFICATE",
+  "RENEWAL_APPROVAL",
+  "INSPECTION_REPORT",
+  "CORRESPONDENCE",
+  "OTHER",
+];
 
 const permitTypes: PermitType[] = [
   "MINING_RIGHT",
@@ -117,14 +127,79 @@ function PermitForm({ sites, initial, onSubmit, onCancel }: {
   );
 }
 
+function PermitDocumentsModal({ permit, canUpload, canDelete, onClose, onChanged }: {
+  permit: Permit;
+  canUpload: boolean;
+  canDelete: boolean;
+  onClose: () => void;
+  onChanged: () => Promise<void>;
+}) {
+  const { t } = useTranslation();
+  const [deleteTarget, setDeleteTarget] = useState<{ id: string; fileName: string } | null>(null);
+
+  async function upload(file: File, docType: string) {
+    const form = new FormData();
+    form.append("file", file);
+    form.append("docType", docType);
+    await api.post(`/permits/${permit.id}/documents`, form, { headers: { "Content-Type": "multipart/form-data" } });
+    await onChanged();
+  }
+
+  async function download(doc: { id: string; fileName: string }) {
+    const res = await api.get(`/permits/${permit.id}/documents/${doc.id}/download`, { responseType: "blob" });
+    const url = window.URL.createObjectURL(res.data);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = doc.fileName;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    window.URL.revokeObjectURL(url);
+  }
+
+  async function remove(password: string) {
+    if (!deleteTarget) return;
+    await api.delete(`/permits/${permit.id}/documents/${deleteTarget.id}`, { data: { password } });
+    setDeleteTarget(null);
+    await onChanged();
+  }
+
+  return (
+    <>
+      <Modal title={t("permits.documentsTitle", { number: permit.permitNumber })} onClose={onClose}>
+        <EntityDocumentsPanel
+          documents={permit.documents}
+          docTypeOptions={permitDocTypes}
+          docTypeI18nPrefix="documents.categoryLabels.PERMIT"
+          onUpload={upload}
+          onDownload={download}
+          onDelete={canDelete ? (doc) => setDeleteTarget(doc) : undefined}
+          canUpload={canUpload}
+        />
+      </Modal>
+      {deleteTarget && (
+        <PasswordConfirmModal
+          title={t("documents.vault.deleteTitle")}
+          hint={t("documents.vault.deleteHint", { name: deleteTarget.fileName })}
+          onConfirm={remove}
+          onClose={() => setDeleteTarget(null)}
+        />
+      )}
+    </>
+  );
+}
+
 export default function Permits() {
   const { t } = useTranslation();
   const { user } = useAuth();
   const canEdit = user?.role === "ADMIN" || user?.role === "SUPERVISOR" || user?.role === "EXECUTIVE";
+  const isAdmin = user?.role === "ADMIN";
   const [items, setItems] = useState<Permit[]>([]);
   const [sites, setSites] = useState<Site[]>([]);
   const [loading, setLoading] = useState(true);
   const [modal, setModal] = useState<null | "create" | Permit>(null);
+  const [docsPermitId, setDocsPermitId] = useState<string | null>(null);
+  const docsPermit = items.find((i) => i.id === docsPermitId) ?? null;
 
   async function load() {
     setLoading(true);
@@ -191,12 +266,17 @@ export default function Permits() {
                 <td className="px-4 py-2 text-mine-300">{new Date(item.expiryDate).toLocaleDateString()}</td>
                 <td className="px-4 py-2"><StatusBadge status={item.status} /></td>
                 <td className="px-4 py-2 text-right">
-                  {canEdit && (
-                    <div className="flex justify-end gap-2">
-                      <button className="text-xs text-mine-300 hover:text-mine-50" onClick={() => setModal(item)}>{t("common.edit")}</button>
-                      <button className={buttonDanger} onClick={() => remove(item.id)}>{t("common.delete")}</button>
-                    </div>
-                  )}
+                  <div className="flex justify-end gap-2">
+                    <button className="text-xs text-mine-300 hover:text-mine-50" onClick={() => setDocsPermitId(item.id)}>
+                      {t("permits.documents", { count: item.documents.length })}
+                    </button>
+                    {canEdit && (
+                      <>
+                        <button className="text-xs text-mine-300 hover:text-mine-50" onClick={() => setModal(item)}>{t("common.edit")}</button>
+                        <button className={buttonDanger} onClick={() => remove(item.id)}>{t("common.delete")}</button>
+                      </>
+                    )}
+                  </div>
                 </td>
               </tr>
             ))}
@@ -216,6 +296,16 @@ export default function Permits() {
             onCancel={() => setModal(null)}
           />
         </Modal>
+      )}
+
+      {docsPermit && (
+        <PermitDocumentsModal
+          permit={docsPermit}
+          canUpload={canEdit}
+          canDelete={isAdmin}
+          onClose={() => setDocsPermitId(null)}
+          onChanged={load}
+        />
       )}
     </div>
   );

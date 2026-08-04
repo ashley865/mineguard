@@ -592,7 +592,9 @@
       "EXPLOSIVES_LICENSE": "Plofstoflisensie",
       "MINE_WORKS_PROGRAMME": "Mynwerkeprogram",
       "OTHER": "Ander"
-    }
+    },
+    "documents": "Dokumente ({{count}})",
+    "documentsTitle": "Dokumente — {{number}}"
   },
   "workforce": {
     "nav": "Arbeidsmagbestuur",
@@ -707,7 +709,9 @@
       "sources": {
         "DOCUMENT": "Beheerde Dokument",
         "VISITOR": "Besoeker-oplaai",
-        "BUYER": "Koper-oplaai"
+        "BUYER": "Koper-oplaai",
+        "PERMIT": "Permitdokument",
+        "CONTRACTOR": "Kontrakteurdokument"
       },
       "colFile": "Lêer",
       "colSource": "Bron",
@@ -720,7 +724,41 @@
       "deleteTitle": "Bevestig skrapping",
       "deleteHint": "Om \"{{name}}\" te skrap is permanent. Voer jou wagwoord in om te bevestig.",
       "confirmPassword": "Jou wagwoord",
-      "deleteError": "Kon nie hierdie dokument skrap nie"
+      "deleteError": "Kon nie hierdie dokument skrap nie",
+      "colCategory": "Kategorie"
+    },
+    "categoryLabels": {
+      "VISITOR": {
+        "ID_DOCUMENT": "ID-dokument",
+        "MEDICAL_CERTIFICATE": "Mediese Sertifikaat",
+        "INDUCTION_ACKNOWLEDGEMENT": "Induksie-erkenning",
+        "OTHER": "Ander"
+      },
+      "BUYER": {
+        "ID_OR_REGISTRATION": "ID / Registrasie",
+        "PROOF_OF_ADDRESS": "Adresbewys",
+        "DEALER_LICENSE": "Handelaarslisensie",
+        "TAX_CLEARANCE": "Belastingklaring",
+        "OTHER": "Ander"
+      },
+      "PERMIT": {
+        "PERMIT_CERTIFICATE": "Permitsertifikaat",
+        "RENEWAL_APPROVAL": "Hernuwingsgoedkeuring",
+        "INSPECTION_REPORT": "Inspeksieverslag",
+        "CORRESPONDENCE": "Korrespondensie",
+        "OTHER": "Ander"
+      },
+      "CONTRACTOR": {
+        "INSURANCE_CERTIFICATE": "Versekeringsertifikaat",
+        "GOOD_STANDING_CERTIFICATE": "Sertifikaat van Goeie Rekord",
+        "CONTRACT_AGREEMENT": "Kontrakooreenkoms",
+        "SAFETY_FILE": "Veiligheidslêer",
+        "OTHER": "Ander"
+      }
+    },
+    "entityPanel": {
+      "noneYet": "Nog geen dokumente opgelaai nie.",
+      "docType": "Dokumenttipe"
     }
   },
   "inspection": {
@@ -859,7 +897,9 @@
     "loading": "Laai tans…",
     "shareLink": "Deel Registrasieskakel",
     "shareTitle": "Kontrakteur Self-Registrasie",
-    "shareHint": "Deel hierdie skakel of QR-kode met 'n kontrakteur sodat hul maatskappy self vir hierdie terrein kan registreer."
+    "shareHint": "Deel hierdie skakel of QR-kode met 'n kontrakteur sodat hul maatskappy self vir hierdie terrein kan registreer.",
+    "documents": "Dokumente ({{count}})",
+    "documentsTitle": "Dokumente — {{name}}"
   },
   "contractorRegister": {
     "title": "Kontrakteurregistrasie",
@@ -1472,7 +1512,11 @@
     "triggeredBy": "Geaktiveer deur {{name}}",
     "triggeredAt": "Geaktiveer",
     "cancelEvacuation": "Kanselleer Evakuasie",
-    "confirmCancelEvacuation": "Kanselleer hierdie evakuasie? Elke gekoppelde skerm sal skoongemaak word."
+    "confirmCancelEvacuation": "Kanselleer hierdie evakuasie? Elke gekoppelde skerm sal skoongemaak word.",
+    "deactivateEvacuation": "Deaktiveer Evakuasie",
+    "deactivateEvacuationTitle": "Deaktiveer Aktiewe Evakuasies",
+    "sitesAlreadyEvacuatingHint": "Myne met 'n aktiewe evakuasie word van hierdie lys weggesteek. Deaktiveer dit eers om 'n nuwe een vir daardie myn te aktiveer.",
+    "allSitesEvacuating": "Elke myn het reeds 'n aktiewe evakuasie."
   },
   "roster": {
     "nav": "Skofrooster",

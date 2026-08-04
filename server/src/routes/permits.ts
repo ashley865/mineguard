@@ -1,10 +1,36 @@
 import { Router } from "express";
+import multer from "multer";
 import { z } from "zod";
 import { prisma } from "../prisma";
 import { requireAuth, requireRole } from "../middleware/auth";
 import { requireMineId } from "../lib/mineScope";
+import { documentFileFilter } from "../lib/uploadFilters";
+import { verifyAdminPassword } from "../lib/verifyPassword";
 
 const router = Router();
+
+const upload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 10 * 1024 * 1024 },
+  fileFilter: documentFileFilter,
+});
+
+const documentSelect = {
+  id: true,
+  docType: true,
+  fileName: true,
+  fileMimeType: true,
+  fileSize: true,
+  createdAt: true,
+} as const;
+
+const permitDocTypeEnum = z.enum([
+  "PERMIT_CERTIFICATE",
+  "RENEWAL_APPROVAL",
+  "INSPECTION_REPORT",
+  "CORRESPONDENCE",
+  "OTHER",
+]);
 
 const permitSchema = z.object({
   permitNumber: z.string().min(1),
@@ -36,7 +62,7 @@ router.get("/", async (req, res) => {
   const siteId = req.query.siteId as string | undefined;
   const items = await prisma.permit.findMany({
     where: { site: { mineId }, siteId: siteId || undefined },
-    include: { site: { select: { id: true, name: true } } },
+    include: { site: { select: { id: true, name: true } }, documents: { select: documentSelect, orderBy: { createdAt: "desc" } } },
     orderBy: { expiryDate: "asc" },
   });
   res.json(items);
@@ -70,6 +96,54 @@ router.delete("/:id", requireRole("ADMIN", "EXECUTIVE"), async (req, res) => {
   const existing = await prisma.permit.findFirst({ where: { id: req.params.id, site: { mineId } } });
   if (!existing) return res.status(404).json({ error: "Permit not found" });
   await prisma.permit.delete({ where: { id: existing.id } });
+  res.status(204).send();
+});
+
+router.post("/:id/documents", requireRole("ADMIN", "SUPERVISOR", "EXECUTIVE"), upload.single("file"), async (req, res) => {
+  const mineId = requireMineId(req, res);
+  if (!mineId) return;
+  if (!req.file) return res.status(400).json({ error: "A file is required" });
+  const permit = await prisma.permit.findFirst({ where: { id: req.params.id, site: { mineId } } });
+  if (!permit) return res.status(404).json({ error: "Permit not found" });
+  const docTypeParsed = permitDocTypeEnum.safeParse(req.body?.docType);
+  const document = await prisma.permitDocument.create({
+    data: {
+      permitId: permit.id,
+      docType: docTypeParsed.success ? docTypeParsed.data : "OTHER",
+      fileName: req.file.originalname,
+      fileMimeType: req.file.mimetype,
+      fileSize: req.file.size,
+      fileData: Uint8Array.from(req.file.buffer),
+    },
+    select: documentSelect,
+  });
+  res.status(201).json(document);
+});
+
+router.get("/:id/documents/:docId/download", async (req, res) => {
+  const mineId = requireMineId(req, res);
+  if (!mineId) return;
+  const doc = await prisma.permitDocument.findFirst({
+    where: { id: req.params.docId, permitId: req.params.id, permit: { site: { mineId } } },
+  });
+  if (!doc) return res.status(404).json({ error: "Document not found" });
+  res.setHeader("Content-Type", doc.fileMimeType);
+  res.setHeader("Content-Disposition", `attachment; filename="${encodeURIComponent(doc.fileName)}"`);
+  res.send(Buffer.from(doc.fileData));
+});
+
+// Deleting a permit document is irreversible, so it requires the ADMIN role plus
+// re-confirming their password, not just a valid session token.
+router.delete("/:id/documents/:docId", requireRole("ADMIN"), async (req, res) => {
+  const mineId = requireMineId(req, res);
+  if (!mineId) return;
+  const passwordOk = await verifyAdminPassword(req.auth!.userId, req.body?.password);
+  if (!passwordOk) return res.status(401).json({ error: "Incorrect password" });
+  const doc = await prisma.permitDocument.findFirst({
+    where: { id: req.params.docId, permitId: req.params.id, permit: { site: { mineId } } },
+  });
+  if (!doc) return res.status(404).json({ error: "Document not found" });
+  await prisma.permitDocument.delete({ where: { id: doc.id } });
   res.status(204).send();
 });
 

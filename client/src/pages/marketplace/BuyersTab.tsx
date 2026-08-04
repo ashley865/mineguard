@@ -1,12 +1,14 @@
 import { FormEvent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { api } from "../../api/client";
-import { Buyer, BuyerStatus } from "../../api/types";
+import { Buyer, BuyerDocumentType, BuyerStatus } from "../../api/types";
 import { StatusBadge } from "../../components/Badges";
 import Modal from "../../components/Modal";
+import EntityDocumentsPanel from "../../components/EntityDocumentsPanel";
 import { buttonDanger, buttonPrimary, buttonSecondary, cardClass, inputClass } from "../../components/ui";
 
 const statusFilters: (BuyerStatus | "ALL")[] = ["ALL", "PENDING_REVIEW", "APPROVED", "REJECTED", "SUSPENDED"];
+const buyerDocTypes: BuyerDocumentType[] = ["ID_OR_REGISTRATION", "PROOF_OF_ADDRESS", "DEALER_LICENSE", "TAX_CLEARANCE", "OTHER"];
 
 function BuyerDetailModal({ buyer, onClose, onReviewed }: { buyer: Buyer; onClose: () => void; onReviewed: () => void }) {
   const { t } = useTranslation();
@@ -35,16 +37,24 @@ function BuyerDetailModal({ buyer, onClose, onReviewed }: { buyer: Buyer; onClos
     }
   }
 
-  async function download(docId: string, fileName: string) {
-    const res = await api.get(`/buyers/${buyer.id}/documents/${docId}/download`, { responseType: "blob" });
+  async function download(doc: { id: string; fileName: string }) {
+    const res = await api.get(`/buyers/${buyer.id}/documents/${doc.id}/download`, { responseType: "blob" });
     const url = window.URL.createObjectURL(res.data);
     const a = document.createElement("a");
     a.href = url;
-    a.download = fileName;
+    a.download = doc.fileName;
     document.body.appendChild(a);
     a.click();
     a.remove();
     window.URL.revokeObjectURL(url);
+  }
+
+  async function upload(file: File, docType: string) {
+    const form = new FormData();
+    form.append("file", file);
+    form.append("docType", docType);
+    await api.post(`/buyers/${buyer.id}/documents`, form, { headers: { "Content-Type": "multipart/form-data" } });
+    onReviewed();
   }
 
   return (
@@ -87,14 +97,14 @@ function BuyerDetailModal({ buyer, onClose, onReviewed }: { buyer: Buyer; onClos
 
         <div>
           <div className="text-xs font-semibold text-mine-300 uppercase mb-1">{t("buyerRegister.sectionDocuments")}</div>
-          {buyer.documents.length === 0 && <div className="text-xs text-mine-400">{t("marketplace.noDocuments")}</div>}
-          <div className="space-y-1">
-            {buyer.documents.map((d) => (
-              <button key={d.id} className="text-xs text-mine-300 hover:text-mine-50 hover:underline block" onClick={() => download(d.id, d.fileName)}>
-                {d.fileName}
-              </button>
-            ))}
-          </div>
+          <EntityDocumentsPanel
+            documents={buyer.documents}
+            docTypeOptions={buyerDocTypes}
+            docTypeI18nPrefix="documents.categoryLabels.BUYER"
+            onUpload={upload}
+            onDownload={download}
+            canUpload
+          />
         </div>
 
         {buyer.reviewNote && (
@@ -130,7 +140,8 @@ export default function BuyersTab() {
   const [items, setItems] = useState<Buyer[]>([]);
   const [loading, setLoading] = useState(true);
   const [statusFilter, setStatusFilter] = useState<(BuyerStatus | "ALL")>("PENDING_REVIEW");
-  const [selected, setSelected] = useState<Buyer | null>(null);
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const selected = items.find((b) => b.id === selectedId) ?? null;
 
   async function load() {
     setLoading(true);
@@ -182,7 +193,7 @@ export default function BuyersTab() {
                   <td className="px-4 py-2 text-mine-300">{t(`buyerRegister.types.${b.buyerType}`)}</td>
                   <td className="px-4 py-2"><StatusBadge status={b.status} /></td>
                   <td className="px-4 py-2 text-right">
-                    <button className="text-xs text-mine-300 hover:text-mine-50" onClick={() => setSelected(b)}>{t("marketplace.review")}</button>
+                    <button className="text-xs text-mine-300 hover:text-mine-50" onClick={() => setSelectedId(b.id)}>{t("marketplace.review")}</button>
                   </td>
                 </tr>
               ))}
@@ -194,7 +205,7 @@ export default function BuyersTab() {
         </div>
       )}
 
-      {selected && <BuyerDetailModal buyer={selected} onClose={() => setSelected(null)} onReviewed={load} />}
+      {selected && <BuyerDetailModal buyer={selected} onClose={() => setSelectedId(null)} onReviewed={load} />}
     </div>
   );
 }

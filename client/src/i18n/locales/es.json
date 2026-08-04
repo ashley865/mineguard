@@ -592,7 +592,9 @@
       "EXPLOSIVES_LICENSE": "Licencia de Explosivos",
       "MINE_WORKS_PROGRAMME": "Programa de Obras Mineras",
       "OTHER": "Otro"
-    }
+    },
+    "documents": "Documentos ({{count}})",
+    "documentsTitle": "Documentos — {{number}}"
   },
   "workforce": {
     "nav": "Gestión de Personal",
@@ -707,7 +709,9 @@
       "sources": {
         "DOCUMENT": "Documento Controlado",
         "VISITOR": "Carga de Visitante",
-        "BUYER": "Carga de Comprador"
+        "BUYER": "Carga de Comprador",
+        "PERMIT": "Documento de Permiso",
+        "CONTRACTOR": "Documento de Contratista"
       },
       "colFile": "Archivo",
       "colSource": "Origen",
@@ -720,7 +724,41 @@
       "deleteTitle": "Confirmar eliminación",
       "deleteHint": "Eliminar \"{{name}}\" es permanente. Ingresa tu contraseña para confirmar.",
       "confirmPassword": "Tu contraseña",
-      "deleteError": "No se pudo eliminar este documento"
+      "deleteError": "No se pudo eliminar este documento",
+      "colCategory": "Categoría"
+    },
+    "categoryLabels": {
+      "VISITOR": {
+        "ID_DOCUMENT": "Documento de Identidad",
+        "MEDICAL_CERTIFICATE": "Certificado Médico",
+        "INDUCTION_ACKNOWLEDGEMENT": "Confirmación de Inducción",
+        "OTHER": "Otro"
+      },
+      "BUYER": {
+        "ID_OR_REGISTRATION": "ID / Registro",
+        "PROOF_OF_ADDRESS": "Comprobante de Domicilio",
+        "DEALER_LICENSE": "Licencia de Comerciante",
+        "TAX_CLEARANCE": "Certificado Fiscal",
+        "OTHER": "Otro"
+      },
+      "PERMIT": {
+        "PERMIT_CERTIFICATE": "Certificado de Permiso",
+        "RENEWAL_APPROVAL": "Aprobación de Renovación",
+        "INSPECTION_REPORT": "Informe de Inspección",
+        "CORRESPONDENCE": "Correspondencia",
+        "OTHER": "Otro"
+      },
+      "CONTRACTOR": {
+        "INSURANCE_CERTIFICATE": "Certificado de Seguro",
+        "GOOD_STANDING_CERTIFICATE": "Certificado de Buena Reputación",
+        "CONTRACT_AGREEMENT": "Contrato",
+        "SAFETY_FILE": "Expediente de Seguridad",
+        "OTHER": "Otro"
+      }
+    },
+    "entityPanel": {
+      "noneYet": "Aún no se han subido documentos.",
+      "docType": "Tipo de documento"
     }
   },
   "inspection": {
@@ -859,7 +897,9 @@
     "loading": "Cargando…",
     "shareLink": "Compartir Enlace de Registro",
     "shareTitle": "Autorregistro de Contratistas",
-    "shareHint": "Comparte este enlace o código QR con un contratista para que su empresa pueda registrarse para este sitio."
+    "shareHint": "Comparte este enlace o código QR con un contratista para que su empresa pueda registrarse para este sitio.",
+    "documents": "Documentos ({{count}})",
+    "documentsTitle": "Documentos — {{name}}"
   },
   "contractorRegister": {
     "title": "Registro de Contratista",
@@ -1472,7 +1512,11 @@
     "triggeredBy": "Activado por {{name}}",
     "triggeredAt": "Activado",
     "cancelEvacuation": "Cancelar Evacuación",
-    "confirmCancelEvacuation": "¿Cancelar esta evacuación? Se despejarán todas las pantallas conectadas."
+    "confirmCancelEvacuation": "¿Cancelar esta evacuación? Se despejarán todas las pantallas conectadas.",
+    "deactivateEvacuation": "Desactivar Evacuación",
+    "deactivateEvacuationTitle": "Desactivar Evacuaciones Activas",
+    "sitesAlreadyEvacuatingHint": "Los sitios con una evacuación activa se ocultan de esta lista. Desactívala primero para activar una nueva para ese sitio.",
+    "allSitesEvacuating": "Todos los sitios ya tienen una evacuación activa."
   },
   "roster": {
     "nav": "Programación de Turnos",

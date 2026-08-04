@@ -565,6 +565,29 @@ model Permit {
   siteId           String
   site             Site         @relation(fields: [siteId], references: [id], onDelete: Cascade)
 
+  documents PermitDocument[]
+
+  createdAt DateTime @default(now())
+}
+
+enum PermitDocumentType {
+  PERMIT_CERTIFICATE
+  RENEWAL_APPROVAL
+  INSPECTION_REPORT
+  CORRESPONDENCE
+  OTHER
+}
+
+model PermitDocument {
+  id           String              @id @default(cuid())
+  permitId     String
+  permit       Permit              @relation(fields: [permitId], references: [id], onDelete: Cascade)
+  docType      PermitDocumentType  @default(OTHER)
+  fileName     String
+  fileMimeType String
+  fileSize     Int
+  fileData     Bytes
+
   createdAt DateTime @default(now())
 }
 
@@ -772,6 +795,28 @@ model Contractor {
   site                Site             @relation(fields: [siteId], references: [id], onDelete: Cascade)
 
   permitsToWork PermitToWork[]
+  documents     ContractorDocument[]
+
+  createdAt DateTime @default(now())
+}
+
+enum ContractorDocumentType {
+  INSURANCE_CERTIFICATE
+  GOOD_STANDING_CERTIFICATE
+  CONTRACT_AGREEMENT
+  SAFETY_FILE
+  OTHER
+}
+
+model ContractorDocument {
+  id           String                 @id @default(cuid())
+  contractorId String
+  contractor   Contractor             @relation(fields: [contractorId], references: [id], onDelete: Cascade)
+  docType      ContractorDocumentType @default(OTHER)
+  fileName     String
+  fileMimeType String
+  fileSize     Int
+  fileData     Bytes
 
   createdAt DateTime @default(now())
 }

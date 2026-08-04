@@ -14,10 +14,10 @@ body {
 
 @keyframes evac-blink {
   0%, 100% {
-    background-color: rgb(225 59 46 / 0.97);
+    background-color: rgb(220 0 0 / 0.97);
   }
   50% {
-    background-color: rgb(150 25 18 / 0.97);
+    background-color: rgb(20 0 0 / 0.97);
   }
 }
 
@@ -36,4 +36,17 @@ body {
 
 .animate-evac-border {
   animation: evac-border-blink 1s step-start infinite;
+}
+
+@keyframes evac-blink-subtle {
+  0%, 100% {
+    box-shadow: 0 0 0 2px rgb(220 0 0 / 0.6);
+  }
+  50% {
+    box-shadow: 0 0 0 2px rgb(220 0 0 / 0);
+  }
+}
+
+.animate-evac-blink-subtle {
+  animation: evac-blink-subtle 1s ease-in-out infinite;
 }

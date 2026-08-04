@@ -59,6 +59,8 @@ const reviewSchema = z.object({
   note: z.string().optional(),
 });
 
+const buyerDocTypeEnum = z.enum(["ID_OR_REGISTRATION", "PROOF_OF_ADDRESS", "DEALER_LICENSE", "TAX_CLEARANCE", "OTHER"]);
+
 const buyerSelect = {
   id: true,
   buyerType: true,
@@ -181,6 +183,25 @@ router.post("/:id/suspend", async (req, res) => {
   } catch {
     res.status(404).json({ error: "Buyer not found" });
   }
+});
+
+router.post("/:id/documents", upload.single("file"), async (req, res) => {
+  if (!req.file) return res.status(400).json({ error: "A file is required" });
+  const buyer = await prisma.buyer.findUnique({ where: { id: req.params.id } });
+  if (!buyer) return res.status(404).json({ error: "Buyer not found" });
+  const docTypeParsed = buyerDocTypeEnum.safeParse(req.body?.docType);
+  const document = await prisma.buyerDocument.create({
+    data: {
+      buyerId: buyer.id,
+      docType: docTypeParsed.success ? docTypeParsed.data : "OTHER",
+      fileName: req.file.originalname,
+      fileMimeType: req.file.mimetype,
+      fileSize: req.file.size,
+      fileData: Uint8Array.from(req.file.buffer),
+    },
+    select: { id: true, docType: true, fileName: true, fileMimeType: true, fileSize: true, createdAt: true },
+  });
+  res.status(201).json(document);
 });
 
 router.get("/:id/documents/:docId/download", async (req, res) => {

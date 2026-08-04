@@ -592,7 +592,9 @@
       "EXPLOSIVES_LICENSE": "Licence d'Explosifs",
       "MINE_WORKS_PROGRAMME": "Programme de Travaux Miniers",
       "OTHER": "Autre"
-    }
+    },
+    "documents": "Documents ({{count}})",
+    "documentsTitle": "Documents — {{number}}"
   },
   "workforce": {
     "nav": "Gestion du Personnel",
@@ -707,7 +709,9 @@
       "sources": {
         "DOCUMENT": "Document Contrôlé",
         "VISITOR": "Téléversement Visiteur",
-        "BUYER": "Téléversement Acheteur"
+        "BUYER": "Téléversement Acheteur",
+        "PERMIT": "Document de Permis",
+        "CONTRACTOR": "Document d'Entrepreneur"
       },
       "colFile": "Fichier",
       "colSource": "Source",
@@ -720,7 +724,41 @@
       "deleteTitle": "Confirmer la suppression",
       "deleteHint": "La suppression de « {{name}} » est définitive. Saisissez votre mot de passe pour confirmer.",
       "confirmPassword": "Votre mot de passe",
-      "deleteError": "Impossible de supprimer ce document"
+      "deleteError": "Impossible de supprimer ce document",
+      "colCategory": "Catégorie"
+    },
+    "categoryLabels": {
+      "VISITOR": {
+        "ID_DOCUMENT": "Pièce d'Identité",
+        "MEDICAL_CERTIFICATE": "Certificat Médical",
+        "INDUCTION_ACKNOWLEDGEMENT": "Accusé d'Induction",
+        "OTHER": "Autre"
+      },
+      "BUYER": {
+        "ID_OR_REGISTRATION": "Pièce d'Identité / Immatriculation",
+        "PROOF_OF_ADDRESS": "Justificatif de Domicile",
+        "DEALER_LICENSE": "Licence de Négociant",
+        "TAX_CLEARANCE": "Attestation Fiscale",
+        "OTHER": "Autre"
+      },
+      "PERMIT": {
+        "PERMIT_CERTIFICATE": "Certificat de Permis",
+        "RENEWAL_APPROVAL": "Approbation de Renouvellement",
+        "INSPECTION_REPORT": "Rapport d'Inspection",
+        "CORRESPONDENCE": "Correspondance",
+        "OTHER": "Autre"
+      },
+      "CONTRACTOR": {
+        "INSURANCE_CERTIFICATE": "Attestation d'Assurance",
+        "GOOD_STANDING_CERTIFICATE": "Certificat de Bonne Réputation",
+        "CONTRACT_AGREEMENT": "Contrat",
+        "SAFETY_FILE": "Dossier de Sécurité",
+        "OTHER": "Autre"
+      }
+    },
+    "entityPanel": {
+      "noneYet": "Aucun document téléversé pour le moment.",
+      "docType": "Type de document"
     }
   },
   "inspection": {
@@ -859,7 +897,9 @@
     "loading": "Chargement…",
     "shareLink": "Partager le Lien d'Inscription",
     "shareTitle": "Auto-inscription des Sous-traitants",
-    "shareHint": "Partagez ce lien ou ce code QR avec un sous-traitant afin que son entreprise puisse s'inscrire elle-même pour ce site."
+    "shareHint": "Partagez ce lien ou ce code QR avec un sous-traitant afin que son entreprise puisse s'inscrire elle-même pour ce site.",
+    "documents": "Documents ({{count}})",
+    "documentsTitle": "Documents — {{name}}"
   },
   "contractorRegister": {
     "title": "Inscription Sous-traitant",
@@ -1472,7 +1512,11 @@
     "triggeredBy": "Déclenché par {{name}}",
     "triggeredAt": "Déclenché",
     "cancelEvacuation": "Annuler l'Évacuation",
-    "confirmCancelEvacuation": "Annuler cette évacuation ? Tous les écrans connectés seront effacés."
+    "confirmCancelEvacuation": "Annuler cette évacuation ? Tous les écrans connectés seront effacés.",
+    "deactivateEvacuation": "Désactiver l'Évacuation",
+    "deactivateEvacuationTitle": "Désactiver les Évacuations Actives",
+    "sitesAlreadyEvacuatingHint": "Les sites ayant une évacuation active sont masqués de cette liste. Désactivez-la d'abord pour en déclencher une nouvelle pour ce site.",
+    "allSitesEvacuating": "Tous les sites ont déjà une évacuation active."
   },
   "roster": {
     "nav": "Planification des Équipes",

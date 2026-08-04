@@ -592,7 +592,9 @@
       "EXPLOSIVES_LICENSE": "Explosives License",
       "MINE_WORKS_PROGRAMME": "Mine Works Programme",
       "OTHER": "Other"
-    }
+    },
+    "documents": "Documents ({{count}})",
+    "documentsTitle": "Documents — {{number}}"
   },
   "workforce": {
     "nav": "Workforce Management",
@@ -698,6 +700,39 @@
       "EXPENSE_RECEIPT": "Expense Receipt",
       "OTHER": "Other"
     },
+    "categoryLabels": {
+      "VISITOR": {
+        "ID_DOCUMENT": "ID Document",
+        "MEDICAL_CERTIFICATE": "Medical Certificate",
+        "INDUCTION_ACKNOWLEDGEMENT": "Induction Acknowledgement",
+        "OTHER": "Other"
+      },
+      "BUYER": {
+        "ID_OR_REGISTRATION": "ID / Registration",
+        "PROOF_OF_ADDRESS": "Proof of Address",
+        "DEALER_LICENSE": "Dealer License",
+        "TAX_CLEARANCE": "Tax Clearance",
+        "OTHER": "Other"
+      },
+      "PERMIT": {
+        "PERMIT_CERTIFICATE": "Permit Certificate",
+        "RENEWAL_APPROVAL": "Renewal Approval",
+        "INSPECTION_REPORT": "Inspection Report",
+        "CORRESPONDENCE": "Correspondence",
+        "OTHER": "Other"
+      },
+      "CONTRACTOR": {
+        "INSURANCE_CERTIFICATE": "Insurance Certificate",
+        "GOOD_STANDING_CERTIFICATE": "Good Standing Certificate",
+        "CONTRACT_AGREEMENT": "Contract Agreement",
+        "SAFETY_FILE": "Safety File",
+        "OTHER": "Other"
+      }
+    },
+    "entityPanel": {
+      "noneYet": "No documents uploaded yet.",
+      "docType": "Document type"
+    },
     "vault": {
       "title": "Document Vault",
       "subtitle": "Every document uploaded or downloaded anywhere in the system, organised in one place",
@@ -707,10 +742,13 @@
       "sources": {
         "DOCUMENT": "Controlled Document",
         "VISITOR": "Visitor Upload",
-        "BUYER": "Buyer Upload"
+        "BUYER": "Buyer Upload",
+        "PERMIT": "Permit Document",
+        "CONTRACTOR": "Contractor Document"
       },
       "colFile": "File",
       "colSource": "Source",
+      "colCategory": "Category",
       "colRelatedTo": "Related To",
       "colUploadedBy": "Uploaded By",
       "colDate": "Date",
@@ -859,7 +897,9 @@
     "loading": "Loading…",
     "shareLink": "Share Registration Link",
     "shareTitle": "Contractor Self-Registration",
-    "shareHint": "Share this link or QR code with a contractor so their company can register itself for this site."
+    "shareHint": "Share this link or QR code with a contractor so their company can register itself for this site.",
+    "documents": "Documents ({{count}})",
+    "documentsTitle": "Documents — {{name}}"
   },
   "contractorRegister": {
     "title": "Contractor Registration",
@@ -1472,7 +1512,11 @@
     "triggeredBy": "Triggered by {{name}}",
     "triggeredAt": "Triggered",
     "cancelEvacuation": "Cancel Evacuation",
-    "confirmCancelEvacuation": "Cancel this evacuation? Every connected screen will be cleared."
+    "confirmCancelEvacuation": "Cancel this evacuation? Every connected screen will be cleared.",
+    "deactivateEvacuation": "Deactivate Evacuation",
+    "deactivateEvacuationTitle": "Deactivate Active Evacuations",
+    "sitesAlreadyEvacuatingHint": "Sites with an active evacuation are hidden from this list. Deactivate it first to trigger a new one for that site.",
+    "allSitesEvacuating": "Every site already has an active evacuation."
   },
   "roster": {
     "nav": "Shift Rostering",

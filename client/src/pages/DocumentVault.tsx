@@ -5,9 +5,11 @@ import { useAuth } from "../context/AuthContext";
 import { DocumentStatus, DocumentType, MineDocument, Site, VaultDocument, VaultDocumentSource } from "../api/types";
 import { StatusBadge } from "../components/Badges";
 import Modal from "../components/Modal";
+import PasswordConfirmModal from "../components/PasswordConfirmModal";
 import { buttonDanger, buttonPrimary, buttonSecondary, cardClass, inputClass, labelClass, selectClass } from "../components/ui";
 import DateField from "../components/DateField";
 import FileDropzone from "../components/FileDropzone";
+import { formatFileSize } from "../lib/formatFileSize";
 
 const docTypes: DocumentType[] = [
   "POLICY",
@@ -21,64 +23,7 @@ const docTypes: DocumentType[] = [
   "OTHER",
 ];
 const docStatuses: DocumentStatus[] = ["DRAFT", "ACTIVE", "UNDER_REVIEW", "ARCHIVED", "WITHDRAWN"];
-const vaultSources: (VaultDocumentSource | "ALL")[] = ["ALL", "DOCUMENT", "VISITOR", "BUYER"];
-
-function formatFileSize(bytes: number) {
-  if (bytes < 1024) return `${bytes} B`;
-  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
-  return `${(bytes / 1024 / 1024).toFixed(1)} MB`;
-}
-
-function PasswordConfirmModal({ title, hint, onConfirm, onClose }: {
-  title: string;
-  hint: string;
-  onConfirm: (password: string) => Promise<void>;
-  onClose: () => void;
-}) {
-  const { t } = useTranslation();
-  const [password, setPassword] = useState("");
-  const [submitting, setSubmitting] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
-  async function handleSubmit(e: FormEvent) {
-    e.preventDefault();
-    setSubmitting(true);
-    setError(null);
-    try {
-      await onConfirm(password);
-    } catch (err: any) {
-      setError(err.response?.data?.error ?? t("documents.vault.deleteError"));
-    } finally {
-      setSubmitting(false);
-    }
-  }
-
-  return (
-    <Modal title={title} onClose={onClose}>
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <p className="text-xs text-mine-400">{hint}</p>
-        <div>
-          <label className={labelClass}>{t("documents.vault.confirmPassword")}</label>
-          <input
-            className={inputClass}
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            autoFocus
-            required
-          />
-        </div>
-        {error && <div className="text-danger-500 text-xs">{error}</div>}
-        <div className="flex justify-end gap-2 pt-2">
-          <button type="button" className={buttonSecondary} onClick={onClose}>{t("common.cancel")}</button>
-          <button type="submit" className={buttonDanger} disabled={submitting}>
-            {submitting ? t("common.saving") : t("common.delete")}
-          </button>
-        </div>
-      </form>
-    </Modal>
-  );
-}
+const vaultSources: (VaultDocumentSource | "ALL")[] = ["ALL", "DOCUMENT", "VISITOR", "BUYER", "PERMIT", "CONTRACTOR"];
 
 function DocumentForm({ sites, initial, onSubmit, onCancel }: {
   sites: Site[];
@@ -326,16 +271,34 @@ function ManageTab({ sites, canEdit }: { sites: Site[]; canEdit: boolean }) {
   );
 }
 
+function vaultCategoryKey(doc: VaultDocument) {
+  if (doc.source === "DOCUMENT") return `documents.types.${doc.category}`;
+  return `documents.categoryLabels.${doc.source}.${doc.category}`;
+}
+
+function vaultEntityRoute(doc: VaultDocument) {
+  switch (doc.source) {
+    case "VISITOR":
+      return "visitors";
+    case "BUYER":
+      return "buyers";
+    case "PERMIT":
+      return "permits";
+    case "CONTRACTOR":
+      return "contractors";
+    default:
+      return null;
+  }
+}
+
 function vaultDownloadUrl(doc: VaultDocument) {
   if (doc.source === "DOCUMENT") return `/documents/${doc.id}/download`;
-  if (doc.source === "VISITOR") return `/visitors/${doc.parentId}/documents/${doc.id}/download`;
-  return `/buyers/${doc.parentId}/documents/${doc.id}/download`;
+  return `/${vaultEntityRoute(doc)}/${doc.parentId}/documents/${doc.id}/download`;
 }
 
 function vaultDeleteUrl(doc: VaultDocument) {
   if (doc.source === "DOCUMENT") return `/documents/${doc.id}`;
-  if (doc.source === "VISITOR") return `/visitors/${doc.parentId}/documents/${doc.id}`;
-  return `/buyers/${doc.parentId}/documents/${doc.id}`;
+  return `/${vaultEntityRoute(doc)}/${doc.parentId}/documents/${doc.id}`;
 }
 
 function VaultTab({ isAdmin }: { isAdmin: boolean }) {
@@ -417,6 +380,7 @@ function VaultTab({ isAdmin }: { isAdmin: boolean }) {
             <tr>
               <th className="text-left px-4 py-2">{t("documents.vault.colFile")}</th>
               <th className="text-left px-4 py-2">{t("documents.vault.colSource")}</th>
+              <th className="text-left px-4 py-2">{t("documents.vault.colCategory")}</th>
               <th className="text-left px-4 py-2">{t("documents.vault.colRelatedTo")}</th>
               <th className="text-left px-4 py-2">{t("documents.vault.colUploadedBy")}</th>
               <th className="text-left px-4 py-2">{t("documents.colSize")}</th>
@@ -431,6 +395,7 @@ function VaultTab({ isAdmin }: { isAdmin: boolean }) {
                   <button className="hover:underline" onClick={() => download(doc)}>{doc.fileName}</button>
                 </td>
                 <td className="px-4 py-2 text-mine-300">{t(`documents.vault.sources.${doc.source}`)}</td>
+                <td className="px-4 py-2 text-mine-300">{t(vaultCategoryKey(doc))}</td>
                 <td className="px-4 py-2 text-mine-300">{doc.relatedTo}</td>
                 <td className="px-4 py-2 text-mine-300">{doc.uploadedBy ?? t("documents.vault.selfService")}</td>
                 <td className="px-4 py-2 text-mine-300">{formatFileSize(doc.fileSize)}</td>
@@ -448,7 +413,7 @@ function VaultTab({ isAdmin }: { isAdmin: boolean }) {
               </tr>
             ))}
             {filtered.length === 0 && (
-              <tr><td colSpan={7} className="px-4 py-6 text-center text-mine-400">{t("documents.vault.noneFound")}</td></tr>
+              <tr><td colSpan={8} className="px-4 py-6 text-center text-mine-400">{t("documents.vault.noneFound")}</td></tr>
             )}
           </tbody>
         </table>

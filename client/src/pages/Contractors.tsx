@@ -3,13 +3,22 @@ import { useTranslation } from "react-i18next";
 import QRCode from "qrcode";
 import { api } from "../api/client";
 import { useAuth } from "../context/AuthContext";
-import { Contractor, ContractorStatus, Site } from "../api/types";
+import { Contractor, ContractorDocumentType, ContractorStatus, Site } from "../api/types";
 import { StatusBadge } from "../components/Badges";
 import Modal from "../components/Modal";
+import EntityDocumentsPanel from "../components/EntityDocumentsPanel";
+import PasswordConfirmModal from "../components/PasswordConfirmModal";
 import { buttonDanger, buttonPrimary, buttonSecondary, cardClass, inputClass, labelClass, selectClass } from "../components/ui";
 import DateField from "../components/DateField";
 
 const contractorStatuses: ContractorStatus[] = ["ACTIVE", "EXPIRED", "SUSPENDED", "TERMINATED"];
+const contractorDocTypes: ContractorDocumentType[] = [
+  "INSURANCE_CERTIFICATE",
+  "GOOD_STANDING_CERTIFICATE",
+  "CONTRACT_AGREEMENT",
+  "SAFETY_FILE",
+  "OTHER",
+];
 
 function ShareRegistrationModal({ sites, onClose }: { sites: Site[]; onClose: () => void }) {
   const { t } = useTranslation();
@@ -177,15 +186,80 @@ function ContractorForm({ sites, initial, onSubmit, onCancel }: {
   );
 }
 
+function ContractorDocumentsModal({ contractor, canUpload, canDelete, onClose, onChanged }: {
+  contractor: Contractor;
+  canUpload: boolean;
+  canDelete: boolean;
+  onClose: () => void;
+  onChanged: () => Promise<void>;
+}) {
+  const { t } = useTranslation();
+  const [deleteTarget, setDeleteTarget] = useState<{ id: string; fileName: string } | null>(null);
+
+  async function upload(file: File, docType: string) {
+    const form = new FormData();
+    form.append("file", file);
+    form.append("docType", docType);
+    await api.post(`/contractors/${contractor.id}/documents`, form, { headers: { "Content-Type": "multipart/form-data" } });
+    await onChanged();
+  }
+
+  async function download(doc: { id: string; fileName: string }) {
+    const res = await api.get(`/contractors/${contractor.id}/documents/${doc.id}/download`, { responseType: "blob" });
+    const url = window.URL.createObjectURL(res.data);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = doc.fileName;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    window.URL.revokeObjectURL(url);
+  }
+
+  async function remove(password: string) {
+    if (!deleteTarget) return;
+    await api.delete(`/contractors/${contractor.id}/documents/${deleteTarget.id}`, { data: { password } });
+    setDeleteTarget(null);
+    await onChanged();
+  }
+
+  return (
+    <>
+      <Modal title={t("contractors.documentsTitle", { name: contractor.companyName })} onClose={onClose}>
+        <EntityDocumentsPanel
+          documents={contractor.documents}
+          docTypeOptions={contractorDocTypes}
+          docTypeI18nPrefix="documents.categoryLabels.CONTRACTOR"
+          onUpload={upload}
+          onDownload={download}
+          onDelete={canDelete ? (doc) => setDeleteTarget(doc) : undefined}
+          canUpload={canUpload}
+        />
+      </Modal>
+      {deleteTarget && (
+        <PasswordConfirmModal
+          title={t("documents.vault.deleteTitle")}
+          hint={t("documents.vault.deleteHint", { name: deleteTarget.fileName })}
+          onConfirm={remove}
+          onClose={() => setDeleteTarget(null)}
+        />
+      )}
+    </>
+  );
+}
+
 export default function Contractors() {
   const { t } = useTranslation();
   const { user } = useAuth();
   const canEdit = user?.role === "ADMIN" || user?.role === "SUPERVISOR" || user?.role === "EXECUTIVE";
+  const isAdmin = user?.role === "ADMIN";
   const [items, setItems] = useState<Contractor[]>([]);
   const [sites, setSites] = useState<Site[]>([]);
+  const [docsContractorId, setDocsContractorId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [modal, setModal] = useState<null | "create" | Contractor>(null);
   const [shareModal, setShareModal] = useState(false);
+  const docsContractor = items.find((i) => i.id === docsContractorId) ?? null;
 
   async function load() {
     setLoading(true);
@@ -257,12 +331,17 @@ export default function Contractors() {
                 <td className="px-4 py-2 text-mine-300">{new Date(item.contractEndDate).toLocaleDateString()}</td>
                 <td className="px-4 py-2"><StatusBadge status={item.status} /></td>
                 <td className="px-4 py-2 text-right">
-                  {canEdit && (
-                    <div className="flex justify-end gap-2">
-                      <button className="text-xs text-mine-300 hover:text-mine-50" onClick={() => setModal(item)}>{t("common.edit")}</button>
-                      <button className={buttonDanger} onClick={() => remove(item.id)}>{t("common.delete")}</button>
-                    </div>
-                  )}
+                  <div className="flex justify-end gap-2">
+                    <button className="text-xs text-mine-300 hover:text-mine-50" onClick={() => setDocsContractorId(item.id)}>
+                      {t("contractors.documents", { count: item.documents.length })}
+                    </button>
+                    {canEdit && (
+                      <>
+                        <button className="text-xs text-mine-300 hover:text-mine-50" onClick={() => setModal(item)}>{t("common.edit")}</button>
+                        <button className={buttonDanger} onClick={() => remove(item.id)}>{t("common.delete")}</button>
+                      </>
+                    )}
+                  </div>
                 </td>
               </tr>
             ))}
@@ -285,6 +364,16 @@ export default function Contractors() {
       )}
 
       {shareModal && <ShareRegistrationModal sites={sites} onClose={() => setShareModal(false)} />}
+
+      {docsContractor && (
+        <ContractorDocumentsModal
+          contractor={docsContractor}
+          canUpload={canEdit}
+          canDelete={isAdmin}
+          onClose={() => setDocsContractorId(null)}
+          onChanged={load}
+        />
+      )}
     </div>
   );
 }

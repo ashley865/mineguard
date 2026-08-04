@@ -592,7 +592,9 @@
       "EXPLOSIVES_LICENSE": "Sprengstofflizenz",
       "MINE_WORKS_PROGRAMME": "Grubenbauprogramm",
       "OTHER": "Sonstiges"
-    }
+    },
+    "documents": "Dokumente ({{count}})",
+    "documentsTitle": "Dokumente — {{number}}"
   },
   "workforce": {
     "nav": "Personalverwaltung",
@@ -707,7 +709,9 @@
       "sources": {
         "DOCUMENT": "Kontrolliertes Dokument",
         "VISITOR": "Besucher-Upload",
-        "BUYER": "Käufer-Upload"
+        "BUYER": "Käufer-Upload",
+        "PERMIT": "Genehmigungsdokument",
+        "CONTRACTOR": "Auftragnehmerdokument"
       },
       "colFile": "Datei",
       "colSource": "Quelle",
@@ -720,7 +724,41 @@
       "deleteTitle": "Löschung bestätigen",
       "deleteHint": "Das Löschen von „{{name}}“ ist endgültig. Geben Sie Ihr Passwort ein, um zu bestätigen.",
       "confirmPassword": "Ihr Passwort",
-      "deleteError": "Dieses Dokument konnte nicht gelöscht werden"
+      "deleteError": "Dieses Dokument konnte nicht gelöscht werden",
+      "colCategory": "Kategorie"
+    },
+    "categoryLabels": {
+      "VISITOR": {
+        "ID_DOCUMENT": "Ausweisdokument",
+        "MEDICAL_CERTIFICATE": "Ärztliches Attest",
+        "INDUCTION_ACKNOWLEDGEMENT": "Einweisungsbestätigung",
+        "OTHER": "Sonstiges"
+      },
+      "BUYER": {
+        "ID_OR_REGISTRATION": "Ausweis / Registrierung",
+        "PROOF_OF_ADDRESS": "Adressnachweis",
+        "DEALER_LICENSE": "Händlerlizenz",
+        "TAX_CLEARANCE": "Steuerunbedenklichkeitsbescheinigung",
+        "OTHER": "Sonstiges"
+      },
+      "PERMIT": {
+        "PERMIT_CERTIFICATE": "Genehmigungszertifikat",
+        "RENEWAL_APPROVAL": "Verlängerungsgenehmigung",
+        "INSPECTION_REPORT": "Inspektionsbericht",
+        "CORRESPONDENCE": "Korrespondenz",
+        "OTHER": "Sonstiges"
+      },
+      "CONTRACTOR": {
+        "INSURANCE_CERTIFICATE": "Versicherungsnachweis",
+        "GOOD_STANDING_CERTIFICATE": "Unbedenklichkeitsbescheinigung",
+        "CONTRACT_AGREEMENT": "Vertrag",
+        "SAFETY_FILE": "Sicherheitsakte",
+        "OTHER": "Sonstiges"
+      }
+    },
+    "entityPanel": {
+      "noneYet": "Noch keine Dokumente hochgeladen.",
+      "docType": "Dokumenttyp"
     }
   },
   "inspection": {
@@ -859,7 +897,9 @@
     "loading": "Wird geladen…",
     "shareLink": "Registrierungslink teilen",
     "shareTitle": "Selbstregistrierung für Auftragnehmer",
-    "shareHint": "Teilen Sie diesen Link oder QR-Code mit einem Auftragnehmer, damit sich dessen Unternehmen selbst für diesen Standort registrieren kann."
+    "shareHint": "Teilen Sie diesen Link oder QR-Code mit einem Auftragnehmer, damit sich dessen Unternehmen selbst für diesen Standort registrieren kann.",
+    "documents": "Dokumente ({{count}})",
+    "documentsTitle": "Dokumente — {{name}}"
   },
   "contractorRegister": {
     "title": "Auftragnehmerregistrierung",
@@ -1472,7 +1512,11 @@
     "triggeredBy": "Ausgelöst von {{name}}",
     "triggeredAt": "Ausgelöst",
     "cancelEvacuation": "Evakuierung Abbrechen",
-    "confirmCancelEvacuation": "Diese Evakuierung abbrechen? Jeder verbundene Bildschirm wird zurückgesetzt."
+    "confirmCancelEvacuation": "Diese Evakuierung abbrechen? Jeder verbundene Bildschirm wird zurückgesetzt.",
+    "deactivateEvacuation": "Evakuierung Deaktivieren",
+    "deactivateEvacuationTitle": "Aktive Evakuierungen Deaktivieren",
+    "sitesAlreadyEvacuatingHint": "Standorte mit einer aktiven Evakuierung werden in dieser Liste ausgeblendet. Deaktivieren Sie sie zuerst, um eine neue für diesen Standort auszulösen.",
+    "allSitesEvacuating": "Jeder Standort hat bereits eine aktive Evakuierung."
   },
   "roster": {
     "nav": "Schichtplanung",
