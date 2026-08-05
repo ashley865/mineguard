@@ -4,7 +4,8 @@ import { api, API_URL } from "../../api/client";
 import { useAuth } from "../../context/AuthContext";
 import { ExecutiveAttendanceReport, TeamMember } from "../../api/types";
 import Avatar from "../../components/Avatar";
-import { cardClass } from "../../components/ui";
+import PasswordConfirmModal from "../../components/PasswordConfirmModal";
+import { buttonDanger, cardClass } from "../../components/ui";
 
 function AttendanceReport() {
   const { t } = useTranslation();
@@ -67,13 +68,23 @@ export default function TeamTab() {
   const { user } = useAuth();
   const [members, setMembers] = useState<TeamMember[]>([]);
   const [loading, setLoading] = useState(true);
+  const [removeTarget, setRemoveTarget] = useState<TeamMember | null>(null);
+
+  async function load() {
+    const res = await api.get<TeamMember[]>("/auth/team");
+    setMembers(res.data);
+    setLoading(false);
+  }
 
   useEffect(() => {
-    api
-      .get<TeamMember[]>("/auth/team")
-      .then((res) => setMembers(res.data))
-      .finally(() => setLoading(false));
+    load();
   }, []);
+
+  async function removeExecutive(password: string) {
+    await api.post(`/auth/team/${removeTarget!.id}/remove-executive`, { password });
+    setRemoveTarget(null);
+    await load();
+  }
 
   if (loading) return <div className="text-mine-300">{t("settings.team.loading")}</div>;
 
@@ -92,7 +103,7 @@ export default function TeamTab() {
                 <div className="min-w-0">
                   <div className="font-semibold text-sm truncate">{m.name}</div>
                   <div className="text-xs text-mine-400 truncate">
-                    {m.title ? t(`settings.invites.titles.${m.title}`) : m.role}
+                    {m.title ? t(`settings.invites.titles.${m.title}`) : t(`roles.${m.role}`)}
                   </div>
                 </div>
               </div>
@@ -114,12 +125,27 @@ export default function TeamTab() {
               <div className="text-[11px] text-mine-500">
                 {t("settings.team.joined")} {new Date(m.createdAt).toLocaleDateString()}
               </div>
+              {user?.role === "ADMIN" && m.role === "EXECUTIVE" && (
+                <button className={`${buttonDanger} w-full`} onClick={() => setRemoveTarget(m)}>
+                  {t("settings.team.removeExecutive")}
+                </button>
+              )}
             </div>
           ))}
         </div>
       )}
 
       {user?.role === "ADMIN" && <AttendanceReport />}
+
+      {removeTarget && (
+        <PasswordConfirmModal
+          title={t("settings.team.removeExecutiveTitle")}
+          hint={t("settings.team.removeExecutiveHint", { name: removeTarget.name })}
+          confirmLabel={t("settings.team.removeExecutive")}
+          onConfirm={removeExecutive}
+          onClose={() => setRemoveTarget(null)}
+        />
+      )}
     </div>
   );
 }

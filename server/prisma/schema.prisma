@@ -1296,14 +1296,16 @@ model ProductionRecord {
   site          Site            @relation(fields: [siteId], references: [id], onDelete: Cascade)
   zoneId        String?
   zone          Zone?           @relation(fields: [zoneId], references: [id], onDelete: SetNull)
-  shiftDate     DateTime
-  shift         ProductionShift
-  mineralType   String
-  tonnesMined   Float
-  oreGrade      Float?
-  wasteRemoved  Float?
-  targetTonnes  Float?
-  notes         String?
+  shiftDate       DateTime
+  shift           ProductionShift
+  mineralType     String
+  tonnesMined     Float
+  tonnesProcessed Float?
+  oreGrade        Float?
+  recoveryRate    Float?
+  wasteRemoved    Float?
+  targetTonnes    Float?
+  notes           String?
   recordedById  String?
   recordedBy    User?           @relation("ProductionRecordedBy", fields: [recordedById], references: [id], onDelete: SetNull)
 

@@ -1031,12 +1031,39 @@ export interface ProductionRecord {
   shift: ProductionShift;
   mineralType: string;
   tonnesMined: number;
+  tonnesProcessed?: number | null;
   oreGrade?: number | null;
+  recoveryRate?: number | null;
   wasteRemoved?: number | null;
   targetTonnes?: number | null;
   notes?: string | null;
   recordedBy?: { id: string; name: string } | null;
   createdAt: string;
+}
+
+export interface ProductionAnalyticsPoint {
+  period: string;
+  tonnesMined: number;
+  tonnesProcessed: number;
+  wasteRemoved: number;
+  targetTonnes: number;
+  oreGrade: number | null;
+  recoveryRate: number | null;
+}
+
+export interface ProductionAnalytics {
+  period: "daily" | "weekly" | "monthly";
+  trend: ProductionAnalyticsPoint[];
+  byShift: { shift: ProductionShift; tonnesMined: number }[];
+  bySection: { name: string; tonnesMined: number; targetTonnes: number }[];
+  totals: {
+    tonnesMined: number;
+    tonnesProcessed: number;
+    wasteRemoved: number;
+    targetTonnes: number;
+    avgOreGrade: number | null;
+    avgRecoveryRate: number | null;
+  };
 }
 
 export type MaintenanceType = "PREVENTIVE" | "CORRECTIVE" | "INSPECTION";

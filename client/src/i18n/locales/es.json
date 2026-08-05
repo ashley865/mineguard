@@ -1,4 +1,10 @@
 {
+  "roles": {
+    "ADMIN": "Propietario",
+    "SUPERVISOR": "Supervisor",
+    "VIEWER": "Observador",
+    "EXECUTIVE": "Ejecutivo"
+  },
   "common": {
     "save": "Guardar",
     "saving": "Guardando…",
@@ -76,11 +82,11 @@
     "password": "Contraseña",
     "passwordHint": "Al menos 8 caracteres.",
     "accountType": "Tipo de cuenta",
-    "admin": "Administrador",
+    "admin": "Propietario",
     "adminDesc": "Acceso completo de entrada y edición en todos los módulos: sitios, sensores, trabajadores, equipos, cumplimiento, permisos e incidentes.",
     "executive": "Ejecutivo",
-    "executiveDesc": "El mismo acceso completo de entrada y edición que el Administrador, además del Panel Ejecutivo y la autoridad para aprobar o rechazar alertas e incidentes.",
-    "adminOnlyNote": "Este enlace crea una cuenta de Administrador. Los ejecutivos se unen mediante un enlace de invitación personal enviado por un Administrador.",
+    "executiveDesc": "El mismo acceso completo de entrada y edición que el Propietario, además del Panel Ejecutivo y la autoridad para aprobar o rechazar alertas e incidentes.",
+    "adminOnlyNote": "Este enlace crea una cuenta de Propietario. Los ejecutivos se unen mediante un enlace de invitación personal enviado por un Propietario.",
     "createAccount": "Crear cuenta",
     "creatingAccount": "Creando cuenta…",
     "alreadyHaveAccount": "¿Ya tienes una cuenta?",
@@ -94,7 +100,7 @@
     "join": "Crear mi cuenta",
     "joining": "Creando cuenta…",
     "error": "No se pudo aceptar esta invitación",
-    "invalid": "Este enlace de invitación no es válido, ya fue usado o fue revocado. Pide a tu administrador que envíe uno nuevo.",
+    "invalid": "Este enlace de invitación no es válido, ya fue usado o fue revocado. Pide a tu Propietario que envíe uno nuevo.",
     "alreadySignedIn": "Actualmente has iniciado sesión como {{name}}. Cierra sesión para aceptar esta invitación con la cuenta invitada.",
     "logOutAndContinue": "Cerrar sesión y continuar",
     "stayLoggedIn": "Mantener la sesión y ir a mi panel",
@@ -107,7 +113,7 @@
     "mineName": "Nombre de la mina",
     "registrationNumber": "Número de registro de la empresa",
     "miningRightNumber": "Número de derecho minero / permiso",
-    "adminAccount": "Cuenta de Administrador",
+    "adminAccount": "Cuenta de Propietario",
     "register": "Registrar mina",
     "registering": "Registrando…",
     "joinExisting": "Unirse a una mina existente",
@@ -994,7 +1000,7 @@
     "qrTitle": "Código QR de registro — {{site}}",
     "qrHint": "Muestra o imprime este código en la entrada del sitio. Los visitantes lo escanean con su teléfono para registrarse ellos mismos.",
     "linkRestrictedTitle": "Enlace de registro restringido",
-    "linkRestrictedBody": "Solo Seguridad o un Administrador pueden compartir el enlace de registro de visitantes. Envía una solicitud a Seguridad si necesitas que se comparta uno.",
+    "linkRestrictedBody": "Solo Seguridad o un Propietario pueden compartir el enlace de registro de visitantes. Envía una solicitud a Seguridad si necesitas que se comparta uno.",
     "requestLinkAccess": "Solicitar enlace de registro",
     "colName": "Visitante",
     "colHost": "Anfitrión",
@@ -1139,7 +1145,7 @@
     },
     "team": {
       "title": "Equipo Ejecutivo",
-      "subtitle": "Administradores y ejecutivos con acceso a esta mina",
+      "subtitle": "Propietarios y ejecutivos con acceso a esta mina",
       "loading": "Cargando…",
       "noneYet": "Aún no hay otros miembros del equipo.",
       "joined": "Se unió",
@@ -1151,7 +1157,10 @@
       "noExecutives": "Aún no hay ejecutivos para reportar.",
       "executive": "Ejecutivo",
       "lastLogin": "Último Inicio de Sesión",
-      "periodFrom": "Desde {{date}}"
+      "periodFrom": "Desde {{date}}",
+      "removeExecutive": "Eliminar ejecutivo",
+      "removeExecutiveTitle": "Eliminar acceso de ejecutivo",
+      "removeExecutiveHint": "Esto revoca el acceso de ejecutivo y las asignaciones de sitio de {{name}}. Su cuenta se degrada a observador en lugar de eliminarse, y se conserva su actividad pasada. Ingresa tu contraseña para confirmar."
     }
   },
   "trucks": {
@@ -1206,8 +1215,8 @@
   "messages": {
     "nav": "Mensajes",
     "title": "Mensajes",
-    "subtitle": "Mensajes directos entre Administradores y Ejecutivos",
-    "noContacts": "Aún no hay otros Administradores o Ejecutivos para enviar mensajes.",
+    "subtitle": "Mensajes directos entre Propietarios y Ejecutivos",
+    "noContacts": "Aún no hay otros Propietarios o Ejecutivos para enviar mensajes.",
     "selectContact": "Selecciona a alguien de la lista para iniciar una conversación.",
     "noMessagesYet": "Aún no hay mensajes. Saluda.",
     "typePlaceholder": "Escribe un mensaje…",
@@ -1395,7 +1404,23 @@
     "earningsVsExpenses": "Ingresos vs Gastos",
     "earnings": "Ingresos",
     "expenses": "Gastos",
-    "tonnesByMineral": "Toneladas Extraídas por Mineral"
+    "tonnesByMineral": "Toneladas Extraídas por Mineral",
+    "tonnesProcessed": "Toneladas procesadas",
+    "recoveryRate": "Tasa de recuperación",
+    "analyticsTitle": "Análisis de Producción Minera",
+    "periodDaily": "Diario",
+    "periodWeekly": "Semanal",
+    "periodMonthly": "Mensual",
+    "avgOreGrade": "Ley de Mineral Prom.",
+    "avgRecovery": "Recuperación Prom.",
+    "actualVsPlanned": "Real vs Planificado",
+    "minedVsProcessed": "Toneladas Extraídas vs Procesadas",
+    "oreVsWaste": "Mineral vs Estéril",
+    "ore": "Mineral",
+    "waste": "Estéril",
+    "gradeAndRecovery": "Ley y Recuperación",
+    "byShift": "Producción por Turno",
+    "bySection": "Producción por Pozo / Rampa / Sección"
   },
   "maintenance": {
     "nav": "Programación de Mantenimiento",

@@ -1,4 +1,10 @@
 {
+  "roles": {
+    "ADMIN": "Eigentümer",
+    "SUPERVISOR": "Vorgesetzter",
+    "VIEWER": "Betrachter",
+    "EXECUTIVE": "Führungskraft"
+  },
   "common": {
     "save": "Speichern",
     "saving": "Speichern…",
@@ -76,11 +82,11 @@
     "password": "Passwort",
     "passwordHint": "Mindestens 8 Zeichen.",
     "accountType": "Kontotyp",
-    "admin": "Administrator",
+    "admin": "Eigentümer",
     "adminDesc": "Vollständiger Eingabe- und Bearbeitungszugriff auf alle Module: Standorte, Sensoren, Mitarbeiter, Ausrüstung, Compliance, Genehmigungen und Vorfälle.",
     "executive": "Führungskraft",
-    "executiveDesc": "Derselbe vollständige Eingabe- und Bearbeitungszugriff wie Administrator, zusätzlich das Führungskräfte-Dashboard und die Befugnis, Alarme und Vorfälle zu genehmigen oder abzulehnen.",
-    "adminOnlyNote": "Dieser Link erstellt ein Administratorkonto. Führungskräfte treten über einen persönlichen Einladungslink bei, der von einem Administrator gesendet wird.",
+    "executiveDesc": "Derselbe vollständige Eingabe- und Bearbeitungszugriff wie Eigentümer, zusätzlich das Führungskräfte-Dashboard und die Befugnis, Alarme und Vorfälle zu genehmigen oder abzulehnen.",
+    "adminOnlyNote": "Dieser Link erstellt ein Eigentümerkonto. Führungskräfte treten über einen persönlichen Einladungslink bei, der von einem Eigentümer gesendet wird.",
     "createAccount": "Konto erstellen",
     "creatingAccount": "Konto wird erstellt…",
     "alreadyHaveAccount": "Haben Sie bereits ein Konto?",
@@ -94,7 +100,7 @@
     "join": "Mein Konto erstellen",
     "joining": "Konto wird erstellt…",
     "error": "Diese Einladung konnte nicht angenommen werden",
-    "invalid": "Dieser Einladungslink ist ungültig, bereits verwendet oder wurde widerrufen. Bitten Sie Ihren Administrator, einen neuen zu senden.",
+    "invalid": "Dieser Einladungslink ist ungültig, bereits verwendet oder wurde widerrufen. Bitten Sie Ihren Eigentümer, einen neuen zu senden.",
     "alreadySignedIn": "Sie sind derzeit als {{name}} angemeldet. Melden Sie sich ab, um diese Einladung mit dem eingeladenen Konto anzunehmen.",
     "logOutAndContinue": "Abmelden und fortfahren",
     "stayLoggedIn": "Angemeldet bleiben und zu meinem Dashboard gehen",
@@ -107,7 +113,7 @@
     "mineName": "Name der Mine",
     "registrationNumber": "Handelsregisternummer",
     "miningRightNumber": "Bergbaurecht- / Genehmigungsnummer",
-    "adminAccount": "Administratorkonto",
+    "adminAccount": "Eigentümerkonto",
     "register": "Mine registrieren",
     "registering": "Wird registriert…",
     "joinExisting": "Einer bestehenden Mine beitreten",
@@ -994,7 +1000,7 @@
     "qrTitle": "Anmelde-QR-Code — {{site}}",
     "qrHint": "Zeigen oder drucken Sie diesen Code am Standorteingang aus. Besucher scannen ihn mit ihrem Telefon, um sich selbst anzumelden.",
     "linkRestrictedTitle": "Anmeldelink eingeschränkt",
-    "linkRestrictedBody": "Nur die Sicherheitsabteilung oder ein Administrator können den Besucheranmeldelink freigeben. Senden Sie eine Anfrage an die Sicherheitsabteilung, wenn Sie einen benötigen.",
+    "linkRestrictedBody": "Nur die Sicherheitsabteilung oder ein Eigentümer können den Besucheranmeldelink freigeben. Senden Sie eine Anfrage an die Sicherheitsabteilung, wenn Sie einen benötigen.",
     "requestLinkAccess": "Anmeldelink anfordern",
     "colName": "Besucher",
     "colHost": "Gastgeber",
@@ -1139,7 +1145,7 @@
     },
     "team": {
       "title": "Führungsteam",
-      "subtitle": "Administratoren und Führungskräfte mit Zugriff auf diese Mine",
+      "subtitle": "Eigentümer und Führungskräfte mit Zugriff auf diese Mine",
       "loading": "Wird geladen…",
       "noneYet": "Noch keine weiteren Teammitglieder.",
       "joined": "Beigetreten",
@@ -1151,7 +1157,10 @@
       "noExecutives": "Noch keine Führungskräfte zum Berichten.",
       "executive": "Führungskraft",
       "lastLogin": "Letzte Anmeldung",
-      "periodFrom": "Ab {{date}}"
+      "periodFrom": "Ab {{date}}",
+      "removeExecutive": "Führungskraft entfernen",
+      "removeExecutiveTitle": "Führungskraftzugriff entfernen",
+      "removeExecutiveHint": "Dies widerruft den Führungskraftzugriff und die Standortzuweisungen von {{name}}. Das Konto wird auf Betrachter herabgestuft statt gelöscht, und die bisherige Aktivität bleibt erhalten. Geben Sie Ihr Passwort ein, um zu bestätigen."
     }
   },
   "trucks": {
@@ -1206,8 +1215,8 @@
   "messages": {
     "nav": "Nachrichten",
     "title": "Nachrichten",
-    "subtitle": "Direktnachrichten zwischen Administratoren und Führungskräften",
-    "noContacts": "Noch keine anderen Administratoren oder Führungskräfte zum Nachrichtenschreiben.",
+    "subtitle": "Direktnachrichten zwischen Eigentümern und Führungskräften",
+    "noContacts": "Noch keine anderen Eigentümer oder Führungskräfte zum Nachrichtenschreiben.",
     "selectContact": "Wählen Sie jemanden aus der Liste, um eine Unterhaltung zu beginnen.",
     "noMessagesYet": "Noch keine Nachrichten. Sagen Sie Hallo.",
     "typePlaceholder": "Nachricht eingeben…",
@@ -1395,7 +1404,23 @@
     "earningsVsExpenses": "Einnahmen vs. Ausgaben",
     "earnings": "Einnahmen",
     "expenses": "Ausgaben",
-    "tonnesByMineral": "Geförderte Tonnen nach Mineral"
+    "tonnesByMineral": "Geförderte Tonnen nach Mineral",
+    "tonnesProcessed": "Tonnen verarbeitet",
+    "recoveryRate": "Ausbeuterate",
+    "analyticsTitle": "Bergbau-Produktionsanalyse",
+    "periodDaily": "Täglich",
+    "periodWeekly": "Wöchentlich",
+    "periodMonthly": "Monatlich",
+    "avgOreGrade": "Ø Erzgehalt",
+    "avgRecovery": "Ø Ausbeute",
+    "actualVsPlanned": "Ist vs Plan",
+    "minedVsProcessed": "Tonnen Gefördert vs Verarbeitet",
+    "oreVsWaste": "Erz vs Abraum",
+    "ore": "Erz",
+    "waste": "Abraum",
+    "gradeAndRecovery": "Gehalt & Ausbeute",
+    "byShift": "Produktion nach Schicht",
+    "bySection": "Produktion nach Schacht / Grube / Abschnitt"
   },
   "maintenance": {
     "nav": "Wartungsplanung",

@@ -3,10 +3,11 @@ import bcrypt from "bcryptjs";
 import multer from "multer";
 import { z } from "zod";
 import { prisma } from "../prisma";
-import { requireAuth } from "../middleware/auth";
+import { requireAuth, requireRole } from "../middleware/auth";
 import { imageFileFilter } from "../lib/uploadFilters";
 import { signAuthToken } from "../lib/jwt";
 import { authLimiter, passwordChangeLimiter } from "../middleware/rateLimit";
+import { verifyAdminPassword } from "../lib/verifyPassword";
 
 const router = Router();
 
@@ -36,6 +37,10 @@ const updateProfileSchema = z.object({
 const changePasswordSchema = z.object({
   currentPassword: z.string().min(1),
   newPassword: z.string().min(8),
+});
+
+const removeExecutiveSchema = z.object({
+  password: z.string().min(1),
 });
 
 router.post("/register", authLimiter, async (req, res) => {
@@ -199,6 +204,28 @@ router.get("/team", requireAuth, async (req, res) => {
       },
     }))
   );
+});
+
+// Revokes an executive's access rather than deleting their account: their historical
+// records (reviewed alerts, incidents, messages, etc.) stay intact, they're just demoted
+// to VIEWER and lose their title and site assignments. Requires re-confirming the admin's
+// own password, matching the pattern used for other irreversible admin actions.
+router.post("/team/:id/remove-executive", requireAuth, requireRole("ADMIN"), async (req, res) => {
+  const parsed = removeExecutiveSchema.safeParse(req.body);
+  if (!parsed.success) return res.status(400).json({ error: parsed.error.flatten() });
+  const passwordOk = await verifyAdminPassword(req.auth!.userId, parsed.data.password);
+  if (!passwordOk) return res.status(401).json({ error: "Incorrect password" });
+
+  const target = await prisma.user.findFirst({
+    where: { id: req.params.id, mineId: req.auth!.mineId ?? undefined, role: "EXECUTIVE" },
+  });
+  if (!target) return res.status(404).json({ error: "Executive not found" });
+
+  await prisma.$transaction([
+    prisma.executiveSiteAssignment.deleteMany({ where: { userId: target.id } }),
+    prisma.user.update({ where: { id: target.id }, data: { role: "VIEWER", title: null } }),
+  ]);
+  res.status(204).send();
 });
 
 export default router;

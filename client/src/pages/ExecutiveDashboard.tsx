@@ -10,6 +10,7 @@ import { buttonPrimary, buttonSecondary, cardClass } from "../components/ui";
 import FinancialSummaryWidget from "../components/FinancialSummaryWidget";
 import HrWorkforceWidget from "../components/HrWorkforceWidget";
 import SecurityVisitorHistoryWidget from "../components/SecurityVisitorHistoryWidget";
+import ProductionAnalyticsWidget from "../components/ProductionAnalyticsWidget";
 
 type Tone = "positive" | "negative" | "caution";
 
@@ -121,6 +122,7 @@ export default function ExecutiveDashboard() {
   const canSeeFinancials = user?.title === "CFO" || user?.title === "GENERAL_MANAGER";
   const canSeeHrWorkforce = user?.title === "HR_MANAGER";
   const canSeeVisitorHistory = user?.title === "SECURITY_MANAGER";
+  const canSeeProductionAnalytics = user?.title === "OPERATIONS_MANAGER";
   const [summary, setSummary] = useState<ExecutiveSummary | null>(null);
   const [trends, setTrends] = useState<ReportTrends | null>(null);
 
@@ -267,6 +269,7 @@ export default function ExecutiveDashboard() {
       {canSeeFinancials && <FinancialSummaryWidget />}
       {canSeeHrWorkforce && <HrWorkforceWidget />}
       {canSeeVisitorHistory && <SecurityVisitorHistoryWidget />}
+      {canSeeProductionAnalytics && <ProductionAnalyticsWidget />}
 
       <div className={`${cardClass} p-3`}>
         <h2 className="text-xs font-semibold mb-2">{t("executive.suggestionsTitle")}</h2>

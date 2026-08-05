@@ -226,7 +226,7 @@ export default function Layout() {
           <div>
             <div className="text-sm font-medium">{user?.name}</div>
             <div className="text-xs text-mine-400">
-              {user?.title ? t(`settings.invites.titles.${user.title}`) : user?.role}
+              {user?.title ? t(`settings.invites.titles.${user.title}`) : user?.role ? t(`roles.${user.role}`) : ""}
             </div>
             <button
               onClick={logout}
@@ -267,7 +267,7 @@ export default function Layout() {
               <div className="hidden md:flex items-center gap-1.5 text-xs text-mine-400">
                 <span>{t("nav.signedInAs")}</span>
                 <span className="font-semibold text-mine-100">
-                  {user?.title ? t(`settings.invites.titles.${user.title}`) : user?.role}
+                  {user?.title ? t(`settings.invites.titles.${user.title}`) : user?.role ? t(`roles.${user.role}`) : ""}
                 </span>
               </div>
             </>

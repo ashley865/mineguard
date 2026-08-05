@@ -1,4 +1,10 @@
 {
+  "roles": {
+    "ADMIN": "Eienaar",
+    "SUPERVISOR": "Toesighouer",
+    "VIEWER": "Kyker",
+    "EXECUTIVE": "Uitvoerende Beampte"
+  },
   "common": {
     "save": "Stoor",
     "saving": "Stoor tans…",
@@ -76,11 +82,11 @@
     "password": "Wagwoord",
     "passwordHint": "Ten minste 8 karakters.",
     "accountType": "Rekeningtipe",
-    "admin": "Administrateur",
+    "admin": "Eienaar",
     "adminDesc": "Volle toegang om in te voer en te wysig oor elke module: terreine, sensors, werkers, toerusting, voldoening, permitte en voorvalle.",
     "executive": "Uitvoerende beampte",
-    "executiveDesc": "Dieselfde volle toegang om in te voer en te wysig soos Administrateur, plus die Uitvoerende Dashboard en gesag om waarskuwings en voorvalle goed te keur of te verwerp.",
-    "adminOnlyNote": "Hierdie skakel skep 'n Administrateur-rekening. Uitvoerende beamptes sluit aan via 'n persoonlike uitnodigingskakel wat deur 'n Administrateur gestuur word.",
+    "executiveDesc": "Dieselfde volle toegang om in te voer en te wysig soos Eienaar, plus die Uitvoerende Dashboard en gesag om waarskuwings en voorvalle goed te keur of te verwerp.",
+    "adminOnlyNote": "Hierdie skakel skep 'n Eienaar-rekening. Uitvoerende beamptes sluit aan via 'n persoonlike uitnodigingskakel wat deur 'n Eienaar gestuur word.",
     "createAccount": "Skep rekening",
     "creatingAccount": "Skep tans rekening…",
     "alreadyHaveAccount": "Het jy reeds 'n rekening?",
@@ -94,7 +100,7 @@
     "join": "Skep my rekening",
     "joining": "Skep tans rekening…",
     "error": "Kon nie hierdie uitnodiging aanvaar nie",
-    "invalid": "Hierdie uitnodigingskakel is ongeldig, reeds gebruik, of is herroep. Vra jou administrateur om 'n nuwe een te stuur.",
+    "invalid": "Hierdie uitnodigingskakel is ongeldig, reeds gebruik, of is herroep. Vra jou Eienaar om 'n nuwe een te stuur.",
     "alreadySignedIn": "Jy is tans aangemeld as {{name}}. Meld af om hierdie uitnodiging met die genooide rekening te aanvaar.",
     "logOutAndContinue": "Meld af en gaan voort",
     "stayLoggedIn": "Bly aangemeld en gaan na my dashboard",
@@ -107,7 +113,7 @@
     "mineName": "Naam van myn",
     "registrationNumber": "Maatskappyregistrasienommer",
     "miningRightNumber": "Mynregnommer / permitnommer",
-    "adminAccount": "Administrateur-rekening",
+    "adminAccount": "Eienaar-rekening",
     "register": "Registreer myn",
     "registering": "Registreer tans…",
     "joinExisting": "Sluit by 'n bestaande myn aan",
@@ -994,7 +1000,7 @@
     "qrTitle": "Aanmeld-QR — {{site}}",
     "qrHint": "Vertoon of druk hierdie kode by die terreiningang. Besoekers skandeer dit met hul foon om hulself aan te meld.",
     "linkRestrictedTitle": "Registrasieskakel beperk",
-    "linkRestrictedBody": "Slegs Sekuriteit of 'n Administrateur kan die besoekersregistrasieskakel deel. Stuur 'n versoek na Sekuriteit as jy wil hê een moet gedeel word.",
+    "linkRestrictedBody": "Slegs Sekuriteit of 'n Eienaar kan die besoekersregistrasieskakel deel. Stuur 'n versoek na Sekuriteit as jy wil hê een moet gedeel word.",
     "requestLinkAccess": "Versoek registrasieskakel",
     "colName": "Besoeker",
     "colHost": "Gasheer",
@@ -1139,7 +1145,7 @@
     },
     "team": {
       "title": "Uitvoerende Span",
-      "subtitle": "Administrateurs en uitvoerende beamptes met toegang tot hierdie myn",
+      "subtitle": "Eienaars en uitvoerende beamptes met toegang tot hierdie myn",
       "loading": "Laai tans…",
       "noneYet": "Nog geen ander spanlede nie.",
       "joined": "Aangesluit",
@@ -1151,7 +1157,10 @@
       "noExecutives": "Nog geen uitvoerende beamptes om oor te rapporteer nie.",
       "executive": "Uitvoerende Beampte",
       "lastLogin": "Laaste Aanmelding",
-      "periodFrom": "Vanaf {{date}}"
+      "periodFrom": "Vanaf {{date}}",
+      "removeExecutive": "Verwyder uitvoerende beampte",
+      "removeExecutiveTitle": "Verwyder uitvoerende toegang",
+      "removeExecutiveHint": "Dit herroep {{name}} se uitvoerende toegang en terreintoewysings. Hul rekening word afgegradeer na kyker eerder as verwyder, en hul vorige aktiwiteit word behou. Voer jou wagwoord in om te bevestig."
     }
   },
   "trucks": {
@@ -1206,8 +1215,8 @@
   "messages": {
     "nav": "Boodskappe",
     "title": "Boodskappe",
-    "subtitle": "Direkte boodskappe tussen Administrateurs en Uitvoerende Beamptes",
-    "noContacts": "Nog geen ander Administrateurs of Uitvoerende Beamptes om te boodskap nie.",
+    "subtitle": "Direkte boodskappe tussen Eienaars en Uitvoerende Beamptes",
+    "noContacts": "Nog geen ander Eienaars of Uitvoerende Beamptes om te boodskap nie.",
     "selectContact": "Kies iemand van die lys om 'n gesprek te begin.",
     "noMessagesYet": "Nog geen boodskappe nie. Groet gerus.",
     "typePlaceholder": "Tik 'n boodskap…",
@@ -1395,7 +1404,23 @@
     "earningsVsExpenses": "Inkomste vs Uitgawes",
     "earnings": "Inkomste",
     "expenses": "Uitgawes",
-    "tonnesByMineral": "Ton Ontgin volgens Mineraal"
+    "tonnesByMineral": "Ton Ontgin volgens Mineraal",
+    "tonnesProcessed": "Ton verwerk",
+    "recoveryRate": "Herwinningskoers",
+    "analyticsTitle": "Mynbouproduksie-ontleding",
+    "periodDaily": "Daagliks",
+    "periodWeekly": "Weekliks",
+    "periodMonthly": "Maandeliks",
+    "avgOreGrade": "Gem. Ertsgraad",
+    "avgRecovery": "Gem. Herwinning",
+    "actualVsPlanned": "Werklik vs Beplan",
+    "minedVsProcessed": "Ton Ontgin vs Verwerk",
+    "oreVsWaste": "Erts vs Afval",
+    "ore": "Erts",
+    "waste": "Afval",
+    "gradeAndRecovery": "Graad & Herwinning",
+    "byShift": "Produksie volgens Skof",
+    "bySection": "Produksie volgens Skag / Put / Afdeling"
   },
   "maintenance": {
     "nav": "Onderhoudskedulering",

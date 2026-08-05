@@ -1,4 +1,10 @@
 {
+  "roles": {
+    "ADMIN": "Propriétaire",
+    "SUPERVISOR": "Superviseur",
+    "VIEWER": "Observateur",
+    "EXECUTIVE": "Exécutif"
+  },
   "common": {
     "save": "Enregistrer",
     "saving": "Enregistrement…",
@@ -76,11 +82,11 @@
     "password": "Mot de passe",
     "passwordHint": "Au moins 8 caractères.",
     "accountType": "Type de compte",
-    "admin": "Administrateur",
+    "admin": "Propriétaire",
     "adminDesc": "Accès complet de saisie et de modification sur tous les modules : sites, capteurs, travailleurs, équipements, conformité, permis et incidents.",
     "executive": "Exécutif",
-    "executiveDesc": "Le même accès complet de saisie et de modification que l'Administrateur, plus le Tableau de bord exécutif et le pouvoir d'approbation ou de rejet des alertes et incidents.",
-    "adminOnlyNote": "Ce lien crée un compte Administrateur. Les exécutifs rejoignent via un lien d'invitation personnel envoyé par un Administrateur.",
+    "executiveDesc": "Le même accès complet de saisie et de modification que le Propriétaire, plus le Tableau de bord exécutif et le pouvoir d'approbation ou de rejet des alertes et incidents.",
+    "adminOnlyNote": "Ce lien crée un compte Propriétaire. Les exécutifs rejoignent via un lien d'invitation personnel envoyé par un Propriétaire.",
     "createAccount": "Créer le compte",
     "creatingAccount": "Création du compte…",
     "alreadyHaveAccount": "Vous avez déjà un compte ?",
@@ -94,7 +100,7 @@
     "join": "Créer mon compte",
     "joining": "Création du compte…",
     "error": "Impossible d'accepter cette invitation",
-    "invalid": "Ce lien d'invitation est invalide, déjà utilisé, ou a été révoqué. Demandez à votre administrateur d'en envoyer un nouveau.",
+    "invalid": "Ce lien d'invitation est invalide, déjà utilisé, ou a été révoqué. Demandez à votre Propriétaire d'en envoyer un nouveau.",
     "alreadySignedIn": "Vous êtes actuellement connecté en tant que {{name}}. Déconnectez-vous pour accepter cette invitation avec le compte invité.",
     "logOutAndContinue": "Se déconnecter et continuer",
     "stayLoggedIn": "Rester connecté et aller à mon tableau de bord",
@@ -107,7 +113,7 @@
     "mineName": "Nom de la mine",
     "registrationNumber": "Numéro d'enregistrement de l'entreprise",
     "miningRightNumber": "Numéro de droit minier / permis",
-    "adminAccount": "Compte Administrateur",
+    "adminAccount": "Compte Propriétaire",
     "register": "Enregistrer la mine",
     "registering": "Enregistrement…",
     "joinExisting": "Rejoindre une mine existante",
@@ -994,7 +1000,7 @@
     "qrTitle": "QR code d'enregistrement — {{site}}",
     "qrHint": "Affichez ou imprimez ce code à l'entrée du site. Les visiteurs le scannent avec leur téléphone pour s'enregistrer eux-mêmes.",
     "linkRestrictedTitle": "Lien d'enregistrement restreint",
-    "linkRestrictedBody": "Seuls la Sécurité ou un Administrateur peuvent partager le lien d'enregistrement des visiteurs. Envoyez une demande à la Sécurité si vous avez besoin qu'il soit partagé.",
+    "linkRestrictedBody": "Seuls la Sécurité ou un Propriétaire peuvent partager le lien d'enregistrement des visiteurs. Envoyez une demande à la Sécurité si vous avez besoin qu'il soit partagé.",
     "requestLinkAccess": "Demander le lien d'enregistrement",
     "colName": "Visiteur",
     "colHost": "Hôte",
@@ -1139,7 +1145,7 @@
     },
     "team": {
       "title": "Équipe de direction",
-      "subtitle": "Administrateurs et cadres ayant accès à cette mine",
+      "subtitle": "Propriétaires et cadres ayant accès à cette mine",
       "loading": "Chargement…",
       "noneYet": "Aucun autre membre de l'équipe pour le moment.",
       "joined": "A rejoint",
@@ -1151,7 +1157,10 @@
       "noExecutives": "Aucun cadre à signaler pour le moment.",
       "executive": "Cadre",
       "lastLogin": "Dernière Connexion",
-      "periodFrom": "À partir du {{date}}"
+      "periodFrom": "À partir du {{date}}",
+      "removeExecutive": "Retirer l'exécutif",
+      "removeExecutiveTitle": "Retirer l'accès exécutif",
+      "removeExecutiveHint": "Cela révoque l'accès exécutif et les affectations de site de {{name}}. Son compte est rétrogradé en observateur plutôt que supprimé, et son activité passée est conservée. Saisissez votre mot de passe pour confirmer."
     }
   },
   "trucks": {
@@ -1206,8 +1215,8 @@
   "messages": {
     "nav": "Messages",
     "title": "Messages",
-    "subtitle": "Messages directs entre Administrateurs et Exécutifs",
-    "noContacts": "Aucun autre Administrateur ou Exécutif à qui envoyer un message pour le moment.",
+    "subtitle": "Messages directs entre Propriétaires et Exécutifs",
+    "noContacts": "Aucun autre Propriétaire ou Exécutif à qui envoyer un message pour le moment.",
     "selectContact": "Sélectionnez quelqu'un dans la liste pour démarrer une conversation.",
     "noMessagesYet": "Aucun message pour le moment. Dites bonjour.",
     "typePlaceholder": "Écrivez un message…",
@@ -1395,7 +1404,23 @@
     "earningsVsExpenses": "Revenus vs Dépenses",
     "earnings": "Revenus",
     "expenses": "Dépenses",
-    "tonnesByMineral": "Tonnes Extraites par Minéral"
+    "tonnesByMineral": "Tonnes Extraites par Minéral",
+    "tonnesProcessed": "Tonnes traitées",
+    "recoveryRate": "Taux de récupération",
+    "analyticsTitle": "Analyse de la Production Minière",
+    "periodDaily": "Quotidien",
+    "periodWeekly": "Hebdomadaire",
+    "periodMonthly": "Mensuel",
+    "avgOreGrade": "Teneur Moy. du Minerai",
+    "avgRecovery": "Récupération Moy.",
+    "actualVsPlanned": "Réel vs Planifié",
+    "minedVsProcessed": "Tonnes Extraites vs Traitées",
+    "oreVsWaste": "Minerai vs Stérile",
+    "ore": "Minerai",
+    "waste": "Stérile",
+    "gradeAndRecovery": "Teneur & Récupération",
+    "byShift": "Production par Poste",
+    "bySection": "Production par Puits / Galerie / Section"
   },
   "maintenance": {
     "nav": "Planification de Maintenance",

@@ -6,6 +6,25 @@ import { requireMineId } from "../lib/mineScope";
 
 const router = Router();
 
+const ANALYTICS_PERIODS = ["daily", "weekly", "monthly"] as const;
+type AnalyticsPeriod = (typeof ANALYTICS_PERIODS)[number];
+
+function round2(n: number): number {
+  return Math.round(n * 100) / 100;
+}
+
+// Buckets a shift date into the key for its daily/weekly(Monday-start)/monthly period.
+function periodKey(date: Date, period: AnalyticsPeriod): string {
+  if (period === "monthly") return date.toISOString().slice(0, 7);
+  if (period === "weekly") {
+    const d = new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate()));
+    const isoDay = d.getUTCDay() || 7;
+    d.setUTCDate(d.getUTCDate() - isoDay + 1);
+    return d.toISOString().slice(0, 10);
+  }
+  return date.toISOString().slice(0, 10);
+}
+
 const recordSchema = z.object({
   siteId: z.string().min(1),
   zoneId: z.string().optional().nullable(),
@@ -13,7 +32,9 @@ const recordSchema = z.object({
   shift: z.enum(["DAY", "AFTERNOON", "NIGHT"]),
   mineralType: z.string().min(1),
   tonnesMined: z.coerce.number().nonnegative(),
+  tonnesProcessed: z.coerce.number().nonnegative().optional().nullable(),
   oreGrade: z.coerce.number().optional().nullable(),
+  recoveryRate: z.coerce.number().min(0).max(100).optional().nullable(),
   wasteRemoved: z.coerce.number().optional().nullable(),
   targetTonnes: z.coerce.number().optional().nullable(),
   notes: z.string().optional(),
@@ -29,7 +50,9 @@ const recordSelect = {
   shift: true,
   mineralType: true,
   tonnesMined: true,
+  tonnesProcessed: true,
   oreGrade: true,
+  recoveryRate: true,
   wasteRemoved: true,
   targetTonnes: true,
   notes: true,
@@ -169,6 +192,151 @@ router.get("/financial-summary", async (req, res) => {
       netMargin: totalEarnings - totalExpenses,
     },
     expensesByCategory: Object.entries(categoryTotals).map(([category, amount]) => ({ category, amount })),
+  });
+});
+
+router.get("/analytics", async (req, res) => {
+  const mineId = requireMineId(req, res);
+  if (!mineId) return;
+  const siteId = req.query.siteId as string | undefined;
+  const period: AnalyticsPeriod = (ANALYTICS_PERIODS as readonly string[]).includes(req.query.period as string)
+    ? (req.query.period as AnalyticsPeriod)
+    : "daily";
+  const days = Math.min(Math.max(Number(req.query.days) || 30, 1), 365);
+
+  const start = new Date();
+  start.setUTCHours(0, 0, 0, 0);
+  start.setUTCDate(start.getUTCDate() - (days - 1));
+
+  const records = await prisma.productionRecord.findMany({
+    where: { site: { mineId }, siteId: siteId || undefined, shiftDate: { gte: start } },
+    select: {
+      shiftDate: true,
+      shift: true,
+      tonnesMined: true,
+      tonnesProcessed: true,
+      oreGrade: true,
+      recoveryRate: true,
+      wasteRemoved: true,
+      targetTonnes: true,
+      zone: { select: { name: true } },
+    },
+    orderBy: { shiftDate: "asc" },
+  });
+
+  type Bucket = {
+    tonnesMined: number;
+    tonnesProcessed: number;
+    wasteRemoved: number;
+    targetTonnes: number;
+    gradeSum: number;
+    gradeCount: number;
+    recoverySum: number;
+    recoveryCount: number;
+  };
+  const emptyBucket = (): Bucket => ({
+    tonnesMined: 0,
+    tonnesProcessed: 0,
+    wasteRemoved: 0,
+    targetTonnes: 0,
+    gradeSum: 0,
+    gradeCount: 0,
+    recoverySum: 0,
+    recoveryCount: 0,
+  });
+
+  const buckets: Record<string, Bucket> = {};
+  const bucketOrder: string[] = [];
+  for (let i = 0; i < days; i++) {
+    const d = new Date(start);
+    d.setUTCDate(d.getUTCDate() + i);
+    const key = periodKey(d, period);
+    if (!buckets[key]) {
+      buckets[key] = emptyBucket();
+      bucketOrder.push(key);
+    }
+  }
+
+  const shiftTotals: Record<string, number> = { DAY: 0, AFTERNOON: 0, NIGHT: 0 };
+  const sectionTotals: Record<string, { tonnesMined: number; targetTonnes: number }> = {};
+
+  for (const r of records) {
+    const key = periodKey(r.shiftDate, period);
+    if (!buckets[key]) {
+      buckets[key] = emptyBucket();
+      bucketOrder.push(key);
+    }
+    const b = buckets[key];
+    b.tonnesMined += r.tonnesMined;
+    b.tonnesProcessed += r.tonnesProcessed ?? 0;
+    b.wasteRemoved += r.wasteRemoved ?? 0;
+    b.targetTonnes += r.targetTonnes ?? 0;
+    if (r.oreGrade != null) {
+      b.gradeSum += r.oreGrade;
+      b.gradeCount++;
+    }
+    if (r.recoveryRate != null) {
+      b.recoverySum += r.recoveryRate;
+      b.recoveryCount++;
+    }
+
+    shiftTotals[r.shift] = (shiftTotals[r.shift] ?? 0) + r.tonnesMined;
+
+    const sectionName = r.zone?.name ?? "Unassigned";
+    if (!sectionTotals[sectionName]) sectionTotals[sectionName] = { tonnesMined: 0, targetTonnes: 0 };
+    sectionTotals[sectionName].tonnesMined += r.tonnesMined;
+    sectionTotals[sectionName].targetTonnes += r.targetTonnes ?? 0;
+  }
+
+  bucketOrder.sort();
+
+  const trend = bucketOrder.map((key) => {
+    const b = buckets[key];
+    return {
+      period: key,
+      tonnesMined: round2(b.tonnesMined),
+      tonnesProcessed: round2(b.tonnesProcessed),
+      wasteRemoved: round2(b.wasteRemoved),
+      targetTonnes: round2(b.targetTonnes),
+      oreGrade: b.gradeCount ? round2(b.gradeSum / b.gradeCount) : null,
+      recoveryRate: b.recoveryCount ? round2(b.recoverySum / b.recoveryCount) : null,
+    };
+  });
+
+  const totals = records.reduce(
+    (acc, r) => {
+      acc.tonnesMined += r.tonnesMined;
+      acc.tonnesProcessed += r.tonnesProcessed ?? 0;
+      acc.wasteRemoved += r.wasteRemoved ?? 0;
+      acc.targetTonnes += r.targetTonnes ?? 0;
+      if (r.oreGrade != null) {
+        acc.gradeSum += r.oreGrade;
+        acc.gradeCount++;
+      }
+      if (r.recoveryRate != null) {
+        acc.recoverySum += r.recoveryRate;
+        acc.recoveryCount++;
+      }
+      return acc;
+    },
+    { tonnesMined: 0, tonnesProcessed: 0, wasteRemoved: 0, targetTonnes: 0, gradeSum: 0, gradeCount: 0, recoverySum: 0, recoveryCount: 0 }
+  );
+
+  res.json({
+    period,
+    trend,
+    byShift: (["DAY", "AFTERNOON", "NIGHT"] as const).map((s) => ({ shift: s, tonnesMined: round2(shiftTotals[s] ?? 0) })),
+    bySection: Object.entries(sectionTotals)
+      .map(([name, v]) => ({ name, tonnesMined: round2(v.tonnesMined), targetTonnes: round2(v.targetTonnes) }))
+      .sort((a, b) => b.tonnesMined - a.tonnesMined),
+    totals: {
+      tonnesMined: round2(totals.tonnesMined),
+      tonnesProcessed: round2(totals.tonnesProcessed),
+      wasteRemoved: round2(totals.wasteRemoved),
+      targetTonnes: round2(totals.targetTonnes),
+      avgOreGrade: totals.gradeCount ? round2(totals.gradeSum / totals.gradeCount) : null,
+      avgRecoveryRate: totals.recoveryCount ? round2(totals.recoverySum / totals.recoveryCount) : null,
+    },
   });
 });
 

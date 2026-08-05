@@ -25,7 +25,9 @@ function ProductionForm({ sites, zones, initial, onSubmit, onCancel }: {
   const [shift, setShift] = useState<ProductionShift>(initial?.shift ?? "DAY");
   const [mineralType, setMineralType] = useState(initial?.mineralType ?? "");
   const [tonnesMined, setTonnesMined] = useState(initial?.tonnesMined?.toString() ?? "");
+  const [tonnesProcessed, setTonnesProcessed] = useState(initial?.tonnesProcessed?.toString() ?? "");
   const [oreGrade, setOreGrade] = useState(initial?.oreGrade?.toString() ?? "");
+  const [recoveryRate, setRecoveryRate] = useState(initial?.recoveryRate?.toString() ?? "");
   const [wasteRemoved, setWasteRemoved] = useState(initial?.wasteRemoved?.toString() ?? "");
   const [targetTonnes, setTargetTonnes] = useState(initial?.targetTonnes?.toString() ?? "");
   const [notes, setNotes] = useState(initial?.notes ?? "");
@@ -44,7 +46,9 @@ function ProductionForm({ sites, zones, initial, onSubmit, onCancel }: {
         shift,
         mineralType,
         tonnesMined: Number(tonnesMined),
+        tonnesProcessed: tonnesProcessed ? Number(tonnesProcessed) : null,
         oreGrade: oreGrade ? Number(oreGrade) : null,
+        recoveryRate: recoveryRate ? Number(recoveryRate) : null,
         wasteRemoved: wasteRemoved ? Number(wasteRemoved) : null,
         targetTonnes: targetTonnes ? Number(targetTonnes) : null,
         notes: notes || undefined,
@@ -97,13 +101,23 @@ function ProductionForm({ sites, zones, initial, onSubmit, onCancel }: {
           <input className={inputClass} type="number" step="any" value={targetTonnes} onChange={(e) => setTargetTonnes(e.target.value)} />
         </div>
         <div>
+          <label className={labelClass}>{t("production.tonnesProcessed")}</label>
+          <input className={inputClass} type="number" step="any" value={tonnesProcessed} onChange={(e) => setTonnesProcessed(e.target.value)} />
+        </div>
+      </div>
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+        <div>
+          <label className={labelClass}>{t("production.wasteRemoved")}</label>
+          <input className={inputClass} type="number" step="any" value={wasteRemoved} onChange={(e) => setWasteRemoved(e.target.value)} />
+        </div>
+        <div>
           <label className={labelClass}>{t("production.oreGrade")}</label>
           <input className={inputClass} type="number" step="any" value={oreGrade} onChange={(e) => setOreGrade(e.target.value)} />
         </div>
-      </div>
-      <div>
-        <label className={labelClass}>{t("production.wasteRemoved")}</label>
-        <input className={inputClass} type="number" step="any" value={wasteRemoved} onChange={(e) => setWasteRemoved(e.target.value)} />
+        <div>
+          <label className={labelClass}>{t("production.recoveryRate")}</label>
+          <input className={inputClass} type="number" step="any" min="0" max="100" value={recoveryRate} onChange={(e) => setRecoveryRate(e.target.value)} />
+        </div>
       </div>
       <div>
         <label className={labelClass}>{t("common.description")}</label>
@@ -207,7 +221,9 @@ export default function ProductionTracking() {
               <th className="text-left px-4 py-2">{t("common.site")}</th>
               <th className="text-left px-4 py-2">{t("production.mineralType")}</th>
               <th className="text-left px-4 py-2">{t("production.tonnesMined")}</th>
+              <th className="text-left px-4 py-2">{t("production.tonnesProcessed")}</th>
               <th className="text-left px-4 py-2">{t("production.oreGrade")}</th>
+              <th className="text-left px-4 py-2">{t("production.recoveryRate")}</th>
               <th className="px-4 py-2"></th>
             </tr>
           </thead>
@@ -221,7 +237,9 @@ export default function ProductionTracking() {
                 <td className="px-4 py-2 text-mine-300">
                   {r.tonnesMined.toLocaleString()}{r.targetTonnes ? ` / ${r.targetTonnes.toLocaleString()}` : ""}
                 </td>
+                <td className="px-4 py-2 text-mine-300">{r.tonnesProcessed?.toLocaleString() ?? "—"}</td>
                 <td className="px-4 py-2 text-mine-300">{r.oreGrade ?? "—"}</td>
+                <td className="px-4 py-2 text-mine-300">{r.recoveryRate != null ? `${r.recoveryRate}%` : "—"}</td>
                 <td className="px-4 py-2 text-right">
                   <div className="flex justify-end gap-2">
                     {canEdit && (
@@ -235,7 +253,7 @@ export default function ProductionTracking() {
               </tr>
             ))}
             {records.length === 0 && (
-              <tr><td colSpan={7} className="px-4 py-6 text-center text-mine-400">{t("production.noneYet")}</td></tr>
+              <tr><td colSpan={9} className="px-4 py-6 text-center text-mine-400">{t("production.noneYet")}</td></tr>
             )}
           </tbody>
         </table>

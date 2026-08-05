@@ -175,7 +175,7 @@ export default function Messages() {
   const selectedSubtitle = selectedContact
     ? selectedContact.title
       ? t(`settings.invites.titles.${selectedContact.title}`)
-      : selectedContact.role
+      : t(`roles.${selectedContact.role}`)
     : selectedGroup
     ? t("messages.groupMemberCount", { count: selectedGroup.members.length })
     : null;
@@ -233,7 +233,7 @@ export default function Messages() {
                 )}
               </div>
               <div className="text-xs text-mine-400 truncate">
-                {c.title ? t(`settings.invites.titles.${c.title}`) : c.role}
+                {c.title ? t(`settings.invites.titles.${c.title}`) : t(`roles.${c.role}`)}
               </div>
             </button>
           ))}

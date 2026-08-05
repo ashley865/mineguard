@@ -3,9 +3,10 @@ import { useTranslation } from "react-i18next";
 import Modal from "./Modal";
 import { buttonDanger, buttonSecondary, inputClass, labelClass } from "./ui";
 
-export default function PasswordConfirmModal({ title, hint, onConfirm, onClose }: {
+export default function PasswordConfirmModal({ title, hint, confirmLabel, onConfirm, onClose }: {
   title: string;
   hint: string;
+  confirmLabel?: string;
   onConfirm: (password: string) => Promise<void>;
   onClose: () => void;
 }) {
@@ -46,7 +47,7 @@ export default function PasswordConfirmModal({ title, hint, onConfirm, onClose }
         <div className="flex justify-end gap-2 pt-2">
           <button type="button" className={buttonSecondary} onClick={onClose}>{t("common.cancel")}</button>
           <button type="submit" className={buttonDanger} disabled={submitting}>
-            {submitting ? t("common.saving") : t("common.delete")}
+            {submitting ? t("common.saving") : confirmLabel ?? t("common.delete")}
           </button>
         </div>
       </form>
