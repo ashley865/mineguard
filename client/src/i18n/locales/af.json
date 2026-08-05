@@ -189,7 +189,13 @@
     "hrWorkforceTitle": "MH-Werksmag-oorsig",
     "spotsToFillToday": "Poste om Vandag te Vul",
     "pendingLeaveRequests": "Hangende Verlofaansoeke",
-    "onShiftByCategory": "% op Diens volgens Personeelkategorie"
+    "onShiftByCategory": "% op Diens volgens Personeelkategorie",
+    "newHiresTitle": "Nuwe Aanstellings (Afgelope 30 Dae)",
+    "noNewHires": "Geen nuwe aanstellings in die afgelope 30 dae nie.",
+    "hiredOn": "Aangestel",
+    "workerWarningsTitle": "Werker-waarskuwings",
+    "noWorkerWarnings": "Geen werker-sertifisering- of opleidingswaarskuwings nie.",
+    "contactWorker": "Kontak"
   },
   "sites": {
     "title": "Terreine & Sones",
@@ -313,7 +319,9 @@
     },
     "colCheckIn": "Inklok",
     "colHoursWeek": "Ure (Wk)",
-    "showingCount": "{{count}} werkers"
+    "showingCount": "{{count}} werkers",
+    "manager": "Bestuurder",
+    "noManager": "Geen bestuurder toegeken nie"
   },
   "equipment": {
     "title": "Toerusting",
@@ -891,7 +899,17 @@
     "incidentLabel": "Voorval",
     "certificationLabel": "Sertifisering",
     "contractLabel": "Kontrak",
-    "dueOn": "Verval {{date}}"
+    "dueOn": "Verval {{date}}",
+    "invoiceLabel": "Faktuur",
+    "orderLabel": "Aankooporder",
+    "viewWorker": "Bekyk Werker",
+    "endContract": "Beëindig Kontrak",
+    "confirmEndContract": "Beëindig hierdie kontrakteur se kontrak? Dit sal hulle as BEËINDIG merk.",
+    "viewContractor": "Bekyk Kontrakteur",
+    "viewInvoice": "Bekyk Faktuur",
+    "cancelOrder": "Kanselleer Order",
+    "confirmCancelOrder": "Kanselleer hierdie aankooporder?",
+    "viewOrder": "Bekyk Order"
   },
   "contractors": {
     "nav": "Kontrakteurs",

@@ -51,9 +51,10 @@ function WorkerQrModal({ worker, onClose }: { worker: Worker; onClose: () => voi
   );
 }
 
-function WorkerForm({ sites, zones, initial, onSubmit, onCancel }: {
+function WorkerForm({ sites, zones, workers, initial, onSubmit, onCancel }: {
   sites: Site[];
   zones: Zone[];
+  workers: Worker[];
   initial?: Partial<Worker>;
   onSubmit: (data: any) => Promise<void>;
   onCancel: () => void;
@@ -67,6 +68,7 @@ function WorkerForm({ sites, zones, initial, onSubmit, onCancel }: {
   const [status, setStatus] = useState<WorkerStatus>(initial?.status ?? "OFF_SHIFT");
   const [siteId, setSiteId] = useState(initial?.siteId ?? sites[0]?.id ?? "");
   const [zoneId, setZoneId] = useState(initial?.zoneId ?? "");
+  const [managerId, setManagerId] = useState(initial?.managerId ?? "");
   const [nextOfKinName, setNextOfKinName] = useState(initial?.nextOfKinName ?? "");
   const [nextOfKinRelationship, setNextOfKinRelationship] = useState(initial?.nextOfKinRelationship ?? "");
   const [nextOfKinPhone, setNextOfKinPhone] = useState(initial?.nextOfKinPhone ?? "");
@@ -74,6 +76,7 @@ function WorkerForm({ sites, zones, initial, onSubmit, onCancel }: {
   const [error, setError] = useState<string | null>(null);
 
   const zonesForSite = zones.filter((z) => z.siteId === siteId);
+  const potentialManagers = workers.filter((w) => w.id !== initial?.id);
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
@@ -89,6 +92,7 @@ function WorkerForm({ sites, zones, initial, onSubmit, onCancel }: {
         status,
         siteId,
         zoneId: zoneId || null,
+        managerId: managerId || null,
         nextOfKinName: nextOfKinName || undefined,
         nextOfKinRelationship: nextOfKinRelationship || undefined,
         nextOfKinPhone: nextOfKinPhone || undefined,
@@ -143,13 +147,22 @@ function WorkerForm({ sites, zones, initial, onSubmit, onCancel }: {
           </select>
         </div>
       </div>
-      <div>
-        <label className={labelClass}>{t("common.status")}</label>
-        <select className={selectClass} value={status} onChange={(e) => setStatus(e.target.value as WorkerStatus)}>
-          <option value="ON_SHIFT">{t("workers.onShift")}</option>
-          <option value="OFF_SHIFT">{t("workers.offShift")}</option>
-          <option value="EMERGENCY">{t("workers.emergency")}</option>
-        </select>
+      <div className="grid grid-cols-2 gap-3">
+        <div>
+          <label className={labelClass}>{t("common.status")}</label>
+          <select className={selectClass} value={status} onChange={(e) => setStatus(e.target.value as WorkerStatus)}>
+            <option value="ON_SHIFT">{t("workers.onShift")}</option>
+            <option value="OFF_SHIFT">{t("workers.offShift")}</option>
+            <option value="EMERGENCY">{t("workers.emergency")}</option>
+          </select>
+        </div>
+        <div>
+          <label className={labelClass}>{t("workers.manager")}</label>
+          <select className={selectClass} value={managerId} onChange={(e) => setManagerId(e.target.value)}>
+            <option value="">{t("workers.noManager")}</option>
+            {potentialManagers.map((w) => <option key={w.id} value={w.id}>{w.name}</option>)}
+          </select>
+        </div>
       </div>
       <div className="border-t border-mine-800 pt-4">
         <div className="text-xs font-semibold text-mine-300 uppercase mb-2">{t("workers.nextOfKin")}</div>
@@ -334,6 +347,7 @@ export default function Workers() {
           <WorkerForm
             sites={sites}
             zones={zones}
+            workers={workers}
             initial={modal === "create" ? undefined : modal}
             onSubmit={(data) => (modal === "create" ? createWorker(data) : updateWorker(modal.id, data))}
             onCancel={() => setModal(null)}

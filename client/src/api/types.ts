@@ -68,7 +68,8 @@ export interface ExecutiveInvite {
 
 export interface ReviewNotification {
   id: string;
-  kind: "alert" | "incident" | "certification" | "contract";
+  kind: "alert" | "incident" | "certification" | "contract" | "invoice" | "order";
+  entityId?: string;
   title: string;
   severity: AlertSeverity;
   reviewStatus: ExecReviewStatus | "OVERDUE" | "SCHEDULED";
@@ -95,6 +96,26 @@ export interface MyAttendanceSummary {
   };
 }
 
+export interface HrNewHire {
+  id: string;
+  name: string;
+  role: string;
+  category: StaffCategory;
+  createdAt: string;
+  site?: { id: string; name: string } | null;
+  manager?: { id: string; name: string } | null;
+}
+
+export interface HrWorkerWarning {
+  id: string;
+  workerId: string;
+  workerName: string;
+  phone?: string | null;
+  message: string;
+  severity: "HIGH" | "MEDIUM" | "LOW";
+  daysUntil: number;
+}
+
 export interface HrWorkforceSnapshot {
   totalWorkers: number;
   onShiftWorkers: number;
@@ -102,6 +123,8 @@ export interface HrWorkforceSnapshot {
   byCategory: { category: StaffCategory; total: number; onShift: number; onShiftPct: number }[];
   pendingLeaveRequests: number;
   onLeaveToday: number;
+  newHires: HrNewHire[];
+  workerWarnings: HrWorkerWarning[];
 }
 
 export type SiteStatus = "OPERATIONAL" | "RESTRICTED" | "SHUT_DOWN";
@@ -210,6 +233,8 @@ export interface Worker {
   site?: { id: string; name: string };
   zoneId?: string | null;
   zone?: { id: string; name: string } | null;
+  managerId?: string | null;
+  manager?: { id: string; name: string } | null;
   nextOfKinName?: string | null;
   nextOfKinRelationship?: string | null;
   nextOfKinPhone?: string | null;

@@ -139,6 +139,7 @@ export default function WorkerProfileModal({
             <SectionCard title={t("workers.contactInfo")}>
               <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs">
                 <div><span className="text-mine-400">{t("common.phone")}:</span> {worker.phone ?? "—"}</div>
+                <div><span className="text-mine-400">{t("workers.manager")}:</span> {worker.manager?.name ?? "—"}</div>
                 <div><span className="text-mine-400">{t("workers.nextOfKin")}:</span> {worker.nextOfKinName ?? "—"}</div>
                 <div><span className="text-mine-400">{t("workers.nextOfKinRelationship")}:</span> {worker.nextOfKinRelationship ?? "—"}</div>
                 <div><span className="text-mine-400">{t("workers.nextOfKinPhone")}:</span> {worker.nextOfKinPhone ?? "—"}</div>

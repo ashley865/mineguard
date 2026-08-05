@@ -38,6 +38,7 @@ const workerSchema = z.object({
   status: z.enum(["ON_SHIFT", "OFF_SHIFT", "EMERGENCY"]).optional(),
   siteId: z.string().min(1),
   zoneId: z.string().optional().nullable(),
+  managerId: z.string().optional().nullable(),
   nextOfKinName: z.string().optional(),
   nextOfKinRelationship: z.string().optional(),
   nextOfKinPhone: z.string().optional(),
@@ -55,6 +56,8 @@ const workerSelect = {
   site: { select: { id: true, name: true } },
   zoneId: true,
   zone: { select: { id: true, name: true } },
+  managerId: true,
+  manager: { select: { id: true, name: true } },
   nextOfKinName: true,
   nextOfKinRelationship: true,
   nextOfKinPhone: true,
@@ -128,6 +131,10 @@ router.post("/", requireRole("ADMIN", "SUPERVISOR", "EXECUTIVE"), async (req, re
   if (!parsed.success) return res.status(400).json({ error: parsed.error.flatten() });
   const site = await prisma.site.findFirst({ where: { id: parsed.data.siteId, mineId } });
   if (!site) return res.status(404).json({ error: "Site not found" });
+  if (parsed.data.managerId) {
+    const manager = await prisma.worker.findFirst({ where: { id: parsed.data.managerId, site: { mineId } } });
+    if (!manager) return res.status(404).json({ error: "Manager not found" });
+  }
   try {
     const worker = await prisma.worker.create({ data: parsed.data, select: workerSelect });
     res.status(201).json(withHasPhoto(worker));
@@ -146,6 +153,11 @@ router.put("/:id", requireRole("ADMIN", "SUPERVISOR", "EXECUTIVE"), async (req, 
   if (parsed.data.siteId) {
     const site = await prisma.site.findFirst({ where: { id: parsed.data.siteId, mineId } });
     if (!site) return res.status(404).json({ error: "Site not found" });
+  }
+  if (parsed.data.managerId) {
+    if (parsed.data.managerId === existing.id) return res.status(400).json({ error: "A worker cannot manage themselves" });
+    const manager = await prisma.worker.findFirst({ where: { id: parsed.data.managerId, site: { mineId } } });
+    if (!manager) return res.status(404).json({ error: "Manager not found" });
   }
   try {
     const worker = await prisma.worker.update({ where: { id: existing.id }, data: parsed.data, select: workerSelect });

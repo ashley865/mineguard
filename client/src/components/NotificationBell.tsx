@@ -1,6 +1,8 @@
 import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { useNavigate } from "react-router-dom";
 import { api } from "../api/client";
+import { useAuth } from "../context/AuthContext";
 import { useSocket } from "../context/SocketContext";
 import { ReviewNotification } from "../api/types";
 import { SeverityBadge, StatusBadge } from "./Badges";
@@ -10,15 +12,46 @@ const SEEN_KEY = "mineguard_notifications_seen";
 
 export default function NotificationBell() {
   const { t } = useTranslation();
+  const { user } = useAuth();
+  const navigate = useNavigate();
   const socket = useSocket();
+  const canAct = user?.role === "ADMIN" || user?.role === "SUPERVISOR" || user?.role === "EXECUTIVE";
   const [items, setItems] = useState<ReviewNotification[]>([]);
   const [open, setOpen] = useState(false);
+  const [actingId, setActingId] = useState<string | null>(null);
   const [lastSeen, setLastSeen] = useState<number>(() => Number(localStorage.getItem(SEEN_KEY) ?? 0));
   const panelRef = useRef<HTMLDivElement>(null);
 
   async function load() {
     const res = await api.get<ReviewNotification[]>("/notifications");
     setItems(res.data);
+  }
+
+  function goTo(path: string) {
+    setOpen(false);
+    navigate(path);
+  }
+
+  async function endContract(n: ReviewNotification) {
+    if (!n.entityId || !confirm(t("notifications.confirmEndContract"))) return;
+    setActingId(n.id);
+    try {
+      await api.put(`/contractors/${n.entityId}`, { status: "TERMINATED" });
+      await load();
+    } finally {
+      setActingId(null);
+    }
+  }
+
+  async function cancelOrder(n: ReviewNotification) {
+    if (!n.entityId || !confirm(t("notifications.confirmCancelOrder"))) return;
+    setActingId(n.id);
+    try {
+      await api.put(`/procurement/orders/${n.entityId}`, { status: "CANCELLED" });
+      await load();
+    } finally {
+      setActingId(null);
+    }
   }
 
   useEffect(() => {
@@ -99,10 +132,56 @@ export default function NotificationBell() {
                 </div>
                 {n.reviewNote && <div className="text-xs text-mine-400 mt-1 italic">"{n.reviewNote}"</div>}
                 <div className="text-[10px] text-mine-500 mt-1">
-                  {(n.kind === "certification" || n.kind === "contract") && n.reviewStatus === "SCHEDULED"
+                  {n.reviewStatus === "SCHEDULED"
                     ? t("notifications.dueOn", { date: new Date(n.reviewedAt).toLocaleDateString() })
                     : new Date(n.reviewedAt).toLocaleString()}
                 </div>
+                {n.kind !== "alert" && n.kind !== "incident" && (
+                  <div className="flex items-center gap-2 mt-2">
+                    {n.kind === "certification" && (
+                      <button className="px-2.5 py-1 rounded-lg text-xs font-medium text-mine-300 hover:text-mine-50 hover:bg-mine-800 transition-colors" onClick={() => goTo("/workers")}>
+                        {t("notifications.viewWorker")}
+                      </button>
+                    )}
+                    {n.kind === "contract" && (
+                      <>
+                        {canAct && (
+                          <button
+                            className="px-2.5 py-1 rounded-lg text-xs font-semibold text-danger-400 hover:bg-danger-500/10 transition-colors disabled:opacity-50"
+                            disabled={actingId === n.id}
+                            onClick={() => endContract(n)}
+                          >
+                            {actingId === n.id ? t("common.saving") : t("notifications.endContract")}
+                          </button>
+                        )}
+                        <button className="px-2.5 py-1 rounded-lg text-xs font-medium text-mine-300 hover:text-mine-50 hover:bg-mine-800 transition-colors" onClick={() => goTo("/contractors")}>
+                          {t("notifications.viewContractor")}
+                        </button>
+                      </>
+                    )}
+                    {n.kind === "invoice" && (
+                      <button className="px-2.5 py-1 rounded-lg text-xs font-medium text-mine-300 hover:text-mine-50 hover:bg-mine-800 transition-colors" onClick={() => goTo("/invoices")}>
+                        {t("notifications.viewInvoice")}
+                      </button>
+                    )}
+                    {n.kind === "order" && (
+                      <>
+                        {canAct && (
+                          <button
+                            className="px-2.5 py-1 rounded-lg text-xs font-semibold text-danger-400 hover:bg-danger-500/10 transition-colors disabled:opacity-50"
+                            disabled={actingId === n.id}
+                            onClick={() => cancelOrder(n)}
+                          >
+                            {actingId === n.id ? t("common.saving") : t("notifications.cancelOrder")}
+                          </button>
+                        )}
+                        <button className="px-2.5 py-1 rounded-lg text-xs font-medium text-mine-300 hover:text-mine-50 hover:bg-mine-800 transition-colors" onClick={() => goTo("/procurement")}>
+                          {t("notifications.viewOrder")}
+                        </button>
+                      </>
+                    )}
+                  </div>
+                )}
               </div>
             ))}
           </div>

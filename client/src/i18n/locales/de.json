@@ -189,7 +189,13 @@
     "hrWorkforceTitle": "HR-Personalübersicht",
     "spotsToFillToday": "Heute zu Besetzende Stellen",
     "pendingLeaveRequests": "Ausstehende Urlaubsanträge",
-    "onShiftByCategory": "% im Dienst nach Personalkategorie"
+    "onShiftByCategory": "% im Dienst nach Personalkategorie",
+    "newHiresTitle": "Neueinstellungen (Letzte 30 Tage)",
+    "noNewHires": "Keine Neueinstellungen in den letzten 30 Tagen.",
+    "hiredOn": "Eingestellt am",
+    "workerWarningsTitle": "Mitarbeiterwarnungen",
+    "noWorkerWarnings": "Keine Zertifizierungs- oder Schulungswarnungen für Mitarbeiter.",
+    "contactWorker": "Kontaktieren"
   },
   "sites": {
     "title": "Standorte & Zonen",
@@ -313,7 +319,9 @@
     },
     "colCheckIn": "Einstempeln",
     "colHoursWeek": "Stunden (Wo.)",
-    "showingCount": "{{count}} Arbeiter"
+    "showingCount": "{{count}} Arbeiter",
+    "manager": "Vorgesetzter",
+    "noManager": "Kein Vorgesetzter zugewiesen"
   },
   "equipment": {
     "title": "Ausrüstung",
@@ -891,7 +899,17 @@
     "incidentLabel": "Vorfall",
     "certificationLabel": "Zertifizierung",
     "contractLabel": "Vertrag",
-    "dueOn": "Fällig am {{date}}"
+    "dueOn": "Fällig am {{date}}",
+    "invoiceLabel": "Rechnung",
+    "orderLabel": "Bestellung",
+    "viewWorker": "Mitarbeiter Anzeigen",
+    "endContract": "Vertrag Beenden",
+    "confirmEndContract": "Vertrag mit diesem Auftragnehmer beenden? Der Status wird auf BEENDET gesetzt.",
+    "viewContractor": "Auftragnehmer Anzeigen",
+    "viewInvoice": "Rechnung Anzeigen",
+    "cancelOrder": "Bestellung Stornieren",
+    "confirmCancelOrder": "Diese Bestellung stornieren?",
+    "viewOrder": "Bestellung Anzeigen"
   },
   "contractors": {
     "nav": "Auftragnehmer",

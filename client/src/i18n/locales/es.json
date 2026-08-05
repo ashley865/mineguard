@@ -189,7 +189,13 @@
     "hrWorkforceTitle": "Panorama de Personal (RR. HH.)",
     "spotsToFillToday": "Puestos por Cubrir Hoy",
     "pendingLeaveRequests": "Solicitudes de Permiso Pendientes",
-    "onShiftByCategory": "% en Turno por Categoría de Personal"
+    "onShiftByCategory": "% en Turno por Categoría de Personal",
+    "newHiresTitle": "Nuevas Contrataciones (Últimos 30 Días)",
+    "noNewHires": "No hay nuevas contrataciones en los últimos 30 días.",
+    "hiredOn": "Contratado",
+    "workerWarningsTitle": "Advertencias de Trabajadores",
+    "noWorkerWarnings": "Sin advertencias de certificación o capacitación de trabajadores.",
+    "contactWorker": "Contactar"
   },
   "sites": {
     "title": "Sitios y Zonas",
@@ -313,7 +319,9 @@
     },
     "colCheckIn": "Entrada",
     "colHoursWeek": "Horas (Sem.)",
-    "showingCount": "{{count}} trabajadores"
+    "showingCount": "{{count}} trabajadores",
+    "manager": "Gerente",
+    "noManager": "Sin gerente asignado"
   },
   "equipment": {
     "title": "Equipos",
@@ -891,7 +899,17 @@
     "incidentLabel": "Incidente",
     "certificationLabel": "Certificación",
     "contractLabel": "Contrato",
-    "dueOn": "Vence el {{date}}"
+    "dueOn": "Vence el {{date}}",
+    "invoiceLabel": "Factura",
+    "orderLabel": "Orden de Compra",
+    "viewWorker": "Ver Trabajador",
+    "endContract": "Finalizar Contrato",
+    "confirmEndContract": "¿Finalizar el contrato de este contratista? Esto lo marcará como TERMINADO.",
+    "viewContractor": "Ver Contratista",
+    "viewInvoice": "Ver Factura",
+    "cancelOrder": "Cancelar Orden",
+    "confirmCancelOrder": "¿Cancelar esta orden de compra?",
+    "viewOrder": "Ver Orden"
   },
   "contractors": {
     "nav": "Contratistas",

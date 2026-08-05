@@ -189,7 +189,13 @@
     "hrWorkforceTitle": "Aperçu des Effectifs (RH)",
     "spotsToFillToday": "Postes à Pourvoir Aujourd'hui",
     "pendingLeaveRequests": "Demandes de Congé en Attente",
-    "onShiftByCategory": "% en Service par Catégorie de Personnel"
+    "onShiftByCategory": "% en Service par Catégorie de Personnel",
+    "newHiresTitle": "Nouvelles Embauches (30 Derniers Jours)",
+    "noNewHires": "Aucune nouvelle embauche au cours des 30 derniers jours.",
+    "hiredOn": "Embauché le",
+    "workerWarningsTitle": "Alertes Travailleurs",
+    "noWorkerWarnings": "Aucune alerte de certification ou de formation des travailleurs.",
+    "contactWorker": "Contacter"
   },
   "sites": {
     "title": "Sites et zones",
@@ -313,7 +319,9 @@
     },
     "colCheckIn": "Arrivée",
     "colHoursWeek": "Heures (Sem.)",
-    "showingCount": "{{count}} travailleurs"
+    "showingCount": "{{count}} travailleurs",
+    "manager": "Responsable",
+    "noManager": "Aucun responsable assigné"
   },
   "equipment": {
     "title": "Équipements",
@@ -891,7 +899,17 @@
     "incidentLabel": "Incident",
     "certificationLabel": "Certification",
     "contractLabel": "Contrat",
-    "dueOn": "Échéance {{date}}"
+    "dueOn": "Échéance {{date}}",
+    "invoiceLabel": "Facture",
+    "orderLabel": "Bon de Commande",
+    "viewWorker": "Voir le Travailleur",
+    "endContract": "Résilier le Contrat",
+    "confirmEndContract": "Résilier le contrat de cet entrepreneur ? Il sera marqué comme RÉSILIÉ.",
+    "viewContractor": "Voir l'Entrepreneur",
+    "viewInvoice": "Voir la Facture",
+    "cancelOrder": "Annuler la Commande",
+    "confirmCancelOrder": "Annuler ce bon de commande ?",
+    "viewOrder": "Voir la Commande"
   },
   "contractors": {
     "nav": "Sous-traitants",

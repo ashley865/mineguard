@@ -380,6 +380,9 @@ model Worker {
   site          Site         @relation(fields: [siteId], references: [id], onDelete: Cascade)
   zoneId        String?
   zone          Zone?        @relation(fields: [zoneId], references: [id], onDelete: SetNull)
+  managerId     String?
+  manager       Worker?      @relation("WorkerManager", fields: [managerId], references: [id], onDelete: SetNull)
+  directReports Worker[]     @relation("WorkerManager")
 
   nextOfKinName         String?
   nextOfKinRelationship String?

@@ -189,7 +189,13 @@
     "hrWorkforceTitle": "HR Workforce Snapshot",
     "spotsToFillToday": "Spots to Fill Today",
     "pendingLeaveRequests": "Pending Leave Requests",
-    "onShiftByCategory": "On Shift % by Staff Category"
+    "onShiftByCategory": "On Shift % by Staff Category",
+    "newHiresTitle": "New Hires (Last 30 Days)",
+    "noNewHires": "No new hires in the last 30 days.",
+    "hiredOn": "Hired",
+    "workerWarningsTitle": "Worker Warnings",
+    "noWorkerWarnings": "No worker certification or training warnings.",
+    "contactWorker": "Contact"
   },
   "sites": {
     "title": "Sites & Zones",
@@ -263,6 +269,8 @@
     "nextOfKinName": "Next of kin name",
     "nextOfKinRelationship": "Relationship",
     "nextOfKinPhone": "Next of kin phone",
+    "manager": "Manager",
+    "noManager": "No manager assigned",
     "showBadge": "QR badge",
     "checkIn": "Check in",
     "checkOut": "Check out",
@@ -891,7 +899,17 @@
     "incidentLabel": "Incident",
     "certificationLabel": "Certification",
     "contractLabel": "Contract",
-    "dueOn": "Due {{date}}"
+    "invoiceLabel": "Invoice",
+    "orderLabel": "Purchase Order",
+    "dueOn": "Due {{date}}",
+    "viewWorker": "View Worker",
+    "endContract": "End Contract",
+    "confirmEndContract": "Terminate this contractor's contract? This marks them as TERMINATED.",
+    "viewContractor": "View Contractor",
+    "viewInvoice": "View Invoice",
+    "cancelOrder": "Cancel Order",
+    "confirmCancelOrder": "Cancel this purchase order?",
+    "viewOrder": "View Order"
   },
   "contractors": {
     "nav": "Contractors",

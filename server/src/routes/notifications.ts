@@ -9,11 +9,16 @@ const router = Router();
 router.use(requireAuth);
 
 const EXPIRY_WARNING_DAYS = 30;
+const ORDER_STUCK_DAYS = 14;
 
 // Executive titles whose department owns worker certification/training compliance.
 const CERTIFICATION_AUDIENCE: ExecutiveTitle[] = ["HR_MANAGER"];
 // Executive titles whose department owns contractor/vendor contract terms.
 const CONTRACT_AUDIENCE: ExecutiveTitle[] = ["GENERAL_MANAGER", "COO", "OPERATIONS_MANAGER", "COMPLIANCE_OFFICER"];
+// Executive titles who need visibility into outstanding client invoice deadlines.
+const INVOICE_AUDIENCE: ExecutiveTitle[] = ["CFO", "GENERAL_MANAGER"];
+// Executive titles who own procurement / purchase order approvals.
+const ORDER_AUDIENCE: ExecutiveTitle[] = ["GENERAL_MANAGER", "COO", "OPERATIONS_MANAGER", "CFO"];
 
 function daysFromNow(date: Date): number {
   return Math.ceil((date.getTime() - Date.now()) / (1000 * 60 * 60 * 24));
@@ -32,8 +37,10 @@ router.get("/", async (req, res) => {
 
   const seesCertifications = role === "ADMIN" || (role === "EXECUTIVE" && !!title && CERTIFICATION_AUDIENCE.includes(title));
   const seesContracts = role === "ADMIN" || (role === "EXECUTIVE" && !!title && CONTRACT_AUDIENCE.includes(title));
+  const seesInvoices = role === "ADMIN" || (role === "EXECUTIVE" && !!title && INVOICE_AUDIENCE.includes(title));
+  const seesOrders = role === "ADMIN" || (role === "EXECUTIVE" && !!title && ORDER_AUDIENCE.includes(title));
 
-  const [reviewedAlerts, reviewedIncidents, certificates, trainingRecords, contractors] = await Promise.all([
+  const [reviewedAlerts, reviewedIncidents, certificates, trainingRecords, contractors, invoices, orders] = await Promise.all([
     prisma.alert.findMany({
       where: { reviewStatus: { in: ["APPROVED", "REJECTED"] }, site: { mineId } },
       include: {
@@ -55,19 +62,31 @@ router.get("/", async (req, res) => {
     seesCertifications
       ? prisma.certificate.findMany({
           where: { status: "ACTIVE", expiryDate: { not: null }, worker: { site: { mineId } } },
-          include: { worker: { select: { name: true, site: { select: { id: true, name: true } } } } },
+          include: { worker: { select: { id: true, name: true, phone: true, site: { select: { id: true, name: true } } } } },
         })
       : Promise.resolve([]),
     seesCertifications
       ? prisma.trainingRecord.findMany({
           where: { expiryDate: { not: null }, worker: { site: { mineId } } },
-          include: { worker: { select: { name: true, site: { select: { id: true, name: true } } } } },
+          include: { worker: { select: { id: true, name: true, phone: true, site: { select: { id: true, name: true } } } } },
         })
       : Promise.resolve([]),
     seesContracts
       ? prisma.contractor.findMany({
           where: { status: "ACTIVE", site: { mineId } },
           include: { site: { select: { id: true, name: true } } },
+        })
+      : Promise.resolve([]),
+    seesInvoices
+      ? prisma.invoice.findMany({
+          where: { status: { in: ["SENT", "OVERDUE"] }, site: { mineId } },
+          include: { site: { select: { id: true, name: true } }, lines: { select: { lineTotal: true } } },
+        })
+      : Promise.resolve([]),
+    seesOrders
+      ? prisma.purchaseOrder.findMany({
+          where: { status: { in: ["SUBMITTED", "APPROVED"] }, site: { mineId } },
+          include: { supplier: { select: { name: true } }, site: { select: { id: true, name: true } } },
         })
       : Promise.resolve([]),
   ]);
@@ -80,6 +99,7 @@ router.get("/", async (req, res) => {
         return {
           id: `certificate-${c.id}`,
           kind: "certification" as const,
+          entityId: c.worker.id,
           title: `${c.type.replace(/_/g, " ")} Certificate of Competency — ${c.worker.name}`,
           severity: (days < 0 ? "HIGH" : days <= 7 ? "MEDIUM" : "LOW") as "HIGH" | "MEDIUM" | "LOW",
           reviewStatus: (days < 0 ? "OVERDUE" : "SCHEDULED") as "OVERDUE" | "SCHEDULED",
@@ -94,6 +114,7 @@ router.get("/", async (req, res) => {
         return {
           id: `training-${tr.id}`,
           kind: "certification" as const,
+          entityId: tr.worker.id,
           title: `${tr.courseName} training — ${tr.worker.name}`,
           severity: (days < 0 ? "MEDIUM" : "LOW") as "MEDIUM" | "LOW",
           reviewStatus: (days < 0 ? "OVERDUE" : "SCHEDULED") as "OVERDUE" | "SCHEDULED",
@@ -114,6 +135,7 @@ router.get("/", async (req, res) => {
         return {
           id: `contract-${contractor.id}-${check.label}`,
           kind: "contract" as const,
+          entityId: contractor.id,
           title: `${check.label} — ${contractor.companyName}`,
           severity: (days < 0 ? "HIGH" : days <= 7 ? "MEDIUM" : "LOW") as "HIGH" | "MEDIUM" | "LOW",
           reviewStatus: (days < 0 ? "OVERDUE" : "SCHEDULED") as "OVERDUE" | "SCHEDULED",
@@ -122,6 +144,39 @@ router.get("/", async (req, res) => {
         };
       });
   });
+
+  const invoiceItems = invoices
+    .map((inv) => {
+      const days = daysFromNow(inv.dueDate);
+      const subtotal = inv.lines.reduce((sum, l) => sum + l.lineTotal, 0);
+      const total = subtotal * (1 + inv.vatRate / 100);
+      return { inv, days, total };
+    })
+    .filter(({ days }) => days <= EXPIRY_WARNING_DAYS)
+    .map(({ inv, days, total }) => ({
+      id: `invoice-${inv.id}`,
+      kind: "invoice" as const,
+      entityId: inv.id,
+      title: `Invoice ${inv.invoiceNumber} — ${inv.clientName} (${inv.currency} ${Math.round(total).toLocaleString()})`,
+      severity: (days < 0 ? "HIGH" : days <= 7 ? "MEDIUM" : "LOW") as "HIGH" | "MEDIUM" | "LOW",
+      reviewStatus: (days < 0 ? "OVERDUE" : "SCHEDULED") as "OVERDUE" | "SCHEDULED",
+      reviewedAt: inv.dueDate,
+      site: inv.site,
+    }));
+
+  const orderItems = orders
+    .map((o) => ({ o, ageDays: Math.floor((Date.now() - o.createdAt.getTime()) / 86400000) }))
+    .filter(({ ageDays }) => ageDays >= ORDER_STUCK_DAYS)
+    .map(({ o, ageDays }) => ({
+      id: `order-${o.id}`,
+      kind: "order" as const,
+      entityId: o.id,
+      title: `Purchase Order ${o.orderNumber} — ${o.supplier.name} (${o.status.replace(/_/g, " ")}, ${ageDays}d old)`,
+      severity: (ageDays >= 30 ? "HIGH" : ageDays >= 21 ? "MEDIUM" : "LOW") as "HIGH" | "MEDIUM" | "LOW",
+      reviewStatus: "OVERDUE" as const,
+      reviewedAt: new Date(o.createdAt.getTime() + ORDER_STUCK_DAYS * 86400000),
+      site: o.site,
+    }));
 
   const items = [
     ...reviewedAlerts.map((a) => ({
@@ -148,6 +203,8 @@ router.get("/", async (req, res) => {
     })),
     ...certificationItems,
     ...contractItems,
+    ...invoiceItems,
+    ...orderItems,
   ]
     .filter((item) => item.reviewedAt)
     .sort((a, b) => new Date(b.reviewedAt!).getTime() - new Date(a.reviewedAt!).getTime())

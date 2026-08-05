@@ -54,6 +54,67 @@ router.get("/hr-workforce", async (req, res) => {
   const totalWorkers = workers.length;
   const onShiftWorkers = workers.filter((w) => w.status === "ON_SHIFT").length;
 
+  const thirtyDaysAgo = new Date(Date.now() - 30 * 86400000);
+  function daysFromNow(date: Date): number {
+    return Math.ceil((date.getTime() - Date.now()) / 86400000);
+  }
+
+  const [newHires, expiringCerts, expiringTraining] = await Promise.all([
+    prisma.worker.findMany({
+      where: { site: { mineId }, createdAt: { gte: thirtyDaysAgo } },
+      select: {
+        id: true,
+        name: true,
+        role: true,
+        category: true,
+        createdAt: true,
+        site: { select: { id: true, name: true } },
+        manager: { select: { id: true, name: true } },
+      },
+      orderBy: { createdAt: "desc" },
+      take: 25,
+    }),
+    prisma.certificate.findMany({
+      where: { status: "ACTIVE", expiryDate: { not: null }, worker: { site: { mineId } } },
+      select: { id: true, type: true, expiryDate: true, worker: { select: { id: true, name: true, phone: true } } },
+    }),
+    prisma.trainingRecord.findMany({
+      where: { expiryDate: { not: null }, worker: { site: { mineId } } },
+      select: { id: true, courseName: true, expiryDate: true, worker: { select: { id: true, name: true, phone: true } } },
+    }),
+  ]);
+
+  const workerWarnings = [
+    ...expiringCerts
+      .filter((c) => c.expiryDate && daysFromNow(c.expiryDate) <= 30)
+      .map((c) => {
+        const days = daysFromNow(c.expiryDate!);
+        return {
+          id: `certificate-${c.id}`,
+          workerId: c.worker.id,
+          workerName: c.worker.name,
+          phone: c.worker.phone,
+          message: `${c.type.replace(/_/g, " ")} certificate ${days < 0 ? `overdue by ${Math.abs(days)}d` : `expires in ${days}d`}`,
+          severity: (days < 0 ? "HIGH" : days <= 7 ? "MEDIUM" : "LOW") as "HIGH" | "MEDIUM" | "LOW",
+          daysUntil: days,
+        };
+      }),
+    ...expiringTraining
+      .filter((tr) => tr.expiryDate && daysFromNow(tr.expiryDate) <= 30)
+      .map((tr) => {
+        const days = daysFromNow(tr.expiryDate!);
+        return {
+          id: `training-${tr.id}`,
+          workerId: tr.worker.id,
+          workerName: tr.worker.name,
+          phone: tr.worker.phone,
+          message: `${tr.courseName} training ${days < 0 ? `overdue by ${Math.abs(days)}d` : `due in ${days}d`}`,
+          severity: (days < 0 ? "MEDIUM" : "LOW") as "MEDIUM" | "LOW",
+          daysUntil: days,
+        };
+      }),
+  ].sort((a, b) => a.daysUntil - b.daysUntil);
+
   res.json({
     totalWorkers,
     onShiftWorkers,
@@ -61,6 +122,8 @@ router.get("/hr-workforce", async (req, res) => {
     byCategory,
     pendingLeaveRequests,
     onLeaveToday,
+    newHires,
+    workerWarnings,
   });
 });
 

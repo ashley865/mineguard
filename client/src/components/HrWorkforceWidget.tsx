@@ -1,8 +1,10 @@
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { Link } from "react-router-dom";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from "recharts";
 import { api } from "../api/client";
 import { HrWorkforceSnapshot } from "../api/types";
+import { SeverityBadge } from "./Badges";
 import { cardClass } from "./ui";
 
 const CHART_TOOLTIP_STYLE = { background: "#fafafa", border: "1px solid #e5e5e5", fontSize: 11 };
@@ -42,6 +44,7 @@ export default function HrWorkforceWidget() {
   }));
 
   return (
+    <>
     <div className={`${cardClass} p-3`}>
       <h2 className="text-xs font-semibold mb-2">{t("executive.hrWorkforceTitle")}</h2>
       <div className="grid grid-cols-2 md:grid-cols-4 gap-2 mb-3">
@@ -69,5 +72,71 @@ export default function HrWorkforceWidget() {
         </ResponsiveContainer>
       </div>
     </div>
+
+    {/* New Hires */}
+    <div className={`${cardClass} p-3`}>
+      <h2 className="text-xs font-semibold mb-2">{t("executive.newHiresTitle")}</h2>
+      {snapshot.newHires.length === 0 ? (
+        <div className="text-mine-400 text-xs">{t("executive.noNewHires")}</div>
+      ) : (
+        <div className="overflow-x-auto">
+          <table className="w-full text-xs">
+            <thead className="text-mine-400 uppercase">
+              <tr>
+                <th className="text-left pr-3 py-1.5">{t("workers.colName")}</th>
+                <th className="text-left pr-3 py-1.5">{t("workers.colRole")}</th>
+                <th className="text-left pr-3 py-1.5">{t("workers.colSiteZone")}</th>
+                <th className="text-left pr-3 py-1.5">{t("workers.manager")}</th>
+                <th className="text-left py-1.5">{t("executive.hiredOn")}</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-mine-800">
+              {snapshot.newHires.map((h) => (
+                <tr key={h.id}>
+                  <td className="pr-3 py-1.5 font-medium">{h.name}</td>
+                  <td className="pr-3 py-1.5 text-mine-300">{h.role}</td>
+                  <td className="pr-3 py-1.5 text-mine-300">{h.site?.name ?? "—"}</td>
+                  <td className="pr-3 py-1.5 text-mine-300">{h.manager?.name ?? t("workers.noManager")}</td>
+                  <td className="py-1.5 text-mine-400">{new Date(h.createdAt).toLocaleDateString()}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+    </div>
+
+    {/* Worker Warnings */}
+    <div className={`${cardClass} p-3`}>
+      <h2 className="text-xs font-semibold mb-2">{t("executive.workerWarningsTitle")}</h2>
+      {snapshot.workerWarnings.length === 0 ? (
+        <div className="text-mine-400 text-xs">{t("executive.noWorkerWarnings")}</div>
+      ) : (
+        <div className="space-y-1.5">
+          {snapshot.workerWarnings.map((w) => (
+            <div key={w.id} className="border border-mine-800 rounded-lg p-2.5 flex items-center justify-between gap-3">
+              <div className="min-w-0">
+                <div className="flex items-center gap-2 mb-0.5">
+                  <SeverityBadge severity={w.severity} />
+                  <span className="text-xs font-semibold truncate">{w.workerName}</span>
+                </div>
+                <div className="text-xs text-mine-400 truncate">{w.message}</div>
+              </div>
+              <div className="flex items-center gap-2 shrink-0">
+                {w.phone && (
+                  <a href={`tel:${w.phone}`} className="px-2.5 py-1 rounded-lg text-xs font-medium text-hazard-400 hover:bg-mine-800 transition-colors">
+                    {t("executive.contactWorker")}
+                  </a>
+                )}
+                <Link to="/workers" className="px-2.5 py-1 rounded-lg text-xs font-medium text-mine-300 hover:text-mine-50 hover:bg-mine-800 transition-colors">
+                  {t("workers.viewProfile")}
+                </Link>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  </>
   );
 }
