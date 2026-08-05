@@ -195,7 +195,9 @@
     "hiredOn": "Contratado",
     "workerWarningsTitle": "Advertencias de Trabajadores",
     "noWorkerWarnings": "Sin advertencias de certificación o capacitación de trabajadores.",
-    "contactWorker": "Contactar"
+    "contactWorker": "Contactar",
+    "visitorHistoryTitle": "Historial de Visitantes",
+    "noVisitorHistory": "Aún no se han registrado visitantes."
   },
   "sites": {
     "title": "Sitios y Zonas",
@@ -878,7 +880,33 @@
       "safetyInspections": "Inspecciones de Seguridad",
       "regulatoryNotices": "Notificaciones Regulatorias",
       "contractors": "Contratistas"
-    }
+    },
+    "tabOverview": "Resumen",
+    "tabBalanceSheet": "Balance General",
+    "tabJournal": "Diario",
+    "lastNMonths": "Últimos {{count}} meses",
+    "balanceSheetNote": "Cuentas de gestión, estimadas a partir de las transacciones registradas al {{date}}. No sustituye a los estados financieros auditados formales.",
+    "assets": "Activos",
+    "cashAndEquivalents": "Efectivo y Equivalentes",
+    "accountsReceivable": "Cuentas por Cobrar",
+    "inventoryValue": "Inventario",
+    "totalAssets": "Total de Activos",
+    "liabilities": "Pasivos",
+    "accountsPayable": "Cuentas por Pagar",
+    "totalLiabilities": "Total de Pasivos",
+    "equity": "Patrimonio",
+    "retainedEarnings": "Utilidades Retenidas",
+    "totalEquity": "Total de Patrimonio",
+    "journalDate": "Fecha",
+    "journalDescription": "Descripción",
+    "journalType": "Tipo",
+    "journalAmount": "Monto",
+    "journalBalance": "Saldo",
+    "journalTypes": {
+      "INCOME": "Ingreso",
+      "EXPENSE": "Gasto"
+    },
+    "noJournalEntries": "No hay asientos en este período."
   },
   "attendance": {
     "clockIn": "Marcar Entrada",
@@ -963,7 +991,8 @@
     "colCheckIn": "Entrada",
     "colCheckOut": "Salida",
     "checkOut": "Registrar salida",
-    "noneYet": "Aún no hay visitantes registrados."
+    "noneYet": "Aún no hay visitantes registrados.",
+    "colCompany": "Empresa"
   },
   "visitorCheckin": {
     "declarationsRequired": "Por favor, confirma las declaraciones de inducción de seguridad, consentimiento POPIA e indemnización antes de registrarte.",
@@ -1773,5 +1802,36 @@
     },
     "totalCosts": "Costos Totales",
     "costsBySource": "Costos por Origen"
+  },
+  "executiveRequests": {
+    "nav": "Solicitudes",
+    "subtitle": "Envía solicitudes de acción al departamento de otro ejecutivo y sigue su progreso",
+    "newRequest": "+ Nueva Solicitud",
+    "newRequestTitle": "Nueva Solicitud",
+    "sendTo": "Enviar A",
+    "category": "Categoría",
+    "categories": {
+      "PAYROLL_PAYMENT": "Pago de Nómina",
+      "INVOICE_APPROVAL": "Aprobación de Factura",
+      "PURCHASE_APPROVAL": "Aprobación de Compra",
+      "BUDGET_APPROVAL": "Aprobación de Presupuesto",
+      "DOCUMENT_REVIEW": "Revisión de Documento",
+      "GENERAL": "General"
+    },
+    "subject": "Asunto",
+    "message": "Mensaje",
+    "send": "Enviar Solicitud",
+    "createError": "No se pudo enviar esta solicitud",
+    "tabReceived": "Recibidas ({{count}})",
+    "tabSent": "Enviadas ({{count}})",
+    "noneReceived": "Aún no se han recibido solicitudes.",
+    "noneSent": "Aún no se han enviado solicitudes.",
+    "toLine": "Para {{title}}",
+    "fromLine": "De {{name}}",
+    "responseNote": "Nota de {{name}}",
+    "notePlaceholder": "Nota opcional…",
+    "approve": "Aprobar",
+    "reject": "Rechazar",
+    "markCompleted": "Marcar Completada"
   }
 }

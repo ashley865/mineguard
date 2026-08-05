@@ -120,6 +120,7 @@ export default function Layout() {
       items: [
         ...(canUseScanner ? [{ to: "/scanner", label: t("scanner.nav") }] : []),
         ...(canMessage ? [{ to: "/messages", label: t("messages.nav") }] : []),
+        ...(canMessage ? [{ to: "/executive-requests", label: t("executiveRequests.nav") }] : []),
       ],
     },
   ];

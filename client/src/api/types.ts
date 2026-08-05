@@ -1378,7 +1378,7 @@ export interface Invoice {
   createdAt: string;
 }
 
-export type PayeeType = "COMPANY" | "INDIVIDUAL" | "BUYER" | "CONTRACTOR";
+export type PayeeType = "COMPANY" | "INDIVIDUAL" | "BUYER" | "CONTRACTOR" | "EMPLOYEE";
 
 export interface Payee {
   id: string;
@@ -1440,6 +1440,47 @@ export interface CostSummary {
   months: { month: string; expenses: number; maintenance: number; payroll: number }[];
   byCategory: { category: ExpenseCategory; amount: number }[];
   totals: { expenses: number; maintenance: number; payroll: number; grandTotal: number };
+}
+
+export interface BalanceSheet {
+  asOf: string;
+  assets: { cashAndEquivalents: number; accountsReceivable: number; inventory: number; total: number };
+  liabilities: { accountsPayable: number; total: number };
+  equity: { retainedEarnings: number; total: number };
+}
+
+export interface JournalEntry {
+  id: string;
+  date: string;
+  type: "INCOME" | "EXPENSE";
+  description: string;
+  amount: number;
+  currency: string;
+  runningBalance: number;
+}
+
+export type ExecutiveRequestCategory =
+  | "PAYROLL_PAYMENT"
+  | "INVOICE_APPROVAL"
+  | "PURCHASE_APPROVAL"
+  | "BUDGET_APPROVAL"
+  | "DOCUMENT_REVIEW"
+  | "GENERAL";
+
+export type ExecutiveRequestStatus = "PENDING" | "APPROVED" | "REJECTED" | "COMPLETED";
+
+export interface ExecutiveRequestItem {
+  id: string;
+  toTitle: ExecutiveTitle;
+  category: ExecutiveRequestCategory;
+  subject: string;
+  message: string;
+  status: ExecutiveRequestStatus;
+  responseNote?: string | null;
+  respondedAt?: string | null;
+  fromUser: { id: string; name: string; title?: ExecutiveTitle | null };
+  respondedBy?: { id: string; name: string } | null;
+  createdAt: string;
 }
 
 export interface ProductionFinancialSummary {

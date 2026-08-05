@@ -195,7 +195,9 @@
     "hiredOn": "Eingestellt am",
     "workerWarningsTitle": "Mitarbeiterwarnungen",
     "noWorkerWarnings": "Keine Zertifizierungs- oder Schulungswarnungen für Mitarbeiter.",
-    "contactWorker": "Kontaktieren"
+    "contactWorker": "Kontaktieren",
+    "visitorHistoryTitle": "Besucherverlauf",
+    "noVisitorHistory": "Noch keine Besucher erfasst."
   },
   "sites": {
     "title": "Standorte & Zonen",
@@ -878,7 +880,33 @@
       "safetyInspections": "Sicherheitsinspektionen",
       "regulatoryNotices": "Behördliche Bescheide",
       "contractors": "Auftragnehmer"
-    }
+    },
+    "tabOverview": "Übersicht",
+    "tabBalanceSheet": "Bilanz",
+    "tabJournal": "Journal",
+    "lastNMonths": "Letzte {{count}} Monate",
+    "balanceSheetNote": "Management-Konten, geschätzt anhand erfasster Transaktionen zum {{date}}. Kein Ersatz für formelle geprüfte Jahresabschlüsse.",
+    "assets": "Vermögenswerte",
+    "cashAndEquivalents": "Zahlungsmittel und Äquivalente",
+    "accountsReceivable": "Forderungen",
+    "inventoryValue": "Lagerbestand",
+    "totalAssets": "Vermögenswerte Gesamt",
+    "liabilities": "Verbindlichkeiten",
+    "accountsPayable": "Verbindlichkeiten aus L&L",
+    "totalLiabilities": "Verbindlichkeiten Gesamt",
+    "equity": "Eigenkapital",
+    "retainedEarnings": "Gewinnrücklagen",
+    "totalEquity": "Eigenkapital Gesamt",
+    "journalDate": "Datum",
+    "journalDescription": "Beschreibung",
+    "journalType": "Typ",
+    "journalAmount": "Betrag",
+    "journalBalance": "Saldo",
+    "journalTypes": {
+      "INCOME": "Einnahme",
+      "EXPENSE": "Ausgabe"
+    },
+    "noJournalEntries": "Keine Journaleinträge in diesem Zeitraum."
   },
   "attendance": {
     "clockIn": "Einstempeln",
@@ -963,7 +991,8 @@
     "colCheckIn": "Anmeldung",
     "colCheckOut": "Abmeldung",
     "checkOut": "Abmelden",
-    "noneYet": "Noch keine Besucher erfasst."
+    "noneYet": "Noch keine Besucher erfasst.",
+    "colCompany": "Unternehmen"
   },
   "visitorCheckin": {
     "declarationsRequired": "Bitte bestätigen Sie die Erklärungen zu Sicherheitseinweisung, POPIA-Einwilligung und Haftungsfreistellung, bevor Sie sich anmelden.",
@@ -1773,5 +1802,36 @@
     },
     "totalCosts": "Gesamtkosten",
     "costsBySource": "Kosten nach Quelle"
+  },
+  "executiveRequests": {
+    "nav": "Anfragen",
+    "subtitle": "Sende Handlungsanfragen an die Abteilung eines anderen Managers und verfolge deren Fortschritt",
+    "newRequest": "+ Neue Anfrage",
+    "newRequestTitle": "Neue Anfrage",
+    "sendTo": "Senden An",
+    "category": "Kategorie",
+    "categories": {
+      "PAYROLL_PAYMENT": "Gehaltszahlung",
+      "INVOICE_APPROVAL": "Rechnungsfreigabe",
+      "PURCHASE_APPROVAL": "Einkaufsfreigabe",
+      "BUDGET_APPROVAL": "Budgetfreigabe",
+      "DOCUMENT_REVIEW": "Dokumentenprüfung",
+      "GENERAL": "Allgemein"
+    },
+    "subject": "Betreff",
+    "message": "Nachricht",
+    "send": "Anfrage Senden",
+    "createError": "Diese Anfrage konnte nicht gesendet werden",
+    "tabReceived": "Empfangen ({{count}})",
+    "tabSent": "Gesendet ({{count}})",
+    "noneReceived": "Noch keine Anfragen erhalten.",
+    "noneSent": "Noch keine Anfragen gesendet.",
+    "toLine": "An {{title}}",
+    "fromLine": "Von {{name}}",
+    "responseNote": "Notiz von {{name}}",
+    "notePlaceholder": "Optionale Notiz…",
+    "approve": "Genehmigen",
+    "reject": "Ablehnen",
+    "markCompleted": "Als Erledigt Markieren"
   }
 }

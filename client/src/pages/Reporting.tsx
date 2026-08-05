@@ -2,11 +2,13 @@ import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { BarChart, Bar, LineChart, Line, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer } from "recharts";
 import { api } from "../api/client";
-import { ExportableEntity, exportableEntities, ReportTrends, Site } from "../api/types";
+import { useAuth } from "../context/AuthContext";
+import { BalanceSheet, ExportableEntity, exportableEntities, JournalEntry, ReportTrends, Site } from "../api/types";
 import { SeverityBadge } from "../components/Badges";
 import { buttonPrimary, buttonSecondary, cardClass, inputClass } from "../components/ui";
 
 const dayOptions = [30, 90, 180, 365];
+type ReportingTab = "overview" | "balanceSheet" | "journal";
 
 function RateCard({ label, numerator, denominator }: { label: string; numerator: number; denominator: number }) {
   const pct = denominator === 0 ? 100 : Math.round((numerator / denominator) * 100);
@@ -20,8 +22,116 @@ function RateCard({ label, numerator, denominator }: { label: string; numerator:
   );
 }
 
+function BalanceSheetLine({ label, value, bold }: { label: string; value: number; bold?: boolean }) {
+  return (
+    <div className={`flex items-center justify-between py-1.5 ${bold ? "font-bold text-sm border-t border-mine-800 mt-1 pt-2" : "text-xs text-mine-300"}`}>
+      <span>{label}</span>
+      <span className={bold ? "text-mine-50" : ""}>{value.toLocaleString()}</span>
+    </div>
+  );
+}
+
+function BalanceSheetTab() {
+  const { t } = useTranslation();
+  const [sheet, setSheet] = useState<BalanceSheet | null>(null);
+
+  useEffect(() => {
+    api.get<BalanceSheet>("/reports/balance-sheet").then((res) => setSheet(res.data));
+  }, []);
+
+  if (!sheet) return <div className="text-mine-300 text-sm">{t("common.loading")}</div>;
+
+  return (
+    <div className="space-y-3">
+      <p className="text-xs text-mine-400">{t("reporting.balanceSheetNote", { date: new Date(sheet.asOf).toLocaleString() })}</p>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+        <div className={`${cardClass} p-4`}>
+          <h3 className="text-xs font-semibold uppercase tracking-wide text-mine-300 mb-2">{t("reporting.assets")}</h3>
+          <BalanceSheetLine label={t("reporting.cashAndEquivalents")} value={sheet.assets.cashAndEquivalents} />
+          <BalanceSheetLine label={t("reporting.accountsReceivable")} value={sheet.assets.accountsReceivable} />
+          <BalanceSheetLine label={t("reporting.inventoryValue")} value={sheet.assets.inventory} />
+          <BalanceSheetLine label={t("reporting.totalAssets")} value={sheet.assets.total} bold />
+        </div>
+        <div className={`${cardClass} p-4`}>
+          <h3 className="text-xs font-semibold uppercase tracking-wide text-mine-300 mb-2">{t("reporting.liabilities")}</h3>
+          <BalanceSheetLine label={t("reporting.accountsPayable")} value={sheet.liabilities.accountsPayable} />
+          <BalanceSheetLine label={t("reporting.totalLiabilities")} value={sheet.liabilities.total} bold />
+        </div>
+        <div className={`${cardClass} p-4`}>
+          <h3 className="text-xs font-semibold uppercase tracking-wide text-mine-300 mb-2">{t("reporting.equity")}</h3>
+          <BalanceSheetLine label={t("reporting.retainedEarnings")} value={sheet.equity.retainedEarnings} />
+          <BalanceSheetLine label={t("reporting.totalEquity")} value={sheet.equity.total} bold />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function JournalTab() {
+  const { t } = useTranslation();
+  const [months, setMonths] = useState(3);
+  const [entries, setEntries] = useState<JournalEntry[] | null>(null);
+
+  useEffect(() => {
+    setEntries(null);
+    api.get<JournalEntry[]>("/reports/journal", { params: { months } }).then((res) => setEntries(res.data));
+  }, [months]);
+
+  return (
+    <div className="space-y-3">
+      <div className="flex gap-1">
+        {[1, 3, 6, 12].map((m) => (
+          <button key={m} className={months === m ? buttonPrimary : buttonSecondary} onClick={() => setMonths(m)}>
+            {t("reporting.lastNMonths", { count: m })}
+          </button>
+        ))}
+      </div>
+      {!entries ? (
+        <div className="text-mine-300 text-sm">{t("common.loading")}</div>
+      ) : (
+        <div className={`${cardClass} overflow-x-auto`}>
+          <table className="w-full text-sm">
+            <thead className="bg-mine-800/50 text-mine-300 text-xs uppercase">
+              <tr>
+                <th className="text-left px-4 py-2">{t("reporting.journalDate")}</th>
+                <th className="text-left px-4 py-2">{t("reporting.journalDescription")}</th>
+                <th className="text-left px-4 py-2">{t("reporting.journalType")}</th>
+                <th className="text-right px-4 py-2">{t("reporting.journalAmount")}</th>
+                <th className="text-right px-4 py-2">{t("reporting.journalBalance")}</th>
+              </tr>
+            </thead>
+            <tbody>
+              {entries.map((e) => (
+                <tr key={e.id} className="border-t border-mine-800 hover:bg-mine-800/30">
+                  <td className="px-4 py-2 text-mine-300">{new Date(e.date).toLocaleDateString()}</td>
+                  <td className="px-4 py-2">{e.description}</td>
+                  <td className="px-4 py-2">
+                    <span className={`px-2 py-0.5 rounded text-xs font-semibold ${e.type === "INCOME" ? "bg-success-600 text-white" : "bg-danger-500 text-white"}`}>
+                      {t(`reporting.journalTypes.${e.type}`)}
+                    </span>
+                  </td>
+                  <td className={`px-4 py-2 text-right font-semibold ${e.type === "INCOME" ? "text-success-500" : "text-danger-400"}`}>
+                    {e.type === "INCOME" ? "+" : "-"}{e.currency} {e.amount.toLocaleString()}
+                  </td>
+                  <td className="px-4 py-2 text-right text-mine-300">{e.currency} {e.runningBalance.toLocaleString()}</td>
+                </tr>
+              ))}
+              {entries.length === 0 && (
+                <tr><td colSpan={5} className="px-4 py-6 text-center text-mine-400">{t("reporting.noJournalEntries")}</td></tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+      )}
+    </div>
+  );
+}
+
 export default function Reporting() {
   const { t } = useTranslation();
+  const { user } = useAuth();
+  const canSeeFinancials = user?.role === "ADMIN" || ["CFO", "GENERAL_MANAGER", "COO"].includes(user?.title ?? "");
+  const [tab, setTab] = useState<ReportingTab>("overview");
   const [sites, setSites] = useState<Site[]>([]);
   const [siteId, setSiteId] = useState<string>("");
   const [days, setDays] = useState(90);
@@ -74,6 +184,25 @@ export default function Reporting() {
         <p className="text-mine-300 text-xs">{t("reporting.subtitle")}</p>
       </div>
 
+      {canSeeFinancials && (
+        <div className="flex gap-2 flex-wrap">
+          <button className={tab === "overview" ? buttonPrimary : buttonSecondary} onClick={() => setTab("overview")}>
+            {t("reporting.tabOverview")}
+          </button>
+          <button className={tab === "balanceSheet" ? buttonPrimary : buttonSecondary} onClick={() => setTab("balanceSheet")}>
+            {t("reporting.tabBalanceSheet")}
+          </button>
+          <button className={tab === "journal" ? buttonPrimary : buttonSecondary} onClick={() => setTab("journal")}>
+            {t("reporting.tabJournal")}
+          </button>
+        </div>
+      )}
+
+      {tab === "balanceSheet" && canSeeFinancials && <BalanceSheetTab />}
+      {tab === "journal" && canSeeFinancials && <JournalTab />}
+
+      {tab === "overview" && (
+      <>
       <div className="flex flex-wrap items-center gap-2">
         <select className={`${inputClass} max-w-xs`} value={siteId} onChange={(e) => setSiteId(e.target.value)}>
           <option value="">{t("reporting.allSites")}</option>
@@ -185,6 +314,8 @@ export default function Reporting() {
             </div>
           </div>
         </>
+      )}
+      </>
       )}
     </div>
   );

@@ -195,7 +195,9 @@
     "hiredOn": "Hired",
     "workerWarningsTitle": "Worker Warnings",
     "noWorkerWarnings": "No worker certification or training warnings.",
-    "contactWorker": "Contact"
+    "contactWorker": "Contact",
+    "visitorHistoryTitle": "Visitor History",
+    "noVisitorHistory": "No visitors logged yet."
   },
   "sites": {
     "title": "Sites & Zones",
@@ -878,7 +880,33 @@
       "safetyInspections": "Safety Inspections",
       "regulatoryNotices": "Regulatory Notices",
       "contractors": "Contractors"
-    }
+    },
+    "tabOverview": "Overview",
+    "tabBalanceSheet": "Balance Sheet",
+    "tabJournal": "Journal",
+    "lastNMonths": "Last {{count}} months",
+    "balanceSheetNote": "Management accounts, estimated from recorded transactions as of {{date}}. Not a substitute for formal audited financial statements.",
+    "assets": "Assets",
+    "cashAndEquivalents": "Cash & Equivalents",
+    "accountsReceivable": "Accounts Receivable",
+    "inventoryValue": "Inventory",
+    "totalAssets": "Total Assets",
+    "liabilities": "Liabilities",
+    "accountsPayable": "Accounts Payable",
+    "totalLiabilities": "Total Liabilities",
+    "equity": "Equity",
+    "retainedEarnings": "Retained Earnings",
+    "totalEquity": "Total Equity",
+    "journalDate": "Date",
+    "journalDescription": "Description",
+    "journalType": "Type",
+    "journalAmount": "Amount",
+    "journalBalance": "Balance",
+    "journalTypes": {
+      "INCOME": "Income",
+      "EXPENSE": "Expense"
+    },
+    "noJournalEntries": "No journal entries in this period."
   },
   "attendance": {
     "clockIn": "Clock In",
@@ -959,6 +987,7 @@
     "qrTitle": "Check-in QR — {{site}}",
     "qrHint": "Display or print this code at the site entrance. Visitors scan it with their phone to self-check-in.",
     "colName": "Visitor",
+    "colCompany": "Company",
     "colHost": "Host",
     "colCheckIn": "Check-in",
     "colCheckOut": "Check-out",
@@ -1145,6 +1174,37 @@
     "workerCheckedOut": "{{name}} checked out.",
     "unknownCode": "This QR code isn't a recognised Mine Guard code.",
     "actionFailed": "Could not process this scan."
+  },
+  "executiveRequests": {
+    "nav": "Requests",
+    "subtitle": "Send action requests to another executive's department and track their progress",
+    "newRequest": "+ New Request",
+    "newRequestTitle": "New Request",
+    "sendTo": "Send To",
+    "category": "Category",
+    "categories": {
+      "PAYROLL_PAYMENT": "Payroll Payment",
+      "INVOICE_APPROVAL": "Invoice Approval",
+      "PURCHASE_APPROVAL": "Purchase Approval",
+      "BUDGET_APPROVAL": "Budget Approval",
+      "DOCUMENT_REVIEW": "Document Review",
+      "GENERAL": "General"
+    },
+    "subject": "Subject",
+    "message": "Message",
+    "send": "Send Request",
+    "createError": "Could not send this request",
+    "tabReceived": "Received ({{count}})",
+    "tabSent": "Sent ({{count}})",
+    "noneReceived": "No requests received yet.",
+    "noneSent": "No requests sent yet.",
+    "toLine": "To {{title}}",
+    "fromLine": "From {{name}}",
+    "responseNote": "Note from {{name}}",
+    "notePlaceholder": "Optional note…",
+    "approve": "Approve",
+    "reject": "Reject",
+    "markCompleted": "Mark Completed"
   },
   "messages": {
     "nav": "Messages",

@@ -195,7 +195,9 @@
     "hiredOn": "Embauché le",
     "workerWarningsTitle": "Alertes Travailleurs",
     "noWorkerWarnings": "Aucune alerte de certification ou de formation des travailleurs.",
-    "contactWorker": "Contacter"
+    "contactWorker": "Contacter",
+    "visitorHistoryTitle": "Historique des Visiteurs",
+    "noVisitorHistory": "Aucun visiteur enregistré pour le moment."
   },
   "sites": {
     "title": "Sites et zones",
@@ -878,7 +880,33 @@
       "safetyInspections": "Inspections de Sécurité",
       "regulatoryNotices": "Avis Réglementaires",
       "contractors": "Sous-traitants"
-    }
+    },
+    "tabOverview": "Aperçu",
+    "tabBalanceSheet": "Bilan",
+    "tabJournal": "Journal",
+    "lastNMonths": "{{count}} derniers mois",
+    "balanceSheetNote": "Comptes de gestion, estimés à partir des transactions enregistrées au {{date}}. Ne remplace pas les états financiers audités formels.",
+    "assets": "Actif",
+    "cashAndEquivalents": "Trésorerie et Équivalents",
+    "accountsReceivable": "Comptes Clients",
+    "inventoryValue": "Stocks",
+    "totalAssets": "Total de l'Actif",
+    "liabilities": "Passif",
+    "accountsPayable": "Comptes Fournisseurs",
+    "totalLiabilities": "Total du Passif",
+    "equity": "Capitaux Propres",
+    "retainedEarnings": "Bénéfices Non Distribués",
+    "totalEquity": "Total des Capitaux Propres",
+    "journalDate": "Date",
+    "journalDescription": "Description",
+    "journalType": "Type",
+    "journalAmount": "Montant",
+    "journalBalance": "Solde",
+    "journalTypes": {
+      "INCOME": "Revenu",
+      "EXPENSE": "Dépense"
+    },
+    "noJournalEntries": "Aucune écriture pour cette période."
   },
   "attendance": {
     "clockIn": "Pointer l'Arrivée",
@@ -963,7 +991,8 @@
     "colCheckIn": "Entrée",
     "colCheckOut": "Sortie",
     "checkOut": "Enregistrer la sortie",
-    "noneYet": "Aucun visiteur enregistré pour le moment."
+    "noneYet": "Aucun visiteur enregistré pour le moment.",
+    "colCompany": "Entreprise"
   },
   "visitorCheckin": {
     "declarationsRequired": "Veuillez confirmer les déclarations d'induction de sécurité, de consentement POPIA et d'indemnisation avant de vous enregistrer.",
@@ -1773,5 +1802,36 @@
     },
     "totalCosts": "Coûts Totaux",
     "costsBySource": "Coûts par Source"
+  },
+  "executiveRequests": {
+    "nav": "Demandes",
+    "subtitle": "Envoyez des demandes d'action au département d'un autre cadre et suivez leur avancement",
+    "newRequest": "+ Nouvelle Demande",
+    "newRequestTitle": "Nouvelle Demande",
+    "sendTo": "Envoyer À",
+    "category": "Catégorie",
+    "categories": {
+      "PAYROLL_PAYMENT": "Paiement de Paie",
+      "INVOICE_APPROVAL": "Approbation de Facture",
+      "PURCHASE_APPROVAL": "Approbation d'Achat",
+      "BUDGET_APPROVAL": "Approbation de Budget",
+      "DOCUMENT_REVIEW": "Révision de Document",
+      "GENERAL": "Général"
+    },
+    "subject": "Objet",
+    "message": "Message",
+    "send": "Envoyer la Demande",
+    "createError": "Impossible d'envoyer cette demande",
+    "tabReceived": "Reçues ({{count}})",
+    "tabSent": "Envoyées ({{count}})",
+    "noneReceived": "Aucune demande reçue pour le moment.",
+    "noneSent": "Aucune demande envoyée pour le moment.",
+    "toLine": "À {{title}}",
+    "fromLine": "De {{name}}",
+    "responseNote": "Note de {{name}}",
+    "notePlaceholder": "Note facultative…",
+    "approve": "Approuver",
+    "reject": "Rejeter",
+    "markCompleted": "Marquer comme Terminée"
   }
 }

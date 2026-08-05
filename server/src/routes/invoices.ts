@@ -92,8 +92,32 @@ router.post("/", requireRole("ADMIN", "SUPERVISOR", "EXECUTIVE"), async (req, re
   });
 
   try {
-    const mine = await prisma.mine.findUnique({ where: { id: mineId }, select: { name: true } });
-    const html = renderInvoiceHtml(invoice, mine?.name ?? "Mine Guard", invoice.site.name);
+    const mine = await prisma.mine.findUnique({
+      where: { id: mineId },
+      select: {
+        name: true,
+        registrationNumber: true,
+        logoData: true,
+        logoMimeType: true,
+        bankName: true,
+        bankAccountHolder: true,
+        bankAccountNumber: true,
+        bankBranchCode: true,
+      },
+    });
+    const html = renderInvoiceHtml(
+      invoice,
+      {
+        name: mine?.name ?? "Mine Guard",
+        registrationNumber: mine?.registrationNumber,
+        logoDataUri: mine?.logoData && mine.logoMimeType ? `data:${mine.logoMimeType};base64,${Buffer.from(mine.logoData).toString("base64")}` : null,
+        bankName: mine?.bankName,
+        bankAccountHolder: mine?.bankAccountHolder,
+        bankAccountNumber: mine?.bankAccountNumber,
+        bankBranchCode: mine?.bankBranchCode,
+      },
+      invoice.site.name
+    );
     const document = await prisma.document.create({
       data: {
         title: `Invoice ${invoice.invoiceNumber} — ${invoice.clientName}`,

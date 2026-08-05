@@ -195,7 +195,9 @@
     "hiredOn": "Aangestel",
     "workerWarningsTitle": "Werker-waarskuwings",
     "noWorkerWarnings": "Geen werker-sertifisering- of opleidingswaarskuwings nie.",
-    "contactWorker": "Kontak"
+    "contactWorker": "Kontak",
+    "visitorHistoryTitle": "Besoekersgeskiedenis",
+    "noVisitorHistory": "Nog geen besoekers aangeteken nie."
   },
   "sites": {
     "title": "Terreine & Sones",
@@ -878,7 +880,33 @@
       "safetyInspections": "Veiligheidsinspeksies",
       "regulatoryNotices": "Regulatoriese Kennisgewings",
       "contractors": "Kontrakteurs"
-    }
+    },
+    "tabOverview": "Oorsig",
+    "tabBalanceSheet": "Balansstaat",
+    "tabJournal": "Joernaal",
+    "lastNMonths": "Afgelope {{count}} maande",
+    "balanceSheetNote": "Bestuursrekeninge, beraam vanaf aangetekende transaksies vanaf {{date}}. Nie 'n plaasvervanger vir formele geouditeerde finansiële state nie.",
+    "assets": "Bates",
+    "cashAndEquivalents": "Kontant en Ekwivalente",
+    "accountsReceivable": "Debiteure",
+    "inventoryValue": "Voorraad",
+    "totalAssets": "Totale Bates",
+    "liabilities": "Laste",
+    "accountsPayable": "Krediteure",
+    "totalLiabilities": "Totale Laste",
+    "equity": "Ekwiteit",
+    "retainedEarnings": "Behoue Verdienste",
+    "totalEquity": "Totale Ekwiteit",
+    "journalDate": "Datum",
+    "journalDescription": "Beskrywing",
+    "journalType": "Tipe",
+    "journalAmount": "Bedrag",
+    "journalBalance": "Balans",
+    "journalTypes": {
+      "INCOME": "Inkomste",
+      "EXPENSE": "Uitgawe"
+    },
+    "noJournalEntries": "Geen joernaalinskrywings in hierdie tydperk nie."
   },
   "attendance": {
     "clockIn": "Klok In",
@@ -963,7 +991,8 @@
     "colCheckIn": "Aanmelding",
     "colCheckOut": "Afmelding",
     "checkOut": "Meld af",
-    "noneYet": "Nog geen besoekers aangeteken nie."
+    "noneYet": "Nog geen besoekers aangeteken nie.",
+    "colCompany": "Maatskappy"
   },
   "visitorCheckin": {
     "declarationsRequired": "Bevestig asseblief die veiligheidsinduksie-, POPIA-toestemmings- en vrywaringsverklarings voordat jy aanmeld.",
@@ -1773,5 +1802,36 @@
     },
     "totalCosts": "Totale Koste",
     "costsBySource": "Koste volgens Bron"
+  },
+  "executiveRequests": {
+    "nav": "Versoeke",
+    "subtitle": "Stuur aksieversoeke na 'n ander bestuurder se afdeling en volg die vordering daarvan",
+    "newRequest": "+ Nuwe Versoek",
+    "newRequestTitle": "Nuwe Versoek",
+    "sendTo": "Stuur Aan",
+    "category": "Kategorie",
+    "categories": {
+      "PAYROLL_PAYMENT": "Salarisbetaling",
+      "INVOICE_APPROVAL": "Faktuurgoedkeuring",
+      "PURCHASE_APPROVAL": "Aankoopgoedkeuring",
+      "BUDGET_APPROVAL": "Begrotingsgoedkeuring",
+      "DOCUMENT_REVIEW": "Dokumentoorsig",
+      "GENERAL": "Algemeen"
+    },
+    "subject": "Onderwerp",
+    "message": "Boodskap",
+    "send": "Stuur Versoek",
+    "createError": "Kon nie hierdie versoek stuur nie",
+    "tabReceived": "Ontvang ({{count}})",
+    "tabSent": "Gestuur ({{count}})",
+    "noneReceived": "Nog geen versoeke ontvang nie.",
+    "noneSent": "Nog geen versoeke gestuur nie.",
+    "toLine": "Aan {{title}}",
+    "fromLine": "Van {{name}}",
+    "responseNote": "Nota van {{name}}",
+    "notePlaceholder": "Opsionele nota…",
+    "approve": "Keur Goed",
+    "reject": "Wys Af",
+    "markCompleted": "Merk as Voltooi"
   }
 }

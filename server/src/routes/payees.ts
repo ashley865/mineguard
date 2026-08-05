@@ -7,7 +7,7 @@ import { requireMineId } from "../lib/mineScope";
 const router = Router();
 
 const payeeSchema = z.object({
-  payeeType: z.enum(["COMPANY", "INDIVIDUAL", "BUYER", "CONTRACTOR"]).optional(),
+  payeeType: z.enum(["COMPANY", "INDIVIDUAL", "BUYER", "CONTRACTOR", "EMPLOYEE"]).optional(),
   name: z.string().min(1),
   registrationNumber: z.string().optional(),
   taxNumber: z.string().optional(),
@@ -42,9 +42,44 @@ const payeeSelect = {
 
 router.use(requireAuth);
 
+// Workers and Executives should always be pickable as payroll payees without HR having
+// to hand-create a duplicate entry per hire, so every list-fetch keeps the auto-synced
+// EMPLOYEE payees (linked via workerId/linkedUserId) up to date with current staff.
+async function syncEmployeePayees(mineId: string) {
+  const [workers, executives, existing] = await Promise.all([
+    prisma.worker.findMany({ where: { site: { mineId } }, select: { id: true, name: true } }),
+    prisma.user.findMany({ where: { mineId, role: "EXECUTIVE" }, select: { id: true, name: true } }),
+    prisma.payee.findMany({
+      where: { mineId, payeeType: "EMPLOYEE" },
+      select: { id: true, name: true, workerId: true, linkedUserId: true },
+    }),
+  ]);
+
+  const byWorkerId = new Map(existing.filter((p) => p.workerId).map((p) => [p.workerId as string, p]));
+  const byUserId = new Map(existing.filter((p) => p.linkedUserId).map((p) => [p.linkedUserId as string, p]));
+
+  const toCreate: { mineId: string; payeeType: "EMPLOYEE"; name: string; workerId?: string; linkedUserId?: string }[] = [];
+  const renames: { id: string; name: string }[] = [];
+
+  for (const w of workers) {
+    const existingPayee = byWorkerId.get(w.id);
+    if (!existingPayee) toCreate.push({ mineId, payeeType: "EMPLOYEE", name: w.name, workerId: w.id });
+    else if (existingPayee.name !== w.name) renames.push({ id: existingPayee.id, name: w.name });
+  }
+  for (const u of executives) {
+    const existingPayee = byUserId.get(u.id);
+    if (!existingPayee) toCreate.push({ mineId, payeeType: "EMPLOYEE", name: u.name, linkedUserId: u.id });
+    else if (existingPayee.name !== u.name) renames.push({ id: existingPayee.id, name: u.name });
+  }
+
+  if (toCreate.length) await prisma.payee.createMany({ data: toCreate });
+  if (renames.length) await Promise.all(renames.map((r) => prisma.payee.update({ where: { id: r.id }, data: { name: r.name } })));
+}
+
 router.get("/", async (req, res) => {
   const mineId = requireMineId(req, res);
   if (!mineId) return;
+  await syncEmployeePayees(mineId);
   const payees = await prisma.payee.findMany({ where: { mineId }, select: payeeSelect, orderBy: { name: "asc" } });
   res.json(payees);
 });

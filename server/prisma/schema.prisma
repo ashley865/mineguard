@@ -213,6 +213,9 @@ model User {
   evacuationsTriggered   EmergencyEvacuation[]   @relation("EvacuationTriggeredBy")
   evacuationsCancelled   EmergencyEvacuation[]   @relation("EvacuationCancelledBy")
   attendance             UserAttendance[]
+  employeePayee          Payee?                  @relation("PayeeLinkedUser")
+  requestsSent           ExecutiveRequest[]      @relation("ExecutiveRequestFrom")
+  requestsResponded      ExecutiveRequest[]      @relation("ExecutiveRequestRespondedBy")
 }
 
 model UserAttendance {
@@ -396,6 +399,7 @@ model Worker {
   trainingEnrollments TrainingEnrollment[]
   leaveRequests   LeaveRequest[]
   payslips        Payslip[]
+  payee           Payee?
 
   createdAt DateTime @default(now())
 }
@@ -763,6 +767,38 @@ model Mine {
   payees           Payee[]
   suppliers        Supplier[]
   evacuations      EmergencyEvacuation[]
+  executiveRequests ExecutiveRequest[]
+}
+
+enum ExecutiveRequestStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  COMPLETED
+}
+
+// A lightweight inter-executive workflow: one executive (or admin) asks a
+// specific executive title to act on something outside their own module —
+// e.g. HR sending a payroll list to the CFO for payment. Routed by title
+// rather than a named user since that's how every other permission check
+// in this app already identifies "the CFO" / "the GM" etc.
+model ExecutiveRequest {
+  id            String                 @id @default(cuid())
+  mineId        String
+  mine          Mine                   @relation(fields: [mineId], references: [id], onDelete: Cascade)
+  fromUserId    String
+  fromUser      User                   @relation("ExecutiveRequestFrom", fields: [fromUserId], references: [id], onDelete: Cascade)
+  toTitle       ExecutiveTitle
+  category      String
+  subject       String
+  message       String
+  status        ExecutiveRequestStatus @default(PENDING)
+  responseNote  String?
+  respondedById String?
+  respondedBy   User?                  @relation("ExecutiveRequestRespondedBy", fields: [respondedById], references: [id], onDelete: SetNull)
+  respondedAt   DateTime?
+
+  createdAt DateTime @default(now())
 }
 
 enum InviteStatus {
@@ -1786,6 +1822,7 @@ enum PayeeType {
   INDIVIDUAL
   BUYER
   CONTRACTOR
+  EMPLOYEE
 }
 
 model Payee {
@@ -1806,6 +1843,14 @@ model Payee {
   notes              String?
   createdById        String?
   createdBy          User?     @relation("PayeeCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+
+  // Auto-synced payees for payroll: linked back to their source Worker or
+  // Executive User so the payee list can stay in step with staff records
+  // without HR having to hand-create a duplicate entry for every hire.
+  workerId    String? @unique
+  worker      Worker? @relation(fields: [workerId], references: [id], onDelete: SetNull)
+  linkedUserId String? @unique
+  linkedUser   User?  @relation("PayeeLinkedUser", fields: [linkedUserId], references: [id], onDelete: SetNull)
 
   expenses Expense[]
 
