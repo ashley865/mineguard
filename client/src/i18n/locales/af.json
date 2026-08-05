@@ -310,7 +310,10 @@
       "MAINTENANCE": "Instandhouding",
       "CATERING": "Spyseniering",
       "OTHER": "Ander"
-    }
+    },
+    "colCheckIn": "Inklok",
+    "colHoursWeek": "Ure (Wk)",
+    "showingCount": "{{count}} werkers"
   },
   "equipment": {
     "title": "Toerusting",

@@ -209,6 +209,8 @@ export interface Worker {
   nextOfKinName?: string | null;
   nextOfKinRelationship?: string | null;
   nextOfKinPhone?: string | null;
+  currentCheckInAt?: string | null;
+  hoursThisWeek?: number;
 }
 
 export interface WorkerAttendance {

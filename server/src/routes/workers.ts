@@ -69,17 +69,56 @@ function withHasPhoto<T extends { photoMimeType: string | null }>(worker: T) {
 
 router.use(requireAuth);
 
+function startOfWeek(): Date {
+  const d = new Date();
+  d.setHours(0, 0, 0, 0);
+  const day = d.getDay();
+  const diff = (day + 6) % 7; // Monday as start of week
+  d.setDate(d.getDate() - diff);
+  return d;
+}
+
 router.get("/", async (req, res) => {
   const mineId = requireMineId(req, res);
   if (!mineId) return;
   const siteId = req.query.siteId as string | undefined;
   const category = req.query.category as string | undefined;
-  const workers = await prisma.worker.findMany({
-    where: { site: { mineId }, siteId: siteId || undefined, category: (category as any) || undefined },
-    select: workerSelect,
-    orderBy: { createdAt: "desc" },
-  });
-  res.json(workers.map(withHasPhoto));
+  const workerFilter = { site: { mineId }, siteId: siteId || undefined, category: (category as any) || undefined };
+  const weekStart = startOfWeek();
+
+  const [workers, weekAttendance] = await Promise.all([
+    prisma.worker.findMany({
+      where: workerFilter,
+      select: {
+        ...workerSelect,
+        attendance: { where: { checkOutAt: null }, select: { checkInAt: true }, orderBy: { checkInAt: "desc" }, take: 1 },
+      },
+      orderBy: { createdAt: "desc" },
+    }),
+    prisma.workerAttendance.findMany({
+      where: { checkInAt: { gte: weekStart }, worker: workerFilter },
+      select: { workerId: true, checkInAt: true, checkOutAt: true },
+    }),
+  ]);
+
+  const now = Date.now();
+  const hoursByWorker = new Map<string, number>();
+  for (const a of weekAttendance) {
+    const end = a.checkOutAt ? a.checkOutAt.getTime() : now;
+    const hours = (end - a.checkInAt.getTime()) / (1000 * 60 * 60);
+    hoursByWorker.set(a.workerId, (hoursByWorker.get(a.workerId) ?? 0) + hours);
+  }
+
+  res.json(
+    workers.map((w) => {
+      const { attendance, ...worker } = w;
+      return {
+        ...withHasPhoto(worker),
+        currentCheckInAt: attendance[0]?.checkInAt ?? null,
+        hoursThisWeek: Math.round((hoursByWorker.get(w.id) ?? 0) * 10) / 10,
+      };
+    })
+  );
 });
 
 router.post("/", requireRole("ADMIN", "SUPERVISOR", "EXECUTIVE"), async (req, res) => {

@@ -310,7 +310,10 @@
       "MAINTENANCE": "Wartung",
       "CATERING": "Verpflegung",
       "OTHER": "Sonstiges"
-    }
+    },
+    "colCheckIn": "Einstempeln",
+    "colHoursWeek": "Stunden (Wo.)",
+    "showingCount": "{{count}} Arbeiter"
   },
   "equipment": {
     "title": "Ausrüstung",

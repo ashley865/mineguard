@@ -232,6 +232,9 @@ export default function Workers() {
 
   if (loading) return <div className="text-mine-300">{t("workers.loading")}</div>;
 
+  const filteredWorkers = workers.filter((w) => !categoryFilter || w.category === categoryFilter);
+  const actionButtonClass = "px-2.5 py-1 rounded-lg text-xs font-medium text-mine-300 hover:text-mine-50 hover:bg-mine-800 transition-colors";
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -244,53 +247,73 @@ export default function Workers() {
         )}
       </div>
 
-      <div className="flex items-center gap-2">
+      <div className={`${cardClass} p-4 flex items-center justify-between flex-wrap gap-3`}>
         <select className={`${selectClass} max-w-xs`} value={categoryFilter} onChange={(e) => setCategoryFilter(e.target.value)}>
           <option value="">{t("workers.allCategories")}</option>
           {staffCategories.map((c) => <option key={c} value={c}>{t(`workers.categories.${c}`)}</option>)}
         </select>
+        <span className="text-xs text-mine-400">{t("workers.showingCount", { count: filteredWorkers.length })}</span>
       </div>
 
       <div className={`${cardClass} overflow-x-auto`}>
         <table className="w-full text-sm">
-          <thead className="bg-mine-800/50 text-mine-300 text-xs uppercase">
+          <thead className="bg-mine-800/50 text-mine-300 text-xs uppercase tracking-wide">
             <tr>
-              <th className="text-left px-4 py-2">{t("workers.colName")}</th>
-              <th className="text-left px-4 py-2">{t("workers.colEmployeeId")}</th>
-              <th className="text-left px-4 py-2">{t("workers.colRole")}</th>
-              <th className="text-left px-4 py-2">{t("workers.colCategory")}</th>
-              <th className="text-left px-4 py-2">{t("workers.colSiteZone")}</th>
-              <th className="text-left px-4 py-2">{t("workers.colStatus")}</th>
-              <th className="px-4 py-2"></th>
+              <th className="text-left px-4 py-3">{t("workers.colName")}</th>
+              <th className="text-left px-4 py-3">{t("workers.colEmployeeId")}</th>
+              <th className="text-left px-4 py-3">{t("workers.colRole")}</th>
+              <th className="text-left px-4 py-3">{t("workers.colCategory")}</th>
+              <th className="text-left px-4 py-3">{t("workers.colSiteZone")}</th>
+              <th className="text-left px-4 py-3">{t("workers.colStatus")}</th>
+              <th className="text-left px-4 py-3">{t("workers.colCheckIn")}</th>
+              <th className="text-left px-4 py-3">{t("workers.colHoursWeek")}</th>
+              <th className="px-4 py-3"></th>
             </tr>
           </thead>
-          <tbody>
-            {workers.filter((w) => !categoryFilter || w.category === categoryFilter).map((w) => (
-              <tr key={w.id} className="border-t border-mine-800 hover:bg-mine-800/30">
-                <td className="px-4 py-2 font-medium">
-                  <button className="flex items-center gap-2 hover:underline" onClick={() => setProfileWorker(w)}>
-                    <Avatar size={28} name={w.name} src={w.hasPhoto ? `${API_URL}/api/workers/${w.id}/photo` : null} />
+          <tbody className="divide-y divide-mine-800">
+            {filteredWorkers.map((w) => (
+              <tr key={w.id} className="hover:bg-mine-800/30 transition-colors">
+                <td className="px-4 py-3 font-medium">
+                  <button className="flex items-center gap-2.5 hover:underline" onClick={() => setProfileWorker(w)}>
+                    <Avatar size={30} name={w.name} src={w.hasPhoto ? `${API_URL}/api/workers/${w.id}/photo` : null} />
                     {w.name}
                   </button>
                 </td>
-                <td className="px-4 py-2 text-mine-300">{w.employeeId}</td>
-                <td className="px-4 py-2 text-mine-300">{w.role}</td>
-                <td className="px-4 py-2 text-mine-300">{t(`workers.categories.${w.category}`)}</td>
-                <td className="px-4 py-2 text-mine-300">
+                <td className="px-4 py-3 text-mine-300">{w.employeeId}</td>
+                <td className="px-4 py-3 text-mine-300">{w.role}</td>
+                <td className="px-4 py-3 text-mine-300">{t(`workers.categories.${w.category}`)}</td>
+                <td className="px-4 py-3 text-mine-300">
                   {w.site?.name}{w.zone?.name ? ` · ${w.zone.name}` : ""}
                 </td>
-                <td className="px-4 py-2"><StatusBadge status={w.status} /></td>
-                <td className="px-4 py-2 text-right">
-                  <div className="flex justify-end gap-2">
-                    <button className="text-xs text-mine-300 hover:text-mine-50" onClick={() => setProfileWorker(w)}>{t("workers.viewProfile")}</button>
-                    <button className="text-xs text-mine-300 hover:text-mine-50" onClick={() => setQrWorker(w)}>{t("workers.showBadge")}</button>
+                <td className="px-4 py-3"><StatusBadge status={w.status} /></td>
+                <td className="px-4 py-3 text-mine-300">
+                  {w.currentCheckInAt
+                    ? new Date(w.currentCheckInAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
+                    : "—"}
+                </td>
+                <td className="px-4 py-3">
+                  <span className={`font-semibold ${(w.hoursThisWeek ?? 0) > 0 ? "text-mine-100" : "text-mine-400"}`}>
+                    {(w.hoursThisWeek ?? 0).toFixed(1)}h
+                  </span>
+                </td>
+                <td className="px-4 py-3 text-right">
+                  <div className="flex justify-end items-center gap-1">
+                    <button className={actionButtonClass} onClick={() => setProfileWorker(w)}>{t("workers.viewProfile")}</button>
+                    <button className={actionButtonClass} onClick={() => setQrWorker(w)}>{t("workers.showBadge")}</button>
                     {canEdit && (
-                      <button className="text-xs text-mine-300 hover:text-mine-50" onClick={() => toggleAttendance(w.id)}>
+                      <button
+                        className={`px-2.5 py-1 rounded-lg text-xs font-semibold transition-colors ${
+                          w.status === "ON_SHIFT"
+                            ? "bg-success-600/15 text-success-400 hover:bg-success-600/25"
+                            : "text-mine-300 hover:text-mine-50 hover:bg-mine-800"
+                        }`}
+                        onClick={() => toggleAttendance(w.id)}
+                      >
                         {w.status === "ON_SHIFT" ? t("workers.checkOut") : t("workers.checkIn")}
                       </button>
                     )}
                     {canEdit && (
-                      <button className="text-xs text-mine-300 hover:text-mine-50" onClick={() => setModal(w)}>{t("common.edit")}</button>
+                      <button className={actionButtonClass} onClick={() => setModal(w)}>{t("common.edit")}</button>
                     )}
                     {canEdit && (
                       <button className={buttonDanger} onClick={() => deleteWorker(w.id)}>{t("common.delete")}</button>
@@ -300,7 +323,7 @@ export default function Workers() {
               </tr>
             ))}
             {workers.length === 0 && (
-              <tr><td colSpan={7} className="px-4 py-6 text-center text-mine-400">{t("workers.noWorkersYet")}</td></tr>
+              <tr><td colSpan={9} className="px-4 py-8 text-center text-mine-400">{t("workers.noWorkersYet")}</td></tr>
             )}
           </tbody>
         </table>

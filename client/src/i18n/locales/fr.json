@@ -310,7 +310,10 @@
       "MAINTENANCE": "Maintenance",
       "CATERING": "Restauration",
       "OTHER": "Autre"
-    }
+    },
+    "colCheckIn": "Arrivée",
+    "colHoursWeek": "Heures (Sem.)",
+    "showingCount": "{{count}} travailleurs"
   },
   "equipment": {
     "title": "Équipements",
