@@ -216,7 +216,7 @@ export default function Sensors() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between flex-wrap gap-3">
         <div>
           <h1 className="text-xl font-bold">{t("sensors.title")}</h1>
           <p className="text-mine-300 text-sm">{t("sensors.subtitle")}</p>

@@ -73,7 +73,7 @@ function MagazineForm({ sites, initial, onSubmit, onCancel }: {
           <DateField value={licenseExpiry} onChange={setLicenseExpiry} required />
         </div>
       </div>
-      <div className="grid grid-cols-3 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
         <div>
           <label className={labelClass}>{t("explosives.capacity")}</label>
           <input className={inputClass} type="number" step="any" value={capacity} onChange={(e) => setCapacity(e.target.value)} required />

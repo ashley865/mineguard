@@ -70,7 +70,7 @@ export default function Alerts() {
         <p className="text-mine-300 text-sm">{t("alerts.subtitle")}</p>
       </div>
 
-      <div className="flex gap-2">
+      <div className="flex gap-2 flex-wrap">
         {statusFilters.map((f) => (
           <button
             key={f.value}

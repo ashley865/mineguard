@@ -51,7 +51,7 @@ function LeaveForm({ workers, onSubmit, onCancel }: {
           </select>
         </div>
       </div>
-      <div className="grid grid-cols-3 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
         <div>
           <label className={labelClass}>{t("payroll.startDate")}</label>
           <DateField value={startDate} onChange={setStartDate} required />
@@ -128,7 +128,7 @@ function PayslipForm({ workers, onSubmit, onCancel }: {
           <DateField value={payPeriodEnd} onChange={setPayPeriodEnd} required />
         </div>
       </div>
-      <div className="grid grid-cols-3 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
         <div>
           <label className={labelClass}>{t("payroll.grossPay")}</label>
           <input className={inputClass} type="number" step="any" value={grossPay} onChange={(e) => setGrossPay(e.target.value)} required />

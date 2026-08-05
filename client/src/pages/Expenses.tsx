@@ -110,7 +110,7 @@ function ExpenseForm({ sites, payees, onSubmit, onCancel }: {
         <label className={labelClass}>{t("common.description")}</label>
         <textarea className={inputClass} rows={2} value={description} onChange={(e) => setDescription(e.target.value)} required />
       </div>
-      <div className="grid grid-cols-3 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
         <div>
           <label className={labelClass}>{t("expenses.category")}</label>
           <select className={selectClass} value={category} onChange={(e) => setCategory(e.target.value as ExpenseCategory)}>
@@ -126,7 +126,7 @@ function ExpenseForm({ sites, payees, onSubmit, onCancel }: {
           <DateField value={expenseDate} onChange={setExpenseDate} required />
         </div>
       </div>
-      <div className="grid grid-cols-3 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
         <div>
           <label className={labelClass}>{t("expenses.paymentMethod")}</label>
           <select className={selectClass} value={paymentMethod} onChange={(e) => setPaymentMethod(e.target.value as PaymentMethod)}>
@@ -228,7 +228,7 @@ function PayeeForm({ initial, onSubmit, onCancel }: {
           <input className={inputClass} value={taxNumber} onChange={(e) => setTaxNumber(e.target.value)} />
         </div>
       </div>
-      <div className="grid grid-cols-3 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
         <div>
           <label className={labelClass}>{t("buyerRegister.contactName")}</label>
           <input className={inputClass} value={contactName} onChange={(e) => setContactName(e.target.value)} />

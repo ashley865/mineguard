@@ -136,7 +136,7 @@ function RiskForm({ sites, zones, initial, onSubmit, onCancel }: {
 
       <div className="border-t border-mine-800 pt-4 space-y-4">
         <h3 className="text-xs font-semibold text-mine-300 uppercase">{t("compliance.risk.registerSection")}</h3>
-        <div className="grid grid-cols-3 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
           <div>
             <label className={labelClass}>{t("compliance.risk.likelihood")}</label>
             <select className={selectClass} value={likelihood} onChange={(e) => setLikelihood(Number(e.target.value))}>

@@ -116,7 +116,7 @@ export default function SnapshotTab({ sites }: { sites: Site[] }) {
             </div>
           </div>
 
-          <div className={`${cardClass} p-5`}>
+          <div className={`${cardClass} p-5 overflow-x-auto`}>
             <h3 className="text-sm font-semibold mb-3">{t("inspection.snapshot.permits")}</h3>
             <table className="w-full text-sm">
               <thead className="text-mine-300 text-xs uppercase">
@@ -143,7 +143,7 @@ export default function SnapshotTab({ sites }: { sites: Site[] }) {
             </table>
           </div>
 
-          <div className={`${cardClass} p-5`}>
+          <div className={`${cardClass} p-5 overflow-x-auto`}>
             <h3 className="text-sm font-semibold mb-3">{t("inspection.snapshot.codesOfPractice")}</h3>
             <table className="w-full text-sm">
               <thead className="text-mine-300 text-xs uppercase">
@@ -168,7 +168,7 @@ export default function SnapshotTab({ sites }: { sites: Site[] }) {
             </table>
           </div>
 
-          <div className={`${cardClass} p-5`}>
+          <div className={`${cardClass} p-5 overflow-x-auto`}>
             <h3 className="text-sm font-semibold mb-3">{t("inspection.snapshot.openNoticesList")}</h3>
             <table className="w-full text-sm">
               <thead className="text-mine-300 text-xs uppercase">
@@ -195,7 +195,7 @@ export default function SnapshotTab({ sites }: { sites: Site[] }) {
             </table>
           </div>
 
-          <div className={`${cardClass} p-5`}>
+          <div className={`${cardClass} p-5 overflow-x-auto`}>
             <h3 className="text-sm font-semibold mb-3">{t("inspection.snapshot.recentVisits")}</h3>
             <table className="w-full text-sm">
               <thead className="text-mine-300 text-xs uppercase">
@@ -220,7 +220,7 @@ export default function SnapshotTab({ sites }: { sites: Site[] }) {
             </table>
           </div>
 
-          <div className={`${cardClass} p-5`}>
+          <div className={`${cardClass} p-5 overflow-x-auto`}>
             <h3 className="text-sm font-semibold mb-3">{t("inspection.snapshot.documentsSection")}</h3>
             <table className="w-full text-sm">
               <thead className="text-mine-300 text-xs uppercase">
@@ -247,7 +247,7 @@ export default function SnapshotTab({ sites }: { sites: Site[] }) {
             </table>
           </div>
 
-          <div className={`${cardClass} p-5`}>
+          <div className={`${cardClass} p-5 overflow-x-auto`}>
             <h3 className="text-sm font-semibold mb-1">{t("inspection.snapshot.buyersSection")}</h3>
             <p className="text-xs text-mine-400 mb-3">{t("inspection.snapshot.buyersHint")}</p>
             <table className="w-full text-sm">
@@ -277,7 +277,7 @@ export default function SnapshotTab({ sites }: { sites: Site[] }) {
             </table>
           </div>
 
-          <div className={`${cardClass} p-5`}>
+          <div className={`${cardClass} p-5 overflow-x-auto`}>
             <h3 className="text-sm font-semibold mb-3">{t("inspection.snapshot.contractsSection")}</h3>
             <table className="w-full text-sm">
               <thead className="text-mine-300 text-xs uppercase">
@@ -306,7 +306,7 @@ export default function SnapshotTab({ sites }: { sites: Site[] }) {
             </table>
           </div>
 
-          <div className={`${cardClass} p-5`}>
+          <div className={`${cardClass} p-5 overflow-x-auto`}>
             <h3 className="text-sm font-semibold mb-3">{t("inspection.snapshot.explosivesSection")}</h3>
             <table className="w-full text-sm">
               <thead className="text-mine-300 text-xs uppercase">
@@ -335,7 +335,7 @@ export default function SnapshotTab({ sites }: { sites: Site[] }) {
             </table>
           </div>
 
-          <div className={`${cardClass} p-5`}>
+          <div className={`${cardClass} p-5 overflow-x-auto`}>
             <h3 className="text-sm font-semibold mb-3">{t("inspection.snapshot.environmentalSection")}</h3>
             <table className="w-full text-sm">
               <thead className="text-mine-300 text-xs uppercase">

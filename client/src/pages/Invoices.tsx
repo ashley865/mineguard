@@ -128,7 +128,7 @@ function InvoiceForm({ sites, onSubmit, onCancel }: {
         <label className={labelClass}>{t("invoices.clientAddress")}</label>
         <textarea className={inputClass} rows={2} value={clientAddress} onChange={(e) => setClientAddress(e.target.value)} />
       </div>
-      <div className="grid grid-cols-3 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
         <div>
           <label className={labelClass}>{t("invoices.clientTaxNumber")}</label>
           <input className={inputClass} value={clientTaxNumber} onChange={(e) => setClientTaxNumber(e.target.value)} />
@@ -223,7 +223,7 @@ function InvoiceView({ invoice, mine, onBack, onStatusChange }: {
         </div>
       </div>
 
-      <div className={`${cardClass} p-8 space-y-6`}>
+      <div className={`${cardClass} p-4 sm:p-6 md:p-8 space-y-6 overflow-x-auto`}>
         <div className="flex items-start justify-between flex-wrap gap-4">
           <div className="flex items-center gap-3">
             {mine?.hasLogo ? (
@@ -243,7 +243,7 @@ function InvoiceView({ invoice, mine, onBack, onStatusChange }: {
           </div>
         </div>
 
-        <div className="grid grid-cols-2 gap-6 text-sm">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 text-sm">
           <div>
             <div className="text-xs font-semibold text-mine-400 uppercase mb-1">{t("invoices.billTo")}</div>
             <div className="font-medium">{invoice.clientName}</div>
@@ -251,7 +251,7 @@ function InvoiceView({ invoice, mine, onBack, onStatusChange }: {
             {invoice.clientEmail && <div className="text-mine-300">{invoice.clientEmail}</div>}
             {invoice.clientTaxNumber && <div className="text-mine-300">{t("invoices.clientTaxNumber")}: {invoice.clientTaxNumber}</div>}
           </div>
-          <div className="text-right">
+          <div className="sm:text-right">
             <div><span className="text-mine-400">{t("invoices.issueDate")}:</span> {new Date(invoice.issueDate).toLocaleDateString()}</div>
             <div><span className="text-mine-400">{t("invoices.dueDate")}:</span> {new Date(invoice.dueDate).toLocaleDateString()}</div>
           </div>

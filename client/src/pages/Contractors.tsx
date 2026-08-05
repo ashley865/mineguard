@@ -130,7 +130,7 @@ function ContractorForm({ sites, initial, onSubmit, onCancel }: {
         <label className={labelClass}>{t("contractors.scopeOfWork")}</label>
         <textarea className={inputClass} value={scopeOfWork} onChange={(e) => setScopeOfWork(e.target.value)} rows={2} required />
       </div>
-      <div className="grid grid-cols-3 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
         <div>
           <label className={labelClass}>{t("contractors.contactName")}</label>
           <input className={inputClass} value={contactName} onChange={(e) => setContactName(e.target.value)} required />
@@ -295,7 +295,7 @@ export default function Contractors() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between flex-wrap gap-3">
         <div>
           <h1 className="text-xl font-bold">{t("contractors.title")}</h1>
           <p className="text-mine-300 text-sm">{t("contractors.subtitle")}</p>

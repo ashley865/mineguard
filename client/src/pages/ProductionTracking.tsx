@@ -87,7 +87,7 @@ function ProductionForm({ sites, zones, initial, onSubmit, onCancel }: {
         <label className={labelClass}>{t("production.mineralType")}</label>
         <input className={inputClass} value={mineralType} onChange={(e) => setMineralType(e.target.value)} required />
       </div>
-      <div className="grid grid-cols-3 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
         <div>
           <label className={labelClass}>{t("production.tonnesMined")}</label>
           <input className={inputClass} type="number" step="any" value={tonnesMined} onChange={(e) => setTonnesMined(e.target.value)} required />

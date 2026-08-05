@@ -245,7 +245,7 @@ export default function Workers() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between flex-wrap gap-3">
         <div>
           <h1 className="text-xl font-bold">{t("workers.title")}</h1>
           <p className="text-mine-300 text-sm">{t("workers.subtitle")}</p>

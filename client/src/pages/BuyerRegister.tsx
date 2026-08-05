@@ -109,7 +109,7 @@ export default function BuyerRegister() {
   if (done) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-mine-950 p-4">
-        <div className={`${cardClass} p-8 max-w-md text-center space-y-3`}>
+        <div className={`${cardClass} p-6 sm:p-8 max-w-md text-center space-y-3`}>
           <h1 className="text-lg font-bold">{t("buyerRegister.successTitle")}</h1>
           <p className="text-mine-300 text-sm">{t("buyerRegister.successBody")}</p>
         </div>

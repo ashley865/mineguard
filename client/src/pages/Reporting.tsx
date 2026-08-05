@@ -119,7 +119,7 @@ function JournalTab() {
   return (
     <div className="space-y-3">
       <div className="flex items-center justify-between gap-3 flex-wrap">
-        <div className="flex gap-1">
+        <div className="flex gap-1 flex-wrap">
           {[1, 3, 6, 12].map((m) => (
             <button key={m} className={months === m ? buttonPrimary : buttonSecondary} onClick={() => setMonths(m)}>
               {t("reporting.lastNMonths", { count: m })}
@@ -252,7 +252,7 @@ export default function Reporting() {
           <option value="">{t("reporting.allSites")}</option>
           {sites.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
         </select>
-        <div className="flex gap-1">
+        <div className="flex gap-1 flex-wrap">
           {dayOptions.map((d) => (
             <button
               key={d}

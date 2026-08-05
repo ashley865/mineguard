@@ -61,7 +61,7 @@ function ReadingForm({ sites, onSubmit, onCancel }: {
           </select>
         </div>
       </div>
-      <div className="grid grid-cols-3 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
         <div>
           <label className={labelClass}>{t("weather.temperature")}</label>
           <input className={inputClass} type="number" step="any" value={temperature} onChange={(e) => setTemperature(e.target.value)} />
