@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next";
 import { useAuth } from "../context/AuthContext";
 import { SocketProvider } from "../context/SocketContext";
 import { EvacuationProvider } from "../context/EvacuationContext";
+import { CallProvider } from "../context/CallContext";
 import Layout from "./Layout";
 
 export default function ProtectedRoute() {
@@ -24,7 +25,9 @@ export default function ProtectedRoute() {
   return (
     <SocketProvider>
       <EvacuationProvider>
-        <Layout />
+        <CallProvider>
+          <Layout />
+        </CallProvider>
       </EvacuationProvider>
     </SocketProvider>
   );

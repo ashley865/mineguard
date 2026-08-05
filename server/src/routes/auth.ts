@@ -87,6 +87,15 @@ router.post("/login", authLimiter, async (req, res) => {
     return res.status(401).json({ error: "Invalid email or password" });
   }
 
+  // Executives are clocked in automatically the moment they log in, rather than
+  // relying on them to remember to use the header clock-in widget themselves.
+  if (user.role === "EXECUTIVE") {
+    const openRecord = await prisma.userAttendance.findFirst({ where: { userId: user.id, checkOutAt: null } });
+    if (!openRecord) {
+      await prisma.userAttendance.create({ data: { userId: user.id } });
+    }
+  }
+
   const token = signAuthToken(user.id);
   res.json({
     token,

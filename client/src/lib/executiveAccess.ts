@@ -50,7 +50,7 @@ export const executiveTitleModules: Partial<Record<ExecutiveTitle, RestrictedMod
   GENERAL_MANAGER: fullAccess,
   COO: fullAccess,
   CFO: ["/reporting", "/contractors", "/permits", "/documents", "/compliance", "/incidents", "/marketplace", "/tenders", "/production", "/inventory", "/payroll", "/procurement", "/invoices", "/expenses"],
-  HR_MANAGER: ["/workers", "/workforce", "/visitors", "/documents", "/reporting", "/emergency", "/payroll"],
+  HR_MANAGER: ["/workers", "/workforce", "/visitors", "/documents", "/reporting", "/emergency", "/payroll", "/scanner"],
   SECURITY_MANAGER: ["/visitors", "/scanner", "/trucks", "/incidents", "/alerts", "/workers", "/sites", "/safety-observations", "/emergency"],
   SAFETY_MANAGER: [
     "/sites",

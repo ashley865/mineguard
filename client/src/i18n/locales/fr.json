@@ -139,7 +139,9 @@
     "complianceScore": "Score de Conformité",
     "workforceStatus": "État du Personnel",
     "equipmentStatus": "État des Équipements",
-    "financialPerformance": "Performance Financière"
+    "financialPerformance": "Performance Financière",
+    "tonnesSold": "Tonnes Vendues",
+    "biggestBuyer": "Plus Gros Acheteur"
   },
   "executive": {
     "title": "Tableau de bord exécutif",
@@ -1123,7 +1125,13 @@
       "joined": "A rejoint",
       "alertsReviewed": "Alertes examinées",
       "incidentsReviewed": "Incidents examinés",
-      "messagesSent": "Messages envoyés"
+      "messagesSent": "Messages envoyés",
+      "attendanceReportTitle": "Rapport de Connexion des Cadres",
+      "attendanceReportSubtitle": "Heures et nombre de connexions par cadre, par périodes de 3 jours",
+      "noExecutives": "Aucun cadre à signaler pour le moment.",
+      "executive": "Cadre",
+      "lastLogin": "Dernière Connexion",
+      "periodFrom": "À partir du {{date}}"
     }
   },
   "trucks": {
@@ -1801,7 +1809,8 @@
       "CONTRACTOR": "Entrepreneur"
     },
     "totalCosts": "Coûts Totaux",
-    "costsBySource": "Coûts par Source"
+    "costsBySource": "Coûts par Source",
+    "exportPdf": "Exporter le Rapport PDF"
   },
   "executiveRequests": {
     "nav": "Demandes",
@@ -1833,5 +1842,20 @@
     "approve": "Approuver",
     "reject": "Rejeter",
     "markCompleted": "Marquer comme Terminée"
+  },
+  "calling": {
+    "incomingVideoCall": "Appel vidéo entrant…",
+    "incomingVoiceCall": "Appel entrant…",
+    "decline": "Refuser",
+    "accept": "Accepter",
+    "callingStatus": "Appel en cours…",
+    "connectedStatus": "Connecté",
+    "mute": "Muet",
+    "unmute": "Réactiver le son",
+    "videoOn": "Activer la Vidéo",
+    "videoOff": "Désactiver la Vidéo",
+    "hangUp": "Raccrocher",
+    "voiceCall": "Appeler",
+    "videoCall": "Appel Vidéo"
   }
 }

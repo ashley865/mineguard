@@ -36,7 +36,10 @@ export default function HrWorkforceWidget() {
 
   if (!snapshot) return null;
 
-  const chartData = snapshot.byCategory.map((c) => ({
+  const newHires = snapshot.newHires ?? [];
+  const workerWarnings = snapshot.workerWarnings ?? [];
+
+  const chartData = (snapshot.byCategory ?? []).map((c) => ({
     category: t(`workers.categories.${c.category}`),
     onShiftPct: c.onShiftPct,
     total: c.total,
@@ -76,7 +79,7 @@ export default function HrWorkforceWidget() {
     {/* New Hires */}
     <div className={`${cardClass} p-3`}>
       <h2 className="text-xs font-semibold mb-2">{t("executive.newHiresTitle")}</h2>
-      {snapshot.newHires.length === 0 ? (
+      {newHires.length === 0 ? (
         <div className="text-mine-400 text-xs">{t("executive.noNewHires")}</div>
       ) : (
         <div className="overflow-x-auto">
@@ -91,7 +94,7 @@ export default function HrWorkforceWidget() {
               </tr>
             </thead>
             <tbody className="divide-y divide-mine-800">
-              {snapshot.newHires.map((h) => (
+              {newHires.map((h) => (
                 <tr key={h.id}>
                   <td className="pr-3 py-1.5 font-medium">{h.name}</td>
                   <td className="pr-3 py-1.5 text-mine-300">{h.role}</td>
@@ -109,11 +112,11 @@ export default function HrWorkforceWidget() {
     {/* Worker Warnings */}
     <div className={`${cardClass} p-3`}>
       <h2 className="text-xs font-semibold mb-2">{t("executive.workerWarningsTitle")}</h2>
-      {snapshot.workerWarnings.length === 0 ? (
+      {workerWarnings.length === 0 ? (
         <div className="text-mine-400 text-xs">{t("executive.noWorkerWarnings")}</div>
       ) : (
         <div className="space-y-1.5">
-          {snapshot.workerWarnings.map((w) => (
+          {workerWarnings.map((w) => (
             <div key={w.id} className="border border-mine-800 rounded-lg p-2.5 flex items-center justify-between gap-3">
               <div className="min-w-0">
                 <div className="flex items-center gap-2 mb-0.5">

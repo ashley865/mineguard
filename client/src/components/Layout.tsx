@@ -12,6 +12,7 @@ import NotificationBell from "./NotificationBell";
 import MessagesBell from "./MessagesBell";
 import EvacuationSystem from "./EvacuationSystem";
 import ClockInOutWidget from "./ClockInOutWidget";
+import CallUI from "./CallUI";
 
 export default function Layout() {
   const { t } = useTranslation();
@@ -282,6 +283,7 @@ export default function Layout() {
           </div>
         </main>
       </div>
+      <CallUI />
     </div>
   );
 }

@@ -139,7 +139,9 @@
     "complianceScore": "Voldoeningstelling",
     "workforceStatus": "Arbeidsmagstatus",
     "equipmentStatus": "Toerustingstatus",
-    "financialPerformance": "Finansiële Prestasie"
+    "financialPerformance": "Finansiële Prestasie",
+    "tonnesSold": "Ton Verkoop",
+    "biggestBuyer": "Grootste Koper"
   },
   "executive": {
     "title": "Uitvoerende Dashboard",
@@ -1123,7 +1125,13 @@
       "joined": "Aangesluit",
       "alertsReviewed": "Waarskuwings hersien",
       "incidentsReviewed": "Voorvalle hersien",
-      "messagesSent": "Boodskappe gestuur"
+      "messagesSent": "Boodskappe gestuur",
+      "attendanceReportTitle": "Uitvoerende Aanmeldingsverslag",
+      "attendanceReportSubtitle": "Ure en aanmeldingstelling per uitvoerende beampte, in periodes van 3 dae",
+      "noExecutives": "Nog geen uitvoerende beamptes om oor te rapporteer nie.",
+      "executive": "Uitvoerende Beampte",
+      "lastLogin": "Laaste Aanmelding",
+      "periodFrom": "Vanaf {{date}}"
     }
   },
   "trucks": {
@@ -1801,7 +1809,8 @@
       "CONTRACTOR": "Kontrakteur"
     },
     "totalCosts": "Totale Koste",
-    "costsBySource": "Koste volgens Bron"
+    "costsBySource": "Koste volgens Bron",
+    "exportPdf": "Voer PDF-verslag Uit"
   },
   "executiveRequests": {
     "nav": "Versoeke",
@@ -1833,5 +1842,20 @@
     "approve": "Keur Goed",
     "reject": "Wys Af",
     "markCompleted": "Merk as Voltooi"
+  },
+  "calling": {
+    "incomingVideoCall": "Inkomende video-oproep…",
+    "incomingVoiceCall": "Inkomende oproep…",
+    "decline": "Weier",
+    "accept": "Aanvaar",
+    "callingStatus": "Bel tans…",
+    "connectedStatus": "Gekoppel",
+    "mute": "Demp",
+    "unmute": "Ontdemp",
+    "videoOn": "Video Aan",
+    "videoOff": "Video Af",
+    "hangUp": "Sit Neer",
+    "voiceCall": "Bel",
+    "videoCall": "Video-oproep"
   }
 }

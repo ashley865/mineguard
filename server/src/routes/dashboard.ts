@@ -71,6 +71,20 @@ router.get("/summary", async (req, res) => {
     },
   });
 
+  const acceptedBids = await prisma.mineralBid.findMany({
+    where: { status: "ACCEPTED", listing: { site: { mineId } } },
+    select: { quantity: true, buyerId: true, buyer: { select: { legalName: true, tradingName: true } } },
+  });
+
+  const totalTonnesSold = acceptedBids.reduce((sum, b) => sum + b.quantity, 0);
+  const buyerTotals = new Map<string, { name: string; quantity: number }>();
+  for (const bid of acceptedBids) {
+    const entry = buyerTotals.get(bid.buyerId) ?? { name: bid.buyer.tradingName || bid.buyer.legalName, quantity: 0 };
+    entry.quantity += bid.quantity;
+    buyerTotals.set(bid.buyerId, entry);
+  }
+  const biggestBuyer = Array.from(buyerTotals.values()).sort((a, b) => b.quantity - a.quantity)[0] ?? null;
+
   res.json({
     counts: {
       siteCount,
@@ -86,6 +100,10 @@ router.get("/summary", async (req, res) => {
     complianceScore,
     recentAlerts,
     sites,
+    marketplace: {
+      totalTonnesSold: Math.round(totalTonnesSold * 100) / 100,
+      biggestBuyer,
+    },
   });
 });
 

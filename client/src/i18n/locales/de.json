@@ -139,7 +139,9 @@
     "complianceScore": "Compliance-Bewertung",
     "workforceStatus": "Belegschaftsstatus",
     "equipmentStatus": "Ausrüstungsstatus",
-    "financialPerformance": "Finanzielle Leistung"
+    "financialPerformance": "Finanzielle Leistung",
+    "tonnesSold": "Verkaufte Tonnen",
+    "biggestBuyer": "Größter Käufer"
   },
   "executive": {
     "title": "Führungskräfte-Dashboard",
@@ -1123,7 +1125,13 @@
       "joined": "Beigetreten",
       "alertsReviewed": "Geprüfte Warnungen",
       "incidentsReviewed": "Geprüfte Vorfälle",
-      "messagesSent": "Gesendete Nachrichten"
+      "messagesSent": "Gesendete Nachrichten",
+      "attendanceReportTitle": "Anmeldebericht der Führungskräfte",
+      "attendanceReportSubtitle": "Stunden und Anmeldezahl pro Führungskraft, in 3-Tage-Zeiträumen",
+      "noExecutives": "Noch keine Führungskräfte zum Berichten.",
+      "executive": "Führungskraft",
+      "lastLogin": "Letzte Anmeldung",
+      "periodFrom": "Ab {{date}}"
     }
   },
   "trucks": {
@@ -1801,7 +1809,8 @@
       "CONTRACTOR": "Auftragnehmer"
     },
     "totalCosts": "Gesamtkosten",
-    "costsBySource": "Kosten nach Quelle"
+    "costsBySource": "Kosten nach Quelle",
+    "exportPdf": "PDF-Bericht Exportieren"
   },
   "executiveRequests": {
     "nav": "Anfragen",
@@ -1833,5 +1842,20 @@
     "approve": "Genehmigen",
     "reject": "Ablehnen",
     "markCompleted": "Als Erledigt Markieren"
+  },
+  "calling": {
+    "incomingVideoCall": "Eingehender Videoanruf…",
+    "incomingVoiceCall": "Eingehender Anruf…",
+    "decline": "Ablehnen",
+    "accept": "Annehmen",
+    "callingStatus": "Rufe an…",
+    "connectedStatus": "Verbunden",
+    "mute": "Stummschalten",
+    "unmute": "Stummschaltung Aufheben",
+    "videoOn": "Video Ein",
+    "videoOff": "Video Aus",
+    "hangUp": "Auflegen",
+    "voiceCall": "Anrufen",
+    "videoCall": "Videoanruf"
   }
 }

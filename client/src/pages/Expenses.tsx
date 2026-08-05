@@ -1,5 +1,6 @@
 import { FormEvent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { useNavigate } from "react-router-dom";
 import { BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer } from "recharts";
 import { api, API_URL } from "../api/client";
 import { useAuth } from "../context/AuthContext";
@@ -275,6 +276,7 @@ function PayeeForm({ initial, onSubmit, onCancel }: {
 export default function Expenses() {
   const { t } = useTranslation();
   const { user } = useAuth();
+  const navigate = useNavigate();
   const canEdit = user?.role === "ADMIN" || user?.role === "SUPERVISOR" || user?.role === "EXECUTIVE";
   const canDelete = user?.role === "ADMIN" || user?.role === "EXECUTIVE";
   const [tab, setTab] = useState<TabKey>("expenses");
@@ -282,6 +284,7 @@ export default function Expenses() {
   const [payees, setPayees] = useState<Payee[]>([]);
   const [sites, setSites] = useState<Site[]>([]);
   const [loading, setLoading] = useState(true);
+  const [exportingPdf, setExportingPdf] = useState(false);
   const [expenseModal, setExpenseModal] = useState(false);
   const [payeeModal, setPayeeModal] = useState<null | "create" | Payee>(null);
   const [costSummary, setCostSummary] = useState<CostSummary | null>(null);
@@ -317,6 +320,16 @@ export default function Expenses() {
     await load();
   }
 
+  async function exportPdf() {
+    setExportingPdf(true);
+    try {
+      await api.post("/expenses/export-pdf");
+      navigate("/documents");
+    } finally {
+      setExportingPdf(false);
+    }
+  }
+
   async function createPayee(data: any) {
     await api.post("/payees", data);
     setPayeeModal(null);
@@ -350,8 +363,15 @@ export default function Expenses() {
           <h1 className="text-xl font-bold">{t("expenses.nav")}</h1>
           <p className="text-mine-300 text-sm">{t("expenses.subtitle")}</p>
         </div>
-        {canEdit && tab === "expenses" && sites.length > 0 && (
-          <button className={buttonPrimary} onClick={() => setExpenseModal(true)}>{t("expenses.newExpense")}</button>
+        {canEdit && tab === "expenses" && (
+          <div className="flex items-center gap-2">
+            <button className={buttonSecondary} disabled={exportingPdf} onClick={exportPdf}>
+              {exportingPdf ? t("common.saving") : t("expenses.exportPdf")}
+            </button>
+            {sites.length > 0 && (
+              <button className={buttonPrimary} onClick={() => setExpenseModal(true)}>{t("expenses.newExpense")}</button>
+            )}
+          </div>
         )}
         {canEdit && tab === "payees" && (
           <button className={buttonPrimary} onClick={() => setPayeeModal("create")}>{t("expenses.newPayee")}</button>

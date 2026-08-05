@@ -168,6 +168,37 @@ app.use((err: any, _req: express.Request, res: express.Response, _next: express.
 io.on("connection", (socket) => {
   if (socket.data.mineId) socket.join(`mine:${socket.data.mineId}`);
   socket.join(`user:${socket.data.userId}`);
+
+  // In-app calling: the server is a pure signaling relay between the two users'
+  // `user:<id>` rooms — no call state is persisted, WebRTC media flows peer-to-peer.
+  socket.on("call:invite", async (payload: { toUserId: string; offer: unknown; video: boolean; fromUserName: string }) => {
+    if (!payload?.toUserId || !socket.data.mineId) return;
+    const target = await prisma.user.findUnique({ where: { id: payload.toUserId }, select: { mineId: true } });
+    if (!target || target.mineId !== socket.data.mineId) return;
+    io.to(`user:${payload.toUserId}`).emit("call:invite", {
+      fromUserId: socket.data.userId,
+      fromUserName: payload.fromUserName,
+      offer: payload.offer,
+      video: !!payload.video,
+    });
+  });
+  socket.on("call:accept", (payload: { toUserId: string; answer: unknown }) => {
+    if (!payload?.toUserId) return;
+    io.to(`user:${payload.toUserId}`).emit("call:accept", { fromUserId: socket.data.userId, answer: payload.answer });
+  });
+  socket.on("call:reject", (payload: { toUserId: string }) => {
+    if (!payload?.toUserId) return;
+    io.to(`user:${payload.toUserId}`).emit("call:reject", { fromUserId: socket.data.userId });
+  });
+  socket.on("call:ice-candidate", (payload: { toUserId: string; candidate: unknown }) => {
+    if (!payload?.toUserId) return;
+    io.to(`user:${payload.toUserId}`).emit("call:ice-candidate", { fromUserId: socket.data.userId, candidate: payload.candidate });
+  });
+  socket.on("call:end", (payload: { toUserId: string }) => {
+    if (!payload?.toUserId) return;
+    io.to(`user:${payload.toUserId}`).emit("call:end", { fromUserId: socket.data.userId });
+  });
+
   socket.on("disconnect", () => {});
 });
 

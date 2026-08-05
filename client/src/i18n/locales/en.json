@@ -139,7 +139,9 @@
     "complianceScore": "Compliance Score",
     "workforceStatus": "Workforce Status",
     "equipmentStatus": "Equipment Status",
-    "financialPerformance": "Financial Performance"
+    "financialPerformance": "Financial Performance",
+    "tonnesSold": "Tonnes Sold",
+    "biggestBuyer": "Biggest Buyer"
   },
   "executive": {
     "title": "Executive Dashboard",
@@ -1123,7 +1125,13 @@
       "joined": "Joined",
       "alertsReviewed": "Alerts reviewed",
       "incidentsReviewed": "Incidents reviewed",
-      "messagesSent": "Messages sent"
+      "messagesSent": "Messages sent",
+      "attendanceReportTitle": "Executive Login Report",
+      "attendanceReportSubtitle": "Hours and login count per executive, in 3-day periods",
+      "noExecutives": "No executives to report on yet.",
+      "executive": "Executive",
+      "lastLogin": "Last Login",
+      "periodFrom": "From {{date}}"
     }
   },
   "trucks": {
@@ -1205,6 +1213,21 @@
     "approve": "Approve",
     "reject": "Reject",
     "markCompleted": "Mark Completed"
+  },
+  "calling": {
+    "incomingVideoCall": "Incoming video call…",
+    "incomingVoiceCall": "Incoming voice call…",
+    "decline": "Decline",
+    "accept": "Accept",
+    "callingStatus": "Calling…",
+    "connectedStatus": "Connected",
+    "mute": "Mute",
+    "unmute": "Unmute",
+    "videoOn": "Video On",
+    "videoOff": "Video Off",
+    "hangUp": "Hang Up",
+    "voiceCall": "Call",
+    "videoCall": "Video Call"
   },
   "messages": {
     "nav": "Messages",
@@ -1794,6 +1817,7 @@
     "totalPaid": "Total Paid",
     "totalCosts": "Total Costs",
     "costsBySource": "Costs by Source",
+    "exportPdf": "Export PDF Report",
     "viewReceipt": "View Receipt",
     "noneYet": "No expenses recorded yet.",
     "confirmDelete": "Delete this expense?",

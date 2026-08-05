@@ -1,6 +1,7 @@
 import { Router } from "express";
 import { prisma } from "../prisma";
-import { requireAuth } from "../middleware/auth";
+import { requireAuth, requireRole } from "../middleware/auth";
+import { requireMineId } from "../lib/mineScope";
 
 const router = Router();
 
@@ -86,6 +87,64 @@ router.get("/me", async (req, res) => {
       shiftsLast30: attendance30.length,
     },
   });
+});
+
+// Admin-facing report of executive login/attendance times, bucketed every 3 days,
+// so an admin can spot who is (and isn't) logging in regularly without digging
+// through each executive's individual attendance history one at a time.
+router.get("/team", requireRole("ADMIN"), async (req, res) => {
+  const mineId = requireMineId(req, res);
+  if (!mineId) return;
+
+  const bucketSize = 3;
+  const days = Math.min(Math.max(Number(req.query.days) || 9, bucketSize), 90);
+  const bucketCount = Math.ceil(days / bucketSize);
+
+  const start = new Date();
+  start.setHours(0, 0, 0, 0);
+  start.setDate(start.getDate() - (bucketCount * bucketSize - 1));
+
+  const executives = await prisma.user.findMany({
+    where: { mineId, role: "EXECUTIVE" },
+    select: { id: true, name: true, title: true },
+    orderBy: { name: "asc" },
+  });
+
+  const records = await prisma.userAttendance.findMany({
+    where: { userId: { in: executives.map((e) => e.id) }, checkInAt: { gte: start } },
+    select: { userId: true, checkInAt: true, checkOutAt: true },
+    orderBy: { checkInAt: "desc" },
+  });
+
+  const bucketStarts: Date[] = [];
+  for (let i = 0; i < bucketCount; i++) {
+    const bucketStart = new Date(start);
+    bucketStart.setDate(bucketStart.getDate() + i * bucketSize);
+    bucketStarts.push(bucketStart);
+  }
+
+  const executiveReports = executives.map((exec) => {
+    const own = records.filter((r) => r.userId === exec.id);
+    const buckets = bucketStarts.map((bucketStart) => {
+      const bucketEnd = new Date(bucketStart);
+      bucketEnd.setDate(bucketEnd.getDate() + bucketSize);
+      const inBucket = own.filter((r) => r.checkInAt >= bucketStart && r.checkInAt < bucketEnd);
+      return {
+        periodStart: bucketStart.toISOString().slice(0, 10),
+        hours: Math.round(sumHours(inBucket) * 10) / 10,
+        logins: inBucket.length,
+      };
+    });
+    return {
+      userId: exec.id,
+      name: exec.name,
+      title: exec.title,
+      lastLogin: own[0]?.checkInAt ?? null,
+      buckets,
+    };
+  });
+
+  res.json({ bucketSize, buckets: bucketStarts.map((d) => d.toISOString().slice(0, 10)), executives: executiveReports });
 });
 
 export default router;

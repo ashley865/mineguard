@@ -238,11 +238,6 @@ export default function Workers() {
     await load();
   }
 
-  async function toggleAttendance(id: string) {
-    await api.post(`/workers/${id}/toggle-attendance`);
-    await load();
-  }
-
   if (loading) return <div className="text-mine-300">{t("workers.loading")}</div>;
 
   const filteredWorkers = workers.filter((w) => !categoryFilter || w.category === categoryFilter);
@@ -313,18 +308,6 @@ export default function Workers() {
                   <div className="flex justify-end items-center gap-1">
                     <button className={actionButtonClass} onClick={() => setProfileWorker(w)}>{t("workers.viewProfile")}</button>
                     <button className={actionButtonClass} onClick={() => setQrWorker(w)}>{t("workers.showBadge")}</button>
-                    {canEdit && (
-                      <button
-                        className={`px-2.5 py-1 rounded-lg text-xs font-semibold transition-colors ${
-                          w.status === "ON_SHIFT"
-                            ? "bg-success-600/15 text-success-400 hover:bg-success-600/25"
-                            : "text-mine-300 hover:text-mine-50 hover:bg-mine-800"
-                        }`}
-                        onClick={() => toggleAttendance(w.id)}
-                      >
-                        {w.status === "ON_SHIFT" ? t("workers.checkOut") : t("workers.checkIn")}
-                      </button>
-                    )}
                     {canEdit && (
                       <button className={actionButtonClass} onClick={() => setModal(w)}>{t("common.edit")}</button>
                     )}

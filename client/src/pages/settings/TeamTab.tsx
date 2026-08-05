@@ -1,12 +1,70 @@
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { api, API_URL } from "../../api/client";
-import { TeamMember } from "../../api/types";
+import { useAuth } from "../../context/AuthContext";
+import { ExecutiveAttendanceReport, TeamMember } from "../../api/types";
 import Avatar from "../../components/Avatar";
 import { cardClass } from "../../components/ui";
 
+function AttendanceReport() {
+  const { t } = useTranslation();
+  const [report, setReport] = useState<ExecutiveAttendanceReport | null>(null);
+
+  useEffect(() => {
+    api.get<ExecutiveAttendanceReport>("/attendance/team", { params: { days: 9 } }).then((res) => setReport(res.data));
+  }, []);
+
+  if (!report) return null;
+
+  return (
+    <div className={`${cardClass} p-4`}>
+      <h2 className="text-sm font-semibold mb-1">{t("settings.team.attendanceReportTitle")}</h2>
+      <p className="text-xs text-mine-400 mb-3">{t("settings.team.attendanceReportSubtitle")}</p>
+      {report.executives.length === 0 ? (
+        <div className="text-mine-400 text-xs">{t("settings.team.noExecutives")}</div>
+      ) : (
+        <div className="overflow-x-auto">
+          <table className="w-full text-xs">
+            <thead className="text-mine-400 uppercase">
+              <tr>
+                <th className="text-left pr-3 py-1.5">{t("settings.team.executive")}</th>
+                <th className="text-left pr-3 py-1.5">{t("settings.team.lastLogin")}</th>
+                {report.buckets.map((b) => (
+                  <th key={b} className="text-right pr-3 py-1.5">
+                    {t("settings.team.periodFrom", { date: new Date(b).toLocaleDateString() })}
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-mine-800">
+              {report.executives.map((exec) => (
+                <tr key={exec.userId}>
+                  <td className="pr-3 py-1.5 font-medium">
+                    {exec.name}
+                    <span className="text-mine-400 font-normal">
+                      {exec.title ? ` · ${t(`settings.invites.titles.${exec.title}`)}` : ""}
+                    </span>
+                  </td>
+                  <td className="pr-3 py-1.5 text-mine-300">{exec.lastLogin ? new Date(exec.lastLogin).toLocaleString() : "—"}</td>
+                  {exec.buckets.map((b) => (
+                    <td key={b.periodStart} className="text-right pr-3 py-1.5">
+                      <span className={b.logins === 0 ? "text-mine-500" : "text-mine-100 font-semibold"}>{b.hours}h</span>
+                      <span className="text-mine-500"> ({b.logins})</span>
+                    </td>
+                  ))}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+    </div>
+  );
+}
+
 export default function TeamTab() {
   const { t } = useTranslation();
+  const { user } = useAuth();
   const [members, setMembers] = useState<TeamMember[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -60,6 +118,8 @@ export default function TeamTab() {
           ))}
         </div>
       )}
+
+      {user?.role === "ADMIN" && <AttendanceReport />}
     </div>
   );
 }

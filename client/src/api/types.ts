@@ -38,6 +38,18 @@ export interface TeamMember {
   };
 }
 
+export interface ExecutiveAttendanceReport {
+  bucketSize: number;
+  buckets: string[];
+  executives: {
+    userId: string;
+    name: string;
+    title?: ExecutiveTitle | null;
+    lastLogin?: string | null;
+    buckets: { periodStart: string; hours: number; logins: number }[];
+  }[];
+}
+
 export interface Mine {
   id: string;
   name: string;
@@ -325,6 +337,10 @@ export interface DashboardSummary {
   complianceScore: number;
   recentAlerts: Alert[];
   sites: Site[];
+  marketplace: {
+    totalTonnesSold: number;
+    biggestBuyer: { name: string; quantity: number } | null;
+  };
 }
 
 export interface ExecutiveSummary {

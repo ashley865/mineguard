@@ -5,6 +5,7 @@ import { prisma } from "../prisma";
 import { requireAuth, requireRole } from "../middleware/auth";
 import { documentFileFilter } from "../lib/uploadFilters";
 import { requireMineId } from "../lib/mineScope";
+import { renderExpensesReportHtml } from "../lib/expensesReportHtml";
 
 const router = Router();
 
@@ -132,6 +133,57 @@ router.get("/cost-summary", async (req, res) => {
       grandTotal: totalExpenses + totalMaintenance + totalPayroll,
     },
   });
+});
+
+router.post("/export-pdf", requireRole("ADMIN", "SUPERVISOR", "EXECUTIVE"), async (req, res) => {
+  const mineId = requireMineId(req, res);
+  if (!mineId) return;
+
+  const [expenses, mine] = await Promise.all([
+    prisma.expense.findMany({
+      where: { site: { mineId } },
+      select: {
+        expenseNumber: true,
+        description: true,
+        category: true,
+        amount: true,
+        currency: true,
+        expenseDate: true,
+        status: true,
+        payee: { select: { name: true } },
+      },
+      orderBy: { expenseDate: "desc" },
+    }),
+    prisma.mine.findUnique({ where: { id: mineId }, select: { name: true, logoData: true, logoMimeType: true } }),
+  ]);
+
+  const generatedAt = new Date();
+  const html = renderExpensesReportHtml(
+    expenses.map((e) => ({ ...e, payeeName: e.payee?.name ?? "—" })),
+    {
+      name: mine?.name ?? "Mine Guard",
+      logoDataUri: mine?.logoData && mine.logoMimeType ? `data:${mine.logoMimeType};base64,${Buffer.from(mine.logoData).toString("base64")}` : null,
+    },
+    generatedAt
+  );
+
+  const document = await prisma.document.create({
+    data: {
+      title: `Expenses Report — ${generatedAt.toLocaleDateString()}`,
+      type: "REPORT",
+      version: "1.0",
+      status: "ACTIVE",
+      description: `Auto-generated expenses report covering ${expenses.length} expense record(s)`,
+      mineId,
+      fileName: `Expenses-Report-${generatedAt.toISOString().slice(0, 10)}.html`,
+      fileMimeType: "text/html",
+      fileSize: Buffer.byteLength(html),
+      fileData: Buffer.from(html),
+      uploadedById: req.auth!.userId,
+    },
+  });
+
+  res.status(201).json({ documentId: document.id });
 });
 
 router.get("/", async (req, res) => {

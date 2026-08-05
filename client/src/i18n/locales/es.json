@@ -139,7 +139,9 @@
     "complianceScore": "Puntaje de Cumplimiento",
     "workforceStatus": "Estado del Personal",
     "equipmentStatus": "Estado de Equipos",
-    "financialPerformance": "Desempeño Financiero"
+    "financialPerformance": "Desempeño Financiero",
+    "tonnesSold": "Toneladas Vendidas",
+    "biggestBuyer": "Mayor Comprador"
   },
   "executive": {
     "title": "Panel Ejecutivo",
@@ -1123,7 +1125,13 @@
       "joined": "Se unió",
       "alertsReviewed": "Alertas revisadas",
       "incidentsReviewed": "Incidentes revisados",
-      "messagesSent": "Mensajes enviados"
+      "messagesSent": "Mensajes enviados",
+      "attendanceReportTitle": "Informe de Inicio de Sesión de Ejecutivos",
+      "attendanceReportSubtitle": "Horas y número de inicios de sesión por ejecutivo, en períodos de 3 días",
+      "noExecutives": "Aún no hay ejecutivos para reportar.",
+      "executive": "Ejecutivo",
+      "lastLogin": "Último Inicio de Sesión",
+      "periodFrom": "Desde {{date}}"
     }
   },
   "trucks": {
@@ -1801,7 +1809,8 @@
       "CONTRACTOR": "Contratista"
     },
     "totalCosts": "Costos Totales",
-    "costsBySource": "Costos por Origen"
+    "costsBySource": "Costos por Origen",
+    "exportPdf": "Exportar Informe PDF"
   },
   "executiveRequests": {
     "nav": "Solicitudes",
@@ -1833,5 +1842,20 @@
     "approve": "Aprobar",
     "reject": "Rechazar",
     "markCompleted": "Marcar Completada"
+  },
+  "calling": {
+    "incomingVideoCall": "Videollamada entrante…",
+    "incomingVoiceCall": "Llamada entrante…",
+    "decline": "Rechazar",
+    "accept": "Aceptar",
+    "callingStatus": "Llamando…",
+    "connectedStatus": "Conectado",
+    "mute": "Silenciar",
+    "unmute": "Activar sonido",
+    "videoOn": "Activar Video",
+    "videoOff": "Desactivar Video",
+    "hangUp": "Colgar",
+    "voiceCall": "Llamar",
+    "videoCall": "Videollamada"
   }
 }

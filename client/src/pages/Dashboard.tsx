@@ -14,7 +14,7 @@ function StatCard({
   tone,
 }: {
   label: string;
-  value: number;
+  value: number | string;
   tone?: "danger" | "hazard" | "success";
 }) {
   const toneClass =
@@ -65,7 +65,7 @@ export default function Dashboard() {
     return <div className="text-mine-300">{t("dashboard.loading")}</div>;
   }
 
-  const { counts, workforce, equipmentSummary, complianceScore, recentAlerts, sites } = summary;
+  const { counts, workforce, equipmentSummary, complianceScore, recentAlerts, sites, marketplace } = summary;
   const scoreTone =
     complianceScore >= 80 ? "text-success-500" : complianceScore >= 50 ? "text-hazard-500" : "text-danger-500";
 
@@ -89,6 +89,14 @@ export default function Dashboard() {
       <div className={`${cardClass} p-3 flex items-center justify-between flex-wrap gap-3`}>
         <h2 className="text-xs font-semibold">{t("dashboard.complianceScore")}</h2>
         <div className={`text-xl font-bold ${scoreTone}`}>{complianceScore}%</div>
+      </div>
+
+      <div className="grid grid-cols-2 gap-2">
+        <StatCard label={t("dashboard.tonnesSold")} value={(marketplace?.totalTonnesSold ?? 0).toLocaleString()} />
+        <StatCard
+          label={t("dashboard.biggestBuyer")}
+          value={marketplace?.biggestBuyer ? `${marketplace.biggestBuyer.name} (${marketplace.biggestBuyer.quantity.toLocaleString()}t)` : "—"}
+        />
       </div>
 
       {user?.role === "ADMIN" && <FinancialSummaryWidget />}

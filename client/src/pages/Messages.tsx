@@ -3,13 +3,15 @@ import { useTranslation } from "react-i18next";
 import { api } from "../api/client";
 import { useAuth } from "../context/AuthContext";
 import { useSocket } from "../context/SocketContext";
+import { useCall } from "../context/CallContext";
 import { Message, MessageContact } from "../api/types";
-import { buttonPrimary, cardClass, inputClass } from "../components/ui";
+import { buttonPrimary, buttonSecondary, cardClass, inputClass } from "../components/ui";
 
 export default function Messages() {
   const { t } = useTranslation();
   const { user } = useAuth();
   const socket = useSocket();
+  const { callState, startCall } = useCall();
   const [contacts, setContacts] = useState<MessageContact[]>([]);
   const [selected, setSelected] = useState<MessageContact | null>(null);
   const [thread, setThread] = useState<Message[]>([]);
@@ -123,10 +125,28 @@ export default function Messages() {
           )}
           {selected && (
             <>
-              <div className="px-4 py-3 border-b border-mine-800">
-                <div className="text-sm font-semibold">{selected.name}</div>
-                <div className="text-xs text-mine-400">
-                  {selected.title ? t(`settings.invites.titles.${selected.title}`) : selected.role}
+              <div className="px-4 py-3 border-b border-mine-800 flex items-center justify-between gap-3">
+                <div className="min-w-0">
+                  <div className="text-sm font-semibold truncate">{selected.name}</div>
+                  <div className="text-xs text-mine-400 truncate">
+                    {selected.title ? t(`settings.invites.titles.${selected.title}`) : selected.role}
+                  </div>
+                </div>
+                <div className="flex items-center gap-2 shrink-0">
+                  <button
+                    className={`${buttonSecondary} text-xs px-3 py-1.5`}
+                    disabled={callState !== "idle"}
+                    onClick={() => startCall(selected.id, selected.name, false)}
+                  >
+                    {t("calling.voiceCall")}
+                  </button>
+                  <button
+                    className={`${buttonSecondary} text-xs px-3 py-1.5`}
+                    disabled={callState !== "idle"}
+                    onClick={() => startCall(selected.id, selected.name, true)}
+                  >
+                    {t("calling.videoCall")}
+                  </button>
                 </div>
               </div>
               <div className="flex-1 overflow-y-auto p-4 space-y-3">

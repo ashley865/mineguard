@@ -176,9 +176,20 @@ router.delete("/:id", requireRole("ADMIN", "SUPERVISOR", "EXECUTIVE"), async (re
   res.status(204).send();
 });
 
-router.post("/:id/toggle-attendance", requireRole("ADMIN", "SUPERVISOR", "EXECUTIVE"), async (req, res) => {
+// Worker clock-in/out is QR-scan only (Scanner page), and only Security or HR staff
+// are trusted to operate that scanner — a manual toggle elsewhere would let anyone
+// mark a worker present without the worker actually being physically scanned in.
+const WORKER_CLOCK_IN_TITLES = ["SECURITY_MANAGER", "HR_MANAGER"];
+
+router.post("/:id/toggle-attendance", requireRole("ADMIN", "EXECUTIVE"), async (req, res) => {
   const mineId = requireMineId(req, res);
   if (!mineId) return;
+  if (req.auth!.role !== "ADMIN") {
+    const me = await prisma.user.findUnique({ where: { id: req.auth!.userId }, select: { title: true } });
+    if (!me?.title || !WORKER_CLOCK_IN_TITLES.includes(me.title)) {
+      return res.status(403).json({ error: "Only Security or HR staff can clock workers in or out" });
+    }
+  }
   const worker = await prisma.worker.findFirst({ where: { id: req.params.id, site: { mineId } } });
   if (!worker) return res.status(404).json({ error: "Worker not found" });
 
