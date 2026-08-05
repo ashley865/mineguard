@@ -13,6 +13,8 @@ import MessagesBell from "./MessagesBell";
 import EvacuationSystem from "./EvacuationSystem";
 import ClockInOutWidget from "./ClockInOutWidget";
 import CallUI from "./CallUI";
+import ToastContainer from "./ToastContainer";
+import RequestNotificationListener from "./RequestNotificationListener";
 
 export default function Layout() {
   const { t } = useTranslation();
@@ -284,6 +286,8 @@ export default function Layout() {
         </main>
       </div>
       <CallUI />
+      <ToastContainer />
+      <RequestNotificationListener />
     </div>
   );
 }

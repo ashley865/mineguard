@@ -10,6 +10,20 @@ import { buttonPrimary, buttonSecondary, cardClass, inputClass } from "../compon
 const dayOptions = [30, 90, 180, 365];
 type ReportingTab = "overview" | "balanceSheet" | "journal";
 
+async function downloadReport(url: string, params: Record<string, unknown> | undefined, fallbackName: string) {
+  const res = await api.get(url, { params, responseType: "blob" });
+  const disposition = res.headers?.["content-disposition"] as string | undefined;
+  const match = disposition?.match(/filename="([^"]+)"/);
+  const objectUrl = window.URL.createObjectURL(res.data);
+  const a = document.createElement("a");
+  a.href = objectUrl;
+  a.download = match?.[1] ?? fallbackName;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  window.URL.revokeObjectURL(objectUrl);
+}
+
 function RateCard({ label, numerator, denominator }: { label: string; numerator: number; denominator: number }) {
   const pct = denominator === 0 ? 100 : Math.round((numerator / denominator) * 100);
   const tone = pct >= 80 ? "text-success-500" : pct >= 50 ? "text-hazard-500" : "text-danger-500";
@@ -34,16 +48,31 @@ function BalanceSheetLine({ label, value, bold }: { label: string; value: number
 function BalanceSheetTab() {
   const { t } = useTranslation();
   const [sheet, setSheet] = useState<BalanceSheet | null>(null);
+  const [downloading, setDownloading] = useState(false);
 
   useEffect(() => {
     api.get<BalanceSheet>("/reports/balance-sheet").then((res) => setSheet(res.data));
   }, []);
 
+  async function download() {
+    setDownloading(true);
+    try {
+      await downloadReport("/reports/balance-sheet/pdf", undefined, "Balance-Sheet.html");
+    } finally {
+      setDownloading(false);
+    }
+  }
+
   if (!sheet) return <div className="text-mine-300 text-sm">{t("common.loading")}</div>;
 
   return (
     <div className="space-y-3">
-      <p className="text-xs text-mine-400">{t("reporting.balanceSheetNote", { date: new Date(sheet.asOf).toLocaleString() })}</p>
+      <div className="flex items-center justify-between gap-3 flex-wrap">
+        <p className="text-xs text-mine-400">{t("reporting.balanceSheetNote", { date: new Date(sheet.asOf).toLocaleString() })}</p>
+        <button className={buttonSecondary} disabled={downloading} onClick={download}>
+          {downloading ? t("reporting.downloading") : t("reporting.downloadPdf")}
+        </button>
+      </div>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
         <div className={`${cardClass} p-4`}>
           <h3 className="text-xs font-semibold uppercase tracking-wide text-mine-300 mb-2">{t("reporting.assets")}</h3>
@@ -71,20 +100,35 @@ function JournalTab() {
   const { t } = useTranslation();
   const [months, setMonths] = useState(3);
   const [entries, setEntries] = useState<JournalEntry[] | null>(null);
+  const [downloading, setDownloading] = useState(false);
 
   useEffect(() => {
     setEntries(null);
     api.get<JournalEntry[]>("/reports/journal", { params: { months } }).then((res) => setEntries(res.data));
   }, [months]);
 
+  async function download() {
+    setDownloading(true);
+    try {
+      await downloadReport("/reports/journal/pdf", { months }, "Journal.html");
+    } finally {
+      setDownloading(false);
+    }
+  }
+
   return (
     <div className="space-y-3">
-      <div className="flex gap-1">
-        {[1, 3, 6, 12].map((m) => (
-          <button key={m} className={months === m ? buttonPrimary : buttonSecondary} onClick={() => setMonths(m)}>
-            {t("reporting.lastNMonths", { count: m })}
-          </button>
-        ))}
+      <div className="flex items-center justify-between gap-3 flex-wrap">
+        <div className="flex gap-1">
+          {[1, 3, 6, 12].map((m) => (
+            <button key={m} className={months === m ? buttonPrimary : buttonSecondary} onClick={() => setMonths(m)}>
+              {t("reporting.lastNMonths", { count: m })}
+            </button>
+          ))}
+        </div>
+        <button className={buttonSecondary} disabled={downloading} onClick={download}>
+          {downloading ? t("reporting.downloading") : t("reporting.downloadPdf")}
+        </button>
       </div>
       {!entries ? (
         <div className="text-mine-300 text-sm">{t("common.loading")}</div>

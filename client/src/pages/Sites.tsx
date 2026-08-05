@@ -175,9 +175,16 @@ export default function Sites() {
           <div key={site.id} className={`${cardClass} p-5`}>
             <div className="flex items-start justify-between">
               <div>
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 flex-wrap">
                   <h2 className="font-semibold text-lg">{site.name}</h2>
                   <StatusBadge status={site.status} />
+                  {site.workforcePresence && (
+                    <span className="text-xs text-mine-300">
+                      <span className="text-success-500 font-semibold">{site.workforcePresence.present} {t("sites.present")}</span>
+                      {" · "}
+                      <span className="text-mine-400">{site.workforcePresence.total - site.workforcePresence.present} {t("sites.notPresent")}</span>
+                    </span>
+                  )}
                 </div>
                 <div className="text-sm text-mine-300">{site.location}</div>
                 {site.description && <div className="text-sm text-mine-400 mt-1">{site.description}</div>}
@@ -210,6 +217,13 @@ export default function Sites() {
                     <div>
                       <div className="text-sm font-medium">{zone.name}</div>
                       {zone.description && <div className="text-xs text-mine-400">{zone.description}</div>}
+                      {zone.workforcePresence && (
+                        <div className="text-[11px] mt-0.5">
+                          <span className="text-success-500 font-semibold">{zone.workforcePresence.present} {t("sites.present")}</span>
+                          {" · "}
+                          <span className="text-mine-400">{zone.workforcePresence.total - zone.workforcePresence.present} {t("sites.notPresent")}</span>
+                        </div>
+                      )}
                     </div>
                     {canEdit && (
                       <div className="flex gap-1 shrink-0">

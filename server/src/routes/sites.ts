@@ -18,15 +18,43 @@ router.use(requireAuth);
 router.get("/", async (req, res) => {
   const mineId = requireMineId(req, res);
   if (!mineId) return;
-  const sites = await prisma.site.findMany({
-    where: { mineId },
-    include: {
-      zones: true,
-      _count: { select: { workers: true, incidents: true, equipment: true, alerts: true } },
-    },
-    orderBy: { createdAt: "desc" },
-  });
-  res.json(sites);
+  const [sites, workers] = await Promise.all([
+    prisma.site.findMany({
+      where: { mineId },
+      include: {
+        zones: true,
+        _count: { select: { workers: true, incidents: true, equipment: true, alerts: true } },
+      },
+      orderBy: { createdAt: "desc" },
+    }),
+    prisma.worker.findMany({ where: { site: { mineId } }, select: { siteId: true, zoneId: true, status: true } }),
+  ]);
+
+  const siteCounts = new Map<string, { present: number; total: number }>();
+  const zoneCounts = new Map<string, { present: number; total: number }>();
+  for (const w of workers) {
+    const s = siteCounts.get(w.siteId) ?? { present: 0, total: 0 };
+    s.total += 1;
+    if (w.status === "ON_SHIFT") s.present += 1;
+    siteCounts.set(w.siteId, s);
+    if (w.zoneId) {
+      const z = zoneCounts.get(w.zoneId) ?? { present: 0, total: 0 };
+      z.total += 1;
+      if (w.status === "ON_SHIFT") z.present += 1;
+      zoneCounts.set(w.zoneId, z);
+    }
+  }
+
+  res.json(
+    sites.map((site) => ({
+      ...site,
+      workforcePresence: siteCounts.get(site.id) ?? { present: 0, total: 0 },
+      zones: site.zones.map((zone) => ({
+        ...zone,
+        workforcePresence: zoneCounts.get(zone.id) ?? { present: 0, total: 0 },
+      })),
+    }))
+  );
 });
 
 router.get("/:id", async (req, res) => {

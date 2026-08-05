@@ -220,7 +220,9 @@
     "editZoneTitle": "Zone bearbeiten",
     "confirmDeleteSite": "Diesen Standort mit allen Zonen, Sensoren, Mitarbeitern und der Ausrüstung löschen?",
     "confirmDeleteZone": "Diese Zone mit allen ihren Sensoren löschen?",
-    "loading": "Standorte werden geladen…"
+    "loading": "Standorte werden geladen…",
+    "present": "anwesend",
+    "notPresent": "abwesend"
   },
   "sensors": {
     "title": "Sensoren",
@@ -908,7 +910,9 @@
       "INCOME": "Einnahme",
       "EXPENSE": "Ausgabe"
     },
-    "noJournalEntries": "Keine Journaleinträge in diesem Zeitraum."
+    "noJournalEntries": "Keine Journaleinträge in diesem Zeitraum.",
+    "downloadPdf": "PDF Herunterladen",
+    "downloading": "Wird heruntergeladen…"
   },
   "attendance": {
     "clockIn": "Einstempeln",
@@ -1191,7 +1195,16 @@
     "selectContact": "Wählen Sie jemanden aus der Liste, um eine Unterhaltung zu beginnen.",
     "noMessagesYet": "Noch keine Nachrichten. Sagen Sie Hallo.",
     "typePlaceholder": "Nachricht eingeben…",
-    "send": "Senden"
+    "send": "Senden",
+    "newGroup": "+ Neue Gruppe",
+    "newGroupTitle": "Neue Gruppe",
+    "groupName": "Gruppenname",
+    "groupMembers": "Mitglieder",
+    "createGroup": "Gruppe Erstellen",
+    "groupCreateError": "Diese Gruppe konnte nicht erstellt werden",
+    "groupMemberCount": "{{count}} Mitglieder",
+    "groupsSection": "Gruppen",
+    "directSection": "Direktnachrichten"
   },
   "buyerRegister": {
     "title": "Registrierung als Mineralienkäufer",
@@ -1841,7 +1854,15 @@
     "notePlaceholder": "Optionale Notiz…",
     "approve": "Genehmigen",
     "reject": "Ablehnen",
-    "markCompleted": "Als Erledigt Markieren"
+    "markCompleted": "Als Erledigt Markieren",
+    "attachment": "Anhang (optional)",
+    "attachmentHint": "Klicken oder ziehen Sie ein Dokument oder Bild zum Anhängen",
+    "toastNewTitle": "Neue Anfrage von {{name}}",
+    "toastResponded": {
+      "APPROVED": "{{name}} hat Ihre Anfrage genehmigt",
+      "REJECTED": "{{name}} hat Ihre Anfrage abgelehnt",
+      "COMPLETED": "{{name}} hat Ihre Anfrage als erledigt markiert"
+    }
   },
   "calling": {
     "incomingVideoCall": "Eingehender Videoanruf…",

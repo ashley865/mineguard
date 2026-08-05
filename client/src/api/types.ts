@@ -141,6 +141,11 @@ export interface HrWorkforceSnapshot {
 
 export type SiteStatus = "OPERATIONAL" | "RESTRICTED" | "SHUT_DOWN";
 
+export interface WorkforcePresence {
+  present: number;
+  total: number;
+}
+
 export interface Site {
   id: string;
   name: string;
@@ -150,6 +155,7 @@ export interface Site {
   createdAt: string;
   zones?: Zone[];
   _count?: { workers: number; incidents: number; equipment: number; alerts: number };
+  workforcePresence?: WorkforcePresence;
 }
 
 export interface Zone {
@@ -159,6 +165,7 @@ export interface Zone {
   siteId: string;
   site?: { id: string; name: string };
   sensors?: Sensor[];
+  workforcePresence?: WorkforcePresence;
 }
 
 export type SensorType =
@@ -850,12 +857,21 @@ export interface MessageContact {
 export interface Message {
   id: string;
   senderId: string;
-  recipientId: string;
+  recipientId?: string | null;
+  groupId?: string | null;
   body: string;
   readAt?: string | null;
   createdAt: string;
   sender: { id: string; name: string; email: string; role: Role; title?: ExecutiveTitle | null };
-  recipient: { id: string; name: string; email: string; role: Role; title?: ExecutiveTitle | null };
+  recipient?: { id: string; name: string; email: string; role: Role; title?: ExecutiveTitle | null } | null;
+}
+
+export interface MessageGroup {
+  id: string;
+  name: string;
+  createdById?: string | null;
+  createdAt: string;
+  members: { id: string; name: string; email: string; role: Role; title?: ExecutiveTitle | null }[];
 }
 
 export type BuyerType = "INDIVIDUAL" | "COMPANY" | "TRUST" | "PARTNERSHIP";
@@ -1496,6 +1512,10 @@ export interface ExecutiveRequestItem {
   respondedAt?: string | null;
   fromUser: { id: string; name: string; title?: ExecutiveTitle | null };
   respondedBy?: { id: string; name: string } | null;
+  hasAttachment?: boolean;
+  fileName?: string | null;
+  fileMimeType?: string | null;
+  fileSize?: number | null;
   createdAt: string;
 }
 

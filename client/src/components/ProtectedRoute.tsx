@@ -4,6 +4,7 @@ import { useAuth } from "../context/AuthContext";
 import { SocketProvider } from "../context/SocketContext";
 import { EvacuationProvider } from "../context/EvacuationContext";
 import { CallProvider } from "../context/CallContext";
+import { ToastProvider } from "../context/ToastContext";
 import Layout from "./Layout";
 
 export default function ProtectedRoute() {
@@ -25,9 +26,11 @@ export default function ProtectedRoute() {
   return (
     <SocketProvider>
       <EvacuationProvider>
-        <CallProvider>
-          <Layout />
-        </CallProvider>
+        <ToastProvider>
+          <CallProvider>
+            <Layout />
+          </CallProvider>
+        </ToastProvider>
       </EvacuationProvider>
     </SocketProvider>
   );

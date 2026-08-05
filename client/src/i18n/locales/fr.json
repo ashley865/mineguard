@@ -220,7 +220,9 @@
     "editZoneTitle": "Modifier la zone",
     "confirmDeleteSite": "Supprimer ce site ainsi que toutes ses zones, capteurs, travailleurs et équipements ?",
     "confirmDeleteZone": "Supprimer cette zone et tous ses capteurs ?",
-    "loading": "Chargement des sites…"
+    "loading": "Chargement des sites…",
+    "present": "présents",
+    "notPresent": "absents"
   },
   "sensors": {
     "title": "Capteurs",
@@ -908,7 +910,9 @@
       "INCOME": "Revenu",
       "EXPENSE": "Dépense"
     },
-    "noJournalEntries": "Aucune écriture pour cette période."
+    "noJournalEntries": "Aucune écriture pour cette période.",
+    "downloadPdf": "Télécharger le PDF",
+    "downloading": "Téléchargement…"
   },
   "attendance": {
     "clockIn": "Pointer l'Arrivée",
@@ -1191,7 +1195,16 @@
     "selectContact": "Sélectionnez quelqu'un dans la liste pour démarrer une conversation.",
     "noMessagesYet": "Aucun message pour le moment. Dites bonjour.",
     "typePlaceholder": "Écrivez un message…",
-    "send": "Envoyer"
+    "send": "Envoyer",
+    "newGroup": "+ Nouveau Groupe",
+    "newGroupTitle": "Nouveau Groupe",
+    "groupName": "Nom du groupe",
+    "groupMembers": "Membres",
+    "createGroup": "Créer le Groupe",
+    "groupCreateError": "Impossible de créer ce groupe",
+    "groupMemberCount": "{{count}} membres",
+    "groupsSection": "Groupes",
+    "directSection": "Messages Directs"
   },
   "buyerRegister": {
     "title": "Inscription Acheteur de Minéraux",
@@ -1841,7 +1854,15 @@
     "notePlaceholder": "Note facultative…",
     "approve": "Approuver",
     "reject": "Rejeter",
-    "markCompleted": "Marquer comme Terminée"
+    "markCompleted": "Marquer comme Terminée",
+    "attachment": "Pièce jointe (facultatif)",
+    "attachmentHint": "Cliquez ou glissez un document ou une image à joindre",
+    "toastNewTitle": "Nouvelle demande de {{name}}",
+    "toastResponded": {
+      "APPROVED": "{{name}} a approuvé votre demande",
+      "REJECTED": "{{name}} a rejeté votre demande",
+      "COMPLETED": "{{name}} a marqué votre demande comme terminée"
+    }
   },
   "calling": {
     "incomingVideoCall": "Appel vidéo entrant…",

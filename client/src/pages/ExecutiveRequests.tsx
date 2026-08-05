@@ -2,9 +2,11 @@ import { FormEvent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { api } from "../api/client";
 import { useAuth } from "../context/AuthContext";
+import { useSocket } from "../context/SocketContext";
 import { ExecutiveRequestCategory, ExecutiveRequestItem, ExecutiveTitle } from "../api/types";
 import { StatusBadge } from "../components/Badges";
 import Modal from "../components/Modal";
+import FileDropzone from "../components/FileDropzone";
 import { buttonPrimary, buttonSecondary, cardClass, inputClass, labelClass, selectClass } from "../components/ui";
 
 const executiveTitles: ExecutiveTitle[] = [
@@ -31,7 +33,7 @@ const categories: ExecutiveRequestCategory[] = [
 type TabKey = "received" | "sent";
 
 function NewRequestForm({ onSubmit, onCancel }: {
-  onSubmit: (data: { toTitle: ExecutiveTitle; category: ExecutiveRequestCategory; subject: string; message: string }) => Promise<void>;
+  onSubmit: (form: FormData) => Promise<void>;
   onCancel: () => void;
 }) {
   const { t } = useTranslation();
@@ -39,6 +41,7 @@ function NewRequestForm({ onSubmit, onCancel }: {
   const [category, setCategory] = useState<ExecutiveRequestCategory>("GENERAL");
   const [subject, setSubject] = useState("");
   const [message, setMessage] = useState("");
+  const [attachment, setAttachment] = useState<File | null>(null);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -47,7 +50,13 @@ function NewRequestForm({ onSubmit, onCancel }: {
     setError(null);
     setSaving(true);
     try {
-      await onSubmit({ toTitle, category, subject, message });
+      const form = new FormData();
+      form.append("toTitle", toTitle);
+      form.append("category", category);
+      form.append("subject", subject);
+      form.append("message", message);
+      if (attachment) form.append("attachment", attachment);
+      await onSubmit(form);
     } catch (err: any) {
       setError(err.response?.data?.error ?? t("executiveRequests.createError"));
     } finally {
@@ -78,6 +87,10 @@ function NewRequestForm({ onSubmit, onCancel }: {
       <div>
         <label className={labelClass}>{t("executiveRequests.message")}</label>
         <textarea className={inputClass} rows={4} value={message} onChange={(e) => setMessage(e.target.value)} required />
+      </div>
+      <div>
+        <label className={labelClass}>{t("executiveRequests.attachment")}</label>
+        <FileDropzone accept="image/*,.pdf,.doc,.docx,.xls,.xlsx,.csv" hint={t("executiveRequests.attachmentHint") ?? ""} onFiles={(files) => setAttachment(files.item(0))} />
       </div>
       {error && <div className="text-danger-500 text-xs">{error}</div>}
       <div className="flex justify-end gap-2 pt-2">
@@ -128,6 +141,25 @@ function RequestCard({ request, mine, onRespond }: {
         </div>
       </div>
       <p className="text-sm text-mine-200 whitespace-pre-line">{request.message}</p>
+      {request.hasAttachment && (
+        <button
+          type="button"
+          className="inline-flex items-center gap-1.5 text-xs text-hazard-400 hover:text-hazard-300"
+          onClick={async () => {
+            const res = await api.get(`/executive-requests/${request.id}/attachment`, { responseType: "blob" });
+            const url = window.URL.createObjectURL(res.data);
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = request.fileName ?? "attachment";
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+            window.URL.revokeObjectURL(url);
+          }}
+        >
+          📎 {request.fileName}
+        </button>
+      )}
       {request.responseNote && (
         <div className="text-xs text-mine-400 italic border-t border-mine-800 pt-2">
           {t("executiveRequests.responseNote", { name: request.respondedBy?.name ?? "" })}: "{request.responseNote}"
@@ -160,6 +192,7 @@ function RequestCard({ request, mine, onRespond }: {
 export default function ExecutiveRequests() {
   const { t } = useTranslation();
   const { user } = useAuth();
+  const socket = useSocket();
   const [items, setItems] = useState<ExecutiveRequestItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [tab, setTab] = useState<TabKey>("received");
@@ -176,8 +209,19 @@ export default function ExecutiveRequests() {
     load();
   }, []);
 
-  async function createRequest(data: { toTitle: ExecutiveTitle; category: ExecutiveRequestCategory; subject: string; message: string }) {
-    await api.post("/executive-requests", data);
+  useEffect(() => {
+    if (!socket) return;
+    const refresh = () => load();
+    socket.on("request:new", refresh);
+    socket.on("request:responded", refresh);
+    return () => {
+      socket.off("request:new", refresh);
+      socket.off("request:responded", refresh);
+    };
+  }, [socket]);
+
+  async function createRequest(form: FormData) {
+    await api.post("/executive-requests", form, { headers: { "Content-Type": "multipart/form-data" } });
     setModal(false);
     await load();
   }

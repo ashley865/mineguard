@@ -4,6 +4,7 @@ import { prisma } from "../prisma";
 import { requireAuth, requireRole } from "../middleware/auth";
 import { computeComplianceScore } from "../services/complianceScore";
 import { requireMineId } from "../lib/mineScope";
+import { renderBalanceSheetHtml, renderJournalHtml } from "../lib/financialReportHtml";
 
 const router = Router();
 
@@ -33,11 +34,7 @@ function invoiceTotal(inv: { vatRate: number; lines: { lineTotal: number }[] }):
   return subtotal * (1 + inv.vatRate / 100);
 }
 
-router.get("/balance-sheet", async (req, res) => {
-  const mineId = requireMineId(req, res);
-  if (!mineId) return;
-  if (!(await requireFinanceAccess(req, res))) return;
-
+async function computeBalanceSheet(mineId: string) {
   const [paidInvoices, unpaidInvoices, paidExpenses, unpaidExpenses, payslips, openOrders, inventoryItems] = await Promise.all([
     prisma.invoice.findMany({ where: { site: { mineId }, status: "PAID" }, select: { vatRate: true, lines: { select: { lineTotal: true } } } }),
     prisma.invoice.findMany({
@@ -67,7 +64,7 @@ router.get("/balance-sheet", async (req, res) => {
   const totalLiabilities = accountsPayable;
   const retainedEarnings = totalAssets - totalLiabilities;
 
-  res.json({
+  return {
     asOf: new Date().toISOString(),
     assets: {
       cashAndEquivalents: Math.round(cashAndEquivalents),
@@ -83,15 +80,40 @@ router.get("/balance-sheet", async (req, res) => {
       retainedEarnings: Math.round(retainedEarnings),
       total: Math.round(retainedEarnings),
     },
-  });
+  };
+}
+
+router.get("/balance-sheet", async (req, res) => {
+  const mineId = requireMineId(req, res);
+  if (!mineId) return;
+  if (!(await requireFinanceAccess(req, res))) return;
+  res.json(await computeBalanceSheet(mineId));
 });
 
-router.get("/journal", async (req, res) => {
+router.get("/balance-sheet/pdf", async (req, res) => {
   const mineId = requireMineId(req, res);
   if (!mineId) return;
   if (!(await requireFinanceAccess(req, res))) return;
 
-  const months = Math.min(Math.max(Number(req.query.months) || 3, 1), 12);
+  const [sheet, mine] = await Promise.all([
+    computeBalanceSheet(mineId),
+    prisma.mine.findUnique({ where: { id: mineId }, select: { name: true, logoData: true, logoMimeType: true } }),
+  ]);
+  const generatedAt = new Date();
+  const html = renderBalanceSheetHtml(
+    sheet,
+    {
+      name: mine?.name ?? "Mine Guard",
+      logoDataUri: mine?.logoData && mine.logoMimeType ? `data:${mine.logoMimeType};base64,${Buffer.from(mine.logoData).toString("base64")}` : null,
+    },
+    generatedAt
+  );
+  res.setHeader("Content-Type", "text/html");
+  res.setHeader("Content-Disposition", `attachment; filename="Balance-Sheet-${generatedAt.toISOString().slice(0, 10)}.html"`);
+  res.send(html);
+});
+
+async function computeJournal(mineId: string, months: number) {
   const since = new Date();
   since.setMonth(since.getMonth() - months);
 
@@ -157,7 +179,39 @@ router.get("/journal", async (req, res) => {
     balanceById.set(e.id, Math.round(runningBalance));
   }
 
-  res.json(entries.map((e) => ({ ...e, runningBalance: balanceById.get(e.id)! })));
+  return entries.map((e) => ({ ...e, runningBalance: balanceById.get(e.id)! }));
+}
+
+router.get("/journal", async (req, res) => {
+  const mineId = requireMineId(req, res);
+  if (!mineId) return;
+  if (!(await requireFinanceAccess(req, res))) return;
+  const months = Math.min(Math.max(Number(req.query.months) || 3, 1), 12);
+  res.json(await computeJournal(mineId, months));
+});
+
+router.get("/journal/pdf", async (req, res) => {
+  const mineId = requireMineId(req, res);
+  if (!mineId) return;
+  if (!(await requireFinanceAccess(req, res))) return;
+  const months = Math.min(Math.max(Number(req.query.months) || 3, 1), 12);
+
+  const [entries, mine] = await Promise.all([
+    computeJournal(mineId, months),
+    prisma.mine.findUnique({ where: { id: mineId }, select: { name: true, logoData: true, logoMimeType: true } }),
+  ]);
+  const generatedAt = new Date();
+  const html = renderJournalHtml(
+    entries.map((e) => ({ ...e, date: new Date(e.date) })),
+    {
+      name: mine?.name ?? "Mine Guard",
+      logoDataUri: mine?.logoData && mine.logoMimeType ? `data:${mine.logoMimeType};base64,${Buffer.from(mine.logoData).toString("base64")}` : null,
+    },
+    generatedAt
+  );
+  res.setHeader("Content-Type", "text/html");
+  res.setHeader("Content-Disposition", `attachment; filename="Journal-${generatedAt.toISOString().slice(0, 10)}.html"`);
+  res.send(html);
 });
 
 function toCsv(rows: Record<string, any>[], columns: { key: string; label: string }[]): string {

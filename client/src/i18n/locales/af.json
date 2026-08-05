@@ -220,7 +220,9 @@
     "editZoneTitle": "Wysig Sone",
     "confirmDeleteSite": "Skrap hierdie terrein en al sy sones, sensors, werkers en toerusting?",
     "confirmDeleteZone": "Skrap hierdie sone en al sy sensors?",
-    "loading": "Laai terreine tans…"
+    "loading": "Laai terreine tans…",
+    "present": "teenwoordig",
+    "notPresent": "afwesig"
   },
   "sensors": {
     "title": "Sensors",
@@ -908,7 +910,9 @@
       "INCOME": "Inkomste",
       "EXPENSE": "Uitgawe"
     },
-    "noJournalEntries": "Geen joernaalinskrywings in hierdie tydperk nie."
+    "noJournalEntries": "Geen joernaalinskrywings in hierdie tydperk nie.",
+    "downloadPdf": "Laai PDF Af",
+    "downloading": "Laai af…"
   },
   "attendance": {
     "clockIn": "Klok In",
@@ -1191,7 +1195,16 @@
     "selectContact": "Kies iemand van die lys om 'n gesprek te begin.",
     "noMessagesYet": "Nog geen boodskappe nie. Groet gerus.",
     "typePlaceholder": "Tik 'n boodskap…",
-    "send": "Stuur"
+    "send": "Stuur",
+    "newGroup": "+ Nuwe Groep",
+    "newGroupTitle": "Nuwe Groep",
+    "groupName": "Groepnaam",
+    "groupMembers": "Lede",
+    "createGroup": "Skep Groep",
+    "groupCreateError": "Kon nie hierdie groep skep nie",
+    "groupMemberCount": "{{count}} lede",
+    "groupsSection": "Groepe",
+    "directSection": "Direkte Boodskappe"
   },
   "buyerRegister": {
     "title": "Mineraalkoper-registrasie",
@@ -1841,7 +1854,15 @@
     "notePlaceholder": "Opsionele nota…",
     "approve": "Keur Goed",
     "reject": "Wys Af",
-    "markCompleted": "Merk as Voltooi"
+    "markCompleted": "Merk as Voltooi",
+    "attachment": "Aanhegsel (opsioneel)",
+    "attachmentHint": "Klik of sleep 'n dokument of prent om aan te heg",
+    "toastNewTitle": "Nuwe versoek van {{name}}",
+    "toastResponded": {
+      "APPROVED": "{{name}} het jou versoek goedgekeur",
+      "REJECTED": "{{name}} het jou versoek afgekeur",
+      "COMPLETED": "{{name}} het jou versoek as voltooi gemerk"
+    }
   },
   "calling": {
     "incomingVideoCall": "Inkomende video-oproep…",

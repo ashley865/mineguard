@@ -216,6 +216,8 @@ model User {
   employeePayee          Payee?                  @relation("PayeeLinkedUser")
   requestsSent           ExecutiveRequest[]      @relation("ExecutiveRequestFrom")
   requestsResponded      ExecutiveRequest[]      @relation("ExecutiveRequestRespondedBy")
+  messageGroupsCreated   MessageGroup[]          @relation("MessageGroupCreatedBy")
+  messageGroupMemberships MessageGroupMember[]
 }
 
 model UserAttendance {
@@ -768,6 +770,7 @@ model Mine {
   suppliers        Supplier[]
   evacuations      EmergencyEvacuation[]
   executiveRequests ExecutiveRequest[]
+  messageGroups    MessageGroup[]
 }
 
 enum ExecutiveRequestStatus {
@@ -797,6 +800,11 @@ model ExecutiveRequest {
   respondedById String?
   respondedBy   User?                  @relation("ExecutiveRequestRespondedBy", fields: [respondedById], references: [id], onDelete: SetNull)
   respondedAt   DateTime?
+
+  fileName     String?
+  fileMimeType String?
+  fileSize     Int?
+  fileData     Bytes?
 
   createdAt DateTime @default(now())
 }
@@ -1021,14 +1029,43 @@ model Message {
   id          String    @id @default(cuid())
   senderId    String
   sender      User      @relation("MessageSender", fields: [senderId], references: [id], onDelete: Cascade)
-  recipientId String
-  recipient   User      @relation("MessageRecipient", fields: [recipientId], references: [id], onDelete: Cascade)
+  // Exactly one of recipientId (1:1 direct message) or groupId (group message) is set.
+  recipientId String?
+  recipient   User?     @relation("MessageRecipient", fields: [recipientId], references: [id], onDelete: Cascade)
+  groupId     String?
+  group       MessageGroup? @relation(fields: [groupId], references: [id], onDelete: Cascade)
   body        String
   readAt      DateTime?
   createdAt   DateTime  @default(now())
 
   @@index([senderId, recipientId])
   @@index([recipientId, readAt])
+  @@index([groupId, createdAt])
+}
+
+model MessageGroup {
+  id          String               @id @default(cuid())
+  mineId      String
+  mine        Mine                 @relation(fields: [mineId], references: [id], onDelete: Cascade)
+  name        String
+  createdById String?
+  createdBy   User?                @relation("MessageGroupCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+  members     MessageGroupMember[]
+  messages    Message[]
+
+  createdAt DateTime @default(now())
+}
+
+model MessageGroupMember {
+  id      String       @id @default(cuid())
+  groupId String
+  group   MessageGroup @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  userId  String
+  user    User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  joinedAt DateTime @default(now())
+
+  @@unique([groupId, userId])
 }
 
 enum BuyerType {

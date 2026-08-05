@@ -212,6 +212,8 @@
     "zones": "Zones",
     "addZone": "+ Add zone",
     "zoneName": "Zone name",
+    "present": "present",
+    "notPresent": "not present",
     "noZonesYet": "No zones yet.",
     "noSitesYet": "No sites yet. Create one to get started.",
     "newSiteTitle": "New Site",
@@ -908,7 +910,9 @@
       "INCOME": "Income",
       "EXPENSE": "Expense"
     },
-    "noJournalEntries": "No journal entries in this period."
+    "noJournalEntries": "No journal entries in this period.",
+    "downloadPdf": "Download PDF",
+    "downloading": "Downloading…"
   },
   "attendance": {
     "clockIn": "Clock In",
@@ -1212,7 +1216,15 @@
     "notePlaceholder": "Optional note…",
     "approve": "Approve",
     "reject": "Reject",
-    "markCompleted": "Mark Completed"
+    "markCompleted": "Mark Completed",
+    "attachment": "Attachment (optional)",
+    "attachmentHint": "Click or drag a document or picture to attach",
+    "toastNewTitle": "New request from {{name}}",
+    "toastResponded": {
+      "APPROVED": "{{name}} approved your request",
+      "REJECTED": "{{name}} rejected your request",
+      "COMPLETED": "{{name}} marked your request as completed"
+    }
   },
   "calling": {
     "incomingVideoCall": "Incoming video call…",
@@ -1237,7 +1249,16 @@
     "selectContact": "Select someone from the list to start a conversation.",
     "noMessagesYet": "No messages yet. Say hello.",
     "typePlaceholder": "Type a message…",
-    "send": "Send"
+    "send": "Send",
+    "newGroup": "+ New Group",
+    "newGroupTitle": "New Group",
+    "groupName": "Group name",
+    "groupMembers": "Members",
+    "createGroup": "Create Group",
+    "groupCreateError": "Could not create this group",
+    "groupMemberCount": "{{count}} members",
+    "groupsSection": "Groups",
+    "directSection": "Direct Messages"
   },
   "buyerRegister": {
     "title": "Mineral Buyer Registration",
