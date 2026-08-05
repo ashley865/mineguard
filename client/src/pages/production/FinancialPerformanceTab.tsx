@@ -98,7 +98,7 @@ export default function FinancialPerformanceTab({ sites }: { sites: Site[] }) {
 
             <div className={`${cardClass} p-4`}>
               <h3 className="text-sm font-semibold mb-3">{t("production.tonnesByMineral")}</h3>
-              {summary.minerals.length === 0 ? (
+              {(summary.minerals ?? []).length === 0 ? (
                 <div className="text-mine-400 text-xs h-64 flex items-center justify-center">{t("production.noneYet")}</div>
               ) : (
                 <div className="h-64">
@@ -108,8 +108,8 @@ export default function FinancialPerformanceTab({ sites }: { sites: Site[] }) {
                       <YAxis tick={CHART_TICK_STYLE} />
                       <Tooltip contentStyle={CHART_TOOLTIP_STYLE} />
                       <Legend wrapperStyle={{ fontSize: 11 }} />
-                      {summary.minerals.map((mineral, i) => (
-                        <Bar key={mineral} dataKey={mineral} name={mineral} stackId="tonnes" fill={MINERAL_COLORS[i % MINERAL_COLORS.length]} radius={i === summary.minerals.length - 1 ? [3, 3, 0, 0] : undefined} />
+                      {(summary.minerals ?? []).map((mineral, i) => (
+                        <Bar key={mineral} dataKey={mineral} name={mineral} stackId="tonnes" fill={MINERAL_COLORS[i % MINERAL_COLORS.length]} radius={i === (summary.minerals ?? []).length - 1 ? [3, 3, 0, 0] : undefined} />
                       ))}
                     </BarChart>
                   </ResponsiveContainer>

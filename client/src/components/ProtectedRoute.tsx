@@ -23,7 +23,9 @@ export default function ProtectedRoute() {
 
   return (
     <SocketProvider>
-      <Layout />
+      <EvacuationProvider>
+        <Layout />
+      </EvacuationProvider>
     </SocketProvider>
   );
 }

@@ -74,6 +74,23 @@ export interface ReviewNotification {
   site?: { id: string; name: string } | null;
 }
 
+export interface UserAttendanceRecord {
+  id: string;
+  checkInAt: string;
+  checkOutAt?: string | null;
+}
+
+export interface MyAttendanceSummary {
+  open: UserAttendanceRecord | null;
+  recent: UserAttendanceRecord[];
+  stats: {
+    hoursThisWeek: number;
+    hoursThisMonth: number;
+    avgHoursPerShift: number | null;
+    shiftsLast30: number;
+  };
+}
+
 export interface HrWorkforceSnapshot {
   totalWorkers: number;
   onShiftWorkers: number;

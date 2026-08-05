@@ -31,6 +31,7 @@ export default function FinancialSummaryWidget() {
   if (!summary) return null;
 
   const money = (n: number) => `ZAR ${Math.round(n).toLocaleString()}`;
+  const minerals = summary.minerals ?? [];
 
   return (
     <div className={`${cardClass} p-3`}>
@@ -66,8 +67,8 @@ export default function FinancialSummaryWidget() {
                 <YAxis tick={CHART_TICK_STYLE} />
                 <Tooltip contentStyle={CHART_TOOLTIP_STYLE} />
                 <Legend wrapperStyle={{ fontSize: 10 }} />
-                {summary.minerals.map((mineral, i) => (
-                  <Bar key={mineral} dataKey={mineral} name={mineral} stackId="tonnes" fill={MINERAL_COLORS[i % MINERAL_COLORS.length]} radius={i === summary.minerals.length - 1 ? [3, 3, 0, 0] : undefined} />
+                {minerals.map((mineral, i) => (
+                  <Bar key={mineral} dataKey={mineral} name={mineral} stackId="tonnes" fill={MINERAL_COLORS[i % MINERAL_COLORS.length]} radius={i === minerals.length - 1 ? [3, 3, 0, 0] : undefined} />
                 ))}
               </BarChart>
             </ResponsiveContainer>

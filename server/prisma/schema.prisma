@@ -212,6 +212,17 @@ model User {
   expensesCreated        Expense[]               @relation("ExpenseCreatedBy")
   evacuationsTriggered   EmergencyEvacuation[]   @relation("EvacuationTriggeredBy")
   evacuationsCancelled   EmergencyEvacuation[]   @relation("EvacuationCancelledBy")
+  attendance             UserAttendance[]
+}
+
+model UserAttendance {
+  id         String    @id @default(cuid())
+  userId     String
+  user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  checkInAt  DateTime  @default(now())
+  checkOutAt DateTime?
+
+  createdAt DateTime @default(now())
 }
 
 model Site {

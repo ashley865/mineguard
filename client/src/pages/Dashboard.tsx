@@ -70,7 +70,7 @@ export default function Dashboard() {
     complianceScore >= 80 ? "text-success-500" : complianceScore >= 50 ? "text-hazard-500" : "text-danger-500";
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-6">
       <div>
         <h1 className="text-lg font-bold">{t("dashboard.title")}</h1>
         <p className="text-mine-300 text-xs">{t("dashboard.subtitle")}</p>

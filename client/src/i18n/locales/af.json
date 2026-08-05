@@ -869,6 +869,18 @@
       "contractors": "Kontrakteurs"
     }
   },
+  "attendance": {
+    "clockIn": "Klok In",
+    "clockOut": "Klok Uit",
+    "viewHours": "Bekyk my ure",
+    "myHoursTitle": "My Ure",
+    "hoursThisWeek": "Hierdie Week",
+    "hoursThisMonth": "Hierdie Maand",
+    "avgPerShift": "Gem. / Skof",
+    "recentActivity": "Onlangse Aktiwiteit",
+    "noneYet": "Nog geen inklokkings aangeteken nie.",
+    "stillClockedIn": "Steeds ingeklok"
+  },
   "notifications": {
     "title": "Kennisgewings",
     "empty": "Nog geen goedkeurings of verwerpings nie.",

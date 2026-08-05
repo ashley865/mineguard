@@ -869,6 +869,18 @@
       "contractors": "Sous-traitants"
     }
   },
+  "attendance": {
+    "clockIn": "Pointer l'Arrivée",
+    "clockOut": "Pointer le Départ",
+    "viewHours": "Voir mes heures",
+    "myHoursTitle": "Mes Heures",
+    "hoursThisWeek": "Cette Semaine",
+    "hoursThisMonth": "Ce Mois",
+    "avgPerShift": "Moy. / Poste",
+    "recentActivity": "Activité Récente",
+    "noneYet": "Aucun pointage enregistré pour le moment.",
+    "stillClockedIn": "Toujours en poste"
+  },
   "notifications": {
     "title": "Notifications",
     "empty": "Aucune approbation ou rejet pour le moment.",

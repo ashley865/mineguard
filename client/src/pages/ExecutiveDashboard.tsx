@@ -192,7 +192,7 @@ export default function ExecutiveDashboard() {
   };
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-6">
       <div className="flex items-start justify-between gap-3 flex-wrap">
         <div>
           <h1 className="text-lg font-bold">{t("executive.title")}</h1>

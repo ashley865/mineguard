@@ -28,7 +28,7 @@ export default function TeamTab() {
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {members.map((m) => (
-            <div key={m.id} className={`${cardClass} p-4 space-y-3`}>
+            <div key={m.id} className={`${cardClass} p-5 space-y-3`}>
               <div className="flex items-center gap-3">
                 <Avatar size={48} name={m.name} src={m.hasPhoto ? `${API_URL}/api/auth/users/${m.id}/photo` : null} />
                 <div className="min-w-0">

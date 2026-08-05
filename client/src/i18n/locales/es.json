@@ -869,6 +869,18 @@
       "contractors": "Contratistas"
     }
   },
+  "attendance": {
+    "clockIn": "Marcar Entrada",
+    "clockOut": "Marcar Salida",
+    "viewHours": "Ver mis horas",
+    "myHoursTitle": "Mis Horas",
+    "hoursThisWeek": "Esta Semana",
+    "hoursThisMonth": "Este Mes",
+    "avgPerShift": "Prom. / Turno",
+    "recentActivity": "Actividad Reciente",
+    "noneYet": "Aún no hay registros de entrada.",
+    "stillClockedIn": "Aún en turno"
+  },
   "notifications": {
     "title": "Notificaciones",
     "empty": "Aún no hay aprobaciones ni rechazos.",

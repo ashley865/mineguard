@@ -68,7 +68,7 @@ export default function Reporting() {
   }
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-6">
       <div>
         <h1 className="text-lg font-bold">{t("reporting.nav")}</h1>
         <p className="text-mine-300 text-xs">{t("reporting.subtitle")}</p>

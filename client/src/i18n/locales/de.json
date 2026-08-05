@@ -869,6 +869,18 @@
       "contractors": "Auftragnehmer"
     }
   },
+  "attendance": {
+    "clockIn": "Einstempeln",
+    "clockOut": "Ausstempeln",
+    "viewHours": "Meine Stunden anzeigen",
+    "myHoursTitle": "Meine Stunden",
+    "hoursThisWeek": "Diese Woche",
+    "hoursThisMonth": "Dieser Monat",
+    "avgPerShift": "Durchschn. / Schicht",
+    "recentActivity": "Letzte Aktivität",
+    "noneYet": "Noch keine Stempelungen erfasst.",
+    "stillClockedIn": "Noch eingestempelt"
+  },
   "notifications": {
     "title": "Benachrichtigungen",
     "empty": "Noch keine Genehmigungen oder Ablehnungen.",

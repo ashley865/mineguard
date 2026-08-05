@@ -869,6 +869,18 @@
       "contractors": "Contractors"
     }
   },
+  "attendance": {
+    "clockIn": "Clock In",
+    "clockOut": "Clock Out",
+    "viewHours": "View my hours",
+    "myHoursTitle": "My Hours",
+    "hoursThisWeek": "This Week",
+    "hoursThisMonth": "This Month",
+    "avgPerShift": "Avg / Shift",
+    "recentActivity": "Recent Activity",
+    "noneYet": "No clock-ins recorded yet.",
+    "stillClockedIn": "Still clocked in"
+  },
   "notifications": {
     "title": "Notifications",
     "empty": "No approvals or rejections yet.",
