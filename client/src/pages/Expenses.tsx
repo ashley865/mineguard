@@ -1,13 +1,18 @@
 import { FormEvent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer } from "recharts";
 import { api, API_URL } from "../api/client";
 import { useAuth } from "../context/AuthContext";
-import { Expense, ExpenseCategory, ExpenseStatus, Payee, PayeeType, PaymentMethod, Site } from "../api/types";
+import { CostSummary, Expense, ExpenseCategory, ExpenseStatus, Payee, PayeeType, PaymentMethod, Site } from "../api/types";
 import { StatusBadge } from "../components/Badges";
 import Modal from "../components/Modal";
 import { buttonDanger, buttonPrimary, buttonSecondary, cardClass, inputClass, labelClass, selectClass } from "../components/ui";
 import DateField from "../components/DateField";
 import FileDropzone from "../components/FileDropzone";
+
+const CHART_TOOLTIP_STYLE = { background: "#fafafa", border: "1px solid #e5e5e5", fontSize: 11 };
+const CHART_TICK_STYLE = { fontSize: 9, fill: "#52525b" };
+const CATEGORY_COLORS = ["#c48a1f", "#8a9ab5", "#16a34a", "#e13b2e", "#f3665b", "#5b7092", "#d9a441", "#3f5a7d", "#7a8a5a", "#9a6b3f", "#6b6b6b"];
 
 const expenseCategories: ExpenseCategory[] = [
   "OPERATIONS",
@@ -279,17 +284,20 @@ export default function Expenses() {
   const [loading, setLoading] = useState(true);
   const [expenseModal, setExpenseModal] = useState(false);
   const [payeeModal, setPayeeModal] = useState<null | "create" | Payee>(null);
+  const [costSummary, setCostSummary] = useState<CostSummary | null>(null);
 
   async function load() {
     setLoading(true);
-    const [e, p, s] = await Promise.all([
+    const [e, p, s, c] = await Promise.all([
       api.get<Expense[]>("/expenses"),
       api.get<Payee[]>("/payees"),
       api.get<Site[]>("/sites"),
+      api.get<CostSummary>("/expenses/cost-summary", { params: { months: 6 } }),
     ]);
     setExpenses(e.data);
     setPayees(p.data);
     setSites(s.data);
+    setCostSummary(c.data);
     setLoading(false);
   }
 
@@ -361,6 +369,81 @@ export default function Expenses() {
 
       {tab === "expenses" && (
         <>
+          {costSummary && (
+            <>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+                <div className={`${cardClass} px-4 py-3`}>
+                  <div className="text-[10px] text-mine-400 uppercase tracking-wide">{t("expenses.tabExpenses")}</div>
+                  <div className="text-lg font-bold mt-0.5">{costSummary.totals.expenses.toLocaleString()}</div>
+                </div>
+                <div className={`${cardClass} px-4 py-3`}>
+                  <div className="text-[10px] text-mine-400 uppercase tracking-wide">{t("maintenance.nav")}</div>
+                  <div className="text-lg font-bold mt-0.5">{costSummary.totals.maintenance.toLocaleString()}</div>
+                </div>
+                <div className={`${cardClass} px-4 py-3`}>
+                  <div className="text-[10px] text-mine-400 uppercase tracking-wide">{t("payroll.nav")}</div>
+                  <div className="text-lg font-bold mt-0.5">{costSummary.totals.payroll.toLocaleString()}</div>
+                </div>
+                <div className={`${cardClass} px-4 py-3 border-hazard-500/40`}>
+                  <div className="text-[10px] text-mine-400 uppercase tracking-wide">{t("expenses.totalCosts")}</div>
+                  <div className="text-lg font-bold mt-0.5 text-hazard-500">{costSummary.totals.grandTotal.toLocaleString()}</div>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
+                <div className={`${cardClass} p-4`}>
+                  <h3 className="text-sm font-semibold mb-3">{t("expenses.costsBySource")}</h3>
+                  <div className="h-56">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <BarChart data={costSummary.months}>
+                        <XAxis dataKey="month" tick={CHART_TICK_STYLE} tickFormatter={(m: string) => m.slice(2)} />
+                        <YAxis tick={CHART_TICK_STYLE} />
+                        <Tooltip contentStyle={CHART_TOOLTIP_STYLE} />
+                        <Legend wrapperStyle={{ fontSize: 10 }} />
+                        <Bar dataKey="expenses" name={t("expenses.tabExpenses")} stackId="cost" fill="#c48a1f" />
+                        <Bar dataKey="maintenance" name={t("maintenance.nav")} stackId="cost" fill="#5b7092" />
+                        <Bar dataKey="payroll" name={t("payroll.nav")} stackId="cost" fill="#e13b2e" radius={[3, 3, 0, 0]} />
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </div>
+                </div>
+
+                <div className={`${cardClass} p-4`}>
+                  <h3 className="text-sm font-semibold mb-3">{t("expenses.byCategory")}</h3>
+                  {costSummary.byCategory.length === 0 ? (
+                    <div className="text-mine-400 text-xs h-56 flex items-center justify-center">{t("expenses.noneYet")}</div>
+                  ) : (
+                    <div className="h-56 flex items-center gap-4">
+                      <div className="w-36 h-36 shrink-0">
+                        <ResponsiveContainer width="100%" height="100%">
+                          <PieChart>
+                            <Pie data={costSummary.byCategory} dataKey="amount" nameKey="category" innerRadius={36} outerRadius={64} paddingAngle={2}>
+                              {costSummary.byCategory.map((d, i) => (
+                                <Cell key={d.category} fill={CATEGORY_COLORS[i % CATEGORY_COLORS.length]} />
+                              ))}
+                            </Pie>
+                            <Tooltip contentStyle={CHART_TOOLTIP_STYLE} formatter={(v: number) => v.toLocaleString()} />
+                          </PieChart>
+                        </ResponsiveContainer>
+                      </div>
+                      <div className="space-y-1 text-xs flex-1 min-w-0 max-h-56 overflow-y-auto">
+                        {costSummary.byCategory.map((d, i) => (
+                          <div key={d.category} className="flex items-center justify-between gap-2">
+                            <span className="flex items-center gap-1.5 text-mine-300 truncate">
+                              <span className="w-2 h-2 rounded-full shrink-0" style={{ background: CATEGORY_COLORS[i % CATEGORY_COLORS.length] }} />
+                              {t(`expenses.categories.${d.category}`)}
+                            </span>
+                            <span className="font-semibold text-mine-50">{d.amount.toLocaleString()}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </>
+          )}
+
           <div className={`${cardClass} p-4 flex items-center gap-2`}>
             <span className="text-mine-400 text-xs uppercase">{t("expenses.totalPaid")}</span>
             <span className="text-lg font-bold">{totalExpenses.toLocaleString()}</span>

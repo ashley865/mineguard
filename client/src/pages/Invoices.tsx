@@ -1,5 +1,6 @@
 import { FormEvent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { BarChart, Bar, Cell, PieChart, Pie, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
 import { api, API_URL } from "../api/client";
 import { useAuth } from "../context/AuthContext";
 import { Invoice, InvoiceStatus, Mine, Site } from "../api/types";
@@ -9,6 +10,39 @@ import { buttonDanger, buttonPrimary, buttonSecondary, cardClass, inputClass, la
 import DateField from "../components/DateField";
 
 const invoiceStatuses: InvoiceStatus[] = ["DRAFT", "SENT", "PAID", "OVERDUE", "CANCELLED"];
+
+const CHART_TOOLTIP_STYLE = { background: "#fafafa", border: "1px solid #e5e5e5", fontSize: 11 };
+const CHART_TICK_STYLE = { fontSize: 10, fill: "#52525b" };
+const STATUS_COLORS: Record<InvoiceStatus, string> = {
+  DRAFT: "#6b6b6b",
+  SENT: "#d9a441",
+  OVERDUE: "#e13b2e",
+  PAID: "#16a34a",
+  CANCELLED: "#3f5a7d",
+};
+const AGING_BUCKETS = ["current", "1-30", "31-60", "61-90", "90+"] as const;
+type AgingBucket = (typeof AGING_BUCKETS)[number];
+const AGING_COLORS: Record<AgingBucket, string> = {
+  current: "#16a34a",
+  "1-30": "#d9a441",
+  "31-60": "#c48a1f",
+  "61-90": "#f3665b",
+  "90+": "#e13b2e",
+};
+
+function invoiceTotal(invoice: Invoice): number {
+  const subtotal = invoice.lines.reduce((sum, l) => sum + l.lineTotal, 0);
+  return subtotal * (1 + invoice.vatRate / 100);
+}
+
+function agingBucket(dueDate: string): AgingBucket {
+  const days = Math.floor((Date.now() - new Date(dueDate).getTime()) / 86400000);
+  if (days <= 0) return "current";
+  if (days <= 30) return "1-30";
+  if (days <= 60) return "31-60";
+  if (days <= 90) return "61-90";
+  return "90+";
+}
 
 function InvoiceForm({ sites, onSubmit, onCancel }: {
   sites: Site[];
@@ -307,6 +341,21 @@ export default function Invoices() {
     await load();
   }
 
+  const unpaidInvoices = invoices.filter((inv) => inv.status === "SENT" || inv.status === "OVERDUE");
+  const totalOutstanding = unpaidInvoices.reduce((sum, inv) => sum + invoiceTotal(inv), 0);
+  const overdueInvoices = unpaidInvoices.filter((inv) => agingBucket(inv.dueDate) !== "current");
+  const totalOverdue = overdueInvoices.reduce((sum, inv) => sum + invoiceTotal(inv), 0);
+
+  const agingTotals: Record<AgingBucket, number> = { current: 0, "1-30": 0, "31-60": 0, "61-90": 0, "90+": 0 };
+  for (const inv of unpaidInvoices) agingTotals[agingBucket(inv.dueDate)] += invoiceTotal(inv);
+  const agingData = AGING_BUCKETS.map((bucket) => ({ bucket, amount: Math.round(agingTotals[bucket]) }));
+
+  const statusTotals: Record<InvoiceStatus, number> = { DRAFT: 0, SENT: 0, PAID: 0, OVERDUE: 0, CANCELLED: 0 };
+  for (const inv of invoices) statusTotals[inv.status] += invoiceTotal(inv);
+  const statusData = invoiceStatuses
+    .map((status) => ({ status, amount: Math.round(statusTotals[status]) }))
+    .filter((d) => d.amount > 0);
+
   if (loading) return <div className="text-mine-300">{t("common.loading")}</div>;
 
   if (viewing) {
@@ -331,6 +380,80 @@ export default function Invoices() {
           <button className={buttonPrimary} onClick={() => setModal(true)}>{t("invoices.newInvoice")}</button>
         )}
       </div>
+
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+        <div className={`${cardClass} px-4 py-3`}>
+          <div className="text-[10px] text-mine-400 uppercase tracking-wide">{t("invoices.totalOutstanding")}</div>
+          <div className="text-lg font-bold mt-0.5 text-hazard-500">{totalOutstanding.toLocaleString()}</div>
+        </div>
+        <div className={`${cardClass} px-4 py-3`}>
+          <div className="text-[10px] text-mine-400 uppercase tracking-wide">{t("invoices.totalOverdue")}</div>
+          <div className={`text-lg font-bold mt-0.5 ${totalOverdue > 0 ? "text-danger-500" : ""}`}>{totalOverdue.toLocaleString()}</div>
+        </div>
+        <div className={`${cardClass} px-4 py-3`}>
+          <div className="text-[10px] text-mine-400 uppercase tracking-wide">{t("invoices.unpaidCount")}</div>
+          <div className="text-lg font-bold mt-0.5">{unpaidInvoices.length}</div>
+        </div>
+        <div className={`${cardClass} px-4 py-3`}>
+          <div className="text-[10px] text-mine-400 uppercase tracking-wide">{t("invoices.overdueCount")}</div>
+          <div className={`text-lg font-bold mt-0.5 ${overdueInvoices.length > 0 ? "text-danger-500" : ""}`}>{overdueInvoices.length}</div>
+        </div>
+      </div>
+
+      {invoices.length > 0 && (
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
+          <div className={`${cardClass} p-4`}>
+            <h3 className="text-sm font-semibold mb-3">{t("invoices.agingTitle")}</h3>
+            <div className="h-56">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={agingData}>
+                  <XAxis dataKey="bucket" tick={CHART_TICK_STYLE} tickFormatter={(b: AgingBucket) => t(`invoices.agingBuckets.${b}`)} />
+                  <YAxis tick={CHART_TICK_STYLE} />
+                  <Tooltip contentStyle={CHART_TOOLTIP_STYLE} labelFormatter={(b: AgingBucket) => t(`invoices.agingBuckets.${b}`)} formatter={(v: number) => v.toLocaleString()} />
+                  <Bar dataKey="amount" radius={[3, 3, 0, 0]}>
+                    {agingData.map((d) => (
+                      <Cell key={d.bucket} fill={AGING_COLORS[d.bucket]} />
+                    ))}
+                  </Bar>
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
+
+          <div className={`${cardClass} p-4`}>
+            <h3 className="text-sm font-semibold mb-3">{t("invoices.byStatusTitle")}</h3>
+            {statusData.length === 0 ? (
+              <div className="text-mine-400 text-xs h-56 flex items-center justify-center">{t("invoices.noneYet")}</div>
+            ) : (
+              <div className="h-56 flex items-center gap-4">
+                <div className="w-36 h-36 shrink-0">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <PieChart>
+                      <Pie data={statusData} dataKey="amount" nameKey="status" innerRadius={36} outerRadius={64} paddingAngle={2}>
+                        {statusData.map((d) => (
+                          <Cell key={d.status} fill={STATUS_COLORS[d.status]} />
+                        ))}
+                      </Pie>
+                      <Tooltip contentStyle={CHART_TOOLTIP_STYLE} formatter={(v: number) => v.toLocaleString()} />
+                    </PieChart>
+                  </ResponsiveContainer>
+                </div>
+                <div className="space-y-1 text-xs flex-1 min-w-0">
+                  {statusData.map((d) => (
+                    <div key={d.status} className="flex items-center justify-between gap-2">
+                      <span className="flex items-center gap-1.5 text-mine-300 truncate">
+                        <span className="w-2 h-2 rounded-full shrink-0" style={{ background: STATUS_COLORS[d.status] }} />
+                        {t(`badges.status.${d.status}`)}
+                      </span>
+                      <span className="font-semibold text-mine-50">{d.amount.toLocaleString()}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
 
       <div className={`${cardClass} overflow-x-auto`}>
         <table className="w-full text-sm">

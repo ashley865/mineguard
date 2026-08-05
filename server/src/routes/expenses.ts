@@ -66,6 +66,74 @@ const expenseSelect = {
 
 router.use(requireAuth);
 
+router.get("/cost-summary", async (req, res) => {
+  const mineId = requireMineId(req, res);
+  if (!mineId) return;
+  const months = Math.min(Math.max(Number(req.query.months) || 6, 1), 24);
+
+  const start = new Date();
+  start.setDate(1);
+  start.setHours(0, 0, 0, 0);
+  start.setMonth(start.getMonth() - (months - 1));
+
+  const [expenses, maintenance, payslips] = await Promise.all([
+    prisma.expense.findMany({
+      where: { site: { mineId }, status: "PAID", expenseDate: { gte: start } },
+      select: { amount: true, category: true, expenseDate: true },
+    }),
+    prisma.maintenanceSchedule.findMany({
+      where: { status: "COMPLETED", cost: { not: null }, equipment: { site: { mineId } } },
+      select: { cost: true, completedDate: true, scheduledDate: true },
+    }),
+    prisma.payslip.findMany({
+      where: { worker: { site: { mineId } }, payPeriodEnd: { gte: start } },
+      select: { grossPay: true, payPeriodEnd: true },
+    }),
+  ]);
+
+  const monthKeys: string[] = [];
+  for (let i = 0; i < months; i++) {
+    const d = new Date(start);
+    d.setMonth(d.getMonth() + i);
+    monthKeys.push(d.toISOString().slice(0, 7));
+  }
+
+  const byMonth: Record<string, { expenses: number; maintenance: number; payroll: number }> = {};
+  for (const key of monthKeys) byMonth[key] = { expenses: 0, maintenance: 0, payroll: 0 };
+
+  for (const e of expenses) {
+    const key = e.expenseDate.toISOString().slice(0, 7);
+    if (byMonth[key]) byMonth[key].expenses += e.amount;
+  }
+  for (const m of maintenance) {
+    const date = m.completedDate ?? m.scheduledDate;
+    const key = date.toISOString().slice(0, 7);
+    if (byMonth[key]) byMonth[key].maintenance += m.cost ?? 0;
+  }
+  for (const p of payslips) {
+    const key = p.payPeriodEnd.toISOString().slice(0, 7);
+    if (byMonth[key]) byMonth[key].payroll += p.grossPay;
+  }
+
+  const categoryTotals: Record<string, number> = {};
+  for (const e of expenses) categoryTotals[e.category] = (categoryTotals[e.category] ?? 0) + e.amount;
+
+  const totalExpenses = expenses.reduce((sum, e) => sum + e.amount, 0);
+  const totalMaintenance = maintenance.reduce((sum, m) => sum + (m.cost ?? 0), 0);
+  const totalPayroll = payslips.reduce((sum, p) => sum + p.grossPay, 0);
+
+  res.json({
+    months: monthKeys.map((key) => ({ month: key, ...byMonth[key] })),
+    byCategory: Object.entries(categoryTotals).map(([category, amount]) => ({ category, amount })),
+    totals: {
+      expenses: totalExpenses,
+      maintenance: totalMaintenance,
+      payroll: totalPayroll,
+      grandTotal: totalExpenses + totalMaintenance + totalPayroll,
+    },
+  });
+});
+
 router.get("/", async (req, res) => {
   const mineId = requireMineId(req, res);
   if (!mineId) return;

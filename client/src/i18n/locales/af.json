@@ -1035,7 +1035,9 @@
       "title": "Myn-besonderhede",
       "saveError": "Kon nie myn-besonderhede opdateer nie",
       "logoTitle": "Myn-logo",
-      "uploadLogo": "Laai logo op"
+      "uploadLogo": "Laai logo op",
+      "bankingDetails": "Bankbesonderhede",
+      "bankingDetailsHint": "Gebruik op gegenereerde fakture en as betalingsverwysing vir kopers/kontrakteurs. Slegs sigbaar vir admins."
     },
     "invites": {
       "newTitle": "Nooi 'n Uitvoerende Beampte",
@@ -1677,7 +1679,20 @@
     "backToList": "Terug na Fakture",
     "print": "Druk",
     "createError": "Kon nie hierdie faktuur skep nie",
-    "viewDocument": "Bekyk in Dokumentkluis"
+    "viewDocument": "Bekyk in Dokumentkluis",
+    "totalOutstanding": "Totaal Uitstaande",
+    "totalOverdue": "Totaal Agterstallig",
+    "unpaidCount": "Onbetaalde Fakture",
+    "overdueCount": "Agterstallige Fakture",
+    "agingTitle": "Uitstaande volgens Ouderdom",
+    "byStatusTitle": "Volgens Status",
+    "agingBuckets": {
+      "current": "Nog nie verskuldig nie",
+      "1-30": "1–30 dae",
+      "31-60": "31–60 dae",
+      "61-90": "61–90 dae",
+      "90+": "90+ dae"
+    }
   },
   "expenses": {
     "nav": "Uitgawes",
@@ -1737,6 +1752,8 @@
       "INDIVIDUAL": "Individu",
       "BUYER": "Koper",
       "CONTRACTOR": "Kontrakteur"
-    }
+    },
+    "totalCosts": "Totale Koste",
+    "costsBySource": "Koste volgens Bron"
   }
 }

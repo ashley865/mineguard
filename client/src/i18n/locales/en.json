@@ -1035,7 +1035,9 @@
       "title": "Mine details",
       "saveError": "Could not update mine details",
       "logoTitle": "Mine logo",
-      "uploadLogo": "Upload logo"
+      "uploadLogo": "Upload logo",
+      "bankingDetails": "Banking Details",
+      "bankingDetailsHint": "Used on generated invoices and for buyer/contractor payment reference. Only visible to admins."
     },
     "invites": {
       "newTitle": "Invite an Executive",
@@ -1676,6 +1678,19 @@
     "viewInvoice": "View",
     "backToList": "Back to Invoices",
     "print": "Print",
+    "totalOutstanding": "Total Outstanding",
+    "totalOverdue": "Total Overdue",
+    "unpaidCount": "Unpaid Invoices",
+    "overdueCount": "Overdue Invoices",
+    "agingTitle": "Outstanding by Age",
+    "byStatusTitle": "By Status",
+    "agingBuckets": {
+      "current": "Not yet due",
+      "1-30": "1–30 days",
+      "31-60": "31–60 days",
+      "61-90": "61–90 days",
+      "90+": "90+ days"
+    },
     "createError": "Could not create this invoice",
     "viewDocument": "View in Document Vault"
   },
@@ -1699,6 +1714,8 @@
     "receipt": "Receipt",
     "receiptHint": "Optional. Accepted formats: images and PDF.",
     "totalPaid": "Total Paid",
+    "totalCosts": "Total Costs",
+    "costsBySource": "Costs by Source",
     "viewReceipt": "View Receipt",
     "noneYet": "No expenses recorded yet.",
     "confirmDelete": "Delete this expense?",

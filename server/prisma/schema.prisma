@@ -745,6 +745,10 @@ model Mine {
   logoData           Bytes?
   logoMimeType       String?
   logoFileName       String?
+  bankName           String?
+  bankAccountHolder  String?
+  bankAccountNumber  String?
+  bankBranchCode     String?
   createdAt          DateTime @default(now())
 
   users            User[]

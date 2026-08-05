@@ -23,6 +23,10 @@ const mineDetailsSchema = z.object({
   registrationNumber: z.string().optional().nullable(),
   miningRightNumber: z.string().optional().nullable(),
   description: z.string().optional().nullable(),
+  bankName: z.string().optional().nullable(),
+  bankAccountHolder: z.string().optional().nullable(),
+  bankAccountNumber: z.string().optional().nullable(),
+  bankBranchCode: z.string().optional().nullable(),
 });
 
 const registerMineSchema = z.object({
@@ -47,12 +51,23 @@ router.get("/search", async (req, res) => {
   res.json(mines);
 });
 
-router.get("/mine", requireAuth, async (req, res) => {
-  const user = await prisma.user.findUnique({ where: { id: req.auth!.userId } });
-  if (!user?.mineId) return res.status(404).json({ error: "Not a member of a mine" });
-  const mine = await prisma.mine.findUnique({ where: { id: user.mineId } });
-  if (!mine) return res.status(404).json({ error: "Mine not found" });
-  res.json({
+// Banking details are only ever included for ADMIN — every authenticated user hits
+// GET /mine on every page load just to show the mine name/logo in the header, so
+// leaking account numbers into that broadly-fetched response would over-expose them.
+function mineResponse(mine: {
+  id: string;
+  name: string;
+  location: string;
+  registrationNumber: string | null;
+  miningRightNumber: string | null;
+  description: string | null;
+  logoData: Uint8Array | null;
+  bankName: string | null;
+  bankAccountHolder: string | null;
+  bankAccountNumber: string | null;
+  bankBranchCode: string | null;
+}, includeBanking: boolean) {
+  return {
     id: mine.id,
     name: mine.name,
     location: mine.location,
@@ -60,7 +75,23 @@ router.get("/mine", requireAuth, async (req, res) => {
     miningRightNumber: mine.miningRightNumber,
     description: mine.description,
     hasLogo: !!mine.logoData,
-  });
+    ...(includeBanking
+      ? {
+          bankName: mine.bankName,
+          bankAccountHolder: mine.bankAccountHolder,
+          bankAccountNumber: mine.bankAccountNumber,
+          bankBranchCode: mine.bankBranchCode,
+        }
+      : {}),
+  };
+}
+
+router.get("/mine", requireAuth, async (req, res) => {
+  const user = await prisma.user.findUnique({ where: { id: req.auth!.userId } });
+  if (!user?.mineId) return res.status(404).json({ error: "Not a member of a mine" });
+  const mine = await prisma.mine.findUnique({ where: { id: user.mineId } });
+  if (!mine) return res.status(404).json({ error: "Mine not found" });
+  res.json(mineResponse(mine, user.role === "ADMIN"));
 });
 
 router.put("/mine", requireAuth, requireRole("ADMIN"), async (req, res) => {
@@ -76,17 +107,13 @@ router.put("/mine", requireAuth, requireRole("ADMIN"), async (req, res) => {
       registrationNumber: parsed.data.registrationNumber || null,
       miningRightNumber: parsed.data.miningRightNumber || null,
       description: parsed.data.description || null,
+      bankName: parsed.data.bankName || null,
+      bankAccountHolder: parsed.data.bankAccountHolder || null,
+      bankAccountNumber: parsed.data.bankAccountNumber || null,
+      bankBranchCode: parsed.data.bankBranchCode || null,
     },
   });
-  res.json({
-    id: mine.id,
-    name: mine.name,
-    location: mine.location,
-    registrationNumber: mine.registrationNumber,
-    miningRightNumber: mine.miningRightNumber,
-    description: mine.description,
-    hasLogo: !!mine.logoData,
-  });
+  res.json(mineResponse(mine, true));
 });
 
 router.post("/mine/logo", requireAuth, requireRole("ADMIN"), upload.single("logo"), async (req, res) => {

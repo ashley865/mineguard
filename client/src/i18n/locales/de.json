@@ -1035,7 +1035,9 @@
       "title": "Minendetails",
       "saveError": "Minendetails konnten nicht aktualisiert werden",
       "logoTitle": "Minenlogo",
-      "uploadLogo": "Logo hochladen"
+      "uploadLogo": "Logo hochladen",
+      "bankingDetails": "Bankverbindung",
+      "bankingDetailsHint": "Wird auf erstellten Rechnungen und als Zahlungsreferenz für Käufer/Auftragnehmer verwendet. Nur für Admins sichtbar."
     },
     "invites": {
       "newTitle": "Eine Führungskraft einladen",
@@ -1677,7 +1679,20 @@
     "backToList": "Zurück zu Rechnungen",
     "print": "Drucken",
     "createError": "Diese Rechnung konnte nicht erstellt werden",
-    "viewDocument": "Im Dokumententresor Ansehen"
+    "viewDocument": "Im Dokumententresor Ansehen",
+    "totalOutstanding": "Gesamt Ausstehend",
+    "totalOverdue": "Gesamt Überfällig",
+    "unpaidCount": "Unbezahlte Rechnungen",
+    "overdueCount": "Überfällige Rechnungen",
+    "agingTitle": "Ausstehend nach Alter",
+    "byStatusTitle": "Nach Status",
+    "agingBuckets": {
+      "current": "Noch nicht fällig",
+      "1-30": "1–30 Tage",
+      "31-60": "31–60 Tage",
+      "61-90": "61–90 Tage",
+      "90+": "90+ Tage"
+    }
   },
   "expenses": {
     "nav": "Ausgaben",
@@ -1737,6 +1752,8 @@
       "INDIVIDUAL": "Einzelperson",
       "BUYER": "Käufer",
       "CONTRACTOR": "Auftragnehmer"
-    }
+    },
+    "totalCosts": "Gesamtkosten",
+    "costsBySource": "Kosten nach Quelle"
   }
 }

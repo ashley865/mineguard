@@ -46,6 +46,10 @@ export interface Mine {
   miningRightNumber?: string | null;
   description?: string | null;
   hasLogo?: boolean;
+  bankName?: string | null;
+  bankAccountHolder?: string | null;
+  bankAccountNumber?: string | null;
+  bankBranchCode?: string | null;
 }
 
 export type InviteStatus = "PENDING" | "ACCEPTED" | "REVOKED";
@@ -1405,6 +1409,12 @@ export interface Expense {
   documentId?: string | null;
   createdBy?: { id: string; name: string } | null;
   createdAt: string;
+}
+
+export interface CostSummary {
+  months: { month: string; expenses: number; maintenance: number; payroll: number }[];
+  byCategory: { category: ExpenseCategory; amount: number }[];
+  totals: { expenses: number; maintenance: number; payroll: number; grandTotal: number };
 }
 
 export interface ProductionFinancialSummary {

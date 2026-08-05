@@ -15,6 +15,10 @@ export default function MineDetailsTab() {
   const [registrationNumber, setRegistrationNumber] = useState("");
   const [miningRightNumber, setMiningRightNumber] = useState("");
   const [description, setDescription] = useState("");
+  const [bankName, setBankName] = useState("");
+  const [bankAccountHolder, setBankAccountHolder] = useState("");
+  const [bankAccountNumber, setBankAccountNumber] = useState("");
+  const [bankBranchCode, setBankBranchCode] = useState("");
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -31,6 +35,10 @@ export default function MineDetailsTab() {
     setRegistrationNumber(res.data.registrationNumber ?? "");
     setMiningRightNumber(res.data.miningRightNumber ?? "");
     setDescription(res.data.description ?? "");
+    setBankName(res.data.bankName ?? "");
+    setBankAccountHolder(res.data.bankAccountHolder ?? "");
+    setBankAccountNumber(res.data.bankAccountNumber ?? "");
+    setBankBranchCode(res.data.bankBranchCode ?? "");
     setLoading(false);
   }
 
@@ -49,8 +57,16 @@ export default function MineDetailsTab() {
         registrationNumber: registrationNumber || null,
         miningRightNumber: miningRightNumber || null,
         description: description || null,
+        bankName: bankName || null,
+        bankAccountHolder: bankAccountHolder || null,
+        bankAccountNumber: bankAccountNumber || null,
+        bankBranchCode: bankBranchCode || null,
       });
       setMine(res.data);
+      setBankName(res.data.bankName ?? "");
+      setBankAccountHolder(res.data.bankAccountHolder ?? "");
+      setBankAccountNumber(res.data.bankAccountNumber ?? "");
+      setBankBranchCode(res.data.bankBranchCode ?? "");
       setSaved(true);
       setTimeout(() => setSaved(false), 2000);
     } catch (err: any) {
@@ -130,6 +146,28 @@ export default function MineDetailsTab() {
         <div>
           <label className={labelClass}>{t("common.description")}</label>
           <textarea className={inputClass} rows={2} value={description} onChange={(e) => setDescription(e.target.value)} />
+        </div>
+        <div className="border-t border-mine-800 pt-4">
+          <div className="text-xs font-semibold text-mine-300 uppercase mb-2">{t("settings.mine.bankingDetails")}</div>
+          <p className="text-xs text-mine-400 mb-3">{t("settings.mine.bankingDetailsHint")}</p>
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className={labelClass}>{t("buyerRegister.bankName")}</label>
+              <input className={inputClass} value={bankName} onChange={(e) => setBankName(e.target.value)} />
+            </div>
+            <div>
+              <label className={labelClass}>{t("buyerRegister.bankAccountHolder")}</label>
+              <input className={inputClass} value={bankAccountHolder} onChange={(e) => setBankAccountHolder(e.target.value)} />
+            </div>
+            <div>
+              <label className={labelClass}>{t("buyerRegister.bankAccountNumber")}</label>
+              <input className={inputClass} value={bankAccountNumber} onChange={(e) => setBankAccountNumber(e.target.value)} />
+            </div>
+            <div>
+              <label className={labelClass}>{t("buyerRegister.bankBranchCode")}</label>
+              <input className={inputClass} value={bankBranchCode} onChange={(e) => setBankBranchCode(e.target.value)} />
+            </div>
+          </div>
         </div>
         {error && <div className="text-danger-500 text-xs">{error}</div>}
         <div className="flex items-center gap-3">

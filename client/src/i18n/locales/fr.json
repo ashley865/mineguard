@@ -1035,7 +1035,9 @@
       "title": "Détails de la mine",
       "saveError": "Impossible de mettre à jour les détails de la mine",
       "logoTitle": "Logo de la mine",
-      "uploadLogo": "Téléverser le logo"
+      "uploadLogo": "Téléverser le logo",
+      "bankingDetails": "Coordonnées Bancaires",
+      "bankingDetailsHint": "Utilisées sur les factures générées et comme référence de paiement pour les acheteurs/entrepreneurs. Visible uniquement par les administrateurs."
     },
     "invites": {
       "newTitle": "Inviter un Exécutif",
@@ -1677,7 +1679,20 @@
     "backToList": "Retour aux Factures",
     "print": "Imprimer",
     "createError": "Impossible de créer cette facture",
-    "viewDocument": "Voir dans le Coffre de Documents"
+    "viewDocument": "Voir dans le Coffre de Documents",
+    "totalOutstanding": "Total Impayé",
+    "totalOverdue": "Total en Retard",
+    "unpaidCount": "Factures Impayées",
+    "overdueCount": "Factures en Retard",
+    "agingTitle": "Impayés par Ancienneté",
+    "byStatusTitle": "Par Statut",
+    "agingBuckets": {
+      "current": "Pas encore échu",
+      "1-30": "1–30 jours",
+      "31-60": "31–60 jours",
+      "61-90": "61–90 jours",
+      "90+": "90+ jours"
+    }
   },
   "expenses": {
     "nav": "Dépenses",
@@ -1737,6 +1752,8 @@
       "INDIVIDUAL": "Particulier",
       "BUYER": "Acheteur",
       "CONTRACTOR": "Entrepreneur"
-    }
+    },
+    "totalCosts": "Coûts Totaux",
+    "costsBySource": "Coûts par Source"
   }
 }
