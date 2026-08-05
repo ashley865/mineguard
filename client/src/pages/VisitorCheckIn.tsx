@@ -7,6 +7,15 @@ import { buttonPrimary, cardClass, inputClass, labelClass } from "../components/
 import { isValidIdOrPassport } from "../lib/saId";
 import FileDropzone from "../components/FileDropzone";
 
+const MIN_LEAD_MINUTES = 60;
+
+function defaultScheduledFor() {
+  const d = new Date(Date.now() + (MIN_LEAD_MINUTES + 5) * 60 * 1000);
+  d.setSeconds(0, 0);
+  const pad = (n: number) => String(n).padStart(2, "0");
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+}
+
 export default function VisitorCheckIn() {
   const { t } = useTranslation();
   const { siteId } = useParams<{ siteId: string }>();
@@ -21,6 +30,8 @@ export default function VisitorCheckIn() {
   const [hostName, setHostName] = useState("");
   const [purposeOfVisit, setPurposeOfVisit] = useState("");
   const [vehicleRegistration, setVehicleRegistration] = useState("");
+  const [scheduledFor, setScheduledFor] = useState(defaultScheduledFor());
+  const [isEmergency, setIsEmergency] = useState(false);
   const [documents, setDocuments] = useState<FileList | null>(null);
   const [inductionAcknowledged, setInductionAcknowledged] = useState(false);
   const [popiaConsentAccepted, setPopiaConsentAccepted] = useState(false);
@@ -28,7 +39,7 @@ export default function VisitorCheckIn() {
 
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [done, setDone] = useState<{ id: string; checkInAt: string } | null>(null);
+  const [done, setDone] = useState<{ id: string; scheduledFor: string } | null>(null);
   const [qrDataUrl, setQrDataUrl] = useState<string | null>(null);
 
   useEffect(() => {
@@ -52,6 +63,10 @@ export default function VisitorCheckIn() {
       setError(t("visitorCheckin.idNumberInvalid"));
       return;
     }
+    if (!isEmergency && new Date(scheduledFor).getTime() - Date.now() < MIN_LEAD_MINUTES * 60 * 1000) {
+      setError(t("visitorCheckin.leadTimeError"));
+      return;
+    }
 
     setSubmitting(true);
     try {
@@ -64,6 +79,8 @@ export default function VisitorCheckIn() {
       form.append("hostName", hostName);
       form.append("purposeOfVisit", purposeOfVisit);
       if (vehicleRegistration) form.append("vehicleRegistration", vehicleRegistration);
+      form.append("scheduledFor", new Date(scheduledFor).toISOString());
+      form.append("isEmergency", isEmergency ? "true" : "false");
       form.append("inductionAcknowledged", "true");
       form.append("popiaConsentAccepted", "true");
       form.append("indemnityAccepted", "true");
@@ -73,7 +90,7 @@ export default function VisitorCheckIn() {
       const res = await api.post(`/visitors/checkin/${siteId}`, form, {
         headers: { "Content-Type": "multipart/form-data" },
       });
-      setDone({ id: res.data.id, checkInAt: res.data.checkInAt });
+      setDone({ id: res.data.id, scheduledFor: res.data.scheduledFor });
       const dataUrl = await QRCode.toDataURL(`visitor:${res.data.id}`, { width: 220, margin: 1 });
       setQrDataUrl(dataUrl);
     } catch {
@@ -97,7 +114,7 @@ export default function VisitorCheckIn() {
         <div className={`${cardClass} p-8 max-w-md text-center space-y-3`}>
           <h1 className="text-lg font-bold">{t("visitorCheckin.successTitle")}</h1>
           <p className="text-mine-300 text-sm">
-            {t("visitorCheckin.successBody", { time: new Date(done.checkInAt).toLocaleString() })}
+            {t("visitorCheckin.successBody", { time: new Date(done.scheduledFor).toLocaleString() })}
           </p>
           {qrDataUrl && (
             <div className="flex flex-col items-center gap-2 pt-2">
@@ -163,6 +180,31 @@ export default function VisitorCheckIn() {
           <div>
             <label className={labelClass}>{t("visitorCheckin.documents")}</label>
             <FileDropzone multiple accept="image/*,.pdf" hint={t("visitorCheckin.documentsHint")} onFiles={setDocuments} />
+          </div>
+
+          <div className="space-y-2 border border-mine-800 rounded-md p-3 bg-mine-900/40">
+            <label className="flex items-start gap-2 text-xs">
+              <input
+                type="checkbox"
+                className="mt-0.5"
+                checked={isEmergency}
+                onChange={(e) => setIsEmergency(e.target.checked)}
+              />
+              <span>{t("visitorCheckin.emergencyDeclaration")}</span>
+            </label>
+            {!isEmergency && (
+              <div>
+                <label className={labelClass}>{t("visitorCheckin.scheduledFor")}</label>
+                <input
+                  type="datetime-local"
+                  className={inputClass}
+                  value={scheduledFor}
+                  onChange={(e) => setScheduledFor(e.target.value)}
+                  required={!isEmergency}
+                />
+                <p className="text-xs text-mine-400 mt-1">{t("visitorCheckin.scheduledForHint")}</p>
+              </div>
+            )}
           </div>
 
           <div className="space-y-2 border border-mine-800 rounded-md p-3 bg-mine-900/40">

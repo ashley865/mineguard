@@ -218,6 +218,7 @@ model User {
   requestsResponded      ExecutiveRequest[]      @relation("ExecutiveRequestRespondedBy")
   messageGroupsCreated   MessageGroup[]          @relation("MessageGroupCreatedBy")
   messageGroupMemberships MessageGroupMember[]
+  visitorApprovals       Visitor[]               @relation("VisitorApprovedBy")
 }
 
 model UserAttendance {
@@ -895,6 +896,8 @@ model ExecutiveSiteAssignment {
 }
 
 enum VisitorStatus {
+  PENDING_APPROVAL
+  APPROVED
   CHECKED_IN
   CHECKED_OUT
   DENIED
@@ -919,8 +922,16 @@ model Visitor {
   vehicleRegistration   String?
   siteId                String
   site                  Site          @relation(fields: [siteId], references: [id], onDelete: Cascade)
-  status                VisitorStatus @default(CHECKED_IN)
-  checkInAt             DateTime      @default(now())
+  status                VisitorStatus @default(PENDING_APPROVAL)
+  // The visitor's requested/scheduled visit time — must be at least 1 hour out at
+  // registration unless isEmergency is set. Distinct from checkInAt, which is only
+  // populated once security marks the visitor as having actually arrived.
+  scheduledFor          DateTime
+  isEmergency           Boolean       @default(false)
+  approvedById          String?
+  approvedBy            User?         @relation("VisitorApprovedBy", fields: [approvedById], references: [id], onDelete: SetNull)
+  approvedAt            DateTime?
+  checkInAt             DateTime?
   checkOutAt            DateTime?
   inductionAcknowledged Boolean       @default(false)
   popiaConsentAccepted  Boolean       @default(false)

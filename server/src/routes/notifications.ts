@@ -12,7 +12,9 @@ const EXPIRY_WARNING_DAYS = 30;
 const ORDER_STUCK_DAYS = 14;
 
 // Executive titles whose department owns worker certification/training compliance.
-const CERTIFICATION_AUDIENCE: ExecutiveTitle[] = ["HR_MANAGER"];
+// Compliance shares this because certificate/training lapses are themselves a
+// compliance risk, not just an HR administration matter.
+const CERTIFICATION_AUDIENCE: ExecutiveTitle[] = ["HR_MANAGER", "COMPLIANCE_OFFICER"];
 // Executive titles whose department owns contractor/vendor contract terms.
 const CONTRACT_AUDIENCE: ExecutiveTitle[] = ["GENERAL_MANAGER", "COO", "OPERATIONS_MANAGER", "COMPLIANCE_OFFICER"];
 // Executive titles who need visibility into outstanding client invoice deadlines.

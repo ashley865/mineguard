@@ -58,6 +58,7 @@ const statusColors: Record<string, string> = {
   CHECKED_IN: "bg-success-600 text-white",
   CHECKED_OUT: "bg-mine-600 text-mine-100",
   DENIED: "bg-danger-500 text-white",
+  PENDING_APPROVAL: "bg-hazard-500 text-white",
   PENDING_SUPERVISOR: "bg-hazard-500 text-white",
   PENDING_EXECUTIVE: "bg-hazard-600/80 text-white",
   CLOSED: "bg-mine-600 text-mine-100",

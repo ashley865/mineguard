@@ -41,7 +41,9 @@ export default function SecurityVisitorHistoryWidget() {
                   <td className="pr-3 py-1.5 text-mine-300">{v.company ?? "—"}</td>
                   <td className="pr-3 py-1.5 text-mine-300">{v.hostName}</td>
                   <td className="pr-3 py-1.5 text-mine-300">{v.site?.name ?? "—"}</td>
-                  <td className="pr-3 py-1.5 text-mine-400">{new Date(v.checkInAt).toLocaleString()}</td>
+                  <td className="pr-3 py-1.5 text-mine-400">
+                    {v.checkInAt ? new Date(v.checkInAt).toLocaleString() : new Date(v.scheduledFor).toLocaleString()}
+                  </td>
                   <td className="pr-3 py-1.5 text-mine-400">{v.checkOutAt ? new Date(v.checkOutAt).toLocaleString() : "—"}</td>
                   <td className="py-1.5"><StatusBadge status={v.status} /></td>
                 </tr>

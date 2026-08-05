@@ -748,7 +748,7 @@ export interface ExecutiveSiteAssignment {
   site: { id: string; name: string };
 }
 
-export type VisitorStatus = "CHECKED_IN" | "CHECKED_OUT" | "DENIED";
+export type VisitorStatus = "PENDING_APPROVAL" | "APPROVED" | "CHECKED_IN" | "CHECKED_OUT" | "DENIED";
 export type VisitorDocumentType = "ID_DOCUMENT" | "MEDICAL_CERTIFICATE" | "INDUCTION_ACKNOWLEDGEMENT" | "OTHER";
 
 export interface VisitorDocument {
@@ -773,7 +773,12 @@ export interface Visitor {
   siteId: string;
   site?: { id: string; name: string };
   status: VisitorStatus;
-  checkInAt: string;
+  scheduledFor: string;
+  isEmergency: boolean;
+  approvedById?: string | null;
+  approvedBy?: { id: string; name: string } | null;
+  approvedAt?: string | null;
+  checkInAt?: string | null;
   checkOutAt?: string | null;
   inductionAcknowledged: boolean;
   popiaConsentAccepted: boolean;

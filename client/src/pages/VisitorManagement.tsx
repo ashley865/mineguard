@@ -1,7 +1,9 @@
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { Link } from "react-router-dom";
 import QRCode from "qrcode";
 import { api } from "../api/client";
+import { useAuth } from "../context/AuthContext";
 import { Site, Visitor } from "../api/types";
 import { useAssignedSiteIds } from "../hooks/useAssignedSiteIds";
 import { StatusBadge } from "../components/Badges";
@@ -40,8 +42,23 @@ function QrPanel({ site }: { site: Site }) {
   );
 }
 
+function RequestLinkAccessCard() {
+  const { t } = useTranslation();
+  return (
+    <div className={`${cardClass} p-5 space-y-2 text-center`}>
+      <h2 className="text-sm font-semibold">{t("visitors.linkRestrictedTitle")}</h2>
+      <p className="text-xs text-mine-400">{t("visitors.linkRestrictedBody")}</p>
+      <Link to="/executive-requests" className={`${buttonSecondary} inline-block text-xs px-3 py-1.5 mt-1`}>
+        {t("visitors.requestLinkAccess")}
+      </Link>
+    </div>
+  );
+}
+
 export default function VisitorManagement() {
   const { t } = useTranslation();
+  const { user } = useAuth();
+  const canShareLink = user?.role === "ADMIN" || user?.title === "SECURITY_MANAGER";
   const { siteIds: assignedSiteIds, loading: loadingAssignment } = useAssignedSiteIds();
   const [sites, setSites] = useState<Site[]>([]);
   const [visitors, setVisitors] = useState<Visitor[]>([]);
@@ -84,6 +101,21 @@ export default function VisitorManagement() {
     await loadVisitors(siteId);
   }
 
+  async function approve(id: string) {
+    await api.post(`/visitors/${id}/approve`);
+    await loadVisitors(siteId);
+  }
+
+  async function deny(id: string) {
+    await api.post(`/visitors/${id}/deny`);
+    await loadVisitors(siteId);
+  }
+
+  async function arrive(id: string) {
+    await api.post(`/visitors/${id}/arrive`);
+    await loadVisitors(siteId);
+  }
+
   if (loadingAssignment) return <div className="text-mine-300">{t("visitors.loading")}</div>;
 
   if (availableSites.length === 0) {
@@ -117,7 +149,9 @@ export default function VisitorManagement() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-1">{selectedSite && <QrPanel site={selectedSite} />}</div>
+        <div className="lg:col-span-1">
+          {selectedSite && (canShareLink ? <QrPanel site={selectedSite} /> : <RequestLinkAccessCard />)}
+        </div>
 
         <div className="lg:col-span-2">
           <div className={`${cardClass} overflow-x-auto`}>
@@ -126,6 +160,7 @@ export default function VisitorManagement() {
                 <tr>
                   <th className="text-left px-4 py-2">{t("visitors.colName")}</th>
                   <th className="text-left px-4 py-2">{t("visitors.colHost")}</th>
+                  <th className="text-left px-4 py-2">{t("visitors.colScheduled")}</th>
                   <th className="text-left px-4 py-2">{t("visitors.colCheckIn")}</th>
                   <th className="text-left px-4 py-2">{t("visitors.colCheckOut")}</th>
                   <th className="text-left px-4 py-2">{t("common.status")}</th>
@@ -141,14 +176,39 @@ export default function VisitorManagement() {
                         {v.company && <div className="text-xs text-mine-400">{v.company}</div>}
                       </td>
                       <td className="px-4 py-2 text-mine-300">{v.hostName}</td>
-                      <td className="px-4 py-2 text-mine-300">{new Date(v.checkInAt).toLocaleString()}</td>
+                      <td className="px-4 py-2 text-mine-300">
+                        {new Date(v.scheduledFor).toLocaleString()}
+                        {v.isEmergency && (
+                          <span className="ml-1 px-1.5 py-0.5 rounded text-xs font-semibold bg-danger-500 text-white">
+                            {t("visitors.emergency")}
+                          </span>
+                        )}
+                      </td>
+                      <td className="px-4 py-2 text-mine-300">
+                        {v.checkInAt ? new Date(v.checkInAt).toLocaleString() : t("visitors.notArrived")}
+                      </td>
                       <td className="px-4 py-2 text-mine-300">
                         {v.checkOutAt ? new Date(v.checkOutAt).toLocaleString() : "—"}
                       </td>
                       <td className="px-4 py-2">
                         <StatusBadge status={v.status} />
                       </td>
-                      <td className="px-4 py-2 text-right">
+                      <td className="px-4 py-2 text-right space-x-2 whitespace-nowrap">
+                        {v.status === "PENDING_APPROVAL" && (
+                          <>
+                            <button className={`${buttonPrimary} text-xs px-3 py-1`} onClick={() => approve(v.id)}>
+                              {t("visitors.approve")}
+                            </button>
+                            <button className={`${buttonSecondary} text-xs px-3 py-1`} onClick={() => deny(v.id)}>
+                              {t("visitors.deny")}
+                            </button>
+                          </>
+                        )}
+                        {v.status === "APPROVED" && (
+                          <button className={`${buttonPrimary} text-xs px-3 py-1`} onClick={() => arrive(v.id)}>
+                            {t("visitors.arrive")}
+                          </button>
+                        )}
                         {v.status === "CHECKED_IN" && (
                           <button className={`${buttonPrimary} text-xs px-3 py-1`} onClick={() => checkout(v.id)}>
                             {t("visitors.checkOut")}
@@ -159,7 +219,7 @@ export default function VisitorManagement() {
                   ))}
                 {!loading && visitors.length === 0 && (
                   <tr>
-                    <td colSpan={6} className="px-4 py-6 text-center text-mine-400">
+                    <td colSpan={7} className="px-4 py-6 text-center text-mine-400">
                       {t("visitors.noneYet")}
                     </td>
                   </tr>

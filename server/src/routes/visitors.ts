@@ -17,6 +17,8 @@ const upload = multer({
   fileFilter: documentFileFilter,
 });
 
+const MIN_LEAD_TIME_MS = 60 * 60 * 1000;
+
 const checkinSchema = z.object({
   fullName: z.string().min(1),
   idNumber: z.string().min(1).refine(isValidIdOrPassport, {
@@ -28,6 +30,8 @@ const checkinSchema = z.object({
   hostName: z.string().min(1),
   purposeOfVisit: z.string().min(1),
   vehicleRegistration: z.string().optional(),
+  scheduledFor: z.coerce.date(),
+  isEmergency: z.coerce.boolean().optional(),
   inductionAcknowledged: z.coerce.boolean(),
   popiaConsentAccepted: z.coerce.boolean(),
   indemnityAccepted: z.coerce.boolean(),
@@ -45,6 +49,11 @@ const visitorSelect = {
   vehicleRegistration: true,
   siteId: true,
   status: true,
+  scheduledFor: true,
+  isEmergency: true,
+  approvedById: true,
+  approvedBy: { select: { id: true, name: true } },
+  approvedAt: true,
   checkInAt: true,
   checkOutAt: true,
   inductionAcknowledged: true,
@@ -85,10 +94,15 @@ router.post("/checkin/:siteId", upload.array("documents", 5), async (req, res) =
 
   const parsed = checkinSchema.safeParse(req.body);
   if (!parsed.success) return res.status(400).json({ error: parsed.error.flatten() });
-  const { inductionAcknowledged, popiaConsentAccepted, indemnityAccepted } = parsed.data;
+  const { inductionAcknowledged, popiaConsentAccepted, indemnityAccepted, isEmergency } = parsed.data;
   if (!inductionAcknowledged || !popiaConsentAccepted || !indemnityAccepted) {
     return res.status(400).json({
       error: "Safety induction, POPIA consent, and indemnity acknowledgement are all required before check-in",
+    });
+  }
+  if (!isEmergency && parsed.data.scheduledFor.getTime() - Date.now() < MIN_LEAD_TIME_MS) {
+    return res.status(400).json({
+      error: "Visits must be scheduled at least 1 hour in advance unless marked as an emergency",
     });
   }
 
@@ -104,6 +118,9 @@ router.post("/checkin/:siteId", upload.array("documents", 5), async (req, res) =
       purposeOfVisit: parsed.data.purposeOfVisit,
       vehicleRegistration: parsed.data.vehicleRegistration || undefined,
       siteId: site.id,
+      status: "PENDING_APPROVAL",
+      scheduledFor: parsed.data.scheduledFor,
+      isEmergency: isEmergency ?? false,
       inductionAcknowledged,
       popiaConsentAccepted,
       indemnityAccepted,
@@ -119,6 +136,11 @@ router.post("/checkin/:siteId", upload.array("documents", 5), async (req, res) =
     },
     select: visitorSelect,
   });
+
+  const io = req.app.get("io");
+  const mineId = (await prisma.site.findUnique({ where: { id: site.id }, select: { mineId: true } }))?.mineId;
+  if (io && mineId) io.to(`mine:${mineId}`).emit("visitor:pending", visitor);
+
   res.status(201).json(visitor);
 });
 
@@ -141,9 +163,63 @@ router.get("/", requireRole("ADMIN", "EXECUTIVE"), async (req, res) => {
       siteId: siteId ?? (allowedSiteIds ? { in: allowedSiteIds } : undefined),
     },
     select: visitorSelect,
-    orderBy: { checkInAt: "desc" },
+    orderBy: { createdAt: "desc" },
   });
   res.json(items);
+});
+
+router.post("/:id/approve", requireRole("ADMIN", "EXECUTIVE"), async (req, res) => {
+  const mineId = requireMineId(req, res);
+  if (!mineId) return;
+  const visitor = await prisma.visitor.findFirst({ where: { id: req.params.id, site: { mineId } } });
+  if (!visitor) return res.status(404).json({ error: "Visitor not found" });
+  if (!(await assertSiteAccess(req, res, visitor.siteId))) return;
+  if (visitor.status !== "PENDING_APPROVAL") {
+    return res.status(409).json({ error: "This visitor has already been reviewed" });
+  }
+
+  const updated = await prisma.visitor.update({
+    where: { id: req.params.id },
+    data: { status: "APPROVED", approvedById: req.auth!.userId, approvedAt: new Date() },
+    select: visitorSelect,
+  });
+  res.json(updated);
+});
+
+router.post("/:id/deny", requireRole("ADMIN", "EXECUTIVE"), async (req, res) => {
+  const mineId = requireMineId(req, res);
+  if (!mineId) return;
+  const visitor = await prisma.visitor.findFirst({ where: { id: req.params.id, site: { mineId } } });
+  if (!visitor) return res.status(404).json({ error: "Visitor not found" });
+  if (!(await assertSiteAccess(req, res, visitor.siteId))) return;
+  if (visitor.status !== "PENDING_APPROVAL") {
+    return res.status(409).json({ error: "This visitor has already been reviewed" });
+  }
+
+  const updated = await prisma.visitor.update({
+    where: { id: req.params.id },
+    data: { status: "DENIED", approvedById: req.auth!.userId, approvedAt: new Date() },
+    select: visitorSelect,
+  });
+  res.json(updated);
+});
+
+router.post("/:id/arrive", requireRole("ADMIN", "EXECUTIVE"), async (req, res) => {
+  const mineId = requireMineId(req, res);
+  if (!mineId) return;
+  const visitor = await prisma.visitor.findFirst({ where: { id: req.params.id, site: { mineId } } });
+  if (!visitor) return res.status(404).json({ error: "Visitor not found" });
+  if (!(await assertSiteAccess(req, res, visitor.siteId))) return;
+  if (visitor.status !== "APPROVED") {
+    return res.status(409).json({ error: "This visitor must be approved before they can be checked in" });
+  }
+
+  const updated = await prisma.visitor.update({
+    where: { id: req.params.id },
+    data: { status: "CHECKED_IN", checkInAt: new Date() },
+    select: visitorSelect,
+  });
+  res.json(updated);
 });
 
 router.post("/:id/checkout", requireRole("ADMIN", "EXECUTIVE"), async (req, res) => {
@@ -152,6 +228,9 @@ router.post("/:id/checkout", requireRole("ADMIN", "EXECUTIVE"), async (req, res)
   const visitor = await prisma.visitor.findFirst({ where: { id: req.params.id, site: { mineId } } });
   if (!visitor) return res.status(404).json({ error: "Visitor not found" });
   if (!(await assertSiteAccess(req, res, visitor.siteId))) return;
+  if (visitor.status !== "CHECKED_IN") {
+    return res.status(409).json({ error: "This visitor is not currently checked in" });
+  }
 
   const updated = await prisma.visitor.update({
     where: { id: req.params.id },

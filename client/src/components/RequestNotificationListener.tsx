@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { useSocket } from "../context/SocketContext";
 import { useAuth } from "../context/AuthContext";
 import { useToast } from "../context/ToastContext";
-import { ExecutiveRequestItem } from "../api/types";
+import { ExecutiveRequestItem, Visitor } from "../api/types";
 
 export default function RequestNotificationListener() {
   const { t } = useTranslation();
@@ -34,11 +34,22 @@ export default function RequestNotificationListener() {
       });
     }
 
+    function onVisitorPending(visitor: Visitor) {
+      if (user!.role !== "ADMIN" && user!.role !== "EXECUTIVE") return;
+      showToast({
+        title: t("visitors.toastPendingTitle", { name: visitor.fullName }),
+        body: t("visitors.toastPendingBody", { site: visitor.site?.name ?? "" }),
+        onClick: () => navigate("/visitors"),
+      });
+    }
+
     socket.on("request:new", onNew);
     socket.on("request:responded", onResponded);
+    socket.on("visitor:pending", onVisitorPending);
     return () => {
       socket.off("request:new", onNew);
       socket.off("request:responded", onResponded);
+      socket.off("visitor:pending", onVisitorPending);
     };
   }, [socket, user, navigate, showToast, t]);
 
