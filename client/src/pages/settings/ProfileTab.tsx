@@ -108,7 +108,12 @@ export default function ProfileTab() {
         </div>
         <div>
           <label className={labelClass}>{t("common.role")}</label>
-          <input className={inputClass} value={user?.role ?? ""} readOnly disabled />
+          <input
+            className={inputClass}
+            value={user?.title ? t(`settings.invites.titles.${user.title}`) : user?.role ? t(`roles.${user.role}`) : ""}
+            readOnly
+            disabled
+          />
         </div>
         {profileError && <div className="text-danger-500 text-xs">{profileError}</div>}
         <div className="flex items-center gap-3">

@@ -195,6 +195,7 @@ model User {
   postedContracts        ContractOpportunity[]
   productionRecords      ProductionRecord[]     @relation("ProductionRecordedBy")
   maintenanceSchedules   MaintenanceSchedule[]  @relation("MaintenanceCreatedBy")
+  maintenanceAssignments MaintenanceSchedule[]  @relation("MaintenanceAssignedTo")
   fleetPositions         FleetPosition[]        @relation("FleetPositionRecordedBy")
   inventoryMovements     InventoryMovement[]    @relation("InventoryMovementBy")
   weatherReadings        WeatherReading[]       @relation("WeatherRecordedBy")
@@ -1313,8 +1314,10 @@ model ProductionRecord {
 }
 
 enum MaintenanceType {
+  PLANNED
   PREVENTIVE
   CORRECTIVE
+  EMERGENCY
   INSPECTION
 }
 
@@ -1333,13 +1336,32 @@ model MaintenanceSchedule {
   maintenanceType MaintenanceType
   scheduledDate   DateTime
   completedDate   DateTime?
-  performedBy     String?
+  assignedToId    String?
+  assignedTo      User?                      @relation("MaintenanceAssignedTo", fields: [assignedToId], references: [id], onDelete: SetNull)
   status          MaintenanceScheduleStatus  @default(SCHEDULED)
+  // How long production/equipment was actually down for this event, and why — this is
+  // the operations-manager-facing "why did production stop" record, distinct from
+  // `findings` which is the technician's post-repair write-up.
+  downtimeMinutes Float?
+  downtimeReason  String?
   findings        String?
   partsUsed       String?
   cost            Float?
   createdById     String?
   createdBy       User?                      @relation("MaintenanceCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+
+  partsConsumed MaintenancePartUsed[]
+
+  createdAt DateTime @default(now())
+}
+
+model MaintenancePartUsed {
+  id                    String               @id @default(cuid())
+  maintenanceScheduleId String
+  maintenanceSchedule   MaintenanceSchedule  @relation(fields: [maintenanceScheduleId], references: [id], onDelete: Cascade)
+  inventoryItemId       String
+  inventoryItem         InventoryItem        @relation(fields: [inventoryItemId], references: [id], onDelete: Cascade)
+  quantity              Float
 
   createdAt DateTime @default(now())
 }
@@ -1389,7 +1411,8 @@ model InventoryItem {
   supplier       String?
   location       String?
 
-  movements InventoryMovement[]
+  movements       InventoryMovement[]
+  usedInMaintenance MaintenancePartUsed[]
 
   createdAt DateTime @default(now())
 }

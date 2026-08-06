@@ -1066,8 +1066,15 @@ export interface ProductionAnalytics {
   };
 }
 
-export type MaintenanceType = "PREVENTIVE" | "CORRECTIVE" | "INSPECTION";
+export type MaintenanceType = "PLANNED" | "PREVENTIVE" | "CORRECTIVE" | "EMERGENCY" | "INSPECTION";
 export type MaintenanceScheduleStatus = "SCHEDULED" | "IN_PROGRESS" | "COMPLETED" | "OVERDUE" | "CANCELLED";
+
+export interface MaintenancePartUsed {
+  id: string;
+  quantity: number;
+  inventoryItem?: { id: string; name: string; unit: string };
+  createdAt: string;
+}
 
 export interface MaintenanceSchedule {
   id: string;
@@ -1076,13 +1083,31 @@ export interface MaintenanceSchedule {
   maintenanceType: MaintenanceType;
   scheduledDate: string;
   completedDate?: string | null;
-  performedBy?: string | null;
+  assignedToId?: string | null;
+  assignedTo?: { id: string; name: string } | null;
   status: MaintenanceScheduleStatus;
+  downtimeMinutes?: number | null;
+  downtimeReason?: string | null;
   findings?: string | null;
   partsUsed?: string | null;
   cost?: number | null;
   createdBy?: { id: string; name: string } | null;
   createdAt: string;
+  partsConsumed?: MaintenancePartUsed[];
+}
+
+export interface MaintenanceSummary {
+  windowDays: number;
+  byType: { type: MaintenanceType; count: number }[];
+  byStatus: { status: MaintenanceScheduleStatus; count: number }[];
+  backlog: number;
+  totalDowntimeMinutes: number;
+  avgDowntimeMinutes: number | null;
+  mtbfDays: number | null;
+  failureCount: number;
+  byTechnician: { name: string; open: number; completed: number }[];
+  topPartsUsed: { name: string; quantity: number }[];
+  recentDowntimeEvents: { equipment: string; type: MaintenanceType; downtimeMinutes: number | null; reason: string | null; date: string }[];
 }
 
 export interface FleetPosition {

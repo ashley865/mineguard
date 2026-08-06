@@ -12,6 +12,7 @@ import HrWorkforceWidget from "../components/HrWorkforceWidget";
 import SecurityVisitorHistoryWidget from "../components/SecurityVisitorHistoryWidget";
 import ProductionAnalyticsWidget from "../components/ProductionAnalyticsWidget";
 import InventoryProcurementWidget from "../components/InventoryProcurementWidget";
+import MaintenanceDowntimeWidget from "../components/MaintenanceDowntimeWidget";
 
 type Tone = "positive" | "negative" | "caution";
 
@@ -272,6 +273,7 @@ export default function ExecutiveDashboard() {
       {canSeeVisitorHistory && <SecurityVisitorHistoryWidget />}
       {canSeeProductionAnalytics && <ProductionAnalyticsWidget />}
       {canSeeProductionAnalytics && <InventoryProcurementWidget />}
+      {canSeeProductionAnalytics && <MaintenanceDowntimeWidget />}
 
       <div className={`${cardClass} p-3`}>
         <h2 className="text-xs font-semibold mb-2">{t("executive.suggestionsTitle")}</h2>
