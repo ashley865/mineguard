@@ -472,7 +472,12 @@
       "NON_COMPLIANT": "Non conforme",
       "NOT_APPLICABLE": "Non applicable",
       "AWAITING_VERIFICATION": "En attente de vérification",
-      "VERIFIED": "Vérifié"
+      "VERIFIED": "Vérifié",
+      "ONLINE": "En ligne",
+      "OFFLINE": "Hors ligne",
+      "DECOMMISSIONED": "Mis hors service",
+      "CONNECTED": "Connecté",
+      "DISCONNECTED": "Déconnecté"
     },
     "severity": {
       "LOW": "Faible",
@@ -2145,5 +2150,50 @@
     "LIMESTONE": "Calcaire",
     "SAND_AND_AGGREGATE": "Sable et Granulats",
     "OTHER": "Autre"
+  },
+  "security": {
+    "nav": "Sécurité",
+    "subtitle": "Infrastructure de sécurité physique de cette mine.",
+    "tabCctv": "Vidéosurveillance (CCTV)",
+    "cctv": {
+      "subtitle": "Inventaire des caméras et, lorsque le fournisseur VMS/CCTV du site le permet techniquement, l'intégration de MineGuard à ce système existant.",
+      "new": "+ Nouvelle Caméra",
+      "newTitle": "Nouvelle Caméra",
+      "editTitle": "Modifier la Caméra",
+      "name": "Nom de la caméra",
+      "location": "Emplacement",
+      "cameraType": "Type de caméra",
+      "cameraTypes": {
+        "FIXED": "Fixe",
+        "PTZ": "PTZ (Pan-Tilt-Zoom)",
+        "DOME": "Dôme",
+        "THERMAL": "Thermique",
+        "BODY_WORN": "Portée sur soi",
+        "DRONE": "Drone",
+        "OTHER": "Autre"
+      },
+      "coverageDescription": "Couverture / ce que cette caméra surveille",
+      "coverageDescriptionPlaceholder": "ex. Périmètre du dépôt d'explosifs, barrière de l'entrée principale",
+      "vmsSectionTitle": "Intégration au système VMS / CCTV",
+      "vmsSectionHint": "Si cette caméra fait partie d'un système VMS/CCTV existant, enregistrez-le ici afin que MineGuard puisse s'y intégrer lorsque cela est techniquement possible. Laissez la méthode d'intégration sur « Non intégré » si elle est surveillée uniquement via son système natif.",
+      "vmsProvider": "Fournisseur VMS / CCTV",
+      "vmsProviderPlaceholder": "ex. Milestone XProtect, Hikvision iVMS, Genetec",
+      "integrationMethod": "Méthode d'intégration",
+      "integrationMethods": {
+        "ONVIF": "ONVIF",
+        "RTSP_STREAM": "Flux RTSP",
+        "VENDOR_API": "API du fournisseur",
+        "NVR_EXPORT": "Export NVR",
+        "NOT_INTEGRATED": "Non intégré"
+      },
+      "streamUrl": "URL de flux / API",
+      "retentionDays": "Conservation des enregistrements (jours)",
+      "installedDate": "Date d'installation",
+      "colName": "Caméra",
+      "colVms": "Intégration VMS",
+      "syncNow": "Synchroniser maintenant",
+      "noneYet": "Aucune caméra enregistrée pour le moment.",
+      "confirmDelete": "Supprimer cette caméra ?"
+    }
   }
 }

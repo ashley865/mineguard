@@ -23,6 +23,7 @@ import Reporting from "./pages/Reporting";
 import Contractors from "./pages/Contractors";
 import ContractorRegister from "./pages/ContractorRegister";
 import VisitorManagement from "./pages/VisitorManagement";
+import SecurityHub from "./pages/SecurityHub";
 import VisitorCheckIn from "./pages/VisitorCheckIn";
 import PermitToWork from "./pages/PermitToWork";
 import Settings from "./pages/Settings";
@@ -88,6 +89,7 @@ export default function App() {
         <Route path="/reporting" element={<ModuleRoute path="/reporting"><Reporting /></ModuleRoute>} />
         <Route path="/contractors" element={<ModuleRoute path="/contractors"><Contractors /></ModuleRoute>} />
         <Route path="/visitors" element={<ModuleRoute path="/visitors"><VisitorManagement /></ModuleRoute>} />
+        <Route path="/security" element={<ModuleRoute path="/security"><SecurityHub /></ModuleRoute>} />
         <Route path="/permits-to-work" element={<ModuleRoute path="/permits-to-work"><PermitToWork /></ModuleRoute>} />
         <Route path="/trucks" element={<ModuleRoute path="/trucks"><TruckRegistration /></ModuleRoute>} />
         <Route path="/scanner" element={<ModuleRoute path="/scanner"><Scanner /></ModuleRoute>} />

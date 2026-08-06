@@ -348,6 +348,34 @@ export interface Equipment {
   assignedOperator?: { id: string; name: string; employeeId: string } | null;
 }
 
+export type CameraType = "FIXED" | "PTZ" | "DOME" | "THERMAL" | "BODY_WORN" | "DRONE" | "OTHER";
+export type CameraOperationalStatus = "ONLINE" | "OFFLINE" | "MAINTENANCE" | "DECOMMISSIONED";
+export type VmsIntegrationMethod = "ONVIF" | "RTSP_STREAM" | "VENDOR_API" | "NVR_EXPORT" | "NOT_INTEGRATED";
+export type VmsIntegrationStatus = "CONNECTED" | "DISCONNECTED" | "PENDING" | "NOT_APPLICABLE";
+
+export interface SecurityCamera {
+  id: string;
+  siteId: string;
+  site?: { id: string; name: string };
+  zoneId?: string | null;
+  zone?: { id: string; name: string } | null;
+  name: string;
+  location: string;
+  cameraType: CameraType;
+  status: CameraOperationalStatus;
+  coverageDescription?: string | null;
+  vmsProvider?: string | null;
+  integrationMethod: VmsIntegrationMethod;
+  integrationStatus: VmsIntegrationStatus;
+  streamUrl?: string | null;
+  retentionDays?: number | null;
+  installedDate?: string | null;
+  lastSyncAt?: string | null;
+  notes?: string | null;
+  createdBy?: { id: string; name: string } | null;
+  createdAt: string;
+}
+
 export interface DashboardSummary {
   counts: {
     siteCount: number;

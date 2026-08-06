@@ -472,7 +472,12 @@
       "NON_COMPLIANT": "No conforme",
       "NOT_APPLICABLE": "No aplicable",
       "AWAITING_VERIFICATION": "En espera de verificación",
-      "VERIFIED": "Verificado"
+      "VERIFIED": "Verificado",
+      "ONLINE": "En línea",
+      "OFFLINE": "Fuera de línea",
+      "DECOMMISSIONED": "Retirado",
+      "CONNECTED": "Conectado",
+      "DISCONNECTED": "Desconectado"
     },
     "severity": {
       "LOW": "Baja",
@@ -2145,5 +2150,50 @@
     "LIMESTONE": "Piedra Caliza",
     "SAND_AND_AGGREGATE": "Arena y Agregados",
     "OTHER": "Otro"
+  },
+  "security": {
+    "nav": "Seguridad",
+    "subtitle": "Infraestructura de seguridad física de esta mina.",
+    "tabCctv": "CCTV y Vigilancia",
+    "cctv": {
+      "subtitle": "Inventario de cámaras y, cuando el proveedor de VMS/CCTV del sitio lo permita técnicamente, la integración de MineGuard con ese sistema existente.",
+      "new": "+ Nueva Cámara",
+      "newTitle": "Nueva Cámara",
+      "editTitle": "Editar Cámara",
+      "name": "Nombre de la cámara",
+      "location": "Ubicación",
+      "cameraType": "Tipo de cámara",
+      "cameraTypes": {
+        "FIXED": "Fija",
+        "PTZ": "PTZ (Pan-Tilt-Zoom)",
+        "DOME": "Domo",
+        "THERMAL": "Térmica",
+        "BODY_WORN": "Corporal",
+        "DRONE": "Dron",
+        "OTHER": "Otro"
+      },
+      "coverageDescription": "Cobertura / qué vigila esta cámara",
+      "coverageDescriptionPlaceholder": "p. ej. Perímetro del polvorín, boom de la puerta principal",
+      "vmsSectionTitle": "Integración con sistema VMS / CCTV",
+      "vmsSectionHint": "Si esta cámara está en un sistema VMS/CCTV existente, regístrelo aquí para que MineGuard pueda integrarse cuando sea técnicamente posible. Deje el método de integración como \"No integrado\" si se supervisa únicamente a través de su sistema nativo.",
+      "vmsProvider": "Proveedor VMS / CCTV",
+      "vmsProviderPlaceholder": "p. ej. Milestone XProtect, Hikvision iVMS, Genetec",
+      "integrationMethod": "Método de integración",
+      "integrationMethods": {
+        "ONVIF": "ONVIF",
+        "RTSP_STREAM": "Transmisión RTSP",
+        "VENDOR_API": "API del proveedor",
+        "NVR_EXPORT": "Exportación NVR",
+        "NOT_INTEGRATED": "No integrado"
+      },
+      "streamUrl": "URL de transmisión / API",
+      "retentionDays": "Retención de grabaciones (días)",
+      "installedDate": "Fecha de instalación",
+      "colName": "Cámara",
+      "colVms": "Integración VMS",
+      "syncNow": "Sincronizar ahora",
+      "noneYet": "Aún no se han registrado cámaras.",
+      "confirmDelete": "¿Eliminar esta cámara?"
+    }
   }
 }

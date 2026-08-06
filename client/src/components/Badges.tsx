@@ -70,6 +70,11 @@ const statusColors: Record<string, string> = {
   NOT_APPLICABLE: "bg-mine-600 text-mine-100",
   AWAITING_VERIFICATION: "bg-hazard-500 text-white",
   VERIFIED: "bg-success-600 text-white",
+  ONLINE: "bg-success-600 text-white",
+  OFFLINE: "bg-danger-500 text-white",
+  DECOMMISSIONED: "bg-mine-600 text-mine-100",
+  CONNECTED: "bg-success-600 text-white",
+  DISCONNECTED: "bg-danger-500 text-white",
 };
 
 export function StatusBadge({

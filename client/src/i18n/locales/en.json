@@ -489,7 +489,12 @@
       "NON_COMPLIANT": "Non-compliant",
       "NOT_APPLICABLE": "Not applicable",
       "AWAITING_VERIFICATION": "Awaiting verification",
-      "VERIFIED": "Verified"
+      "VERIFIED": "Verified",
+      "ONLINE": "Online",
+      "OFFLINE": "Offline",
+      "DECOMMISSIONED": "Decommissioned",
+      "CONNECTED": "Connected",
+      "DISCONNECTED": "Disconnected"
     },
     "severity": {
       "LOW": "Low",
@@ -1177,6 +1182,51 @@
     "indemnityDeclaration": "I acknowledge the site's hazard notice and accept the visitor indemnity terms for the duration of my visit.",
     "submit": "Submit registration",
     "qrHint": "Keep this code. Show it to security on arrival and when you leave."
+  },
+  "security": {
+    "nav": "Security",
+    "subtitle": "Physical security infrastructure for this mine.",
+    "tabCctv": "CCTV & Surveillance",
+    "cctv": {
+      "subtitle": "Camera inventory and, where the site's VMS/CCTV vendor technically supports it, MineGuard's integration with that existing system.",
+      "new": "+ New Camera",
+      "newTitle": "New Camera",
+      "editTitle": "Edit Camera",
+      "name": "Camera name",
+      "location": "Location",
+      "cameraType": "Camera type",
+      "cameraTypes": {
+        "FIXED": "Fixed",
+        "PTZ": "PTZ (Pan-Tilt-Zoom)",
+        "DOME": "Dome",
+        "THERMAL": "Thermal",
+        "BODY_WORN": "Body-worn",
+        "DRONE": "Drone",
+        "OTHER": "Other"
+      },
+      "coverageDescription": "Coverage / what this camera watches",
+      "coverageDescriptionPlaceholder": "e.g. Explosives magazine perimeter, main gate boom",
+      "vmsSectionTitle": "VMS / CCTV system integration",
+      "vmsSectionHint": "If this camera is on an existing VMS/CCTV system, record it here so MineGuard can integrate where technically supported. Leave the integration method as \"Not integrated\" if it's monitored solely through its native system.",
+      "vmsProvider": "VMS / CCTV provider",
+      "vmsProviderPlaceholder": "e.g. Milestone XProtect, Hikvision iVMS, Genetec",
+      "integrationMethod": "Integration method",
+      "integrationMethods": {
+        "ONVIF": "ONVIF",
+        "RTSP_STREAM": "RTSP stream",
+        "VENDOR_API": "Vendor API",
+        "NVR_EXPORT": "NVR export",
+        "NOT_INTEGRATED": "Not integrated"
+      },
+      "streamUrl": "Stream / API URL",
+      "retentionDays": "Recording retention (days)",
+      "installedDate": "Installed date",
+      "colName": "Camera",
+      "colVms": "VMS Integration",
+      "syncNow": "Sync now",
+      "noneYet": "No cameras recorded yet.",
+      "confirmDelete": "Delete this camera?"
+    }
   },
   "permitToWork": {
     "nav": "Permit to Work",

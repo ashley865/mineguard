@@ -204,6 +204,7 @@ model User {
   auditFindingsResponsibleFor AuditFinding[]         @relation("AuditFindingResponsiblePerson")
   auditFindingsVerified      AuditFinding[]          @relation("AuditFindingVerifiedBy")
   auditFindingsClosed        AuditFinding[]          @relation("AuditFindingClosedBy")
+  securityCamerasCreated     SecurityCamera[]        @relation("SecurityCameraCreatedBy")
   fleetPositions         FleetPosition[]        @relation("FleetPositionRecordedBy")
   inventoryMovements     InventoryMovement[]    @relation("InventoryMovementBy")
   weatherReadings        WeatherReading[]       @relation("WeatherRecordedBy")
@@ -292,6 +293,7 @@ model Site {
   evacuations          EmergencyEvacuation[]
   complianceRequirements ComplianceRequirement[]
   auditFindings          AuditFinding[]
+  securityCameras        SecurityCamera[]
 }
 
 model Zone {
@@ -306,6 +308,7 @@ model Zone {
   incidents Incident[]
   equipment Equipment[]
   alerts    Alert[]
+  securityCameras SecurityCamera[]
 
   codesOfPractice   CodeOfPractice[]
   riskAssessments   RiskAssessment[]
@@ -488,6 +491,69 @@ model Equipment {
   assignedOperator    Worker?     @relation("EquipmentAssignedOperator", fields: [assignedOperatorId], references: [id], onDelete: SetNull)
 
   maintenanceSchedules MaintenanceSchedule[]
+
+  createdAt DateTime @default(now())
+}
+
+enum CameraType {
+  FIXED
+  PTZ
+  DOME
+  THERMAL
+  BODY_WORN
+  DRONE
+  OTHER
+}
+
+enum CameraOperationalStatus {
+  ONLINE
+  OFFLINE
+  MAINTENANCE
+  DECOMMISSIONED
+}
+
+// How MineGuard talks to the camera's actual video management system, where that's
+// technically supported by the vendor — NOT_INTEGRATED just means the camera is on the
+// register for asset-tracking purposes but is monitored solely through its native VMS.
+enum VmsIntegrationMethod {
+  ONVIF
+  RTSP_STREAM
+  VENDOR_API
+  NVR_EXPORT
+  NOT_INTEGRATED
+}
+
+enum VmsIntegrationStatus {
+  CONNECTED
+  DISCONNECTED
+  PENDING
+  NOT_APPLICABLE
+}
+
+// The Security Manager's CCTV & Surveillance register: physical camera inventory plus,
+// where the site's VMS/CCTV vendor technically supports it, the integration details
+// MineGuard uses to pull live status/health from that external system.
+model SecurityCamera {
+  id                  String                  @id @default(cuid())
+  siteId              String
+  site                Site                    @relation(fields: [siteId], references: [id], onDelete: Cascade)
+  zoneId              String?
+  zone                Zone?                   @relation(fields: [zoneId], references: [id], onDelete: SetNull)
+  name                String
+  location            String
+  cameraType          CameraType              @default(FIXED)
+  status              CameraOperationalStatus @default(ONLINE)
+  coverageDescription String?
+  vmsProvider         String?
+  integrationMethod   VmsIntegrationMethod    @default(NOT_INTEGRATED)
+  integrationStatus   VmsIntegrationStatus    @default(NOT_APPLICABLE)
+  streamUrl           String?
+  retentionDays       Int?
+  installedDate       DateTime?
+  lastSyncAt          DateTime?
+  notes               String?
+  createdById         String?
+  createdBy           User?                   @relation("SecurityCameraCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
 
   createdAt DateTime @default(now())
 }

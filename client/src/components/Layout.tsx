@@ -114,6 +114,7 @@ export default function Layout() {
         ? [
             { to: "/visitors", label: t("visitors.nav") },
             { to: "/permits-to-work", label: t("permitToWork.nav") },
+            { to: "/security", label: t("security.nav") },
           ]
         : [],
     },

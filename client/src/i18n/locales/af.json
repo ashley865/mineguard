@@ -472,7 +472,12 @@
       "NON_COMPLIANT": "Voldoen nie",
       "NOT_APPLICABLE": "Nie van toepassing nie",
       "AWAITING_VERIFICATION": "Wag vir verifikasie",
-      "VERIFIED": "Geverifieer"
+      "VERIFIED": "Geverifieer",
+      "ONLINE": "Aanlyn",
+      "OFFLINE": "Vanlyn",
+      "DECOMMISSIONED": "Buite diens gestel",
+      "CONNECTED": "Gekoppel",
+      "DISCONNECTED": "Ontkoppel"
     },
     "severity": {
       "LOW": "Laag",
@@ -2145,5 +2150,50 @@
     "LIMESTONE": "Kalksteen",
     "SAND_AND_AGGREGATE": "Sand en Aggregaat",
     "OTHER": "Ander"
+  },
+  "security": {
+    "nav": "Sekuriteit",
+    "subtitle": "Fisiese sekuriteitsinfrastruktuur vir hierdie myn.",
+    "tabCctv": "CCTV & Toesig",
+    "cctv": {
+      "subtitle": "Kamerainventaris en, waar die terrein se VMS/CCTV-verskaffer dit tegnies ondersteun, MineGuard se integrasie met daardie bestaande stelsel.",
+      "new": "+ Nuwe Kamera",
+      "newTitle": "Nuwe Kamera",
+      "editTitle": "Wysig Kamera",
+      "name": "Kameranaam",
+      "location": "Ligging",
+      "cameraType": "Kameratipe",
+      "cameraTypes": {
+        "FIXED": "Vas",
+        "PTZ": "PTZ (Pan-Tilt-Zoom)",
+        "DOME": "Koepel",
+        "THERMAL": "Termies",
+        "BODY_WORN": "Liggaamsgedra",
+        "DRONE": "Dromel",
+        "OTHER": "Ander"
+      },
+      "coverageDescription": "Dekking / wat hierdie kamera dophou",
+      "coverageDescriptionPlaceholder": "bv. Plofstofmagasyn se omtrek, hoofhek-slagboom",
+      "vmsSectionTitle": "VMS-/CCTV-stelselintegrasie",
+      "vmsSectionHint": "As hierdie kamera op 'n bestaande VMS/CCTV-stelsel is, teken dit hier aan sodat MineGuard kan integreer waar dit tegnies ondersteun word. Laat die integrasiemetode as \"Nie geïntegreer nie\" as dit slegs deur sy inheemse stelsel gemonitor word.",
+      "vmsProvider": "VMS-/CCTV-verskaffer",
+      "vmsProviderPlaceholder": "bv. Milestone XProtect, Hikvision iVMS, Genetec",
+      "integrationMethod": "Integrasiemetode",
+      "integrationMethods": {
+        "ONVIF": "ONVIF",
+        "RTSP_STREAM": "RTSP-stroom",
+        "VENDOR_API": "Verskaffer-API",
+        "NVR_EXPORT": "NVR-uitvoer",
+        "NOT_INTEGRATED": "Nie geïntegreer nie"
+      },
+      "streamUrl": "Stroom-/API-URL",
+      "retentionDays": "Opnamebehoud (dae)",
+      "installedDate": "Installeringsdatum",
+      "colName": "Kamera",
+      "colVms": "VMS-integrasie",
+      "syncNow": "Sinkroniseer nou",
+      "noneYet": "Nog geen kameras aangeteken nie.",
+      "confirmDelete": "Verwyder hierdie kamera?"
+    }
   }
 }

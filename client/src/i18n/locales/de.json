@@ -472,7 +472,12 @@
       "NON_COMPLIANT": "Nicht konform",
       "NOT_APPLICABLE": "Nicht zutreffend",
       "AWAITING_VERIFICATION": "Wartet auf Verifizierung",
-      "VERIFIED": "Verifiziert"
+      "VERIFIED": "Verifiziert",
+      "ONLINE": "Online",
+      "OFFLINE": "Offline",
+      "DECOMMISSIONED": "Außer Betrieb",
+      "CONNECTED": "Verbunden",
+      "DISCONNECTED": "Getrennt"
     },
     "severity": {
       "LOW": "Niedrig",
@@ -2145,5 +2150,50 @@
     "LIMESTONE": "Kalkstein",
     "SAND_AND_AGGREGATE": "Sand und Gesteinskörnung",
     "OTHER": "Sonstiges"
+  },
+  "security": {
+    "nav": "Sicherheit",
+    "subtitle": "Physische Sicherheitsinfrastruktur für diese Mine.",
+    "tabCctv": "Videoüberwachung (CCTV)",
+    "cctv": {
+      "subtitle": "Kamerabestand und, sofern vom VMS-/CCTV-Anbieter des Standorts technisch unterstützt, die Integration von MineGuard in dieses bestehende System.",
+      "new": "+ Neue Kamera",
+      "newTitle": "Neue Kamera",
+      "editTitle": "Kamera Bearbeiten",
+      "name": "Kameraname",
+      "location": "Standort",
+      "cameraType": "Kameratyp",
+      "cameraTypes": {
+        "FIXED": "Fest",
+        "PTZ": "PTZ (Schwenk-Neige-Zoom)",
+        "DOME": "Dome",
+        "THERMAL": "Wärmebild",
+        "BODY_WORN": "Körperkamera",
+        "DRONE": "Drohne",
+        "OTHER": "Sonstiges"
+      },
+      "coverageDescription": "Abdeckung / was diese Kamera überwacht",
+      "coverageDescriptionPlaceholder": "z. B. Sprengstofflager-Perimeter, Hauptschranke",
+      "vmsSectionTitle": "VMS-/CCTV-Systemintegration",
+      "vmsSectionHint": "Wenn sich diese Kamera in einem bestehenden VMS-/CCTV-System befindet, erfassen Sie dies hier, damit MineGuard sich integrieren kann, wo dies technisch unterstützt wird. Belassen Sie die Integrationsmethode bei „Nicht integriert“, wenn sie ausschließlich über ihr natives System überwacht wird.",
+      "vmsProvider": "VMS-/CCTV-Anbieter",
+      "vmsProviderPlaceholder": "z. B. Milestone XProtect, Hikvision iVMS, Genetec",
+      "integrationMethod": "Integrationsmethode",
+      "integrationMethods": {
+        "ONVIF": "ONVIF",
+        "RTSP_STREAM": "RTSP-Stream",
+        "VENDOR_API": "Anbieter-API",
+        "NVR_EXPORT": "NVR-Export",
+        "NOT_INTEGRATED": "Nicht integriert"
+      },
+      "streamUrl": "Stream-/API-URL",
+      "retentionDays": "Aufbewahrung der Aufnahmen (Tage)",
+      "installedDate": "Installationsdatum",
+      "colName": "Kamera",
+      "colVms": "VMS-Integration",
+      "syncNow": "Jetzt synchronisieren",
+      "noneYet": "Noch keine Kameras erfasst.",
+      "confirmDelete": "Diese Kamera löschen?"
+    }
   }
 }
