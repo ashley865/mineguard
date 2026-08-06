@@ -59,9 +59,9 @@ router.use(requireAuth);
 router.get("/technicians", async (req, res) => {
   const mineId = requireMineId(req, res);
   if (!mineId) return;
-  const technicians = await prisma.user.findMany({
-    where: { mineId, role: { in: ["ADMIN", "SUPERVISOR", "EXECUTIVE"] } },
-    select: { id: true, name: true, role: true },
+  const technicians = await prisma.worker.findMany({
+    where: { site: { mineId } },
+    select: { id: true, name: true, employeeId: true },
     orderBy: { name: "asc" },
   });
   res.json(technicians);
@@ -92,7 +92,7 @@ router.post("/", requireRole("ADMIN", "SUPERVISOR", "EXECUTIVE"), async (req, re
   const equipment = await prisma.equipment.findFirst({ where: { id: parsed.data.equipmentId, site: { mineId } } });
   if (!equipment) return res.status(404).json({ error: "Equipment not found" });
   if (parsed.data.assignedToId) {
-    const technician = await prisma.user.findFirst({ where: { id: parsed.data.assignedToId, mineId } });
+    const technician = await prisma.worker.findFirst({ where: { id: parsed.data.assignedToId, site: { mineId } } });
     if (!technician) return res.status(404).json({ error: "Assigned technician not found" });
   }
   const schedule = await prisma.maintenanceSchedule.create({
@@ -110,7 +110,7 @@ router.put("/:id", requireRole("ADMIN", "SUPERVISOR", "EXECUTIVE"), async (req, 
   const existing = await prisma.maintenanceSchedule.findFirst({ where: { id: req.params.id, equipment: { site: { mineId } } } });
   if (!existing) return res.status(404).json({ error: "Maintenance schedule not found" });
   if (parsed.data.assignedToId) {
-    const technician = await prisma.user.findFirst({ where: { id: parsed.data.assignedToId, mineId } });
+    const technician = await prisma.worker.findFirst({ where: { id: parsed.data.assignedToId, site: { mineId } } });
     if (!technician) return res.status(404).json({ error: "Assigned technician not found" });
   }
   const schedule = await prisma.maintenanceSchedule.update({ where: { id: existing.id }, data: parsed.data, select: scheduleSelect });

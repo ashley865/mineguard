@@ -1,6 +1,7 @@
-import { Router } from "express";
+import { Router, Request, Response } from "express";
 import multer from "multer";
 import { z } from "zod";
+import { ExecutiveTitle } from "@prisma/client";
 import { prisma } from "../prisma";
 import { requireAuth, requireRole } from "../middleware/auth";
 import { documentFileFilter } from "../lib/uploadFilters";
@@ -8,6 +9,24 @@ import { requireMineId } from "../lib/mineScope";
 import { renderExpensesReportHtml } from "../lib/expensesReportHtml";
 
 const router = Router();
+
+// Every expense, regardless of who logs it, needs sign-off from Finance before it's
+// considered paid — mirrors FINANCE_AUDIENCE in reports.ts.
+const EXPENSE_APPROVAL_AUDIENCE: ExecutiveTitle[] = ["CFO", "GENERAL_MANAGER", "COO"];
+
+async function requireExpenseApprovalAccess(req: Request, res: Response): Promise<boolean> {
+  if (req.auth!.role === "ADMIN") return true;
+  if (req.auth!.role !== "EXECUTIVE") {
+    res.status(403).json({ error: "Insufficient permissions" });
+    return false;
+  }
+  const me = await prisma.user.findUnique({ where: { id: req.auth!.userId }, select: { title: true } });
+  if (!me?.title || !EXPENSE_APPROVAL_AUDIENCE.includes(me.title)) {
+    res.status(403).json({ error: "Insufficient permissions" });
+    return false;
+  }
+  return true;
+}
 
 const upload = multer({
   storage: multer.memoryStorage(),
@@ -39,9 +58,15 @@ const expenseSchema = z.object({
   currency: z.string().optional(),
   expenseDate: z.coerce.date().optional(),
   paymentMethod: z.enum(["EFT", "CASH", "CHEQUE", "CARD", "OTHER"]).optional(),
-  status: z.enum(["PENDING", "PAID", "CANCELLED"]).optional(),
   referenceNumber: z.string().optional(),
   notes: z.string().optional(),
+});
+
+// Status can only change via the /review endpoint below, not through the general
+// create/update form — that's what makes CFO approval mandatory rather than advisory.
+const expenseReviewSchema = z.object({
+  decision: z.enum(["PAID", "CANCELLED"]),
+  note: z.string().optional(),
 });
 
 const expenseSelect = {
@@ -58,6 +83,9 @@ const expenseSelect = {
   expenseDate: true,
   paymentMethod: true,
   status: true,
+  reviewedBy: { select: { id: true, name: true } },
+  reviewedAt: true,
+  reviewNote: true,
   referenceNumber: true,
   notes: true,
   documentId: true,
@@ -285,6 +313,30 @@ router.put("/:id", requireRole("ADMIN", "SUPERVISOR", "EXECUTIVE"), upload.singl
   const expense = await prisma.expense.update({
     where: { id: existing.id },
     data: { ...parsed.data, documentId },
+    select: expenseSelect,
+  });
+  res.json(expense);
+});
+
+router.post("/:id/review", async (req, res) => {
+  const mineId = requireMineId(req, res);
+  if (!mineId) return;
+  if (!(await requireExpenseApprovalAccess(req, res))) return;
+  const parsed = expenseReviewSchema.safeParse(req.body);
+  if (!parsed.success) return res.status(400).json({ error: parsed.error.flatten() });
+  const existing = await prisma.expense.findFirst({ where: { id: req.params.id, site: { mineId } } });
+  if (!existing) return res.status(404).json({ error: "Expense not found" });
+  if (existing.status !== "PENDING") {
+    return res.status(409).json({ error: "This expense has already been reviewed" });
+  }
+  const expense = await prisma.expense.update({
+    where: { id: existing.id },
+    data: {
+      status: parsed.data.decision,
+      reviewedById: req.auth!.userId,
+      reviewedAt: new Date(),
+      reviewNote: parsed.data.note || undefined,
+    },
     select: expenseSelect,
   });
   res.json(expense);

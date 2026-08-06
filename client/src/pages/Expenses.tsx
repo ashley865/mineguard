@@ -28,7 +28,6 @@ const expenseCategories: ExpenseCategory[] = [
   "TAXES_LEVIES",
   "OTHER",
 ];
-const expenseStatuses: ExpenseStatus[] = ["PENDING", "PAID", "CANCELLED"];
 const paymentMethods: PaymentMethod[] = ["EFT", "CASH", "CHEQUE", "CARD", "OTHER"];
 const payeeTypes: PayeeType[] = ["COMPANY", "INDIVIDUAL", "BUYER", "CONTRACTOR"];
 
@@ -49,7 +48,6 @@ function ExpenseForm({ sites, payees, onSubmit, onCancel }: {
   const [amount, setAmount] = useState("");
   const [expenseDate, setExpenseDate] = useState(new Date().toISOString().slice(0, 10));
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("EFT");
-  const [status, setStatus] = useState<ExpenseStatus>("PAID");
   const [referenceNumber, setReferenceNumber] = useState("");
   const [notes, setNotes] = useState("");
   const [receipt, setReceipt] = useState<File | null>(null);
@@ -70,7 +68,6 @@ function ExpenseForm({ sites, payees, onSubmit, onCancel }: {
       form.append("amount", amount);
       form.append("expenseDate", expenseDate);
       form.append("paymentMethod", paymentMethod);
-      form.append("status", status);
       if (referenceNumber) form.append("referenceNumber", referenceNumber);
       if (notes) form.append("notes", notes);
       if (receipt) form.append("receipt", receipt);
@@ -126,17 +123,11 @@ function ExpenseForm({ sites, payees, onSubmit, onCancel }: {
           <DateField value={expenseDate} onChange={setExpenseDate} required />
         </div>
       </div>
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         <div>
           <label className={labelClass}>{t("expenses.paymentMethod")}</label>
           <select className={selectClass} value={paymentMethod} onChange={(e) => setPaymentMethod(e.target.value as PaymentMethod)}>
             {paymentMethods.map((m) => <option key={m} value={m}>{t(`expenses.paymentMethods.${m}`)}</option>)}
-          </select>
-        </div>
-        <div>
-          <label className={labelClass}>{t("common.status")}</label>
-          <select className={selectClass} value={status} onChange={(e) => setStatus(e.target.value as ExpenseStatus)}>
-            {expenseStatuses.map((s) => <option key={s} value={s}>{t(`badges.status.${s}`)}</option>)}
           </select>
         </div>
         <div>
@@ -152,6 +143,7 @@ function ExpenseForm({ sites, payees, onSubmit, onCancel }: {
         <label className={labelClass}>{t("common.notes")}</label>
         <textarea className={inputClass} rows={2} value={notes} onChange={(e) => setNotes(e.target.value)} />
       </div>
+      <p className="text-xs text-mine-400">{t("expenses.pendingApprovalHint")}</p>
       {error && <div className="text-danger-500 text-xs">{error}</div>}
       <div className="flex justify-end gap-2 pt-2">
         <button type="button" className={buttonSecondary} onClick={onCancel}>{t("common.cancel")}</button>
@@ -279,6 +271,9 @@ export default function Expenses() {
   const navigate = useNavigate();
   const canEdit = user?.role === "ADMIN" || user?.role === "SUPERVISOR" || user?.role === "EXECUTIVE";
   const canDelete = user?.role === "ADMIN" || user?.role === "EXECUTIVE";
+  const canApprove =
+    user?.role === "ADMIN" ||
+    (user?.role === "EXECUTIVE" && (user?.title === "CFO" || user?.title === "GENERAL_MANAGER" || user?.title === "COO"));
   const [tab, setTab] = useState<TabKey>("expenses");
   const [expenses, setExpenses] = useState<Expense[]>([]);
   const [payees, setPayees] = useState<Payee[]>([]);
@@ -317,6 +312,17 @@ export default function Expenses() {
   async function removeExpense(id: string) {
     if (!confirm(t("expenses.confirmDelete"))) return;
     await api.delete(`/expenses/${id}`);
+    await load();
+  }
+
+  async function reviewExpense(id: string, decision: Extract<ExpenseStatus, "PAID" | "CANCELLED">) {
+    if (decision === "PAID") {
+      if (!confirm(t("expenses.confirmApprove"))) return;
+      await api.post(`/expenses/${id}/review`, { decision });
+    } else {
+      const note = window.prompt(t("expenses.rejectReasonPrompt") ?? "") ?? undefined;
+      await api.post(`/expenses/${id}/review`, { decision, note });
+    }
     await load();
   }
 
@@ -502,6 +508,16 @@ export default function Expenses() {
                           >
                             {t("expenses.viewReceipt")}
                           </a>
+                        )}
+                        {canApprove && ex.status === "PENDING" && (
+                          <>
+                            <button className={`${buttonPrimary} text-xs px-3 py-1`} onClick={() => reviewExpense(ex.id, "PAID")}>
+                              {t("expenses.approve")}
+                            </button>
+                            <button className={`${buttonSecondary} text-xs px-3 py-1`} onClick={() => reviewExpense(ex.id, "CANCELLED")}>
+                              {t("expenses.reject")}
+                            </button>
+                          </>
                         )}
                         {canDelete && (
                           <button className={buttonDanger} onClick={() => removeExpense(ex.id)}>{t("common.delete")}</button>

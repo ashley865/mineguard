@@ -146,6 +146,24 @@ export default function WorkerProfileModal({
               </div>
             </SectionCard>
 
+            <SectionCard title={t("workers.assignedEquipment")}>
+              {profile.assignedEquipment.length === 0 ? (
+                <div className="text-mine-400 text-xs">{t("workers.noAssignedEquipment")}</div>
+              ) : (
+                <div className="space-y-1">
+                  {profile.assignedEquipment.map((eq) => (
+                    <div key={eq.id} className="flex items-center justify-between text-xs border-t border-mine-800 pt-1">
+                      <span>{eq.name} <span className="text-mine-400">({t(`equipment.types.${eq.type}`)})</span></span>
+                      <div className="flex items-center gap-2">
+                        <span className="text-mine-400">{eq.site?.name}</span>
+                        <StatusBadge status={eq.status} />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </SectionCard>
+
             <SectionCard title={t("workers.recentAttendance")}>
               <div className="space-y-1 max-h-32 overflow-y-auto">
                 {profile.recentAttendance.length === 0 && <div className="text-mine-400 text-xs">{t("workers.noAttendance")}</div>}

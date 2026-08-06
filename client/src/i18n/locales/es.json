@@ -335,7 +335,9 @@
     "colHoursWeek": "Horas (Sem.)",
     "showingCount": "{{count}} trabajadores",
     "manager": "Gerente",
-    "noManager": "Sin gerente asignado"
+    "noManager": "Sin gerente asignado",
+    "assignedEquipment": "Equipo Asignado",
+    "noAssignedEquipment": "No hay equipo asignado a este trabajador."
   },
   "equipment": {
     "title": "Equipos",
@@ -353,7 +355,25 @@
     "newEquipmentTitle": "Nuevo Equipo",
     "editEquipmentTitle": "Editar Equipo",
     "confirmDelete": "¿Eliminar este registro de equipo?",
-    "loading": "Cargando equipos…"
+    "loading": "Cargando equipos…",
+    "assignedOperator": "Operador asignado",
+    "types": {
+      "EXCAVATOR": "Excavadora",
+      "HAUL_TRUCK": "Camión Minero",
+      "DRILL_RIG": "Perforadora",
+      "LOADER": "Cargadora",
+      "DOZER": "Topadora",
+      "GRADER": "Motoniveladora",
+      "CRUSHER": "Trituradora",
+      "CONVEYOR": "Transportador",
+      "GENERATOR": "Generador",
+      "PUMP": "Bomba",
+      "VENTILATION_FAN": "Ventilador",
+      "COMPRESSOR": "Compresor",
+      "WINCH": "Cabrestante",
+      "CRANE": "Grúa",
+      "OTHER": "Otro"
+    }
   },
   "incidents": {
     "title": "Incidentes",
@@ -1462,7 +1482,22 @@
     "waste": "Estéril",
     "gradeAndRecovery": "Ley y Recuperación",
     "byShift": "Producción por Turno",
-    "bySection": "Producción por Pozo / Rampa / Sección"
+    "bySection": "Producción por Pozo / Rampa / Sección",
+    "oreGradeUnit": "Unidad de ley del mineral",
+    "oreGradeUnits": {
+      "PERCENT": "Porcentaje (%)",
+      "GRAMS_PER_TONNE": "Gramos por Tonelada (g/t)",
+      "OUNCES_PER_TONNE": "Onzas por Tonelada (oz/t)",
+      "CARATS_PER_TONNE": "Quilates por Tonelada (ct/t)",
+      "PARTS_PER_MILLION": "Partes por Millón (ppm)"
+    },
+    "oreGradeUnitsShort": {
+      "PERCENT": "%",
+      "GRAMS_PER_TONNE": "g/t",
+      "OUNCES_PER_TONNE": "oz/t",
+      "CARATS_PER_TONNE": "ct/t",
+      "PARTS_PER_MILLION": "ppm"
+    }
   },
   "maintenance": {
     "nav": "Programación de Mantenimiento",
@@ -1582,7 +1617,21 @@
     "poByStatus": "Órdenes de Compra por Estado",
     "pendingApproval": "Pendiente de Aprobación",
     "suppliersByStatus": "Proveedores por Estado",
-    "totalSuppliers": "Total de Proveedores"
+    "totalSuppliers": "Total de Proveedores",
+    "units": {
+      "KILOGRAMS": "Kilogramos",
+      "TONNES": "Toneladas",
+      "LITRES": "Litros",
+      "METERS": "Metros",
+      "PIECES": "Piezas",
+      "BOXES": "Cajas",
+      "PAIRS": "Pares",
+      "ROLLS": "Rollos",
+      "DRUMS": "Tambores",
+      "BAGS": "Bolsas",
+      "SETS": "Conjuntos",
+      "OTHER": "Otro"
+    }
   },
   "weather": {
     "nav": "Monitoreo del Clima",
@@ -1962,7 +2011,12 @@
     },
     "totalCosts": "Costos Totales",
     "costsBySource": "Costos por Origen",
-    "exportPdf": "Exportar Informe PDF"
+    "exportPdf": "Exportar Informe PDF",
+    "pendingApprovalHint": "Este gasto se enviará a Finanzas (CFO) para su aprobación antes de marcarse como pagado.",
+    "approve": "Aprobar",
+    "reject": "Rechazar",
+    "confirmApprove": "¿Aprobar este gasto para su pago?",
+    "rejectReasonPrompt": "Motivo del rechazo de este gasto (opcional):"
   },
   "executiveRequests": {
     "nav": "Solicitudes",

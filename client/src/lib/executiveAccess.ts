@@ -103,7 +103,6 @@ export const executiveTitleModules: Partial<Record<ExecutiveTitle, RestrictedMod
     "/incidents",
     "/reporting",
     "/marketplace",
-    "/tenders",
     "/safety-observations",
     "/environmental",
   ],

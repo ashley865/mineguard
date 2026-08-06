@@ -39,10 +39,16 @@ export async function requireAuth(req: Request, res: Response, next: NextFunctio
     // user's very next request instead of waiting out the token's lifetime.
     const user = await prisma.user.findUnique({
       where: { id: userId },
-      select: { id: true, role: true, mineId: true },
+      select: { id: true, role: true, mineId: true, isActive: true },
     });
     if (!user) {
       return res.status(401).json({ error: "Invalid or expired token" });
+    }
+    // A banned account (isActive: false) is rejected immediately on its very next
+    // request, the same way a role/mine change takes effect without waiting for the
+    // token to expire — a removed executive can't keep using an already-issued token.
+    if (!user.isActive) {
+      return res.status(403).json({ error: "This account has been deactivated" });
     }
     req.auth = { userId: user.id, role: user.role, mineId: user.mineId };
     next();

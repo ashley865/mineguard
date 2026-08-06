@@ -21,6 +21,9 @@ const CONTRACT_AUDIENCE: ExecutiveTitle[] = ["GENERAL_MANAGER", "COO", "OPERATIO
 const INVOICE_AUDIENCE: ExecutiveTitle[] = ["CFO", "GENERAL_MANAGER"];
 // Executive titles who own procurement / purchase order approvals.
 const ORDER_AUDIENCE: ExecutiveTitle[] = ["GENERAL_MANAGER", "COO", "OPERATIONS_MANAGER", "CFO"];
+// Executive titles who own sign-off on logged expenses before they're paid.
+const EXPENSE_APPROVAL_AUDIENCE: ExecutiveTitle[] = ["CFO", "GENERAL_MANAGER", "COO"];
+const EXPENSE_PENDING_NOTICE_DAYS = 3;
 
 function daysFromNow(date: Date): number {
   return Math.ceil((date.getTime() - Date.now()) / (1000 * 60 * 60 * 24));
@@ -41,8 +44,9 @@ router.get("/", async (req, res) => {
   const seesContracts = role === "ADMIN" || (role === "EXECUTIVE" && !!title && CONTRACT_AUDIENCE.includes(title));
   const seesInvoices = role === "ADMIN" || (role === "EXECUTIVE" && !!title && INVOICE_AUDIENCE.includes(title));
   const seesOrders = role === "ADMIN" || (role === "EXECUTIVE" && !!title && ORDER_AUDIENCE.includes(title));
+  const seesExpenseApprovals = role === "ADMIN" || (role === "EXECUTIVE" && !!title && EXPENSE_APPROVAL_AUDIENCE.includes(title));
 
-  const [reviewedAlerts, reviewedIncidents, certificates, trainingRecords, contractors, invoices, orders] = await Promise.all([
+  const [reviewedAlerts, reviewedIncidents, certificates, trainingRecords, contractors, invoices, orders, pendingExpenses] = await Promise.all([
     prisma.alert.findMany({
       where: { reviewStatus: { in: ["APPROVED", "REJECTED"] }, site: { mineId } },
       include: {
@@ -89,6 +93,12 @@ router.get("/", async (req, res) => {
       ? prisma.purchaseOrder.findMany({
           where: { status: { in: ["SUBMITTED", "APPROVED"] }, site: { mineId } },
           include: { supplier: { select: { name: true } }, site: { select: { id: true, name: true } } },
+        })
+      : Promise.resolve([]),
+    seesExpenseApprovals
+      ? prisma.expense.findMany({
+          where: { status: "PENDING", site: { mineId } },
+          include: { site: { select: { id: true, name: true } }, payee: { select: { name: true } } },
         })
       : Promise.resolve([]),
   ]);
@@ -180,6 +190,20 @@ router.get("/", async (req, res) => {
       site: o.site,
     }));
 
+  const expenseApprovalItems = pendingExpenses
+    .map((e) => ({ e, ageDays: Math.floor((Date.now() - e.createdAt.getTime()) / 86400000) }))
+    .filter(({ ageDays }) => ageDays >= EXPENSE_PENDING_NOTICE_DAYS)
+    .map(({ e, ageDays }) => ({
+      id: `expense-${e.id}`,
+      kind: "expense" as const,
+      entityId: e.id,
+      title: `Expense ${e.expenseNumber} — ${e.payee.name} (${e.currency} ${Math.round(e.amount).toLocaleString()}, ${ageDays}d awaiting approval)`,
+      severity: (ageDays >= 14 ? "HIGH" : ageDays >= 7 ? "MEDIUM" : "LOW") as "HIGH" | "MEDIUM" | "LOW",
+      reviewStatus: "OVERDUE" as const,
+      reviewedAt: new Date(e.createdAt.getTime() + EXPENSE_PENDING_NOTICE_DAYS * 86400000),
+      site: e.site,
+    }));
+
   const items = [
     ...reviewedAlerts.map((a) => ({
       id: `alert-${a.id}`,
@@ -207,6 +231,7 @@ router.get("/", async (req, res) => {
     ...contractItems,
     ...invoiceItems,
     ...orderItems,
+    ...expenseApprovalItems,
   ]
     .filter((item) => item.reviewedAt)
     .sort((a, b) => new Date(b.reviewedAt!).getTime() - new Date(a.reviewedAt!).getTime())

@@ -258,7 +258,7 @@ router.get("/:id/profile", async (req, res) => {
 
   const yearStart = new Date(new Date().getFullYear(), 0, 1);
 
-  const [attendance90, attendance30, certificates, trainingRecords, medicalRecords, leaveRequests, payslips] = await Promise.all([
+  const [attendance90, attendance30, certificates, trainingRecords, medicalRecords, leaveRequests, payslips, assignedEquipment] = await Promise.all([
     prisma.workerAttendance.findMany({
       where: { workerId: worker.id, checkInAt: { gte: since90 } },
       orderBy: { checkInAt: "desc" },
@@ -286,6 +286,11 @@ router.get("/:id/profile", async (req, res) => {
       },
       orderBy: { payPeriodEnd: "desc" },
       take: 12,
+    }),
+    prisma.equipment.findMany({
+      where: { assignedOperatorId: worker.id },
+      select: { id: true, name: true, type: true, status: true, site: { select: { id: true, name: true } } },
+      orderBy: { name: "asc" },
     }),
   ]);
 
@@ -333,6 +338,7 @@ router.get("/:id/profile", async (req, res) => {
     leaveDaysByType,
     recentLeaveRequests: leaveRequests.slice(0, 10),
     payslips,
+    assignedEquipment,
   });
 });
 

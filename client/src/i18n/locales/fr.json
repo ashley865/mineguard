@@ -335,7 +335,9 @@
     "colHoursWeek": "Heures (Sem.)",
     "showingCount": "{{count}} travailleurs",
     "manager": "Responsable",
-    "noManager": "Aucun responsable assigné"
+    "noManager": "Aucun responsable assigné",
+    "assignedEquipment": "Équipement Assigné",
+    "noAssignedEquipment": "Aucun équipement assigné à ce travailleur."
   },
   "equipment": {
     "title": "Équipements",
@@ -353,7 +355,25 @@
     "newEquipmentTitle": "Nouvel équipement",
     "editEquipmentTitle": "Modifier l'équipement",
     "confirmDelete": "Supprimer cette fiche d'équipement ?",
-    "loading": "Chargement des équipements…"
+    "loading": "Chargement des équipements…",
+    "assignedOperator": "Opérateur assigné",
+    "types": {
+      "EXCAVATOR": "Excavatrice",
+      "HAUL_TRUCK": "Camion Minier",
+      "DRILL_RIG": "Foreuse",
+      "LOADER": "Chargeuse",
+      "DOZER": "Bulldozer",
+      "GRADER": "Niveleuse",
+      "CRUSHER": "Concasseur",
+      "CONVEYOR": "Convoyeur",
+      "GENERATOR": "Générateur",
+      "PUMP": "Pompe",
+      "VENTILATION_FAN": "Ventilateur",
+      "COMPRESSOR": "Compresseur",
+      "WINCH": "Treuil",
+      "CRANE": "Grue",
+      "OTHER": "Autre"
+    }
   },
   "incidents": {
     "title": "Incidents",
@@ -1462,7 +1482,22 @@
     "waste": "Stérile",
     "gradeAndRecovery": "Teneur & Récupération",
     "byShift": "Production par Poste",
-    "bySection": "Production par Puits / Galerie / Section"
+    "bySection": "Production par Puits / Galerie / Section",
+    "oreGradeUnit": "Unité de teneur",
+    "oreGradeUnits": {
+      "PERCENT": "Pourcentage (%)",
+      "GRAMS_PER_TONNE": "Grammes par Tonne (g/t)",
+      "OUNCES_PER_TONNE": "Onces par Tonne (oz/t)",
+      "CARATS_PER_TONNE": "Carats par Tonne (ct/t)",
+      "PARTS_PER_MILLION": "Parties par Million (ppm)"
+    },
+    "oreGradeUnitsShort": {
+      "PERCENT": "%",
+      "GRAMS_PER_TONNE": "g/t",
+      "OUNCES_PER_TONNE": "oz/t",
+      "CARATS_PER_TONNE": "ct/t",
+      "PARTS_PER_MILLION": "ppm"
+    }
   },
   "maintenance": {
     "nav": "Planification de Maintenance",
@@ -1582,7 +1617,21 @@
     "poByStatus": "Bons de Commande par Statut",
     "pendingApproval": "En Attente d'Approbation",
     "suppliersByStatus": "Fournisseurs par Statut",
-    "totalSuppliers": "Total des Fournisseurs"
+    "totalSuppliers": "Total des Fournisseurs",
+    "units": {
+      "KILOGRAMS": "Kilogrammes",
+      "TONNES": "Tonnes",
+      "LITRES": "Litres",
+      "METERS": "Mètres",
+      "PIECES": "Pièces",
+      "BOXES": "Boîtes",
+      "PAIRS": "Paires",
+      "ROLLS": "Rouleaux",
+      "DRUMS": "Fûts",
+      "BAGS": "Sacs",
+      "SETS": "Ensembles",
+      "OTHER": "Autre"
+    }
   },
   "weather": {
     "nav": "Surveillance Météorologique",
@@ -1962,7 +2011,12 @@
     },
     "totalCosts": "Coûts Totaux",
     "costsBySource": "Coûts par Source",
-    "exportPdf": "Exporter le Rapport PDF"
+    "exportPdf": "Exporter le Rapport PDF",
+    "pendingApprovalHint": "Cette dépense sera envoyée aux Finances (CFO) pour approbation avant d'être marquée comme payée.",
+    "approve": "Approuver",
+    "reject": "Rejeter",
+    "confirmApprove": "Approuver cette dépense pour paiement ?",
+    "rejectReasonPrompt": "Raison du rejet de cette dépense (facultatif) :"
   },
   "executiveRequests": {
     "nav": "Demandes",

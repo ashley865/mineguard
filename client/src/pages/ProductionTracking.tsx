@@ -2,7 +2,7 @@ import { FormEvent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { api } from "../api/client";
 import { useAuth } from "../context/AuthContext";
-import { MineralType, ProductionRecord, ProductionShift, Site, Zone } from "../api/types";
+import { MineralType, OreGradeUnit, ProductionRecord, ProductionShift, Site, Zone } from "../api/types";
 import Modal from "../components/Modal";
 import { buttonDanger, buttonPrimary, buttonSecondary, cardClass, inputClass, labelClass, selectClass } from "../components/ui";
 import DateField from "../components/DateField";
@@ -10,6 +10,7 @@ import FinancialPerformanceTab from "./production/FinancialPerformanceTab";
 import { mineralTypes } from "../lib/minerals";
 
 const shifts: ProductionShift[] = ["DAY", "AFTERNOON", "NIGHT"];
+const oreGradeUnits: OreGradeUnit[] = ["PERCENT", "GRAMS_PER_TONNE", "OUNCES_PER_TONNE", "CARATS_PER_TONNE", "PARTS_PER_MILLION"];
 type TabKey = "records" | "financial";
 
 function ProductionForm({ sites, zones, initial, onSubmit, onCancel }: {
@@ -28,6 +29,7 @@ function ProductionForm({ sites, zones, initial, onSubmit, onCancel }: {
   const [tonnesMined, setTonnesMined] = useState(initial?.tonnesMined?.toString() ?? "");
   const [tonnesProcessed, setTonnesProcessed] = useState(initial?.tonnesProcessed?.toString() ?? "");
   const [oreGrade, setOreGrade] = useState(initial?.oreGrade?.toString() ?? "");
+  const [oreGradeUnit, setOreGradeUnit] = useState<OreGradeUnit>(initial?.oreGradeUnit ?? "GRAMS_PER_TONNE");
   const [recoveryRate, setRecoveryRate] = useState(initial?.recoveryRate?.toString() ?? "");
   const [wasteRemoved, setWasteRemoved] = useState(initial?.wasteRemoved?.toString() ?? "");
   const [targetTonnes, setTargetTonnes] = useState(initial?.targetTonnes?.toString() ?? "");
@@ -49,6 +51,7 @@ function ProductionForm({ sites, zones, initial, onSubmit, onCancel }: {
         tonnesMined: Number(tonnesMined),
         tonnesProcessed: tonnesProcessed ? Number(tonnesProcessed) : null,
         oreGrade: oreGrade ? Number(oreGrade) : null,
+        oreGradeUnit: oreGrade ? oreGradeUnit : null,
         recoveryRate: recoveryRate ? Number(recoveryRate) : null,
         wasteRemoved: wasteRemoved ? Number(wasteRemoved) : null,
         targetTonnes: targetTonnes ? Number(targetTonnes) : null,
@@ -108,18 +111,26 @@ function ProductionForm({ sites, zones, initial, onSubmit, onCancel }: {
           <input className={inputClass} type="number" step="any" value={tonnesProcessed} onChange={(e) => setTonnesProcessed(e.target.value)} />
         </div>
       </div>
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         <div>
           <label className={labelClass}>{t("production.wasteRemoved")}</label>
           <input className={inputClass} type="number" step="any" value={wasteRemoved} onChange={(e) => setWasteRemoved(e.target.value)} />
         </div>
         <div>
+          <label className={labelClass}>{t("production.recoveryRate")}</label>
+          <input className={inputClass} type="number" step="any" min="0" max="100" value={recoveryRate} onChange={(e) => setRecoveryRate(e.target.value)} />
+        </div>
+      </div>
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <div>
           <label className={labelClass}>{t("production.oreGrade")}</label>
           <input className={inputClass} type="number" step="any" value={oreGrade} onChange={(e) => setOreGrade(e.target.value)} />
         </div>
         <div>
-          <label className={labelClass}>{t("production.recoveryRate")}</label>
-          <input className={inputClass} type="number" step="any" min="0" max="100" value={recoveryRate} onChange={(e) => setRecoveryRate(e.target.value)} />
+          <label className={labelClass}>{t("production.oreGradeUnit")}</label>
+          <select className={selectClass} value={oreGradeUnit} onChange={(e) => setOreGradeUnit(e.target.value as OreGradeUnit)}>
+            {oreGradeUnits.map((u) => <option key={u} value={u}>{t(`production.oreGradeUnits.${u}`)}</option>)}
+          </select>
         </div>
       </div>
       <div>
@@ -241,7 +252,9 @@ export default function ProductionTracking() {
                   {r.tonnesMined.toLocaleString()}{r.targetTonnes ? ` / ${r.targetTonnes.toLocaleString()}` : ""}
                 </td>
                 <td className="px-4 py-2 text-mine-300">{r.tonnesProcessed?.toLocaleString() ?? "—"}</td>
-                <td className="px-4 py-2 text-mine-300">{r.oreGrade ?? "—"}</td>
+                <td className="px-4 py-2 text-mine-300">
+                  {r.oreGrade != null ? `${r.oreGrade} ${r.oreGradeUnit ? t(`production.oreGradeUnitsShort.${r.oreGradeUnit}`) : ""}` : "—"}
+                </td>
                 <td className="px-4 py-2 text-mine-300">{r.recoveryRate != null ? `${r.recoveryRate}%` : "—"}</td>
                 <td className="px-4 py-2 text-right">
                   <div className="flex justify-end gap-2">

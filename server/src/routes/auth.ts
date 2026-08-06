@@ -91,6 +91,9 @@ router.post("/login", authLimiter, async (req, res) => {
   if (!valid) {
     return res.status(401).json({ error: "Invalid email or password" });
   }
+  if (!user.isActive) {
+    return res.status(403).json({ error: "This account has been deactivated. Contact your mine owner for access." });
+  }
 
   // Executives are clocked in automatically the moment they log in, rather than
   // relying on them to remember to use the header clock-in widget themselves.
@@ -206,10 +209,11 @@ router.get("/team", requireAuth, async (req, res) => {
   );
 });
 
-// Revokes an executive's access rather than deleting their account: their historical
-// records (reviewed alerts, incidents, messages, etc.) stay intact, they're just demoted
-// to VIEWER and lose their title and site assignments. Requires re-confirming the admin's
-// own password, matching the pattern used for other irreversible admin actions.
+// Revokes an executive's access AND bans the account from logging back in at all —
+// not even as a viewer. Their historical records (reviewed alerts, incidents, messages,
+// etc.) stay intact since the account isn't deleted, just deactivated. Requires
+// re-confirming the admin's own password, matching the pattern used for other
+// irreversible admin actions.
 router.post("/team/:id/remove-executive", requireAuth, requireRole("ADMIN"), async (req, res) => {
   const parsed = removeExecutiveSchema.safeParse(req.body);
   if (!parsed.success) return res.status(400).json({ error: parsed.error.flatten() });
@@ -223,7 +227,7 @@ router.post("/team/:id/remove-executive", requireAuth, requireRole("ADMIN"), asy
 
   await prisma.$transaction([
     prisma.executiveSiteAssignment.deleteMany({ where: { userId: target.id } }),
-    prisma.user.update({ where: { id: target.id }, data: { role: "VIEWER", title: null } }),
+    prisma.user.update({ where: { id: target.id }, data: { role: "VIEWER", title: null, isActive: false } }),
   ]);
   res.status(204).send();
 });

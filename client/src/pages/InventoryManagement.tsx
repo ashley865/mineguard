@@ -2,7 +2,7 @@ import { FormEvent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { api } from "../api/client";
 import { useAuth } from "../context/AuthContext";
-import { InventoryCategory, InventoryItem, InventoryMovement, InventoryMovementDirection, Site } from "../api/types";
+import { InventoryCategory, InventoryItem, InventoryMovement, InventoryMovementDirection, InventoryUnit, Site } from "../api/types";
 import Modal from "../components/Modal";
 import { buttonDanger, buttonPrimary, buttonSecondary, cardClass, inputClass, labelClass, selectClass } from "../components/ui";
 
@@ -13,6 +13,21 @@ const inventoryCategories: InventoryCategory[] = [
   "LUBRICANTS",
   "CRITICAL_COMPONENT",
   "WAREHOUSE_STOCK",
+  "OTHER",
+];
+
+const inventoryUnits: InventoryUnit[] = [
+  "KILOGRAMS",
+  "TONNES",
+  "LITRES",
+  "METERS",
+  "PIECES",
+  "BOXES",
+  "PAIRS",
+  "ROLLS",
+  "DRUMS",
+  "BAGS",
+  "SETS",
   "OTHER",
 ];
 
@@ -29,7 +44,7 @@ function ItemForm({ sites, initial, onSubmit, onCancel }: {
   const [category, setCategory] = useState<InventoryCategory | "">(initial?.category ?? "");
   const [quantityOnHand, setQuantityOnHand] = useState(initial?.quantityOnHand?.toString() ?? "0");
   const [reorderPoint, setReorderPoint] = useState(initial?.reorderPoint?.toString() ?? "");
-  const [unit, setUnit] = useState(initial?.unit ?? "");
+  const [unit, setUnit] = useState<InventoryUnit>(initial?.unit ?? "PIECES");
   const [unitCost, setUnitCost] = useState(initial?.unitCost?.toString() ?? "");
   const [supplier, setSupplier] = useState(initial?.supplier ?? "");
   const [location, setLocation] = useState(initial?.location ?? "");
@@ -84,7 +99,9 @@ function ItemForm({ sites, initial, onSubmit, onCancel }: {
         </div>
         <div>
           <label className={labelClass}>{t("inventory.unit")}</label>
-          <input className={inputClass} value={unit} onChange={(e) => setUnit(e.target.value)} required />
+          <select className={selectClass} value={unit} onChange={(e) => setUnit(e.target.value as InventoryUnit)}>
+            {inventoryUnits.map((u) => <option key={u} value={u}>{t(`inventory.units.${u}`)}</option>)}
+          </select>
         </div>
       </div>
       <div className="grid grid-cols-2 gap-3">
@@ -189,7 +206,7 @@ function MovementsModal({ item, onClose, onChanged }: { item: InventoryItem; onC
           {movements.map((m) => (
             <div key={m.id} className="flex items-center justify-between text-xs border-t border-mine-800 pt-1.5">
               <span className={m.direction === "IN" ? "text-success-500" : "text-danger-500"}>
-                {m.direction === "IN" ? "+" : "-"}{m.quantity} {item.unit}
+                {m.direction === "IN" ? "+" : "-"}{m.quantity} {t(`inventory.units.${item.unit}`)}
               </span>
               <span className="text-mine-400">{m.reason ?? "—"}</span>
               <span className="text-mine-400">{m.performedBy?.name}</span>
@@ -301,7 +318,7 @@ export default function InventoryManagement() {
                   <td className="px-4 py-2 text-mine-300">{item.site?.name}</td>
                   <td className="px-4 py-2 text-mine-300">{item.category ? t(`inventory.categories.${item.category}`) : t("inventory.uncategorized")}</td>
                   <td className={`px-4 py-2 ${low ? "text-danger-500 font-semibold" : "text-mine-300"}`}>
-                    {item.quantityOnHand} {item.unit}
+                    {item.quantityOnHand} {t(`inventory.units.${item.unit}`)}
                   </td>
                   <td className="px-4 py-2 text-mine-300">{item.reorderPoint ?? "—"}</td>
                   <td className="px-4 py-2 text-right">

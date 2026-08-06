@@ -292,6 +292,7 @@ export interface WorkerProfile {
     Payslip,
     "id" | "payPeriodStart" | "payPeriodEnd" | "grossPay" | "deductions" | "netPay" | "issuedAt" | "fileName" | "fileMimeType"
   >[];
+  assignedEquipment: { id: string; name: string; type: EquipmentType; status: EquipmentStatus; site?: { id: string; name: string } }[];
 }
 
 export type IncidentStatus = "OPEN" | "INVESTIGATING" | "RESOLVED";
@@ -316,17 +317,35 @@ export interface Incident {
 }
 
 export type EquipmentStatus = "OPERATIONAL" | "MAINTENANCE" | "DOWN";
+export type EquipmentType =
+  | "EXCAVATOR"
+  | "HAUL_TRUCK"
+  | "DRILL_RIG"
+  | "LOADER"
+  | "DOZER"
+  | "GRADER"
+  | "CRUSHER"
+  | "CONVEYOR"
+  | "GENERATOR"
+  | "PUMP"
+  | "VENTILATION_FAN"
+  | "COMPRESSOR"
+  | "WINCH"
+  | "CRANE"
+  | "OTHER";
 
 export interface Equipment {
   id: string;
   name: string;
-  type: string;
+  type: EquipmentType;
   status: EquipmentStatus;
   siteId: string;
   site?: { id: string; name: string };
   zoneId?: string | null;
   zone?: { id: string; name: string } | null;
   lastMaintenance?: string | null;
+  assignedOperatorId?: string | null;
+  assignedOperator?: { id: string; name: string; employeeId: string } | null;
 }
 
 export interface DashboardSummary {
@@ -1075,6 +1094,7 @@ export interface ProductionRecord {
   tonnesMined: number;
   tonnesProcessed?: number | null;
   oreGrade?: number | null;
+  oreGradeUnit?: OreGradeUnit | null;
   recoveryRate?: number | null;
   wasteRemoved?: number | null;
   targetTonnes?: number | null;
@@ -1082,6 +1102,8 @@ export interface ProductionRecord {
   recordedBy?: { id: string; name: string } | null;
   createdAt: string;
 }
+
+export type OreGradeUnit = "PERCENT" | "GRAMS_PER_TONNE" | "OUNCES_PER_TONNE" | "CARATS_PER_TONNE" | "PARTS_PER_MILLION";
 
 export interface ProductionAnalyticsPoint {
   period: string;
@@ -1114,7 +1136,7 @@ export type MaintenanceScheduleStatus = "SCHEDULED" | "IN_PROGRESS" | "COMPLETED
 export interface MaintenancePartUsed {
   id: string;
   quantity: number;
-  inventoryItem?: { id: string; name: string; unit: string };
+  inventoryItem?: { id: string; name: string; unit: InventoryUnit };
   createdAt: string;
 }
 
@@ -1175,6 +1197,20 @@ export type InventoryCategory =
   | "WAREHOUSE_STOCK"
   | "OTHER";
 
+export type InventoryUnit =
+  | "KILOGRAMS"
+  | "TONNES"
+  | "LITRES"
+  | "METERS"
+  | "PIECES"
+  | "BOXES"
+  | "PAIRS"
+  | "ROLLS"
+  | "DRUMS"
+  | "BAGS"
+  | "SETS"
+  | "OTHER";
+
 export interface InventoryItem {
   id: string;
   siteId: string;
@@ -1184,7 +1220,7 @@ export interface InventoryItem {
   category?: InventoryCategory | null;
   quantityOnHand: number;
   reorderPoint?: number | null;
-  unit: string;
+  unit: InventoryUnit;
   unitCost?: number | null;
   supplier?: string | null;
   location?: string | null;
@@ -1225,7 +1261,7 @@ export type InventoryMovementDirection = "IN" | "OUT";
 export interface InventoryMovement {
   id: string;
   itemId: string;
-  item?: { id: string; name: string; unit: string };
+  item?: { id: string; name: string; unit: InventoryUnit };
   direction: InventoryMovementDirection;
   quantity: number;
   reason?: string | null;
@@ -1598,6 +1634,9 @@ export interface Expense {
   expenseDate: string;
   paymentMethod: PaymentMethod;
   status: ExpenseStatus;
+  reviewedBy?: { id: string; name: string } | null;
+  reviewedAt?: string | null;
+  reviewNote?: string | null;
   referenceNumber?: string | null;
   notes?: string | null;
   documentId?: string | null;

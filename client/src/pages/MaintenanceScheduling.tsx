@@ -169,7 +169,7 @@ function PartsUsedModal({ schedule, inventoryItems, onClose, onChanged }: {
               <select className={selectClass} value={itemId} onChange={(e) => setItemId(e.target.value)}>
                 {inventoryItems.map((item) => (
                   <option key={item.id} value={item.id}>
-                    {item.name} ({item.quantityOnHand} {item.unit} {t("maintenance.inStock")})
+                    {item.name} ({item.quantityOnHand} {t(`inventory.units.${item.unit}`)} {t("maintenance.inStock")})
                   </option>
                 ))}
               </select>
@@ -190,7 +190,7 @@ function PartsUsedModal({ schedule, inventoryItems, onClose, onChanged }: {
           {(schedule.partsConsumed ?? []).map((p) => (
             <div key={p.id} className="flex items-center justify-between text-xs border-t border-mine-800 pt-1.5">
               <span>{p.inventoryItem?.name}</span>
-              <span className="text-mine-300">{p.quantity} {p.inventoryItem?.unit}</span>
+              <span className="text-mine-300">{p.quantity} {p.inventoryItem?.unit ? t(`inventory.units.${p.inventoryItem.unit}`) : ""}</span>
               <button className={buttonDanger} onClick={() => removePart(p.id)}>{t("common.delete")}</button>
             </div>
           ))}

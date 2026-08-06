@@ -335,7 +335,9 @@
     "colHoursWeek": "Ure (Wk)",
     "showingCount": "{{count}} werkers",
     "manager": "Bestuurder",
-    "noManager": "Geen bestuurder toegeken nie"
+    "noManager": "Geen bestuurder toegeken nie",
+    "assignedEquipment": "Toegewese Toerusting",
+    "noAssignedEquipment": "Geen toerusting aan hierdie werker toegewys nie."
   },
   "equipment": {
     "title": "Toerusting",
@@ -353,7 +355,25 @@
     "newEquipmentTitle": "Nuwe Toerusting",
     "editEquipmentTitle": "Wysig Toerusting",
     "confirmDelete": "Verwyder hierdie toerustingrekord?",
-    "loading": "Laai toerusting tans…"
+    "loading": "Laai toerusting tans…",
+    "assignedOperator": "Toegewese operateur",
+    "types": {
+      "EXCAVATOR": "Grafmasjien",
+      "HAUL_TRUCK": "Vragmotor",
+      "DRILL_RIG": "Boorrig",
+      "LOADER": "Laaigraaf",
+      "DOZER": "Grondskraper",
+      "GRADER": "Grader",
+      "CRUSHER": "Vergruiser",
+      "CONVEYOR": "Vervoerband",
+      "GENERATOR": "Generator",
+      "PUMP": "Pomp",
+      "VENTILATION_FAN": "Ventilasiewaaier",
+      "COMPRESSOR": "Kompressor",
+      "WINCH": "Windas",
+      "CRANE": "Hyskraan",
+      "OTHER": "Ander"
+    }
   },
   "incidents": {
     "title": "Voorvalle",
@@ -1462,7 +1482,22 @@
     "waste": "Afval",
     "gradeAndRecovery": "Graad & Herwinning",
     "byShift": "Produksie volgens Skof",
-    "bySection": "Produksie volgens Skag / Put / Afdeling"
+    "bySection": "Produksie volgens Skag / Put / Afdeling",
+    "oreGradeUnit": "Ertsgraad-eenheid",
+    "oreGradeUnits": {
+      "PERCENT": "Persent (%)",
+      "GRAMS_PER_TONNE": "Gram per Ton (g/t)",
+      "OUNCES_PER_TONNE": "Onse per Ton (oz/t)",
+      "CARATS_PER_TONNE": "Karaat per Ton (ct/t)",
+      "PARTS_PER_MILLION": "Dele per Miljoen (ppm)"
+    },
+    "oreGradeUnitsShort": {
+      "PERCENT": "%",
+      "GRAMS_PER_TONNE": "g/t",
+      "OUNCES_PER_TONNE": "oz/t",
+      "CARATS_PER_TONNE": "ct/t",
+      "PARTS_PER_MILLION": "ppm"
+    }
   },
   "maintenance": {
     "nav": "Onderhoudskedulering",
@@ -1582,7 +1617,21 @@
     "poByStatus": "Bestelordes volgens Status",
     "pendingApproval": "Wag op Goedkeuring",
     "suppliersByStatus": "Verskaffers volgens Status",
-    "totalSuppliers": "Totale Verskaffers"
+    "totalSuppliers": "Totale Verskaffers",
+    "units": {
+      "KILOGRAMS": "Kilogram",
+      "TONNES": "Ton",
+      "LITRES": "Liter",
+      "METERS": "Meter",
+      "PIECES": "Stukke",
+      "BOXES": "Bokse",
+      "PAIRS": "Pare",
+      "ROLLS": "Rolle",
+      "DRUMS": "Dromme",
+      "BAGS": "Sakke",
+      "SETS": "Stelle",
+      "OTHER": "Ander"
+    }
   },
   "weather": {
     "nav": "Weermonitering",
@@ -1962,7 +2011,12 @@
     },
     "totalCosts": "Totale Koste",
     "costsBySource": "Koste volgens Bron",
-    "exportPdf": "Voer PDF-verslag Uit"
+    "exportPdf": "Voer PDF-verslag Uit",
+    "pendingApprovalHint": "Hierdie uitgawe sal na Finansies (CFO) gestuur word vir goedkeuring voordat dit as betaal gemerk word.",
+    "approve": "Keur goed",
+    "reject": "Verwerp",
+    "confirmApprove": "Keur hierdie uitgawe goed vir betaling?",
+    "rejectReasonPrompt": "Rede vir verwerping van hierdie uitgawe (opsioneel):"
   },
   "executiveRequests": {
     "nav": "Versoeke",

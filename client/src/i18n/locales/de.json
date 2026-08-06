@@ -335,7 +335,9 @@
     "colHoursWeek": "Stunden (Wo.)",
     "showingCount": "{{count}} Arbeiter",
     "manager": "Vorgesetzter",
-    "noManager": "Kein Vorgesetzter zugewiesen"
+    "noManager": "Kein Vorgesetzter zugewiesen",
+    "assignedEquipment": "Zugewiesene Ausrüstung",
+    "noAssignedEquipment": "Diesem Mitarbeiter ist keine Ausrüstung zugewiesen."
   },
   "equipment": {
     "title": "Ausrüstung",
@@ -353,7 +355,25 @@
     "newEquipmentTitle": "Neue Ausrüstung",
     "editEquipmentTitle": "Ausrüstung bearbeiten",
     "confirmDelete": "Diesen Ausrüstungsdatensatz entfernen?",
-    "loading": "Ausrüstung wird geladen…"
+    "loading": "Ausrüstung wird geladen…",
+    "assignedOperator": "Zugewiesener Bediener",
+    "types": {
+      "EXCAVATOR": "Bagger",
+      "HAUL_TRUCK": "Muldenkipper",
+      "DRILL_RIG": "Bohrgerät",
+      "LOADER": "Radlader",
+      "DOZER": "Planierraupe",
+      "GRADER": "Grader",
+      "CRUSHER": "Brecher",
+      "CONVEYOR": "Förderband",
+      "GENERATOR": "Generator",
+      "PUMP": "Pumpe",
+      "VENTILATION_FAN": "Belüftungsventilator",
+      "COMPRESSOR": "Kompressor",
+      "WINCH": "Winde",
+      "CRANE": "Kran",
+      "OTHER": "Sonstiges"
+    }
   },
   "incidents": {
     "title": "Vorfälle",
@@ -1462,7 +1482,22 @@
     "waste": "Abraum",
     "gradeAndRecovery": "Gehalt & Ausbeute",
     "byShift": "Produktion nach Schicht",
-    "bySection": "Produktion nach Schacht / Grube / Abschnitt"
+    "bySection": "Produktion nach Schacht / Grube / Abschnitt",
+    "oreGradeUnit": "Erzgehalt-Einheit",
+    "oreGradeUnits": {
+      "PERCENT": "Prozent (%)",
+      "GRAMS_PER_TONNE": "Gramm pro Tonne (g/t)",
+      "OUNCES_PER_TONNE": "Unzen pro Tonne (oz/t)",
+      "CARATS_PER_TONNE": "Karat pro Tonne (ct/t)",
+      "PARTS_PER_MILLION": "Teile pro Million (ppm)"
+    },
+    "oreGradeUnitsShort": {
+      "PERCENT": "%",
+      "GRAMS_PER_TONNE": "g/t",
+      "OUNCES_PER_TONNE": "oz/t",
+      "CARATS_PER_TONNE": "ct/t",
+      "PARTS_PER_MILLION": "ppm"
+    }
   },
   "maintenance": {
     "nav": "Wartungsplanung",
@@ -1582,7 +1617,21 @@
     "poByStatus": "Bestellungen nach Status",
     "pendingApproval": "Ausstehende Genehmigung",
     "suppliersByStatus": "Lieferanten nach Status",
-    "totalSuppliers": "Lieferanten Gesamt"
+    "totalSuppliers": "Lieferanten Gesamt",
+    "units": {
+      "KILOGRAMS": "Kilogramm",
+      "TONNES": "Tonnen",
+      "LITRES": "Liter",
+      "METERS": "Meter",
+      "PIECES": "Stück",
+      "BOXES": "Kartons",
+      "PAIRS": "Paare",
+      "ROLLS": "Rollen",
+      "DRUMS": "Fässer",
+      "BAGS": "Säcke",
+      "SETS": "Sets",
+      "OTHER": "Sonstiges"
+    }
   },
   "weather": {
     "nav": "Wetterüberwachung",
@@ -1962,7 +2011,12 @@
     },
     "totalCosts": "Gesamtkosten",
     "costsBySource": "Kosten nach Quelle",
-    "exportPdf": "PDF-Bericht Exportieren"
+    "exportPdf": "PDF-Bericht Exportieren",
+    "pendingApprovalHint": "Diese Ausgabe wird zur Genehmigung an die Finanzabteilung (CFO) gesendet, bevor sie als bezahlt markiert wird.",
+    "approve": "Genehmigen",
+    "reject": "Ablehnen",
+    "confirmApprove": "Diese Ausgabe zur Zahlung genehmigen?",
+    "rejectReasonPrompt": "Grund für die Ablehnung dieser Ausgabe (optional):"
   },
   "executiveRequests": {
     "nav": "Anfragen",

@@ -16,6 +16,21 @@ const inventoryCategoryEnum = z.enum([
   "OTHER",
 ]);
 
+const inventoryUnitEnum = z.enum([
+  "KILOGRAMS",
+  "TONNES",
+  "LITRES",
+  "METERS",
+  "PIECES",
+  "BOXES",
+  "PAIRS",
+  "ROLLS",
+  "DRUMS",
+  "BAGS",
+  "SETS",
+  "OTHER",
+]);
+
 const itemSchema = z.object({
   siteId: z.string().min(1),
   partNumber: z.string().optional(),
@@ -23,7 +38,7 @@ const itemSchema = z.object({
   category: inventoryCategoryEnum.optional().nullable(),
   quantityOnHand: z.coerce.number().optional(),
   reorderPoint: z.coerce.number().optional().nullable(),
-  unit: z.string().min(1),
+  unit: inventoryUnitEnum,
   unitCost: z.coerce.number().optional().nullable(),
   supplier: z.string().optional(),
   location: z.string().optional(),

@@ -171,6 +171,9 @@ model User {
   title        ExecutiveTitle?
   photoData    Bytes?
   photoMimeType String?
+  // Set to false when an owner removes an executive: blocks login entirely rather than
+  // just demoting the role, so a removed executive can't fall back to viewer access.
+  isActive     Boolean         @default(true)
   createdAt    DateTime        @default(now())
 
   mineId String?
@@ -195,7 +198,6 @@ model User {
   postedContracts        ContractOpportunity[]
   productionRecords      ProductionRecord[]     @relation("ProductionRecordedBy")
   maintenanceSchedules   MaintenanceSchedule[]  @relation("MaintenanceCreatedBy")
-  maintenanceAssignments MaintenanceSchedule[]  @relation("MaintenanceAssignedTo")
   requirementsCreated    ComplianceRequirement[] @relation("RequirementCreatedBy")
   requirementsResponsibleFor ComplianceRequirement[] @relation("RequirementResponsiblePerson")
   fleetPositions         FleetPosition[]        @relation("FleetPositionRecordedBy")
@@ -213,6 +215,7 @@ model User {
   invoicesCreated        Invoice[]               @relation("InvoiceCreatedBy")
   payeesCreated          Payee[]                 @relation("PayeeCreatedBy")
   expensesCreated        Expense[]               @relation("ExpenseCreatedBy")
+  expensesReviewed       Expense[]               @relation("ExpenseReviewedBy")
   evacuationsTriggered   EmergencyEvacuation[]   @relation("EvacuationTriggeredBy")
   evacuationsCancelled   EmergencyEvacuation[]   @relation("EvacuationCancelledBy")
   attendance             UserAttendance[]
@@ -407,6 +410,8 @@ model Worker {
   leaveRequests   LeaveRequest[]
   payslips        Payslip[]
   payee           Payee?
+  assignedEquipment      Equipment[]           @relation("EquipmentAssignedOperator")
+  maintenanceAssignments MaintenanceSchedule[] @relation("MaintenanceAssignedToWorker")
 
   createdAt DateTime @default(now())
 }
@@ -444,16 +449,36 @@ model Incident {
   resolvedAt DateTime?
 }
 
+enum EquipmentType {
+  EXCAVATOR
+  HAUL_TRUCK
+  DRILL_RIG
+  LOADER
+  DOZER
+  GRADER
+  CRUSHER
+  CONVEYOR
+  GENERATOR
+  PUMP
+  VENTILATION_FAN
+  COMPRESSOR
+  WINCH
+  CRANE
+  OTHER
+}
+
 model Equipment {
   id              String          @id @default(cuid())
   name            String
-  type            String
+  type            EquipmentType
   status          EquipmentStatus @default(OPERATIONAL)
   siteId          String
   site            Site            @relation(fields: [siteId], references: [id], onDelete: Cascade)
   zoneId          String?
   zone            Zone?           @relation(fields: [zoneId], references: [id], onDelete: SetNull)
   lastMaintenance DateTime?
+  assignedOperatorId String?
+  assignedOperator    Worker?     @relation("EquipmentAssignedOperator", fields: [assignedOperatorId], references: [id], onDelete: SetNull)
 
   maintenanceSchedules MaintenanceSchedule[]
 
@@ -1362,6 +1387,16 @@ enum ProductionShift {
   NIGHT
 }
 
+// Grade is meaningless without a unit: gold/PGMs are conventionally reported in g/t,
+// diamonds in carats/t, base metals often in %, trace elements in ppm.
+enum OreGradeUnit {
+  PERCENT
+  GRAMS_PER_TONNE
+  OUNCES_PER_TONNE
+  CARATS_PER_TONNE
+  PARTS_PER_MILLION
+}
+
 model ProductionRecord {
   id            String          @id @default(cuid())
   siteId        String
@@ -1374,6 +1409,7 @@ model ProductionRecord {
   tonnesMined     Float
   tonnesProcessed Float?
   oreGrade        Float?
+  oreGradeUnit    OreGradeUnit?
   recoveryRate    Float?
   wasteRemoved    Float?
   targetTonnes    Float?
@@ -1408,7 +1444,9 @@ model MaintenanceSchedule {
   scheduledDate   DateTime
   completedDate   DateTime?
   assignedToId    String?
-  assignedTo      User?                      @relation("MaintenanceAssignedTo", fields: [assignedToId], references: [id], onDelete: SetNull)
+  // Repairs are assigned to a technician on the workforce roster (Worker), not an
+  // executive/admin login account — mirrors who's actually turning the wrench.
+  assignedTo      Worker?                    @relation("MaintenanceAssignedToWorker", fields: [assignedToId], references: [id], onDelete: SetNull)
   status          MaintenanceScheduleStatus  @default(SCHEDULED)
   // How long production/equipment was actually down for this event, and why — this is
   // the operations-manager-facing "why did production stop" record, distinct from
@@ -1468,6 +1506,21 @@ enum InventoryCategory {
   OTHER
 }
 
+enum InventoryUnit {
+  KILOGRAMS
+  TONNES
+  LITRES
+  METERS
+  PIECES
+  BOXES
+  PAIRS
+  ROLLS
+  DRUMS
+  BAGS
+  SETS
+  OTHER
+}
+
 model InventoryItem {
   id             String             @id @default(cuid())
   siteId         String
@@ -1477,7 +1530,7 @@ model InventoryItem {
   category       InventoryCategory?
   quantityOnHand Float              @default(0)
   reorderPoint   Float?
-  unit           String
+  unit           InventoryUnit
   unitCost       Float?
   supplier       String?
   location       String?
@@ -2052,7 +2105,14 @@ model Expense {
   currency       String          @default("ZAR")
   expenseDate    DateTime        @default(now())
   paymentMethod  PaymentMethod   @default(EFT)
-  status         ExpenseStatus   @default(PAID)
+  // Every expense starts PENDING, regardless of who logs it, and can only move to
+  // PAID/CANCELLED via the dedicated CFO-gated review endpoint — logging an expense is
+  // not the same as approving it for payment.
+  status         ExpenseStatus   @default(PENDING)
+  reviewedById   String?
+  reviewedBy     User?           @relation("ExpenseReviewedBy", fields: [reviewedById], references: [id], onDelete: SetNull)
+  reviewedAt     DateTime?
+  reviewNote     String?
   referenceNumber String?
   notes          String?
   documentId     String?
