@@ -1,6 +1,7 @@
-import { Router } from "express";
+import { Router, Request } from "express";
 import multer from "multer";
 import { z } from "zod";
+import { ExecutiveTitle } from "@prisma/client";
 import { prisma } from "../prisma";
 import { requireAuth, requireRole } from "../middleware/auth";
 import { verifyAdminPassword } from "../lib/verifyPassword";
@@ -8,6 +9,23 @@ import { controlledDocumentFileFilter } from "../lib/uploadFilters";
 import { requireMineId } from "../lib/mineScope";
 
 const router = Router();
+
+// POPIA: personal information about a specific worker or buyer (ID copies, certificates,
+// FICA/KYC files) is only shown to the executive titles whose department has a genuine
+// need for it — not to every executive who happens to have Document Vault access.
+const WORKER_SENSITIVE_AUDIENCE: ExecutiveTitle[] = ["HR_MANAGER", "COMPLIANCE_OFFICER", "GENERAL_MANAGER", "COO"];
+const BUYER_SENSITIVE_AUDIENCE: ExecutiveTitle[] = ["COMPLIANCE_OFFICER", "CFO", "GENERAL_MANAGER", "COO"];
+const VISITOR_SENSITIVE_AUDIENCE: ExecutiveTitle[] = ["SECURITY_MANAGER", "COMPLIANCE_OFFICER", "GENERAL_MANAGER", "COO"];
+
+async function getRequesterTitle(req: Request): Promise<ExecutiveTitle | null> {
+  if (req.auth!.role !== "EXECUTIVE") return null;
+  const me = await prisma.user.findUnique({ where: { id: req.auth!.userId }, select: { title: true } });
+  return me?.title ?? null;
+}
+
+function inAudience(role: string, title: ExecutiveTitle | null, audience: ExecutiveTitle[]): boolean {
+  return role === "ADMIN" || (role === "EXECUTIVE" && !!title && audience.includes(title));
+}
 
 const upload = multer({
   storage: multer.memoryStorage(),
@@ -64,8 +82,14 @@ router.get("/", async (req, res) => {
   const mineId = requireMineId(req, res);
   if (!mineId) return;
   const siteId = req.query.siteId as string | undefined;
+  const title = await getRequesterTitle(req);
+  const canSeeSensitive = inAudience(req.auth!.role, title, WORKER_SENSITIVE_AUDIENCE);
   const items = await prisma.document.findMany({
-    where: { mineId, siteId: siteId || undefined },
+    where: {
+      mineId,
+      siteId: siteId || undefined,
+      type: canSeeSensitive ? undefined : { not: "CERTIFICATE" },
+    },
     select: documentSelect,
     orderBy: { createdAt: "desc" },
   });
@@ -77,6 +101,12 @@ router.get("/:id/download", async (req, res) => {
   if (!mineId) return;
   const doc = await prisma.document.findFirst({ where: { id: req.params.id, mineId } });
   if (!doc) return res.status(404).json({ error: "Document not found" });
+  if (doc.type === "CERTIFICATE") {
+    const title = await getRequesterTitle(req);
+    if (!inAudience(req.auth!.role, title, WORKER_SENSITIVE_AUDIENCE)) {
+      return res.status(403).json({ error: "Insufficient permissions" });
+    }
+  }
   res.setHeader("Content-Type", doc.fileMimeType);
   res.setHeader("Content-Disposition", `attachment; filename="${encodeURIComponent(doc.fileName)}"`);
   res.send(Buffer.from(doc.fileData));
@@ -145,9 +175,14 @@ router.delete("/:id", requireRole("ADMIN"), async (req, res) => {
 router.get("/vault/all", async (req, res) => {
   const mineId = requireMineId(req, res);
   if (!mineId) return;
+  const title = await getRequesterTitle(req);
+  const canSeeWorkerSensitive = inAudience(req.auth!.role, title, WORKER_SENSITIVE_AUDIENCE);
+  const canSeeBuyerDocs = inAudience(req.auth!.role, title, BUYER_SENSITIVE_AUDIENCE);
+  const canSeeVisitorDocs = inAudience(req.auth!.role, title, VISITOR_SENSITIVE_AUDIENCE);
+
   const [documents, visitorDocs, buyerDocs, permitDocs, contractorDocs] = await Promise.all([
     prisma.document.findMany({
-      where: { mineId },
+      where: { mineId, type: canSeeWorkerSensitive ? undefined : { not: "CERTIFICATE" } },
       select: {
         id: true,
         title: true,
@@ -160,31 +195,35 @@ router.get("/vault/all", async (req, res) => {
         createdAt: true,
       },
     }),
-    prisma.visitorDocument.findMany({
-      where: { visitor: { site: { mineId } } },
-      select: {
-        id: true,
-        visitorId: true,
-        docType: true,
-        fileName: true,
-        fileMimeType: true,
-        fileSize: true,
-        visitor: { select: { fullName: true, site: { select: { id: true, name: true } } } },
-        createdAt: true,
-      },
-    }),
-    prisma.buyerDocument.findMany({
-      select: {
-        id: true,
-        buyerId: true,
-        docType: true,
-        fileName: true,
-        fileMimeType: true,
-        fileSize: true,
-        buyer: { select: { legalName: true } },
-        createdAt: true,
-      },
-    }),
+    canSeeVisitorDocs
+      ? prisma.visitorDocument.findMany({
+          where: { visitor: { site: { mineId } } },
+          select: {
+            id: true,
+            visitorId: true,
+            docType: true,
+            fileName: true,
+            fileMimeType: true,
+            fileSize: true,
+            visitor: { select: { fullName: true, site: { select: { id: true, name: true } } } },
+            createdAt: true,
+          },
+        })
+      : Promise.resolve([]),
+    canSeeBuyerDocs
+      ? prisma.buyerDocument.findMany({
+          select: {
+            id: true,
+            buyerId: true,
+            docType: true,
+            fileName: true,
+            fileMimeType: true,
+            fileSize: true,
+            buyer: { select: { legalName: true } },
+            createdAt: true,
+          },
+        })
+      : Promise.resolve([]),
     prisma.permitDocument.findMany({
       where: { permit: { site: { mineId } } },
       select: {

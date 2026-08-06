@@ -748,6 +748,32 @@
         "SKILLS_DEVELOPMENT": "Développement des Compétences",
         "OTHER": "Autre"
       }
+    },
+    "tabCompliance": "Conformité des Employés",
+    "compliance": {
+      "subtitle": "Les RH et le Responsable de la Conformité valident l'aptitude de chaque travailleur avant son affectation à une tâche.",
+      "new": "+ Nouvelle Évaluation",
+      "worker": "Travailleur",
+      "medicalFitness": "Aptitude médicale",
+      "notApplicable": "N/A",
+      "notes": "Notes",
+      "colWorker": "Travailleur",
+      "colChecks": "Vérifications",
+      "colMedicalFitness": "Aptitude Médicale",
+      "colAssessmentDate": "Date d'Évaluation",
+      "colAssessedBy": "Évalué Par",
+      "noneYet": "Aucune évaluation de conformité des employés enregistrée pour le moment.",
+      "confirmDelete": "Supprimer cette évaluation de conformité ?",
+      "newTitle": "Nouvelle Évaluation de Conformité des Employés",
+      "editTitle": "Modifier l'Évaluation de Conformité des Employés",
+      "fields": {
+        "isProperlyTrained": "Correctement formé",
+        "isCompetent": "Compétent",
+        "isCertified": "Certifié",
+        "isAuthorised": "Autorisé",
+        "isAssignedPermittedTasks": "Affecté à des tâches autorisées",
+        "isTrainingUpToDate": "À jour avec la formation requise"
+      }
     }
   },
   "documents": {
@@ -2016,7 +2042,8 @@
     "approve": "Approuver",
     "reject": "Rejeter",
     "confirmApprove": "Approuver cette dépense pour paiement ?",
-    "rejectReasonPrompt": "Raison du rejet de cette dépense (facultatif) :"
+    "rejectReasonPrompt": "Raison du rejet de cette dépense (facultatif) :",
+    "payslipLinked": "Paie"
   },
   "executiveRequests": {
     "nav": "Demandes",

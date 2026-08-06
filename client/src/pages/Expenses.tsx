@@ -492,7 +492,14 @@ export default function Expenses() {
                 {expenses.map((ex) => (
                   <tr key={ex.id} className="border-t border-mine-800 hover:bg-mine-800/30">
                     <td className="px-4 py-2 font-medium">{ex.expenseNumber}</td>
-                    <td className="px-4 py-2 text-mine-300">{ex.payee?.name}</td>
+                    <td className="px-4 py-2 text-mine-300">
+                      {ex.payee?.name}
+                      {ex.payslipId && (
+                        <span className="ml-2 text-[10px] uppercase tracking-wide text-mine-400 border border-mine-700 rounded px-1 py-0.5">
+                          {t("expenses.payslipLinked")}
+                        </span>
+                      )}
+                    </td>
                     <td className="px-4 py-2 text-mine-300">{t(`expenses.categories.${ex.category}`)}</td>
                     <td className="px-4 py-2 text-mine-300">{new Date(ex.expenseDate).toLocaleDateString()}</td>
                     <td className="px-4 py-2 text-mine-300">{ex.currency} {ex.amount.toLocaleString()}</td>

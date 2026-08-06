@@ -748,6 +748,32 @@
         "SKILLS_DEVELOPMENT": "Desarrollo de Habilidades",
         "OTHER": "Otro"
       }
+    },
+    "tabCompliance": "Cumplimiento del Empleado",
+    "compliance": {
+      "subtitle": "RR. HH. y el Oficial de Cumplimiento aprueban la preparación de cada trabajador antes de asignarlo a una tarea.",
+      "new": "+ Nueva Evaluación",
+      "worker": "Trabajador",
+      "medicalFitness": "Aptitud médica",
+      "notApplicable": "N/A",
+      "notes": "Notas",
+      "colWorker": "Trabajador",
+      "colChecks": "Verificaciones",
+      "colMedicalFitness": "Aptitud Médica",
+      "colAssessmentDate": "Fecha de Evaluación",
+      "colAssessedBy": "Evaluado Por",
+      "noneYet": "Aún no se han registrado evaluaciones de cumplimiento de empleados.",
+      "confirmDelete": "¿Eliminar esta evaluación de cumplimiento?",
+      "newTitle": "Nueva Evaluación de Cumplimiento del Empleado",
+      "editTitle": "Editar Evaluación de Cumplimiento del Empleado",
+      "fields": {
+        "isProperlyTrained": "Debidamente capacitado",
+        "isCompetent": "Competente",
+        "isCertified": "Certificado",
+        "isAuthorised": "Autorizado",
+        "isAssignedPermittedTasks": "Asignado a tareas permitidas",
+        "isTrainingUpToDate": "Al día con la capacitación requerida"
+      }
     }
   },
   "documents": {
@@ -2016,7 +2042,8 @@
     "approve": "Aprobar",
     "reject": "Rechazar",
     "confirmApprove": "¿Aprobar este gasto para su pago?",
-    "rejectReasonPrompt": "Motivo del rechazo de este gasto (opcional):"
+    "rejectReasonPrompt": "Motivo del rechazo de este gasto (opcional):",
+    "payslipLinked": "Nómina"
   },
   "executiveRequests": {
     "nav": "Solicitudes",

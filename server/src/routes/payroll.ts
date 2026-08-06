@@ -146,6 +146,30 @@ router.post("/payslips", requireRole("ADMIN", "SUPERVISOR", "EXECUTIVE"), upload
     },
     select: payslipSelect,
   });
+
+  // Every payslip also shows up in the expense ledger so payroll cost flows through the
+  // same CFO approval pipeline as any other expense, reusing the worker's auto-synced
+  // EMPLOYEE payee rather than creating a duplicate payee entry.
+  let payee = await prisma.payee.findFirst({ where: { workerId: worker.id, payeeType: "EMPLOYEE" } });
+  if (!payee) {
+    payee = await prisma.payee.create({ data: { mineId, payeeType: "EMPLOYEE", name: worker.name, workerId: worker.id } });
+  }
+  await prisma.expense.create({
+    data: {
+      siteId: worker.siteId,
+      payeeId: payee.id,
+      expenseNumber: `PS-${worker.employeeId}-${parsed.data.payPeriodEnd.toISOString().slice(0, 10)}`,
+      category: "SALARIES_WAGES",
+      description: `Payslip - ${worker.name} (${parsed.data.payPeriodStart.toISOString().slice(0, 10)} to ${parsed.data.payPeriodEnd.toISOString().slice(0, 10)})`,
+      amount: parsed.data.grossPay,
+      currency: "ZAR",
+      expenseDate: parsed.data.payPeriodEnd,
+      paymentMethod: "EFT",
+      payslipId: payslip.id,
+      createdById: req.auth!.userId,
+    },
+  });
+
   res.status(201).json(payslip);
 });
 

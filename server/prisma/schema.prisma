@@ -225,6 +225,7 @@ model User {
   messageGroupsCreated   MessageGroup[]          @relation("MessageGroupCreatedBy")
   messageGroupMemberships MessageGroupMember[]
   visitorApprovals       Visitor[]               @relation("VisitorApprovedBy")
+  complianceChecksAssessed EmployeeComplianceCheck[] @relation("EmployeeComplianceAssessedBy")
 }
 
 model UserAttendance {
@@ -404,6 +405,7 @@ model Worker {
   medicalRecords  MedicalSurveillance[]
   certificates    Certificate[]
   trainingRecords TrainingRecord[]
+  complianceChecks EmployeeComplianceCheck[]
   attendance      WorkerAttendance[]
   rosterAssignments   RosterAssignment[]
   trainingEnrollments TrainingEnrollment[]
@@ -741,6 +743,30 @@ model TrainingRecord {
   completionDate DateTime
   expiryDate     DateTime?
   provider       String
+
+  createdAt DateTime @default(now())
+}
+
+// Point-in-time compliance assessment for a worker, covering the checks HR and the
+// Compliance Officer must sign off before a worker may be assigned to a task: training,
+// competence, certification, authorisation, medical fitness, task assignment, and currency
+// of required training. Kept as an append-only history (like Certificate/TrainingRecord)
+// rather than a single mutable record per worker, so past assessments remain auditable.
+model EmployeeComplianceCheck {
+  id                       String         @id @default(cuid())
+  workerId                 String
+  worker                   Worker         @relation(fields: [workerId], references: [id], onDelete: Cascade)
+  isProperlyTrained        Boolean        @default(false)
+  isCompetent              Boolean        @default(false)
+  isCertified              Boolean        @default(false)
+  isAuthorised             Boolean        @default(false)
+  medicalFitness           FitnessResult?
+  isAssignedPermittedTasks Boolean        @default(false)
+  isTrainingUpToDate       Boolean        @default(false)
+  notes                    String?
+  assessmentDate           DateTime       @default(now())
+  assessedById             String?
+  assessedBy               User?          @relation("EmployeeComplianceAssessedBy", fields: [assessedById], references: [id], onDelete: SetNull)
 
   createdAt DateTime @default(now())
 }
@@ -1906,6 +1932,7 @@ model Payslip {
   fileData       Bytes?
   uploadedById   String?
   uploadedBy     User?    @relation("PayslipUploadedBy", fields: [uploadedById], references: [id], onDelete: SetNull)
+  expense        Expense?
 
   createdAt DateTime @default(now())
 }
@@ -2119,6 +2146,10 @@ model Expense {
   document       Document?       @relation(fields: [documentId], references: [id], onDelete: SetNull)
   createdById    String?
   createdBy      User?           @relation("ExpenseCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+  // Set when this expense was auto-generated from an issued payslip, so payroll costs
+  // flow through the same CFO approval pipeline as any other expense.
+  payslipId      String?         @unique
+  payslip        Payslip?        @relation(fields: [payslipId], references: [id], onDelete: Cascade)
 
   createdAt DateTime @default(now())
 }

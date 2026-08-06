@@ -748,6 +748,32 @@
         "SKILLS_DEVELOPMENT": "Vaardigheidsontwikkeling",
         "OTHER": "Ander"
       }
+    },
+    "tabCompliance": "Werknemernakoming",
+    "compliance": {
+      "subtitle": "MH en die Nakomingsbeampte teken elke werker se gereedheid af voordat hulle aan 'n taak toegewys word.",
+      "new": "+ Nuwe Assessering",
+      "worker": "Werker",
+      "medicalFitness": "Mediese geskiktheid",
+      "notApplicable": "N.v.t.",
+      "notes": "Notas",
+      "colWorker": "Werker",
+      "colChecks": "Toetse",
+      "colMedicalFitness": "Mediese Geskiktheid",
+      "colAssessmentDate": "Assesseringsdatum",
+      "colAssessedBy": "Geassesseer Deur",
+      "noneYet": "Nog geen werknemernakomingsassesserings aangeteken nie.",
+      "confirmDelete": "Verwyder hierdie nakomingsassessering?",
+      "newTitle": "Nuwe Werknemernakomingsassessering",
+      "editTitle": "Wysig Werknemernakomingsassessering",
+      "fields": {
+        "isProperlyTrained": "Behoorlik opgelei",
+        "isCompetent": "Bevoeg",
+        "isCertified": "Gesertifiseer",
+        "isAuthorised": "Gemagtig",
+        "isAssignedPermittedTasks": "Toegewys aan toegelate take",
+        "isTrainingUpToDate": "Op datum met vereiste opleiding"
+      }
     }
   },
   "documents": {
@@ -2016,7 +2042,8 @@
     "approve": "Keur goed",
     "reject": "Verwerp",
     "confirmApprove": "Keur hierdie uitgawe goed vir betaling?",
-    "rejectReasonPrompt": "Rede vir verwerping van hierdie uitgawe (opsioneel):"
+    "rejectReasonPrompt": "Rede vir verwerping van hierdie uitgawe (opsioneel):",
+    "payslipLinked": "Betaalstaat"
   },
   "executiveRequests": {
     "nav": "Versoeke",

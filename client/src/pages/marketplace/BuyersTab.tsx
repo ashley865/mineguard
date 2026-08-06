@@ -1,17 +1,21 @@
 import { FormEvent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { api } from "../../api/client";
-import { Buyer, BuyerDocumentType, BuyerStatus, BuyerType } from "../../api/types";
+import { Buyer, BuyerDocumentType, BuyerStatus, BuyerType, ExecutiveTitle } from "../../api/types";
 import { StatusBadge } from "../../components/Badges";
 import Modal from "../../components/Modal";
 import EntityDocumentsPanel from "../../components/EntityDocumentsPanel";
 import FileDropzone from "../../components/FileDropzone";
 import { isValidIdOrPassport } from "../../lib/saId";
+import { useAuth } from "../../context/AuthContext";
 import { buttonDanger, buttonPrimary, buttonSecondary, cardClass, inputClass, labelClass, selectClass } from "../../components/ui";
 
 const statusFilters: (BuyerStatus | "ALL")[] = ["ALL", "PENDING_REVIEW", "APPROVED", "REJECTED", "SUSPENDED"];
 const buyerDocTypes: BuyerDocumentType[] = ["ID_OR_REGISTRATION", "PROOF_OF_ADDRESS", "DEALER_LICENSE", "TAX_CLEARANCE", "OTHER"];
 const buyerTypes: BuyerType[] = ["INDIVIDUAL", "COMPANY", "TRUST", "PARTNERSHIP"];
+// POPIA: mirrors BUYER_DOCUMENT_AUDIENCE in server/src/routes/buyers.ts — only these
+// executive titles have a genuine compliance/financial need to see buyer FICA/KYC documents.
+const BUYER_DOCUMENT_AUDIENCE: ExecutiveTitle[] = ["COMPLIANCE_OFFICER", "CFO", "GENERAL_MANAGER", "COO"];
 
 function RegisterBuyerModal({ onClose, onRegistered }: { onClose: () => void; onRegistered: () => void }) {
   const { t } = useTranslation();
@@ -183,8 +187,11 @@ function RegisterBuyerModal({ onClose, onRegistered }: { onClose: () => void; on
 
 function BuyerDetailModal({ buyer, onClose, onReviewed }: { buyer: Buyer; onClose: () => void; onReviewed: () => void }) {
   const { t } = useTranslation();
+  const { user } = useAuth();
   const [note, setNote] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const canSeeDocuments =
+    user?.role === "ADMIN" || (user?.role === "EXECUTIVE" && !!user.title && BUYER_DOCUMENT_AUDIENCE.includes(user.title));
 
   async function review(decision: "APPROVED" | "REJECTED") {
     setSubmitting(true);
@@ -266,17 +273,19 @@ function BuyerDetailModal({ buyer, onClose, onReviewed }: { buyer: Buyer; onClos
           </div>
         </div>
 
-        <div>
-          <div className="text-xs font-semibold text-mine-300 uppercase mb-1">{t("buyerRegister.sectionDocuments")}</div>
-          <EntityDocumentsPanel
-            documents={buyer.documents}
-            docTypeOptions={buyerDocTypes}
-            docTypeI18nPrefix="documents.categoryLabels.BUYER"
-            onUpload={upload}
-            onDownload={download}
-            canUpload
-          />
-        </div>
+        {canSeeDocuments && (
+          <div>
+            <div className="text-xs font-semibold text-mine-300 uppercase mb-1">{t("buyerRegister.sectionDocuments")}</div>
+            <EntityDocumentsPanel
+              documents={buyer.documents}
+              docTypeOptions={buyerDocTypes}
+              docTypeI18nPrefix="documents.categoryLabels.BUYER"
+              onUpload={upload}
+              onDownload={download}
+              canUpload
+            />
+          </div>
+        )}
 
         {buyer.reviewNote && (
           <div className="text-xs text-mine-400 italic">{t("marketplace.reviewNote")}: "{buyer.reviewNote}"</div>

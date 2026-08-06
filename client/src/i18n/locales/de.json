@@ -748,6 +748,32 @@
         "SKILLS_DEVELOPMENT": "Kompetenzentwicklung",
         "OTHER": "Sonstiges"
       }
+    },
+    "tabCompliance": "Mitarbeiter-Compliance",
+    "compliance": {
+      "subtitle": "HR und der Compliance-Beauftragte bestätigen die Einsatzbereitschaft jedes Mitarbeiters, bevor er einer Aufgabe zugewiesen wird.",
+      "new": "+ Neue Bewertung",
+      "worker": "Mitarbeiter",
+      "medicalFitness": "Ärztliche Tauglichkeit",
+      "notApplicable": "N/A",
+      "notes": "Notizen",
+      "colWorker": "Mitarbeiter",
+      "colChecks": "Prüfungen",
+      "colMedicalFitness": "Ärztliche Tauglichkeit",
+      "colAssessmentDate": "Bewertungsdatum",
+      "colAssessedBy": "Bewertet Von",
+      "noneYet": "Noch keine Mitarbeiter-Compliance-Bewertungen erfasst.",
+      "confirmDelete": "Diese Compliance-Bewertung löschen?",
+      "newTitle": "Neue Mitarbeiter-Compliance-Bewertung",
+      "editTitle": "Mitarbeiter-Compliance-Bewertung Bearbeiten",
+      "fields": {
+        "isProperlyTrained": "Ordnungsgemäß geschult",
+        "isCompetent": "Kompetent",
+        "isCertified": "Zertifiziert",
+        "isAuthorised": "Befugt",
+        "isAssignedPermittedTasks": "Zulässigen Aufgaben zugewiesen",
+        "isTrainingUpToDate": "Erforderliche Schulung aktuell"
+      }
     }
   },
   "documents": {
@@ -2016,7 +2042,8 @@
     "approve": "Genehmigen",
     "reject": "Ablehnen",
     "confirmApprove": "Diese Ausgabe zur Zahlung genehmigen?",
-    "rejectReasonPrompt": "Grund für die Ablehnung dieser Ausgabe (optional):"
+    "rejectReasonPrompt": "Grund für die Ablehnung dieser Ausgabe (optional):",
+    "payslipLinked": "Gehaltsabrechnung"
   },
   "executiveRequests": {
     "nav": "Anfragen",

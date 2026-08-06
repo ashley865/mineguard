@@ -1,6 +1,7 @@
-import { Router } from "express";
+import { Router, Request, Response } from "express";
 import multer from "multer";
 import { z } from "zod";
+import { ExecutiveTitle } from "@prisma/client";
 import { prisma } from "../prisma";
 import { requireAuth, requireRole } from "../middleware/auth";
 import { verifyAdminPassword } from "../lib/verifyPassword";
@@ -8,6 +9,24 @@ import { isValidIdOrPassport } from "../lib/saId";
 import { documentFileFilter } from "../lib/uploadFilters";
 
 const router = Router();
+
+// POPIA: buyer FICA/KYC documents (ID copies, proof of address) are only downloadable by
+// the executive titles whose department has a genuine compliance/financial need for them.
+const BUYER_DOCUMENT_AUDIENCE: ExecutiveTitle[] = ["COMPLIANCE_OFFICER", "CFO", "GENERAL_MANAGER", "COO"];
+
+async function requireBuyerDocumentAccess(req: Request, res: Response): Promise<boolean> {
+  if (req.auth!.role === "ADMIN") return true;
+  if (req.auth!.role !== "EXECUTIVE") {
+    res.status(403).json({ error: "Insufficient permissions" });
+    return false;
+  }
+  const me = await prisma.user.findUnique({ where: { id: req.auth!.userId }, select: { title: true } });
+  if (!me?.title || !BUYER_DOCUMENT_AUDIENCE.includes(me.title)) {
+    res.status(403).json({ error: "Insufficient permissions" });
+    return false;
+  }
+  return true;
+}
 
 const upload = multer({
   storage: multer.memoryStorage(),
@@ -240,6 +259,7 @@ router.post("/:id/documents", upload.single("file"), async (req, res) => {
 });
 
 router.get("/:id/documents/:docId/download", async (req, res) => {
+  if (!(await requireBuyerDocumentAccess(req, res))) return;
   const doc = await prisma.buyerDocument.findUnique({ where: { id: req.params.docId } });
   if (!doc || doc.buyerId !== req.params.id) return res.status(404).json({ error: "Document not found" });
   res.setHeader("Content-Type", doc.fileMimeType);

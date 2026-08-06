@@ -604,6 +604,23 @@ export interface TrainingRecord {
   provider: string;
 }
 
+export interface EmployeeComplianceCheck {
+  id: string;
+  workerId: string;
+  worker?: { id: string; name: string; employeeId: string; siteId: string };
+  isProperlyTrained: boolean;
+  isCompetent: boolean;
+  isCertified: boolean;
+  isAuthorised: boolean;
+  medicalFitness?: FitnessResult | null;
+  isAssignedPermittedTasks: boolean;
+  isTrainingUpToDate: boolean;
+  notes?: string | null;
+  assessmentDate: string;
+  assessedBy?: { id: string; name: string } | null;
+  createdAt: string;
+}
+
 export type DocumentType =
   | "POLICY"
   | "CODE_OF_PRACTICE"
@@ -1640,6 +1657,7 @@ export interface Expense {
   referenceNumber?: string | null;
   notes?: string | null;
   documentId?: string | null;
+  payslipId?: string | null;
   createdBy?: { id: string; name: string } | null;
   createdAt: string;
 }

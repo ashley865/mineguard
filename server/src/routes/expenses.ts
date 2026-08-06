@@ -89,6 +89,7 @@ const expenseSelect = {
   referenceNumber: true,
   notes: true,
   documentId: true,
+  payslipId: true,
   createdBy: { select: { id: true, name: true } },
   createdAt: true,
 } as const;
@@ -106,8 +107,10 @@ router.get("/cost-summary", async (req, res) => {
   start.setMonth(start.getMonth() - (months - 1));
 
   const [expenses, maintenance, payslips] = await Promise.all([
+    // Payroll costs are already summed separately from Payslip below, so exclude
+    // SALARIES_WAGES here to avoid double-counting once those expenses are marked PAID.
     prisma.expense.findMany({
-      where: { site: { mineId }, status: "PAID", expenseDate: { gte: start } },
+      where: { site: { mineId }, status: "PAID", expenseDate: { gte: start }, category: { not: "SALARIES_WAGES" } },
       select: { amount: true, category: true, expenseDate: true },
     }),
     prisma.maintenanceSchedule.findMany({

@@ -708,6 +708,7 @@
     "subtitle": "Statutory competency certificates and training records for mine personnel",
     "tabCertificates": "Certificates of Competency",
     "tabTraining": "Training Records",
+    "tabCompliance": "Employee Compliance",
     "loading": "Loading…",
     "cert": {
       "new": "+ New Certificate",
@@ -764,6 +765,31 @@
         "HAZARD_SPECIFIC": "Hazard Specific",
         "SKILLS_DEVELOPMENT": "Skills Development",
         "OTHER": "Other"
+      }
+    },
+    "compliance": {
+      "subtitle": "HR and the Compliance Officer sign off on each worker's readiness before they are assigned to a task.",
+      "new": "+ New Assessment",
+      "worker": "Worker",
+      "medicalFitness": "Medical fitness",
+      "notApplicable": "N/A",
+      "notes": "Notes",
+      "colWorker": "Worker",
+      "colChecks": "Checks",
+      "colMedicalFitness": "Medical Fitness",
+      "colAssessmentDate": "Assessment Date",
+      "colAssessedBy": "Assessed By",
+      "noneYet": "No employee compliance assessments recorded yet.",
+      "confirmDelete": "Delete this compliance assessment?",
+      "newTitle": "New Employee Compliance Assessment",
+      "editTitle": "Edit Employee Compliance Assessment",
+      "fields": {
+        "isProperlyTrained": "Properly trained",
+        "isCompetent": "Competent",
+        "isCertified": "Certified",
+        "isAuthorised": "Authorised",
+        "isAssignedPermittedTasks": "Assigned to permitted tasks",
+        "isTrainingUpToDate": "Up to date with required training"
       }
     }
   },
@@ -2044,6 +2070,7 @@
     "costsBySource": "Costs by Source",
     "exportPdf": "Export PDF Report",
     "viewReceipt": "View Receipt",
+    "payslipLinked": "Payroll",
     "noneYet": "No expenses recorded yet.",
     "confirmDelete": "Delete this expense?",
     "createError": "Could not create this expense",

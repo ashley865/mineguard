@@ -1,6 +1,7 @@
-import { Router } from "express";
+import { Router, Request, Response } from "express";
 import multer from "multer";
 import { z } from "zod";
+import { ExecutiveTitle } from "@prisma/client";
 import { prisma } from "../prisma";
 import { requireAuth, requireRole } from "../middleware/auth";
 import { getAssignedSiteIds } from "../services/executiveSites";
@@ -10,6 +11,24 @@ import { documentFileFilter } from "../lib/uploadFilters";
 import { requireMineId } from "../lib/mineScope";
 
 const router = Router();
+
+// POPIA: visitor personal documents (ID copies, etc.) are only downloadable by the
+// executive titles whose department manages site access/compliance.
+const VISITOR_DOCUMENT_AUDIENCE: ExecutiveTitle[] = ["SECURITY_MANAGER", "COMPLIANCE_OFFICER", "GENERAL_MANAGER", "COO"];
+
+async function requireVisitorDocumentAccess(req: Request, res: Response): Promise<boolean> {
+  if (req.auth!.role === "ADMIN") return true;
+  if (req.auth!.role !== "EXECUTIVE") {
+    res.status(403).json({ error: "Insufficient permissions" });
+    return false;
+  }
+  const me = await prisma.user.findUnique({ where: { id: req.auth!.userId }, select: { title: true } });
+  if (!me?.title || !VISITOR_DOCUMENT_AUDIENCE.includes(me.title)) {
+    res.status(403).json({ error: "Insufficient permissions" });
+    return false;
+  }
+  return true;
+}
 
 const upload = multer({
   storage: multer.memoryStorage(),
@@ -243,6 +262,7 @@ router.post("/:id/checkout", requireRole("ADMIN", "EXECUTIVE"), async (req, res)
 router.get("/:id/documents/:docId/download", requireRole("ADMIN", "EXECUTIVE"), async (req, res) => {
   const mineId = requireMineId(req, res);
   if (!mineId) return;
+  if (!(await requireVisitorDocumentAccess(req, res))) return;
   const doc = await prisma.visitorDocument.findUnique({
     where: { id: req.params.docId },
     include: { visitor: { select: { id: true, siteId: true, site: { select: { mineId: true } } } } },
