@@ -54,6 +54,44 @@ const scheduleSelect = {
   },
 } as const;
 
+// A completed job with a cost is a real payment obligation (parts, contracted labour,
+// etc.), so — like every other cost source in the app — it's routed through the same
+// CFO-gated expense review pipeline. Guarded on `schedule.expense` so this only ever
+// fires once per job, regardless of whether cost and COMPLETED status arrive together
+// (via PUT) or separately (cost set first, then /complete called later, or vice versa).
+async function ensureMaintenanceExpense(mineId: string, scheduleId: string, actorUserId: string) {
+  const schedule = await prisma.maintenanceSchedule.findUnique({
+    where: { id: scheduleId },
+    select: {
+      id: true,
+      cost: true,
+      status: true,
+      maintenanceType: true,
+      expense: { select: { id: true } },
+      equipment: { select: { name: true, siteId: true } },
+    },
+  });
+  if (!schedule || schedule.status !== "COMPLETED" || schedule.cost == null || schedule.expense) return;
+
+  let payee = await prisma.payee.findFirst({ where: { mineId, payeeType: "COMPANY", name: "Maintenance Workshop (Internal)" } });
+  if (!payee) {
+    payee = await prisma.payee.create({ data: { mineId, payeeType: "COMPANY", name: "Maintenance Workshop (Internal)" } });
+  }
+
+  await prisma.expense.create({
+    data: {
+      siteId: schedule.equipment.siteId,
+      payeeId: payee.id,
+      expenseNumber: `MT-${schedule.id.slice(-8).toUpperCase()}`,
+      category: "MAINTENANCE",
+      description: `Maintenance — ${schedule.equipment.name} (${schedule.maintenanceType})`,
+      amount: schedule.cost,
+      maintenanceScheduleId: schedule.id,
+      createdById: actorUserId,
+    },
+  });
+}
+
 router.use(requireAuth);
 
 router.get("/technicians", async (req, res) => {
@@ -114,6 +152,7 @@ router.put("/:id", requireRole("ADMIN", "SUPERVISOR", "EXECUTIVE"), async (req, 
     if (!technician) return res.status(404).json({ error: "Assigned technician not found" });
   }
   const schedule = await prisma.maintenanceSchedule.update({ where: { id: existing.id }, data: parsed.data, select: scheduleSelect });
+  await ensureMaintenanceExpense(mineId, schedule.id, req.auth!.userId);
   res.json(schedule);
 });
 
@@ -127,6 +166,7 @@ router.post("/:id/complete", requireRole("ADMIN", "SUPERVISOR", "EXECUTIVE"), as
     data: { status: "COMPLETED", completedDate: new Date() },
     select: scheduleSelect,
   });
+  await ensureMaintenanceExpense(mineId, schedule.id, req.auth!.userId);
   res.json(schedule);
 });
 

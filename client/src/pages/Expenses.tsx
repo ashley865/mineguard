@@ -499,6 +499,21 @@ export default function Expenses() {
                           {t("expenses.payslipLinked")}
                         </span>
                       )}
+                      {ex.purchaseOrderId && (
+                        <span className="ml-2 text-[10px] uppercase tracking-wide text-mine-400 border border-mine-700 rounded px-1 py-0.5">
+                          {t("expenses.purchaseOrderLinked")}
+                        </span>
+                      )}
+                      {ex.maintenanceScheduleId && (
+                        <span className="ml-2 text-[10px] uppercase tracking-wide text-mine-400 border border-mine-700 rounded px-1 py-0.5">
+                          {t("expenses.maintenanceLinked")}
+                        </span>
+                      )}
+                      {ex.contractBidId && (
+                        <span className="ml-2 text-[10px] uppercase tracking-wide text-mine-400 border border-mine-700 rounded px-1 py-0.5">
+                          {t("expenses.contractLinked")}
+                        </span>
+                      )}
                     </td>
                     <td className="px-4 py-2 text-mine-300">{t(`expenses.categories.${ex.category}`)}</td>
                     <td className="px-4 py-2 text-mine-300">{new Date(ex.expenseDate).toLocaleDateString()}</td>

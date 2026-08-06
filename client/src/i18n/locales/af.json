@@ -2033,7 +2033,9 @@
       "COMPANY": "Maatskappy",
       "INDIVIDUAL": "Individu",
       "BUYER": "Koper",
-      "CONTRACTOR": "Kontrakteur"
+      "CONTRACTOR": "Kontrakteur",
+      "EMPLOYEE": "Werknemer",
+      "SUPPLIER": "Verskaffer"
     },
     "totalCosts": "Totale Koste",
     "costsBySource": "Koste volgens Bron",
@@ -2043,7 +2045,10 @@
     "reject": "Verwerp",
     "confirmApprove": "Keur hierdie uitgawe goed vir betaling?",
     "rejectReasonPrompt": "Rede vir verwerping van hierdie uitgawe (opsioneel):",
-    "payslipLinked": "Betaalstaat"
+    "payslipLinked": "Betaalstaat",
+    "purchaseOrderLinked": "Aankooporder",
+    "maintenanceLinked": "Onderhoud",
+    "contractLinked": "Kontraktoekenning"
   },
   "executiveRequests": {
     "nav": "Versoeke",

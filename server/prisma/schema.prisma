@@ -1403,6 +1403,8 @@ model ContractBid {
   bidAmount     Float
   proposalNotes String?
   status        ContractBidStatus @default(SUBMITTED)
+  payee         Payee?
+  expense       Expense?
 
   createdAt DateTime @default(now())
 }
@@ -1486,6 +1488,7 @@ model MaintenanceSchedule {
   createdBy       User?                      @relation("MaintenanceCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
 
   partsConsumed MaintenancePartUsed[]
+  expense       Expense?
 
   createdAt DateTime @default(now())
 }
@@ -1957,6 +1960,7 @@ model Supplier {
   status             SupplierStatus @default(ACTIVE)
 
   purchaseOrders PurchaseOrder[]
+  payee          Payee?
 
   createdAt DateTime @default(now())
 }
@@ -1990,6 +1994,7 @@ model PurchaseOrder {
   expectedDeliveryDate DateTime?
 
   lines PurchaseOrderLine[]
+  expense Expense?
 
   createdAt DateTime @default(now())
 }
@@ -2057,6 +2062,7 @@ enum PayeeType {
   BUYER
   CONTRACTOR
   EMPLOYEE
+  SUPPLIER
 }
 
 model Payee {
@@ -2085,6 +2091,12 @@ model Payee {
   worker      Worker? @relation(fields: [workerId], references: [id], onDelete: SetNull)
   linkedUserId String? @unique
   linkedUser   User?  @relation("PayeeLinkedUser", fields: [linkedUserId], references: [id], onDelete: SetNull)
+  // Auto-synced payees for procurement and awarded contracts, mirroring the worker/user
+  // sync above, so every cost source gets a real payee to route its Expense through.
+  supplierId     String?      @unique
+  supplier       Supplier?    @relation(fields: [supplierId], references: [id], onDelete: SetNull)
+  contractBidId  String?      @unique
+  contractBid    ContractBid? @relation(fields: [contractBidId], references: [id], onDelete: SetNull)
 
   expenses Expense[]
 
@@ -2146,10 +2158,18 @@ model Expense {
   document       Document?       @relation(fields: [documentId], references: [id], onDelete: SetNull)
   createdById    String?
   createdBy      User?           @relation("ExpenseCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
-  // Set when this expense was auto-generated from an issued payslip, so payroll costs
-  // flow through the same CFO approval pipeline as any other expense.
-  payslipId      String?         @unique
-  payslip        Payslip?        @relation(fields: [payslipId], references: [id], onDelete: Cascade)
+  // Set when this expense was auto-generated from some other cost-incurring event —
+  // an issued payslip, an approved purchase order, a completed maintenance job, or an
+  // awarded contract bid — so every cost anyone in the mine incurs flows through the
+  // same CFO approval pipeline rather than being settled outside Finance's view.
+  payslipId              String?              @unique
+  payslip                Payslip?             @relation(fields: [payslipId], references: [id], onDelete: Cascade)
+  purchaseOrderId        String?              @unique
+  purchaseOrder          PurchaseOrder?       @relation(fields: [purchaseOrderId], references: [id], onDelete: Cascade)
+  maintenanceScheduleId  String?              @unique
+  maintenanceSchedule    MaintenanceSchedule? @relation(fields: [maintenanceScheduleId], references: [id], onDelete: Cascade)
+  contractBidId          String?              @unique
+  contractBid            ContractBid?         @relation(fields: [contractBidId], references: [id], onDelete: Cascade)
 
   createdAt DateTime @default(now())
 }

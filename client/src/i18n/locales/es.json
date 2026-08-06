@@ -2033,7 +2033,9 @@
       "COMPANY": "Empresa",
       "INDIVIDUAL": "Individuo",
       "BUYER": "Comprador",
-      "CONTRACTOR": "Contratista"
+      "CONTRACTOR": "Contratista",
+      "EMPLOYEE": "Empleado",
+      "SUPPLIER": "Proveedor"
     },
     "totalCosts": "Costos Totales",
     "costsBySource": "Costos por Origen",
@@ -2043,7 +2045,10 @@
     "reject": "Rechazar",
     "confirmApprove": "¿Aprobar este gasto para su pago?",
     "rejectReasonPrompt": "Motivo del rechazo de este gasto (opcional):",
-    "payslipLinked": "Nómina"
+    "payslipLinked": "Nómina",
+    "purchaseOrderLinked": "Orden de Compra",
+    "maintenanceLinked": "Mantenimiento",
+    "contractLinked": "Adjudicación de Contrato"
   },
   "executiveRequests": {
     "nav": "Solicitudes",

@@ -1600,7 +1600,7 @@ export interface Invoice {
   createdAt: string;
 }
 
-export type PayeeType = "COMPANY" | "INDIVIDUAL" | "BUYER" | "CONTRACTOR" | "EMPLOYEE";
+export type PayeeType = "COMPANY" | "INDIVIDUAL" | "BUYER" | "CONTRACTOR" | "EMPLOYEE" | "SUPPLIER";
 
 export interface Payee {
   id: string;
@@ -1658,6 +1658,9 @@ export interface Expense {
   notes?: string | null;
   documentId?: string | null;
   payslipId?: string | null;
+  purchaseOrderId?: string | null;
+  maintenanceScheduleId?: string | null;
+  contractBidId?: string | null;
   createdBy?: { id: string; name: string } | null;
   createdAt: string;
 }

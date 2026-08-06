@@ -90,6 +90,9 @@ const expenseSelect = {
   notes: true,
   documentId: true,
   payslipId: true,
+  purchaseOrderId: true,
+  maintenanceScheduleId: true,
+  contractBidId: true,
   createdBy: { select: { id: true, name: true } },
   createdAt: true,
 } as const;
@@ -107,10 +110,19 @@ router.get("/cost-summary", async (req, res) => {
   start.setMonth(start.getMonth() - (months - 1));
 
   const [expenses, maintenance, payslips] = await Promise.all([
-    // Payroll costs are already summed separately from Payslip below, so exclude
-    // SALARIES_WAGES here to avoid double-counting once those expenses are marked PAID.
+    // Payroll and maintenance costs are already summed separately below (from Payslip and
+    // MaintenanceSchedule directly), so auto-generated expenses linked back to one of
+    // those are excluded here to avoid double-counting once they're marked PAID. A
+    // manually-logged expense in the same category but with no such link (e.g. an
+    // externally contracted repair logged by hand) still counts normally.
     prisma.expense.findMany({
-      where: { site: { mineId }, status: "PAID", expenseDate: { gte: start }, category: { not: "SALARIES_WAGES" } },
+      where: {
+        site: { mineId },
+        status: "PAID",
+        expenseDate: { gte: start },
+        payslipId: null,
+        maintenanceScheduleId: null,
+      },
       select: { amount: true, category: true, expenseDate: true },
     }),
     prisma.maintenanceSchedule.findMany({

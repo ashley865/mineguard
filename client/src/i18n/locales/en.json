@@ -2071,6 +2071,9 @@
     "exportPdf": "Export PDF Report",
     "viewReceipt": "View Receipt",
     "payslipLinked": "Payroll",
+    "purchaseOrderLinked": "Purchase Order",
+    "maintenanceLinked": "Maintenance",
+    "contractLinked": "Contract Award",
     "noneYet": "No expenses recorded yet.",
     "confirmDelete": "Delete this expense?",
     "createError": "Could not create this expense",
@@ -2112,7 +2115,9 @@
       "COMPANY": "Company",
       "INDIVIDUAL": "Individual",
       "BUYER": "Buyer",
-      "CONTRACTOR": "Contractor"
+      "CONTRACTOR": "Contractor",
+      "EMPLOYEE": "Employee",
+      "SUPPLIER": "Supplier"
     }
   }
 }

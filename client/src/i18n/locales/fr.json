@@ -2033,7 +2033,9 @@
       "COMPANY": "Entreprise",
       "INDIVIDUAL": "Particulier",
       "BUYER": "Acheteur",
-      "CONTRACTOR": "Entrepreneur"
+      "CONTRACTOR": "Entrepreneur",
+      "EMPLOYEE": "Employé",
+      "SUPPLIER": "Fournisseur"
     },
     "totalCosts": "Coûts Totaux",
     "costsBySource": "Coûts par Source",
@@ -2043,7 +2045,10 @@
     "reject": "Rejeter",
     "confirmApprove": "Approuver cette dépense pour paiement ?",
     "rejectReasonPrompt": "Raison du rejet de cette dépense (facultatif) :",
-    "payslipLinked": "Paie"
+    "payslipLinked": "Paie",
+    "purchaseOrderLinked": "Bon de Commande",
+    "maintenanceLinked": "Maintenance",
+    "contractLinked": "Attribution de Contrat"
   },
   "executiveRequests": {
     "nav": "Demandes",

@@ -179,6 +179,32 @@ router.post("/orders/:id/approve", requireRole("ADMIN", "EXECUTIVE"), async (req
     data: { status: "APPROVED", approvedById: req.auth!.userId, approvedAt: new Date() },
     select: orderSelect,
   });
+
+  // Approving the order commits the mine to a real payment obligation to the supplier,
+  // so — like every other cost source — it's routed through the same CFO-gated expense
+  // review before it's considered paid. Guarded so re-approving never double-creates it.
+  if (existing.status !== "APPROVED") {
+    let payee = await prisma.payee.findFirst({ where: { supplierId: existing.supplierId, payeeType: "SUPPLIER" } });
+    if (!payee) {
+      payee = await prisma.payee.create({
+        data: { mineId, payeeType: "SUPPLIER", name: order.supplier.name, supplierId: existing.supplierId },
+      });
+    }
+    await prisma.expense.create({
+      data: {
+        siteId: existing.siteId,
+        payeeId: payee.id,
+        expenseNumber: `PO-${order.orderNumber}`,
+        category: "EQUIPMENT_SUPPLIES",
+        description: `Purchase Order ${order.orderNumber} — ${order.description}`,
+        amount: existing.totalAmount,
+        currency: existing.currency,
+        purchaseOrderId: order.id,
+        createdById: req.auth!.userId,
+      },
+    });
+  }
+
   res.json(order);
 });
 

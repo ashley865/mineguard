@@ -2033,7 +2033,9 @@
       "COMPANY": "Unternehmen",
       "INDIVIDUAL": "Einzelperson",
       "BUYER": "Käufer",
-      "CONTRACTOR": "Auftragnehmer"
+      "CONTRACTOR": "Auftragnehmer",
+      "EMPLOYEE": "Mitarbeiter",
+      "SUPPLIER": "Lieferant"
     },
     "totalCosts": "Gesamtkosten",
     "costsBySource": "Kosten nach Quelle",
@@ -2043,7 +2045,10 @@
     "reject": "Ablehnen",
     "confirmApprove": "Diese Ausgabe zur Zahlung genehmigen?",
     "rejectReasonPrompt": "Grund für die Ablehnung dieser Ausgabe (optional):",
-    "payslipLinked": "Gehaltsabrechnung"
+    "payslipLinked": "Gehaltsabrechnung",
+    "purchaseOrderLinked": "Bestellung",
+    "maintenanceLinked": "Wartung",
+    "contractLinked": "Vertragsvergabe"
   },
   "executiveRequests": {
     "nav": "Anfragen",
