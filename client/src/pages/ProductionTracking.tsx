@@ -2,11 +2,12 @@ import { FormEvent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { api } from "../api/client";
 import { useAuth } from "../context/AuthContext";
-import { ProductionRecord, ProductionShift, Site, Zone } from "../api/types";
+import { MineralType, ProductionRecord, ProductionShift, Site, Zone } from "../api/types";
 import Modal from "../components/Modal";
 import { buttonDanger, buttonPrimary, buttonSecondary, cardClass, inputClass, labelClass, selectClass } from "../components/ui";
 import DateField from "../components/DateField";
 import FinancialPerformanceTab from "./production/FinancialPerformanceTab";
+import { mineralTypes } from "../lib/minerals";
 
 const shifts: ProductionShift[] = ["DAY", "AFTERNOON", "NIGHT"];
 type TabKey = "records" | "financial";
@@ -23,7 +24,7 @@ function ProductionForm({ sites, zones, initial, onSubmit, onCancel }: {
   const [zoneId, setZoneId] = useState(initial?.zoneId ?? "");
   const [shiftDate, setShiftDate] = useState(initial?.shiftDate?.slice(0, 10) ?? "");
   const [shift, setShift] = useState<ProductionShift>(initial?.shift ?? "DAY");
-  const [mineralType, setMineralType] = useState(initial?.mineralType ?? "");
+  const [mineralType, setMineralType] = useState<MineralType>(initial?.mineralType ?? "GOLD");
   const [tonnesMined, setTonnesMined] = useState(initial?.tonnesMined?.toString() ?? "");
   const [tonnesProcessed, setTonnesProcessed] = useState(initial?.tonnesProcessed?.toString() ?? "");
   const [oreGrade, setOreGrade] = useState(initial?.oreGrade?.toString() ?? "");
@@ -60,6 +61,12 @@ function ProductionForm({ sites, zones, initial, onSubmit, onCancel }: {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
+      <div>
+        <label className={labelClass}>{t("production.mineralType")}</label>
+        <select className={selectClass} value={mineralType} onChange={(e) => setMineralType(e.target.value as MineralType)}>
+          {mineralTypes.map((mt) => <option key={mt} value={mt}>{t(`mineralTypes.${mt}`)}</option>)}
+        </select>
+      </div>
       <div className="grid grid-cols-2 gap-3">
         <div>
           <label className={labelClass}>{t("common.site")}</label>
@@ -86,10 +93,6 @@ function ProductionForm({ sites, zones, initial, onSubmit, onCancel }: {
             {shifts.map((s) => <option key={s} value={s}>{t(`production.shifts.${s}`)}</option>)}
           </select>
         </div>
-      </div>
-      <div>
-        <label className={labelClass}>{t("production.mineralType")}</label>
-        <input className={inputClass} value={mineralType} onChange={(e) => setMineralType(e.target.value)} required />
       </div>
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
         <div>
@@ -233,7 +236,7 @@ export default function ProductionTracking() {
                 <td className="px-4 py-2 font-medium">{new Date(r.shiftDate).toLocaleDateString()}</td>
                 <td className="px-4 py-2 text-mine-300">{t(`production.shifts.${r.shift}`)}</td>
                 <td className="px-4 py-2 text-mine-300">{r.site?.name}{r.zone?.name ? ` · ${r.zone.name}` : ""}</td>
-                <td className="px-4 py-2 text-mine-300">{r.mineralType}</td>
+                <td className="px-4 py-2 text-mine-300">{t(`mineralTypes.${r.mineralType}`)}</td>
                 <td className="px-4 py-2 text-mine-300">
                   {r.tonnesMined.toLocaleString()}{r.targetTonnes ? ` / ${r.targetTonnes.toLocaleString()}` : ""}
                 </td>

@@ -5,6 +5,23 @@
     "VIEWER": "Viewer",
     "EXECUTIVE": "Executive"
   },
+  "mineralTypes": {
+    "GOLD": "Gold",
+    "PLATINUM_GROUP_METALS": "Platinum Group Metals (PGMs)",
+    "DIAMOND": "Diamond",
+    "COAL": "Coal",
+    "IRON_ORE": "Iron Ore",
+    "CHROME": "Chrome",
+    "MANGANESE": "Manganese",
+    "COPPER": "Copper",
+    "ZINC": "Zinc",
+    "NICKEL": "Nickel",
+    "URANIUM": "Uranium",
+    "COBALT": "Cobalt",
+    "LIMESTONE": "Limestone",
+    "SAND_AND_AGGREGATE": "Sand & Aggregate",
+    "OTHER": "Other"
+  },
   "common": {
     "save": "Save",
     "add": "Add",
@@ -447,7 +464,10 @@
       "PAID": "Paid",
       "ORDERED": "Ordered",
       "RECEIVED": "Received",
-      "BLACKLISTED": "Blacklisted"
+      "BLACKLISTED": "Blacklisted",
+      "COMPLIANT": "Compliant",
+      "NON_COMPLIANT": "Non-compliant",
+      "NOT_APPLICABLE": "Not applicable"
     },
     "severity": {
       "LOW": "Low",
@@ -462,6 +482,7 @@
     "tabCop": "Codes of Practice",
     "tabRisk": "Risk Assessments",
     "tabNotices": "Regulatory Notices",
+    "tabRequirements": "Requirements Register",
     "tabMedical": "Medical Surveillance",
     "tabInspections": "Safety Inspections",
     "cop": {
@@ -546,6 +567,39 @@
         "SECTION_53": "Section 53",
         "OTHER": "Other"
       }
+    },
+    "requirement": {
+      "subtitle": "Legal and regulatory requirements applicable to this mine, who owns each one, and when it's next due.",
+      "new": "+ New Requirement",
+      "newTitle": "New Requirement",
+      "editTitle": "Edit Requirement",
+      "regulation": "Regulation / legislation",
+      "requirement": "Requirement",
+      "applicableOperation": "Applicable operation",
+      "responsibleDepartment": "Responsible department",
+      "responsiblePerson": "Responsible person",
+      "frequency": "Frequency",
+      "frequencies": {
+        "DAILY": "Daily",
+        "WEEKLY": "Weekly",
+        "MONTHLY": "Monthly",
+        "QUARTERLY": "Quarterly",
+        "ANNUALLY": "Annually",
+        "ONCE_OFF": "Once-off",
+        "AD_HOC": "Ad hoc"
+      },
+      "evidenceRequired": "Evidence required",
+      "dueDate": "Due date",
+      "riskLevel": "Risk level",
+      "lastVerification": "Last verification",
+      "nextReview": "Next review",
+      "relatedDocuments": "Related documents",
+      "relatedDocumentsPlaceholder": "Reference the document name(s) or vault entry",
+      "colRegulation": "Regulation",
+      "colOperation": "Applicable Operation",
+      "colResponsible": "Responsible",
+      "noneYet": "No requirements recorded yet.",
+      "confirmDelete": "Delete this requirement?"
     },
     "medical": {
       "new": "+ New Medical Record",

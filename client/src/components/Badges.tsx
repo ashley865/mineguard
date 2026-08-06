@@ -65,6 +65,9 @@ const statusColors: Record<string, string> = {
   ORDERED: "bg-hazard-500 text-white",
   RECEIVED: "bg-success-600 text-white",
   BLACKLISTED: "bg-danger-600 text-white",
+  COMPLIANT: "bg-success-600 text-white",
+  NON_COMPLIANT: "bg-danger-500 text-white",
+  NOT_APPLICABLE: "bg-mine-600 text-mine-100",
 };
 
 export function StatusBadge({

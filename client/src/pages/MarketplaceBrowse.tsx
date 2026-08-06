@@ -111,7 +111,7 @@ export default function MarketplaceBrowse() {
                       <img
                         key={img.id}
                         src={`${API_URL}/api/minerals/${l.id}/images/${img.id}`}
-                        alt={l.mineralType}
+                        alt={t(`mineralTypes.${l.mineralType}`)}
                         className="h-32 w-32 object-cover shrink-0"
                       />
                     ))}
@@ -119,7 +119,7 @@ export default function MarketplaceBrowse() {
                 )}
                 <div className="p-5 space-y-2">
                   <div className="flex items-center justify-between">
-                    <h3 className="text-sm font-semibold">{l.mineralType}</h3>
+                    <h3 className="text-sm font-semibold">{t(`mineralTypes.${l.mineralType}`)}</h3>
                     <StatusBadge status={l.status} />
                   </div>
                   <div className="text-xs text-mine-400">{l.site?.name}{l.grade ? ` · ${t("marketplace.grade")}: ${l.grade}` : ""}</div>
@@ -144,7 +144,7 @@ export default function MarketplaceBrowse() {
       </div>
 
       {bidListing && (
-        <Modal title={t("marketplace.bidOn", { name: bidListing.mineralType })} onClose={() => setBidListing(null)}>
+        <Modal title={t("marketplace.bidOn", { name: t(`mineralTypes.${bidListing.mineralType}`) })} onClose={() => setBidListing(null)}>
           <MineralBidForm listing={bidListing} onDone={() => setBidListing(null)} />
         </Modal>
       )}

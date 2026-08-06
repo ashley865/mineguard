@@ -5,6 +5,7 @@ import { prisma } from "../prisma";
 import { requireAuth, requireRole } from "../middleware/auth";
 import { imageFileFilter } from "../lib/uploadFilters";
 import { requireMineId } from "../lib/mineScope";
+import { mineralTypeEnum } from "../lib/minerals";
 
 const router = Router();
 
@@ -16,7 +17,7 @@ const upload = multer({
 
 const listingSchema = z.object({
   siteId: z.string().min(1),
-  mineralType: z.string().min(1),
+  mineralType: mineralTypeEnum,
   grade: z.string().optional(),
   quantity: z.coerce.number().positive(),
   unit: z.string().min(1),

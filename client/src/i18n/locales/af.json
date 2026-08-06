@@ -447,7 +447,10 @@
       "PAID": "Betaal",
       "ORDERED": "Bestel",
       "RECEIVED": "Ontvang",
-      "BLACKLISTED": "Swartlys"
+      "BLACKLISTED": "Swartlys",
+      "COMPLIANT": "Voldoen",
+      "NON_COMPLIANT": "Voldoen nie",
+      "NOT_APPLICABLE": "Nie van toepassing nie"
     },
     "severity": {
       "LOW": "Laag",
@@ -591,7 +594,41 @@
       "newTitle": "Nuwe Veiligheidsinspeksie",
       "editTitle": "Wysig Veiligheidsinspeksie"
     },
-    "loading": "Laai tans…"
+    "loading": "Laai tans…",
+    "tabRequirements": "Vereisteregister",
+    "requirement": {
+      "subtitle": "Wetlike en regulatoriese vereistes van toepassing op hierdie myn, wie elkeen besit, en wanneer dit volgende verval.",
+      "new": "+ Nuwe Vereiste",
+      "newTitle": "Nuwe Vereiste",
+      "editTitle": "Wysig Vereiste",
+      "regulation": "Regulasie / wetgewing",
+      "requirement": "Vereiste",
+      "applicableOperation": "Toepaslike bedrywighede",
+      "responsibleDepartment": "Verantwoordelike departement",
+      "responsiblePerson": "Verantwoordelike persoon",
+      "frequency": "Frekwensie",
+      "frequencies": {
+        "DAILY": "Daagliks",
+        "WEEKLY": "Weekliks",
+        "MONTHLY": "Maandeliks",
+        "QUARTERLY": "Kwartaalliks",
+        "ANNUALLY": "Jaarliks",
+        "ONCE_OFF": "Eenmalig",
+        "AD_HOC": "Ad hoc"
+      },
+      "evidenceRequired": "Vereiste bewys",
+      "dueDate": "Vervaldatum",
+      "riskLevel": "Risikovlak",
+      "lastVerification": "Laaste verifikasie",
+      "nextReview": "Volgende hersiening",
+      "relatedDocuments": "Verwante dokumente",
+      "relatedDocumentsPlaceholder": "Verwys na die dokumentnaam(e) of kluisinskrywing",
+      "colRegulation": "Regulasie",
+      "colOperation": "Toepaslike Bedrywighede",
+      "colResponsible": "Verantwoordelik",
+      "noneYet": "Nog geen vereistes aangeteken nie.",
+      "confirmDelete": "Verwyder hierdie vereiste?"
+    }
   },
   "permits": {
     "nav": "Regulasies & Permitte",
@@ -1980,5 +2017,22 @@
     "hangUp": "Sit Neer",
     "voiceCall": "Bel",
     "videoCall": "Video-oproep"
+  },
+  "mineralTypes": {
+    "GOLD": "Goud",
+    "PLATINUM_GROUP_METALS": "Platinumgroepmetale (PGM)",
+    "DIAMOND": "Diamant",
+    "COAL": "Steenkool",
+    "IRON_ORE": "Ystererts",
+    "CHROME": "Chroom",
+    "MANGANESE": "Mangaan",
+    "COPPER": "Koper",
+    "ZINC": "Sink",
+    "NICKEL": "Nikkel",
+    "URANIUM": "Uraan",
+    "COBALT": "Kobalt",
+    "LIMESTONE": "Kalksteen",
+    "SAND_AND_AGGREGATE": "Sand en Aggregaat",
+    "OTHER": "Ander"
   }
 }

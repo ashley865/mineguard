@@ -91,8 +91,6 @@ export const executiveTitleModules: Partial<Record<ExecutiveTitle, RestrictedMod
     "/environmental",
     "/emergency",
     "/procurement",
-    "/invoices",
-    "/expenses",
   ],
   COMPLIANCE_OFFICER: [
     "/compliance",

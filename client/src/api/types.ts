@@ -444,6 +444,31 @@ export interface RegulatoryNotice {
   zone?: { id: string; name: string } | null;
 }
 
+export type RequirementFrequency = "DAILY" | "WEEKLY" | "MONTHLY" | "QUARTERLY" | "ANNUALLY" | "ONCE_OFF" | "AD_HOC";
+export type RequirementStatus = "PENDING" | "COMPLIANT" | "NON_COMPLIANT" | "IN_PROGRESS" | "OVERDUE" | "NOT_APPLICABLE";
+
+export interface ComplianceRequirement {
+  id: string;
+  siteId: string;
+  site?: { id: string; name: string };
+  regulation: string;
+  requirement: string;
+  applicableOperation: string;
+  responsibleDepartment: string;
+  responsiblePersonId?: string | null;
+  responsiblePerson?: { id: string; name: string } | null;
+  frequency: RequirementFrequency;
+  evidenceRequired: string;
+  dueDate: string;
+  status: RequirementStatus;
+  riskLevel: RiskLevel;
+  lastVerification?: string | null;
+  nextReview?: string | null;
+  relatedDocuments?: string | null;
+  createdBy?: { id: string; name: string } | null;
+  createdAt: string;
+}
+
 export type ExamType = "PRE_EMPLOYMENT" | "PERIODICAL" | "EXIT" | "RETURN_TO_WORK";
 export type FitnessResult = "FIT" | "FIT_WITH_RESTRICTION" | "TEMPORARILY_UNFIT" | "UNFIT";
 
@@ -928,6 +953,23 @@ export interface Buyer {
 
 export type MineralListingStatus = "AVAILABLE" | "SOLD" | "WITHDRAWN";
 
+export type MineralType =
+  | "GOLD"
+  | "PLATINUM_GROUP_METALS"
+  | "DIAMOND"
+  | "COAL"
+  | "IRON_ORE"
+  | "CHROME"
+  | "MANGANESE"
+  | "COPPER"
+  | "ZINC"
+  | "NICKEL"
+  | "URANIUM"
+  | "COBALT"
+  | "LIMESTONE"
+  | "SAND_AND_AGGREGATE"
+  | "OTHER";
+
 export interface MineralListingImage {
   id: string;
   fileName: string;
@@ -939,7 +981,7 @@ export interface MineralListing {
   id: string;
   siteId: string;
   site?: { id: string; name: string };
-  mineralType: string;
+  mineralType: MineralType;
   grade?: string | null;
   quantity: number;
   unit: string;
@@ -959,7 +1001,7 @@ export type MineralBidStatus = "PENDING" | "ACCEPTED" | "REJECTED" | "WITHDRAWN"
 export interface MineralBid {
   id: string;
   listingId: string;
-  listing?: { id: string; mineralType: string; unit: string; site?: { id: string; name: string } };
+  listing?: { id: string; mineralType: MineralType; unit: string; site?: { id: string; name: string } };
   buyerId: string;
   buyer?: { id: string; legalName: string; contactEmail: string; status: BuyerStatus };
   quantity: number;
@@ -1029,7 +1071,7 @@ export interface ProductionRecord {
   zone?: { id: string; name: string } | null;
   shiftDate: string;
   shift: ProductionShift;
-  mineralType: string;
+  mineralType: MineralType;
   tonnesMined: number;
   tonnesProcessed?: number | null;
   oreGrade?: number | null;

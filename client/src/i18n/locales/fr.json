@@ -447,7 +447,10 @@
       "PAID": "Payé",
       "ORDERED": "Commandé",
       "RECEIVED": "Reçu",
-      "BLACKLISTED": "Sur liste noire"
+      "BLACKLISTED": "Sur liste noire",
+      "COMPLIANT": "Conforme",
+      "NON_COMPLIANT": "Non conforme",
+      "NOT_APPLICABLE": "Non applicable"
     },
     "severity": {
       "LOW": "Faible",
@@ -591,7 +594,41 @@
       "newTitle": "Nouvelle Inspection de Sécurité",
       "editTitle": "Modifier l'Inspection de Sécurité"
     },
-    "loading": "Chargement…"
+    "loading": "Chargement…",
+    "tabRequirements": "Registre des Exigences",
+    "requirement": {
+      "subtitle": "Exigences légales et réglementaires applicables à cette mine, qui en est responsable et quand elles arrivent à échéance.",
+      "new": "+ Nouvelle Exigence",
+      "newTitle": "Nouvelle Exigence",
+      "editTitle": "Modifier l'Exigence",
+      "regulation": "Réglementation / législation",
+      "requirement": "Exigence",
+      "applicableOperation": "Opération applicable",
+      "responsibleDepartment": "Département responsable",
+      "responsiblePerson": "Personne responsable",
+      "frequency": "Fréquence",
+      "frequencies": {
+        "DAILY": "Quotidienne",
+        "WEEKLY": "Hebdomadaire",
+        "MONTHLY": "Mensuelle",
+        "QUARTERLY": "Trimestrielle",
+        "ANNUALLY": "Annuelle",
+        "ONCE_OFF": "Ponctuelle",
+        "AD_HOC": "Au cas par cas"
+      },
+      "evidenceRequired": "Preuve requise",
+      "dueDate": "Date d'échéance",
+      "riskLevel": "Niveau de risque",
+      "lastVerification": "Dernière vérification",
+      "nextReview": "Prochaine révision",
+      "relatedDocuments": "Documents liés",
+      "relatedDocumentsPlaceholder": "Référencez le(s) nom(s) du document ou l'entrée dans le coffre",
+      "colRegulation": "Réglementation",
+      "colOperation": "Opération Applicable",
+      "colResponsible": "Responsable",
+      "noneYet": "Aucune exigence enregistrée pour le moment.",
+      "confirmDelete": "Supprimer cette exigence ?"
+    }
   },
   "permits": {
     "nav": "Réglementation et Permis",
@@ -1980,5 +2017,22 @@
     "hangUp": "Raccrocher",
     "voiceCall": "Appeler",
     "videoCall": "Appel Vidéo"
+  },
+  "mineralTypes": {
+    "GOLD": "Or",
+    "PLATINUM_GROUP_METALS": "Métaux du Groupe du Platine (MGP)",
+    "DIAMOND": "Diamant",
+    "COAL": "Charbon",
+    "IRON_ORE": "Minerai de Fer",
+    "CHROME": "Chrome",
+    "MANGANESE": "Manganèse",
+    "COPPER": "Cuivre",
+    "ZINC": "Zinc",
+    "NICKEL": "Nickel",
+    "URANIUM": "Uranium",
+    "COBALT": "Cobalt",
+    "LIMESTONE": "Calcaire",
+    "SAND_AND_AGGREGATE": "Sable et Granulats",
+    "OTHER": "Autre"
   }
 }

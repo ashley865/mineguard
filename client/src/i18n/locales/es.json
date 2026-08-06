@@ -447,7 +447,10 @@
       "PAID": "Pagado",
       "ORDERED": "Pedido",
       "RECEIVED": "Recibido",
-      "BLACKLISTED": "En lista negra"
+      "BLACKLISTED": "En lista negra",
+      "COMPLIANT": "Conforme",
+      "NON_COMPLIANT": "No conforme",
+      "NOT_APPLICABLE": "No aplicable"
     },
     "severity": {
       "LOW": "Baja",
@@ -591,7 +594,41 @@
       "newTitle": "Nueva Inspección de Seguridad",
       "editTitle": "Editar Inspección de Seguridad"
     },
-    "loading": "Cargando…"
+    "loading": "Cargando…",
+    "tabRequirements": "Registro de Requisitos",
+    "requirement": {
+      "subtitle": "Requisitos legales y reglamentarios aplicables a esta mina, quién es responsable de cada uno y cuándo vence.",
+      "new": "+ Nuevo Requisito",
+      "newTitle": "Nuevo Requisito",
+      "editTitle": "Editar Requisito",
+      "regulation": "Regulación / legislación",
+      "requirement": "Requisito",
+      "applicableOperation": "Operación aplicable",
+      "responsibleDepartment": "Departamento responsable",
+      "responsiblePerson": "Persona responsable",
+      "frequency": "Frecuencia",
+      "frequencies": {
+        "DAILY": "Diaria",
+        "WEEKLY": "Semanal",
+        "MONTHLY": "Mensual",
+        "QUARTERLY": "Trimestral",
+        "ANNUALLY": "Anual",
+        "ONCE_OFF": "Única vez",
+        "AD_HOC": "Ad hoc"
+      },
+      "evidenceRequired": "Evidencia requerida",
+      "dueDate": "Fecha de vencimiento",
+      "riskLevel": "Nivel de riesgo",
+      "lastVerification": "Última verificación",
+      "nextReview": "Próxima revisión",
+      "relatedDocuments": "Documentos relacionados",
+      "relatedDocumentsPlaceholder": "Referencia el nombre del documento o la entrada en el archivo",
+      "colRegulation": "Regulación",
+      "colOperation": "Operación Aplicable",
+      "colResponsible": "Responsable",
+      "noneYet": "Aún no se han registrado requisitos.",
+      "confirmDelete": "¿Eliminar este requisito?"
+    }
   },
   "permits": {
     "nav": "Normativa y Permisos",
@@ -1980,5 +2017,22 @@
     "hangUp": "Colgar",
     "voiceCall": "Llamar",
     "videoCall": "Videollamada"
+  },
+  "mineralTypes": {
+    "GOLD": "Oro",
+    "PLATINUM_GROUP_METALS": "Metales del Grupo del Platino (MGP)",
+    "DIAMOND": "Diamante",
+    "COAL": "Carbón",
+    "IRON_ORE": "Mineral de Hierro",
+    "CHROME": "Cromo",
+    "MANGANESE": "Manganeso",
+    "COPPER": "Cobre",
+    "ZINC": "Zinc",
+    "NICKEL": "Níquel",
+    "URANIUM": "Uranio",
+    "COBALT": "Cobalto",
+    "LIMESTONE": "Piedra Caliza",
+    "SAND_AND_AGGREGATE": "Arena y Agregados",
+    "OTHER": "Otro"
   }
 }

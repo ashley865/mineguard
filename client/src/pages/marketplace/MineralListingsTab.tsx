@@ -2,10 +2,11 @@ import { FormEvent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { api, API_URL } from "../../api/client";
 import { useAuth } from "../../context/AuthContext";
-import { MineralBid, MineralListing, MineralListingStatus, Site } from "../../api/types";
+import { MineralBid, MineralListing, MineralListingStatus, MineralType, Site } from "../../api/types";
 import { StatusBadge } from "../../components/Badges";
 import Modal from "../../components/Modal";
 import { buttonDanger, buttonPrimary, buttonSecondary, cardClass, inputClass, labelClass, selectClass } from "../../components/ui";
+import { mineralTypes } from "../../lib/minerals";
 
 const listingStatuses: MineralListingStatus[] = ["AVAILABLE", "SOLD", "WITHDRAWN"];
 
@@ -94,7 +95,7 @@ function ListingForm({ sites, initial, onSubmit, onCancel }: {
 }) {
   const { t } = useTranslation();
   const [siteId, setSiteId] = useState(initial?.siteId ?? sites[0]?.id ?? "");
-  const [mineralType, setMineralType] = useState(initial?.mineralType ?? "");
+  const [mineralType, setMineralType] = useState<MineralType>(initial?.mineralType ?? "GOLD");
   const [grade, setGrade] = useState(initial?.grade ?? "");
   const [quantity, setQuantity] = useState(initial?.quantity?.toString() ?? "");
   const [unit, setUnit] = useState(initial?.unit ?? "");
@@ -131,19 +132,19 @@ function ListingForm({ sites, initial, onSubmit, onCancel }: {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
-      <div className="grid grid-cols-2 gap-3">
+      <div>
+        <label className={labelClass}>{t("marketplace.mineralType")}</label>
+        <select className={selectClass} value={mineralType} onChange={(e) => setMineralType(e.target.value as MineralType)}>
+          {mineralTypes.map((mt) => <option key={mt} value={mt}>{t(`mineralTypes.${mt}`)}</option>)}
+        </select>
+      </div>
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
         <div>
           <label className={labelClass}>{t("common.site")}</label>
           <select className={selectClass} value={siteId} onChange={(e) => setSiteId(e.target.value)}>
             {sites.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
           </select>
         </div>
-        <div>
-          <label className={labelClass}>{t("marketplace.mineralType")}</label>
-          <input className={inputClass} value={mineralType} onChange={(e) => setMineralType(e.target.value)} required />
-        </div>
-      </div>
-      <div className="grid grid-cols-2 gap-3">
         <div>
           <label className={labelClass}>{t("marketplace.grade")}</label>
           <input className={inputClass} value={grade} onChange={(e) => setGrade(e.target.value)} />
@@ -222,7 +223,7 @@ function BidsModal({ listing, onClose }: { listing: MineralListing; onClose: () 
   }
 
   return (
-    <Modal title={t("marketplace.bidsFor", { name: listing.mineralType })} onClose={onClose}>
+    <Modal title={t("marketplace.bidsFor", { name: t(`mineralTypes.${listing.mineralType}`) })} onClose={onClose}>
       {loading && <div className="text-mine-300 text-sm">{t("common.loading")}</div>}
       {!loading && bids.length === 0 && <div className="text-mine-400 text-sm">{t("marketplace.noBids")}</div>}
       <div className="space-y-3">
@@ -313,7 +314,7 @@ export default function MineralListingsTab({ sites }: { sites: Site[] }) {
           <tbody>
             {items.map((item) => (
               <tr key={item.id} className="border-t border-mine-800 hover:bg-mine-800/30">
-                <td className="px-4 py-2 font-medium">{item.mineralType}{item.grade ? ` (${item.grade})` : ""}</td>
+                <td className="px-4 py-2 font-medium">{t(`mineralTypes.${item.mineralType}`)}{item.grade ? ` (${item.grade})` : ""}</td>
                 <td className="px-4 py-2 text-mine-300">{item.site?.name}</td>
                 <td className="px-4 py-2 text-mine-300">{item.quantity} {item.unit}</td>
                 <td className="px-4 py-2"><StatusBadge status={item.status} /></td>

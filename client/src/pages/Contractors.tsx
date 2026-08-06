@@ -251,7 +251,11 @@ function ContractorDocumentsModal({ contractor, canUpload, canDelete, onClose, o
 export default function Contractors() {
   const { t } = useTranslation();
   const { user } = useAuth();
-  const canEdit = user?.role === "ADMIN" || user?.role === "SUPERVISOR" || user?.role === "EXECUTIVE";
+  // Operations Manager can view contractors but must not register, edit, or remove
+  // them — that stays with whichever executive title actually owns vendor onboarding.
+  const canEdit =
+    user?.title !== "OPERATIONS_MANAGER" &&
+    (user?.role === "ADMIN" || user?.role === "SUPERVISOR" || user?.role === "EXECUTIVE");
   const isAdmin = user?.role === "ADMIN";
   const [items, setItems] = useState<Contractor[]>([]);
   const [sites, setSites] = useState<Site[]>([]);

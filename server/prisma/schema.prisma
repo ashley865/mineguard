@@ -196,6 +196,8 @@ model User {
   productionRecords      ProductionRecord[]     @relation("ProductionRecordedBy")
   maintenanceSchedules   MaintenanceSchedule[]  @relation("MaintenanceCreatedBy")
   maintenanceAssignments MaintenanceSchedule[]  @relation("MaintenanceAssignedTo")
+  requirementsCreated    ComplianceRequirement[] @relation("RequirementCreatedBy")
+  requirementsResponsibleFor ComplianceRequirement[] @relation("RequirementResponsiblePerson")
   fleetPositions         FleetPosition[]        @relation("FleetPositionRecordedBy")
   inventoryMovements     InventoryMovement[]    @relation("InventoryMovementBy")
   weatherReadings        WeatherReading[]       @relation("WeatherRecordedBy")
@@ -280,6 +282,7 @@ model Site {
   invoices             Invoice[]
   expenses             Expense[]
   evacuations          EmergencyEvacuation[]
+  complianceRequirements ComplianceRequirement[]
 }
 
 model Zone {
@@ -518,6 +521,53 @@ model RegulatoryNotice {
   zone                Zone?          @relation(fields: [zoneId], references: [id], onDelete: SetNull)
 
   visits InspectionVisit[]
+
+  createdAt DateTime @default(now())
+}
+
+enum RequirementFrequency {
+  DAILY
+  WEEKLY
+  MONTHLY
+  QUARTERLY
+  ANNUALLY
+  ONCE_OFF
+  AD_HOC
+}
+
+enum RequirementStatus {
+  PENDING
+  COMPLIANT
+  NON_COMPLIANT
+  IN_PROGRESS
+  OVERDUE
+  NOT_APPLICABLE
+}
+
+// The Compliance Officer's Legal & Regulatory Requirements Register: one row per
+// applicable law/regulation, tracking who owns it, what proves compliance, and when
+// it's next due — distinct from RegulatoryNotice, which tracks notices already issued
+// by a regulator rather than the underlying ongoing legal obligations.
+model ComplianceRequirement {
+  id                     String                @id @default(cuid())
+  siteId                 String
+  site                   Site                  @relation(fields: [siteId], references: [id], onDelete: Cascade)
+  regulation             String
+  requirement            String
+  applicableOperation    String
+  responsibleDepartment  String
+  responsiblePersonId    String?
+  responsiblePerson      User?                 @relation("RequirementResponsiblePerson", fields: [responsiblePersonId], references: [id], onDelete: SetNull)
+  frequency              RequirementFrequency
+  evidenceRequired       String
+  dueDate                DateTime
+  status                 RequirementStatus     @default(PENDING)
+  riskLevel              RiskLevel
+  lastVerification       DateTime?
+  nextReview             DateTime?
+  relatedDocuments       String?
+  createdById            String?
+  createdBy              User?                 @relation("RequirementCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
 
   createdAt DateTime @default(now())
 }
@@ -1162,11 +1212,32 @@ enum MineralListingStatus {
   WITHDRAWN
 }
 
+// Shared commodity list for South African mining operations, used wherever a mineral
+// type is captured (production records, marketplace listings) so the value can be
+// reliably grouped/charted instead of free text.
+enum MineralType {
+  GOLD
+  PLATINUM_GROUP_METALS
+  DIAMOND
+  COAL
+  IRON_ORE
+  CHROME
+  MANGANESE
+  COPPER
+  ZINC
+  NICKEL
+  URANIUM
+  COBALT
+  LIMESTONE
+  SAND_AND_AGGREGATE
+  OTHER
+}
+
 model MineralListing {
   id            String               @id @default(cuid())
   siteId        String
   site          Site                 @relation(fields: [siteId], references: [id], onDelete: Cascade)
-  mineralType   String
+  mineralType   MineralType
   grade         String?
   quantity      Float
   unit          String
@@ -1299,7 +1370,7 @@ model ProductionRecord {
   zone          Zone?           @relation(fields: [zoneId], references: [id], onDelete: SetNull)
   shiftDate       DateTime
   shift           ProductionShift
-  mineralType     String
+  mineralType     MineralType
   tonnesMined     Float
   tonnesProcessed Float?
   oreGrade        Float?

@@ -3,6 +3,7 @@ import { z } from "zod";
 import { prisma } from "../prisma";
 import { requireAuth, requireRole } from "../middleware/auth";
 import { requireMineId } from "../lib/mineScope";
+import { mineralTypeEnum } from "../lib/minerals";
 
 const router = Router();
 
@@ -30,7 +31,7 @@ const recordSchema = z.object({
   zoneId: z.string().optional().nullable(),
   shiftDate: z.coerce.date(),
   shift: z.enum(["DAY", "AFTERNOON", "NIGHT"]),
-  mineralType: z.string().min(1),
+  mineralType: mineralTypeEnum,
   tonnesMined: z.coerce.number().nonnegative(),
   tonnesProcessed: z.coerce.number().nonnegative().optional().nullable(),
   oreGrade: z.coerce.number().optional().nullable(),

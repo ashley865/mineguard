@@ -109,7 +109,7 @@ export default function FinancialPerformanceTab({ sites }: { sites: Site[] }) {
                       <Tooltip contentStyle={CHART_TOOLTIP_STYLE} />
                       <Legend wrapperStyle={{ fontSize: 11 }} />
                       {(summary.minerals ?? []).map((mineral, i) => (
-                        <Bar key={mineral} dataKey={mineral} name={mineral} stackId="tonnes" fill={MINERAL_COLORS[i % MINERAL_COLORS.length]} radius={i === (summary.minerals ?? []).length - 1 ? [3, 3, 0, 0] : undefined} />
+                        <Bar key={mineral} dataKey={mineral} name={t(`mineralTypes.${mineral}`)} stackId="tonnes" fill={MINERAL_COLORS[i % MINERAL_COLORS.length]} radius={i === (summary.minerals ?? []).length - 1 ? [3, 3, 0, 0] : undefined} />
                       ))}
                     </BarChart>
                   </ResponsiveContainer>

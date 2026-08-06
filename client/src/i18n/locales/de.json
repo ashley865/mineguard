@@ -447,7 +447,10 @@
       "PAID": "Bezahlt",
       "ORDERED": "Bestellt",
       "RECEIVED": "Erhalten",
-      "BLACKLISTED": "Gesperrt"
+      "BLACKLISTED": "Gesperrt",
+      "COMPLIANT": "Konform",
+      "NON_COMPLIANT": "Nicht konform",
+      "NOT_APPLICABLE": "Nicht zutreffend"
     },
     "severity": {
       "LOW": "Niedrig",
@@ -591,7 +594,41 @@
       "newTitle": "Neue Sicherheitsinspektion",
       "editTitle": "Sicherheitsinspektion bearbeiten"
     },
-    "loading": "Wird geladen…"
+    "loading": "Wird geladen…",
+    "tabRequirements": "Anforderungsregister",
+    "requirement": {
+      "subtitle": "Gesetzliche und behördliche Anforderungen für diese Mine, wer für jede verantwortlich ist und wann sie als Nächstes fällig ist.",
+      "new": "+ Neue Anforderung",
+      "newTitle": "Neue Anforderung",
+      "editTitle": "Anforderung Bearbeiten",
+      "regulation": "Vorschrift / Gesetzgebung",
+      "requirement": "Anforderung",
+      "applicableOperation": "Anwendbarer Betrieb",
+      "responsibleDepartment": "Verantwortliche Abteilung",
+      "responsiblePerson": "Verantwortliche Person",
+      "frequency": "Häufigkeit",
+      "frequencies": {
+        "DAILY": "Täglich",
+        "WEEKLY": "Wöchentlich",
+        "MONTHLY": "Monatlich",
+        "QUARTERLY": "Vierteljährlich",
+        "ANNUALLY": "Jährlich",
+        "ONCE_OFF": "Einmalig",
+        "AD_HOC": "Ad hoc"
+      },
+      "evidenceRequired": "Erforderlicher Nachweis",
+      "dueDate": "Fälligkeitsdatum",
+      "riskLevel": "Risikostufe",
+      "lastVerification": "Letzte Überprüfung",
+      "nextReview": "Nächste Überprüfung",
+      "relatedDocuments": "Zugehörige Dokumente",
+      "relatedDocumentsPlaceholder": "Dokumentname(n) oder Ablageeintrag angeben",
+      "colRegulation": "Vorschrift",
+      "colOperation": "Anwendbarer Betrieb",
+      "colResponsible": "Verantwortlich",
+      "noneYet": "Noch keine Anforderungen erfasst.",
+      "confirmDelete": "Diese Anforderung löschen?"
+    }
   },
   "permits": {
     "nav": "Genehmigungen & Vorschriften",
@@ -1980,5 +2017,22 @@
     "hangUp": "Auflegen",
     "voiceCall": "Anrufen",
     "videoCall": "Videoanruf"
+  },
+  "mineralTypes": {
+    "GOLD": "Gold",
+    "PLATINUM_GROUP_METALS": "Platingruppenmetalle (PGM)",
+    "DIAMOND": "Diamant",
+    "COAL": "Kohle",
+    "IRON_ORE": "Eisenerz",
+    "CHROME": "Chrom",
+    "MANGANESE": "Mangan",
+    "COPPER": "Kupfer",
+    "ZINC": "Zink",
+    "NICKEL": "Nickel",
+    "URANIUM": "Uran",
+    "COBALT": "Kobalt",
+    "LIMESTONE": "Kalkstein",
+    "SAND_AND_AGGREGATE": "Sand und Gesteinskörnung",
+    "OTHER": "Sonstiges"
   }
 }
