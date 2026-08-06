@@ -200,6 +200,10 @@ model User {
   maintenanceSchedules   MaintenanceSchedule[]  @relation("MaintenanceCreatedBy")
   requirementsCreated    ComplianceRequirement[] @relation("RequirementCreatedBy")
   requirementsResponsibleFor ComplianceRequirement[] @relation("RequirementResponsiblePerson")
+  auditFindingsCreated       AuditFinding[]          @relation("AuditFindingCreatedBy")
+  auditFindingsResponsibleFor AuditFinding[]         @relation("AuditFindingResponsiblePerson")
+  auditFindingsVerified      AuditFinding[]          @relation("AuditFindingVerifiedBy")
+  auditFindingsClosed        AuditFinding[]          @relation("AuditFindingClosedBy")
   fleetPositions         FleetPosition[]        @relation("FleetPositionRecordedBy")
   inventoryMovements     InventoryMovement[]    @relation("InventoryMovementBy")
   weatherReadings        WeatherReading[]       @relation("WeatherRecordedBy")
@@ -287,6 +291,7 @@ model Site {
   expenses             Expense[]
   evacuations          EmergencyEvacuation[]
   complianceRequirements ComplianceRequirement[]
+  auditFindings          AuditFinding[]
 }
 
 model Zone {
@@ -595,6 +600,46 @@ model ComplianceRequirement {
   relatedDocuments       String?
   createdById            String?
   createdBy              User?                 @relation("RequirementCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+
+  createdAt DateTime @default(now())
+}
+
+enum AuditFindingStatus {
+  OPEN
+  IN_PROGRESS
+  AWAITING_VERIFICATION
+  VERIFIED
+  CLOSED
+  OVERDUE
+}
+
+// The Compliance Officer's audit findings register: one row per finding raised in an
+// internal or external audit, tracked through its full lifecycle — Finding, Actions,
+// Evidence, Verification, Closure — distinct from ComplianceRequirement, which tracks the
+// ongoing legal obligation itself rather than a specific instance of non-conformance.
+model AuditFinding {
+  id                  String             @id @default(cuid())
+  siteId              String
+  site                Site               @relation(fields: [siteId], references: [id], onDelete: Cascade)
+  findingNumber       String
+  requirementViolated String
+  severity            RiskLevel
+  description         String
+  evidence            String?
+  responsiblePersonId String?
+  responsiblePerson   User?              @relation("AuditFindingResponsiblePerson", fields: [responsiblePersonId], references: [id], onDelete: SetNull)
+  correctiveAction    String
+  dueDate             DateTime
+  status              AuditFindingStatus @default(OPEN)
+  verificationNotes   String?
+  verifiedById        String?
+  verifiedBy          User?              @relation("AuditFindingVerifiedBy", fields: [verifiedById], references: [id], onDelete: SetNull)
+  verifiedAt          DateTime?
+  closureDate         DateTime?
+  closedById          String?
+  closedBy            User?              @relation("AuditFindingClosedBy", fields: [closedById], references: [id], onDelete: SetNull)
+  createdById         String?
+  createdBy           User?              @relation("AuditFindingCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
 
   createdAt DateTime @default(now())
 }

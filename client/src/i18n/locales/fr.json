@@ -470,7 +470,9 @@
       "BLACKLISTED": "Sur liste noire",
       "COMPLIANT": "Conforme",
       "NON_COMPLIANT": "Non conforme",
-      "NOT_APPLICABLE": "Non applicable"
+      "NOT_APPLICABLE": "Non applicable",
+      "AWAITING_VERIFICATION": "En attente de vérification",
+      "VERIFIED": "Vérifié"
     },
     "severity": {
       "LOW": "Faible",
@@ -648,6 +650,29 @@
       "colResponsible": "Responsable",
       "noneYet": "Aucune exigence enregistrée pour le moment.",
       "confirmDelete": "Supprimer cette exigence ?"
+    },
+    "tabAudit": "Constatations d'Audit",
+    "audit": {
+      "subtitle": "Constatations d'audit suivies tout au long de leur cycle de vie complet : Constatation, Actions, Preuves, Vérification, Clôture.",
+      "new": "+ Nouvelle Constatation",
+      "newTitle": "Nouvelle Constatation d'Audit",
+      "editTitle": "Modifier la Constatation d'Audit",
+      "findingNumber": "ID de la constatation",
+      "requirementViolated": "Exigence enfreinte",
+      "severity": "Gravité",
+      "description": "Description",
+      "evidence": "Preuve",
+      "evidencePlaceholder": "Décrivez ou référencez les preuves à l'appui (photos, registres, entrée du coffre)",
+      "responsiblePerson": "Personne responsable",
+      "correctiveAction": "Action corrective",
+      "dueDate": "Date d'échéance",
+      "verificationNotes": "Vérification",
+      "closureDate": "Date de clôture",
+      "colFindingNumber": "ID de la Constatation",
+      "colRequirement": "Exigence Enfreinte",
+      "colResponsible": "Responsable",
+      "noneYet": "Aucune constatation d'audit enregistrée pour le moment.",
+      "confirmDelete": "Supprimer cette constatation d'audit ?"
     }
   },
   "permits": {

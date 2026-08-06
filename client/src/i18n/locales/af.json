@@ -470,7 +470,9 @@
       "BLACKLISTED": "Swartlys",
       "COMPLIANT": "Voldoen",
       "NON_COMPLIANT": "Voldoen nie",
-      "NOT_APPLICABLE": "Nie van toepassing nie"
+      "NOT_APPLICABLE": "Nie van toepassing nie",
+      "AWAITING_VERIFICATION": "Wag vir verifikasie",
+      "VERIFIED": "Geverifieer"
     },
     "severity": {
       "LOW": "Laag",
@@ -648,6 +650,29 @@
       "colResponsible": "Verantwoordelik",
       "noneYet": "Nog geen vereistes aangeteken nie.",
       "confirmDelete": "Verwyder hierdie vereiste?"
+    },
+    "tabAudit": "Ouditbevindinge",
+    "audit": {
+      "subtitle": "Ouditbevindinge gevolg deur hul volle lewensiklus: Bevinding, Aksies, Bewyse, Verifikasie, Afsluiting.",
+      "new": "+ Nuwe Bevinding",
+      "newTitle": "Nuwe Ouditbevinding",
+      "editTitle": "Wysig Ouditbevinding",
+      "findingNumber": "Bevindings-ID",
+      "requirementViolated": "Vereiste oortree",
+      "severity": "Erns",
+      "description": "Beskrywing",
+      "evidence": "Bewys",
+      "evidencePlaceholder": "Beskryf of verwys na die ondersteunende bewys (foto's, rekords, kluisinskrywing)",
+      "responsiblePerson": "Verantwoordelike persoon",
+      "correctiveAction": "Regstellende aksie",
+      "dueDate": "Vervaldatum",
+      "verificationNotes": "Verifikasie",
+      "closureDate": "Afsluitingsdatum",
+      "colFindingNumber": "Bevindings-ID",
+      "colRequirement": "Oortrede Vereiste",
+      "colResponsible": "Verantwoordelik",
+      "noneYet": "Nog geen ouditbevindinge aangeteken nie.",
+      "confirmDelete": "Verwyder hierdie ouditbevinding?"
     }
   },
   "permits": {

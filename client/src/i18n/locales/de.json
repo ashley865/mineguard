@@ -470,7 +470,9 @@
       "BLACKLISTED": "Gesperrt",
       "COMPLIANT": "Konform",
       "NON_COMPLIANT": "Nicht konform",
-      "NOT_APPLICABLE": "Nicht zutreffend"
+      "NOT_APPLICABLE": "Nicht zutreffend",
+      "AWAITING_VERIFICATION": "Wartet auf Verifizierung",
+      "VERIFIED": "Verifiziert"
     },
     "severity": {
       "LOW": "Niedrig",
@@ -648,6 +650,29 @@
       "colResponsible": "Verantwortlich",
       "noneYet": "Noch keine Anforderungen erfasst.",
       "confirmDelete": "Diese Anforderung löschen?"
+    },
+    "tabAudit": "Auditfeststellungen",
+    "audit": {
+      "subtitle": "Auditfeststellungen werden über ihren gesamten Lebenszyklus verfolgt: Feststellung, Maßnahmen, Nachweis, Verifizierung, Abschluss.",
+      "new": "+ Neue Feststellung",
+      "newTitle": "Neue Auditfeststellung",
+      "editTitle": "Auditfeststellung Bearbeiten",
+      "findingNumber": "Feststellungs-ID",
+      "requirementViolated": "Verletzte Anforderung",
+      "severity": "Schweregrad",
+      "description": "Beschreibung",
+      "evidence": "Nachweis",
+      "evidencePlaceholder": "Beschreiben oder referenzieren Sie den unterstützenden Nachweis (Fotos, Aufzeichnungen, Tresoreintrag)",
+      "responsiblePerson": "Verantwortliche Person",
+      "correctiveAction": "Korrekturmaßnahme",
+      "dueDate": "Fälligkeitsdatum",
+      "verificationNotes": "Verifizierung",
+      "closureDate": "Abschlussdatum",
+      "colFindingNumber": "Feststellungs-ID",
+      "colRequirement": "Verletzte Anforderung",
+      "colResponsible": "Verantwortlich",
+      "noneYet": "Noch keine Auditfeststellungen erfasst.",
+      "confirmDelete": "Diese Auditfeststellung löschen?"
     }
   },
   "permits": {

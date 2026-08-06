@@ -487,7 +487,9 @@
       "BLACKLISTED": "Blacklisted",
       "COMPLIANT": "Compliant",
       "NON_COMPLIANT": "Non-compliant",
-      "NOT_APPLICABLE": "Not applicable"
+      "NOT_APPLICABLE": "Not applicable",
+      "AWAITING_VERIFICATION": "Awaiting verification",
+      "VERIFIED": "Verified"
     },
     "severity": {
       "LOW": "Low",
@@ -503,6 +505,7 @@
     "tabRisk": "Risk Assessments",
     "tabNotices": "Regulatory Notices",
     "tabRequirements": "Requirements Register",
+    "tabAudit": "Audit Findings",
     "tabMedical": "Medical Surveillance",
     "tabInspections": "Safety Inspections",
     "cop": {
@@ -620,6 +623,28 @@
       "colResponsible": "Responsible",
       "noneYet": "No requirements recorded yet.",
       "confirmDelete": "Delete this requirement?"
+    },
+    "audit": {
+      "subtitle": "Audit findings tracked through their full lifecycle: Finding, Actions, Evidence, Verification, Closure.",
+      "new": "+ New Finding",
+      "newTitle": "New Audit Finding",
+      "editTitle": "Edit Audit Finding",
+      "findingNumber": "Finding ID",
+      "requirementViolated": "Requirement violated",
+      "severity": "Severity",
+      "description": "Description",
+      "evidence": "Evidence",
+      "evidencePlaceholder": "Describe or reference the supporting evidence (photos, records, vault entry)",
+      "responsiblePerson": "Responsible person",
+      "correctiveAction": "Corrective action",
+      "dueDate": "Due date",
+      "verificationNotes": "Verification",
+      "closureDate": "Closure date",
+      "colFindingNumber": "Finding ID",
+      "colRequirement": "Requirement Violated",
+      "colResponsible": "Responsible",
+      "noneYet": "No audit findings recorded yet.",
+      "confirmDelete": "Delete this audit finding?"
     },
     "medical": {
       "new": "+ New Medical Record",

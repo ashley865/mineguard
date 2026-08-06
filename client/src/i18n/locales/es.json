@@ -470,7 +470,9 @@
       "BLACKLISTED": "En lista negra",
       "COMPLIANT": "Conforme",
       "NON_COMPLIANT": "No conforme",
-      "NOT_APPLICABLE": "No aplicable"
+      "NOT_APPLICABLE": "No aplicable",
+      "AWAITING_VERIFICATION": "En espera de verificación",
+      "VERIFIED": "Verificado"
     },
     "severity": {
       "LOW": "Baja",
@@ -648,6 +650,29 @@
       "colResponsible": "Responsable",
       "noneYet": "Aún no se han registrado requisitos.",
       "confirmDelete": "¿Eliminar este requisito?"
+    },
+    "tabAudit": "Hallazgos de Auditoría",
+    "audit": {
+      "subtitle": "Hallazgos de auditoría rastreados a través de su ciclo de vida completo: Hallazgo, Acciones, Evidencia, Verificación, Cierre.",
+      "new": "+ Nuevo Hallazgo",
+      "newTitle": "Nuevo Hallazgo de Auditoría",
+      "editTitle": "Editar Hallazgo de Auditoría",
+      "findingNumber": "ID del hallazgo",
+      "requirementViolated": "Requisito incumplido",
+      "severity": "Gravedad",
+      "description": "Descripción",
+      "evidence": "Evidencia",
+      "evidencePlaceholder": "Describa o referencie la evidencia de respaldo (fotos, registros, entrada del archivo)",
+      "responsiblePerson": "Persona responsable",
+      "correctiveAction": "Acción correctiva",
+      "dueDate": "Fecha límite",
+      "verificationNotes": "Verificación",
+      "closureDate": "Fecha de cierre",
+      "colFindingNumber": "ID del Hallazgo",
+      "colRequirement": "Requisito Incumplido",
+      "colResponsible": "Responsable",
+      "noneYet": "Aún no se han registrado hallazgos de auditoría.",
+      "confirmDelete": "¿Eliminar este hallazgo de auditoría?"
     }
   },
   "permits": {

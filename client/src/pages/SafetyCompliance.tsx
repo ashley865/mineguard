@@ -6,12 +6,13 @@ import CodesOfPracticeTab from "./compliance/CodesOfPracticeTab";
 import RiskAssessmentsTab from "./compliance/RiskAssessmentsTab";
 import RegulatoryNoticesTab from "./compliance/RegulatoryNoticesTab";
 import RequirementsRegisterTab from "./compliance/RequirementsRegisterTab";
+import AuditFindingsTab from "./compliance/AuditFindingsTab";
 import MedicalSurveillanceTab from "./compliance/MedicalSurveillanceTab";
 import SafetyInspectionsTab from "./compliance/SafetyInspectionsTab";
 import ExplosivesRegister from "./ExplosivesRegister";
 import { buttonPrimary, buttonSecondary } from "../components/ui";
 
-type TabKey = "cop" | "risk" | "notices" | "requirements" | "medical" | "inspections" | "explosives";
+type TabKey = "cop" | "risk" | "notices" | "requirements" | "audit" | "medical" | "inspections" | "explosives";
 
 export default function SafetyCompliance() {
   const { t } = useTranslation();
@@ -41,6 +42,7 @@ export default function SafetyCompliance() {
     { key: "risk", label: t("compliance.tabRisk") },
     { key: "notices", label: t("compliance.tabNotices") },
     { key: "requirements", label: t("compliance.tabRequirements") },
+    { key: "audit", label: t("compliance.tabAudit") },
     { key: "medical", label: t("compliance.tabMedical") },
     { key: "inspections", label: t("compliance.tabInspections") },
     { key: "explosives", label: t("explosives.nav") },
@@ -71,6 +73,7 @@ export default function SafetyCompliance() {
       {tab === "risk" && <RiskAssessmentsTab sites={sites} zones={zones} />}
       {tab === "notices" && <RegulatoryNoticesTab sites={sites} zones={zones} />}
       {tab === "requirements" && <RequirementsRegisterTab sites={sites} />}
+      {tab === "audit" && <AuditFindingsTab sites={sites} />}
       {tab === "medical" && <MedicalSurveillanceTab workers={workers} />}
       {tab === "inspections" && <SafetyInspectionsTab sites={sites} zones={zones} />}
       {tab === "explosives" && <ExplosivesRegister />}

@@ -488,6 +488,31 @@ export interface ComplianceRequirement {
   createdAt: string;
 }
 
+export type AuditFindingStatus = "OPEN" | "IN_PROGRESS" | "AWAITING_VERIFICATION" | "VERIFIED" | "CLOSED" | "OVERDUE";
+
+export interface AuditFinding {
+  id: string;
+  siteId: string;
+  site?: { id: string; name: string };
+  findingNumber: string;
+  requirementViolated: string;
+  severity: RiskLevel;
+  description: string;
+  evidence?: string | null;
+  responsiblePersonId?: string | null;
+  responsiblePerson?: { id: string; name: string } | null;
+  correctiveAction: string;
+  dueDate: string;
+  status: AuditFindingStatus;
+  verificationNotes?: string | null;
+  verifiedBy?: { id: string; name: string } | null;
+  verifiedAt?: string | null;
+  closureDate?: string | null;
+  closedBy?: { id: string; name: string } | null;
+  createdBy?: { id: string; name: string } | null;
+  createdAt: string;
+}
+
 export type ExamType = "PRE_EMPLOYMENT" | "PERIODICAL" | "EXIT" | "RETURN_TO_WORK";
 export type FitnessResult = "FIT" | "FIT_WITH_RESTRICTION" | "TEMPORARILY_UNFIT" | "UNFIT";
 
