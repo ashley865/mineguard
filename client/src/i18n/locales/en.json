@@ -442,7 +442,10 @@
       "AWARDED": "Awarded",
       "CANCELLED": "Cancelled",
       "ACTION_REQUIRED": "Action required",
-      "PAID": "Paid"
+      "PAID": "Paid",
+      "ORDERED": "Ordered",
+      "RECEIVED": "Received",
+      "BLACKLISTED": "Blacklisted"
     },
     "severity": {
       "LOW": "Low",
@@ -1519,6 +1522,17 @@
     "subtitle": "Warehouse stock levels, reorder points, and stock movements",
     "partNumber": "Part number",
     "category": "Category",
+    "uncategorized": "Uncategorized",
+    "allCategories": "All categories",
+    "categories": {
+      "SPARE_PARTS": "Spare Parts",
+      "PPE": "PPE",
+      "FUEL": "Fuel",
+      "LUBRICANTS": "Lubricants",
+      "CRITICAL_COMPONENT": "Critical Components",
+      "WAREHOUSE_STOCK": "Warehouse Stock",
+      "OTHER": "Other"
+    },
     "quantityOnHand": "Quantity on hand",
     "reorderPoint": "Reorder point",
     "unit": "Unit",
@@ -1539,7 +1553,20 @@
     "quantity": "Quantity",
     "reason": "Reason",
     "noMovements": "No movements logged yet.",
-    "movementError": "Could not log this movement"
+    "movementError": "Could not log this movement",
+    "procurementOverviewTitle": "Inventory & Procurement Overview",
+    "byCategory": "Stock by Category",
+    "itemCount": "Items",
+    "lowStockItems": "Low Stock Items",
+    "noLowStock": "No items at or below their reorder point.",
+    "explosivesStock": "Explosives Stock / Capacity",
+    "explosivesByStatus": "Explosives Magazines by Status",
+    "expiringLicenses": "{{count}} license(s) expiring within 30 days",
+    "openPoValue": "Open PO Value",
+    "poByStatus": "Purchase Orders by Status",
+    "pendingApproval": "Pending Approval",
+    "suppliersByStatus": "Suppliers by Status",
+    "totalSuppliers": "Total Suppliers"
   },
   "weather": {
     "nav": "Weather Monitoring",

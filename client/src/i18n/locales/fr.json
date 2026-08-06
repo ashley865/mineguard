@@ -442,7 +442,10 @@
       "AWARDED": "Attribuée",
       "CANCELLED": "Annulée",
       "ACTION_REQUIRED": "Action requise",
-      "PAID": "Payé"
+      "PAID": "Payé",
+      "ORDERED": "Commandé",
+      "RECEIVED": "Reçu",
+      "BLACKLISTED": "Sur liste noire"
     },
     "severity": {
       "LOW": "Faible",
@@ -1485,7 +1488,31 @@
     "quantity": "Quantité",
     "reason": "Motif",
     "noMovements": "Aucun mouvement enregistré pour le moment.",
-    "movementError": "Impossible d'enregistrer ce mouvement"
+    "movementError": "Impossible d'enregistrer ce mouvement",
+    "uncategorized": "Sans catégorie",
+    "allCategories": "Toutes les catégories",
+    "categories": {
+      "SPARE_PARTS": "Pièces Détachées",
+      "PPE": "EPI",
+      "FUEL": "Carburant",
+      "LUBRICANTS": "Lubrifiants",
+      "CRITICAL_COMPONENT": "Composants Critiques",
+      "WAREHOUSE_STOCK": "Stock d'Entrepôt",
+      "OTHER": "Autre"
+    },
+    "procurementOverviewTitle": "Aperçu des Stocks et Achats",
+    "byCategory": "Stock par Catégorie",
+    "itemCount": "Articles",
+    "lowStockItems": "Articles en Stock Faible",
+    "noLowStock": "Aucun article à son seuil de réapprovisionnement ou en dessous.",
+    "explosivesStock": "Stock d'Explosifs / Capacité",
+    "explosivesByStatus": "Dépôts d'Explosifs par Statut",
+    "expiringLicenses": "{{count}} licence(s) expirant sous 30 jours",
+    "openPoValue": "Valeur des BC Ouverts",
+    "poByStatus": "Bons de Commande par Statut",
+    "pendingApproval": "En Attente d'Approbation",
+    "suppliersByStatus": "Fournisseurs par Statut",
+    "totalSuppliers": "Total des Fournisseurs"
   },
   "weather": {
     "nav": "Surveillance Météorologique",

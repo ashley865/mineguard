@@ -442,7 +442,10 @@
       "AWARDED": "Vergeben",
       "CANCELLED": "Storniert",
       "ACTION_REQUIRED": "Maßnahme erforderlich",
-      "PAID": "Bezahlt"
+      "PAID": "Bezahlt",
+      "ORDERED": "Bestellt",
+      "RECEIVED": "Erhalten",
+      "BLACKLISTED": "Gesperrt"
     },
     "severity": {
       "LOW": "Niedrig",
@@ -1485,7 +1488,31 @@
     "quantity": "Menge",
     "reason": "Grund",
     "noMovements": "Noch keine Bewegungen erfasst.",
-    "movementError": "Diese Bewegung konnte nicht erfasst werden"
+    "movementError": "Diese Bewegung konnte nicht erfasst werden",
+    "uncategorized": "Nicht kategorisiert",
+    "allCategories": "Alle Kategorien",
+    "categories": {
+      "SPARE_PARTS": "Ersatzteile",
+      "PPE": "PSA",
+      "FUEL": "Kraftstoff",
+      "LUBRICANTS": "Schmiermittel",
+      "CRITICAL_COMPONENT": "Kritische Komponenten",
+      "WAREHOUSE_STOCK": "Lagerbestand",
+      "OTHER": "Sonstiges"
+    },
+    "procurementOverviewTitle": "Bestands- und Beschaffungsübersicht",
+    "byCategory": "Bestand nach Kategorie",
+    "itemCount": "Artikel",
+    "lowStockItems": "Artikel mit Niedrigem Bestand",
+    "noLowStock": "Keine Artikel auf oder unter ihrem Meldebestand.",
+    "explosivesStock": "Sprengstoffbestand / Kapazität",
+    "explosivesByStatus": "Sprengstofflager nach Status",
+    "expiringLicenses": "{{count}} Lizenz(en) laufen innerhalb von 30 Tagen ab",
+    "openPoValue": "Offener Bestellwert",
+    "poByStatus": "Bestellungen nach Status",
+    "pendingApproval": "Ausstehende Genehmigung",
+    "suppliersByStatus": "Lieferanten nach Status",
+    "totalSuppliers": "Lieferanten Gesamt"
   },
   "weather": {
     "nav": "Wetterüberwachung",

@@ -442,7 +442,10 @@
       "AWARDED": "Toegeken",
       "CANCELLED": "Gekanselleer",
       "ACTION_REQUIRED": "Aksie vereis",
-      "PAID": "Betaal"
+      "PAID": "Betaal",
+      "ORDERED": "Bestel",
+      "RECEIVED": "Ontvang",
+      "BLACKLISTED": "Swartlys"
     },
     "severity": {
       "LOW": "Laag",
@@ -1485,7 +1488,31 @@
     "quantity": "Hoeveelheid",
     "reason": "Rede",
     "noMovements": "Nog geen bewegings aangeteken nie.",
-    "movementError": "Kon nie hierdie beweging aanteken nie"
+    "movementError": "Kon nie hierdie beweging aanteken nie",
+    "uncategorized": "Ongekategoriseer",
+    "allCategories": "Alle kategorieë",
+    "categories": {
+      "SPARE_PARTS": "Onderdele",
+      "PPE": "PBU",
+      "FUEL": "Brandstof",
+      "LUBRICANTS": "Smeermiddels",
+      "CRITICAL_COMPONENT": "Kritieke Komponente",
+      "WAREHOUSE_STOCK": "Pakhuisvoorraad",
+      "OTHER": "Ander"
+    },
+    "procurementOverviewTitle": "Voorraad- en Verkrygingsoorsig",
+    "byCategory": "Voorraad volgens Kategorie",
+    "itemCount": "Items",
+    "lowStockItems": "Lae Voorraaditems",
+    "noLowStock": "Geen items op of onder hul herbestelpunt nie.",
+    "explosivesStock": "Plofstofvoorraad / Kapasiteit",
+    "explosivesByStatus": "Plofstofmagasyne volgens Status",
+    "expiringLicenses": "{{count}} lisensie(s) verval binne 30 dae",
+    "openPoValue": "Oop Bestelwaarde",
+    "poByStatus": "Bestelordes volgens Status",
+    "pendingApproval": "Wag op Goedkeuring",
+    "suppliersByStatus": "Verskaffers volgens Status",
+    "totalSuppliers": "Totale Verskaffers"
   },
   "weather": {
     "nav": "Weermonitering",

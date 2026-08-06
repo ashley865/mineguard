@@ -1365,14 +1365,24 @@ enum InventoryMovementDirection {
   OUT
 }
 
+enum InventoryCategory {
+  SPARE_PARTS
+  PPE
+  FUEL
+  LUBRICANTS
+  CRITICAL_COMPONENT
+  WAREHOUSE_STOCK
+  OTHER
+}
+
 model InventoryItem {
-  id             String   @id @default(cuid())
+  id             String             @id @default(cuid())
   siteId         String
-  site           Site     @relation(fields: [siteId], references: [id], onDelete: Cascade)
+  site           Site               @relation(fields: [siteId], references: [id], onDelete: Cascade)
   partNumber     String?
   name           String
-  category       String?
-  quantityOnHand Float    @default(0)
+  category       InventoryCategory?
+  quantityOnHand Float              @default(0)
   reorderPoint   Float?
   unit           String
   unitCost       Float?

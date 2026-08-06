@@ -11,6 +11,7 @@ import FinancialSummaryWidget from "../components/FinancialSummaryWidget";
 import HrWorkforceWidget from "../components/HrWorkforceWidget";
 import SecurityVisitorHistoryWidget from "../components/SecurityVisitorHistoryWidget";
 import ProductionAnalyticsWidget from "../components/ProductionAnalyticsWidget";
+import InventoryProcurementWidget from "../components/InventoryProcurementWidget";
 
 type Tone = "positive" | "negative" | "caution";
 
@@ -270,6 +271,7 @@ export default function ExecutiveDashboard() {
       {canSeeHrWorkforce && <HrWorkforceWidget />}
       {canSeeVisitorHistory && <SecurityVisitorHistoryWidget />}
       {canSeeProductionAnalytics && <ProductionAnalyticsWidget />}
+      {canSeeProductionAnalytics && <InventoryProcurementWidget />}
 
       <div className={`${cardClass} p-3`}>
         <h2 className="text-xs font-semibold mb-2">{t("executive.suggestionsTitle")}</h2>

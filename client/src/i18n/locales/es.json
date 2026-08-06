@@ -442,7 +442,10 @@
       "AWARDED": "Adjudicada",
       "CANCELLED": "Cancelada",
       "ACTION_REQUIRED": "Acción requerida",
-      "PAID": "Pagado"
+      "PAID": "Pagado",
+      "ORDERED": "Pedido",
+      "RECEIVED": "Recibido",
+      "BLACKLISTED": "En lista negra"
     },
     "severity": {
       "LOW": "Baja",
@@ -1485,7 +1488,31 @@
     "quantity": "Cantidad",
     "reason": "Motivo",
     "noMovements": "Aún no hay movimientos registrados.",
-    "movementError": "No se pudo registrar este movimiento"
+    "movementError": "No se pudo registrar este movimiento",
+    "uncategorized": "Sin categoría",
+    "allCategories": "Todas las categorías",
+    "categories": {
+      "SPARE_PARTS": "Repuestos",
+      "PPE": "EPP",
+      "FUEL": "Combustible",
+      "LUBRICANTS": "Lubricantes",
+      "CRITICAL_COMPONENT": "Componentes Críticos",
+      "WAREHOUSE_STOCK": "Existencias de Almacén",
+      "OTHER": "Otro"
+    },
+    "procurementOverviewTitle": "Resumen de Inventario y Adquisiciones",
+    "byCategory": "Existencias por Categoría",
+    "itemCount": "Artículos",
+    "lowStockItems": "Artículos con Poco Stock",
+    "noLowStock": "No hay artículos en o por debajo de su punto de reorden.",
+    "explosivesStock": "Stock de Explosivos / Capacidad",
+    "explosivesByStatus": "Polvorines por Estado",
+    "expiringLicenses": "{{count}} licencia(s) vencen en 30 días",
+    "openPoValue": "Valor de OC Abiertas",
+    "poByStatus": "Órdenes de Compra por Estado",
+    "pendingApproval": "Pendiente de Aprobación",
+    "suppliersByStatus": "Proveedores por Estado",
+    "totalSuppliers": "Total de Proveedores"
   },
   "weather": {
     "nav": "Monitoreo del Clima",

@@ -1099,13 +1099,22 @@ export interface FleetPosition {
   createdAt: string;
 }
 
+export type InventoryCategory =
+  | "SPARE_PARTS"
+  | "PPE"
+  | "FUEL"
+  | "LUBRICANTS"
+  | "CRITICAL_COMPONENT"
+  | "WAREHOUSE_STOCK"
+  | "OTHER";
+
 export interface InventoryItem {
   id: string;
   siteId: string;
   site?: { id: string; name: string };
   partNumber?: string | null;
   name: string;
-  category?: string | null;
+  category?: InventoryCategory | null;
   quantityOnHand: number;
   reorderPoint?: number | null;
   unit: string;
@@ -1113,6 +1122,35 @@ export interface InventoryItem {
   supplier?: string | null;
   location?: string | null;
   createdAt: string;
+}
+
+export interface InventoryProcurementSummary {
+  categories: { category: InventoryCategory; itemCount: number; lowStockCount: number; totalValue: number }[];
+  uncategorizedCount: number;
+  lowStockItems: {
+    name: string;
+    category: InventoryCategory | null;
+    quantityOnHand: number;
+    reorderPoint: number | null;
+    unit: string;
+    site: string | null;
+  }[];
+  explosives: {
+    magazineCount: number;
+    totalCurrentStock: number;
+    totalCapacity: number;
+    byStatus: Record<ExplosivesMagazineStatus, number>;
+    expiringLicenses: number;
+  };
+  purchaseOrders: {
+    byStatus: Record<PurchaseOrderStatus, number>;
+    openValue: number;
+    pendingApproval: number;
+  };
+  suppliers: {
+    total: number;
+    byStatus: Record<SupplierStatus, number>;
+  };
 }
 
 export type InventoryMovementDirection = "IN" | "OUT";

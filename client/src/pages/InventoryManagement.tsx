@@ -2,9 +2,19 @@ import { FormEvent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { api } from "../api/client";
 import { useAuth } from "../context/AuthContext";
-import { InventoryItem, InventoryMovement, InventoryMovementDirection, Site } from "../api/types";
+import { InventoryCategory, InventoryItem, InventoryMovement, InventoryMovementDirection, Site } from "../api/types";
 import Modal from "../components/Modal";
 import { buttonDanger, buttonPrimary, buttonSecondary, cardClass, inputClass, labelClass, selectClass } from "../components/ui";
+
+const inventoryCategories: InventoryCategory[] = [
+  "SPARE_PARTS",
+  "PPE",
+  "FUEL",
+  "LUBRICANTS",
+  "CRITICAL_COMPONENT",
+  "WAREHOUSE_STOCK",
+  "OTHER",
+];
 
 function ItemForm({ sites, initial, onSubmit, onCancel }: {
   sites: Site[];
@@ -16,7 +26,7 @@ function ItemForm({ sites, initial, onSubmit, onCancel }: {
   const [siteId, setSiteId] = useState(initial?.siteId ?? sites[0]?.id ?? "");
   const [partNumber, setPartNumber] = useState(initial?.partNumber ?? "");
   const [name, setName] = useState(initial?.name ?? "");
-  const [category, setCategory] = useState(initial?.category ?? "");
+  const [category, setCategory] = useState<InventoryCategory | "">(initial?.category ?? "");
   const [quantityOnHand, setQuantityOnHand] = useState(initial?.quantityOnHand?.toString() ?? "0");
   const [reorderPoint, setReorderPoint] = useState(initial?.reorderPoint?.toString() ?? "");
   const [unit, setUnit] = useState(initial?.unit ?? "");
@@ -33,7 +43,7 @@ function ItemForm({ sites, initial, onSubmit, onCancel }: {
         siteId,
         partNumber: partNumber || undefined,
         name,
-        category: category || undefined,
+        category: category || null,
         quantityOnHand: initial ? undefined : Number(quantityOnHand),
         reorderPoint: reorderPoint ? Number(reorderPoint) : null,
         unit,
@@ -67,7 +77,10 @@ function ItemForm({ sites, initial, onSubmit, onCancel }: {
       <div className="grid grid-cols-2 gap-3">
         <div>
           <label className={labelClass}>{t("inventory.category")}</label>
-          <input className={inputClass} value={category} onChange={(e) => setCategory(e.target.value)} />
+          <select className={selectClass} value={category} onChange={(e) => setCategory(e.target.value as InventoryCategory | "")}>
+            <option value="">{t("inventory.uncategorized")}</option>
+            {inventoryCategories.map((c) => <option key={c} value={c}>{t(`inventory.categories.${c}`)}</option>)}
+          </select>
         </div>
         <div>
           <label className={labelClass}>{t("inventory.unit")}</label>
@@ -198,6 +211,7 @@ export default function InventoryManagement() {
   const [sites, setSites] = useState<Site[]>([]);
   const [loading, setLoading] = useState(true);
   const [lowStockOnly, setLowStockOnly] = useState(false);
+  const [categoryFilter, setCategoryFilter] = useState<InventoryCategory | "">("");
   const [modal, setModal] = useState<null | "create" | InventoryItem>(null);
   const [movementsItem, setMovementsItem] = useState<InventoryItem | null>(null);
 
@@ -235,6 +249,8 @@ export default function InventoryManagement() {
     await load();
   }
 
+  const visibleItems = categoryFilter ? items.filter((i) => i.category === categoryFilter) : items;
+
   if (loading) return <div className="text-mine-300">{t("common.loading")}</div>;
 
   return (
@@ -249,10 +265,20 @@ export default function InventoryManagement() {
         )}
       </div>
 
-      <label className="flex items-center gap-2 text-xs text-mine-300">
-        <input type="checkbox" checked={lowStockOnly} onChange={(e) => setLowStockOnly(e.target.checked)} />
-        {t("inventory.lowStockOnly")}
-      </label>
+      <div className="flex items-center gap-4 flex-wrap">
+        <label className="flex items-center gap-2 text-xs text-mine-300">
+          <input type="checkbox" checked={lowStockOnly} onChange={(e) => setLowStockOnly(e.target.checked)} />
+          {t("inventory.lowStockOnly")}
+        </label>
+        <select
+          className={`${selectClass} text-xs max-w-[12rem] py-1.5`}
+          value={categoryFilter}
+          onChange={(e) => setCategoryFilter(e.target.value as InventoryCategory | "")}
+        >
+          <option value="">{t("inventory.allCategories")}</option>
+          {inventoryCategories.map((c) => <option key={c} value={c}>{t(`inventory.categories.${c}`)}</option>)}
+        </select>
+      </div>
 
       <div className={`${cardClass} overflow-x-auto`}>
         <table className="w-full text-sm">
@@ -267,13 +293,13 @@ export default function InventoryManagement() {
             </tr>
           </thead>
           <tbody>
-            {items.map((item) => {
+            {visibleItems.map((item) => {
               const low = item.reorderPoint != null && item.quantityOnHand <= item.reorderPoint;
               return (
                 <tr key={item.id} className="border-t border-mine-800 hover:bg-mine-800/30">
                   <td className="px-4 py-2 font-medium">{item.name}{item.partNumber ? ` (${item.partNumber})` : ""}</td>
                   <td className="px-4 py-2 text-mine-300">{item.site?.name}</td>
-                  <td className="px-4 py-2 text-mine-300">{item.category ?? "—"}</td>
+                  <td className="px-4 py-2 text-mine-300">{item.category ? t(`inventory.categories.${item.category}`) : t("inventory.uncategorized")}</td>
                   <td className={`px-4 py-2 ${low ? "text-danger-500 font-semibold" : "text-mine-300"}`}>
                     {item.quantityOnHand} {item.unit}
                   </td>
@@ -292,7 +318,7 @@ export default function InventoryManagement() {
                 </tr>
               );
             })}
-            {items.length === 0 && (
+            {visibleItems.length === 0 && (
               <tr><td colSpan={6} className="px-4 py-6 text-center text-mine-400">{t("inventory.noneYet")}</td></tr>
             )}
           </tbody>
