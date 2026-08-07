@@ -478,7 +478,9 @@
       "OFFLINE": "Offline",
       "DECOMMISSIONED": "Außer Betrieb",
       "CONNECTED": "Verbunden",
-      "DISCONNECTED": "Getrennt"
+      "DISCONNECTED": "Getrennt",
+      "RESPONDING": "Im Einsatz",
+      "CONTAINED": "Unter Kontrolle"
     },
     "severity": {
       "LOW": "Niedrig",
@@ -1936,7 +1938,39 @@
     "sitesAlreadyEvacuatingHint": "Standorte mit einer aktiven Evakuierung werden in dieser Liste ausgeblendet. Deaktivieren Sie sie zuerst, um eine neue für diesen Standort auszulösen.",
     "allSitesEvacuating": "Jeder Standort hat bereits eine aktive Evakuierung.",
     "viewEvacuationDetails": "Evakuierungsdetails Anzeigen",
-    "evacuationDetailsTitle": "Aktive Evakuierungen"
+    "evacuationDetailsTitle": "Aktive Evakuierungen",
+    "tabEvents": "Notfall-Dashboard",
+    "event": {
+      "subtitle": "Notfall → Standort → Betroffene Personen → Reaktion → Evakuierung → Status.",
+      "new": "+ Notfall Melden",
+      "newTitle": "Einen Notfall Melden",
+      "editTitle": "Notfallereignis Aktualisieren",
+      "eventType": "Notfall",
+      "types": {
+        "FIRE": "Feuer",
+        "GROUND_INSTABILITY": "Bodeninstabilität",
+        "EXPLOSION": "Explosion",
+        "FLOODING": "Überflutung",
+        "GAS_EVENT": "Gasereignis",
+        "SERIOUS_INJURY": "Schwere Verletzung",
+        "VEHICLE_INCIDENT": "Fahrzeugvorfall",
+        "EVACUATION": "Evakuierung",
+        "OTHER": "Sonstiges"
+      },
+      "location": "Standort",
+      "peopleAffectedCount": "Betroffene Personen (Anzahl)",
+      "peopleAffectedDetails": "Betroffene Personen (Details)",
+      "peopleAffectedDetailsPlaceholder": "Namen, Rollen oder Beschreibungen der Betroffenen",
+      "response": "Reaktion",
+      "responsePlaceholder": "Als Reaktion auf diesen Notfall ergriffene Maßnahmen",
+      "colType": "Notfall",
+      "colPeopleAffected": "Betroffene Personen",
+      "colEvacuation": "Evakuierung",
+      "triggerEvacuation": "Evakuierung auslösen",
+      "assemblyPointPrompt": "Sammelpunkt für diese Evakuierung:",
+      "noneYet": "Noch keine Notfallereignisse erfasst.",
+      "confirmDelete": "Dieses Notfallereignis löschen?"
+    }
   },
   "roster": {
     "nav": "Schichtplanung",

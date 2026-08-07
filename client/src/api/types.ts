@@ -1667,6 +1667,40 @@ export interface EmergencyEvacuation {
   cancelledAt?: string | null;
 }
 
+export type EmergencyEventType =
+  | "FIRE"
+  | "GROUND_INSTABILITY"
+  | "EXPLOSION"
+  | "FLOODING"
+  | "GAS_EVENT"
+  | "SERIOUS_INJURY"
+  | "VEHICLE_INCIDENT"
+  | "EVACUATION"
+  | "OTHER";
+
+export type EmergencyEventStatus = "ACTIVE" | "RESPONDING" | "CONTAINED" | "RESOLVED";
+
+export interface EmergencyEvent {
+  id: string;
+  siteId: string;
+  site?: { id: string; name: string };
+  zoneId?: string | null;
+  zone?: { id: string; name: string } | null;
+  eventType: EmergencyEventType;
+  location: string;
+  description: string;
+  peopleAffectedCount?: number | null;
+  peopleAffectedDetails?: string | null;
+  response?: string | null;
+  evacuationId?: string | null;
+  evacuation?: { id: string; status: EvacuationStatus; assemblyPoint: string; triggeredAt: string } | null;
+  status: EmergencyEventStatus;
+  reportedBy?: { id: string; name: string } | null;
+  occurredAt: string;
+  resolvedAt?: string | null;
+  createdAt: string;
+}
+
 export type ShiftType = "DAY" | "AFTERNOON" | "NIGHT";
 
 export interface RosterAssignment {

@@ -478,7 +478,9 @@
       "OFFLINE": "Hors ligne",
       "DECOMMISSIONED": "Mis hors service",
       "CONNECTED": "Connecté",
-      "DISCONNECTED": "Déconnecté"
+      "DISCONNECTED": "Déconnecté",
+      "RESPONDING": "En intervention",
+      "CONTAINED": "Maîtrisé"
     },
     "severity": {
       "LOW": "Faible",
@@ -1936,7 +1938,39 @@
     "sitesAlreadyEvacuatingHint": "Les sites ayant une évacuation active sont masqués de cette liste. Désactivez-la d'abord pour en déclencher une nouvelle pour ce site.",
     "allSitesEvacuating": "Tous les sites ont déjà une évacuation active.",
     "viewEvacuationDetails": "Voir les Détails de l'Évacuation",
-    "evacuationDetailsTitle": "Évacuations Actives"
+    "evacuationDetailsTitle": "Évacuations Actives",
+    "tabEvents": "Tableau de Bord des Urgences",
+    "event": {
+      "subtitle": "Urgence → Emplacement → Personnes affectées → Réponse → Évacuation → Statut.",
+      "new": "+ Signaler une Urgence",
+      "newTitle": "Signaler une Urgence",
+      "editTitle": "Mettre à Jour l'Événement d'Urgence",
+      "eventType": "Urgence",
+      "types": {
+        "FIRE": "Incendie",
+        "GROUND_INSTABILITY": "Instabilité du terrain",
+        "EXPLOSION": "Explosion",
+        "FLOODING": "Inondation",
+        "GAS_EVENT": "Événement gazeux",
+        "SERIOUS_INJURY": "Blessure grave",
+        "VEHICLE_INCIDENT": "Incident de véhicule",
+        "EVACUATION": "Évacuation",
+        "OTHER": "Autre"
+      },
+      "location": "Emplacement",
+      "peopleAffectedCount": "Personnes affectées (nombre)",
+      "peopleAffectedDetails": "Personnes affectées (détails)",
+      "peopleAffectedDetailsPlaceholder": "Noms, rôles ou descriptions des personnes affectées",
+      "response": "Réponse",
+      "responsePlaceholder": "Mesures prises en réponse à cette urgence",
+      "colType": "Urgence",
+      "colPeopleAffected": "Personnes Affectées",
+      "colEvacuation": "Évacuation",
+      "triggerEvacuation": "Déclencher l'évacuation",
+      "assemblyPointPrompt": "Point de rassemblement pour cette évacuation :",
+      "noneYet": "Aucun événement d'urgence enregistré pour le moment.",
+      "confirmDelete": "Supprimer cet événement d'urgence ?"
+    }
   },
   "roster": {
     "nav": "Planification des Équipes",

@@ -212,6 +212,7 @@ model User {
   hazardReportsResponsibleFor HazardReport[]         @relation("HazardResponsiblePerson")
   hazardReportsClosed        HazardReport[]          @relation("HazardClosedBy")
   ppeRequirementsCreated     WorkerPpeRequirement[]  @relation("PpeRequirementCreatedBy")
+  emergencyEventsReported    EmergencyEvent[]        @relation("EmergencyEventReportedBy")
   fleetPositions         FleetPosition[]        @relation("FleetPositionRecordedBy")
   inventoryMovements     InventoryMovement[]    @relation("InventoryMovementBy")
   weatherReadings        WeatherReading[]       @relation("WeatherRecordedBy")
@@ -305,6 +306,7 @@ model Site {
   patrolRoutes           PatrolRoute[]
   patrolAssignments      PatrolAssignment[]
   hazardReports          HazardReport[]
+  emergencyEvents        EmergencyEvent[]
 }
 
 model Zone {
@@ -322,6 +324,7 @@ model Zone {
   securityCameras SecurityCamera[]
   securityIncidents SecurityIncident[]
   hazardReports HazardReport[]
+  emergencyEvents EmergencyEvent[]
 
   codesOfPractice   CodeOfPractice[]
   riskAssessments   RiskAssessment[]
@@ -2133,6 +2136,53 @@ model EmergencyEvacuation {
   cancelledById  String?
   cancelledBy    User?            @relation("EvacuationCancelledBy", fields: [cancelledById], references: [id], onDelete: SetNull)
   cancelledAt    DateTime?
+  emergencyEvent EmergencyEvent?
+
+  createdAt DateTime @default(now())
+}
+
+enum EmergencyEventType {
+  FIRE
+  GROUND_INSTABILITY
+  EXPLOSION
+  FLOODING
+  GAS_EVENT
+  SERIOUS_INJURY
+  VEHICLE_INCIDENT
+  EVACUATION
+  OTHER
+}
+
+enum EmergencyEventStatus {
+  ACTIVE
+  RESPONDING
+  CONTAINED
+  RESOLVED
+}
+
+// The Safety Officer's emergency dashboard: Emergency -> Location -> People affected ->
+// Response -> Evacuation -> Status. Distinct from the lighter EmergencyContact/
+// EvacuationDrill registers above — this is the live incident record for an actual major
+// emergency, optionally linked to a formal EmergencyEvacuation trigger.
+model EmergencyEvent {
+  id                     String                @id @default(cuid())
+  siteId                 String
+  site                   Site                  @relation(fields: [siteId], references: [id], onDelete: Cascade)
+  zoneId                 String?
+  zone                   Zone?                 @relation(fields: [zoneId], references: [id], onDelete: SetNull)
+  eventType              EmergencyEventType
+  location               String
+  description            String
+  peopleAffectedCount    Int?
+  peopleAffectedDetails  String?
+  response               String?
+  evacuationId           String?               @unique
+  evacuation             EmergencyEvacuation?  @relation(fields: [evacuationId], references: [id], onDelete: SetNull)
+  status                 EmergencyEventStatus  @default(ACTIVE)
+  reportedById           String?
+  reportedBy             User?                 @relation("EmergencyEventReportedBy", fields: [reportedById], references: [id], onDelete: SetNull)
+  occurredAt             DateTime              @default(now())
+  resolvedAt             DateTime?
 
   createdAt DateTime @default(now())
 }

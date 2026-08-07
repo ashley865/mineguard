@@ -478,7 +478,9 @@
       "OFFLINE": "Vanlyn",
       "DECOMMISSIONED": "Buite diens gestel",
       "CONNECTED": "Gekoppel",
-      "DISCONNECTED": "Ontkoppel"
+      "DISCONNECTED": "Ontkoppel",
+      "RESPONDING": "Reageer tans",
+      "CONTAINED": "Bedwing"
     },
     "severity": {
       "LOW": "Laag",
@@ -1936,7 +1938,39 @@
     "sitesAlreadyEvacuatingHint": "Myne met 'n aktiewe evakuasie word van hierdie lys weggesteek. Deaktiveer dit eers om 'n nuwe een vir daardie myn te aktiveer.",
     "allSitesEvacuating": "Elke myn het reeds 'n aktiewe evakuasie.",
     "viewEvacuationDetails": "Bekyk Ontruimingsbesonderhede",
-    "evacuationDetailsTitle": "Aktiewe Ontruimings"
+    "evacuationDetailsTitle": "Aktiewe Ontruimings",
+    "tabEvents": "Noodbord",
+    "event": {
+      "subtitle": "Noodgeval → Ligging → Mense geraak → Reaksie → Ontruiming → Status.",
+      "new": "+ Meld Noodgeval Aan",
+      "newTitle": "Meld 'n Noodgeval Aan",
+      "editTitle": "Werk Noodgevalvoorval By",
+      "eventType": "Noodgeval",
+      "types": {
+        "FIRE": "Brand",
+        "GROUND_INSTABILITY": "Grondonstabiliteit",
+        "EXPLOSION": "Ontploffing",
+        "FLOODING": "Oorstroming",
+        "GAS_EVENT": "Gasvoorval",
+        "SERIOUS_INJURY": "Ernstige besering",
+        "VEHICLE_INCIDENT": "Voertuigvoorval",
+        "EVACUATION": "Ontruiming",
+        "OTHER": "Ander"
+      },
+      "location": "Ligging",
+      "peopleAffectedCount": "Mense geraak (getal)",
+      "peopleAffectedDetails": "Mense geraak (besonderhede)",
+      "peopleAffectedDetailsPlaceholder": "Name, rolle of beskrywings van geraaktes",
+      "response": "Reaksie",
+      "responsePlaceholder": "Stappe geneem in reaksie op hierdie noodgeval",
+      "colType": "Noodgeval",
+      "colPeopleAffected": "Mense Geraak",
+      "colEvacuation": "Ontruiming",
+      "triggerEvacuation": "Veroorsaak ontruiming",
+      "assemblyPointPrompt": "Samelpunt vir hierdie ontruiming:",
+      "noneYet": "Nog geen noodgevalle aangeteken nie.",
+      "confirmDelete": "Verwyder hierdie noodgevalvoorval?"
+    }
   },
   "roster": {
     "nav": "Skofrooster",

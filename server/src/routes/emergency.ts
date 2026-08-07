@@ -229,4 +229,131 @@ router.post("/evacuations/:id/cancel", requireRole("ADMIN", "SUPERVISOR", "EXECU
   res.json(evacuation);
 });
 
+// ---------------------------------------------------------------------------
+// Emergency events — the Safety Officer's emergency dashboard. Distinct from the
+// EmergencyContact/EvacuationDrill registers above: this is the live incident record for
+// an actual major emergency (fire, explosion, serious injury, etc.), optionally linked to
+// a formal evacuation trigger.
+// ---------------------------------------------------------------------------
+
+const eventTypeEnum = z.enum([
+  "FIRE",
+  "GROUND_INSTABILITY",
+  "EXPLOSION",
+  "FLOODING",
+  "GAS_EVENT",
+  "SERIOUS_INJURY",
+  "VEHICLE_INCIDENT",
+  "EVACUATION",
+  "OTHER",
+]);
+
+const eventSchema = z.object({
+  siteId: z.string().min(1),
+  zoneId: z.string().optional().nullable(),
+  eventType: eventTypeEnum,
+  location: z.string().min(1),
+  description: z.string().min(1),
+  peopleAffectedCount: z.coerce.number().int().nonnegative().optional().nullable(),
+  peopleAffectedDetails: z.string().optional().nullable(),
+  response: z.string().optional().nullable(),
+  evacuationId: z.string().optional().nullable(),
+  status: z.enum(["ACTIVE", "RESPONDING", "CONTAINED", "RESOLVED"]).optional(),
+});
+
+const eventSelect = {
+  id: true,
+  siteId: true,
+  site: { select: { id: true, name: true } },
+  zoneId: true,
+  zone: { select: { id: true, name: true } },
+  eventType: true,
+  location: true,
+  description: true,
+  peopleAffectedCount: true,
+  peopleAffectedDetails: true,
+  response: true,
+  evacuationId: true,
+  evacuation: { select: { id: true, status: true, assemblyPoint: true, triggeredAt: true } },
+  status: true,
+  reportedBy: { select: { id: true, name: true } },
+  occurredAt: true,
+  resolvedAt: true,
+  createdAt: true,
+} as const;
+
+router.get("/events", async (req, res) => {
+  const mineId = requireMineId(req, res);
+  if (!mineId) return;
+  const siteId = req.query.siteId as string | undefined;
+  const status = req.query.status as string | undefined;
+  const events = await prisma.emergencyEvent.findMany({
+    where: { site: { mineId }, siteId: siteId || undefined, status: (status as any) || undefined },
+    select: eventSelect,
+    orderBy: { occurredAt: "desc" },
+  });
+  res.json(events);
+});
+
+// Anyone can log an emergency event, same as raising the evacuation alarm above — a fire
+// or serious injury can't wait on an executive/admin being available to file the report.
+router.post("/events", async (req, res) => {
+  const mineId = requireMineId(req, res);
+  if (!mineId) return;
+  const parsed = eventSchema.safeParse(req.body);
+  if (!parsed.success) return res.status(400).json({ error: parsed.error.flatten() });
+  const site = await prisma.site.findFirst({ where: { id: parsed.data.siteId, mineId } });
+  if (!site) return res.status(404).json({ error: "Site not found" });
+  if (parsed.data.zoneId) {
+    const zone = await prisma.zone.findFirst({ where: { id: parsed.data.zoneId, siteId: parsed.data.siteId } });
+    if (!zone) return res.status(404).json({ error: "Zone not found" });
+  }
+  if (parsed.data.evacuationId) {
+    const evacuation = await prisma.emergencyEvacuation.findFirst({ where: { id: parsed.data.evacuationId, mineId } });
+    if (!evacuation) return res.status(404).json({ error: "Evacuation not found" });
+  }
+
+  const event = await prisma.emergencyEvent.create({
+    data: { ...parsed.data, reportedById: req.auth!.userId },
+    select: eventSelect,
+  });
+
+  const io = req.app.get("io");
+  io?.to(`mine:${mineId}`).emit("emergency:event", event);
+
+  res.status(201).json(event);
+});
+
+// Follow-up (response notes, status, linking/unlinking an evacuation) is a management
+// action, unlike the initial report — restricted the same way as every other register.
+router.put("/events/:id", requireRole("ADMIN", "SUPERVISOR", "EXECUTIVE"), async (req, res) => {
+  const mineId = requireMineId(req, res);
+  if (!mineId) return;
+  const parsed = eventSchema.partial().safeParse(req.body);
+  if (!parsed.success) return res.status(400).json({ error: parsed.error.flatten() });
+  const existing = await prisma.emergencyEvent.findFirst({ where: { id: req.params.id, site: { mineId } } });
+  if (!existing) return res.status(404).json({ error: "Emergency event not found" });
+  if (parsed.data.evacuationId) {
+    const evacuation = await prisma.emergencyEvacuation.findFirst({ where: { id: parsed.data.evacuationId, mineId } });
+    if (!evacuation) return res.status(404).json({ error: "Evacuation not found" });
+  }
+
+  const resolvedAt = parsed.data.status === "RESOLVED" && existing.status !== "RESOLVED" ? new Date() : undefined;
+  const event = await prisma.emergencyEvent.update({
+    where: { id: existing.id },
+    data: { ...parsed.data, ...(resolvedAt ? { resolvedAt } : {}) },
+    select: eventSelect,
+  });
+  res.json(event);
+});
+
+router.delete("/events/:id", requireRole("ADMIN", "EXECUTIVE"), async (req, res) => {
+  const mineId = requireMineId(req, res);
+  if (!mineId) return;
+  const existing = await prisma.emergencyEvent.findFirst({ where: { id: req.params.id, site: { mineId } } });
+  if (!existing) return res.status(404).json({ error: "Emergency event not found" });
+  await prisma.emergencyEvent.delete({ where: { id: existing.id } });
+  res.status(204).send();
+});
+
 export default router;

@@ -495,7 +495,9 @@
       "OFFLINE": "Offline",
       "DECOMMISSIONED": "Decommissioned",
       "CONNECTED": "Connected",
-      "DISCONNECTED": "Disconnected"
+      "DISCONNECTED": "Disconnected",
+      "RESPONDING": "Responding",
+      "CONTAINED": "Contained"
     },
     "severity": {
       "LOW": "Low",
@@ -2091,8 +2093,40 @@
   "emergency": {
     "nav": "Emergency Response",
     "subtitle": "Emergency contact directory and evacuation drill records",
+    "tabEvents": "Emergency Dashboard",
     "tabContacts": "Emergency Contacts",
     "tabDrills": "Evacuation Drills",
+    "event": {
+      "subtitle": "Emergency → Location → People affected → Response → Evacuation → Status.",
+      "new": "+ Report Emergency",
+      "newTitle": "Report an Emergency",
+      "editTitle": "Update Emergency Event",
+      "eventType": "Emergency",
+      "types": {
+        "FIRE": "Fire",
+        "GROUND_INSTABILITY": "Ground instability",
+        "EXPLOSION": "Explosion",
+        "FLOODING": "Flooding",
+        "GAS_EVENT": "Gas event",
+        "SERIOUS_INJURY": "Serious injury",
+        "VEHICLE_INCIDENT": "Vehicle incident",
+        "EVACUATION": "Evacuation",
+        "OTHER": "Other"
+      },
+      "location": "Location",
+      "peopleAffectedCount": "People affected (count)",
+      "peopleAffectedDetails": "People affected (details)",
+      "peopleAffectedDetailsPlaceholder": "Names, roles, or descriptions of those affected",
+      "response": "Response",
+      "responsePlaceholder": "Actions taken in response to this emergency",
+      "colType": "Emergency",
+      "colPeopleAffected": "People Affected",
+      "colEvacuation": "Evacuation",
+      "triggerEvacuation": "Trigger evacuation",
+      "assemblyPointPrompt": "Assembly / muster point for this evacuation:",
+      "noneYet": "No emergency events logged yet.",
+      "confirmDelete": "Delete this emergency event?"
+    },
     "role": "Role",
     "category": "Category",
     "categories": {

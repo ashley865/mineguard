@@ -75,6 +75,8 @@ const statusColors: Record<string, string> = {
   DECOMMISSIONED: "bg-mine-600 text-mine-100",
   CONNECTED: "bg-success-600 text-white",
   DISCONNECTED: "bg-danger-500 text-white",
+  RESPONDING: "bg-hazard-500 text-white",
+  CONTAINED: "bg-hazard-600/80 text-white",
 };
 
 export function StatusBadge({

@@ -478,7 +478,9 @@
       "OFFLINE": "Fuera de línea",
       "DECOMMISSIONED": "Retirado",
       "CONNECTED": "Conectado",
-      "DISCONNECTED": "Desconectado"
+      "DISCONNECTED": "Desconectado",
+      "RESPONDING": "Respondiendo",
+      "CONTAINED": "Contenido"
     },
     "severity": {
       "LOW": "Baja",
@@ -1936,7 +1938,39 @@
     "sitesAlreadyEvacuatingHint": "Los sitios con una evacuación activa se ocultan de esta lista. Desactívala primero para activar una nueva para ese sitio.",
     "allSitesEvacuating": "Todos los sitios ya tienen una evacuación activa.",
     "viewEvacuationDetails": "Ver Detalles de la Evacuación",
-    "evacuationDetailsTitle": "Evacuaciones Activas"
+    "evacuationDetailsTitle": "Evacuaciones Activas",
+    "tabEvents": "Panel de Emergencias",
+    "event": {
+      "subtitle": "Emergencia → Ubicación → Personas afectadas → Respuesta → Evacuación → Estado.",
+      "new": "+ Reportar Emergencia",
+      "newTitle": "Reportar una Emergencia",
+      "editTitle": "Actualizar Evento de Emergencia",
+      "eventType": "Emergencia",
+      "types": {
+        "FIRE": "Incendio",
+        "GROUND_INSTABILITY": "Inestabilidad del terreno",
+        "EXPLOSION": "Explosión",
+        "FLOODING": "Inundación",
+        "GAS_EVENT": "Evento de gas",
+        "SERIOUS_INJURY": "Lesión grave",
+        "VEHICLE_INCIDENT": "Incidente vehicular",
+        "EVACUATION": "Evacuación",
+        "OTHER": "Otro"
+      },
+      "location": "Ubicación",
+      "peopleAffectedCount": "Personas afectadas (número)",
+      "peopleAffectedDetails": "Personas afectadas (detalles)",
+      "peopleAffectedDetailsPlaceholder": "Nombres, roles o descripciones de los afectados",
+      "response": "Respuesta",
+      "responsePlaceholder": "Medidas tomadas en respuesta a esta emergencia",
+      "colType": "Emergencia",
+      "colPeopleAffected": "Personas Afectadas",
+      "colEvacuation": "Evacuación",
+      "triggerEvacuation": "Activar evacuación",
+      "assemblyPointPrompt": "Punto de encuentro / reunión para esta evacuación:",
+      "noneYet": "Aún no se han registrado eventos de emergencia.",
+      "confirmDelete": "¿Eliminar este evento de emergencia?"
+    }
   },
   "roster": {
     "nav": "Programación de Turnos",
