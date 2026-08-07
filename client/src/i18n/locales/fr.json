@@ -2228,6 +2228,67 @@
       "noneYet": "Aucun incident de sécurité signalé pour le moment.",
       "confirmDelete": "Supprimer cet incident de sécurité ?",
       "saveError": "Impossible d'enregistrer cet incident de sécurité"
+    },
+    "tabPatrol": "Gestion des Patrouilles"
+  },
+  "patrol": {
+    "subtitle": "Définissez des itinéraires de patrouille et des points de contrôle, et affectez des agents de sécurité pour les parcourir à chaque poste.",
+    "dutyLinkTitle": "Lien de service du garde",
+    "dutyLinkHint": "Partagez ce lien avec les gardes de chaque site. Aucune connexion requise : ils sélectionnent leur propre nom pour se présenter en service, enregistrer les points de contrôle et déclencher une évacuation.",
+    "copyLinkFor": "Copier le lien pour {{site}}",
+    "linkCopied": "Copié !",
+    "tabRoutes": "Itinéraires de Patrouille",
+    "tabAssignments": "Affectations",
+    "routes": {
+      "new": "+ Nouvel Itinéraire",
+      "newTitle": "Nouvel Itinéraire de Patrouille",
+      "editTitle": "Modifier l'Itinéraire de Patrouille",
+      "name": "Nom de l'itinéraire",
+      "isActive": "Actif (assignable aux gardes)",
+      "checkpoints": "Points de contrôle",
+      "addCheckpointPlaceholder": "Ajouter un point de contrôle, ex. Portail 1",
+      "needCheckpoints": "Ajoutez au moins un point de contrôle.",
+      "noneYet": "Aucun itinéraire de patrouille défini pour le moment.",
+      "confirmDelete": "Supprimer cet itinéraire de patrouille ?"
+    },
+    "assignments": {
+      "new": "+ Nouvelle Affectation",
+      "newTitle": "Affecter un Garde à un Itinéraire",
+      "route": "Itinéraire de patrouille",
+      "guard": "Garde",
+      "selectRoute": "Sélectionnez un itinéraire",
+      "selectGuard": "Sélectionnez un garde",
+      "selectRouteAndGuard": "Sélectionnez un itinéraire et un garde.",
+      "noGuardsAtSite": "Aucun travailleur de catégorie sécurité n'est encore enregistré sur ce site.",
+      "shiftDate": "Date du poste",
+      "colProgress": "Points de Contrôle Enregistrés",
+      "noneYet": "Aucune affectation de patrouille pour le moment.",
+      "confirmDelete": "Supprimer cette affectation de patrouille ?"
+    },
+    "duty": {
+      "title": "Service du Garde",
+      "whoAreYou": "Qui êtes-vous ?",
+      "selectGuard": "Sélectionnez votre nom",
+      "noGuards": "Aucun agent de sécurité n'est encore enregistré sur ce site.",
+      "onDuty": "En service",
+      "offDuty": "Hors service",
+      "reportOnDuty": "Se présenter en service",
+      "reportOffDuty": "Signaler la fin de service",
+      "assignedRoute": "Itinéraire assigné",
+      "checkIn": "Enregistrer",
+      "logAgain": "Enregistrer à nouveau",
+      "reportObservation": "Signaler une observation",
+      "noAssignment": "Aucune patrouille ne vous est encore assignée pour aujourd'hui.",
+      "takePhoto": "Prendre une photo",
+      "retakePhoto": "Reprendre la photo",
+      "checkpointHint": "Prenez une photo pour confirmer que vous êtes à ce point de contrôle.",
+      "observationHint": "Photographiez tout ce qui mérite d'être signalé — ceci n'est pas lié à un point de contrôle spécifique.",
+      "triggerEvacuation": "Déclencher l'Évacuation",
+      "evacuationWarning": "Ceci alertera immédiatement tout le monde sur le site pour évacuer. N'utilisez ceci que pour une urgence réelle.",
+      "confirmEvacuation": "Déclencher l'évacuation",
+      "evacuationSent": "Évacuation déclenchée. Rendez-vous au point de rassemblement le plus proche.",
+      "siteNotFound": "Ce lien de site n'est pas valide.",
+      "genericError": "Une erreur s'est produite. Veuillez réessayer."
     }
   }
 }

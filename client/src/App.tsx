@@ -25,6 +25,7 @@ import ContractorRegister from "./pages/ContractorRegister";
 import VisitorManagement from "./pages/VisitorManagement";
 import SecurityHub from "./pages/SecurityHub";
 import VisitorCheckIn from "./pages/VisitorCheckIn";
+import PatrolDuty from "./pages/PatrolDuty";
 import PermitToWork from "./pages/PermitToWork";
 import Settings from "./pages/Settings";
 import AcceptExecutiveInvite from "./pages/AcceptExecutiveInvite";
@@ -67,6 +68,7 @@ export default function App() {
       <Route path="/signup" element={<Signup />} />
       <Route path="/register-mine" element={<RegisterMine />} />
       <Route path="/visit/:siteId" element={<VisitorCheckIn />} />
+      <Route path="/patrol/:siteId" element={<PatrolDuty />} />
       <Route path="/contractor-register/:siteId" element={<ContractorRegister />} />
       <Route path="/join-executive/:inviteId" element={<AcceptExecutiveInvite />} />
       <Route path="/buy" element={<MarketplaceBrowse />} />

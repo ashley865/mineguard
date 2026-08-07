@@ -2228,6 +2228,67 @@
       "noneYet": "Noch keine Sicherheitsvorfälle erfasst.",
       "confirmDelete": "Diesen Sicherheitsvorfall löschen?",
       "saveError": "Dieser Sicherheitsvorfall konnte nicht gespeichert werden"
+    },
+    "tabPatrol": "Patrouillenmanagement"
+  },
+  "patrol": {
+    "subtitle": "Definieren Sie Patrouillenrouten und Kontrollpunkte und weisen Sie Sicherheitswachen zu, die diese in jeder Schicht ablaufen.",
+    "dutyLinkTitle": "Dienstlink für Wachen",
+    "dutyLinkHint": "Teilen Sie diesen Link mit den Wachen an jedem Standort. Keine Anmeldung erforderlich — sie wählen ihren eigenen Namen aus, um sich zum Dienst zu melden, Kontrollpunkte zu protokollieren und eine Evakuierung auszulösen.",
+    "copyLinkFor": "Link für {{site}} kopieren",
+    "linkCopied": "Kopiert!",
+    "tabRoutes": "Patrouillenrouten",
+    "tabAssignments": "Zuweisungen",
+    "routes": {
+      "new": "+ Neue Route",
+      "newTitle": "Neue Patrouillenroute",
+      "editTitle": "Patrouillenroute Bearbeiten",
+      "name": "Routenname",
+      "isActive": "Aktiv (Wachen zuweisbar)",
+      "checkpoints": "Kontrollpunkte",
+      "addCheckpointPlaceholder": "Kontrollpunkt hinzufügen, z. B. Tor 1",
+      "needCheckpoints": "Fügen Sie mindestens einen Kontrollpunkt hinzu.",
+      "noneYet": "Noch keine Patrouillenrouten definiert.",
+      "confirmDelete": "Diese Patrouillenroute löschen?"
+    },
+    "assignments": {
+      "new": "+ Neue Zuweisung",
+      "newTitle": "Wache einer Route Zuweisen",
+      "route": "Patrouillenroute",
+      "guard": "Wache",
+      "selectRoute": "Route auswählen",
+      "selectGuard": "Wache auswählen",
+      "selectRouteAndGuard": "Wählen Sie eine Route und eine Wache.",
+      "noGuardsAtSite": "An diesem Standort sind noch keine Mitarbeiter der Kategorie Sicherheit registriert.",
+      "shiftDate": "Schichtdatum",
+      "colProgress": "Protokollierte Kontrollpunkte",
+      "noneYet": "Noch keine Patrouillenzuweisungen.",
+      "confirmDelete": "Diese Patrouillenzuweisung löschen?"
+    },
+    "duty": {
+      "title": "Wachdienst",
+      "whoAreYou": "Wer sind Sie?",
+      "selectGuard": "Wählen Sie Ihren Namen",
+      "noGuards": "An diesem Standort sind noch keine Sicherheitswachen registriert.",
+      "onDuty": "Im Dienst",
+      "offDuty": "Außer Dienst",
+      "reportOnDuty": "Zum Dienst melden",
+      "reportOffDuty": "Dienstende melden",
+      "assignedRoute": "Zugewiesene Route",
+      "checkIn": "Einchecken",
+      "logAgain": "Erneut protokollieren",
+      "reportObservation": "Beobachtung melden",
+      "noAssignment": "Ihnen ist heute noch keine Patrouille zugewiesen.",
+      "takePhoto": "Foto aufnehmen",
+      "retakePhoto": "Foto erneut aufnehmen",
+      "checkpointHint": "Machen Sie ein Foto, um zu bestätigen, dass Sie sich an diesem Kontrollpunkt befinden.",
+      "observationHint": "Fotografieren Sie alles, was meldenswert ist — dies ist nicht an einen bestimmten Kontrollpunkt gebunden.",
+      "triggerEvacuation": "Evakuierung Auslösen",
+      "evacuationWarning": "Dies alarmiert sofort alle auf dem Gelände zur Evakuierung. Verwenden Sie dies nur bei einem echten Notfall.",
+      "confirmEvacuation": "Evakuierung auslösen",
+      "evacuationSent": "Evakuierung ausgelöst. Begeben Sie sich zum nächsten Sammelpunkt.",
+      "siteNotFound": "Dieser Standortlink ist ungültig.",
+      "genericError": "Etwas ist schiefgelaufen. Bitte versuchen Sie es erneut."
     }
   }
 }

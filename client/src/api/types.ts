@@ -409,6 +409,54 @@ export interface SecurityIncident {
   createdAt: string;
 }
 
+export type PatrolAssignmentStatus = "SCHEDULED" | "IN_PROGRESS" | "COMPLETED" | "MISSED";
+
+export interface PatrolCheckpoint {
+  id: string;
+  sequence: number;
+  name: string;
+  description?: string | null;
+}
+
+export interface PatrolRoute {
+  id: string;
+  siteId: string;
+  site?: { id: string; name: string };
+  name: string;
+  description?: string | null;
+  isActive: boolean;
+  checkpoints: PatrolCheckpoint[];
+  createdBy?: { id: string; name: string } | null;
+  createdAt: string;
+}
+
+export interface PatrolLogEntry {
+  id: string;
+  checkpointId?: string | null;
+  checkpoint?: { id: string; name: string; sequence: number } | null;
+  photoMimeType?: string | null;
+  notes?: string | null;
+  loggedAt: string;
+}
+
+export interface PatrolAssignment {
+  id: string;
+  routeId: string;
+  route: PatrolRoute;
+  workerId: string;
+  worker: { id: string; name: string; employeeId: string };
+  siteId: string;
+  site?: { id: string; name: string };
+  shiftDate: string;
+  status: PatrolAssignmentStatus;
+  startedAt?: string | null;
+  completedAt?: string | null;
+  notes?: string | null;
+  assignedBy?: { id: string; name: string } | null;
+  logs: PatrolLogEntry[];
+  createdAt: string;
+}
+
 export interface DashboardSummary {
   counts: {
     siteCount: number;

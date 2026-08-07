@@ -4,9 +4,10 @@ import { api } from "../api/client";
 import { Site, Zone } from "../api/types";
 import CctvTab from "./security/CctvTab";
 import IncidentManagementTab from "./security/IncidentManagementTab";
+import PatrolManagementTab from "./security/PatrolManagementTab";
 import { buttonPrimary, buttonSecondary } from "../components/ui";
 
-type TabKey = "cctv" | "incidents";
+type TabKey = "cctv" | "incidents" | "patrol";
 
 export default function SecurityHub() {
   const { t } = useTranslation();
@@ -28,6 +29,7 @@ export default function SecurityHub() {
   const tabs: { key: TabKey; label: string }[] = [
     { key: "cctv", label: t("security.tabCctv") },
     { key: "incidents", label: t("security.tabIncidents") },
+    { key: "patrol", label: t("security.tabPatrol") },
   ];
 
   if (loading) return <div className="text-mine-300">{t("common.loading")}</div>;
@@ -53,6 +55,7 @@ export default function SecurityHub() {
 
       {tab === "cctv" && <CctvTab sites={sites} zones={zones} />}
       {tab === "incidents" && <IncidentManagementTab sites={sites} zones={zones} />}
+      {tab === "patrol" && <PatrolManagementTab sites={sites} />}
     </div>
   );
 }

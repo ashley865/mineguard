@@ -206,6 +206,8 @@ model User {
   auditFindingsClosed        AuditFinding[]          @relation("AuditFindingClosedBy")
   securityCamerasCreated     SecurityCamera[]        @relation("SecurityCameraCreatedBy")
   securityIncidentsReported  SecurityIncident[]      @relation("SecurityIncidentReportedBy")
+  patrolRoutesCreated        PatrolRoute[]           @relation("PatrolRouteCreatedBy")
+  patrolAssignmentsAssigned  PatrolAssignment[]      @relation("PatrolAssignmentAssignedBy")
   fleetPositions         FleetPosition[]        @relation("FleetPositionRecordedBy")
   inventoryMovements     InventoryMovement[]    @relation("InventoryMovementBy")
   weatherReadings        WeatherReading[]       @relation("WeatherRecordedBy")
@@ -296,6 +298,8 @@ model Site {
   auditFindings          AuditFinding[]
   securityCameras        SecurityCamera[]
   securityIncidents      SecurityIncident[]
+  patrolRoutes           PatrolRoute[]
+  patrolAssignments      PatrolAssignment[]
 }
 
 model Zone {
@@ -425,6 +429,8 @@ model Worker {
   payee           Payee?
   assignedEquipment      Equipment[]           @relation("EquipmentAssignedOperator")
   maintenanceAssignments MaintenanceSchedule[] @relation("MaintenanceAssignedToWorker")
+  patrolAssignments      PatrolAssignment[]
+  evacuationsTriggered   EmergencyEvacuation[] @relation("EvacuationTriggeredByGuard")
 
   createdAt DateTime @default(now())
 }
@@ -599,6 +605,81 @@ model SecurityIncident {
   resolvedAt   DateTime?
 
   createdAt DateTime @default(now())
+}
+
+enum PatrolAssignmentStatus {
+  SCHEDULED
+  IN_PROGRESS
+  COMPLETED
+  MISSED
+}
+
+// A named sequence of checkpoints a guard walks/drives during a shift (e.g. Gate 1 ->
+// Warehouse -> Plant -> Fuel Station -> Gate). Managed by the Security Manager from the
+// authenticated dashboard; guards themselves only ever see it read-only via their duty link.
+model PatrolRoute {
+  id          String             @id @default(cuid())
+  siteId      String
+  site        Site               @relation(fields: [siteId], references: [id], onDelete: Cascade)
+  name        String
+  description String?
+  isActive    Boolean            @default(true)
+  checkpoints PatrolCheckpoint[]
+  assignments PatrolAssignment[]
+  createdById String?
+  createdBy   User?              @relation("PatrolRouteCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+
+  createdAt DateTime @default(now())
+}
+
+model PatrolCheckpoint {
+  id          String           @id @default(cuid())
+  routeId     String
+  route       PatrolRoute      @relation(fields: [routeId], references: [id], onDelete: Cascade)
+  sequence    Int
+  name        String
+  description String?
+  logs        PatrolLogEntry[]
+
+  createdAt DateTime @default(now())
+
+  @@unique([routeId, sequence])
+}
+
+// One guard's patrol for one shift: which route, current progress, and the checkpoint/
+// ad-hoc photo log entries they've submitted from the public duty portal.
+model PatrolAssignment {
+  id           String                 @id @default(cuid())
+  routeId      String
+  route        PatrolRoute            @relation(fields: [routeId], references: [id], onDelete: Cascade)
+  workerId     String
+  worker       Worker                 @relation(fields: [workerId], references: [id], onDelete: Cascade)
+  siteId       String
+  site         Site                   @relation(fields: [siteId], references: [id], onDelete: Cascade)
+  shiftDate    DateTime
+  status       PatrolAssignmentStatus @default(SCHEDULED)
+  startedAt    DateTime?
+  completedAt  DateTime?
+  notes        String?
+  assignedById String?
+  assignedBy   User?                  @relation("PatrolAssignmentAssignedBy", fields: [assignedById], references: [id], onDelete: SetNull)
+  logs         PatrolLogEntry[]
+
+  createdAt DateTime @default(now())
+}
+
+// A checkpoint check-in (checkpointId set) or an ad-hoc "shoot a picture of this" report
+// (checkpointId null) submitted by the guard from the public duty portal.
+model PatrolLogEntry {
+  id            String            @id @default(cuid())
+  assignmentId  String
+  assignment    PatrolAssignment  @relation(fields: [assignmentId], references: [id], onDelete: Cascade)
+  checkpointId  String?
+  checkpoint    PatrolCheckpoint? @relation(fields: [checkpointId], references: [id], onDelete: SetNull)
+  photoData     Bytes?
+  photoMimeType String?
+  notes         String?
+  loggedAt      DateTime          @default(now())
 }
 
 model CodeOfPractice {
@@ -1937,6 +2018,10 @@ model EmergencyEvacuation {
   status         EvacuationStatus @default(ACTIVE)
   triggeredById  String?
   triggeredBy    User?            @relation("EvacuationTriggeredBy", fields: [triggeredById], references: [id], onDelete: SetNull)
+  // Set instead of triggeredById when a guard raises the alarm from the public,
+  // no-login patrol duty portal rather than a logged-in User account.
+  triggeredByWorkerId String?
+  triggeredByWorker   Worker?    @relation("EvacuationTriggeredByGuard", fields: [triggeredByWorkerId], references: [id], onDelete: SetNull)
   triggeredAt    DateTime         @default(now())
   cancelledById  String?
   cancelledBy    User?            @relation("EvacuationCancelledBy", fields: [cancelledById], references: [id], onDelete: SetNull)

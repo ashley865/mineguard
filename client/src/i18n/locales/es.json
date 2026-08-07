@@ -2228,6 +2228,67 @@
       "noneYet": "Aún no se han registrado incidentes de seguridad.",
       "confirmDelete": "¿Eliminar este incidente de seguridad?",
       "saveError": "No se pudo guardar este incidente de seguridad"
+    },
+    "tabPatrol": "Gestión de Patrullas"
+  },
+  "patrol": {
+    "subtitle": "Defina rutas de patrulla y puntos de control, y asigne guardias de seguridad para recorrerlas en cada turno.",
+    "dutyLinkTitle": "Enlace de servicio del guardia",
+    "dutyLinkHint": "Comparta este enlace con los guardias de cada sitio. No se requiere inicio de sesión: seleccionan su propio nombre para presentarse de servicio, registrar puntos de control y activar una evacuación.",
+    "copyLinkFor": "Copiar enlace para {{site}}",
+    "linkCopied": "¡Copiado!",
+    "tabRoutes": "Rutas de Patrulla",
+    "tabAssignments": "Asignaciones",
+    "routes": {
+      "new": "+ Nueva Ruta",
+      "newTitle": "Nueva Ruta de Patrulla",
+      "editTitle": "Editar Ruta de Patrulla",
+      "name": "Nombre de la ruta",
+      "isActive": "Activa (asignable a guardias)",
+      "checkpoints": "Puntos de control",
+      "addCheckpointPlaceholder": "Agregar un punto de control, p. ej. Puerta 1",
+      "needCheckpoints": "Agregue al menos un punto de control.",
+      "noneYet": "Aún no se han definido rutas de patrulla.",
+      "confirmDelete": "¿Eliminar esta ruta de patrulla?"
+    },
+    "assignments": {
+      "new": "+ Nueva Asignación",
+      "newTitle": "Asignar Guardia a Ruta",
+      "route": "Ruta de patrulla",
+      "guard": "Guardia",
+      "selectRoute": "Seleccione una ruta",
+      "selectGuard": "Seleccione un guardia",
+      "selectRouteAndGuard": "Seleccione una ruta y un guardia.",
+      "noGuardsAtSite": "Aún no hay trabajadores de categoría seguridad registrados en este sitio.",
+      "shiftDate": "Fecha del turno",
+      "colProgress": "Puntos de Control Registrados",
+      "noneYet": "Aún no hay asignaciones de patrulla.",
+      "confirmDelete": "¿Eliminar esta asignación de patrulla?"
+    },
+    "duty": {
+      "title": "Servicio del Guardia",
+      "whoAreYou": "¿Quién es usted?",
+      "selectGuard": "Seleccione su nombre",
+      "noGuards": "Aún no hay guardias de seguridad registrados en este sitio.",
+      "onDuty": "De servicio",
+      "offDuty": "Fuera de servicio",
+      "reportOnDuty": "Presentarse de servicio",
+      "reportOffDuty": "Reportar salida de servicio",
+      "assignedRoute": "Ruta asignada",
+      "checkIn": "Registrar",
+      "logAgain": "Registrar de nuevo",
+      "reportObservation": "Informar una observación",
+      "noAssignment": "Aún no tiene una patrulla asignada para hoy.",
+      "takePhoto": "Tomar foto",
+      "retakePhoto": "Volver a tomar foto",
+      "checkpointHint": "Tome una foto para confirmar que está en este punto de control.",
+      "observationHint": "Fotografíe cualquier cosa que valga la pena informar; esto no está vinculado a un punto de control específico.",
+      "triggerEvacuation": "Activar Evacuación",
+      "evacuationWarning": "Esto alertará inmediatamente a todos en el sitio para evacuar. Use esto solo para una emergencia genuina.",
+      "confirmEvacuation": "Activar evacuación",
+      "evacuationSent": "Evacuación activada. Diríjase al punto de encuentro más cercano.",
+      "siteNotFound": "Este enlace de sitio no es válido.",
+      "genericError": "Algo salió mal. Inténtelo de nuevo."
     }
   }
 }

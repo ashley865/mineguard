@@ -2228,6 +2228,67 @@
       "noneYet": "Nog geen sekuriteitsvoorvalle aangeteken nie.",
       "confirmDelete": "Verwyder hierdie sekuriteitsvoorval?",
       "saveError": "Kon nie hierdie sekuriteitsvoorval stoor nie"
+    },
+    "tabPatrol": "Patrolliebestuur"
+  },
+  "patrol": {
+    "subtitle": "Definieer patrollieroetes en kontrolepunte, en wys sekuriteitswagte aan om dit elke skof te loop.",
+    "dutyLinkTitle": "Wag se diensskakel",
+    "dutyLinkHint": "Deel hierdie skakel met wagte by elke terrein. Geen aanmelding nodig nie — hulle kies hul eie naam om vir diens aan te meld, kontrolepunte aan te teken en 'n ontruiming te veroorsaak.",
+    "copyLinkFor": "Kopieer skakel vir {{site}}",
+    "linkCopied": "Gekopieer!",
+    "tabRoutes": "Patrollieroetes",
+    "tabAssignments": "Toewysings",
+    "routes": {
+      "new": "+ Nuwe Roete",
+      "newTitle": "Nuwe Patrollieroete",
+      "editTitle": "Wysig Patrollieroete",
+      "name": "Roetenaam",
+      "isActive": "Aktief (toewysbaar aan wagte)",
+      "checkpoints": "Kontrolepunte",
+      "addCheckpointPlaceholder": "Voeg 'n kontrolepunt by, bv. Hek 1",
+      "needCheckpoints": "Voeg ten minste een kontrolepunt by.",
+      "noneYet": "Nog geen patrollieroetes gedefinieer nie.",
+      "confirmDelete": "Verwyder hierdie patrollieroete?"
+    },
+    "assignments": {
+      "new": "+ Nuwe Toewysing",
+      "newTitle": "Wys Wag aan Roete Toe",
+      "route": "Patrollieroete",
+      "guard": "Wag",
+      "selectRoute": "Kies 'n roete",
+      "selectGuard": "Kies 'n wag",
+      "selectRouteAndGuard": "Kies 'n roete en 'n wag.",
+      "noGuardsAtSite": "Nog geen sekuriteitskategorie-werkers by hierdie terrein geregistreer nie.",
+      "shiftDate": "Skofdatum",
+      "colProgress": "Kontrolepunte Aangeteken",
+      "noneYet": "Nog geen patrollietoewysings nie.",
+      "confirmDelete": "Verwyder hierdie patrollietoewysing?"
+    },
+    "duty": {
+      "title": "Wagdiens",
+      "whoAreYou": "Wie is jy?",
+      "selectGuard": "Kies jou naam",
+      "noGuards": "Nog geen sekuriteitswagte by hierdie terrein geregistreer nie.",
+      "onDuty": "Aan diens",
+      "offDuty": "Af diens",
+      "reportOnDuty": "Meld aan vir diens",
+      "reportOffDuty": "Meld af diens aan",
+      "assignedRoute": "Toegewysde roete",
+      "checkIn": "Teken aan",
+      "logAgain": "Teken weer aan",
+      "reportObservation": "Meld 'n waarneming aan",
+      "noAssignment": "Nog geen patrollie vir vandag aan jou toegewys nie.",
+      "takePhoto": "Neem foto",
+      "retakePhoto": "Neem foto weer",
+      "checkpointHint": "Neem 'n foto om te bevestig jy is by hierdie kontrolepunt.",
+      "observationHint": "Neem 'n foto van enigiets wat die moeite werd is om aan te meld — dit is nie aan 'n spesifieke kontrolepunt gekoppel nie.",
+      "triggerEvacuation": "Veroorsaak Ontruiming",
+      "evacuationWarning": "Dit sal onmiddellik almal op die terrein waarsku om te ontruim. Gebruik dit slegs vir 'n werklike noodgeval.",
+      "confirmEvacuation": "Veroorsaak ontruiming",
+      "evacuationSent": "Ontruiming veroorsaak. Gaan na die naaste samelpunt.",
+      "siteNotFound": "Hierdie terreinskakel is nie geldig nie.",
+      "genericError": "Iets het verkeerd geloop. Probeer asseblief weer."
     }
   }
 }
