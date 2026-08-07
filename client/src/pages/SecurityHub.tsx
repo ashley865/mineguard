@@ -3,9 +3,10 @@ import { useTranslation } from "react-i18next";
 import { api } from "../api/client";
 import { Site, Zone } from "../api/types";
 import CctvTab from "./security/CctvTab";
+import IncidentManagementTab from "./security/IncidentManagementTab";
 import { buttonPrimary, buttonSecondary } from "../components/ui";
 
-type TabKey = "cctv";
+type TabKey = "cctv" | "incidents";
 
 export default function SecurityHub() {
   const { t } = useTranslation();
@@ -26,6 +27,7 @@ export default function SecurityHub() {
 
   const tabs: { key: TabKey; label: string }[] = [
     { key: "cctv", label: t("security.tabCctv") },
+    { key: "incidents", label: t("security.tabIncidents") },
   ];
 
   if (loading) return <div className="text-mine-300">{t("common.loading")}</div>;
@@ -50,6 +52,7 @@ export default function SecurityHub() {
       </div>
 
       {tab === "cctv" && <CctvTab sites={sites} zones={zones} />}
+      {tab === "incidents" && <IncidentManagementTab sites={sites} zones={zones} />}
     </div>
   );
 }

@@ -51,7 +51,8 @@
     "sectionCommercial": "Kommersieel",
     "sectionReports": "Verslae & Dokumente",
     "sectionSiteOps": "Terreinbedrywighede",
-    "sectionTools": "Nutsmiddels"
+    "sectionTools": "Nutsmiddels",
+    "sectionSecurity": "Sekuriteit"
   },
   "language": {
     "label": "Taal",
@@ -2194,6 +2195,39 @@
       "syncNow": "Sinkroniseer nou",
       "noneYet": "Nog geen kameras aangeteken nie.",
       "confirmDelete": "Verwyder hierdie kamera?"
+    },
+    "tabIncidents": "Voorvalbestuur",
+    "incidents": {
+      "subtitle": "Sekuriteitsvoorvalle moet dadelik aangeteken word, en dan opgedateer word soos die ondersoek vorder.",
+      "new": "+ Teken Voorval Aan",
+      "newTitle": "Teken Sekuriteitsvoorval Aan",
+      "editTitle": "Wysig Sekuriteitsvoorval",
+      "category": "Kategorie",
+      "categories": {
+        "THEFT": "Diefstal",
+        "UNAUTHORISED_ACCESS": "Ongemagtigde toegang",
+        "TRESPASSING": "Oortreding",
+        "VANDALISM": "Vandalisme",
+        "ASSAULT": "Aanranding",
+        "PROPERTY_DAMAGE": "Eiendomskade",
+        "SUSPICIOUS_ACTIVITY": "Verdagte aktiwiteit",
+        "MISSING_EQUIPMENT": "Vermiste toerusting",
+        "VEHICLE_INCIDENT": "Voertuigvoorval",
+        "PERIMETER_BREACH": "Omheiningsdeurbraak",
+        "FRAUD_MISCONDUCT": "Bedrog / sekuriteitsverwante wangedrag",
+        "EMERGENCY": "Noodgeval",
+        "OTHER": "Ander"
+      },
+      "severity": "Erns",
+      "description": "Beskrywing",
+      "location": "Spesifieke ligging",
+      "locationPlaceholder": "bv. Hoofhek, Pakhuis 2, Noordelike omheining",
+      "actionsTaken": "Stappe gedoen",
+      "colOccurred": "Voorgekom",
+      "colReportedBy": "Aangemeld Deur",
+      "noneYet": "Nog geen sekuriteitsvoorvalle aangeteken nie.",
+      "confirmDelete": "Verwyder hierdie sekuriteitsvoorval?",
+      "saveError": "Kon nie hierdie sekuriteitsvoorval stoor nie"
     }
   }
 }

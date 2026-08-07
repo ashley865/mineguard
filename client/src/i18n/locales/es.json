@@ -51,7 +51,8 @@
     "sectionCommercial": "Comercial",
     "sectionReports": "Informes y Documentos",
     "sectionSiteOps": "Operaciones del Sitio",
-    "sectionTools": "Herramientas"
+    "sectionTools": "Herramientas",
+    "sectionSecurity": "Seguridad"
   },
   "language": {
     "label": "Idioma",
@@ -2194,6 +2195,39 @@
       "syncNow": "Sincronizar ahora",
       "noneYet": "Aún no se han registrado cámaras.",
       "confirmDelete": "¿Eliminar esta cámara?"
+    },
+    "tabIncidents": "Gestión de Incidentes",
+    "incidents": {
+      "subtitle": "Los incidentes de seguridad deben registrarse de inmediato y luego actualizarse a medida que avanza la investigación.",
+      "new": "+ Registrar Incidente",
+      "newTitle": "Registrar Incidente de Seguridad",
+      "editTitle": "Editar Incidente de Seguridad",
+      "category": "Categoría",
+      "categories": {
+        "THEFT": "Robo",
+        "UNAUTHORISED_ACCESS": "Acceso no autorizado",
+        "TRESPASSING": "Intrusión",
+        "VANDALISM": "Vandalismo",
+        "ASSAULT": "Agresión",
+        "PROPERTY_DAMAGE": "Daño a la propiedad",
+        "SUSPICIOUS_ACTIVITY": "Actividad sospechosa",
+        "MISSING_EQUIPMENT": "Equipo faltante",
+        "VEHICLE_INCIDENT": "Incidente vehicular",
+        "PERIMETER_BREACH": "Brecha de perímetro",
+        "FRAUD_MISCONDUCT": "Fraude / mala conducta relacionada con seguridad",
+        "EMERGENCY": "Emergencia",
+        "OTHER": "Otro"
+      },
+      "severity": "Gravedad",
+      "description": "Descripción",
+      "location": "Ubicación específica",
+      "locationPlaceholder": "p. ej. Puerta principal, Almacén 2, Cerca perimetral norte",
+      "actionsTaken": "Medidas tomadas",
+      "colOccurred": "Ocurrió",
+      "colReportedBy": "Reportado Por",
+      "noneYet": "Aún no se han registrado incidentes de seguridad.",
+      "confirmDelete": "¿Eliminar este incidente de seguridad?",
+      "saveError": "No se pudo guardar este incidente de seguridad"
     }
   }
 }

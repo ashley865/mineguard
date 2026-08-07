@@ -51,7 +51,8 @@
     "sectionCommercial": "Commercial",
     "sectionReports": "Rapports et Documents",
     "sectionSiteOps": "Opérations sur Site",
-    "sectionTools": "Outils"
+    "sectionTools": "Outils",
+    "sectionSecurity": "Sécurité"
   },
   "language": {
     "label": "Langue",
@@ -2194,6 +2195,39 @@
       "syncNow": "Synchroniser maintenant",
       "noneYet": "Aucune caméra enregistrée pour le moment.",
       "confirmDelete": "Supprimer cette caméra ?"
+    },
+    "tabIncidents": "Gestion des Incidents",
+    "incidents": {
+      "subtitle": "Les incidents de sécurité doivent être signalés immédiatement, puis mis à jour au fur et à mesure de l'enquête.",
+      "new": "+ Signaler un Incident",
+      "newTitle": "Signaler un Incident de Sécurité",
+      "editTitle": "Modifier l'Incident de Sécurité",
+      "category": "Catégorie",
+      "categories": {
+        "THEFT": "Vol",
+        "UNAUTHORISED_ACCESS": "Accès non autorisé",
+        "TRESPASSING": "Intrusion",
+        "VANDALISM": "Vandalisme",
+        "ASSAULT": "Agression",
+        "PROPERTY_DAMAGE": "Dommage matériel",
+        "SUSPICIOUS_ACTIVITY": "Activité suspecte",
+        "MISSING_EQUIPMENT": "Équipement manquant",
+        "VEHICLE_INCIDENT": "Incident de véhicule",
+        "PERIMETER_BREACH": "Brèche de périmètre",
+        "FRAUD_MISCONDUCT": "Fraude / faute liée à la sécurité",
+        "EMERGENCY": "Urgence",
+        "OTHER": "Autre"
+      },
+      "severity": "Gravité",
+      "description": "Description",
+      "location": "Emplacement précis",
+      "locationPlaceholder": "ex. Portail principal, Entrepôt 2, Clôture périmétrique nord",
+      "actionsTaken": "Mesures prises",
+      "colOccurred": "Survenu",
+      "colReportedBy": "Signalé Par",
+      "noneYet": "Aucun incident de sécurité signalé pour le moment.",
+      "confirmDelete": "Supprimer cet incident de sécurité ?",
+      "saveError": "Impossible d'enregistrer cet incident de sécurité"
     }
   }
 }

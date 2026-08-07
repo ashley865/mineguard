@@ -205,6 +205,7 @@ model User {
   auditFindingsVerified      AuditFinding[]          @relation("AuditFindingVerifiedBy")
   auditFindingsClosed        AuditFinding[]          @relation("AuditFindingClosedBy")
   securityCamerasCreated     SecurityCamera[]        @relation("SecurityCameraCreatedBy")
+  securityIncidentsReported  SecurityIncident[]      @relation("SecurityIncidentReportedBy")
   fleetPositions         FleetPosition[]        @relation("FleetPositionRecordedBy")
   inventoryMovements     InventoryMovement[]    @relation("InventoryMovementBy")
   weatherReadings        WeatherReading[]       @relation("WeatherRecordedBy")
@@ -294,6 +295,7 @@ model Site {
   complianceRequirements ComplianceRequirement[]
   auditFindings          AuditFinding[]
   securityCameras        SecurityCamera[]
+  securityIncidents      SecurityIncident[]
 }
 
 model Zone {
@@ -309,6 +311,7 @@ model Zone {
   equipment Equipment[]
   alerts    Alert[]
   securityCameras SecurityCamera[]
+  securityIncidents SecurityIncident[]
 
   codesOfPractice   CodeOfPractice[]
   riskAssessments   RiskAssessment[]
@@ -554,6 +557,46 @@ model SecurityCamera {
   notes               String?
   createdById         String?
   createdBy           User?                   @relation("SecurityCameraCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+
+  createdAt DateTime @default(now())
+}
+
+enum SecurityIncidentCategory {
+  THEFT
+  UNAUTHORISED_ACCESS
+  TRESPASSING
+  VANDALISM
+  ASSAULT
+  PROPERTY_DAMAGE
+  SUSPICIOUS_ACTIVITY
+  MISSING_EQUIPMENT
+  VEHICLE_INCIDENT
+  PERIMETER_BREACH
+  FRAUD_MISCONDUCT
+  EMERGENCY
+  OTHER
+}
+
+// The Security Manager's incident log: security incidents are logged immediately with
+// a category and severity first, with investigation details filled in as they develop —
+// distinct from the general Incident model, which covers safety/operational incidents
+// rather than security-specific ones (theft, trespassing, assault, etc.).
+model SecurityIncident {
+  id           String                   @id @default(cuid())
+  siteId       String
+  site         Site                     @relation(fields: [siteId], references: [id], onDelete: Cascade)
+  zoneId       String?
+  zone         Zone?                    @relation(fields: [zoneId], references: [id], onDelete: SetNull)
+  category     SecurityIncidentCategory
+  severity     AlertSeverity
+  description  String
+  location     String?
+  occurredAt   DateTime                 @default(now())
+  reportedById String?
+  reportedBy   User?                    @relation("SecurityIncidentReportedBy", fields: [reportedById], references: [id], onDelete: SetNull)
+  status       IncidentStatus           @default(OPEN)
+  actionsTaken String?
+  resolvedAt   DateTime?
 
   createdAt DateTime @default(now())
 }

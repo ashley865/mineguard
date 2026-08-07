@@ -68,6 +68,7 @@
     "sectionCommercial": "Commercial",
     "sectionReports": "Reports & Documents",
     "sectionSiteOps": "Site Operations",
+    "sectionSecurity": "Security",
     "sectionTools": "Tools"
   },
   "language": {
@@ -1187,6 +1188,7 @@
     "nav": "Security",
     "subtitle": "Physical security infrastructure for this mine.",
     "tabCctv": "CCTV & Surveillance",
+    "tabIncidents": "Incident Management",
     "cctv": {
       "subtitle": "Camera inventory and, where the site's VMS/CCTV vendor technically supports it, MineGuard's integration with that existing system.",
       "new": "+ New Camera",
@@ -1226,6 +1228,38 @@
       "syncNow": "Sync now",
       "noneYet": "No cameras recorded yet.",
       "confirmDelete": "Delete this camera?"
+    },
+    "incidents": {
+      "subtitle": "Security incidents should be logged immediately, then updated as the investigation develops.",
+      "new": "+ Log Incident",
+      "newTitle": "Log Security Incident",
+      "editTitle": "Edit Security Incident",
+      "category": "Category",
+      "categories": {
+        "THEFT": "Theft",
+        "UNAUTHORISED_ACCESS": "Unauthorised access",
+        "TRESPASSING": "Trespassing",
+        "VANDALISM": "Vandalism",
+        "ASSAULT": "Assault",
+        "PROPERTY_DAMAGE": "Property damage",
+        "SUSPICIOUS_ACTIVITY": "Suspicious activity",
+        "MISSING_EQUIPMENT": "Missing equipment",
+        "VEHICLE_INCIDENT": "Vehicle incident",
+        "PERIMETER_BREACH": "Perimeter breach",
+        "FRAUD_MISCONDUCT": "Fraud / security-related misconduct",
+        "EMERGENCY": "Emergency",
+        "OTHER": "Other"
+      },
+      "severity": "Severity",
+      "description": "Description",
+      "location": "Specific location",
+      "locationPlaceholder": "e.g. Main gate, Warehouse 2, North perimeter fence",
+      "actionsTaken": "Actions taken",
+      "colOccurred": "Occurred",
+      "colReportedBy": "Reported By",
+      "noneYet": "No security incidents logged yet.",
+      "confirmDelete": "Delete this security incident?",
+      "saveError": "Could not save this security incident"
     }
   },
   "permitToWork": {

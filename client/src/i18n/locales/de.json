@@ -51,7 +51,8 @@
     "sectionCommercial": "Kommerziell",
     "sectionReports": "Berichte & Dokumente",
     "sectionSiteOps": "Standortbetrieb",
-    "sectionTools": "Werkzeuge"
+    "sectionTools": "Werkzeuge",
+    "sectionSecurity": "Sicherheit"
   },
   "language": {
     "label": "Sprache",
@@ -2194,6 +2195,39 @@
       "syncNow": "Jetzt synchronisieren",
       "noneYet": "Noch keine Kameras erfasst.",
       "confirmDelete": "Diese Kamera löschen?"
+    },
+    "tabIncidents": "Vorfallmanagement",
+    "incidents": {
+      "subtitle": "Sicherheitsvorfälle müssen sofort erfasst und dann im Verlauf der Untersuchung aktualisiert werden.",
+      "new": "+ Vorfall Melden",
+      "newTitle": "Sicherheitsvorfall Melden",
+      "editTitle": "Sicherheitsvorfall Bearbeiten",
+      "category": "Kategorie",
+      "categories": {
+        "THEFT": "Diebstahl",
+        "UNAUTHORISED_ACCESS": "Unbefugter Zutritt",
+        "TRESPASSING": "Hausfriedensbruch",
+        "VANDALISM": "Vandalismus",
+        "ASSAULT": "Körperverletzung",
+        "PROPERTY_DAMAGE": "Sachschaden",
+        "SUSPICIOUS_ACTIVITY": "Verdächtige Aktivität",
+        "MISSING_EQUIPMENT": "Fehlende Ausrüstung",
+        "VEHICLE_INCIDENT": "Fahrzeugvorfall",
+        "PERIMETER_BREACH": "Perimeterdurchbruch",
+        "FRAUD_MISCONDUCT": "Betrug / sicherheitsrelevantes Fehlverhalten",
+        "EMERGENCY": "Notfall",
+        "OTHER": "Sonstiges"
+      },
+      "severity": "Schweregrad",
+      "description": "Beschreibung",
+      "location": "Genauer Standort",
+      "locationPlaceholder": "z. B. Haupttor, Lagerhalle 2, Nordzaun",
+      "actionsTaken": "Ergriffene Maßnahmen",
+      "colOccurred": "Aufgetreten",
+      "colReportedBy": "Gemeldet Von",
+      "noneYet": "Noch keine Sicherheitsvorfälle erfasst.",
+      "confirmDelete": "Diesen Sicherheitsvorfall löschen?",
+      "saveError": "Dieser Sicherheitsvorfall konnte nicht gespeichert werden"
     }
   }
 }

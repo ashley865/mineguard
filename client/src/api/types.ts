@@ -376,6 +376,39 @@ export interface SecurityCamera {
   createdAt: string;
 }
 
+export type SecurityIncidentCategory =
+  | "THEFT"
+  | "UNAUTHORISED_ACCESS"
+  | "TRESPASSING"
+  | "VANDALISM"
+  | "ASSAULT"
+  | "PROPERTY_DAMAGE"
+  | "SUSPICIOUS_ACTIVITY"
+  | "MISSING_EQUIPMENT"
+  | "VEHICLE_INCIDENT"
+  | "PERIMETER_BREACH"
+  | "FRAUD_MISCONDUCT"
+  | "EMERGENCY"
+  | "OTHER";
+
+export interface SecurityIncident {
+  id: string;
+  siteId: string;
+  site?: { id: string; name: string };
+  zoneId?: string | null;
+  zone?: { id: string; name: string } | null;
+  category: SecurityIncidentCategory;
+  severity: AlertSeverity;
+  description: string;
+  location?: string | null;
+  occurredAt: string;
+  reportedBy?: { id: string; name: string } | null;
+  status: IncidentStatus;
+  actionsTaken?: string | null;
+  resolvedAt?: string | null;
+  createdAt: string;
+}
+
 export interface DashboardSummary {
   counts: {
     siteCount: number;
