@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { api } from "../api/client";
 import { Site, Worker, Zone } from "../api/types";
+import HazardManagementTab from "./compliance/HazardManagementTab";
 import CodesOfPracticeTab from "./compliance/CodesOfPracticeTab";
 import RiskAssessmentsTab from "./compliance/RiskAssessmentsTab";
 import RegulatoryNoticesTab from "./compliance/RegulatoryNoticesTab";
@@ -12,11 +13,11 @@ import SafetyInspectionsTab from "./compliance/SafetyInspectionsTab";
 import ExplosivesRegister from "./ExplosivesRegister";
 import { buttonPrimary, buttonSecondary } from "../components/ui";
 
-type TabKey = "cop" | "risk" | "notices" | "requirements" | "audit" | "medical" | "inspections" | "explosives";
+type TabKey = "hazards" | "cop" | "risk" | "notices" | "requirements" | "audit" | "medical" | "inspections" | "explosives";
 
 export default function SafetyCompliance() {
   const { t } = useTranslation();
-  const [tab, setTab] = useState<TabKey>("cop");
+  const [tab, setTab] = useState<TabKey>("hazards");
   const [sites, setSites] = useState<Site[]>([]);
   const [zones, setZones] = useState<Zone[]>([]);
   const [workers, setWorkers] = useState<Worker[]>([]);
@@ -38,6 +39,7 @@ export default function SafetyCompliance() {
   }, []);
 
   const tabs: { key: TabKey; label: string }[] = [
+    { key: "hazards", label: t("compliance.tabHazards") },
     { key: "cop", label: t("compliance.tabCop") },
     { key: "risk", label: t("compliance.tabRisk") },
     { key: "notices", label: t("compliance.tabNotices") },
@@ -69,6 +71,7 @@ export default function SafetyCompliance() {
         ))}
       </div>
 
+      {tab === "hazards" && <HazardManagementTab sites={sites} zones={zones} />}
       {tab === "cop" && <CodesOfPracticeTab sites={sites} zones={zones} />}
       {tab === "risk" && <RiskAssessmentsTab sites={sites} zones={zones} />}
       {tab === "notices" && <RegulatoryNoticesTab sites={sites} zones={zones} />}

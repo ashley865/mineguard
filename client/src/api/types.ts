@@ -457,6 +457,56 @@ export interface PatrolAssignment {
   createdAt: string;
 }
 
+export type HazardType =
+  | "GEOTECHNICAL_ROCKFALL"
+  | "ELECTRICAL"
+  | "FIRE_EXPLOSION"
+  | "CHEMICAL_SPILL"
+  | "MACHINERY_EQUIPMENT"
+  | "VENTILATION_AIR_QUALITY"
+  | "DUST_NOISE"
+  | "SLIP_TRIP_FALL"
+  | "WORKING_AT_HEIGHT"
+  | "CONFINED_SPACE"
+  | "VEHICLE_TRAFFIC"
+  | "STRUCTURAL"
+  | "ERGONOMIC"
+  | "ENVIRONMENTAL"
+  | "OTHER";
+
+export type HazardStatus = "OPEN" | "IN_PROGRESS" | "CLOSED" | "OVERDUE";
+
+export interface HazardMedia {
+  id: string;
+  fileName: string;
+  fileMimeType: string;
+  fileSize: number;
+  createdAt: string;
+}
+
+export interface HazardReport {
+  id: string;
+  siteId: string;
+  site?: { id: string; name: string };
+  zoneId?: string | null;
+  zone?: { id: string; name: string } | null;
+  hazardType: HazardType;
+  location: string;
+  description: string;
+  reportedBy?: { id: string; name: string } | null;
+  riskLevel: RiskLevel;
+  immediateAction?: string | null;
+  responsiblePersonId?: string | null;
+  responsiblePerson?: { id: string; name: string } | null;
+  dueDate?: string | null;
+  status: HazardStatus;
+  closureEvidence?: string | null;
+  closedBy?: { id: string; name: string } | null;
+  closureDate?: string | null;
+  media: HazardMedia[];
+  createdAt: string;
+}
+
 export interface DashboardSummary {
   counts: {
     siteCount: number;
