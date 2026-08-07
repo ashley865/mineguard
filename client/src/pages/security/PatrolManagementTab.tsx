@@ -2,13 +2,13 @@ import { FormEvent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { api } from "../../api/client";
 import { useAuth } from "../../context/AuthContext";
-import { PatrolAssignment, PatrolRoute, Site, Worker } from "../../api/types";
+import { DutyLogEntry, GuardSummary, PatrolAssignment, PatrolRoute, Site, Worker } from "../../api/types";
 import { StatusBadge } from "../../components/Badges";
 import Modal from "../../components/Modal";
 import { buttonDanger, buttonPrimary, buttonSecondary, cardClass, inputClass, labelClass, selectClass } from "../../components/ui";
 import DateField from "../../components/DateField";
 
-type SubTab = "routes" | "assignments";
+type SubTab = "routes" | "assignments" | "guards" | "dutyLog";
 
 const SUGGESTED_CHECKPOINTS = [
   "Gate 1",
@@ -241,6 +241,108 @@ function AssignmentForm({ sites, routes, guards, onSubmit, onCancel }: {
   );
 }
 
+function ScheduleGenerateForm({ sites, routes, guards, onSubmit, onCancel }: {
+  sites: Site[];
+  routes: PatrolRoute[];
+  guards: Worker[];
+  onSubmit: (data: any) => Promise<{ created: number; skipped: number }>;
+  onCancel: () => void;
+}) {
+  const { t } = useTranslation();
+  const [siteId, setSiteId] = useState(sites[0]?.id ?? "");
+  const routesForSite = routes.filter((r) => r.siteId === siteId && r.isActive);
+  const guardsForSite = guards.filter((g) => g.siteId === siteId);
+  const [routeIds, setRouteIds] = useState<string[]>([]);
+  const [workerIds, setWorkerIds] = useState<string[]>([]);
+  const [startDate, setStartDate] = useState(new Date().toISOString().slice(0, 10));
+  const [days, setDays] = useState("7");
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [result, setResult] = useState<{ created: number; skipped: number } | null>(null);
+
+  function toggle(list: string[], setList: (v: string[]) => void, id: string) {
+    setList(list.includes(id) ? list.filter((x) => x !== id) : [...list, id]);
+  }
+
+  async function handleSubmit(e: FormEvent) {
+    e.preventDefault();
+    setError(null);
+    if (routeIds.length === 0 || workerIds.length === 0) {
+      setError(t("patrol.schedule.selectAtLeastOne"));
+      return;
+    }
+    setSaving(true);
+    try {
+      const res = await onSubmit({ siteId, routeIds, workerIds, startDate, days: Number(days) });
+      setResult(res);
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  if (result) {
+    return (
+      <div className="space-y-4">
+        <p className="text-sm text-mine-200">{t("patrol.schedule.resultSummary", { created: result.created, skipped: result.skipped })}</p>
+        <div className="flex justify-end pt-2">
+          <button className={buttonPrimary} onClick={onCancel}>{t("common.close")}</button>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <form onSubmit={handleSubmit} className="space-y-4">
+      <p className="text-xs text-mine-400">{t("patrol.schedule.hint")}</p>
+      <div>
+        <label className={labelClass}>{t("common.site")}</label>
+        <select className={selectClass} value={siteId} onChange={(e) => { setSiteId(e.target.value); setRouteIds([]); setWorkerIds([]); }}>
+          {sites.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
+        </select>
+      </div>
+      <div className="grid grid-cols-2 gap-3">
+        <div>
+          <label className={labelClass}>{t("patrol.schedule.startDate")}</label>
+          <DateField value={startDate} onChange={setStartDate} required />
+        </div>
+        <div>
+          <label className={labelClass}>{t("patrol.schedule.days")}</label>
+          <input className={inputClass} type="number" min="1" max="31" value={days} onChange={(e) => setDays(e.target.value)} required />
+        </div>
+      </div>
+      <div>
+        <label className={labelClass}>{t("patrol.assignments.route")}</label>
+        <div className="flex flex-wrap gap-2">
+          {routesForSite.map((r) => (
+            <label key={r.id} className="flex items-center gap-1.5 text-xs border border-mine-700 rounded-full px-2.5 py-1">
+              <input type="checkbox" checked={routeIds.includes(r.id)} onChange={() => toggle(routeIds, setRouteIds, r.id)} />
+              {r.name}
+            </label>
+          ))}
+          {routesForSite.length === 0 && <p className="text-xs text-mine-400">{t("patrol.schedule.noRoutesAtSite")}</p>}
+        </div>
+      </div>
+      <div>
+        <label className={labelClass}>{t("patrol.assignments.guard")}</label>
+        <div className="flex flex-wrap gap-2">
+          {guardsForSite.map((g) => (
+            <label key={g.id} className="flex items-center gap-1.5 text-xs border border-mine-700 rounded-full px-2.5 py-1">
+              <input type="checkbox" checked={workerIds.includes(g.id)} onChange={() => toggle(workerIds, setWorkerIds, g.id)} />
+              {g.name}
+            </label>
+          ))}
+          {guardsForSite.length === 0 && <p className="text-xs text-mine-400">{t("patrol.assignments.noGuardsAtSite")}</p>}
+        </div>
+      </div>
+      {error && <div className="text-danger-500 text-xs">{error}</div>}
+      <div className="flex justify-end gap-2 pt-2">
+        <button type="button" className={buttonSecondary} onClick={onCancel}>{t("common.cancel")}</button>
+        <button type="submit" className={buttonPrimary} disabled={saving}>{saving ? t("common.saving") : t("patrol.schedule.generate")}</button>
+      </div>
+    </form>
+  );
+}
+
 export default function PatrolManagementTab({ sites }: { sites: Site[] }) {
   const { t } = useTranslation();
   const { user } = useAuth();
@@ -249,21 +351,29 @@ export default function PatrolManagementTab({ sites }: { sites: Site[] }) {
   const [routes, setRoutes] = useState<PatrolRoute[]>([]);
   const [assignments, setAssignments] = useState<PatrolAssignment[]>([]);
   const [guards, setGuards] = useState<Worker[]>([]);
+  const [guardSummaries, setGuardSummaries] = useState<GuardSummary[]>([]);
+  const [dutyLog, setDutyLog] = useState<DutyLogEntry[]>([]);
   const [loading, setLoading] = useState(true);
   const [routeModal, setRouteModal] = useState<null | "create" | PatrolRoute>(null);
   const [assignmentModal, setAssignmentModal] = useState(false);
+  const [scheduleModal, setScheduleModal] = useState(false);
   const [copiedSiteId, setCopiedSiteId] = useState<string | null>(null);
+  const [copiedGuardId, setCopiedGuardId] = useState<string | null>(null);
 
   async function load() {
     setLoading(true);
-    const [r, a, g] = await Promise.all([
+    const [r, a, g, gs, dl] = await Promise.all([
       api.get<PatrolRoute[]>("/patrol/routes"),
       api.get<PatrolAssignment[]>("/patrol/assignments"),
       api.get<Worker[]>("/workers", { params: { category: "SECURITY" } }),
+      api.get<GuardSummary[]>("/patrol/guards"),
+      api.get<DutyLogEntry[]>("/patrol/duty-log"),
     ]);
     setRoutes(r.data);
     setAssignments(a.data);
     setGuards(g.data);
+    setGuardSummaries(gs.data);
+    setDutyLog(dl.data);
     setLoading(false);
   }
 
@@ -309,6 +419,28 @@ export default function PatrolManagementTab({ sites }: { sites: Site[] }) {
     });
   }
 
+  async function generateGuardLink(workerId: string) {
+    const res = await api.post(`/patrol/guards/${workerId}/duty-link`);
+    const url = `${window.location.origin}/patrol/g/${res.data.dutyToken}`;
+    navigator.clipboard?.writeText(url).then(() => {
+      setCopiedGuardId(workerId);
+      setTimeout(() => setCopiedGuardId(null), 2000);
+    });
+    await load();
+  }
+
+  async function revokeGuardLink(workerId: string) {
+    if (!confirm(t("patrol.guards.confirmRevoke"))) return;
+    await api.delete(`/patrol/guards/${workerId}/duty-link`);
+    await load();
+  }
+
+  async function generateSchedule(data: any) {
+    const res = await api.post("/patrol/schedule/generate", data);
+    await load();
+    return res.data;
+  }
+
   if (loading) return <div className="text-mine-300">{t("common.loading")}</div>;
 
   return (
@@ -333,6 +465,12 @@ export default function PatrolManagementTab({ sites }: { sites: Site[] }) {
         </button>
         <button className={subTab === "assignments" ? buttonPrimary : buttonSecondary} onClick={() => setSubTab("assignments")}>
           {t("patrol.tabAssignments")}
+        </button>
+        <button className={subTab === "guards" ? buttonPrimary : buttonSecondary} onClick={() => setSubTab("guards")}>
+          {t("patrol.tabGuards")}
+        </button>
+        <button className={subTab === "dutyLog" ? buttonPrimary : buttonSecondary} onClick={() => setSubTab("dutyLog")}>
+          {t("patrol.tabDutyLog")}
         </button>
       </div>
 
@@ -385,7 +523,8 @@ export default function PatrolManagementTab({ sites }: { sites: Site[] }) {
       {subTab === "assignments" && (
         <div className="space-y-3">
           {canEdit && sites.length > 0 && (
-            <div className="flex justify-end">
+            <div className="flex justify-end gap-2">
+              <button className={buttonSecondary} onClick={() => setScheduleModal(true)}>{t("patrol.schedule.generate")}</button>
               <button className={buttonPrimary} onClick={() => setAssignmentModal(true)}>{t("patrol.assignments.new")}</button>
             </div>
           )}
@@ -428,6 +567,99 @@ export default function PatrolManagementTab({ sites }: { sites: Site[] }) {
         </div>
       )}
 
+      {subTab === "guards" && (
+        <div className="space-y-3">
+          <p className="text-xs text-mine-400">{t("patrol.guards.hint")}</p>
+          <div className={`${cardClass} overflow-x-auto`}>
+            <table className="w-full text-sm">
+              <thead className="bg-mine-800/50 text-mine-300 text-xs uppercase">
+                <tr>
+                  <th className="text-left px-4 py-2">{t("patrol.guards.colGuard")}</th>
+                  <th className="text-left px-4 py-2">{t("common.site")}</th>
+                  <th className="text-left px-4 py-2">{t("patrol.duty.onDuty")}</th>
+                  <th className="text-left px-4 py-2">{t("patrol.guards.colLink")}</th>
+                  <th className="px-4 py-2"></th>
+                </tr>
+              </thead>
+              <tbody>
+                {guardSummaries.map((g) => (
+                  <tr key={g.id} className="border-t border-mine-800 hover:bg-mine-800/30 align-top">
+                    <td className="px-4 py-2 font-medium">
+                      {g.name}
+                      <div className="text-[10px] text-mine-400">{g.employeeId}</div>
+                    </td>
+                    <td className="px-4 py-2 text-mine-300">{g.site?.name}</td>
+                    <td className="px-4 py-2">
+                      {g.onDutySince ? (
+                        <span className="text-success-500 text-xs">{t("patrol.duty.onDuty")} · {new Date(g.onDutySince).toLocaleString()}</span>
+                      ) : (
+                        <span className="text-mine-400 text-xs">{t("patrol.duty.offDuty")}</span>
+                      )}
+                    </td>
+                    <td className="px-4 py-2 text-xs">
+                      {g.hasDutyLink ? (
+                        <span className="text-success-500">{t("patrol.guards.linkActive")}</span>
+                      ) : (
+                        <span className="text-mine-400">{t("patrol.guards.noLink")}</span>
+                      )}
+                    </td>
+                    <td className="px-4 py-2 text-right">
+                      {canEdit && (
+                        <div className="flex justify-end gap-2">
+                          <button className="text-xs text-mine-300 hover:text-mine-50" onClick={() => generateGuardLink(g.id)}>
+                            {copiedGuardId === g.id ? t("patrol.linkCopied") : g.hasDutyLink ? t("patrol.guards.regenerateLink") : t("patrol.guards.generateLink")}
+                          </button>
+                          {g.hasDutyLink && (
+                            <button className={buttonDanger} onClick={() => revokeGuardLink(g.id)}>{t("patrol.guards.revoke")}</button>
+                          )}
+                        </div>
+                      )}
+                    </td>
+                  </tr>
+                ))}
+                {guardSummaries.length === 0 && (
+                  <tr><td colSpan={5} className="px-4 py-6 text-center text-mine-400">{t("patrol.guards.noneYet")}</td></tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
+
+      {subTab === "dutyLog" && (
+        <div className="space-y-3">
+          <p className="text-xs text-mine-400">{t("patrol.dutyLog.hint")}</p>
+          <div className={`${cardClass} overflow-x-auto`}>
+            <table className="w-full text-sm">
+              <thead className="bg-mine-800/50 text-mine-300 text-xs uppercase">
+                <tr>
+                  <th className="text-left px-4 py-2">{t("patrol.guards.colGuard")}</th>
+                  <th className="text-left px-4 py-2">{t("patrol.dutyLog.colDate")}</th>
+                  <th className="text-left px-4 py-2">{t("patrol.dutyLog.colOnDuty")}</th>
+                  <th className="text-left px-4 py-2">{t("patrol.dutyLog.colOffDuty")}</th>
+                </tr>
+              </thead>
+              <tbody>
+                {dutyLog.map((entry) => (
+                  <tr key={entry.id} className="border-t border-mine-800 hover:bg-mine-800/30">
+                    <td className="px-4 py-2 font-medium">
+                      {entry.worker.name}
+                      <div className="text-[10px] text-mine-400">{entry.worker.site?.name}</div>
+                    </td>
+                    <td className="px-4 py-2 text-mine-300">{new Date(entry.checkInAt).toLocaleDateString()}</td>
+                    <td className="px-4 py-2 text-mine-300">{new Date(entry.checkInAt).toLocaleTimeString()}</td>
+                    <td className="px-4 py-2 text-mine-300">{entry.checkOutAt ? new Date(entry.checkOutAt).toLocaleTimeString() : "—"}</td>
+                  </tr>
+                ))}
+                {dutyLog.length === 0 && (
+                  <tr><td colSpan={4} className="px-4 py-6 text-center text-mine-400">{t("patrol.dutyLog.noneYet")}</td></tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
+
       {routeModal && (
         <Modal title={routeModal === "create" ? t("patrol.routes.newTitle") : t("patrol.routes.editTitle")} onClose={() => setRouteModal(null)} size="lg">
           <RouteForm
@@ -442,6 +674,18 @@ export default function PatrolManagementTab({ sites }: { sites: Site[] }) {
       {assignmentModal && (
         <Modal title={t("patrol.assignments.newTitle")} onClose={() => setAssignmentModal(false)}>
           <AssignmentForm sites={sites} routes={routes} guards={guards} onSubmit={createAssignment} onCancel={() => setAssignmentModal(false)} />
+        </Modal>
+      )}
+
+      {scheduleModal && (
+        <Modal title={t("patrol.schedule.title")} onClose={() => setScheduleModal(false)}>
+          <ScheduleGenerateForm
+            sites={sites}
+            routes={routes}
+            guards={guards}
+            onSubmit={generateSchedule}
+            onCancel={() => setScheduleModal(false)}
+          />
         </Modal>
       )}
     </div>

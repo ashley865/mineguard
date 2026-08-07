@@ -1,3 +1,4 @@
+import crypto from "crypto";
 import { Router } from "express";
 import multer from "multer";
 import { z } from "zod";
@@ -74,6 +75,18 @@ async function findGuard(siteId: string, workerId: string) {
 // identifying yourself from the site's own security-staff list is the access
 // control, the same as a visitor filling in their own check-in form.
 // ---------------------------------------------------------------------------
+
+// A guard's personal duty link (/patrol/g/:token) resolves straight to their own
+// identity + site, skipping the site-wide name picker — the token itself is the
+// credential, so it must never be guessable (crypto.randomBytes, see below).
+router.get("/public/duty-link/:token", async (req, res) => {
+  const guard = await prisma.worker.findFirst({
+    where: { dutyToken: req.params.token, category: "SECURITY" },
+    select: { id: true, name: true, employeeId: true, status: true, siteId: true, site: { select: { id: true, name: true } } },
+  });
+  if (!guard) return res.status(404).json({ error: "Invalid or expired duty link" });
+  res.json(guard);
+});
 
 router.get("/public/:siteId/guards", async (req, res) => {
   const site = await prisma.site.findUnique({ where: { id: req.params.siteId }, select: { id: true, name: true } });
@@ -271,6 +284,135 @@ const assignmentUpdateSchema = z.object({
 });
 
 router.use(requireAuth);
+
+// ---------------------------------------------------------------------------
+// Guards & duty (Security Manager / Admin dashboard)
+// ---------------------------------------------------------------------------
+
+router.get("/guards", async (req, res) => {
+  const mineId = requireMineId(req, res);
+  if (!mineId) return;
+  const siteId = req.query.siteId as string | undefined;
+  const guards = await prisma.worker.findMany({
+    where: { site: { mineId }, siteId: siteId || undefined, category: "SECURITY" },
+    select: { id: true, name: true, employeeId: true, status: true, siteId: true, site: { select: { id: true, name: true } }, dutyToken: true },
+    orderBy: { name: "asc" },
+  });
+  const openAttendance = await prisma.workerAttendance.findMany({
+    where: { workerId: { in: guards.map((g) => g.id) }, checkOutAt: null },
+    select: { workerId: true, checkInAt: true },
+  });
+  const onDutySince = new Map(openAttendance.map((a) => [a.workerId, a.checkInAt]));
+  res.json(
+    guards.map((g) => ({
+      id: g.id,
+      name: g.name,
+      employeeId: g.employeeId,
+      status: g.status,
+      siteId: g.siteId,
+      site: g.site,
+      hasDutyLink: !!g.dutyToken,
+      onDutySince: onDutySince.get(g.id) ?? null,
+    }))
+  );
+});
+
+// The token is only ever returned here, once, at generation time — like an API key —
+// not exposed through the general guards list above.
+router.post("/guards/:workerId/duty-link", requireRole("ADMIN", "SUPERVISOR", "EXECUTIVE"), async (req, res) => {
+  const mineId = requireMineId(req, res);
+  if (!mineId) return;
+  const guard = await prisma.worker.findFirst({ where: { id: req.params.workerId, site: { mineId }, category: "SECURITY" } });
+  if (!guard) return res.status(404).json({ error: "Security worker not found" });
+  const dutyToken = crypto.randomBytes(24).toString("base64url");
+  await prisma.worker.update({ where: { id: guard.id }, data: { dutyToken } });
+  res.json({ workerId: guard.id, dutyToken });
+});
+
+router.delete("/guards/:workerId/duty-link", requireRole("ADMIN", "SUPERVISOR", "EXECUTIVE"), async (req, res) => {
+  const mineId = requireMineId(req, res);
+  if (!mineId) return;
+  const guard = await prisma.worker.findFirst({ where: { id: req.params.workerId, site: { mineId }, category: "SECURITY" } });
+  if (!guard) return res.status(404).json({ error: "Security worker not found" });
+  await prisma.worker.update({ where: { id: guard.id }, data: { dutyToken: null } });
+  res.status(204).send();
+});
+
+// Automatic report-for-duty log: every time a guard toggles on/off duty from their
+// public duty link, it's a plain WorkerAttendance row — this just surfaces that
+// history, scoped to security staff, on the Security dashboard.
+router.get("/duty-log", async (req, res) => {
+  const mineId = requireMineId(req, res);
+  if (!mineId) return;
+  const siteId = req.query.siteId as string | undefined;
+  const records = await prisma.workerAttendance.findMany({
+    where: { worker: { category: "SECURITY", site: { mineId }, siteId: siteId || undefined } },
+    select: {
+      id: true,
+      checkInAt: true,
+      checkOutAt: true,
+      worker: { select: { id: true, name: true, employeeId: true, site: { select: { id: true, name: true } } } },
+    },
+    orderBy: { checkInAt: "desc" },
+    take: 200,
+  });
+  res.json(records);
+});
+
+const scheduleGenerateSchema = z.object({
+  siteId: z.string().min(1),
+  workerIds: z.array(z.string()).min(1),
+  routeIds: z.array(z.string()).min(1),
+  startDate: z.coerce.date(),
+  days: z.coerce.number().int().min(1).max(31),
+});
+
+// Auto-generates patrol assignments for the given guards over the given date range,
+// rotating each guard through the selected routes so coverage doesn't need to be
+// entered by hand one day at a time. Never overwrites a day a guard is already
+// assigned on.
+router.post("/schedule/generate", requireRole("ADMIN", "SUPERVISOR", "EXECUTIVE"), async (req, res) => {
+  const mineId = requireMineId(req, res);
+  if (!mineId) return;
+  const parsed = scheduleGenerateSchema.safeParse(req.body);
+  if (!parsed.success) return res.status(400).json({ error: parsed.error.flatten() });
+  const { siteId, workerIds, routeIds, startDate, days } = parsed.data;
+
+  const site = await prisma.site.findFirst({ where: { id: siteId, mineId } });
+  if (!site) return res.status(404).json({ error: "Site not found" });
+  const [workers, routes] = await Promise.all([
+    prisma.worker.findMany({ where: { id: { in: workerIds }, siteId, category: "SECURITY" } }),
+    prisma.patrolRoute.findMany({ where: { id: { in: routeIds }, siteId, isActive: true } }),
+  ]);
+  if (workers.length === 0 || routes.length === 0) {
+    return res.status(400).json({ error: "Select at least one guard and one active route" });
+  }
+
+  const rangeStart = new Date(startDate);
+  rangeStart.setHours(0, 0, 0, 0);
+  const rangeEnd = new Date(rangeStart);
+  rangeEnd.setDate(rangeEnd.getDate() + days);
+
+  const existing = await prisma.patrolAssignment.findMany({
+    where: { siteId, workerId: { in: workers.map((w) => w.id) }, shiftDate: { gte: rangeStart, lt: rangeEnd } },
+    select: { workerId: true, shiftDate: true },
+  });
+  const existingKeys = new Set(existing.map((e) => `${e.workerId}|${e.shiftDate.toISOString().slice(0, 10)}`));
+
+  const toCreate: { routeId: string; workerId: string; siteId: string; shiftDate: Date; assignedById: string }[] = [];
+  for (let day = 0; day < days; day++) {
+    const shiftDate = new Date(rangeStart);
+    shiftDate.setDate(shiftDate.getDate() + day);
+    workers.forEach((worker, i) => {
+      const key = `${worker.id}|${shiftDate.toISOString().slice(0, 10)}`;
+      if (existingKeys.has(key)) return;
+      const route = routes[(day + i) % routes.length];
+      toCreate.push({ routeId: route.id, workerId: worker.id, siteId, shiftDate, assignedById: req.auth!.userId });
+    });
+  }
+  if (toCreate.length > 0) await prisma.patrolAssignment.createMany({ data: toCreate });
+  res.status(201).json({ created: toCreate.length, skipped: workers.length * days - toCreate.length });
+});
 
 router.get("/routes", async (req, res) => {
   const mineId = requireMineId(req, res);

@@ -2418,7 +2418,39 @@
       "confirmEvacuation": "Evakuierung auslösen",
       "evacuationSent": "Evakuierung ausgelöst. Begeben Sie sich zum nächsten Sammelpunkt.",
       "siteNotFound": "Dieser Standortlink ist ungültig.",
-      "genericError": "Etwas ist schiefgelaufen. Bitte versuchen Sie es erneut."
+      "genericError": "Etwas ist schiefgelaufen. Bitte versuchen Sie es erneut.",
+      "linkInvalid": "Dieser Dienstlink ist ungültig oder wurde widerrufen. Wenden Sie sich an Ihren Sicherheitsmanager für einen neuen Link."
+    },
+    "tabGuards": "Wachen",
+    "tabDutyLog": "Dienstprotokoll",
+    "guards": {
+      "hint": "Jede Wache erhält ihren eigenen sicheren Link — generieren Sie ihn einmal und teilen Sie ihn direkt mit. Keine Anmeldung erforderlich; der Link selbst identifiziert sie.",
+      "colGuard": "Wache",
+      "colLink": "Dienstlink",
+      "linkActive": "Link aktiv",
+      "noLink": "Noch kein Link",
+      "generateLink": "Link generieren & kopieren",
+      "regenerateLink": "Link neu generieren & kopieren",
+      "revoke": "Widerrufen",
+      "confirmRevoke": "Den Dienstlink dieser Wache widerrufen? Sie benötigt einen neuen, um sich zum Dienst zu melden.",
+      "noneYet": "Noch keine Mitarbeiter der Kategorie Sicherheit registriert."
+    },
+    "dutyLog": {
+      "hint": "Automatische Aufzeichnung jedes Dienstantritts oder Dienstendes einer Wache, mit genauer Uhrzeit und Datum.",
+      "colDate": "Datum",
+      "colOnDuty": "Dienstantritt Gemeldet",
+      "colOffDuty": "Dienstende Gemeldet",
+      "noneYet": "Noch keine Dienstaufzeichnungen erfasst."
+    },
+    "schedule": {
+      "title": "Dienstplan Automatisch Generieren",
+      "hint": "Weist die ausgewählten Wachen automatisch den ausgewählten Routen über den Datumsbereich zu und rotiert Wache-zu-Route täglich. Bestehende Zuweisungen einer Wache an einem bestimmten Tag bleiben unverändert.",
+      "generate": "Dienstplan Automatisch Generieren",
+      "startDate": "Startdatum",
+      "days": "Anzahl der Tage",
+      "selectAtLeastOne": "Wählen Sie mindestens eine Route und eine Wache aus.",
+      "noRoutesAtSite": "Noch keine aktiven Patrouillenrouten an diesem Standort.",
+      "resultSummary": "{{created}} neue Zuweisung(en) erstellt. {{skipped}} bereits zugewiesene(r) Tag(e) übersprungen."
     }
   }
 }

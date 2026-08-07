@@ -418,6 +418,10 @@ model Worker {
   status        WorkerStatus @default(OFF_SHIFT)
   photoData     Bytes?
   photoMimeType String?
+  // A unique unguessable token for this worker's personal patrol duty link
+  // (/patrol/g/:dutyToken) — generated on demand by the Security Manager, one per
+  // guard, rather than everyone sharing a single site-wide link with a name picker.
+  dutyToken     String?      @unique
   siteId        String
   site          Site         @relation(fields: [siteId], references: [id], onDelete: Cascade)
   zoneId        String?

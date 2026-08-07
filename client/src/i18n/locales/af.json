@@ -2418,7 +2418,39 @@
       "confirmEvacuation": "Veroorsaak ontruiming",
       "evacuationSent": "Ontruiming veroorsaak. Gaan na die naaste samelpunt.",
       "siteNotFound": "Hierdie terreinskakel is nie geldig nie.",
-      "genericError": "Iets het verkeerd geloop. Probeer asseblief weer."
+      "genericError": "Iets het verkeerd geloop. Probeer asseblief weer.",
+      "linkInvalid": "Hierdie diensskakel is nie geldig nie of is herroep. Kontak jou Sekuriteitsbestuurder vir 'n nuwe skakel."
+    },
+    "tabGuards": "Wagte",
+    "tabDutyLog": "Diensrekord",
+    "guards": {
+      "hint": "Elke wag kry sy eie veilige skakel — genereer dit een keer en deel dit direk met hulle. Geen aanmelding nodig nie; die skakel self identifiseer hulle.",
+      "colGuard": "Wag",
+      "colLink": "Diensskakel",
+      "linkActive": "Skakel aktief",
+      "noLink": "Nog geen skakel nie",
+      "generateLink": "Genereer en kopieer skakel",
+      "regenerateLink": "Genereer skakel weer en kopieer",
+      "revoke": "Herroep",
+      "confirmRevoke": "Herroep hierdie wag se diensskakel? Hulle sal 'n nuwe een nodig hê om vir diens aan te meld.",
+      "noneYet": "Nog geen sekuriteitskategorie-werkers geregistreer nie."
+    },
+    "dutyLog": {
+      "hint": "Outomatiese rekord van elke keer wat 'n wag vir diens of van diens aangemeld het, met die presiese tyd en datum.",
+      "colDate": "Datum",
+      "colOnDuty": "Aangemeld vir Diens",
+      "colOffDuty": "Aangemeld Af Diens",
+      "noneYet": "Nog geen diensrekords aangeteken nie."
+    },
+    "schedule": {
+      "title": "Genereer Diensskedule Outomaties",
+      "hint": "Wys die gekose wagte outomaties aan die gekose roetes toe oor die datumreeks, en roteer wag-na-roete elke dag. Bestaande toewysings vir 'n wag op 'n gegewe dag word nie verander nie.",
+      "generate": "Genereer Skedule Outomaties",
+      "startDate": "Begindatum",
+      "days": "Aantal dae",
+      "selectAtLeastOne": "Kies ten minste een roete en een wag.",
+      "noRoutesAtSite": "Nog geen aktiewe patrollieroetes by hierdie terrein nie.",
+      "resultSummary": "{{created}} nuwe toewysing(s) geskep. {{skipped}} reeds-toegewysde dag/dae oorgeslaan."
     }
   }
 }

@@ -461,6 +461,24 @@ export interface PatrolAssignment {
   createdAt: string;
 }
 
+export interface GuardSummary {
+  id: string;
+  name: string;
+  employeeId: string;
+  status: WorkerStatus;
+  siteId: string;
+  site?: { id: string; name: string };
+  hasDutyLink: boolean;
+  onDutySince?: string | null;
+}
+
+export interface DutyLogEntry {
+  id: string;
+  checkInAt: string;
+  checkOutAt?: string | null;
+  worker: { id: string; name: string; employeeId: string; site?: { id: string; name: string } };
+}
+
 export type HazardType =
   | "GEOTECHNICAL_ROCKFALL"
   | "ELECTRICAL"

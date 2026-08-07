@@ -2418,7 +2418,39 @@
       "confirmEvacuation": "Déclencher l'évacuation",
       "evacuationSent": "Évacuation déclenchée. Rendez-vous au point de rassemblement le plus proche.",
       "siteNotFound": "Ce lien de site n'est pas valide.",
-      "genericError": "Une erreur s'est produite. Veuillez réessayer."
+      "genericError": "Une erreur s'est produite. Veuillez réessayer.",
+      "linkInvalid": "Ce lien de service n'est pas valide ou a été révoqué. Contactez votre Responsable Sécurité pour un nouveau lien."
+    },
+    "tabGuards": "Gardes",
+    "tabDutyLog": "Journal de Service",
+    "guards": {
+      "hint": "Chaque garde obtient son propre lien sécurisé : générez-le une fois et partagez-le directement avec lui. Aucune connexion requise ; le lien lui-même l'identifie.",
+      "colGuard": "Garde",
+      "colLink": "Lien de Service",
+      "linkActive": "Lien actif",
+      "noLink": "Pas encore de lien",
+      "generateLink": "Générer et copier le lien",
+      "regenerateLink": "Régénérer et copier le lien",
+      "revoke": "Révoquer",
+      "confirmRevoke": "Révoquer le lien de service de ce garde ? Il en faudra un nouveau pour se présenter en service.",
+      "noneYet": "Aucun travailleur de catégorie sécurité enregistré pour le moment."
+    },
+    "dutyLog": {
+      "hint": "Enregistrement automatique de chaque prise ou fin de service d'un garde, avec l'heure et la date exactes.",
+      "colDate": "Date",
+      "colOnDuty": "Prise de Service Signalée",
+      "colOffDuty": "Fin de Service Signalée",
+      "noneYet": "Aucun enregistrement de service pour le moment."
+    },
+    "schedule": {
+      "title": "Générer Automatiquement le Planning de Service",
+      "hint": "Affecte automatiquement les gardes sélectionnés aux itinéraires sélectionnés sur la période, en alternant garde-itinéraire chaque jour. Les affectations existantes d'un garde pour un jour donné ne sont pas modifiées.",
+      "generate": "Générer le Planning Automatiquement",
+      "startDate": "Date de début",
+      "days": "Nombre de jours",
+      "selectAtLeastOne": "Sélectionnez au moins un itinéraire et un garde.",
+      "noRoutesAtSite": "Aucun itinéraire de patrouille actif sur ce site pour le moment.",
+      "resultSummary": "{{created}} nouvelle(s) affectation(s) créée(s). {{skipped}} jour(s) déjà affecté(s) ignoré(s)."
     }
   }
 }

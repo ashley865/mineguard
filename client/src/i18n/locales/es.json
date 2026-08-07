@@ -2418,7 +2418,39 @@
       "confirmEvacuation": "Activar evacuación",
       "evacuationSent": "Evacuación activada. Diríjase al punto de encuentro más cercano.",
       "siteNotFound": "Este enlace de sitio no es válido.",
-      "genericError": "Algo salió mal. Inténtelo de nuevo."
+      "genericError": "Algo salió mal. Inténtelo de nuevo.",
+      "linkInvalid": "Este enlace de servicio no es válido o ha sido revocado. Contacte a su Gerente de Seguridad para obtener un nuevo enlace."
+    },
+    "tabGuards": "Guardias",
+    "tabDutyLog": "Registro de Servicio",
+    "guards": {
+      "hint": "Cada guardia obtiene su propio enlace seguro: genérelo una vez y compártalo directamente con ellos. No se requiere inicio de sesión; el enlace mismo los identifica.",
+      "colGuard": "Guardia",
+      "colLink": "Enlace de Servicio",
+      "linkActive": "Enlace activo",
+      "noLink": "Sin enlace aún",
+      "generateLink": "Generar y copiar enlace",
+      "regenerateLink": "Regenerar y copiar enlace",
+      "revoke": "Revocar",
+      "confirmRevoke": "¿Revocar el enlace de servicio de este guardia? Necesitará uno nuevo para presentarse de servicio.",
+      "noneYet": "Aún no hay trabajadores de categoría seguridad registrados."
+    },
+    "dutyLog": {
+      "hint": "Registro automático de cada vez que un guardia se presentó o salió de servicio, con la fecha y hora exactas.",
+      "colDate": "Fecha",
+      "colOnDuty": "Presentado de Servicio",
+      "colOffDuty": "Reportado Fuera de Servicio",
+      "noneYet": "Aún no se han registrado turnos de servicio."
+    },
+    "schedule": {
+      "title": "Generar Horario de Servicio Automáticamente",
+      "hint": "Asigna automáticamente a los guardias seleccionados a las rutas seleccionadas en el rango de fechas, rotando guardia-ruta cada día. Las asignaciones existentes de un guardia en un día determinado no se modifican.",
+      "generate": "Generar Horario Automáticamente",
+      "startDate": "Fecha de inicio",
+      "days": "Número de días",
+      "selectAtLeastOne": "Seleccione al menos una ruta y un guardia.",
+      "noRoutesAtSite": "Aún no hay rutas de patrulla activas en este sitio.",
+      "resultSummary": "Se crearon {{created}} nueva(s) asignación(es). Se omitieron {{skipped}} día(s) ya asignado(s)."
     }
   }
 }

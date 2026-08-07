@@ -1369,6 +1369,8 @@
     "linkCopied": "Copied!",
     "tabRoutes": "Patrol Routes",
     "tabAssignments": "Assignments",
+    "tabGuards": "Guards",
+    "tabDutyLog": "Duty Log",
     "routes": {
       "new": "+ New Route",
       "newTitle": "New Patrol Route",
@@ -1418,7 +1420,37 @@
       "confirmEvacuation": "Trigger evacuation",
       "evacuationSent": "Evacuation triggered. Proceed to the nearest assembly point.",
       "siteNotFound": "This site link is not valid.",
+      "linkInvalid": "This duty link is not valid or has been revoked. Contact your Security Manager for a new link.",
       "genericError": "Something went wrong. Please try again."
+    },
+    "guards": {
+      "hint": "Each guard gets their own secure link — generate it once and share it with them directly. No login required; the link itself identifies them.",
+      "colGuard": "Guard",
+      "colLink": "Duty Link",
+      "linkActive": "Link active",
+      "noLink": "No link yet",
+      "generateLink": "Generate & copy link",
+      "regenerateLink": "Regenerate & copy link",
+      "revoke": "Revoke",
+      "confirmRevoke": "Revoke this guard's duty link? They will need a new one to report for duty.",
+      "noneYet": "No security-category workers registered yet."
+    },
+    "dutyLog": {
+      "hint": "Automatic record of every time a guard reported for or off duty, with the exact timestamp and date.",
+      "colDate": "Date",
+      "colOnDuty": "Reported On Duty",
+      "colOffDuty": "Reported Off Duty",
+      "noneYet": "No duty records logged yet."
+    },
+    "schedule": {
+      "title": "Auto-Generate Duty Schedule",
+      "hint": "Automatically assigns the selected guards to the selected routes across the date range, rotating guard-to-route each day. Existing assignments for a guard on a given day are left untouched.",
+      "generate": "Auto-Generate Schedule",
+      "startDate": "Start date",
+      "days": "Number of days",
+      "selectAtLeastOne": "Select at least one route and one guard.",
+      "noRoutesAtSite": "No active patrol routes at this site yet.",
+      "resultSummary": "Created {{created}} new assignment(s). Skipped {{skipped}} already-assigned day(s)."
     }
   },
   "permitToWork": {
