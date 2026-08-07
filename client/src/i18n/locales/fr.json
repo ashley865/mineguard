@@ -257,7 +257,23 @@
     "liveReadings": "Relevés en direct",
     "safeRangeLabel": "Plage sûre : {{min}}–{{max}}{{unit}}",
     "confirmDelete": "Supprimer ce capteur et son historique de relevés ?",
-    "loading": "Chargement des capteurs…"
+    "loading": "Chargement des capteurs…",
+    "types": {
+      "METHANE": "Gaz méthane",
+      "CARBON_MONOXIDE": "Monoxyde de carbone",
+      "OXYGEN": "Niveau d'oxygène",
+      "TEMPERATURE": "Température",
+      "HUMIDITY": "Humidité",
+      "SEISMIC": "Activité sismique / du sol",
+      "AIR_FLOW": "Flux d'air",
+      "DUST": "Concentration de poussière",
+      "NOISE": "Niveau de bruit",
+      "WATER_LEVEL": "Niveau d'eau",
+      "EQUIPMENT_CONDITION": "État de l'équipement"
+    },
+    "safetyAlertBanner": "ALERTE DE SÉCURITÉ : {{type}} dans {{zone}} a {{verb}} le seuil de sécurité configuré.",
+    "safetyAlertVerbAbove": "dépassé",
+    "safetyAlertVerbBelow": "chuté en dessous de"
   },
   "workers": {
     "title": "Travailleurs",

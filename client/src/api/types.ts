@@ -175,7 +175,11 @@ export type SensorType =
   | "TEMPERATURE"
   | "HUMIDITY"
   | "SEISMIC"
-  | "AIR_FLOW";
+  | "AIR_FLOW"
+  | "DUST"
+  | "NOISE"
+  | "WATER_LEVEL"
+  | "EQUIPMENT_CONDITION";
 
 export type SensorStatus = "ACTIVE" | "INACTIVE" | "FAULT";
 

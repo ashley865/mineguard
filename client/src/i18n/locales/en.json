@@ -274,7 +274,23 @@
     "liveReadings": "Live Readings",
     "safeRangeLabel": "Safe range: {{min}}–{{max}}{{unit}}",
     "confirmDelete": "Delete this sensor and its reading history?",
-    "loading": "Loading sensors…"
+    "loading": "Loading sensors…",
+    "types": {
+      "METHANE": "Methane gas",
+      "CARBON_MONOXIDE": "Carbon monoxide",
+      "OXYGEN": "Oxygen level",
+      "TEMPERATURE": "Temperature",
+      "HUMIDITY": "Humidity",
+      "SEISMIC": "Seismic / ground activity",
+      "AIR_FLOW": "Air flow",
+      "DUST": "Dust concentration",
+      "NOISE": "Noise level",
+      "WATER_LEVEL": "Water level",
+      "EQUIPMENT_CONDITION": "Equipment condition"
+    },
+    "safetyAlertBanner": "SAFETY ALERT: {{type}} in {{zone}} has {{verb}} the configured safety threshold.",
+    "safetyAlertVerbAbove": "exceeded",
+    "safetyAlertVerbBelow": "dropped below"
   },
   "workers": {
     "title": "Workers",

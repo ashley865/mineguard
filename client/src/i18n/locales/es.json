@@ -257,7 +257,23 @@
     "liveReadings": "Lecturas en Vivo",
     "safeRangeLabel": "Rango seguro: {{min}}–{{max}}{{unit}}",
     "confirmDelete": "¿Eliminar este sensor y su historial de lecturas?",
-    "loading": "Cargando sensores…"
+    "loading": "Cargando sensores…",
+    "types": {
+      "METHANE": "Gas metano",
+      "CARBON_MONOXIDE": "Monóxido de carbono",
+      "OXYGEN": "Nivel de oxígeno",
+      "TEMPERATURE": "Temperatura",
+      "HUMIDITY": "Humedad",
+      "SEISMIC": "Actividad sísmica / del terreno",
+      "AIR_FLOW": "Flujo de aire",
+      "DUST": "Concentración de polvo",
+      "NOISE": "Nivel de ruido",
+      "WATER_LEVEL": "Nivel de agua",
+      "EQUIPMENT_CONDITION": "Condición del equipo"
+    },
+    "safetyAlertBanner": "ALERTA DE SEGURIDAD: {{type}} en {{zone}} ha {{verb}} el umbral de seguridad configurado.",
+    "safetyAlertVerbAbove": "superado",
+    "safetyAlertVerbBelow": "caído por debajo de"
   },
   "workers": {
     "title": "Trabajadores",

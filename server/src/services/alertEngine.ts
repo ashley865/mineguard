@@ -1,6 +1,28 @@
 import { Sensor } from "@prisma/client";
 import { prisma } from "../prisma";
 
+// Plain-language description of what each sensor type actually monitors, used to turn a
+// bare reading into an interpreted safety statement rather than a raw number — e.g.
+// "Temperature in Area B has exceeded the configured safety threshold" instead of
+// "Temperature: 42°C".
+const SENSOR_TYPE_LABELS: Record<string, string> = {
+  METHANE: "Methane gas",
+  CARBON_MONOXIDE: "Carbon monoxide",
+  OXYGEN: "Oxygen level",
+  TEMPERATURE: "Temperature",
+  HUMIDITY: "Humidity",
+  SEISMIC: "Seismic / ground activity",
+  AIR_FLOW: "Air flow",
+  DUST: "Dust concentration",
+  NOISE: "Noise level",
+  WATER_LEVEL: "Water level",
+  EQUIPMENT_CONDITION: "Equipment condition",
+};
+
+function describeSensorType(type: string): string {
+  return SENSOR_TYPE_LABELS[type] ?? type.replace(/_/g, " ").toLowerCase();
+}
+
 function severityFor(sensor: Sensor, value: number): "LOW" | "MEDIUM" | "HIGH" | "CRITICAL" | null {
   const { minSafe, maxSafe } = sensor;
   const range = maxSafe - minSafe;
@@ -39,7 +61,9 @@ export async function evaluateReading(sensor: Sensor, value: number) {
   if (!zone) return null;
 
   const direction = value > sensor.maxSafe ? "above" : value < sensor.minSafe ? "below" : "near";
-  const message = `${sensor.name} reading ${value}${sensor.unit} is ${direction} safe range (${sensor.minSafe}-${sensor.maxSafe}${sensor.unit})`;
+  const verb = direction === "near" ? "is approaching" : "has exceeded";
+  const label = describeSensorType(sensor.type);
+  const message = `SAFETY ALERT: ${label} in ${zone.name} ${verb} the configured safety threshold. ${sensor.name} reading: ${value}${sensor.unit} (safe range ${sensor.minSafe}-${sensor.maxSafe}${sensor.unit}).`;
 
   const alert = await prisma.alert.create({
     data: {

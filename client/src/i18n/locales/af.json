@@ -257,7 +257,23 @@
     "liveReadings": "Intydse Lesings",
     "safeRangeLabel": "Veilige reeks: {{min}}–{{max}}{{unit}}",
     "confirmDelete": "Skrap hierdie sensor en sy lesingsgeskiedenis?",
-    "loading": "Laai sensors tans…"
+    "loading": "Laai sensors tans…",
+    "types": {
+      "METHANE": "Metaangas",
+      "CARBON_MONOXIDE": "Koolstofmonoksied",
+      "OXYGEN": "Suurstofvlak",
+      "TEMPERATURE": "Temperatuur",
+      "HUMIDITY": "Humiditeit",
+      "SEISMIC": "Seismiese / grondaktiwiteit",
+      "AIR_FLOW": "Lugvloei",
+      "DUST": "Stofkonsentrasie",
+      "NOISE": "Geraasvlak",
+      "WATER_LEVEL": "Watervlak",
+      "EQUIPMENT_CONDITION": "Toerustingstoestand"
+    },
+    "safetyAlertBanner": "VEILIGHEIDSWAARSKUWING: {{type}} in {{zone}} het die gekonfigureerde veiligheidsdrempel {{verb}}.",
+    "safetyAlertVerbAbove": "oorskry",
+    "safetyAlertVerbBelow": "onder geval"
   },
   "workers": {
     "title": "Werkers",

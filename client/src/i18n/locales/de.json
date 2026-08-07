@@ -257,7 +257,23 @@
     "liveReadings": "Live-Messwerte",
     "safeRangeLabel": "Sicherer Bereich: {{min}}–{{max}}{{unit}}",
     "confirmDelete": "Diesen Sensor und seinen Messverlauf löschen?",
-    "loading": "Sensoren werden geladen…"
+    "loading": "Sensoren werden geladen…",
+    "types": {
+      "METHANE": "Methangas",
+      "CARBON_MONOXIDE": "Kohlenmonoxid",
+      "OXYGEN": "Sauerstoffgehalt",
+      "TEMPERATURE": "Temperatur",
+      "HUMIDITY": "Luftfeuchtigkeit",
+      "SEISMIC": "Seismische / Bodenaktivität",
+      "AIR_FLOW": "Luftstrom",
+      "DUST": "Staubkonzentration",
+      "NOISE": "Lärmpegel",
+      "WATER_LEVEL": "Wasserstand",
+      "EQUIPMENT_CONDITION": "Gerätezustand"
+    },
+    "safetyAlertBanner": "SICHERHEITSWARNUNG: {{type}} in {{zone}} hat den konfigurierten Sicherheitsschwellenwert {{verb}}.",
+    "safetyAlertVerbAbove": "überschritten",
+    "safetyAlertVerbBelow": "unterschritten"
   },
   "workers": {
     "title": "Mitarbeiter",

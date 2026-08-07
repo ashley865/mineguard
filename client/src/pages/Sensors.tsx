@@ -1,4 +1,4 @@
-import { FormEvent, useEffect, useState } from "react";
+import { Fragment, FormEvent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, ReferenceLine } from "recharts";
 import { api } from "../api/client";
@@ -17,6 +17,10 @@ const sensorTypes: SensorType[] = [
   "HUMIDITY",
   "SEISMIC",
   "AIR_FLOW",
+  "DUST",
+  "NOISE",
+  "WATER_LEVEL",
+  "EQUIPMENT_CONDITION",
 ];
 
 function SensorForm({ zones, initial, onSubmit, onCancel }: {
@@ -64,7 +68,7 @@ function SensorForm({ zones, initial, onSubmit, onCancel }: {
           <label className={labelClass}>{t("common.type")}</label>
           <select className={selectClass} value={type} onChange={(e) => setType(e.target.value as SensorType)}>
             {sensorTypes.map((sensorType) => (
-              <option key={sensorType} value={sensorType}>{sensorType.replace(/_/g, " ")}</option>
+              <option key={sensorType} value={sensorType}>{t(`sensors.types.${sensorType}`)}</option>
             ))}
           </select>
         </div>
@@ -245,29 +249,43 @@ export default function Sensors() {
             {sensors.map((sensor) => {
               const latest = sensor.readings?.[0];
               const outOfRange = latest && (latest.value < sensor.minSafe || latest.value > sensor.maxSafe);
+              const direction = latest ? (latest.value > sensor.maxSafe ? "above" : latest.value < sensor.minSafe ? "below" : null) : null;
               return (
-                <tr key={sensor.id} className="border-t border-mine-800 hover:bg-mine-800/30">
-                  <td className="px-4 py-2 font-medium">
-                    <button className="hover:underline" onClick={() => setChartSensor(sensor)}>
-                      {sensor.name}
-                    </button>
-                  </td>
-                  <td className="px-4 py-2 text-mine-300">{sensor.zone?.name}</td>
-                  <td className="px-4 py-2 text-mine-300">{sensor.type.replace(/_/g, " ")}</td>
-                  <td className={`px-4 py-2 font-semibold ${outOfRange ? "text-danger-400" : ""}`}>
-                    {latest ? `${latest.value}${sensor.unit}` : "—"}
-                  </td>
-                  <td className="px-4 py-2 text-mine-400">{sensor.minSafe}–{sensor.maxSafe}{sensor.unit}</td>
-                  <td className="px-4 py-2"><StatusBadge status={sensor.status} /></td>
-                  <td className="px-4 py-2 text-right">
-                    {canEdit && (
-                      <div className="flex justify-end gap-2">
-                        <button className="text-xs text-mine-300 hover:text-mine-50" onClick={() => setSensorModal(sensor)}>{t("common.edit")}</button>
-                        <button className={buttonDanger} onClick={() => deleteSensor(sensor.id)}>{t("common.delete")}</button>
-                      </div>
-                    )}
-                  </td>
-                </tr>
+                <Fragment key={sensor.id}>
+                  <tr className={`border-t border-mine-800 hover:bg-mine-800/30 ${outOfRange ? "bg-danger-500/5" : ""}`}>
+                    <td className="px-4 py-2 font-medium">
+                      <button className="hover:underline" onClick={() => setChartSensor(sensor)}>
+                        {sensor.name}
+                      </button>
+                    </td>
+                    <td className="px-4 py-2 text-mine-300">{sensor.zone?.name}</td>
+                    <td className="px-4 py-2 text-mine-300">{t(`sensors.types.${sensor.type}`)}</td>
+                    <td className={`px-4 py-2 font-semibold ${outOfRange ? "text-danger-400" : ""}`}>
+                      {latest ? `${latest.value}${sensor.unit}` : "—"}
+                    </td>
+                    <td className="px-4 py-2 text-mine-400">{sensor.minSafe}–{sensor.maxSafe}{sensor.unit}</td>
+                    <td className="px-4 py-2"><StatusBadge status={sensor.status} /></td>
+                    <td className="px-4 py-2 text-right">
+                      {canEdit && (
+                        <div className="flex justify-end gap-2">
+                          <button className="text-xs text-mine-300 hover:text-mine-50" onClick={() => setSensorModal(sensor)}>{t("common.edit")}</button>
+                          <button className={buttonDanger} onClick={() => deleteSensor(sensor.id)}>{t("common.delete")}</button>
+                        </div>
+                      )}
+                    </td>
+                  </tr>
+                  {outOfRange && (
+                    <tr className="bg-danger-500/10">
+                      <td colSpan={7} className="px-4 py-2 text-xs text-danger-500 font-semibold">
+                        ⚠ {t("sensors.safetyAlertBanner", {
+                          type: t(`sensors.types.${sensor.type}`),
+                          zone: sensor.zone?.name ?? "",
+                          verb: direction === "below" ? t("sensors.safetyAlertVerbBelow") : t("sensors.safetyAlertVerbAbove"),
+                        })}
+                      </td>
+                    </tr>
+                  )}
+                </Fragment>
               );
             })}
             {sensors.length === 0 && (

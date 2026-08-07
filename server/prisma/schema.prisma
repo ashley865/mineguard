@@ -47,6 +47,10 @@ enum SensorType {
   HUMIDITY
   SEISMIC
   AIR_FLOW
+  DUST
+  NOISE
+  WATER_LEVEL
+  EQUIPMENT_CONDITION
 }
 
 enum SensorStatus {
