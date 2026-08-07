@@ -194,6 +194,9 @@ export default function Workers() {
   const { t } = useTranslation();
   const { user } = useAuth();
   const canEdit = user?.role === "ADMIN" || user?.role === "SUPERVISOR" || user?.role === "EXECUTIVE";
+  // Adding a new worker is an HR function — other executive titles can still edit/manage
+  // existing workers via canEdit above, but only HR (or Admin/Supervisor) registers a hire.
+  const canAddWorker = user?.role === "ADMIN" || user?.role === "SUPERVISOR" || (user?.role === "EXECUTIVE" && user?.title === "HR_MANAGER");
   const [workers, setWorkers] = useState<Worker[]>([]);
   const [sites, setSites] = useState<Site[]>([]);
   const [zones, setZones] = useState<Zone[]>([]);
@@ -250,7 +253,7 @@ export default function Workers() {
           <h1 className="text-xl font-bold">{t("workers.title")}</h1>
           <p className="text-mine-300 text-sm">{t("workers.subtitle")}</p>
         </div>
-        {canEdit && sites.length > 0 && (
+        {canAddWorker && sites.length > 0 && (
           <button className={buttonPrimary} onClick={() => setModal("create")}>{t("workers.newWorker")}</button>
         )}
       </div>

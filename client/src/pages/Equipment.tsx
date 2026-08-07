@@ -97,7 +97,7 @@ function EquipmentForm({ sites, zones, workers, initial, onSubmit, onCancel }: {
           <label className={labelClass}>{t("equipment.assignedOperator")}</label>
           <select className={selectClass} value={assignedOperatorId} onChange={(e) => setAssignedOperatorId(e.target.value)}>
             <option value="">{t("common.unassigned")}</option>
-            {workersForSite.map((w) => <option key={w.id} value={w.id}>{w.name} ({w.employeeId})</option>)}
+            {workersForSite.map((w) => <option key={w.id} value={w.id}>{w.name} ({t(`workers.categories.${w.category}`)})</option>)}
           </select>
         </div>
       </div>

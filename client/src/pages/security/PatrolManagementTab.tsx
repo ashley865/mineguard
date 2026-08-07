@@ -219,7 +219,7 @@ function AssignmentForm({ sites, routes, guards, onSubmit, onCancel }: {
           <label className={labelClass}>{t("patrol.assignments.guard")}</label>
           <select className={selectClass} value={workerId} onChange={(e) => setWorkerId(e.target.value)}>
             <option value="">{t("patrol.assignments.selectGuard")}</option>
-            {guardsForSite.map((g) => <option key={g.id} value={g.id}>{g.name} ({g.employeeId})</option>)}
+            {guardsForSite.map((g) => <option key={g.id} value={g.id}>{g.name}</option>)}
           </select>
           {guardsForSite.length === 0 && <p className="text-xs text-mine-400 mt-1">{t("patrol.assignments.noGuardsAtSite")}</p>}
         </div>
@@ -362,18 +362,21 @@ export default function PatrolManagementTab({ sites }: { sites: Site[] }) {
 
   async function load() {
     setLoading(true);
-    const [r, a, g, gs, dl] = await Promise.all([
+    // Settled rather than Promise.all: a failure fetching one section (e.g. the guard
+    // duty log) must not leave every other section — routes, assignments — stuck on a
+    // permanent loading spinner just because one request rejected.
+    const [r, a, g, gs, dl] = await Promise.allSettled([
       api.get<PatrolRoute[]>("/patrol/routes"),
       api.get<PatrolAssignment[]>("/patrol/assignments"),
       api.get<Worker[]>("/workers", { params: { category: "SECURITY" } }),
       api.get<GuardSummary[]>("/patrol/guards"),
       api.get<DutyLogEntry[]>("/patrol/duty-log"),
     ]);
-    setRoutes(r.data);
-    setAssignments(a.data);
-    setGuards(g.data);
-    setGuardSummaries(gs.data);
-    setDutyLog(dl.data);
+    if (r.status === "fulfilled") setRoutes(r.value.data);
+    if (a.status === "fulfilled") setAssignments(a.value.data);
+    if (g.status === "fulfilled") setGuards(g.value.data);
+    if (gs.status === "fulfilled") setGuardSummaries(gs.value.data);
+    if (dl.status === "fulfilled") setDutyLog(dl.value.data);
     setLoading(false);
   }
 
@@ -584,10 +587,7 @@ export default function PatrolManagementTab({ sites }: { sites: Site[] }) {
               <tbody>
                 {guardSummaries.map((g) => (
                   <tr key={g.id} className="border-t border-mine-800 hover:bg-mine-800/30 align-top">
-                    <td className="px-4 py-2 font-medium">
-                      {g.name}
-                      <div className="text-[10px] text-mine-400">{g.employeeId}</div>
-                    </td>
+                    <td className="px-4 py-2 font-medium">{g.name}</td>
                     <td className="px-4 py-2 text-mine-300">{g.site?.name}</td>
                     <td className="px-4 py-2">
                       {g.onDutySince ? (

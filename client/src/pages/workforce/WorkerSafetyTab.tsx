@@ -79,7 +79,7 @@ function WorkerSafetyDetail({ worker, canManage, onClose }: { worker: Worker; ca
   const availablePpeTypes = ppeTypes.filter((pt) => !ppe.some((p) => p.ppeType === pt));
 
   return (
-    <Modal title={`${worker.name} (${worker.employeeId})`} onClose={onClose} size="lg">
+    <Modal title={worker.name} onClose={onClose} size="lg">
       {loading ? (
         <div className="text-mine-300 text-sm">{t("common.loading")}</div>
       ) : (
@@ -203,7 +203,7 @@ export default function WorkerSafetyTab({ workers }: { workers: Worker[] }) {
               <tr key={row.worker.id} className="border-t border-mine-800 hover:bg-mine-800/30 align-top">
                 <td className="px-4 py-2 font-medium">
                   {row.worker.name}
-                  <div className="text-[10px] text-mine-400">{row.worker.employeeId}</div>
+                  <div className="text-[10px] text-mine-400">{t(`workers.categories.${row.worker.category}`)}</div>
                 </td>
                 <td className="px-4 py-2">
                   <div className="flex flex-wrap gap-1">

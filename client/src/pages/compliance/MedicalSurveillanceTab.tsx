@@ -50,7 +50,7 @@ function MedicalForm({ workers, initial, onSubmit, onCancel }: {
       <div>
         <label className={labelClass}>{t("compliance.medical.worker")}</label>
         <select className={selectClass} value={workerId} onChange={(e) => setWorkerId(e.target.value)} required>
-          {workers.map((w) => <option key={w.id} value={w.id}>{w.name} ({w.employeeId})</option>)}
+          {workers.map((w) => <option key={w.id} value={w.id}>{w.name} ({t(`workers.categories.${w.category}`)})</option>)}
         </select>
       </div>
       <div className="grid grid-cols-2 gap-3">

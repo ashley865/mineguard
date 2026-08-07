@@ -68,7 +68,7 @@ export default function PatrolDuty() {
           <label className={labelClass}>{t("patrol.duty.whoAreYou")}</label>
           <select className={selectClass} value={guardId} onChange={(e) => setGuardId(e.target.value)}>
             <option value="">{t("patrol.duty.selectGuard")}</option>
-            {guards.map((g) => <option key={g.id} value={g.id}>{g.name} ({g.employeeId})</option>)}
+            {guards.map((g) => <option key={g.id} value={g.id}>{g.name}</option>)}
           </select>
           {guards.length === 0 && <p className="text-xs text-mine-400">{t("patrol.duty.noGuards")}</p>}
         </div>

@@ -1,4 +1,4 @@
-import { Router } from "express";
+import { Router, Request, Response } from "express";
 import multer from "multer";
 import { z } from "zod";
 import { prisma } from "../prisma";
@@ -72,6 +72,23 @@ function withHasPhoto<T extends { photoMimeType: string | null }>(worker: T) {
 
 router.use(requireAuth);
 
+// Adding a worker to the roster is an HR function — other executive titles (Operations,
+// Safety, Security, etc.) can still view/manage workers day-to-day, but only HR_MANAGER
+// (plus ADMIN/SUPERVISOR, who aren't executive titles) can register a new hire.
+async function requireWorkerCreateAccess(req: Request, res: Response): Promise<boolean> {
+  if (req.auth!.role === "ADMIN" || req.auth!.role === "SUPERVISOR") return true;
+  if (req.auth!.role !== "EXECUTIVE") {
+    res.status(403).json({ error: "Insufficient permissions" });
+    return false;
+  }
+  const me = await prisma.user.findUnique({ where: { id: req.auth!.userId }, select: { title: true } });
+  if (me?.title !== "HR_MANAGER") {
+    res.status(403).json({ error: "Only HR can add a new worker" });
+    return false;
+  }
+  return true;
+}
+
 function startOfWeek(): Date {
   const d = new Date();
   d.setHours(0, 0, 0, 0);
@@ -85,7 +102,16 @@ router.get("/", async (req, res) => {
   const mineId = requireMineId(req, res);
   if (!mineId) return;
   const siteId = req.query.siteId as string | undefined;
-  const category = req.query.category as string | undefined;
+  let category = req.query.category as string | undefined;
+
+  // Security Managers deal only with security staff — the general workers list is
+  // restricted to the SECURITY category for that title, regardless of what filter (if
+  // any) was requested, so no other worker's details leak into the Security module.
+  if (req.auth!.role === "EXECUTIVE") {
+    const me = await prisma.user.findUnique({ where: { id: req.auth!.userId }, select: { title: true } });
+    if (me?.title === "SECURITY_MANAGER") category = "SECURITY";
+  }
+
   const workerFilter = { site: { mineId }, siteId: siteId || undefined, category: (category as any) || undefined };
   const weekStart = startOfWeek();
 
@@ -125,6 +151,7 @@ router.get("/", async (req, res) => {
 });
 
 router.post("/", requireRole("ADMIN", "SUPERVISOR", "EXECUTIVE"), async (req, res) => {
+  if (!(await requireWorkerCreateAccess(req, res))) return;
   const mineId = requireMineId(req, res);
   if (!mineId) return;
   const parsed = workerSchema.safeParse(req.body);
