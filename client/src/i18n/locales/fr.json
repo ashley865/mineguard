@@ -850,6 +850,41 @@
         "isAssignedPermittedTasks": "Affecté à des tâches autorisées",
         "isTrainingUpToDate": "À jour avec la formation requise"
       }
+    },
+    "tabSafety": "Sécurité et Compétence",
+    "safety": {
+      "subtitle": "Formation, certifications, compétences, inductions, EPI, aptitude médicale et autorisations — une vue par travailleur, avec les expirations signalées pour que rien n'échappe à l'attention.",
+      "sectionCertificates": "Certificats",
+      "sectionTraining": "Formation et Inductions",
+      "sectionPpe": "Exigences EPI",
+      "issued": "Délivré",
+      "notIssued": "Non délivré",
+      "noPpeYet": "Aucune exigence EPI enregistrée pour le moment.",
+      "colWorker": "Travailleur",
+      "colCertificates": "Certificats",
+      "colTraining": "Formation",
+      "colCompliance": "Conformité",
+      "colMedical": "Aptitude Médicale",
+      "colPpe": "EPI",
+      "expired": "expiré(s)",
+      "expiringSoon": "bientôt expiré",
+      "missing": "manquant(s)",
+      "noneYet": "Aucun",
+      "viewProfile": "Voir le profil",
+      "noWorkers": "Aucun travailleur enregistré pour le moment.",
+      "ppeTypes": {
+        "HARD_HAT": "Casque",
+        "SAFETY_BOOTS": "Bottes de sécurité",
+        "HI_VIS_VEST": "Gilet haute visibilité",
+        "SAFETY_GLASSES": "Lunettes de sécurité",
+        "HEARING_PROTECTION": "Protection auditive",
+        "RESPIRATOR": "Respirateur",
+        "GLOVES": "Gants",
+        "FALL_PROTECTION_HARNESS": "Harnais antichute",
+        "FACE_SHIELD": "Écran facial",
+        "DUST_MASK": "Masque anti-poussière",
+        "OTHER": "Autre"
+      }
     }
   },
   "documents": {

@@ -507,6 +507,58 @@ export interface HazardReport {
   createdAt: string;
 }
 
+export type PpeType =
+  | "HARD_HAT"
+  | "SAFETY_BOOTS"
+  | "HI_VIS_VEST"
+  | "SAFETY_GLASSES"
+  | "HEARING_PROTECTION"
+  | "RESPIRATOR"
+  | "GLOVES"
+  | "FALL_PROTECTION_HARNESS"
+  | "FACE_SHIELD"
+  | "DUST_MASK"
+  | "OTHER";
+
+export interface WorkerPpeRequirement {
+  id: string;
+  workerId: string;
+  ppeType: PpeType;
+  isRequired: boolean;
+  isIssued: boolean;
+  issuedDate?: string | null;
+  notes?: string | null;
+  createdAt: string;
+}
+
+export interface WorkerSafetyComplianceSnapshot {
+  workerId: string;
+  isProperlyTrained: boolean;
+  isCompetent: boolean;
+  isCertified: boolean;
+  isAuthorised: boolean;
+  medicalFitness?: FitnessResult | null;
+  isAssignedPermittedTasks: boolean;
+  isTrainingUpToDate: boolean;
+  assessmentDate: string;
+}
+
+export interface WorkerSafetyMedicalSnapshot {
+  workerId: string;
+  result: FitnessResult;
+  nextExamDue: string;
+  examDate: string;
+}
+
+export interface WorkerSafetySummary {
+  worker: { id: string; name: string; employeeId: string; category: StaffCategory; siteId: string };
+  certificates: { total: number; expired: number; expiringSoon: number };
+  training: { total: number; expired: number; expiringSoon: number };
+  compliance: WorkerSafetyComplianceSnapshot | null;
+  medical: WorkerSafetyMedicalSnapshot | null;
+  ppe: { total: number; missing: number };
+}
+
 export interface DashboardSummary {
   counts: {
     siteCount: number;

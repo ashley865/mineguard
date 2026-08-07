@@ -850,6 +850,41 @@
         "isAssignedPermittedTasks": "Zulässigen Aufgaben zugewiesen",
         "isTrainingUpToDate": "Erforderliche Schulung aktuell"
       }
+    },
+    "tabSafety": "Sicherheit & Kompetenz",
+    "safety": {
+      "subtitle": "Schulung, Zertifizierungen, Kompetenzen, Einweisungen, PSA, medizinische Tauglichkeit und Befugnisse — eine Ansicht pro Mitarbeiter, mit markierten Ablaufdaten, damit nichts unbemerkt verfällt.",
+      "sectionCertificates": "Zertifikate",
+      "sectionTraining": "Schulung & Einweisungen",
+      "sectionPpe": "PSA-Anforderungen",
+      "issued": "Ausgegeben",
+      "notIssued": "Nicht ausgegeben",
+      "noPpeYet": "Noch keine PSA-Anforderungen erfasst.",
+      "colWorker": "Mitarbeiter",
+      "colCertificates": "Zertifikate",
+      "colTraining": "Schulung",
+      "colCompliance": "Compliance",
+      "colMedical": "Ärztliche Tauglichkeit",
+      "colPpe": "PSA",
+      "expired": "abgelaufen",
+      "expiringSoon": "läuft bald ab",
+      "missing": "fehlend",
+      "noneYet": "Keine",
+      "viewProfile": "Profil ansehen",
+      "noWorkers": "Noch keine Mitarbeiter registriert.",
+      "ppeTypes": {
+        "HARD_HAT": "Schutzhelm",
+        "SAFETY_BOOTS": "Sicherheitsschuhe",
+        "HI_VIS_VEST": "Warnweste",
+        "SAFETY_GLASSES": "Schutzbrille",
+        "HEARING_PROTECTION": "Gehörschutz",
+        "RESPIRATOR": "Atemschutzgerät",
+        "GLOVES": "Handschuhe",
+        "FALL_PROTECTION_HARNESS": "Absturzsicherungsgurt",
+        "FACE_SHIELD": "Gesichtsschutz",
+        "DUST_MASK": "Staubmaske",
+        "OTHER": "Sonstiges"
+      }
     }
   },
   "documents": {

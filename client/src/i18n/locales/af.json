@@ -850,6 +850,41 @@
         "isAssignedPermittedTasks": "Toegewys aan toegelate take",
         "isTrainingUpToDate": "Op datum met vereiste opleiding"
       }
+    },
+    "tabSafety": "Veiligheid & Bevoegdheid",
+    "safety": {
+      "subtitle": "Opleiding, sertifisering, bevoegdhede, induksies, PBM, mediese geskiktheid en magtigings — een aansig per werker, met vervaldatums gemerk sodat niks ongemerk verval nie.",
+      "sectionCertificates": "Sertifikate",
+      "sectionTraining": "Opleiding & Induksies",
+      "sectionPpe": "PBM-vereistes",
+      "issued": "Uitgereik",
+      "notIssued": "Nie uitgereik nie",
+      "noPpeYet": "Nog geen PBM-vereistes aangeteken nie.",
+      "colWorker": "Werker",
+      "colCertificates": "Sertifikate",
+      "colTraining": "Opleiding",
+      "colCompliance": "Nakoming",
+      "colMedical": "Mediese Geskiktheid",
+      "colPpe": "PBM",
+      "expired": "verval",
+      "expiringSoon": "verval binnekort",
+      "missing": "ontbreek",
+      "noneYet": "Geen",
+      "viewProfile": "Bekyk profiel",
+      "noWorkers": "Nog geen werkers geregistreer nie.",
+      "ppeTypes": {
+        "HARD_HAT": "Veiligheidshelm",
+        "SAFETY_BOOTS": "Veiligheidstewels",
+        "HI_VIS_VEST": "Hi-vis baadjie",
+        "SAFETY_GLASSES": "Veiligheidsbril",
+        "HEARING_PROTECTION": "Gehoorbeskerming",
+        "RESPIRATOR": "Asemhalingstoestel",
+        "GLOVES": "Handskoene",
+        "FALL_PROTECTION_HARNESS": "Valbeskermingstuig",
+        "FACE_SHIELD": "Gesigskerm",
+        "DUST_MASK": "Stofmasker",
+        "OTHER": "Ander"
+      }
     }
   },
   "documents": {

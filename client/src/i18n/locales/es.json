@@ -850,6 +850,41 @@
         "isAssignedPermittedTasks": "Asignado a tareas permitidas",
         "isTrainingUpToDate": "Al día con la capacitación requerida"
       }
+    },
+    "tabSafety": "Seguridad y Competencia",
+    "safety": {
+      "subtitle": "Capacitación, certificaciones, competencias, inducciones, EPP, aptitud médica y autorizaciones — una vista por trabajador, con vencimientos señalados para que nada caduque sin notar.",
+      "sectionCertificates": "Certificados",
+      "sectionTraining": "Capacitación e Inducciones",
+      "sectionPpe": "Requisitos de EPP",
+      "issued": "Emitido",
+      "notIssued": "No emitido",
+      "noPpeYet": "Aún no se han registrado requisitos de EPP.",
+      "colWorker": "Trabajador",
+      "colCertificates": "Certificados",
+      "colTraining": "Capacitación",
+      "colCompliance": "Cumplimiento",
+      "colMedical": "Aptitud Médica",
+      "colPpe": "EPP",
+      "expired": "vencido(s)",
+      "expiringSoon": "por vencer",
+      "missing": "faltante(s)",
+      "noneYet": "Ninguno",
+      "viewProfile": "Ver perfil",
+      "noWorkers": "Aún no hay trabajadores registrados.",
+      "ppeTypes": {
+        "HARD_HAT": "Casco",
+        "SAFETY_BOOTS": "Botas de seguridad",
+        "HI_VIS_VEST": "Chaleco reflectante",
+        "SAFETY_GLASSES": "Gafas de seguridad",
+        "HEARING_PROTECTION": "Protección auditiva",
+        "RESPIRATOR": "Respirador",
+        "GLOVES": "Guantes",
+        "FALL_PROTECTION_HARNESS": "Arnés de protección contra caídas",
+        "FACE_SHIELD": "Careta facial",
+        "DUST_MASK": "Mascarilla contra polvo",
+        "OTHER": "Otro"
+      }
     }
   },
   "documents": {

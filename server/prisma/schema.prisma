@@ -211,6 +211,7 @@ model User {
   hazardReportsReported      HazardReport[]          @relation("HazardReportedBy")
   hazardReportsResponsibleFor HazardReport[]         @relation("HazardResponsiblePerson")
   hazardReportsClosed        HazardReport[]          @relation("HazardClosedBy")
+  ppeRequirementsCreated     WorkerPpeRequirement[]  @relation("PpeRequirementCreatedBy")
   fleetPositions         FleetPosition[]        @relation("FleetPositionRecordedBy")
   inventoryMovements     InventoryMovement[]    @relation("InventoryMovementBy")
   weatherReadings        WeatherReading[]       @relation("WeatherRecordedBy")
@@ -426,6 +427,7 @@ model Worker {
   certificates    Certificate[]
   trainingRecords TrainingRecord[]
   complianceChecks EmployeeComplianceCheck[]
+  ppeRequirements  WorkerPpeRequirement[]
   attendance      WorkerAttendance[]
   rosterAssignments   RosterAssignment[]
   trainingEnrollments TrainingEnrollment[]
@@ -1076,6 +1078,39 @@ model EmployeeComplianceCheck {
   assessedBy               User?          @relation("EmployeeComplianceAssessedBy", fields: [assessedById], references: [id], onDelete: SetNull)
 
   createdAt DateTime @default(now())
+}
+
+enum PpeType {
+  HARD_HAT
+  SAFETY_BOOTS
+  HI_VIS_VEST
+  SAFETY_GLASSES
+  HEARING_PROTECTION
+  RESPIRATOR
+  GLOVES
+  FALL_PROTECTION_HARNESS
+  FACE_SHIELD
+  DUST_MASK
+  OTHER
+}
+
+// One row per PPE item applicable to a worker's job, so Worker Safety & Competency can
+// show at a glance whether the required PPE has actually been issued to them.
+model WorkerPpeRequirement {
+  id          String    @id @default(cuid())
+  workerId    String
+  worker      Worker    @relation(fields: [workerId], references: [id], onDelete: Cascade)
+  ppeType     PpeType
+  isRequired  Boolean   @default(true)
+  isIssued    Boolean   @default(false)
+  issuedDate  DateTime?
+  notes       String?
+  createdById String?
+  createdBy   User?     @relation("PpeRequirementCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+
+  createdAt DateTime @default(now())
+
+  @@unique([workerId, ppeType])
 }
 
 enum DocumentType {
