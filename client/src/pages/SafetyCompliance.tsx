@@ -11,9 +11,30 @@ import AuditFindingsTab from "./compliance/AuditFindingsTab";
 import MedicalSurveillanceTab from "./compliance/MedicalSurveillanceTab";
 import SafetyInspectionsTab from "./compliance/SafetyInspectionsTab";
 import ExplosivesRegister from "./ExplosivesRegister";
+import StatutoryAppointmentsTab from "./compliance/StatutoryAppointmentsTab";
+import IodClaimsTab from "./compliance/IodClaimsTab";
+import BlastLogsTab from "./compliance/BlastLogsTab";
+import TailingsTab from "./compliance/TailingsTab";
+import ClosureRehabilitationTab from "./compliance/ClosureRehabilitationTab";
+import LegalComplianceTab from "./compliance/LegalComplianceTab";
 import { buttonPrimary, buttonSecondary } from "../components/ui";
 
-type TabKey = "hazards" | "cop" | "risk" | "notices" | "requirements" | "audit" | "medical" | "inspections" | "explosives";
+type TabKey =
+  | "hazards"
+  | "cop"
+  | "risk"
+  | "notices"
+  | "requirements"
+  | "audit"
+  | "medical"
+  | "inspections"
+  | "explosives"
+  | "appointments"
+  | "iodClaims"
+  | "blastLogs"
+  | "tailings"
+  | "closure"
+  | "legal";
 
 export default function SafetyCompliance() {
   const { t } = useTranslation();
@@ -48,6 +69,12 @@ export default function SafetyCompliance() {
     { key: "medical", label: t("compliance.tabMedical") },
     { key: "inspections", label: t("compliance.tabInspections") },
     { key: "explosives", label: t("explosives.nav") },
+    { key: "appointments", label: t("statutoryAppointments.nav") },
+    { key: "iodClaims", label: t("iodClaims.nav") },
+    { key: "blastLogs", label: t("blastLogs.nav") },
+    { key: "tailings", label: t("tailings.nav") },
+    { key: "closure", label: t("closureRehabilitation.nav") },
+    { key: "legal", label: t("legalCompliance.nav") },
   ];
 
   if (loading) return <div className="text-mine-300">{t("compliance.loading")}</div>;
@@ -80,6 +107,12 @@ export default function SafetyCompliance() {
       {tab === "medical" && <MedicalSurveillanceTab workers={workers} />}
       {tab === "inspections" && <SafetyInspectionsTab sites={sites} zones={zones} />}
       {tab === "explosives" && <ExplosivesRegister />}
+      {tab === "appointments" && <StatutoryAppointmentsTab sites={sites} workers={workers} />}
+      {tab === "iodClaims" && <IodClaimsTab workers={workers} />}
+      {tab === "blastLogs" && <BlastLogsTab sites={sites} zones={zones} workers={workers} />}
+      {tab === "tailings" && <TailingsTab sites={sites} />}
+      {tab === "closure" && <ClosureRehabilitationTab sites={sites} />}
+      {tab === "legal" && <LegalComplianceTab sites={sites} />}
     </div>
   );
 }

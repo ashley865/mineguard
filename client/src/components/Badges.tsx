@@ -77,6 +77,22 @@ const statusColors: Record<string, string> = {
   DISCONNECTED: "bg-danger-500 text-white",
   RESPONDING: "bg-hazard-500 text-white",
   CONTAINED: "bg-hazard-600/80 text-white",
+  VACANT: "bg-danger-500 text-white",
+  REVOKED: "bg-danger-600 text-white",
+  REPORTED: "bg-mine-600 text-mine-100",
+  UNDER_ASSESSMENT: "bg-hazard-500 text-white",
+  PLANNED: "bg-mine-600 text-mine-100",
+  FIRED: "bg-success-600 text-white",
+  MISFIRE: "bg-danger-600 text-white",
+  SATISFACTORY: "bg-success-600 text-white",
+  FAIR: "bg-hazard-500 text-white",
+  POOR: "bg-danger-400 text-white",
+  UNSATISFACTORY: "bg-danger-600 text-white",
+  UNKNOWN: "bg-mine-600 text-mine-100",
+  UPCOMING: "bg-mine-600 text-mine-100",
+  DUE: "bg-hazard-500 text-white",
+  APPLIED: "bg-mine-600 text-mine-100",
+  ENROLLED: "bg-hazard-500 text-white",
 };
 
 export function StatusBadge({

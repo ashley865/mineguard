@@ -244,6 +244,13 @@ model User {
   messageGroupMemberships MessageGroupMember[]
   visitorApprovals       Visitor[]               @relation("VisitorApprovedBy")
   complianceChecksAssessed EmployeeComplianceCheck[] @relation("EmployeeComplianceAssessedBy")
+
+  statutoryAppointmentsMade StatutoryAppointment[]  @relation("StatutoryAppointmentAppointedBy")
+  iodClaimsReported         IodClaim[]              @relation("IodClaimReportedBy")
+  blastClearancesGiven      BlastLog[]              @relation("BlastLogClearanceGivenBy")
+  rehabProgressRecorded     ClosureRehabilitationProgress[] @relation("RehabProgressRecordedBy")
+  learnershipsRecorded      Learnership[]           @relation("LearnershipRecordedBy")
+  legalComplianceItemsOwned LegalComplianceItem[]   @relation("LegalComplianceOwner")
 }
 
 model UserAttendance {
@@ -312,6 +319,12 @@ model Site {
   patrolAssignments      PatrolAssignment[]
   hazardReports          HazardReport[]
   emergencyEvents        EmergencyEvent[]
+
+  statutoryAppointments  StatutoryAppointment[]
+  blastLogs              BlastLog[]
+  tailingsFacilities     TailingsFacility[]
+  closureRehabilitationPlans ClosureRehabilitationPlan[]
+  legalComplianceItems   LegalComplianceItem[]
 }
 
 model Zone {
@@ -337,6 +350,7 @@ model Zone {
   safetyInspections SafetyInspection[]
   productionRecords ProductionRecord[]
   safetyObservations SafetyObservation[]
+  blastLogs          BlastLog[]
 
   createdAt DateTime @default(now())
 }
@@ -452,6 +466,12 @@ model Worker {
   evacuationsTriggered   EmergencyEvacuation[] @relation("EvacuationTriggeredByGuard")
   documents              WorkerDocument[]
 
+  statutoryAppointments StatutoryAppointment[]
+  iodClaims             IodClaim[]
+  blastLogsAsShotFirer  BlastLog[]             @relation("BlastLogShotFirer")
+  learnerships          Learnership[]
+  leaveBalances         LeaveBalance[]
+
   createdAt DateTime @default(now())
 }
 
@@ -513,6 +533,8 @@ model Incident {
   reviewedAt   DateTime?
   reviewedById String?
   reviewedBy   User?            @relation("IncidentReviewedBy", fields: [reviewedById], references: [id], onDelete: SetNull)
+
+  iodClaims IodClaim[]
 
   createdAt  DateTime  @default(now())
   resolvedAt DateTime?
@@ -951,6 +973,19 @@ model HazardMedia {
   createdAt DateTime @default(now())
 }
 
+// Occupational Diseases in Mines and Works Act (ODMWA) fields are additional to the
+// general fitness-for-work exam above: mining has its own disease-certification regime
+// (via the Medical Bureau for Occupational Diseases) for dust-exposed workers, distinct
+// from the periodic/exit medical every employer must do under general OHS law.
+enum OccupationalDiseaseClassification {
+  NONE
+  SILICOSIS
+  TUBERCULOSIS
+  NOISE_INDUCED_HEARING_LOSS
+  PNEUMOCONIOSIS_OTHER
+  OTHER
+}
+
 model MedicalSurveillance {
   id            String        @id @default(cuid())
   workerId      String
@@ -961,6 +996,14 @@ model MedicalSurveillance {
   restrictions  String?
   nextExamDue   DateTime
   practitioner  String
+
+  dustExposed            Boolean                            @default(false)
+  lungFunctionResult     String?
+  chestXrayResult        String?
+  diseaseClassification  OccupationalDiseaseClassification @default(NONE)
+  mbodReferenceNumber    String?
+  submittedToMbod        Boolean                            @default(false)
+  submittedToMbodAt      DateTime?
 
   createdAt DateTime @default(now())
 }
@@ -1071,6 +1114,8 @@ model Certificate {
   issueDate         DateTime
   expiryDate        DateTime?
   status            CertificateStatus @default(ACTIVE)
+
+  statutoryAppointments StatutoryAppointment[]
 
   createdAt DateTime @default(now())
 }
@@ -1259,6 +1304,12 @@ model Mine {
   evacuations      EmergencyEvacuation[]
   executiveRequests ExecutiveRequest[]
   messageGroups    MessageGroup[]
+
+  employmentEquityTargets EmploymentEquityTarget[]
+  miningCharterElements   MiningCharterElement[]
+  workplaceSkillsPlans    WorkplaceSkillsPlan[]
+  learnerships            Learnership[]
+  legalComplianceItems    LegalComplianceItem[]
 }
 
 enum ExecutiveRequestStatus {
@@ -2050,6 +2101,7 @@ model ExplosivesMagazine {
   status             ExplosivesMagazineStatus  @default(ACTIVE)
 
   transactions ExplosivesTransaction[]
+  blastLogs    BlastLog[]
 
   createdAt DateTime @default(now())
 }
@@ -2606,6 +2658,418 @@ model Expense {
   maintenanceSchedule    MaintenanceSchedule? @relation(fields: [maintenanceScheduleId], references: [id], onDelete: Cascade)
   contractBidId          String?              @unique
   contractBid            ContractBid?         @relation(fields: [contractBidId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+}
+
+// ---------------------------------------------------------------------------
+// Module: Statutory Appointments Register (Mine Health & Safety Act s2.1)
+// ---------------------------------------------------------------------------
+
+enum StatutoryAppointmentType {
+  MINE_MANAGER
+  MINE_OVERSEER
+  ENGINEER
+  SURVEYOR
+  VENTILATION_OFFICER
+  HEALTH_SAFETY_OFFICER
+  BLASTING_OFFICER
+  ROCK_ENGINEER
+  ELECTRICAL_ENGINEER
+  MECHANICAL_ENGINEER
+  ASSISTANT_MANAGER
+  ENVIRONMENTAL_CONTROL_OFFICER
+  OCCUPATIONAL_HYGIENIST
+  OTHER
+}
+
+enum StatutoryAppointmentStatus {
+  ACTIVE
+  VACANT
+  SUSPENDED
+  EXPIRED
+  REVOKED
+}
+
+// The MHSA requires named, certificated individuals formally appointed to specific legal
+// roles at each mine (Mine Manager, Engineer, Ventilation Officer, etc.), each traceable to
+// an appointment letter and a competency certificate — distinct from just holding a
+// Certificate, which only proves competence, not that someone is *currently* the legally
+// accountable appointee for that role at this site.
+model StatutoryAppointment {
+  id                   String                     @id @default(cuid())
+  siteId               String
+  site                 Site                       @relation(fields: [siteId], references: [id], onDelete: Cascade)
+  appointmentType      StatutoryAppointmentType
+  customTitle          String?
+  legislativeReference String?
+  workerId             String?
+  worker               Worker?                    @relation(fields: [workerId], references: [id], onDelete: SetNull)
+  appointeeName        String
+  certificateId        String?
+  certificate          Certificate?               @relation(fields: [certificateId], references: [id], onDelete: SetNull)
+  appointedDate        DateTime
+  status               StatutoryAppointmentStatus @default(ACTIVE)
+  scopeOfAppointment   String?
+  notes                String?
+  letterFileName       String?
+  letterFileMimeType   String?
+  letterFileSize       Int?
+  letterFileData       Bytes?
+  appointedById        String?
+  appointedBy          User?                      @relation("StatutoryAppointmentAppointedBy", fields: [appointedById], references: [id], onDelete: SetNull)
+
+  createdAt DateTime @default(now())
+}
+
+// ---------------------------------------------------------------------------
+// Module: COIDA Injury-on-Duty Claims
+// ---------------------------------------------------------------------------
+
+enum IodClaimStatus {
+  REPORTED
+  SUBMITTED
+  UNDER_ASSESSMENT
+  ACCEPTED
+  REJECTED
+  CLOSED
+}
+
+// Tracks a workplace injury through the Compensation for Occupational Injuries and Diseases
+// Act (COIDA) claim lifecycle — separate from the Incident record itself, since not every
+// incident becomes a compensation claim, and a claim has its own legal paper trail
+// (Form W.Cl.2, medical reports, Compensation Fund claim number and payout).
+model IodClaim {
+  id                 String         @id @default(cuid())
+  incidentId         String?
+  incident           Incident?      @relation(fields: [incidentId], references: [id], onDelete: SetNull)
+  workerId           String
+  worker             Worker         @relation(fields: [workerId], references: [id], onDelete: Cascade)
+  claimNumber        String?
+  dateOfInjury       DateTime
+  natureOfInjury     String
+  wclForm2Filed      Boolean        @default(false)
+  wclForm2FiledAt    DateTime?
+  firstMedicalReport String?
+  finalMedicalReport String?
+  status             IodClaimStatus @default(REPORTED)
+  compensationAmount Float?
+  payoutDate         DateTime?
+  notes              String?
+  reportedById       String?
+  reportedBy         User?          @relation("IodClaimReportedBy", fields: [reportedById], references: [id], onDelete: SetNull)
+
+  createdAt DateTime @default(now())
+}
+
+// ---------------------------------------------------------------------------
+// Module: Explosives & Blasting — blast logs (extends the existing magazine register)
+// ---------------------------------------------------------------------------
+
+enum BlastLogStatus {
+  PLANNED
+  FIRED
+  MISFIRE
+  CANCELLED
+}
+
+// The existing ExplosivesMagazine/ExplosivesTransaction models cover magazine stock
+// control; a blast itself is a separate legal event under the Explosives Act and MHSA
+// blasting regulations, requiring a certificated shot-firer, a clearance sign-off before
+// re-entry, and misfire handling.
+model BlastLog {
+  id                  String              @id @default(cuid())
+  siteId              String
+  site                Site                @relation(fields: [siteId], references: [id], onDelete: Cascade)
+  zoneId              String?
+  zone                Zone?               @relation(fields: [zoneId], references: [id], onDelete: SetNull)
+  magazineId          String?
+  magazine            ExplosivesMagazine? @relation(fields: [magazineId], references: [id], onDelete: SetNull)
+  shotFirerId         String?
+  shotFirer           Worker?             @relation("BlastLogShotFirer", fields: [shotFirerId], references: [id], onDelete: SetNull)
+  blastDate           DateTime
+  explosiveType       String
+  quantityUsed        Float
+  unit                String
+  numberOfHoles       Int?
+  misfireOccurred     Boolean             @default(false)
+  misfireResolution   String?
+  clearanceGivenById  String?
+  clearanceGivenBy    User?               @relation("BlastLogClearanceGivenBy", fields: [clearanceGivenById], references: [id], onDelete: SetNull)
+  clearanceTime       DateTime?
+  sapsNotified        Boolean             @default(false)
+  status              BlastLogStatus      @default(PLANNED)
+  notes               String?
+
+  createdAt DateTime @default(now())
+}
+
+// ---------------------------------------------------------------------------
+// Module: Tailings Storage Facility (TSF) / Dam Safety
+// ---------------------------------------------------------------------------
+
+enum DamStructuralRating {
+  SATISFACTORY
+  FAIR
+  POOR
+  UNSATISFACTORY
+  UNKNOWN
+}
+
+// A TSF is the single highest-consequence structure most mines operate (Jagersfontein,
+// Brumadinho); it warrants its own register and inspection history rather than being one
+// more generic EnvironmentalReading parameter.
+model TailingsFacility {
+  id                  String   @id @default(cuid())
+  siteId              String
+  site                Site     @relation(fields: [siteId], references: [id], onDelete: Cascade)
+  name                String
+  facilityType        String?
+  designCapacity      Float?
+  unit                String?
+  engineerOfRecord    String?
+  gistmClassification String?
+  status              String   @default("ACTIVE")
+
+  inspections TailingsInspection[]
+
+  createdAt DateTime @default(now())
+}
+
+model TailingsInspection {
+  id                  String              @id @default(cuid())
+  facilityId          String
+  facility            TailingsFacility    @relation(fields: [facilityId], references: [id], onDelete: Cascade)
+  inspectionDate      DateTime
+  inspector           String
+  freeboardMeters     Float?
+  seepageObserved     Boolean             @default(false)
+  seepageDescription  String?
+  structuralRating    DamStructuralRating @default(UNKNOWN)
+  findings            String?
+  correctiveActions   String?
+  engineerSignOff     Boolean             @default(false)
+  engineerSignOffName String?
+  engineerSignOffDate DateTime?
+
+  createdAt DateTime @default(now())
+}
+
+// ---------------------------------------------------------------------------
+// Module: Mine Closure & Rehabilitation Financial Provision (MPRDA / NEMA)
+// ---------------------------------------------------------------------------
+
+enum RehabilitationStatus {
+  PLANNED
+  IN_PROGRESS
+  COMPLETED
+  VERIFIED
+}
+
+// Every SA mine must maintain a costed, periodically-reassessed financial provision for
+// eventual rehabilitation/closure and report progressive rehabilitation against an approved
+// plan — a legal (and financial-statement) obligation, not just an environmental nicety.
+model ClosureRehabilitationPlan {
+  id                        String                @id @default(cuid())
+  siteId                    String
+  site                      Site                  @relation(fields: [siteId], references: [id], onDelete: Cascade)
+  planReferenceNumber       String?
+  financialProvisionAmount  Float?
+  currency                  String                @default("ZAR")
+  guaranteeInstrument       String?
+  lastAssessmentDate        DateTime?
+  nextAssessmentDue         DateTime?
+  targetClosureDate         DateTime?
+  status                    RehabilitationStatus  @default(PLANNED)
+  notes                     String?
+
+  progressUpdates ClosureRehabilitationProgress[]
+
+  createdAt DateTime @default(now())
+}
+
+model ClosureRehabilitationProgress {
+  id                    String                    @id @default(cuid())
+  planId                String
+  plan                  ClosureRehabilitationPlan @relation(fields: [planId], references: [id], onDelete: Cascade)
+  updateDate            DateTime                  @default(now())
+  hectaresRehabilitated Float?
+  percentComplete       Float?
+  description           String
+  recordedById          String?
+  recordedBy            User?                     @relation("RehabProgressRecordedBy", fields: [recordedById], references: [id], onDelete: SetNull)
+
+  createdAt DateTime @default(now())
+}
+
+// ---------------------------------------------------------------------------
+// Module: Employment Equity & Mining Charter Scorecard
+// ---------------------------------------------------------------------------
+
+enum OccupationalLevel {
+  TOP_MANAGEMENT
+  SENIOR_MANAGEMENT
+  PROFESSIONALLY_QUALIFIED
+  SKILLED_TECHNICAL
+  SEMI_SKILLED
+  UNSKILLED
+}
+
+enum DesignatedGroup {
+  AFRICAN
+  COLOURED
+  INDIAN
+  WHITE
+  FOREIGN_NATIONAL
+}
+
+// Employment Equity Act targets by occupational level and designated group, and the
+// Mining Charter (2018) scorecard elements DMRE audits against (ownership, procurement,
+// housing/living conditions, beneficiation, etc.) — nothing in the app currently answers
+// "are we compliant with our EE plan and Charter scorecard."
+model EmploymentEquityTarget {
+  id                    String            @id @default(cuid())
+  mineId                String
+  mine                  Mine              @relation(fields: [mineId], references: [id], onDelete: Cascade)
+  reportingYear         Int
+  occupationalLevel     OccupationalLevel
+  designatedGroup       DesignatedGroup
+  gender                String
+  targetPercent         Float
+  actualHeadcount       Int               @default(0)
+  totalHeadcountAtLevel Int               @default(0)
+  notes                 String?
+
+  createdAt DateTime @default(now())
+}
+
+model MiningCharterElement {
+  id            String   @id @default(cuid())
+  mineId        String
+  mine          Mine     @relation(fields: [mineId], references: [id], onDelete: Cascade)
+  reportingYear Int
+  elementName   String
+  targetPercent Float?
+  actualPercent Float?
+  status        String   @default("ON_TRACK")
+  notes         String?
+
+  createdAt DateTime @default(now())
+}
+
+// ---------------------------------------------------------------------------
+// Module: Skills Development & SETA Reporting (Skills Development Act / MQA)
+// ---------------------------------------------------------------------------
+
+enum LearnershipStatus {
+  APPLIED
+  ENROLLED
+  IN_PROGRESS
+  COMPLETED
+  WITHDRAWN
+}
+
+// Distinct from per-worker TrainingRecord/Certificate: this is the employer's own legal
+// reporting obligation to the Mining Qualifications Authority — the annual Workplace
+// Skills Plan and Annual Training Report used to claim back Skills Development Levy grants.
+model WorkplaceSkillsPlan {
+  id               String    @id @default(cuid())
+  mineId           String
+  mine             Mine      @relation(fields: [mineId], references: [id], onDelete: Cascade)
+  planYear         Int
+  setaName         String    @default("MQA")
+  submittedDate    DateTime?
+  levyPayable      Float?
+  levyGrantClaimed Float?
+  atrSubmittedDate DateTime?
+  status           String    @default("DRAFT")
+  notes            String?
+
+  createdAt DateTime @default(now())
+}
+
+model Learnership {
+  id            String            @id @default(cuid())
+  mineId        String
+  mine          Mine              @relation(fields: [mineId], references: [id], onDelete: Cascade)
+  workerId      String?
+  worker        Worker?           @relation(fields: [workerId], references: [id], onDelete: SetNull)
+  learnerName   String
+  programme     String
+  provider      String?
+  startDate     DateTime
+  endDate       DateTime?
+  status        LearnershipStatus @default(APPLIED)
+  fundingSource String?
+  notes         String?
+  recordedById  String?
+  recordedBy    User?             @relation("LearnershipRecordedBy", fields: [recordedById], references: [id], onDelete: SetNull)
+
+  createdAt DateTime @default(now())
+}
+
+// ---------------------------------------------------------------------------
+// Module: Leave balances (BCEA) — working-time breach detection is computed from the
+// existing WorkerAttendance clock-in/out records rather than a stored table.
+// ---------------------------------------------------------------------------
+
+// A leave-balance ledger per worker/leave type/cycle, since LeaveRequest is only a
+// request-and-approve workflow with no accrual or entitlement tracking today.
+model LeaveBalance {
+  id              String    @id @default(cuid())
+  workerId        String
+  worker          Worker    @relation(fields: [workerId], references: [id], onDelete: Cascade)
+  leaveType       LeaveType
+  cycleStartDate  DateTime
+  cycleEndDate    DateTime
+  entitlementDays Float
+  carriedOverDays Float     @default(0)
+  notes           String?
+
+  createdAt DateTime @default(now())
+}
+
+// ---------------------------------------------------------------------------
+// Module: Legal & Regulatory Compliance Calendar
+// ---------------------------------------------------------------------------
+
+enum LegalComplianceCategory {
+  MINING_RIGHT
+  ENVIRONMENTAL
+  WATER_USE
+  LABOUR
+  HEALTH_SAFETY
+  TAX_LEVY
+  OTHER
+}
+
+enum LegalComplianceItemStatus {
+  UPCOMING
+  DUE
+  OVERDUE
+  COMPLETED
+}
+
+// Manually-tracked legal deadlines that aren't already represented by another module's own
+// expiry field (e.g. a mining-right renewal filing date, a DMRE inspection visit, an SLP
+// review). The /legal-compliance calendar endpoint merges these with expiry dates already
+// captured on Permit, Certificate, MedicalSurveillance and ExplosivesMagazine, so this table
+// is additive rather than a duplicate source of truth for things already tracked elsewhere.
+model LegalComplianceItem {
+  id                    String                     @id @default(cuid())
+  mineId                String
+  mine                  Mine                       @relation(fields: [mineId], references: [id], onDelete: Cascade)
+  siteId                String?
+  site                  Site?                      @relation(fields: [siteId], references: [id], onDelete: SetNull)
+  category              LegalComplianceCategory
+  title                 String
+  legislativeReference  String?
+  dueDate               DateTime
+  ownerId               String?
+  owner                 User?                      @relation("LegalComplianceOwner", fields: [ownerId], references: [id], onDelete: SetNull)
+  status                LegalComplianceItemStatus  @default(UPCOMING)
+  completedAt           DateTime?
+  notes                 String?
 
   createdAt DateTime @default(now())
 }

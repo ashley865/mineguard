@@ -58,6 +58,48 @@ const transactionSelect = {
   createdAt: true,
 } as const;
 
+const blastLogSchema = z.object({
+  siteId: z.string().min(1),
+  zoneId: z.string().optional().nullable(),
+  magazineId: z.string().optional().nullable(),
+  shotFirerId: z.string().optional().nullable(),
+  blastDate: z.coerce.date(),
+  explosiveType: z.string().min(1),
+  quantityUsed: z.coerce.number().positive(),
+  unit: z.string().min(1),
+  numberOfHoles: z.coerce.number().int().optional().nullable(),
+  misfireOccurred: z.coerce.boolean().optional(),
+  misfireResolution: z.string().optional(),
+  sapsNotified: z.coerce.boolean().optional(),
+  status: z.enum(["PLANNED", "FIRED", "MISFIRE", "CANCELLED"]).optional(),
+  notes: z.string().optional(),
+});
+
+const blastLogSelect = {
+  id: true,
+  siteId: true,
+  site: { select: { id: true, name: true } },
+  zoneId: true,
+  zone: { select: { id: true, name: true } },
+  magazineId: true,
+  magazine: { select: { id: true, magazineNumber: true } },
+  shotFirerId: true,
+  shotFirer: { select: { id: true, name: true } },
+  blastDate: true,
+  explosiveType: true,
+  quantityUsed: true,
+  unit: true,
+  numberOfHoles: true,
+  misfireOccurred: true,
+  misfireResolution: true,
+  clearanceGivenBy: { select: { id: true, name: true } },
+  clearanceTime: true,
+  sapsNotified: true,
+  status: true,
+  notes: true,
+  createdAt: true,
+} as const;
+
 router.use(requireAuth);
 
 router.get("/magazines", async (req, res) => {
@@ -140,6 +182,74 @@ router.post("/transactions", requireRole("ADMIN", "SUPERVISOR", "EXECUTIVE"), as
     prisma.explosivesMagazine.update({ where: { id: magazine.id }, data: { currentStock: { increment: delta } } }),
   ]);
   res.status(201).json(transaction);
+});
+
+router.get("/blast-logs", async (req, res) => {
+  const mineId = requireMineId(req, res);
+  if (!mineId) return;
+  const siteId = req.query.siteId as string | undefined;
+  const logs = await prisma.blastLog.findMany({
+    where: { site: { mineId }, siteId: siteId || undefined },
+    select: blastLogSelect,
+    orderBy: { blastDate: "desc" },
+  });
+  res.json(logs);
+});
+
+router.post("/blast-logs", requireRole("ADMIN", "SUPERVISOR", "EXECUTIVE"), async (req, res) => {
+  const mineId = requireMineId(req, res);
+  if (!mineId) return;
+  const parsed = blastLogSchema.safeParse(req.body);
+  if (!parsed.success) return res.status(400).json({ error: parsed.error.flatten() });
+  const site = await prisma.site.findFirst({ where: { id: parsed.data.siteId, mineId } });
+  if (!site) return res.status(404).json({ error: "Site not found" });
+
+  // A blast may only be logged against a worker holding an active blasting certificate of
+  // competence (MHSA blasting regulations) — this is the one place the module enforces that.
+  if (parsed.data.shotFirerId) {
+    const shotFirerCert = await prisma.certificate.findFirst({
+      where: { workerId: parsed.data.shotFirerId, type: "BLASTING", status: "ACTIVE" },
+    });
+    if (!shotFirerCert) {
+      return res.status(409).json({ error: "The nominated shot-firer has no active blasting certificate of competence on file" });
+    }
+  }
+
+  const log = await prisma.blastLog.create({ data: parsed.data, select: blastLogSelect });
+  res.status(201).json(log);
+});
+
+router.put("/blast-logs/:id", requireRole("ADMIN", "SUPERVISOR", "EXECUTIVE"), async (req, res) => {
+  const mineId = requireMineId(req, res);
+  if (!mineId) return;
+  const parsed = blastLogSchema.partial().safeParse(req.body);
+  if (!parsed.success) return res.status(400).json({ error: parsed.error.flatten() });
+  const existing = await prisma.blastLog.findFirst({ where: { id: req.params.id, site: { mineId } } });
+  if (!existing) return res.status(404).json({ error: "Blast log not found" });
+  const log = await prisma.blastLog.update({ where: { id: existing.id }, data: parsed.data, select: blastLogSelect });
+  res.json(log);
+});
+
+router.post("/blast-logs/:id/clearance", requireRole("ADMIN", "SUPERVISOR", "EXECUTIVE"), async (req, res) => {
+  const mineId = requireMineId(req, res);
+  if (!mineId) return;
+  const existing = await prisma.blastLog.findFirst({ where: { id: req.params.id, site: { mineId } } });
+  if (!existing) return res.status(404).json({ error: "Blast log not found" });
+  const log = await prisma.blastLog.update({
+    where: { id: existing.id },
+    data: { clearanceGivenById: req.auth!.userId, clearanceTime: new Date() },
+    select: blastLogSelect,
+  });
+  res.json(log);
+});
+
+router.delete("/blast-logs/:id", requireRole("ADMIN", "EXECUTIVE"), async (req, res) => {
+  const mineId = requireMineId(req, res);
+  if (!mineId) return;
+  const existing = await prisma.blastLog.findFirst({ where: { id: req.params.id, site: { mineId } } });
+  if (!existing) return res.status(404).json({ error: "Blast log not found" });
+  await prisma.blastLog.delete({ where: { id: existing.id } });
+  res.status(204).send();
 });
 
 export default router;

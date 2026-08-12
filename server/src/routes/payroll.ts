@@ -25,6 +25,16 @@ const leaveSchema = z.object({
 
 const leaveReviewSchema = z.object({ decision: z.enum(["APPROVED", "REJECTED"]) });
 
+const leaveBalanceSchema = z.object({
+  workerId: z.string().min(1),
+  leaveType: z.enum(["ANNUAL", "SICK", "FAMILY_RESPONSIBILITY", "UNPAID", "STUDY", "MATERNITY_PATERNITY", "OTHER"]),
+  cycleStartDate: z.coerce.date(),
+  cycleEndDate: z.coerce.date(),
+  entitlementDays: z.coerce.number().min(0),
+  carriedOverDays: z.coerce.number().min(0).optional(),
+  notes: z.string().optional(),
+});
+
 const payslipMetaSchema = z.object({
   workerId: z.string().min(1),
   payPeriodStart: z.coerce.date(),
@@ -190,6 +200,118 @@ router.delete("/payslips/:id", requireRole("ADMIN", "EXECUTIVE"), async (req, re
   if (!existing) return res.status(404).json({ error: "Payslip not found" });
   await prisma.payslip.delete({ where: { id: existing.id } });
   res.status(204).send();
+});
+
+// LeaveRequest is a request/approve workflow with no accrual — LeaveBalance is the ledger
+// HR sets an entitlement + carry-over on, with "taken" computed live from approved requests
+// that fall inside the cycle window (rather than kept as a second, driftable field).
+router.get("/leave-balances", async (req, res) => {
+  const mineId = requireMineId(req, res);
+  if (!mineId) return;
+  const workerId = req.query.workerId as string | undefined;
+  const balances = await prisma.leaveBalance.findMany({
+    where: { worker: { site: { mineId } }, workerId: workerId || undefined },
+    include: { worker: { select: { id: true, name: true, employeeId: true } } },
+    orderBy: { cycleStartDate: "desc" },
+  });
+  const enriched = await Promise.all(
+    balances.map(async (b) => {
+      const taken = await prisma.leaveRequest.aggregate({
+        where: {
+          workerId: b.workerId,
+          leaveType: b.leaveType,
+          status: "APPROVED",
+          startDate: { gte: b.cycleStartDate },
+          endDate: { lte: b.cycleEndDate },
+        },
+        _sum: { daysRequested: true },
+      });
+      const takenDays = taken._sum.daysRequested ?? 0;
+      return { ...b, takenDays, remainingDays: b.entitlementDays + b.carriedOverDays - takenDays };
+    })
+  );
+  res.json(enriched);
+});
+
+router.post("/leave-balances", requireRole("ADMIN", "SUPERVISOR", "EXECUTIVE"), async (req, res) => {
+  const mineId = requireMineId(req, res);
+  if (!mineId) return;
+  const parsed = leaveBalanceSchema.safeParse(req.body);
+  if (!parsed.success) return res.status(400).json({ error: parsed.error.flatten() });
+  const worker = await prisma.worker.findFirst({ where: { id: parsed.data.workerId, site: { mineId } } });
+  if (!worker) return res.status(404).json({ error: "Worker not found" });
+  const balance = await prisma.leaveBalance.create({ data: parsed.data });
+  res.status(201).json(balance);
+});
+
+router.put("/leave-balances/:id", requireRole("ADMIN", "SUPERVISOR", "EXECUTIVE"), async (req, res) => {
+  const mineId = requireMineId(req, res);
+  if (!mineId) return;
+  const parsed = leaveBalanceSchema.partial().safeParse(req.body);
+  if (!parsed.success) return res.status(400).json({ error: parsed.error.flatten() });
+  const existing = await prisma.leaveBalance.findFirst({ where: { id: req.params.id, worker: { site: { mineId } } } });
+  if (!existing) return res.status(404).json({ error: "Leave balance not found" });
+  const balance = await prisma.leaveBalance.update({ where: { id: existing.id }, data: parsed.data });
+  res.json(balance);
+});
+
+router.delete("/leave-balances/:id", requireRole("ADMIN", "EXECUTIVE"), async (req, res) => {
+  const mineId = requireMineId(req, res);
+  if (!mineId) return;
+  const existing = await prisma.leaveBalance.findFirst({ where: { id: req.params.id, worker: { site: { mineId } } } });
+  if (!existing) return res.status(404).json({ error: "Leave balance not found" });
+  await prisma.leaveBalance.delete({ where: { id: existing.id } });
+  res.status(204).send();
+});
+
+// BCEA working-time compliance, computed live from WorkerAttendance clock records: ordinary
+// hours may not exceed 45/week (s9), a daily rest period of 12 consecutive hours is required
+// between shifts (s14). Attendance is already this app's system of record for hours actually
+// worked, so this reads it directly rather than keeping a parallel breach-tracking table.
+router.get("/bcea-compliance", async (req, res) => {
+  const mineId = requireMineId(req, res);
+  if (!mineId) return;
+  const days = Math.min(Number(req.query.days) || 7, 31);
+  const since = new Date(Date.now() - days * 24 * 60 * 60 * 1000);
+  const records = await prisma.workerAttendance.findMany({
+    where: { worker: { site: { mineId } }, checkInAt: { gte: since }, checkOutAt: { not: null } },
+    select: { workerId: true, worker: { select: { name: true } }, checkInAt: true, checkOutAt: true },
+    orderBy: { checkInAt: "asc" },
+  });
+
+  const byWorker = new Map<string, typeof records>();
+  for (const r of records) {
+    if (!byWorker.has(r.workerId)) byWorker.set(r.workerId, []);
+    byWorker.get(r.workerId)!.push(r);
+  }
+
+  const breaches: { workerId: string; workerName: string; type: string; detail: string }[] = [];
+  for (const [workerId, shifts] of byWorker) {
+    const totalHours = shifts.reduce((sum, s) => sum + (s.checkOutAt!.getTime() - s.checkInAt.getTime()) / 3_600_000, 0);
+    const weeklyEquivalent = totalHours / (days / 7);
+    const workerName = shifts[0].worker.name;
+    if (weeklyEquivalent > 45) {
+      breaches.push({
+        workerId,
+        workerName,
+        type: "ORDINARY_HOURS_EXCEEDED",
+        detail: `Averaging ${weeklyEquivalent.toFixed(1)} hours/week over the last ${days} days (BCEA s9 limit: 45)`,
+      });
+    }
+    for (let i = 1; i < shifts.length; i++) {
+      const restHours = (shifts[i].checkInAt.getTime() - shifts[i - 1].checkOutAt!.getTime()) / 3_600_000;
+      if (restHours < 12) {
+        breaches.push({
+          workerId,
+          workerName,
+          type: "DAILY_REST_SHORT",
+          detail: `Only ${restHours.toFixed(1)} hours' rest before the shift starting ${shifts[i].checkInAt.toISOString()} (BCEA s14 minimum: 12)`,
+        });
+      }
+    }
+  }
+
+  res.json({ periodDays: days, workersChecked: byWorker.size, breaches });
 });
 
 export default router;

@@ -8,9 +8,11 @@ import TrainingRecordsTab from "./workforce/TrainingRecordsTab";
 import EmployeeComplianceTab from "./workforce/EmployeeComplianceTab";
 import ShiftRostering from "./ShiftRostering";
 import TrainingLms from "./TrainingLms";
+import EmploymentEquityTab from "./workforce/EmploymentEquityTab";
+import SkillsDevelopmentTab from "./workforce/SkillsDevelopmentTab";
 import { buttonPrimary, buttonSecondary } from "../components/ui";
 
-type TabKey = "safety" | "certificates" | "training" | "compliance" | "roster" | "lms";
+type TabKey = "safety" | "certificates" | "training" | "compliance" | "roster" | "lms" | "employmentEquity" | "skillsDevelopment";
 
 export default function WorkforceManagement() {
   const { t } = useTranslation();
@@ -34,6 +36,8 @@ export default function WorkforceManagement() {
     { key: "compliance", label: t("workforce.tabCompliance") },
     { key: "roster", label: t("roster.nav") },
     { key: "lms", label: t("trainingLms.nav") },
+    { key: "employmentEquity", label: t("employmentEquity.nav") },
+    { key: "skillsDevelopment", label: t("skillsDevelopment.nav") },
   ];
 
   if (loading) return <div className="text-mine-300">{t("workforce.loading")}</div>;
@@ -63,6 +67,8 @@ export default function WorkforceManagement() {
       {tab === "compliance" && <EmployeeComplianceTab workers={workers} />}
       {tab === "roster" && <ShiftRostering />}
       {tab === "lms" && <TrainingLms />}
+      {tab === "employmentEquity" && <EmploymentEquityTab />}
+      {tab === "skillsDevelopment" && <SkillsDevelopmentTab workers={workers} />}
     </div>
   );
 }

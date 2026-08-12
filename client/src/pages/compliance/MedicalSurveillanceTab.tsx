@@ -2,7 +2,7 @@ import { FormEvent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { api } from "../../api/client";
 import { useAuth } from "../../context/AuthContext";
-import { ExamType, FitnessResult, MedicalSurveillance, Worker } from "../../api/types";
+import { ExamType, FitnessResult, MedicalSurveillance, OccupationalDiseaseClassification, Worker } from "../../api/types";
 import { StatusBadge } from "../../components/Badges";
 import Modal from "../../components/Modal";
 import { buttonDanger, buttonPrimary, buttonSecondary, cardClass, inputClass, labelClass, selectClass } from "../../components/ui";
@@ -10,6 +10,14 @@ import DateField from "../../components/DateField";
 
 const examTypes: ExamType[] = ["PRE_EMPLOYMENT", "PERIODICAL", "EXIT", "RETURN_TO_WORK"];
 const results: FitnessResult[] = ["FIT", "FIT_WITH_RESTRICTION", "TEMPORARILY_UNFIT", "UNFIT"];
+const diseaseClassifications: OccupationalDiseaseClassification[] = [
+  "NONE",
+  "SILICOSIS",
+  "TUBERCULOSIS",
+  "NOISE_INDUCED_HEARING_LOSS",
+  "PNEUMOCONIOSIS_OTHER",
+  "OTHER",
+];
 
 function MedicalForm({ workers, initial, onSubmit, onCancel }: {
   workers: Worker[];
@@ -25,6 +33,12 @@ function MedicalForm({ workers, initial, onSubmit, onCancel }: {
   const [restrictions, setRestrictions] = useState(initial?.restrictions ?? "");
   const [nextExamDue, setNextExamDue] = useState(initial?.nextExamDue?.slice(0, 10) ?? "");
   const [practitioner, setPractitioner] = useState(initial?.practitioner ?? "");
+  const [dustExposed, setDustExposed] = useState(initial?.dustExposed ?? false);
+  const [lungFunctionResult, setLungFunctionResult] = useState(initial?.lungFunctionResult ?? "");
+  const [chestXrayResult, setChestXrayResult] = useState(initial?.chestXrayResult ?? "");
+  const [diseaseClassification, setDiseaseClassification] = useState<OccupationalDiseaseClassification>(initial?.diseaseClassification ?? "NONE");
+  const [mbodReferenceNumber, setMbodReferenceNumber] = useState(initial?.mbodReferenceNumber ?? "");
+  const [submittedToMbod, setSubmittedToMbod] = useState(initial?.submittedToMbod ?? false);
   const [saving, setSaving] = useState(false);
 
   async function handleSubmit(e: FormEvent) {
@@ -39,6 +53,13 @@ function MedicalForm({ workers, initial, onSubmit, onCancel }: {
         restrictions: restrictions || undefined,
         nextExamDue,
         practitioner,
+        dustExposed,
+        lungFunctionResult: lungFunctionResult || undefined,
+        chestXrayResult: chestXrayResult || undefined,
+        diseaseClassification,
+        mbodReferenceNumber: mbodReferenceNumber || undefined,
+        submittedToMbod,
+        submittedToMbodAt: submittedToMbod ? new Date().toISOString() : null,
       });
     } finally {
       setSaving(false);
@@ -85,6 +106,41 @@ function MedicalForm({ workers, initial, onSubmit, onCancel }: {
         <label className={labelClass}>{t("compliance.medical.practitioner")}</label>
         <input className={inputClass} value={practitioner} onChange={(e) => setPractitioner(e.target.value)} required />
       </div>
+
+      <div className="border-t border-mine-800 pt-3 space-y-3">
+        <div className="text-xs font-semibold text-mine-300 uppercase">{t("compliance.medical.odmwaSection")}</div>
+        <label className="flex items-center gap-2 text-sm">
+          <input type="checkbox" checked={dustExposed} onChange={(e) => setDustExposed(e.target.checked)} />
+          {t("compliance.medical.dustExposed")}
+        </label>
+        <div className="grid grid-cols-2 gap-3">
+          <div>
+            <label className={labelClass}>{t("compliance.medical.lungFunctionResult")}</label>
+            <input className={inputClass} value={lungFunctionResult} onChange={(e) => setLungFunctionResult(e.target.value)} />
+          </div>
+          <div>
+            <label className={labelClass}>{t("compliance.medical.chestXrayResult")}</label>
+            <input className={inputClass} value={chestXrayResult} onChange={(e) => setChestXrayResult(e.target.value)} />
+          </div>
+        </div>
+        <div className="grid grid-cols-2 gap-3">
+          <div>
+            <label className={labelClass}>{t("compliance.medical.diseaseClassification")}</label>
+            <select className={selectClass} value={diseaseClassification} onChange={(e) => setDiseaseClassification(e.target.value as OccupationalDiseaseClassification)}>
+              {diseaseClassifications.map((d) => <option key={d} value={d}>{t(`compliance.medical.diseaseClassifications.${d}`)}</option>)}
+            </select>
+          </div>
+          <div>
+            <label className={labelClass}>{t("compliance.medical.mbodReferenceNumber")}</label>
+            <input className={inputClass} value={mbodReferenceNumber} onChange={(e) => setMbodReferenceNumber(e.target.value)} />
+          </div>
+        </div>
+        <label className="flex items-center gap-2 text-sm">
+          <input type="checkbox" checked={submittedToMbod} onChange={(e) => setSubmittedToMbod(e.target.checked)} />
+          {t("compliance.medical.submittedToMbod")}
+        </label>
+      </div>
+
       <div className="flex justify-end gap-2 pt-2">
         <button type="button" className={buttonSecondary} onClick={onCancel}>{t("common.cancel")}</button>
         <button type="submit" className={buttonPrimary} disabled={saving}>{saving ? t("common.saving") : t("common.save")}</button>
@@ -149,6 +205,7 @@ export default function MedicalSurveillanceTab({ workers }: { workers: Worker[] 
               <th className="text-left px-4 py-2">{t("compliance.medical.colExamDate")}</th>
               <th className="text-left px-4 py-2">{t("compliance.medical.colResult")}</th>
               <th className="text-left px-4 py-2">{t("compliance.medical.colNextDue")}</th>
+              <th className="text-left px-4 py-2">{t("compliance.medical.colDisease")}</th>
               <th className="px-4 py-2"></th>
             </tr>
           </thead>
@@ -160,6 +217,11 @@ export default function MedicalSurveillanceTab({ workers }: { workers: Worker[] 
                 <td className="px-4 py-2 text-mine-300">{new Date(item.examDate).toLocaleDateString()}</td>
                 <td className="px-4 py-2"><StatusBadge status={item.result} /></td>
                 <td className="px-4 py-2 text-mine-300">{new Date(item.nextExamDue).toLocaleDateString()}</td>
+                <td className="px-4 py-2 text-mine-300">
+                  {item.diseaseClassification && item.diseaseClassification !== "NONE"
+                    ? t(`compliance.medical.diseaseClassifications.${item.diseaseClassification}`)
+                    : "—"}
+                </td>
                 <td className="px-4 py-2 text-right">
                   {canEdit && (
                     <div className="flex justify-end gap-2">
@@ -171,7 +233,7 @@ export default function MedicalSurveillanceTab({ workers }: { workers: Worker[] 
               </tr>
             ))}
             {items.length === 0 && (
-              <tr><td colSpan={6} className="px-4 py-6 text-center text-mine-400">{t("compliance.medical.noneYet")}</td></tr>
+              <tr><td colSpan={7} className="px-4 py-6 text-center text-mine-400">{t("compliance.medical.noneYet")}</td></tr>
             )}
           </tbody>
         </table>

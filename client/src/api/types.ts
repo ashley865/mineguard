@@ -769,6 +769,13 @@ export interface AuditFinding {
 
 export type ExamType = "PRE_EMPLOYMENT" | "PERIODICAL" | "EXIT" | "RETURN_TO_WORK";
 export type FitnessResult = "FIT" | "FIT_WITH_RESTRICTION" | "TEMPORARILY_UNFIT" | "UNFIT";
+export type OccupationalDiseaseClassification =
+  | "NONE"
+  | "SILICOSIS"
+  | "TUBERCULOSIS"
+  | "NOISE_INDUCED_HEARING_LOSS"
+  | "PNEUMOCONIOSIS_OTHER"
+  | "OTHER";
 
 export interface MedicalSurveillance {
   id: string;
@@ -780,6 +787,13 @@ export interface MedicalSurveillance {
   restrictions?: string | null;
   nextExamDue: string;
   practitioner: string;
+  dustExposed: boolean;
+  lungFunctionResult?: string | null;
+  chestXrayResult?: string | null;
+  diseaseClassification: OccupationalDiseaseClassification;
+  mbodReferenceNumber?: string | null;
+  submittedToMbod: boolean;
+  submittedToMbodAt?: string | null;
 }
 
 export type InspectionStatus = "SCHEDULED" | "COMPLETED" | "OVERDUE";
@@ -2034,4 +2048,337 @@ export interface ProductionFinancialSummary {
   minerals: string[];
   totals: { totalTonnes: number; totalEarnings: number; totalExpenses: number; netMargin: number };
   expensesByCategory: { category: ExpenseCategory; amount: number }[];
+}
+
+// ---------------------------------------------------------------------------
+// Statutory Appointments Register (MHSA s2.1)
+// ---------------------------------------------------------------------------
+
+export type StatutoryAppointmentType =
+  | "MINE_MANAGER"
+  | "MINE_OVERSEER"
+  | "ENGINEER"
+  | "SURVEYOR"
+  | "VENTILATION_OFFICER"
+  | "HEALTH_SAFETY_OFFICER"
+  | "BLASTING_OFFICER"
+  | "ROCK_ENGINEER"
+  | "ELECTRICAL_ENGINEER"
+  | "MECHANICAL_ENGINEER"
+  | "ASSISTANT_MANAGER"
+  | "ENVIRONMENTAL_CONTROL_OFFICER"
+  | "OCCUPATIONAL_HYGIENIST"
+  | "OTHER";
+
+export type StatutoryAppointmentStatus = "ACTIVE" | "VACANT" | "SUSPENDED" | "EXPIRED" | "REVOKED";
+
+export interface StatutoryAppointment {
+  id: string;
+  siteId: string;
+  site?: { id: string; name: string };
+  appointmentType: StatutoryAppointmentType;
+  customTitle?: string | null;
+  legislativeReference?: string | null;
+  workerId?: string | null;
+  worker?: { id: string; name: string; category: string } | null;
+  appointeeName: string;
+  certificateId?: string | null;
+  certificate?: { id: string; type: CertificateType; certificateNumber: string; expiryDate?: string | null; status: CertificateStatus } | null;
+  appointedDate: string;
+  status: StatutoryAppointmentStatus;
+  scopeOfAppointment?: string | null;
+  notes?: string | null;
+  letterFileName?: string | null;
+  letterFileMimeType?: string | null;
+  letterFileSize?: number | null;
+  appointedBy?: { id: string; name: string } | null;
+  createdAt: string;
+}
+
+// ---------------------------------------------------------------------------
+// COIDA Injury-on-Duty Claims
+// ---------------------------------------------------------------------------
+
+export type IodClaimStatus = "REPORTED" | "SUBMITTED" | "UNDER_ASSESSMENT" | "ACCEPTED" | "REJECTED" | "CLOSED";
+
+export interface IodClaim {
+  id: string;
+  incidentId?: string | null;
+  incident?: { id: string; title: string; severity: string } | null;
+  workerId: string;
+  worker?: { id: string; name: string; category: string };
+  claimNumber?: string | null;
+  dateOfInjury: string;
+  natureOfInjury: string;
+  wclForm2Filed: boolean;
+  wclForm2FiledAt?: string | null;
+  firstMedicalReport?: string | null;
+  finalMedicalReport?: string | null;
+  status: IodClaimStatus;
+  compensationAmount?: number | null;
+  payoutDate?: string | null;
+  notes?: string | null;
+  reportedBy?: { id: string; name: string } | null;
+  createdAt: string;
+}
+
+// ---------------------------------------------------------------------------
+// Explosives & Blasting — blast logs
+// ---------------------------------------------------------------------------
+
+export type BlastLogStatus = "PLANNED" | "FIRED" | "MISFIRE" | "CANCELLED";
+
+export interface BlastLog {
+  id: string;
+  siteId: string;
+  site?: { id: string; name: string };
+  zoneId?: string | null;
+  zone?: { id: string; name: string } | null;
+  magazineId?: string | null;
+  magazine?: { id: string; magazineNumber: string } | null;
+  shotFirerId?: string | null;
+  shotFirer?: { id: string; name: string } | null;
+  blastDate: string;
+  explosiveType: string;
+  quantityUsed: number;
+  unit: string;
+  numberOfHoles?: number | null;
+  misfireOccurred: boolean;
+  misfireResolution?: string | null;
+  clearanceGivenBy?: { id: string; name: string } | null;
+  clearanceTime?: string | null;
+  sapsNotified: boolean;
+  status: BlastLogStatus;
+  notes?: string | null;
+  createdAt: string;
+}
+
+// ---------------------------------------------------------------------------
+// Tailings Storage Facility (TSF) / Dam Safety
+// ---------------------------------------------------------------------------
+
+export type DamStructuralRating = "SATISFACTORY" | "FAIR" | "POOR" | "UNSATISFACTORY" | "UNKNOWN";
+
+export interface TailingsFacility {
+  id: string;
+  siteId: string;
+  site?: { id: string; name: string };
+  name: string;
+  facilityType?: string | null;
+  designCapacity?: number | null;
+  unit?: string | null;
+  engineerOfRecord?: string | null;
+  gistmClassification?: string | null;
+  status: string;
+  inspections?: {
+    id: string;
+    inspectionDate: string;
+    inspector: string;
+    freeboardMeters?: number | null;
+    seepageObserved: boolean;
+    structuralRating: DamStructuralRating;
+    engineerSignOff: boolean;
+  }[];
+  createdAt: string;
+}
+
+export interface TailingsInspection {
+  id: string;
+  facilityId: string;
+  facility?: { id: string; name: string; site: { id: string; name: string } };
+  inspectionDate: string;
+  inspector: string;
+  freeboardMeters?: number | null;
+  seepageObserved: boolean;
+  seepageDescription?: string | null;
+  structuralRating: DamStructuralRating;
+  findings?: string | null;
+  correctiveActions?: string | null;
+  engineerSignOff: boolean;
+  engineerSignOffName?: string | null;
+  engineerSignOffDate?: string | null;
+  createdAt: string;
+}
+
+// ---------------------------------------------------------------------------
+// Mine Closure & Rehabilitation Financial Provision
+// ---------------------------------------------------------------------------
+
+export type RehabilitationStatus = "PLANNED" | "IN_PROGRESS" | "COMPLETED" | "VERIFIED";
+
+export interface ClosureRehabilitationProgress {
+  id: string;
+  updateDate: string;
+  hectaresRehabilitated?: number | null;
+  percentComplete?: number | null;
+  description: string;
+  recordedBy?: { id: string; name: string } | null;
+}
+
+export interface ClosureRehabilitationPlan {
+  id: string;
+  siteId: string;
+  site?: { id: string; name: string };
+  planReferenceNumber?: string | null;
+  financialProvisionAmount?: number | null;
+  currency: string;
+  guaranteeInstrument?: string | null;
+  lastAssessmentDate?: string | null;
+  nextAssessmentDue?: string | null;
+  targetClosureDate?: string | null;
+  status: RehabilitationStatus;
+  notes?: string | null;
+  progressUpdates?: ClosureRehabilitationProgress[];
+  createdAt: string;
+}
+
+// ---------------------------------------------------------------------------
+// Employment Equity & Mining Charter Scorecard
+// ---------------------------------------------------------------------------
+
+export type OccupationalLevel =
+  | "TOP_MANAGEMENT"
+  | "SENIOR_MANAGEMENT"
+  | "PROFESSIONALLY_QUALIFIED"
+  | "SKILLED_TECHNICAL"
+  | "SEMI_SKILLED"
+  | "UNSKILLED";
+
+export type DesignatedGroup = "AFRICAN" | "COLOURED" | "INDIAN" | "WHITE" | "FOREIGN_NATIONAL";
+
+export interface EmploymentEquityTarget {
+  id: string;
+  mineId: string;
+  reportingYear: number;
+  occupationalLevel: OccupationalLevel;
+  designatedGroup: DesignatedGroup;
+  gender: string;
+  targetPercent: number;
+  actualHeadcount: number;
+  totalHeadcountAtLevel: number;
+  notes?: string | null;
+  createdAt: string;
+}
+
+export interface MiningCharterElement {
+  id: string;
+  mineId: string;
+  reportingYear: number;
+  elementName: string;
+  targetPercent?: number | null;
+  actualPercent?: number | null;
+  status: string;
+  notes?: string | null;
+  createdAt: string;
+}
+
+export interface ProcurementSpendSummary {
+  totalSpend: number;
+  bbbeeRatedSpend: number;
+  bbbeeRatedSpendPercent: number;
+}
+
+// ---------------------------------------------------------------------------
+// Skills Development & SETA Reporting
+// ---------------------------------------------------------------------------
+
+export interface WorkplaceSkillsPlan {
+  id: string;
+  mineId: string;
+  planYear: number;
+  setaName: string;
+  submittedDate?: string | null;
+  levyPayable?: number | null;
+  levyGrantClaimed?: number | null;
+  atrSubmittedDate?: string | null;
+  status: string;
+  notes?: string | null;
+  createdAt: string;
+}
+
+export type LearnershipStatus = "APPLIED" | "ENROLLED" | "IN_PROGRESS" | "COMPLETED" | "WITHDRAWN";
+
+export interface Learnership {
+  id: string;
+  workerId?: string | null;
+  worker?: { id: string; name: string; category: string } | null;
+  learnerName: string;
+  programme: string;
+  provider?: string | null;
+  startDate: string;
+  endDate?: string | null;
+  status: LearnershipStatus;
+  fundingSource?: string | null;
+  notes?: string | null;
+  recordedBy?: { id: string; name: string } | null;
+  createdAt: string;
+}
+
+// ---------------------------------------------------------------------------
+// Leave balances (BCEA)
+// ---------------------------------------------------------------------------
+
+export interface LeaveBalance {
+  id: string;
+  workerId: string;
+  worker?: { id: string; name: string; employeeId: string };
+  leaveType: LeaveType;
+  cycleStartDate: string;
+  cycleEndDate: string;
+  entitlementDays: number;
+  carriedOverDays: number;
+  takenDays: number;
+  remainingDays: number;
+  notes?: string | null;
+  createdAt: string;
+}
+
+export interface BceaBreach {
+  workerId: string;
+  workerName: string;
+  type: "ORDINARY_HOURS_EXCEEDED" | "DAILY_REST_SHORT";
+  detail: string;
+}
+
+export interface BceaComplianceReport {
+  periodDays: number;
+  workersChecked: number;
+  breaches: BceaBreach[];
+}
+
+// ---------------------------------------------------------------------------
+// Legal & Regulatory Compliance Calendar
+// ---------------------------------------------------------------------------
+
+export type LegalComplianceCategory = "MINING_RIGHT" | "ENVIRONMENTAL" | "WATER_USE" | "LABOUR" | "HEALTH_SAFETY" | "TAX_LEVY" | "OTHER";
+export type LegalComplianceItemStatus = "UPCOMING" | "DUE" | "OVERDUE" | "COMPLETED";
+
+export interface LegalComplianceItem {
+  id: string;
+  siteId?: string | null;
+  site?: { id: string; name: string } | null;
+  category: LegalComplianceCategory;
+  title: string;
+  legislativeReference?: string | null;
+  dueDate: string;
+  owner?: { id: string; name: string } | null;
+  status: LegalComplianceItemStatus;
+  completedAt?: string | null;
+  notes?: string | null;
+  createdAt: string;
+}
+
+export interface LegalComplianceCalendarEntry {
+  source: "LEGAL_ITEM" | "PERMIT" | "CERTIFICATE" | "MEDICAL_SURVEILLANCE" | "EXPLOSIVES_MAGAZINE";
+  id: string;
+  title: string;
+  category: string;
+  dueDate: string;
+  relatedTo: string;
+  overdue: boolean;
+}
+
+export interface LegalComplianceCalendar {
+  withinDays: number;
+  entries: LegalComplianceCalendarEntry[];
 }

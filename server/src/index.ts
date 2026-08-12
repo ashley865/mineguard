@@ -64,6 +64,13 @@ import procurementRoutes from "./routes/procurement";
 import invoicesRoutes from "./routes/invoices";
 import payeesRoutes from "./routes/payees";
 import expensesRoutes from "./routes/expenses";
+import statutoryAppointmentsRoutes from "./routes/statutoryAppointments";
+import iodClaimsRoutes from "./routes/iodClaims";
+import tailingsRoutes from "./routes/tailings";
+import closureRehabilitationRoutes from "./routes/closureRehabilitation";
+import employmentEquityRoutes from "./routes/employmentEquity";
+import skillsDevelopmentRoutes from "./routes/skillsDevelopment";
+import legalComplianceRoutes from "./routes/legalCompliance";
 import { sanitizeBody } from "./middleware/sanitize";
 import { startSimulator } from "./services/simulator";
 import { scanCompliance } from "./services/complianceScanner";
@@ -169,6 +176,13 @@ app.use("/api/procurement", procurementRoutes);
 app.use("/api/invoices", invoicesRoutes);
 app.use("/api/payees", payeesRoutes);
 app.use("/api/expenses", expensesRoutes);
+app.use("/api/statutory-appointments", statutoryAppointmentsRoutes);
+app.use("/api/iod-claims", iodClaimsRoutes);
+app.use("/api/tailings", tailingsRoutes);
+app.use("/api/closure-rehabilitation", closureRehabilitationRoutes);
+app.use("/api/employment-equity", employmentEquityRoutes);
+app.use("/api/skills-development", skillsDevelopmentRoutes);
+app.use("/api/legal-compliance", legalComplianceRoutes);
 
 app.use((err: any, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
   if (err?.message === "UNSUPPORTED_FILE_TYPE") {

@@ -14,6 +14,17 @@ const medicalSchema = z.object({
   restrictions: z.string().optional(),
   nextExamDue: z.coerce.date(),
   practitioner: z.string().min(1),
+  // Occupational Diseases in Mines and Works Act (ODMWA) surveillance fields — additional
+  // to the general fitness exam above, for dust-exposed workers subject to MBOD certification.
+  dustExposed: z.coerce.boolean().optional(),
+  lungFunctionResult: z.string().optional(),
+  chestXrayResult: z.string().optional(),
+  diseaseClassification: z
+    .enum(["NONE", "SILICOSIS", "TUBERCULOSIS", "NOISE_INDUCED_HEARING_LOSS", "PNEUMOCONIOSIS_OTHER", "OTHER"])
+    .optional(),
+  mbodReferenceNumber: z.string().optional(),
+  submittedToMbod: z.coerce.boolean().optional(),
+  submittedToMbodAt: z.coerce.date().optional().nullable(),
 });
 
 router.use(requireAuth);

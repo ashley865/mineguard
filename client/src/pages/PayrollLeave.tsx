@@ -2,7 +2,7 @@ import { FormEvent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { api } from "../api/client";
 import { useAuth } from "../context/AuthContext";
-import { LeaveRequest, LeaveType, Payslip, Worker } from "../api/types";
+import { BceaComplianceReport, LeaveBalance, LeaveRequest, LeaveType, Payslip, Worker } from "../api/types";
 import { StatusBadge } from "../components/Badges";
 import Modal from "../components/Modal";
 import { buttonDanger, buttonPrimary, buttonSecondary, cardClass, inputClass, labelClass, selectClass } from "../components/ui";
@@ -344,12 +344,224 @@ function PayslipsTab({ workers, canEdit, canDelete }: { workers: Worker[]; canEd
   );
 }
 
+function LeaveBalanceForm({ workers, onSubmit, onCancel }: { workers: Worker[]; onSubmit: (data: any) => Promise<void>; onCancel: () => void }) {
+  const { t } = useTranslation();
+  const [workerId, setWorkerId] = useState(workers[0]?.id ?? "");
+  const [leaveType, setLeaveType] = useState<LeaveType>("ANNUAL");
+  const [cycleStartDate, setCycleStartDate] = useState("");
+  const [cycleEndDate, setCycleEndDate] = useState("");
+  const [entitlementDays, setEntitlementDays] = useState("15");
+  const [carriedOverDays, setCarriedOverDays] = useState("0");
+  const [saving, setSaving] = useState(false);
+
+  async function handleSubmit(e: FormEvent) {
+    e.preventDefault();
+    setSaving(true);
+    try {
+      await onSubmit({
+        workerId,
+        leaveType,
+        cycleStartDate,
+        cycleEndDate,
+        entitlementDays: Number(entitlementDays),
+        carriedOverDays: Number(carriedOverDays),
+      });
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  return (
+    <form onSubmit={handleSubmit} className="space-y-4">
+      <div className="grid grid-cols-2 gap-3">
+        <div>
+          <label className={labelClass}>{t("workers.title")}</label>
+          <select className={selectClass} value={workerId} onChange={(e) => setWorkerId(e.target.value)}>
+            {workers.map((w) => <option key={w.id} value={w.id}>{w.name}</option>)}
+          </select>
+        </div>
+        <div>
+          <label className={labelClass}>{t("payroll.leaveType")}</label>
+          <select className={selectClass} value={leaveType} onChange={(e) => setLeaveType(e.target.value as LeaveType)}>
+            {leaveTypes.map((lt) => <option key={lt} value={lt}>{t(`payroll.leaveTypes.${lt}`)}</option>)}
+          </select>
+        </div>
+      </div>
+      <div className="grid grid-cols-2 gap-3">
+        <div>
+          <label className={labelClass}>{t("payroll.leaveBalances.cycleStartDate")}</label>
+          <DateField value={cycleStartDate} onChange={setCycleStartDate} required />
+        </div>
+        <div>
+          <label className={labelClass}>{t("payroll.leaveBalances.cycleEndDate")}</label>
+          <DateField value={cycleEndDate} onChange={setCycleEndDate} required />
+        </div>
+      </div>
+      <div className="grid grid-cols-2 gap-3">
+        <div>
+          <label className={labelClass}>{t("payroll.leaveBalances.entitlementDays")}</label>
+          <input className={inputClass} type="number" step="any" value={entitlementDays} onChange={(e) => setEntitlementDays(e.target.value)} required />
+        </div>
+        <div>
+          <label className={labelClass}>{t("payroll.leaveBalances.carriedOverDays")}</label>
+          <input className={inputClass} type="number" step="any" value={carriedOverDays} onChange={(e) => setCarriedOverDays(e.target.value)} />
+        </div>
+      </div>
+      <div className="flex justify-end gap-2 pt-2">
+        <button type="button" className={buttonSecondary} onClick={onCancel}>{t("common.cancel")}</button>
+        <button type="submit" className={buttonPrimary} disabled={saving}>{saving ? t("common.saving") : t("common.save")}</button>
+      </div>
+    </form>
+  );
+}
+
+function LeaveBalancesTab({ workers, canEdit, canDelete }: { workers: Worker[]; canEdit: boolean; canDelete: boolean }) {
+  const { t } = useTranslation();
+  const [balances, setBalances] = useState<LeaveBalance[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [modal, setModal] = useState(false);
+
+  async function load() {
+    setLoading(true);
+    const res = await api.get<LeaveBalance[]>("/payroll/leave-balances");
+    setBalances(res.data);
+    setLoading(false);
+  }
+
+  useEffect(() => {
+    load();
+  }, []);
+
+  async function create(data: any) {
+    await api.post("/payroll/leave-balances", data);
+    setModal(false);
+    await load();
+  }
+
+  async function remove(id: string) {
+    await api.delete(`/payroll/leave-balances/${id}`);
+    await load();
+  }
+
+  if (loading) return <div className="text-mine-300">{t("common.loading")}</div>;
+
+  return (
+    <div className="space-y-4">
+      <p className="text-xs text-mine-400">{t("payroll.leaveBalances.hint")}</p>
+      {canEdit && workers.length > 0 && (
+        <div className="flex justify-end">
+          <button className={buttonPrimary} onClick={() => setModal(true)}>{t("payroll.leaveBalances.new")}</button>
+        </div>
+      )}
+      <div className={`${cardClass} overflow-x-auto`}>
+        <table className="w-full text-sm">
+          <thead className="bg-mine-800/50 text-mine-300 text-xs uppercase">
+            <tr>
+              <th className="text-left px-4 py-2">{t("workers.title")}</th>
+              <th className="text-left px-4 py-2">{t("payroll.leaveType")}</th>
+              <th className="text-left px-4 py-2">{t("payroll.leaveBalances.entitlementDays")}</th>
+              <th className="text-left px-4 py-2">{t("payroll.leaveBalances.takenDays")}</th>
+              <th className="text-left px-4 py-2">{t("payroll.leaveBalances.remainingDays")}</th>
+              <th className="px-4 py-2"></th>
+            </tr>
+          </thead>
+          <tbody>
+            {balances.map((b) => (
+              <tr key={b.id} className="border-t border-mine-800 hover:bg-mine-800/30">
+                <td className="px-4 py-2 font-medium">{b.worker?.name}</td>
+                <td className="px-4 py-2 text-mine-300">{t(`payroll.leaveTypes.${b.leaveType}`)}</td>
+                <td className="px-4 py-2 text-mine-300">{(b.entitlementDays + b.carriedOverDays).toFixed(1)}</td>
+                <td className="px-4 py-2 text-mine-300">{b.takenDays.toFixed(1)}</td>
+                <td className={`px-4 py-2 font-medium ${b.remainingDays < 0 ? "text-danger-500" : ""}`}>{b.remainingDays.toFixed(1)}</td>
+                <td className="px-4 py-2 text-right">
+                  {canDelete && <button className={buttonDanger} onClick={() => remove(b.id)}>{t("common.delete")}</button>}
+                </td>
+              </tr>
+            ))}
+            {balances.length === 0 && (
+              <tr><td colSpan={6} className="px-4 py-6 text-center text-mine-400">{t("payroll.leaveBalances.noneYet")}</td></tr>
+            )}
+          </tbody>
+        </table>
+      </div>
+      {modal && (
+        <Modal title={t("payroll.leaveBalances.newTitle")} onClose={() => setModal(false)}>
+          <LeaveBalanceForm workers={workers} onSubmit={create} onCancel={() => setModal(false)} />
+        </Modal>
+      )}
+    </div>
+  );
+}
+
+function BceaComplianceTab() {
+  const { t } = useTranslation();
+  const [report, setReport] = useState<BceaComplianceReport | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [days, setDays] = useState(7);
+
+  async function load(d: number) {
+    setLoading(true);
+    const res = await api.get<BceaComplianceReport>("/payroll/bcea-compliance", { params: { days: d } });
+    setReport(res.data);
+    setLoading(false);
+  }
+
+  useEffect(() => {
+    load(days);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  return (
+    <div className="space-y-4">
+      <p className="text-xs text-mine-400">{t("payroll.bceaCompliance.hint")}</p>
+      <div className="flex items-center gap-3">
+        <label className={labelClass}>{t("payroll.bceaCompliance.periodDays")}</label>
+        <select
+          className={`${selectClass} w-auto`}
+          value={days}
+          onChange={(e) => { const d = Number(e.target.value); setDays(d); load(d); }}
+        >
+          <option value={7}>7</option>
+          <option value={14}>14</option>
+          <option value={31}>31</option>
+        </select>
+      </div>
+      {loading && <div className="text-mine-300">{t("common.loading")}</div>}
+      {!loading && report && (
+        <div className={`${cardClass} overflow-x-auto`}>
+          <table className="w-full text-sm">
+            <thead className="bg-mine-800/50 text-mine-300 text-xs uppercase">
+              <tr>
+                <th className="text-left px-4 py-2">{t("workers.title")}</th>
+                <th className="text-left px-4 py-2">{t("payroll.bceaCompliance.breachType")}</th>
+                <th className="text-left px-4 py-2">{t("common.description")}</th>
+              </tr>
+            </thead>
+            <tbody>
+              {report.breaches.map((b, idx) => (
+                <tr key={`${b.workerId}-${idx}`} className="border-t border-mine-800 hover:bg-mine-800/30">
+                  <td className="px-4 py-2 font-medium">{b.workerName}</td>
+                  <td className="px-4 py-2 text-danger-500">{t(`payroll.bceaCompliance.breachTypes.${b.type}`)}</td>
+                  <td className="px-4 py-2 text-mine-300">{b.detail}</td>
+                </tr>
+              ))}
+              {report.breaches.length === 0 && (
+                <tr><td colSpan={3} className="px-4 py-6 text-center text-mine-400">{t("payroll.bceaCompliance.noBreaches")}</td></tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+      )}
+    </div>
+  );
+}
+
 export default function PayrollLeave() {
   const { t } = useTranslation();
   const { user } = useAuth();
   const canEdit = user?.role === "ADMIN" || user?.role === "SUPERVISOR" || user?.role === "EXECUTIVE";
   const canDelete = user?.role === "ADMIN" || user?.role === "EXECUTIVE";
-  const [tab, setTab] = useState<"leave" | "payslips">("leave");
+  const [tab, setTab] = useState<"leave" | "payslips" | "balances" | "bcea">("leave");
   const [workers, setWorkers] = useState<Worker[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -376,10 +588,18 @@ export default function PayrollLeave() {
         <button className={tab === "payslips" ? buttonPrimary : buttonSecondary} onClick={() => setTab("payslips")}>
           {t("payroll.tabPayslips")}
         </button>
+        <button className={tab === "balances" ? buttonPrimary : buttonSecondary} onClick={() => setTab("balances")}>
+          {t("payroll.tabLeaveBalances")}
+        </button>
+        <button className={tab === "bcea" ? buttonPrimary : buttonSecondary} onClick={() => setTab("bcea")}>
+          {t("payroll.tabBceaCompliance")}
+        </button>
       </div>
 
       {tab === "leave" && <LeaveTab workers={workers} canEdit={canEdit} canDelete={canDelete} />}
       {tab === "payslips" && <PayslipsTab workers={workers} canEdit={canEdit} canDelete={canDelete} />}
+      {tab === "balances" && <LeaveBalancesTab workers={workers} canEdit={canEdit} canDelete={canDelete} />}
+      {tab === "bcea" && <BceaComplianceTab />}
     </div>
   );
 }
