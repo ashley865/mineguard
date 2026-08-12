@@ -3,12 +3,25 @@ import { useTranslation } from "react-i18next";
 import QRCode from "qrcode";
 import { api, API_URL } from "../api/client";
 import { useAuth } from "../context/AuthContext";
-import { Site, StaffCategory, Worker, WorkerStatus, Zone } from "../api/types";
+import { Site, StaffCategory, Worker, WorkerDocument, WorkerDocumentType, WorkerStatus, Zone } from "../api/types";
 import { StatusBadge } from "../components/Badges";
 import Modal from "../components/Modal";
 import Avatar from "../components/Avatar";
 import WorkerProfileModal from "../components/WorkerProfileModal";
+import EntityDocumentsPanel from "../components/EntityDocumentsPanel";
 import { buttonDanger, buttonPrimary, buttonSecondary, cardClass, inputClass, labelClass, selectClass } from "../components/ui";
+
+const workerDocTypes: WorkerDocumentType[] = [
+  "ID_DOCUMENT",
+  "CERTIFICATE",
+  "CV_RESUME",
+  "QUALIFICATION",
+  "PROOF_OF_ADDRESS",
+  "BANKING_DETAILS",
+  "MEDICAL_CERTIFICATE",
+  "CONTRACT",
+  "OTHER",
+];
 
 const staffCategories: StaffCategory[] = [
   "MINING_OPERATIONS",
@@ -46,6 +59,51 @@ function WorkerQrModal({ worker, onClose }: { worker: Worker; onClose: () => voi
         <div className="text-sm font-medium">{worker.name}</div>
         <div className="text-xs text-mine-400">{worker.employeeId}</div>
         <p className="text-xs text-mine-400 max-w-xs">{t("workers.badgeHint")}</p>
+      </div>
+    </Modal>
+  );
+}
+
+function WorkerDocumentsModal({ worker, onClose, onChanged }: { worker: Worker; onClose: () => void; onChanged: () => void }) {
+  const { t } = useTranslation();
+  const [documents, setDocuments] = useState<WorkerDocument[]>(worker.documents ?? []);
+
+  async function upload(file: File, docType: string) {
+    const form = new FormData();
+    form.append("file", file);
+    form.append("docType", docType);
+    const res = await api.post(`/workers/${worker.id}/documents`, form, { headers: { "Content-Type": "multipart/form-data" } });
+    setDocuments((docs) => [res.data, ...docs]);
+    onChanged();
+  }
+
+  async function download(doc: { id: string; fileName: string }) {
+    const res = await api.get(`/workers/${worker.id}/documents/${doc.id}/download`, { responseType: "blob" });
+    const url = window.URL.createObjectURL(res.data);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = doc.fileName;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    window.URL.revokeObjectURL(url);
+  }
+
+  return (
+    <Modal title={t("workers.documentsTitle", { name: worker.name })} onClose={onClose}>
+      <div className="space-y-4">
+        <p className="text-xs text-mine-400">{t("workers.documentsHint")}</p>
+        <EntityDocumentsPanel
+          documents={documents}
+          docTypeOptions={workerDocTypes}
+          docTypeI18nPrefix="documents.categoryLabels.WORKER"
+          onUpload={upload}
+          onDownload={download}
+          canUpload
+        />
+        <div className="flex justify-end pt-2">
+          <button className={buttonPrimary} onClick={onClose}>{t("common.close")}</button>
+        </div>
       </div>
     </Modal>
   );
@@ -204,6 +262,7 @@ export default function Workers() {
   const [modal, setModal] = useState<null | "create" | Worker>(null);
   const [qrWorker, setQrWorker] = useState<Worker | null>(null);
   const [profileWorker, setProfileWorker] = useState<Worker | null>(null);
+  const [documentsForWorker, setDocumentsForWorker] = useState<Worker | null>(null);
   const [categoryFilter, setCategoryFilter] = useState("");
 
   async function load() {
@@ -224,9 +283,12 @@ export default function Workers() {
   }, []);
 
   async function createWorker(data: any) {
-    await api.post("/workers", data);
+    const res = await api.post<Worker>("/workers", data);
     setModal(null);
     await load();
+    // Straight into a document session for the new hire — ID, certificate, CV, etc. —
+    // rather than requiring HR to find the worker again afterward to attach anything.
+    setDocumentsForWorker(res.data);
   }
 
   async function updateWorker(id: string, data: any) {
@@ -312,6 +374,9 @@ export default function Workers() {
                     <button className={actionButtonClass} onClick={() => setProfileWorker(w)}>{t("workers.viewProfile")}</button>
                     <button className={actionButtonClass} onClick={() => setQrWorker(w)}>{t("workers.showBadge")}</button>
                     {canEdit && (
+                      <button className={actionButtonClass} onClick={() => setDocumentsForWorker(w)}>{t("workers.manageDocuments")}</button>
+                    )}
+                    {canEdit && (
                       <button className={actionButtonClass} onClick={() => setModal(w)}>{t("common.edit")}</button>
                     )}
                     {canEdit && (
@@ -349,6 +414,14 @@ export default function Workers() {
           canEdit={canEdit}
           onClose={() => setProfileWorker(null)}
           onPhotoChanged={load}
+        />
+      )}
+
+      {documentsForWorker && (
+        <WorkerDocumentsModal
+          worker={documentsForWorker}
+          onClose={() => setDocumentsForWorker(null)}
+          onChanged={load}
         />
       )}
     </div>

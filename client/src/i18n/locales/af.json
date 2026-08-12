@@ -354,7 +354,10 @@
     "manager": "Bestuurder",
     "noManager": "Geen bestuurder toegeken nie",
     "assignedEquipment": "Toegewese Toerusting",
-    "noAssignedEquipment": "Geen toerusting aan hierdie werker toegewys nie."
+    "noAssignedEquipment": "Geen toerusting aan hierdie werker toegewys nie.",
+    "manageDocuments": "Dokumente",
+    "documentsTitle": "Dokumente — {{name}}",
+    "documentsHint": "ID-dokument, sertifikate, CV, kwalifikasies en ander indiensnemingsdokumentasie vir hierdie werker."
   },
   "equipment": {
     "title": "Toerusting",
@@ -998,6 +1001,17 @@
         "GOOD_STANDING_CERTIFICATE": "Sertifikaat van Goeie Rekord",
         "CONTRACT_AGREEMENT": "Kontrakooreenkoms",
         "SAFETY_FILE": "Veiligheidslêer",
+        "OTHER": "Ander"
+      },
+      "WORKER": {
+        "ID_DOCUMENT": "ID-dokument",
+        "CERTIFICATE": "Sertifikaat",
+        "CV_RESUME": "CV",
+        "QUALIFICATION": "Kwalifikasie",
+        "PROOF_OF_ADDRESS": "Bewys van Adres",
+        "BANKING_DETAILS": "Bankbesonderhede",
+        "MEDICAL_CERTIFICATE": "Mediese Sertifikaat",
+        "CONTRACT": "Kontrak",
         "OTHER": "Ander"
       }
     },

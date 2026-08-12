@@ -216,6 +216,7 @@ model User {
   hazardReportsResponsibleFor HazardReport[]         @relation("HazardResponsiblePerson")
   hazardReportsClosed        HazardReport[]          @relation("HazardClosedBy")
   ppeRequirementsCreated     WorkerPpeRequirement[]  @relation("PpeRequirementCreatedBy")
+  workerDocumentsUploaded    WorkerDocument[]        @relation("WorkerDocumentUploadedBy")
   emergencyEventsReported    EmergencyEvent[]        @relation("EmergencyEventReportedBy")
   fleetPositions         FleetPosition[]        @relation("FleetPositionRecordedBy")
   inventoryMovements     InventoryMovement[]    @relation("InventoryMovementBy")
@@ -449,6 +450,37 @@ model Worker {
   maintenanceAssignments MaintenanceSchedule[] @relation("MaintenanceAssignedToWorker")
   patrolAssignments      PatrolAssignment[]
   evacuationsTriggered   EmergencyEvacuation[] @relation("EvacuationTriggeredByGuard")
+  documents              WorkerDocument[]
+
+  createdAt DateTime @default(now())
+}
+
+enum WorkerDocumentType {
+  ID_DOCUMENT
+  CERTIFICATE
+  CV_RESUME
+  QUALIFICATION
+  PROOF_OF_ADDRESS
+  BANKING_DETAILS
+  MEDICAL_CERTIFICATE
+  CONTRACT
+  OTHER
+}
+
+// HR's onboarding document set for a worker — ID copy, certificates, CV, qualifications,
+// etc. POPIA-sensitive personal information, so downloads are restricted the same way as
+// the generic Document vault's worker-certificate filtering (documents.ts).
+model WorkerDocument {
+  id           String             @id @default(cuid())
+  workerId     String
+  worker       Worker             @relation(fields: [workerId], references: [id], onDelete: Cascade)
+  docType      WorkerDocumentType @default(OTHER)
+  fileName     String
+  fileMimeType String
+  fileSize     Int
+  fileData     Bytes
+  uploadedById String?
+  uploadedBy   User?              @relation("WorkerDocumentUploadedBy", fields: [uploadedById], references: [id], onDelete: SetNull)
 
   createdAt DateTime @default(now())
 }

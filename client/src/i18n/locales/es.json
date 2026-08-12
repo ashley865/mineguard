@@ -354,7 +354,10 @@
     "manager": "Gerente",
     "noManager": "Sin gerente asignado",
     "assignedEquipment": "Equipo Asignado",
-    "noAssignedEquipment": "No hay equipo asignado a este trabajador."
+    "noAssignedEquipment": "No hay equipo asignado a este trabajador.",
+    "manageDocuments": "Documentos",
+    "documentsTitle": "Documentos — {{name}}",
+    "documentsHint": "Documento de identidad, certificados, CV, calificaciones y otra documentación de incorporación de este trabajador."
   },
   "equipment": {
     "title": "Equipos",
@@ -998,6 +1001,17 @@
         "GOOD_STANDING_CERTIFICATE": "Certificado de Buena Reputación",
         "CONTRACT_AGREEMENT": "Contrato",
         "SAFETY_FILE": "Expediente de Seguridad",
+        "OTHER": "Otro"
+      },
+      "WORKER": {
+        "ID_DOCUMENT": "Documento de Identidad",
+        "CERTIFICATE": "Certificado",
+        "CV_RESUME": "CV / Currículum",
+        "QUALIFICATION": "Calificación",
+        "PROOF_OF_ADDRESS": "Comprobante de Domicilio",
+        "BANKING_DETAILS": "Datos Bancarios",
+        "MEDICAL_CERTIFICATE": "Certificado Médico",
+        "CONTRACT": "Contrato",
         "OTHER": "Otro"
       }
     },

@@ -325,6 +325,9 @@
     "badgeTitle": "{{name}}'s badge",
     "badgeHint": "Security scans this code at the gate to check this worker in or out on the Scanner page.",
     "viewProfile": "Profile",
+    "manageDocuments": "Documents",
+    "documentsTitle": "Documents — {{name}}",
+    "documentsHint": "ID document, certificates, CV, qualifications, and other onboarding paperwork for this worker.",
     "profileTitle": "{{name}}'s Profile",
     "changePhoto": "Change photo",
     "daysWorked90": "Days Worked (90d)",
@@ -988,6 +991,17 @@
         "GOOD_STANDING_CERTIFICATE": "Good Standing Certificate",
         "CONTRACT_AGREEMENT": "Contract Agreement",
         "SAFETY_FILE": "Safety File",
+        "OTHER": "Other"
+      },
+      "WORKER": {
+        "ID_DOCUMENT": "ID Document",
+        "CERTIFICATE": "Certificate",
+        "CV_RESUME": "CV / Resume",
+        "QUALIFICATION": "Qualification",
+        "PROOF_OF_ADDRESS": "Proof of Address",
+        "BANKING_DETAILS": "Banking Details",
+        "MEDICAL_CERTIFICATE": "Medical Certificate",
+        "CONTRACT": "Contract",
         "OTHER": "Other"
       }
     },

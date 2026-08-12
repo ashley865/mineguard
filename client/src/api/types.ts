@@ -263,6 +263,27 @@ export interface Worker {
   nextOfKinPhone?: string | null;
   currentCheckInAt?: string | null;
   hoursThisWeek?: number;
+  documents?: WorkerDocument[];
+}
+
+export type WorkerDocumentType =
+  | "ID_DOCUMENT"
+  | "CERTIFICATE"
+  | "CV_RESUME"
+  | "QUALIFICATION"
+  | "PROOF_OF_ADDRESS"
+  | "BANKING_DETAILS"
+  | "MEDICAL_CERTIFICATE"
+  | "CONTRACT"
+  | "OTHER";
+
+export interface WorkerDocument {
+  id: string;
+  docType: WorkerDocumentType;
+  fileName: string;
+  fileMimeType: string;
+  fileSize: number;
+  createdAt: string;
 }
 
 export interface WorkerAttendance {

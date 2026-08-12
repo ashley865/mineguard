@@ -354,7 +354,10 @@
     "manager": "Vorgesetzter",
     "noManager": "Kein Vorgesetzter zugewiesen",
     "assignedEquipment": "Zugewiesene Ausrüstung",
-    "noAssignedEquipment": "Diesem Mitarbeiter ist keine Ausrüstung zugewiesen."
+    "noAssignedEquipment": "Diesem Mitarbeiter ist keine Ausrüstung zugewiesen.",
+    "manageDocuments": "Dokumente",
+    "documentsTitle": "Dokumente — {{name}}",
+    "documentsHint": "Ausweisdokument, Zertifikate, Lebenslauf, Qualifikationen und weitere Einstellungsunterlagen für diesen Mitarbeiter."
   },
   "equipment": {
     "title": "Ausrüstung",
@@ -998,6 +1001,17 @@
         "GOOD_STANDING_CERTIFICATE": "Unbedenklichkeitsbescheinigung",
         "CONTRACT_AGREEMENT": "Vertrag",
         "SAFETY_FILE": "Sicherheitsakte",
+        "OTHER": "Sonstiges"
+      },
+      "WORKER": {
+        "ID_DOCUMENT": "Ausweisdokument",
+        "CERTIFICATE": "Zertifikat",
+        "CV_RESUME": "Lebenslauf",
+        "QUALIFICATION": "Qualifikation",
+        "PROOF_OF_ADDRESS": "Adressnachweis",
+        "BANKING_DETAILS": "Bankdaten",
+        "MEDICAL_CERTIFICATE": "Ärztliches Attest",
+        "CONTRACT": "Vertrag",
         "OTHER": "Sonstiges"
       }
     },

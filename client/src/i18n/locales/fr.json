@@ -354,7 +354,10 @@
     "manager": "Responsable",
     "noManager": "Aucun responsable assigné",
     "assignedEquipment": "Équipement Assigné",
-    "noAssignedEquipment": "Aucun équipement assigné à ce travailleur."
+    "noAssignedEquipment": "Aucun équipement assigné à ce travailleur.",
+    "manageDocuments": "Documents",
+    "documentsTitle": "Documents — {{name}}",
+    "documentsHint": "Document d'identité, certificats, CV, qualifications et autres documents d'intégration pour ce travailleur."
   },
   "equipment": {
     "title": "Équipements",
@@ -998,6 +1001,17 @@
         "GOOD_STANDING_CERTIFICATE": "Certificat de Bonne Réputation",
         "CONTRACT_AGREEMENT": "Contrat",
         "SAFETY_FILE": "Dossier de Sécurité",
+        "OTHER": "Autre"
+      },
+      "WORKER": {
+        "ID_DOCUMENT": "Pièce d'Identité",
+        "CERTIFICATE": "Certificat",
+        "CV_RESUME": "CV",
+        "QUALIFICATION": "Qualification",
+        "PROOF_OF_ADDRESS": "Justificatif de Domicile",
+        "BANKING_DETAILS": "Coordonnées Bancaires",
+        "MEDICAL_CERTIFICATE": "Certificat Médical",
+        "CONTRACT": "Contrat",
         "OTHER": "Autre"
       }
     },

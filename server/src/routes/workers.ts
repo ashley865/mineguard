@@ -1,9 +1,10 @@
 import { Router, Request, Response } from "express";
 import multer from "multer";
 import { z } from "zod";
+import { ExecutiveTitle } from "@prisma/client";
 import { prisma } from "../prisma";
 import { requireAuth, requireRole } from "../middleware/auth";
-import { imageFileFilter } from "../lib/uploadFilters";
+import { imageFileFilter, documentFileFilter } from "../lib/uploadFilters";
 import { requireMineId } from "../lib/mineScope";
 
 const router = Router();
@@ -13,6 +14,43 @@ const upload = multer({
   limits: { fileSize: 5 * 1024 * 1024 },
   fileFilter: imageFileFilter,
 });
+
+const documentUpload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 10 * 1024 * 1024 },
+  fileFilter: documentFileFilter,
+});
+
+const workerDocTypeEnum = z.enum([
+  "ID_DOCUMENT",
+  "CERTIFICATE",
+  "CV_RESUME",
+  "QUALIFICATION",
+  "PROOF_OF_ADDRESS",
+  "BANKING_DETAILS",
+  "MEDICAL_CERTIFICATE",
+  "CONTRACT",
+  "OTHER",
+]);
+
+// POPIA: a worker's onboarding documents (ID copy, certificates, CV, banking details)
+// are personal information — downloadable only by the departments with a genuine need,
+// mirroring WORKER_SENSITIVE_AUDIENCE in documents.ts for the generic vault's worker docs.
+const WORKER_DOCUMENT_AUDIENCE: ExecutiveTitle[] = ["HR_MANAGER", "COMPLIANCE_OFFICER", "GENERAL_MANAGER", "COO"];
+
+async function requireWorkerDocumentAccess(req: Request, res: Response): Promise<boolean> {
+  if (req.auth!.role === "ADMIN") return true;
+  if (req.auth!.role !== "EXECUTIVE") {
+    res.status(403).json({ error: "Insufficient permissions" });
+    return false;
+  }
+  const me = await prisma.user.findUnique({ where: { id: req.auth!.userId }, select: { title: true } });
+  if (!me?.title || !WORKER_DOCUMENT_AUDIENCE.includes(me.title)) {
+    res.status(403).json({ error: "Insufficient permissions" });
+    return false;
+  }
+  return true;
+}
 
 const staffCategoryEnum = z.enum([
   "MINING_OPERATIONS",
@@ -63,6 +101,10 @@ const workerSelect = {
   nextOfKinPhone: true,
   createdAt: true,
   photoMimeType: true,
+  documents: {
+    select: { id: true, docType: true, fileName: true, fileMimeType: true, fileSize: true, createdAt: true },
+    orderBy: { createdAt: "desc" },
+  },
 } as const;
 
 function withHasPhoto<T extends { photoMimeType: string | null }>(worker: T) {
@@ -272,6 +314,54 @@ router.get("/:id/photo", async (req, res) => {
   if (!worker?.photoData || !worker.photoMimeType) return res.status(404).json({ error: "No photo set" });
   res.setHeader("Content-Type", worker.photoMimeType);
   res.send(Buffer.from(worker.photoData));
+});
+
+// HR's onboarding document session: ID copy, certificates, CV, qualifications, etc.,
+// uploaded either right after registering a worker or later when managing an existing one.
+router.post("/:id/documents", requireRole("ADMIN", "SUPERVISOR", "EXECUTIVE"), documentUpload.single("file"), async (req, res) => {
+  const mineId = requireMineId(req, res);
+  if (!mineId) return;
+  if (!req.file) return res.status(400).json({ error: "A file is required" });
+  const worker = await prisma.worker.findFirst({ where: { id: req.params.id, site: { mineId } } });
+  if (!worker) return res.status(404).json({ error: "Worker not found" });
+  const docTypeParsed = workerDocTypeEnum.safeParse(req.body?.docType);
+  const document = await prisma.workerDocument.create({
+    data: {
+      workerId: worker.id,
+      docType: docTypeParsed.success ? docTypeParsed.data : "OTHER",
+      fileName: req.file.originalname,
+      fileMimeType: req.file.mimetype,
+      fileSize: req.file.size,
+      fileData: Uint8Array.from(req.file.buffer),
+      uploadedById: req.auth!.userId,
+    },
+    select: { id: true, docType: true, fileName: true, fileMimeType: true, fileSize: true, createdAt: true },
+  });
+  res.status(201).json(document);
+});
+
+router.get("/:id/documents/:docId/download", async (req, res) => {
+  const mineId = requireMineId(req, res);
+  if (!mineId) return;
+  if (!(await requireWorkerDocumentAccess(req, res))) return;
+  const doc = await prisma.workerDocument.findFirst({
+    where: { id: req.params.docId, workerId: req.params.id, worker: { site: { mineId } } },
+  });
+  if (!doc) return res.status(404).json({ error: "Document not found" });
+  res.setHeader("Content-Type", doc.fileMimeType);
+  res.setHeader("Content-Disposition", `attachment; filename="${encodeURIComponent(doc.fileName)}"`);
+  res.send(Buffer.from(doc.fileData));
+});
+
+router.delete("/:id/documents/:docId", requireRole("ADMIN", "SUPERVISOR", "EXECUTIVE"), async (req, res) => {
+  const mineId = requireMineId(req, res);
+  if (!mineId) return;
+  const doc = await prisma.workerDocument.findFirst({
+    where: { id: req.params.docId, workerId: req.params.id, worker: { site: { mineId } } },
+  });
+  if (!doc) return res.status(404).json({ error: "Document not found" });
+  await prisma.workerDocument.delete({ where: { id: doc.id } });
+  res.status(204).send();
 });
 
 router.get("/:id/profile", async (req, res) => {
