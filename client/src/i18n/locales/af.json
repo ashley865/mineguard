@@ -1575,7 +1575,9 @@
     "images": "Foto's",
     "uploadImages": "Laai Foto's Op",
     "imageUploadError": "Kon nie beelde oplaai nie",
-    "imagesAfterSaveHint": "Stoor eers die lys, en wysig dit dan om foto's by te voeg."
+    "imagesAfterSaveHint": "Stoor eers die lys, en wysig dit dan om foto's by te voeg.",
+    "stockHint": "Beskikbaar by hierdie terrein: {{available}} t (gebaseer op aangetekende produksie, min ander lysings)",
+    "saveError": "Kon nie hierdie lysing stoor nie"
   },
   "tenders": {
     "nav": "Tenders & Kontrakte",

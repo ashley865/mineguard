@@ -1817,7 +1817,9 @@
     "images": "Photos",
     "uploadImages": "Upload Photos",
     "imageUploadError": "Could not upload images",
-    "imagesAfterSaveHint": "Save the listing first, then edit it to add photos."
+    "imagesAfterSaveHint": "Save the listing first, then edit it to add photos.",
+    "stockHint": "Available at this site: {{available}} t (based on recorded production, minus other listings)",
+    "saveError": "Could not save this listing"
   },
   "tenders": {
     "nav": "Tenders & Contracts",

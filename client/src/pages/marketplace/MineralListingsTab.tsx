@@ -10,6 +10,19 @@ import { mineralTypes } from "../../lib/minerals";
 
 const listingStatuses: MineralListingStatus[] = ["AVAILABLE", "SOLD", "WITHDRAWN"];
 
+// Mirrors the server's tonnage-unit check (production is only recorded in tonnes) so the
+// stock hint only appears when it's actually meaningful for the unit the user typed.
+const TONNAGE_UNIT_ALIASES = new Set(["t", "ton", "tons", "tonne", "tonnes", "mt", "metric ton", "metric tons"]);
+function isTonnageUnit(unit: string): boolean {
+  return TONNAGE_UNIT_ALIASES.has(unit.trim().toLowerCase());
+}
+
+interface MineralStock {
+  producedTonnes: number;
+  committedTonnes: number;
+  availableTonnes: number;
+}
+
 function ImageManager({ listing, onChanged }: { listing: MineralListing; onChanged: (updated: MineralListing) => void }) {
   const { t } = useTranslation();
   const [pending, setPending] = useState<FileList | null>(null);
@@ -107,9 +120,38 @@ function ListingForm({ sites, initial, onSubmit, onCancel }: {
   const [status, setStatus] = useState<MineralListingStatus>(initial?.status ?? "AVAILABLE");
   const [listing, setListing] = useState(initial);
   const [saving, setSaving] = useState(false);
+  const [formError, setFormError] = useState<string | null>(null);
+  const [stock, setStock] = useState<MineralStock | null>(null);
+
+  useEffect(() => {
+    if (!siteId || !mineralType) {
+      setStock(null);
+      return;
+    }
+    let cancelled = false;
+    api
+      .get<MineralStock>(`/minerals/stock/${siteId}/${mineralType}`)
+      .then((res) => {
+        if (!cancelled) setStock(res.data);
+      })
+      .catch(() => {
+        if (!cancelled) setStock(null);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [siteId, mineralType]);
+
+  // When editing, this listing's own already-committed quantity was excluded server-side
+  // from the "committed" total, so add it back here to show what's really still available.
+  const availableTonnes = stock
+    ? stock.availableTonnes + (initial && initial.siteId === siteId && initial.mineralType === mineralType ? initial.quantity : 0)
+    : null;
+  const exceedsStock = availableTonnes !== null && isTonnageUnit(unit) && Number(quantity) > availableTonnes;
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
+    setFormError(null);
     setSaving(true);
     try {
       await onSubmit({
@@ -125,6 +167,8 @@ function ListingForm({ sites, initial, onSubmit, onCancel }: {
         certifications: certifications || undefined,
         status,
       });
+    } catch (err: any) {
+      setFormError(err.response?.data?.error ?? t("marketplace.saveError"));
     } finally {
       setSaving(false);
     }
@@ -160,6 +204,11 @@ function ListingForm({ sites, initial, onSubmit, onCancel }: {
         <div>
           <label className={labelClass}>{t("marketplace.quantity")}</label>
           <input className={inputClass} type="number" step="any" value={quantity} onChange={(e) => setQuantity(e.target.value)} required />
+          {availableTonnes !== null && isTonnageUnit(unit) && (
+            <p className={`text-xs mt-1 ${exceedsStock ? "text-danger-500" : "text-mine-400"}`}>
+              {t("marketplace.stockHint", { available: availableTonnes.toFixed(2) })}
+            </p>
+          )}
         </div>
         <div>
           <label className={labelClass}>{t("marketplace.unit")}</label>
@@ -193,9 +242,10 @@ function ListingForm({ sites, initial, onSubmit, onCancel }: {
       ) : (
         <p className="text-xs text-mine-400">{t("marketplace.imagesAfterSaveHint")}</p>
       )}
+      {formError && <div className="text-danger-500 text-xs">{formError}</div>}
       <div className="flex justify-end gap-2 pt-2">
         <button type="button" className={buttonSecondary} onClick={onCancel}>{t("common.cancel")}</button>
-        <button type="submit" className={buttonPrimary} disabled={saving}>{saving ? t("common.saving") : t("common.save")}</button>
+        <button type="submit" className={buttonPrimary} disabled={saving || exceedsStock}>{saving ? t("common.saving") : t("common.save")}</button>
       </div>
     </form>
   );

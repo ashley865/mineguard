@@ -1575,7 +1575,9 @@
     "images": "Photos",
     "uploadImages": "Téléverser des Photos",
     "imageUploadError": "Impossible de téléverser les images",
-    "imagesAfterSaveHint": "Enregistrez d'abord l'annonce, puis modifiez-la pour ajouter des photos."
+    "imagesAfterSaveHint": "Enregistrez d'abord l'annonce, puis modifiez-la pour ajouter des photos.",
+    "stockHint": "Disponible sur ce site : {{available}} t (d'après la production enregistrée, moins les autres annonces)",
+    "saveError": "Impossible d'enregistrer cette annonce"
   },
   "tenders": {
     "nav": "Appels d'Offres et Contrats",

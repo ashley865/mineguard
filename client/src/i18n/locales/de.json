@@ -1575,7 +1575,9 @@
     "images": "Fotos",
     "uploadImages": "Fotos hochladen",
     "imageUploadError": "Bilder konnten nicht hochgeladen werden",
-    "imagesAfterSaveHint": "Speichern Sie das Angebot zuerst und bearbeiten Sie es anschließend, um Fotos hinzuzufügen."
+    "imagesAfterSaveHint": "Speichern Sie das Angebot zuerst und bearbeiten Sie es anschließend, um Fotos hinzuzufügen.",
+    "stockHint": "Verfügbar an diesem Standort: {{available}} t (basierend auf erfasster Produktion, abzüglich anderer Angebote)",
+    "saveError": "Dieses Angebot konnte nicht gespeichert werden"
   },
   "tenders": {
     "nav": "Ausschreibungen & Verträge",

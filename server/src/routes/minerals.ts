@@ -1,6 +1,7 @@
 import { Router } from "express";
 import multer from "multer";
 import { z } from "zod";
+import { MineralType } from "@prisma/client";
 import { prisma } from "../prisma";
 import { requireAuth, requireRole } from "../middleware/auth";
 import { imageFileFilter } from "../lib/uploadFilters";
@@ -8,6 +9,38 @@ import { requireMineId } from "../lib/mineScope";
 import { mineralTypeEnum } from "../lib/minerals";
 
 const router = Router();
+
+// Production is recorded in tonnes (ProductionRecord has no unit field), so we can only
+// automatically check a listing against real stock when it's also denominated in tonnes —
+// gram/carat/ounce-denominated precious-metal listings fall outside what we can verify here.
+const TONNAGE_UNIT_ALIASES = new Set(["t", "ton", "tons", "tonne", "tonnes", "mt", "metric ton", "metric tons"]);
+function isTonnageUnit(unit: string): boolean {
+  return TONNAGE_UNIT_ALIASES.has(unit.trim().toLowerCase());
+}
+
+// A mine can only sell what it has actually produced: available stock is cumulative tonnes
+// produced at the site for that mineral, minus tonnes already committed to other listings
+// that are still AVAILABLE or already SOLD (WITHDRAWN listings release their tonnage back).
+async function getMineralStock(siteId: string, mineralType: MineralType, excludeListingId?: string) {
+  const [records, committedAgg] = await Promise.all([
+    prisma.productionRecord.findMany({
+      where: { siteId, mineralType },
+      select: { tonnesMined: true, tonnesProcessed: true },
+    }),
+    prisma.mineralListing.aggregate({
+      where: {
+        siteId,
+        mineralType,
+        status: { in: ["AVAILABLE", "SOLD"] },
+        id: excludeListingId ? { not: excludeListingId } : undefined,
+      },
+      _sum: { quantity: true },
+    }),
+  ]);
+  const producedTonnes = records.reduce((sum, r) => sum + (r.tonnesProcessed ?? r.tonnesMined), 0);
+  const committedTonnes = committedAgg._sum.quantity ?? 0;
+  return { producedTonnes, committedTonnes, availableTonnes: producedTonnes - committedTonnes };
+}
 
 const upload = multer({
   storage: multer.memoryStorage(),
@@ -121,6 +154,18 @@ router.post("/:id/bids", async (req, res) => {
 
 router.use(requireAuth);
 
+// Lets the listing form show real-time available stock for a site + mineral before submitting.
+router.get("/stock/:siteId/:mineralType", requireRole("ADMIN", "SUPERVISOR", "EXECUTIVE"), async (req, res) => {
+  const mineId = requireMineId(req, res);
+  if (!mineId) return;
+  const site = await prisma.site.findFirst({ where: { id: req.params.siteId, mineId } });
+  if (!site) return res.status(404).json({ error: "Site not found" });
+  const mineralType = mineralTypeEnum.safeParse(req.params.mineralType);
+  if (!mineralType.success) return res.status(400).json({ error: "Invalid mineral type" });
+  const stock = await getMineralStock(req.params.siteId, mineralType.data);
+  res.json(stock);
+});
+
 router.post("/", requireRole("ADMIN", "SUPERVISOR", "EXECUTIVE"), async (req, res) => {
   const mineId = requireMineId(req, res);
   if (!mineId) return;
@@ -128,6 +173,14 @@ router.post("/", requireRole("ADMIN", "SUPERVISOR", "EXECUTIVE"), async (req, re
   if (!parsed.success) return res.status(400).json({ error: parsed.error.flatten() });
   const site = await prisma.site.findFirst({ where: { id: parsed.data.siteId, mineId } });
   if (!site) return res.status(404).json({ error: "Site not found" });
+  if (isTonnageUnit(parsed.data.unit)) {
+    const stock = await getMineralStock(parsed.data.siteId, parsed.data.mineralType);
+    if (parsed.data.quantity > stock.availableTonnes) {
+      return res.status(409).json({
+        error: `Only ${stock.availableTonnes.toFixed(2)} t of this mineral is available to list at this site (${stock.committedTonnes.toFixed(2)} t already listed/sold out of ${stock.producedTonnes.toFixed(2)} t produced).`,
+      });
+    }
+  }
   const listing = await prisma.mineralListing.create({
     data: { ...parsed.data, listedById: req.auth!.userId },
     select: listingSelect,
@@ -142,6 +195,18 @@ router.put("/:id", requireRole("ADMIN", "SUPERVISOR", "EXECUTIVE"), async (req, 
   if (!parsed.success) return res.status(400).json({ error: parsed.error.flatten() });
   const existing = await prisma.mineralListing.findFirst({ where: { id: req.params.id, site: { mineId } } });
   if (!existing) return res.status(404).json({ error: "Listing not found" });
+  const effectiveSiteId = parsed.data.siteId ?? existing.siteId;
+  const effectiveMineralType = parsed.data.mineralType ?? existing.mineralType;
+  const effectiveQuantity = parsed.data.quantity ?? existing.quantity;
+  const effectiveUnit = parsed.data.unit ?? existing.unit;
+  if (isTonnageUnit(effectiveUnit)) {
+    const stock = await getMineralStock(effectiveSiteId, effectiveMineralType, existing.id);
+    if (effectiveQuantity > stock.availableTonnes) {
+      return res.status(409).json({
+        error: `Only ${stock.availableTonnes.toFixed(2)} t of this mineral is available to list at this site (${stock.committedTonnes.toFixed(2)} t already listed/sold out of ${stock.producedTonnes.toFixed(2)} t produced).`,
+      });
+    }
+  }
   const listing = await prisma.mineralListing.update({ where: { id: existing.id }, data: parsed.data, select: listingSelect });
   res.json(listing);
 });

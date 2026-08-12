@@ -16,6 +16,10 @@ const router = Router();
 const WORKER_SENSITIVE_AUDIENCE: ExecutiveTitle[] = ["HR_MANAGER", "COMPLIANCE_OFFICER", "GENERAL_MANAGER", "COO"];
 const BUYER_SENSITIVE_AUDIENCE: ExecutiveTitle[] = ["COMPLIANCE_OFFICER", "CFO", "GENERAL_MANAGER", "COO"];
 const VISITOR_SENSITIVE_AUDIENCE: ExecutiveTitle[] = ["SECURITY_MANAGER", "COMPLIANCE_OFFICER", "GENERAL_MANAGER", "COO"];
+// Expense receipts/supplier invoices attached to a logged expense are financial records —
+// they stay within Finance (CFO, GM) and the mine owner (ADMIN), except the person who
+// actually submitted that specific expense may still see their own receipt.
+const EXPENSE_RECEIPT_AUDIENCE: ExecutiveTitle[] = ["CFO", "GENERAL_MANAGER"];
 
 async function getRequesterTitle(req: Request): Promise<ExecutiveTitle | null> {
   if (req.auth!.role !== "EXECUTIVE") return null;
@@ -25,6 +29,21 @@ async function getRequesterTitle(req: Request): Promise<ExecutiveTitle | null> {
 
 function inAudience(role: string, title: ExecutiveTitle | null, audience: ExecutiveTitle[]): boolean {
   return role === "ADMIN" || (role === "EXECUTIVE" && !!title && audience.includes(title));
+}
+
+// Returns the subset of the given EXPENSE_RECEIPT document ids the requester may see:
+// everyone in EXPENSE_RECEIPT_AUDIENCE (or ADMIN/owner) sees all of them; anyone else only
+// sees the ones tied to an expense they personally submitted.
+async function allowedExpenseReceiptIds(req: Request, candidateIds: string[]): Promise<Set<string>> {
+  if (candidateIds.length === 0) return new Set();
+  if (req.auth!.role === "ADMIN") return new Set(candidateIds);
+  const title = await getRequesterTitle(req);
+  if (inAudience(req.auth!.role, title, EXPENSE_RECEIPT_AUDIENCE)) return new Set(candidateIds);
+  const own = await prisma.expense.findMany({
+    where: { documentId: { in: candidateIds }, createdById: req.auth!.userId },
+    select: { documentId: true },
+  });
+  return new Set(own.map((e) => e.documentId).filter((id): id is string => !!id));
 }
 
 const upload = multer({
@@ -93,7 +112,10 @@ router.get("/", async (req, res) => {
     select: documentSelect,
     orderBy: { createdAt: "desc" },
   });
-  res.json(items);
+  const receiptIds = items.filter((d) => d.type === "EXPENSE_RECEIPT").map((d) => d.id);
+  const allowedReceiptIds = await allowedExpenseReceiptIds(req, receiptIds);
+  const visible = items.filter((d) => d.type !== "EXPENSE_RECEIPT" || allowedReceiptIds.has(d.id));
+  res.json(visible);
 });
 
 router.get("/:id/download", async (req, res) => {
@@ -104,6 +126,12 @@ router.get("/:id/download", async (req, res) => {
   if (doc.type === "CERTIFICATE") {
     const title = await getRequesterTitle(req);
     if (!inAudience(req.auth!.role, title, WORKER_SENSITIVE_AUDIENCE)) {
+      return res.status(403).json({ error: "Insufficient permissions" });
+    }
+  }
+  if (doc.type === "EXPENSE_RECEIPT") {
+    const allowed = await allowedExpenseReceiptIds(req, [doc.id]);
+    if (!allowed.has(doc.id)) {
       return res.status(403).json({ error: "Insufficient permissions" });
     }
   }
@@ -252,8 +280,12 @@ router.get("/vault/all", async (req, res) => {
     }),
   ]);
 
+  const receiptIds = documents.filter((d) => d.type === "EXPENSE_RECEIPT").map((d) => d.id);
+  const allowedReceiptIds = await allowedExpenseReceiptIds(req, receiptIds);
+  const visibleDocuments = documents.filter((d) => d.type !== "EXPENSE_RECEIPT" || allowedReceiptIds.has(d.id));
+
   const items = [
-    ...documents.map((d) => ({
+    ...visibleDocuments.map((d) => ({
       id: d.id,
       source: "DOCUMENT" as const,
       parentId: d.id,
