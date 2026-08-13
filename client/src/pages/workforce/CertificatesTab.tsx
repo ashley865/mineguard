@@ -5,8 +5,11 @@ import { useAuth } from "../../context/AuthContext";
 import { Certificate, CertificateStatus, CertificateType, Worker } from "../../api/types";
 import { StatusBadge } from "../../components/Badges";
 import Modal from "../../components/Modal";
-import { buttonDanger, buttonPrimary, buttonSecondary, cardClass, inputClass, labelClass, selectClass } from "../../components/ui";
+import { buttonDanger, buttonPrimary, buttonSecondary, inputClass, labelClass, selectClass } from "../../components/ui";
 import DateField from "../../components/DateField";
+import DataTable, { DataTableColumn } from "../../components/DataTable";
+import SummaryCards from "../../components/SummaryCards";
+import { AuditHistoryButton } from "../../components/AuditHistoryPanel";
 
 const certTypes: CertificateType[] = [
   "MINE_MANAGER",
@@ -142,52 +145,58 @@ export default function CertificatesTab({ workers }: { workers: Worker[] }) {
 
   if (loading) return <div className="text-mine-300">{t("workforce.loading")}</div>;
 
+  const expiredCount = items.filter((i) => i.status === "EXPIRED").length;
+  const expiringSoonCount = items.filter((i) => i.status === "ACTIVE" && i.expiryDate && new Date(i.expiryDate).getTime() - Date.now() < 1000 * 60 * 60 * 24 * 90).length;
+
+  const columns: DataTableColumn<Certificate>[] = [
+    { key: "worker", header: t("workforce.cert.colWorker"), render: (item) => <span className="font-medium">{item.worker?.name}</span>, sortValue: (item) => item.worker?.name ?? "" },
+    { key: "type", header: t("workforce.cert.colType"), render: (item) => t(`workforce.cert.types.${item.type}`), sortValue: (item) => item.type },
+    { key: "number", header: t("workforce.cert.colNumber"), render: (item) => item.certificateNumber, sortValue: (item) => item.certificateNumber },
+    { key: "expiry", header: t("workforce.cert.colExpiry"), render: (item) => (item.expiryDate ? new Date(item.expiryDate).toLocaleDateString() : "—"), sortValue: (item) => item.expiryDate ?? "" },
+    { key: "status", header: t("workforce.cert.colStatus"), render: (item) => <StatusBadge status={item.status} />, sortValue: (item) => item.status },
+  ];
+
   return (
     <div className="space-y-4">
+      <SummaryCards
+        cards={[
+          { label: t("workforce.cert.summaryExpiringSoon"), value: expiringSoonCount, tone: expiringSoonCount > 0 ? "hazard" : "default" },
+          { label: t("workforce.cert.summaryExpired"), value: expiredCount, tone: expiredCount > 0 ? "danger" : "default" },
+        ]}
+      />
+
       {canEdit && workers.length > 0 && (
         <div className="flex justify-end">
           <button className={buttonPrimary} onClick={() => setModal("create")}>{t("workforce.cert.new")}</button>
         </div>
       )}
 
-      <div className={`${cardClass} overflow-x-auto`}>
-        <table className="w-full text-sm">
-          <thead className="bg-mine-800/50 text-mine-300 text-xs uppercase">
-            <tr>
-              <th className="text-left px-4 py-2">{t("workforce.cert.colWorker")}</th>
-              <th className="text-left px-4 py-2">{t("workforce.cert.colType")}</th>
-              <th className="text-left px-4 py-2">{t("workforce.cert.colNumber")}</th>
-              <th className="text-left px-4 py-2">{t("workforce.cert.colExpiry")}</th>
-              <th className="text-left px-4 py-2">{t("workforce.cert.colStatus")}</th>
-              <th className="px-4 py-2"></th>
-            </tr>
-          </thead>
-          <tbody>
-            {items.map((item) => (
-              <tr key={item.id} className="border-t border-mine-800 hover:bg-mine-800/30">
-                <td className="px-4 py-2 font-medium">{item.worker?.name}</td>
-                <td className="px-4 py-2 text-mine-300">{t(`workforce.cert.types.${item.type}`)}</td>
-                <td className="px-4 py-2 text-mine-300">{item.certificateNumber}</td>
-                <td className="px-4 py-2 text-mine-300">
-                  {item.expiryDate ? new Date(item.expiryDate).toLocaleDateString() : "—"}
-                </td>
-                <td className="px-4 py-2"><StatusBadge status={item.status} /></td>
-                <td className="px-4 py-2 text-right">
-                  {canEdit && (
-                    <div className="flex justify-end gap-2">
-                      <button className="text-xs text-mine-300 hover:text-mine-50" onClick={() => setModal(item)}>{t("common.edit")}</button>
-                      <button className={buttonDanger} onClick={() => remove(item.id)}>{t("common.delete")}</button>
-                    </div>
-                  )}
-                </td>
-              </tr>
-            ))}
-            {items.length === 0 && (
-              <tr><td colSpan={6} className="px-4 py-6 text-center text-mine-400">{t("workforce.cert.noneYet")}</td></tr>
+      <DataTable
+        columns={columns}
+        rows={items}
+        rowKey={(item) => item.id}
+        emptyMessage={t("workforce.cert.noneYet")}
+        searchValue={(item) => `${item.worker?.name ?? ""} ${item.certificateNumber} ${item.type}`}
+        exportFilename="certificates"
+        exportColumns={[
+          { header: t("workforce.cert.colWorker"), value: (item) => item.worker?.name ?? "" },
+          { header: t("workforce.cert.colType"), value: (item) => item.type },
+          { header: t("workforce.cert.colNumber"), value: (item) => item.certificateNumber },
+          { header: t("workforce.cert.colExpiry"), value: (item) => item.expiryDate ?? "" },
+          { header: t("workforce.cert.colStatus"), value: (item) => item.status },
+        ]}
+        actions={(item) => (
+          <div className="flex justify-end gap-2">
+            <AuditHistoryButton entityType="Certificate" entityId={item.id} />
+            {canEdit && (
+              <>
+                <button className="text-xs text-mine-300 hover:text-mine-50" onClick={() => setModal(item)}>{t("common.edit")}</button>
+                <button className={buttonDanger} onClick={() => remove(item.id)}>{t("common.delete")}</button>
+              </>
             )}
-          </tbody>
-        </table>
-      </div>
+          </div>
+        )}
+      />
 
       {modal && (
         <Modal title={modal === "create" ? t("workforce.cert.newTitle") : t("workforce.cert.editTitle")} onClose={() => setModal(null)}>

@@ -10,6 +10,8 @@ import Modal from "../components/Modal";
 import { buttonDanger, buttonPrimary, buttonSecondary, cardClass, inputClass, labelClass, selectClass } from "../components/ui";
 import DateField from "../components/DateField";
 import FileDropzone from "../components/FileDropzone";
+import DataTable, { DataTableColumn } from "../components/DataTable";
+import { AuditHistoryButton } from "../components/AuditHistoryPanel";
 
 const CHART_TOOLTIP_STYLE = { background: "#fafafa", border: "1px solid #e5e5e5", fontSize: 11 };
 const CHART_TICK_STYLE = { fontSize: 9, fill: "#52525b" };
@@ -475,127 +477,101 @@ export default function Expenses() {
             <span className="text-lg font-bold">{totalExpenses.toLocaleString()}</span>
           </div>
 
-          <div className={`${cardClass} overflow-x-auto`}>
-            <table className="w-full text-sm">
-              <thead className="bg-mine-800/50 text-mine-300 text-xs uppercase">
-                <tr>
-                  <th className="text-left px-4 py-2">{t("expenses.expenseNumber")}</th>
-                  <th className="text-left px-4 py-2">{t("expenses.payee")}</th>
-                  <th className="text-left px-4 py-2">{t("expenses.category")}</th>
-                  <th className="text-left px-4 py-2">{t("expenses.expenseDate")}</th>
-                  <th className="text-left px-4 py-2">{t("expenses.amount")}</th>
-                  <th className="text-left px-4 py-2">{t("common.status")}</th>
-                  <th className="px-4 py-2"></th>
-                </tr>
-              </thead>
-              <tbody>
-                {expenses.map((ex) => (
-                  <tr key={ex.id} className="border-t border-mine-800 hover:bg-mine-800/30">
-                    <td className="px-4 py-2 font-medium">{ex.expenseNumber}</td>
-                    <td className="px-4 py-2 text-mine-300">
+          <DataTable
+            columns={
+              [
+                { key: "number", header: t("expenses.expenseNumber"), render: (ex) => <span className="font-medium">{ex.expenseNumber}</span>, sortValue: (ex) => ex.expenseNumber },
+                {
+                  key: "payee",
+                  header: t("expenses.payee"),
+                  render: (ex) => (
+                    <>
                       {ex.payee?.name}
-                      {ex.payslipId && (
-                        <span className="ml-2 text-[10px] uppercase tracking-wide text-mine-400 border border-mine-700 rounded px-1 py-0.5">
-                          {t("expenses.payslipLinked")}
-                        </span>
-                      )}
-                      {ex.purchaseOrderId && (
-                        <span className="ml-2 text-[10px] uppercase tracking-wide text-mine-400 border border-mine-700 rounded px-1 py-0.5">
-                          {t("expenses.purchaseOrderLinked")}
-                        </span>
-                      )}
-                      {ex.maintenanceScheduleId && (
-                        <span className="ml-2 text-[10px] uppercase tracking-wide text-mine-400 border border-mine-700 rounded px-1 py-0.5">
-                          {t("expenses.maintenanceLinked")}
-                        </span>
-                      )}
-                      {ex.contractBidId && (
-                        <span className="ml-2 text-[10px] uppercase tracking-wide text-mine-400 border border-mine-700 rounded px-1 py-0.5">
-                          {t("expenses.contractLinked")}
-                        </span>
-                      )}
-                    </td>
-                    <td className="px-4 py-2 text-mine-300">{t(`expenses.categories.${ex.category}`)}</td>
-                    <td className="px-4 py-2 text-mine-300">{new Date(ex.expenseDate).toLocaleDateString()}</td>
-                    <td className="px-4 py-2 text-mine-300">{ex.currency} {ex.amount.toLocaleString()}</td>
-                    <td className="px-4 py-2"><StatusBadge status={ex.status} /></td>
-                    <td className="px-4 py-2 text-right">
-                      <div className="flex justify-end gap-2">
-                        {ex.documentId && (
-                          <a
-                            className="text-xs text-mine-300 hover:text-mine-50"
-                            href={`${API_URL}/api/documents/${ex.documentId}/download`}
-                            target="_blank"
-                            rel="noreferrer"
-                          >
-                            {t("expenses.viewReceipt")}
-                          </a>
-                        )}
-                        {canApprove && ex.status === "PENDING" && (
-                          <>
-                            <button className={`${buttonPrimary} text-xs px-3 py-1`} onClick={() => reviewExpense(ex.id, "PAID")}>
-                              {t("expenses.approve")}
-                            </button>
-                            <button className={`${buttonSecondary} text-xs px-3 py-1`} onClick={() => reviewExpense(ex.id, "CANCELLED")}>
-                              {t("expenses.reject")}
-                            </button>
-                          </>
-                        )}
-                        {canDelete && (
-                          <button className={buttonDanger} onClick={() => removeExpense(ex.id)}>{t("common.delete")}</button>
-                        )}
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-                {expenses.length === 0 && (
-                  <tr><td colSpan={7} className="px-4 py-6 text-center text-mine-400">{t("expenses.noneYet")}</td></tr>
+                      {ex.payslipId && <span className="ml-2 text-[10px] uppercase tracking-wide text-mine-400 border border-mine-700 rounded px-1 py-0.5">{t("expenses.payslipLinked")}</span>}
+                      {ex.purchaseOrderId && <span className="ml-2 text-[10px] uppercase tracking-wide text-mine-400 border border-mine-700 rounded px-1 py-0.5">{t("expenses.purchaseOrderLinked")}</span>}
+                      {ex.maintenanceScheduleId && <span className="ml-2 text-[10px] uppercase tracking-wide text-mine-400 border border-mine-700 rounded px-1 py-0.5">{t("expenses.maintenanceLinked")}</span>}
+                      {ex.contractBidId && <span className="ml-2 text-[10px] uppercase tracking-wide text-mine-400 border border-mine-700 rounded px-1 py-0.5">{t("expenses.contractLinked")}</span>}
+                    </>
+                  ),
+                  sortValue: (ex) => ex.payee?.name ?? "",
+                },
+                { key: "category", header: t("expenses.category"), render: (ex) => t(`expenses.categories.${ex.category}`), sortValue: (ex) => ex.category },
+                { key: "date", header: t("expenses.expenseDate"), render: (ex) => new Date(ex.expenseDate).toLocaleDateString(), sortValue: (ex) => ex.expenseDate },
+                { key: "amount", header: t("expenses.amount"), render: (ex) => `${ex.currency} ${ex.amount.toLocaleString()}`, sortValue: (ex) => ex.amount },
+                { key: "status", header: t("common.status"), render: (ex) => <StatusBadge status={ex.status} />, sortValue: (ex) => ex.status },
+              ] as DataTableColumn<Expense>[]
+            }
+            rows={expenses}
+            rowKey={(ex) => ex.id}
+            emptyMessage={t("expenses.noneYet")}
+            searchValue={(ex) => `${ex.expenseNumber} ${ex.payee?.name ?? ""}`}
+            exportFilename="expenses"
+            exportColumns={[
+              { header: t("expenses.expenseNumber"), value: (ex) => ex.expenseNumber },
+              { header: t("expenses.payee"), value: (ex) => ex.payee?.name ?? "" },
+              { header: t("expenses.category"), value: (ex) => ex.category },
+              { header: t("expenses.expenseDate"), value: (ex) => ex.expenseDate },
+              { header: t("expenses.amount"), value: (ex) => ex.amount },
+              { header: t("common.status"), value: (ex) => ex.status },
+            ]}
+            actions={(ex) => (
+              <div className="flex justify-end gap-2">
+                {ex.documentId && (
+                  <a
+                    className="text-xs text-mine-300 hover:text-mine-50"
+                    href={`${API_URL}/api/documents/${ex.documentId}/download`}
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    {t("expenses.viewReceipt")}
+                  </a>
                 )}
-              </tbody>
-            </table>
-          </div>
+                <AuditHistoryButton entityType="Expense" entityId={ex.id} />
+                {canApprove && ex.status === "PENDING" && (
+                  <>
+                    <button className={`${buttonPrimary} text-xs px-3 py-1`} onClick={() => reviewExpense(ex.id, "PAID")}>
+                      {t("expenses.approve")}
+                    </button>
+                    <button className={`${buttonSecondary} text-xs px-3 py-1`} onClick={() => reviewExpense(ex.id, "CANCELLED")}>
+                      {t("expenses.reject")}
+                    </button>
+                  </>
+                )}
+                {canDelete && (
+                  <button className={buttonDanger} onClick={() => removeExpense(ex.id)}>{t("common.delete")}</button>
+                )}
+              </div>
+            )}
+          />
         </>
       )}
 
       {tab === "payees" && (
-        <div className={`${cardClass} overflow-x-auto`}>
-          <table className="w-full text-sm">
-            <thead className="bg-mine-800/50 text-mine-300 text-xs uppercase">
-              <tr>
-                <th className="text-left px-4 py-2">{t("expenses.payeeName")}</th>
-                <th className="text-left px-4 py-2">{t("expenses.payeeType")}</th>
-                <th className="text-left px-4 py-2">{t("buyerRegister.contactEmail")}</th>
-                <th className="text-left px-4 py-2">{t("buyerRegister.contactPhone")}</th>
-                <th className="text-left px-4 py-2">{t("expenses.expenseCount")}</th>
-                <th className="px-4 py-2"></th>
-              </tr>
-            </thead>
-            <tbody>
-              {payees.map((p) => (
-                <tr key={p.id} className="border-t border-mine-800 hover:bg-mine-800/30">
-                  <td className="px-4 py-2 font-medium">{p.name}</td>
-                  <td className="px-4 py-2 text-mine-300">{t(`expenses.payeeTypes.${p.payeeType}`)}</td>
-                  <td className="px-4 py-2 text-mine-300">{p.contactEmail ?? "—"}</td>
-                  <td className="px-4 py-2 text-mine-300">{p.contactPhone ?? "—"}</td>
-                  <td className="px-4 py-2 text-mine-300">{p._count?.expenses ?? 0}</td>
-                  <td className="px-4 py-2 text-right">
-                    <div className="flex justify-end gap-2">
-                      {canEdit && (
-                        <button className="text-xs text-mine-300 hover:text-mine-50" onClick={() => setPayeeModal(p)}>{t("common.edit")}</button>
-                      )}
-                      {canDelete && (
-                        <button className={buttonDanger} onClick={() => removePayee(p.id)}>{t("common.delete")}</button>
-                      )}
-                    </div>
-                  </td>
-                </tr>
-              ))}
-              {payees.length === 0 && (
-                <tr><td colSpan={6} className="px-4 py-6 text-center text-mine-400">{t("expenses.noPayeesYet")}</td></tr>
+        <DataTable
+          columns={
+            [
+              { key: "name", header: t("expenses.payeeName"), render: (p) => <span className="font-medium">{p.name}</span>, sortValue: (p) => p.name },
+              { key: "type", header: t("expenses.payeeType"), render: (p) => t(`expenses.payeeTypes.${p.payeeType}`), sortValue: (p) => p.payeeType },
+              { key: "email", header: t("buyerRegister.contactEmail"), render: (p) => p.contactEmail ?? "—", sortValue: (p) => p.contactEmail ?? "" },
+              { key: "phone", header: t("buyerRegister.contactPhone"), render: (p) => p.contactPhone ?? "—" },
+              { key: "expenseCount", header: t("expenses.expenseCount"), render: (p) => p._count?.expenses ?? 0, sortValue: (p) => p._count?.expenses ?? 0 },
+            ] as DataTableColumn<Payee>[]
+          }
+          rows={payees}
+          rowKey={(p) => p.id}
+          emptyMessage={t("expenses.noPayeesYet")}
+          searchValue={(p) => `${p.name} ${p.contactEmail ?? ""}`}
+          actions={(p) => (
+            <div className="flex justify-end gap-2">
+              {canEdit && (
+                <button className="text-xs text-mine-300 hover:text-mine-50" onClick={() => setPayeeModal(p)}>{t("common.edit")}</button>
               )}
-            </tbody>
-          </table>
-        </div>
+              {canDelete && (
+                <button className={buttonDanger} onClick={() => removePayee(p.id)}>{t("common.delete")}</button>
+              )}
+            </div>
+          )}
+        />
       )}
 
       {expenseModal && (

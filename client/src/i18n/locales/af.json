@@ -958,7 +958,9 @@
         "ELECTRICAL": "Elektries",
         "MECHANICAL": "Meganies",
         "OTHER": "Ander"
-      }
+      },
+      "summaryExpiringSoon": "Verval Binne 90 Dae",
+      "summaryExpired": "Verstryk"
     },
     "training": {
       "new": "+ Nuwe Opleidingsrekord",
@@ -2279,7 +2281,8 @@
     "newOrderTitle": "Nuwe Aankooporder",
     "createError": "Kon nie hierdie aankooporder skep nie",
     "noneYetOrders": "Nog geen aankooporders nie.",
-    "confirmDeleteOrder": "Skrap hierdie aankooporder?"
+    "confirmDeleteOrder": "Skrap hierdie aankooporder?",
+    "summaryPendingApproval": "Wag Vir Goedkeuring"
   },
   "invoices": {
     "nav": "Fakture",

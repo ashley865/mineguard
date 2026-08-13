@@ -958,7 +958,9 @@
         "ELECTRICAL": "Eléctrico",
         "MECHANICAL": "Mecánico",
         "OTHER": "Otro"
-      }
+      },
+      "summaryExpiringSoon": "Vencen en 90 Días",
+      "summaryExpired": "Vencidos"
     },
     "training": {
       "new": "+ Nuevo Registro de Capacitación",
@@ -2279,7 +2281,8 @@
     "newOrderTitle": "Nueva Orden de Compra",
     "createError": "No se pudo crear esta orden de compra",
     "noneYetOrders": "Aún no hay órdenes de compra.",
-    "confirmDeleteOrder": "¿Eliminar esta orden de compra?"
+    "confirmDeleteOrder": "¿Eliminar esta orden de compra?",
+    "summaryPendingApproval": "Pendientes de Aprobación"
   },
   "invoices": {
     "nav": "Facturas",

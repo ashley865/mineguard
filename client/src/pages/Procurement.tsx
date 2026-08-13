@@ -5,8 +5,11 @@ import { useAuth } from "../context/AuthContext";
 import { PurchaseOrder, PurchaseOrderStatus, Site, Supplier, SupplierStatus } from "../api/types";
 import { StatusBadge } from "../components/Badges";
 import Modal from "../components/Modal";
-import { buttonDanger, buttonPrimary, buttonSecondary, cardClass, inputClass, labelClass, selectClass } from "../components/ui";
+import { buttonDanger, buttonPrimary, buttonSecondary, inputClass, labelClass, selectClass } from "../components/ui";
 import DateField from "../components/DateField";
+import DataTable, { DataTableColumn } from "../components/DataTable";
+import SummaryCards from "../components/SummaryCards";
+import { AuditHistoryButton } from "../components/AuditHistoryPanel";
 
 const supplierStatuses: SupplierStatus[] = ["ACTIVE", "INACTIVE", "BLACKLISTED"];
 const orderStatuses: PurchaseOrderStatus[] = ["DRAFT", "SUBMITTED", "APPROVED", "ORDERED", "RECEIVED", "CANCELLED"];
@@ -257,42 +260,30 @@ function SuppliersTab({ canEdit, canDelete }: { canEdit: boolean; canDelete: boo
           <button className={buttonPrimary} onClick={() => setModal("create")}>{t("procurement.newSupplier")}</button>
         </div>
       )}
-      <div className={`${cardClass} overflow-x-auto`}>
-        <table className="w-full text-sm">
-          <thead className="bg-mine-800/50 text-mine-300 text-xs uppercase">
-            <tr>
-              <th className="text-left px-4 py-2">{t("common.name")}</th>
-              <th className="text-left px-4 py-2">{t("inventory.category")}</th>
-              <th className="text-left px-4 py-2">{t("contractors.contactEmail")}</th>
-              <th className="text-left px-4 py-2">{t("common.status")}</th>
-              <th className="px-4 py-2"></th>
-            </tr>
-          </thead>
-          <tbody>
-            {suppliers.map((s) => (
-              <tr key={s.id} className="border-t border-mine-800 hover:bg-mine-800/30">
-                <td className="px-4 py-2 font-medium">{s.name}</td>
-                <td className="px-4 py-2 text-mine-300">{s.category ?? "—"}</td>
-                <td className="px-4 py-2 text-mine-300">{s.contactEmail ?? "—"}</td>
-                <td className="px-4 py-2"><StatusBadge status={s.status} /></td>
-                <td className="px-4 py-2 text-right">
-                  <div className="flex justify-end gap-2">
-                    {canEdit && (
-                      <button className="text-xs text-mine-300 hover:text-mine-50" onClick={() => setModal(s)}>{t("common.edit")}</button>
-                    )}
-                    {canDelete && (
-                      <button className={buttonDanger} onClick={() => remove(s.id)}>{t("common.delete")}</button>
-                    )}
-                  </div>
-                </td>
-              </tr>
-            ))}
-            {suppliers.length === 0 && (
-              <tr><td colSpan={5} className="px-4 py-6 text-center text-mine-400">{t("procurement.noneYetSuppliers")}</td></tr>
+      <DataTable
+        columns={
+          [
+            { key: "name", header: t("common.name"), render: (s) => <span className="font-medium">{s.name}</span>, sortValue: (s) => s.name },
+            { key: "category", header: t("inventory.category"), render: (s) => s.category ?? "—", sortValue: (s) => s.category ?? "" },
+            { key: "email", header: t("contractors.contactEmail"), render: (s) => s.contactEmail ?? "—", sortValue: (s) => s.contactEmail ?? "" },
+            { key: "status", header: t("common.status"), render: (s) => <StatusBadge status={s.status} />, sortValue: (s) => s.status },
+          ] as DataTableColumn<Supplier>[]
+        }
+        rows={suppliers}
+        rowKey={(s) => s.id}
+        emptyMessage={t("procurement.noneYetSuppliers")}
+        searchValue={(s) => `${s.name} ${s.category ?? ""}`}
+        actions={(s) => (
+          <div className="flex justify-end gap-2">
+            {canEdit && (
+              <button className="text-xs text-mine-300 hover:text-mine-50" onClick={() => setModal(s)}>{t("common.edit")}</button>
             )}
-          </tbody>
-        </table>
-      </div>
+            {canDelete && (
+              <button className={buttonDanger} onClick={() => remove(s.id)}>{t("common.delete")}</button>
+            )}
+          </div>
+        )}
+      />
       {modal && (
         <Modal title={modal === "create" ? t("procurement.newSupplierTitle") : t("procurement.editSupplierTitle")} onClose={() => setModal(null)}>
           <SupplierForm
@@ -376,53 +367,53 @@ function OrdersTab({ sites, suppliers, canEdit, canApprove, canDelete }: {
 
   if (loading) return <div className="text-mine-300">{t("common.loading")}</div>;
 
+  const pendingApprovalCount = orders.filter((o) => o.status === "SUBMITTED").length;
+
   return (
     <div className="space-y-4">
+      {canApprove && (
+        <SummaryCards cards={[{ label: t("procurement.summaryPendingApproval"), value: pendingApprovalCount, tone: pendingApprovalCount > 0 ? "hazard" : "default" }]} />
+      )}
+
       {canEdit && sites.length > 0 && suppliers.length > 0 && (
         <div className="flex justify-end">
           <button className={buttonPrimary} onClick={() => setModal(true)}>{t("procurement.newOrder")}</button>
         </div>
       )}
-      <div className={`${cardClass} overflow-x-auto`}>
-        <table className="w-full text-sm">
-          <thead className="bg-mine-800/50 text-mine-300 text-xs uppercase">
-            <tr>
-              <th className="text-left px-4 py-2">{t("procurement.orderNumber")}</th>
-              <th className="text-left px-4 py-2">{t("procurement.supplier")}</th>
-              <th className="text-left px-4 py-2">{t("common.site")}</th>
-              <th className="text-left px-4 py-2">{t("procurement.total")}</th>
-              <th className="text-left px-4 py-2">{t("common.status")}</th>
-              <th className="px-4 py-2"></th>
-            </tr>
-          </thead>
-          <tbody>
-            {orders.map((o) => (
-              <tr key={o.id} className="border-t border-mine-800 hover:bg-mine-800/30">
-                <td className="px-4 py-2 font-medium">
-                  <button className="hover:underline" onClick={() => setDetailOrder(o)}>{o.orderNumber}</button>
-                </td>
-                <td className="px-4 py-2 text-mine-300">{o.supplier?.name}</td>
-                <td className="px-4 py-2 text-mine-300">{o.site?.name}</td>
-                <td className="px-4 py-2 text-mine-300">{o.currency} {o.totalAmount.toLocaleString()}</td>
-                <td className="px-4 py-2"><StatusBadge status={o.status} /></td>
-                <td className="px-4 py-2 text-right">
-                  <div className="flex justify-end gap-2">
-                    {canApprove && o.status !== "APPROVED" && o.status !== "CANCELLED" && (
-                      <button className={`${buttonPrimary} text-xs px-3 py-1`} onClick={() => approve(o.id)}>{t("common.approve")}</button>
-                    )}
-                    {canDelete && (
-                      <button className={buttonDanger} onClick={() => remove(o.id)}>{t("common.delete")}</button>
-                    )}
-                  </div>
-                </td>
-              </tr>
-            ))}
-            {orders.length === 0 && (
-              <tr><td colSpan={6} className="px-4 py-6 text-center text-mine-400">{t("procurement.noneYetOrders")}</td></tr>
+      <DataTable
+        columns={
+          [
+            { key: "number", header: t("procurement.orderNumber"), render: (o) => <button className="font-medium hover:underline" onClick={() => setDetailOrder(o)}>{o.orderNumber}</button>, sortValue: (o) => o.orderNumber },
+            { key: "supplier", header: t("procurement.supplier"), render: (o) => o.supplier?.name ?? "—", sortValue: (o) => o.supplier?.name ?? "" },
+            { key: "site", header: t("common.site"), render: (o) => o.site?.name ?? "—", sortValue: (o) => o.site?.name ?? "" },
+            { key: "total", header: t("procurement.total"), render: (o) => `${o.currency} ${o.totalAmount.toLocaleString()}`, sortValue: (o) => o.totalAmount },
+            { key: "status", header: t("common.status"), render: (o) => <StatusBadge status={o.status} />, sortValue: (o) => o.status },
+          ] as DataTableColumn<PurchaseOrder>[]
+        }
+        rows={orders}
+        rowKey={(o) => o.id}
+        emptyMessage={t("procurement.noneYetOrders")}
+        searchValue={(o) => `${o.orderNumber} ${o.supplier?.name ?? ""}`}
+        exportFilename="purchase-orders"
+        exportColumns={[
+          { header: t("procurement.orderNumber"), value: (o) => o.orderNumber },
+          { header: t("procurement.supplier"), value: (o) => o.supplier?.name ?? "" },
+          { header: t("common.site"), value: (o) => o.site?.name ?? "" },
+          { header: t("procurement.total"), value: (o) => o.totalAmount },
+          { header: t("common.status"), value: (o) => o.status },
+        ]}
+        actions={(o) => (
+          <div className="flex justify-end gap-2">
+            <AuditHistoryButton entityType="PurchaseOrder" entityId={o.id} />
+            {canApprove && o.status !== "APPROVED" && o.status !== "CANCELLED" && (
+              <button className={`${buttonPrimary} text-xs px-3 py-1`} onClick={() => approve(o.id)}>{t("common.approve")}</button>
             )}
-          </tbody>
-        </table>
-      </div>
+            {canDelete && (
+              <button className={buttonDanger} onClick={() => remove(o.id)}>{t("common.delete")}</button>
+            )}
+          </div>
+        )}
+      />
       {modal && (
         <Modal title={t("procurement.newOrderTitle")} onClose={() => setModal(false)}>
           <OrderForm sites={sites} suppliers={suppliers} onSubmit={create} onCancel={() => setModal(false)} />

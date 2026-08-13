@@ -958,7 +958,9 @@
         "ELECTRICAL": "Elektrik",
         "MECHANICAL": "Mechanik",
         "OTHER": "Sonstiges"
-      }
+      },
+      "summaryExpiringSoon": "Läuft in 90 Tagen ab",
+      "summaryExpired": "Abgelaufen"
     },
     "training": {
       "new": "+ Neuer Schulungsnachweis",
@@ -2279,7 +2281,8 @@
     "newOrderTitle": "Neue Bestellung",
     "createError": "Diese Bestellung konnte nicht erstellt werden",
     "noneYetOrders": "Noch keine Bestellungen.",
-    "confirmDeleteOrder": "Diese Bestellung löschen?"
+    "confirmDeleteOrder": "Diese Bestellung löschen?",
+    "summaryPendingApproval": "Genehmigung Ausstehend"
   },
   "invoices": {
     "nav": "Rechnungen",

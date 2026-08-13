@@ -8,6 +8,8 @@ import { StatusBadge } from "../components/Badges";
 import Modal from "../components/Modal";
 import { buttonDanger, buttonPrimary, buttonSecondary, cardClass, inputClass, labelClass, selectClass } from "../components/ui";
 import DateField from "../components/DateField";
+import DataTable, { DataTableColumn } from "../components/DataTable";
+import { AuditHistoryButton } from "../components/AuditHistoryPanel";
 
 const invoiceStatuses: InvoiceStatus[] = ["DRAFT", "SENT", "PAID", "OVERDUE", "CANCELLED"];
 
@@ -455,42 +457,36 @@ export default function Invoices() {
         </div>
       )}
 
-      <div className={`${cardClass} overflow-x-auto`}>
-        <table className="w-full text-sm">
-          <thead className="bg-mine-800/50 text-mine-300 text-xs uppercase">
-            <tr>
-              <th className="text-left px-4 py-2">{t("invoices.invoiceNumber")}</th>
-              <th className="text-left px-4 py-2">{t("invoices.clientName")}</th>
-              <th className="text-left px-4 py-2">{t("invoices.dueDate")}</th>
-              <th className="text-left px-4 py-2">{t("common.status")}</th>
-              <th className="px-4 py-2"></th>
-            </tr>
-          </thead>
-          <tbody>
-            {invoices.map((inv) => (
-              <tr key={inv.id} className="border-t border-mine-800 hover:bg-mine-800/30">
-                <td className="px-4 py-2 font-medium">
-                  <button className="hover:underline" onClick={() => setViewing(inv)}>{inv.invoiceNumber}</button>
-                </td>
-                <td className="px-4 py-2 text-mine-300">{inv.clientName}</td>
-                <td className="px-4 py-2 text-mine-300">{new Date(inv.dueDate).toLocaleDateString()}</td>
-                <td className="px-4 py-2"><StatusBadge status={inv.status} /></td>
-                <td className="px-4 py-2 text-right">
-                  <div className="flex justify-end gap-2">
-                    <button className="text-xs text-mine-300 hover:text-mine-50" onClick={() => setViewing(inv)}>{t("invoices.viewInvoice")}</button>
-                    {canDelete && (
-                      <button className={buttonDanger} onClick={() => remove(inv.id)}>{t("common.delete")}</button>
-                    )}
-                  </div>
-                </td>
-              </tr>
-            ))}
-            {invoices.length === 0 && (
-              <tr><td colSpan={5} className="px-4 py-6 text-center text-mine-400">{t("invoices.noneYet")}</td></tr>
+      <DataTable
+        columns={
+          [
+            { key: "number", header: t("invoices.invoiceNumber"), render: (inv) => <button className="font-medium hover:underline" onClick={() => setViewing(inv)}>{inv.invoiceNumber}</button>, sortValue: (inv) => inv.invoiceNumber },
+            { key: "client", header: t("invoices.clientName"), render: (inv) => inv.clientName, sortValue: (inv) => inv.clientName },
+            { key: "dueDate", header: t("invoices.dueDate"), render: (inv) => new Date(inv.dueDate).toLocaleDateString(), sortValue: (inv) => inv.dueDate },
+            { key: "status", header: t("common.status"), render: (inv) => <StatusBadge status={inv.status} />, sortValue: (inv) => inv.status },
+          ] as DataTableColumn<Invoice>[]
+        }
+        rows={invoices}
+        rowKey={(inv) => inv.id}
+        emptyMessage={t("invoices.noneYet")}
+        searchValue={(inv) => `${inv.invoiceNumber} ${inv.clientName}`}
+        exportFilename="invoices"
+        exportColumns={[
+          { header: t("invoices.invoiceNumber"), value: (inv) => inv.invoiceNumber },
+          { header: t("invoices.clientName"), value: (inv) => inv.clientName },
+          { header: t("invoices.dueDate"), value: (inv) => inv.dueDate },
+          { header: t("common.status"), value: (inv) => inv.status },
+        ]}
+        actions={(inv) => (
+          <div className="flex justify-end gap-2">
+            <button className="text-xs text-mine-300 hover:text-mine-50" onClick={() => setViewing(inv)}>{t("invoices.viewInvoice")}</button>
+            <AuditHistoryButton entityType="Invoice" entityId={inv.id} />
+            {canDelete && (
+              <button className={buttonDanger} onClick={() => remove(inv.id)}>{t("common.delete")}</button>
             )}
-          </tbody>
-        </table>
-      </div>
+          </div>
+        )}
+      />
 
       {modal && (
         <Modal title={t("invoices.newInvoiceTitle")} onClose={() => setModal(false)}>

@@ -958,7 +958,9 @@
         "ELECTRICAL": "Électrique",
         "MECHANICAL": "Mécanique",
         "OTHER": "Autre"
-      }
+      },
+      "summaryExpiringSoon": "Expirent Sous 90 Jours",
+      "summaryExpired": "Expirés"
     },
     "training": {
       "new": "+ Nouveau Dossier de Formation",
@@ -2279,7 +2281,8 @@
     "newOrderTitle": "Nouveau Bon de Commande",
     "createError": "Impossible de créer ce bon de commande",
     "noneYetOrders": "Aucun bon de commande pour le moment.",
-    "confirmDeleteOrder": "Supprimer ce bon de commande ?"
+    "confirmDeleteOrder": "Supprimer ce bon de commande ?",
+    "summaryPendingApproval": "En Attente d'Approbation"
   },
   "invoices": {
     "nav": "Factures",

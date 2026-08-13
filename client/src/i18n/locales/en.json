@@ -1011,7 +1011,9 @@
         "ELECTRICAL": "Electrical",
         "MECHANICAL": "Mechanical",
         "OTHER": "Other"
-      }
+      },
+      "summaryExpiringSoon": "Expiring Within 90 Days",
+      "summaryExpired": "Expired"
     },
     "training": {
       "new": "+ New Training Record",
@@ -2542,7 +2544,8 @@
     "newOrderTitle": "New Purchase Order",
     "createError": "Could not create this purchase order",
     "noneYetOrders": "No purchase orders yet.",
-    "confirmDeleteOrder": "Delete this purchase order?"
+    "confirmDeleteOrder": "Delete this purchase order?",
+    "summaryPendingApproval": "Pending Approval"
   },
   "invoices": {
     "nav": "Invoices",
