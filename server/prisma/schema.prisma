@@ -251,6 +251,11 @@ model User {
   rehabProgressRecorded     ClosureRehabilitationProgress[] @relation("RehabProgressRecordedBy")
   learnershipsRecorded      Learnership[]           @relation("LearnershipRecordedBy")
   legalComplianceItemsOwned LegalComplianceItem[]   @relation("LegalComplianceOwner")
+
+  geotechReadingsRecorded  GeotechnicalReading[] @relation("GeotechReadingRecordedBy")
+  rockfallSignOffs         RockfallIncident[]    @relation("RockfallSignOffBy")
+  rescueDrillsConducted    RescueDrill[]         @relation("RescueDrillConductedBy")
+  disciplinaryCasesCreated DisciplinaryCase[]    @relation("DisciplinaryCaseCreatedBy")
 }
 
 model UserAttendance {
@@ -325,6 +330,21 @@ model Site {
   tailingsFacilities     TailingsFacility[]
   closureRehabilitationPlans ClosureRehabilitationPlan[]
   legalComplianceItems   LegalComplianceItem[]
+
+  groundControlDistricts GroundControlDistrict[]
+  seismicEvents          SeismicEvent[]
+  rockfallIncidents      RockfallIncident[]
+  ventilationDistricts   VentilationDistrict[]
+  refugeBays             RefugeBay[]
+  rescueTeamMembers      RescueTeamMember[]
+  breathingApparatusSets BreathingApparatusSet[]
+  rescueDrills           RescueDrill[]
+  mutualAidAgreements    MutualAidAgreement[]
+  rescueCallouts         RescueCallout[]
+  waterBalanceRecords    WaterBalanceRecord[]
+  pollutionControlDams   PollutionControlDam[]
+  acidMineDrainageReadings AcidMineDrainageReading[]
+  energyConsumptionRecords EnergyConsumptionRecord[]
 }
 
 model Zone {
@@ -351,6 +371,12 @@ model Zone {
   productionRecords ProductionRecord[]
   safetyObservations SafetyObservation[]
   blastLogs          BlastLog[]
+
+  groundControlDistricts GroundControlDistrict[]
+  seismicEvents          SeismicEvent[]
+  rockfallIncidents      RockfallIncident[]
+  ventilationDistricts   VentilationDistrict[]
+  refugeBays             RefugeBay[]
 
   createdAt DateTime @default(now())
 }
@@ -471,6 +497,12 @@ model Worker {
   blastLogsAsShotFirer  BlastLog[]             @relation("BlastLogShotFirer")
   learnerships          Learnership[]
   leaveBalances         LeaveBalance[]
+
+  occupationalExposureRecords OccupationalExposureRecord[]
+  rescueTeamMemberships       RescueTeamMember[]
+  disciplinaryCases           DisciplinaryCase[]
+  grievanceCases               GrievanceCase[]
+  ccmaCases                    CcmaCase[]
 
   createdAt DateTime @default(now())
 }
@@ -1310,6 +1342,9 @@ model Mine {
   workplaceSkillsPlans    WorkplaceSkillsPlan[]
   learnerships            Learnership[]
   legalComplianceItems    LegalComplianceItem[]
+
+  unionAgreements    UnionAgreement[]
+  ghgEmissionsRecords GhgEmissionsRecord[]
 }
 
 enum ExecutiveRequestStatus {
@@ -2276,6 +2311,8 @@ model EmergencyEvent {
   occurredAt             DateTime              @default(now())
   resolvedAt             DateTime?
 
+  rescueCallouts RescueCallout[]
+
   createdAt DateTime @default(now())
 }
 
@@ -3070,6 +3107,495 @@ model LegalComplianceItem {
   status                LegalComplianceItemStatus  @default(UPCOMING)
   completedAt           DateTime?
   notes                 String?
+
+  createdAt DateTime @default(now())
+}
+
+// ---------------------------------------------------------------------------
+// Module: Ground Control & Geotechnical Management (MHSA Rockfall/Rockburst COP)
+// ---------------------------------------------------------------------------
+
+enum GeotechnicalPointType {
+  EXTENSOMETER
+  CONVERGENCE_STATION
+  TILTMETER
+  PIEZOMETER
+  OTHER
+}
+
+enum GeotechnicalEventType {
+  ROCKFALL
+  ROCKBURST
+}
+
+// A ground control district is the area a support standard applies to — the unit that
+// monitoring points, seismic events and rockfall/rockburst incidents are all scoped to.
+model GroundControlDistrict {
+  id                      String   @id @default(cuid())
+  siteId                  String
+  site                    Site     @relation(fields: [siteId], references: [id], onDelete: Cascade)
+  zoneId                  String?
+  zone                    Zone?    @relation(fields: [zoneId], references: [id], onDelete: SetNull)
+  name                    String
+  requiredSupportStandard String?
+  status                  String   @default("ACTIVE")
+
+  monitoringPoints  GeotechnicalMonitoringPoint[]
+  rockfallIncidents RockfallIncident[]
+
+  createdAt DateTime @default(now())
+}
+
+model GeotechnicalMonitoringPoint {
+  id                  String                @id @default(cuid())
+  districtId          String
+  district            GroundControlDistrict @relation(fields: [districtId], references: [id], onDelete: Cascade)
+  pointType           GeotechnicalPointType
+  locationDescription String
+  installedDate       DateTime?
+  status              String                @default("ACTIVE")
+
+  readings GeotechnicalReading[]
+
+  createdAt DateTime @default(now())
+}
+
+model GeotechnicalReading {
+  id                String                      @id @default(cuid())
+  pointId           String
+  point             GeotechnicalMonitoringPoint @relation(fields: [pointId], references: [id], onDelete: Cascade)
+  readingDate       DateTime
+  value             Float
+  unit              String
+  alertThreshold    Float?
+  exceedsThreshold  Boolean                     @default(false)
+  notes             String?
+  recordedById      String?
+  recordedBy        User?                       @relation("GeotechReadingRecordedBy", fields: [recordedById], references: [id], onDelete: SetNull)
+
+  createdAt DateTime @default(now())
+}
+
+model SeismicEvent {
+  id                  String   @id @default(cuid())
+  siteId              String
+  site                Site     @relation(fields: [siteId], references: [id], onDelete: Cascade)
+  zoneId              String?
+  zone                Zone?    @relation(fields: [zoneId], references: [id], onDelete: SetNull)
+  eventDate           DateTime
+  magnitude           Float
+  locationDescription String?
+  damageObserved      Boolean  @default(false)
+  damageDescription   String?
+
+  createdAt DateTime @default(now())
+}
+
+// A rockfall/rockburst event requires the Rock Engineer (the MHSA-appointed statutory
+// appointee) to authorise re-entry before work may resume in the affected area.
+model RockfallIncident {
+  id                 String                 @id @default(cuid())
+  siteId             String
+  site               Site                   @relation(fields: [siteId], references: [id], onDelete: Cascade)
+  zoneId             String?
+  zone               Zone?                  @relation(fields: [zoneId], references: [id], onDelete: SetNull)
+  districtId         String?
+  district           GroundControlDistrict? @relation(fields: [districtId], references: [id], onDelete: SetNull)
+  eventType          GeotechnicalEventType
+  eventDate          DateTime
+  supportInPlace     String?
+  description        String
+  reEntryAuthorized  Boolean                @default(false)
+  signOffById        String?
+  signOffBy          User?                  @relation("RockfallSignOffBy", fields: [signOffById], references: [id], onDelete: SetNull)
+  signOffAt          DateTime?
+
+  createdAt DateTime @default(now())
+}
+
+// ---------------------------------------------------------------------------
+// Module: Ventilation & Occupational Hygiene Management (MHSA Ventilation COP)
+// ---------------------------------------------------------------------------
+
+enum RefugeBayStatus {
+  OPERATIONAL
+  OUT_OF_SERVICE
+}
+
+enum ExposurePollutant {
+  DUST_RESPIRABLE
+  DUST_INHALABLE
+  NOISE
+  METHANE
+  CARBON_MONOXIDE
+  DIESEL_PARTICULATE
+  SILICA
+  OTHER
+}
+
+enum ExposureSampleType {
+  PERSONAL
+  AREA
+}
+
+model VentilationDistrict {
+  id                      String   @id @default(cuid())
+  siteId                  String
+  site                    Site     @relation(fields: [siteId], references: [id], onDelete: Cascade)
+  zoneId                  String?
+  zone                    Zone?    @relation(fields: [zoneId], references: [id], onDelete: SetNull)
+  name                    String
+  requiredAirflowQuantity Float?
+  unit                    String   @default("m3/s")
+  status                  String   @default("ACTIVE")
+
+  readings VentilationReading[]
+
+  createdAt DateTime @default(now())
+}
+
+model VentilationReading {
+  id                String               @id @default(cuid())
+  districtId        String
+  district          VentilationDistrict  @relation(fields: [districtId], references: [id], onDelete: Cascade)
+  readingDate       DateTime
+  airflowQuantity   Float
+  unit              String               @default("m3/s")
+  withinRequirement Boolean              @default(true)
+  notes             String?
+
+  createdAt DateTime @default(now())
+}
+
+model RefugeBay {
+  id                     String          @id @default(cuid())
+  siteId                 String
+  site                   Site            @relation(fields: [siteId], references: [id], onDelete: Cascade)
+  zoneId                 String?
+  zone                   Zone?           @relation(fields: [zoneId], references: [id], onDelete: SetNull)
+  name                   String
+  capacityPersons        Int
+  airSupplyDurationHours Float?
+  lastInspectionDate     DateTime?
+  nextInspectionDue      DateTime?
+  status                 RefugeBayStatus @default(OPERATIONAL)
+
+  createdAt DateTime @default(now())
+}
+
+// A worker's personal or area airborne-pollutant sample compared against the regulatory
+// Occupational Exposure Limit — the legally required record that raw sensor readings alone
+// don't provide, since sensors log ambient conditions, not what an individual was exposed to.
+model OccupationalExposureRecord {
+  id                        String              @id @default(cuid())
+  workerId                  String
+  worker                    Worker              @relation(fields: [workerId], references: [id], onDelete: Cascade)
+  pollutant                 ExposurePollutant
+  sampleDate                DateTime
+  sampleType                ExposureSampleType  @default(PERSONAL)
+  measuredValue             Float
+  unit                      String
+  occupationalExposureLimit Float
+  exceedsLimit              Boolean             @default(false)
+  notes                     String?
+
+  createdAt DateTime @default(now())
+}
+
+// ---------------------------------------------------------------------------
+// Module: Mine Rescue Services & Emergency Readiness (MHSA mine rescue regulations)
+// ---------------------------------------------------------------------------
+
+enum RescueTeamRole {
+  TEAM_LEADER
+  MEMBER
+}
+
+enum RescueMemberStatus {
+  ACTIVE
+  INACTIVE
+}
+
+enum BaSetStatus {
+  SERVICEABLE
+  OUT_OF_SERVICE
+  DUE_FOR_SERVICE
+}
+
+enum RescueDrillResult {
+  PASS
+  FAIL
+  PARTIAL
+}
+
+model RescueTeamMember {
+  id                  String              @id @default(cuid())
+  siteId              String
+  site                Site                @relation(fields: [siteId], references: [id], onDelete: Cascade)
+  workerId            String
+  worker              Worker              @relation(fields: [workerId], references: [id], onDelete: Cascade)
+  role                RescueTeamRole      @default(MEMBER)
+  certificationNumber String?
+  certificationExpiry DateTime?
+  status              RescueMemberStatus  @default(ACTIVE)
+
+  createdAt DateTime @default(now())
+}
+
+model BreathingApparatusSet {
+  id                   String      @id @default(cuid())
+  siteId               String
+  site                 Site        @relation(fields: [siteId], references: [id], onDelete: Cascade)
+  setNumber            String
+  manufacturer         String?
+  model                String?
+  lastServiceDate      DateTime?
+  nextServiceDue       DateTime?
+  lastPressureTestDate DateTime?
+  nextPressureTestDue  DateTime?
+  status               BaSetStatus @default(SERVICEABLE)
+
+  createdAt DateTime @default(now())
+}
+
+model RescueDrill {
+  id              String            @id @default(cuid())
+  siteId          String
+  site            Site              @relation(fields: [siteId], references: [id], onDelete: Cascade)
+  drillDate       DateTime
+  scenario        String
+  result          RescueDrillResult @default(PASS)
+  durationMinutes Int?
+  notes           String?
+  conductedById   String?
+  conductedBy     User?             @relation("RescueDrillConductedBy", fields: [conductedById], references: [id], onDelete: SetNull)
+
+  createdAt DateTime @default(now())
+}
+
+model MutualAidAgreement {
+  id                  String    @id @default(cuid())
+  siteId              String
+  site                Site      @relation(fields: [siteId], references: [id], onDelete: Cascade)
+  partnerOrganization String
+  agreementType       String?
+  effectiveDate       DateTime
+  expiryDate          DateTime?
+  contactName         String?
+  contactPhone        String?
+  status              String    @default("ACTIVE")
+  notes               String?
+
+  createdAt DateTime @default(now())
+}
+
+model RescueCallout {
+  id                  String          @id @default(cuid())
+  siteId              String
+  site                Site            @relation(fields: [siteId], references: [id], onDelete: Cascade)
+  emergencyEventId    String?
+  emergencyEvent      EmergencyEvent? @relation(fields: [emergencyEventId], references: [id], onDelete: SetNull)
+  calloutTime         DateTime
+  teamDispatched      String?
+  responseTimeMinutes Int?
+  outcome             String?
+  notes               String?
+
+  createdAt DateTime @default(now())
+}
+
+// ---------------------------------------------------------------------------
+// Module: Industrial & Labour Relations (Labour Relations Act)
+// ---------------------------------------------------------------------------
+
+enum DisciplinaryOutcome {
+  PENDING
+  VERBAL_WARNING
+  WRITTEN_WARNING
+  FINAL_WRITTEN_WARNING
+  DISMISSAL
+  NOT_GUILTY
+  WITHDRAWN
+}
+
+enum DisciplinaryStatus {
+  OPEN
+  SCHEDULED
+  CONCLUDED
+  APPEALED
+}
+
+enum GrievanceStatus {
+  OPEN
+  UNDER_INVESTIGATION
+  RESOLVED
+  ESCALATED
+  WITHDRAWN
+}
+
+enum CcmaCaseType {
+  UNFAIR_DISMISSAL
+  UNFAIR_LABOUR_PRACTICE
+  DISCRIMINATION
+  WAGE_DISPUTE
+  OTHER
+}
+
+enum CcmaCaseStatus {
+  REFERRED
+  CONCILIATION
+  ARBITRATION
+  SETTLED
+  AWARD_ISSUED
+  WITHDRAWN
+}
+
+enum UnionAgreementStatus {
+  ACTIVE
+  EXPIRED
+  UNDER_NEGOTIATION
+}
+
+model DisciplinaryCase {
+  id                String              @id @default(cuid())
+  workerId          String
+  worker            Worker              @relation(fields: [workerId], references: [id], onDelete: Cascade)
+  chargeDescription String
+  hearingDate       DateTime?
+  chairperson       String?
+  outcome           DisciplinaryOutcome @default(PENDING)
+  sanctionDetails   String?
+  status            DisciplinaryStatus  @default(OPEN)
+  notes             String?
+  createdById       String?
+  createdBy         User?               @relation("DisciplinaryCaseCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+
+  createdAt DateTime @default(now())
+}
+
+model GrievanceCase {
+  id            String          @id @default(cuid())
+  workerId      String
+  worker        Worker          @relation(fields: [workerId], references: [id], onDelete: Cascade)
+  raisedAgainst String?
+  description   String
+  dateRaised    DateTime
+  status        GrievanceStatus @default(OPEN)
+  resolution    String?
+  resolvedAt    DateTime?
+
+  createdAt DateTime @default(now())
+}
+
+model CcmaCase {
+  id               String         @id @default(cuid())
+  workerId         String?
+  worker           Worker?        @relation(fields: [workerId], references: [id], onDelete: SetNull)
+  referralNumber   String?
+  caseType         CcmaCaseType
+  conciliationDate DateTime?
+  arbitrationDate  DateTime?
+  outcome          String?
+  status           CcmaCaseStatus @default(REFERRED)
+  notes            String?
+
+  createdAt DateTime @default(now())
+}
+
+model UnionAgreement {
+  id                           String                @id @default(cuid())
+  mineId                       String
+  mine                         Mine                  @relation(fields: [mineId], references: [id], onDelete: Cascade)
+  unionName                    String
+  agreementType                String?
+  recognitionThresholdPercent  Float?
+  membershipCount              Int?
+  effectiveDate                DateTime
+  expiryDate                   DateTime?
+  status                       UnionAgreementStatus  @default(ACTIVE)
+  notes                        String?
+
+  createdAt DateTime @default(now())
+}
+
+// ---------------------------------------------------------------------------
+// Module: Water & Energy Resource Management (National Water Act, Carbon Tax Act,
+// mandatory GHG reporting regulations)
+// ---------------------------------------------------------------------------
+
+enum PollutionDamStatus {
+  ACTIVE
+  DECOMMISSIONED
+}
+
+model WaterBalanceRecord {
+  id                String   @id @default(cuid())
+  siteId            String
+  site              Site     @relation(fields: [siteId], references: [id], onDelete: Cascade)
+  recordDate        DateTime
+  abstractedVolume  Float
+  dischargedVolume  Float
+  recycledVolume    Float    @default(0)
+  unit              String   @default("kL")
+  licenseLimit      Float?
+  withinLimit       Boolean  @default(true)
+  notes             String?
+
+  createdAt DateTime @default(now())
+}
+
+model PollutionControlDam {
+  id                 String              @id @default(cuid())
+  siteId             String
+  site               Site                @relation(fields: [siteId], references: [id], onDelete: Cascade)
+  name               String
+  capacity           Float?
+  unit               String?
+  currentLevel       Float?
+  status             PollutionDamStatus  @default(ACTIVE)
+  lastInspectionDate DateTime?
+
+  createdAt DateTime @default(now())
+}
+
+model AcidMineDrainageReading {
+  id                   String   @id @default(cuid())
+  siteId               String
+  site                 Site     @relation(fields: [siteId], references: [id], onDelete: Cascade)
+  monitoringPoint      String
+  readingDate          DateTime
+  ph                   Float
+  sulfateConcentration Float?
+  metalConcentration   Float?
+  withinLimits         Boolean  @default(true)
+  notes                String?
+
+  createdAt DateTime @default(now())
+}
+
+model EnergyConsumptionRecord {
+  id                      String   @id @default(cuid())
+  siteId                  String
+  site                    Site     @relation(fields: [siteId], references: [id], onDelete: Cascade)
+  recordMonth             DateTime
+  gridConsumptionKwh      Float
+  renewableConsumptionKwh Float    @default(0)
+  dieselConsumptionLiters Float?
+  notes                   String?
+
+  createdAt DateTime @default(now())
+}
+
+model GhgEmissionsRecord {
+  id                 String   @id @default(cuid())
+  mineId             String
+  mine               Mine     @relation(fields: [mineId], references: [id], onDelete: Cascade)
+  reportingYear      Int
+  scope1TonnesCO2e   Float
+  scope2TonnesCO2e   Float
+  carbonTaxLiability Float?
+  currency           String   @default("ZAR")
+  notes              String?
 
   createdAt DateTime @default(now())
 }

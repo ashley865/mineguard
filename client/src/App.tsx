@@ -50,6 +50,11 @@ import Procurement from "./pages/Procurement";
 import Invoices from "./pages/Invoices";
 import Expenses from "./pages/Expenses";
 import ExecutiveRequests from "./pages/ExecutiveRequests";
+import GroundControl from "./pages/GroundControl";
+import VentilationHygiene from "./pages/VentilationHygiene";
+import MineRescue from "./pages/MineRescue";
+import LabourRelations from "./pages/LabourRelations";
+import ResourceManagement from "./pages/ResourceManagement";
 
 function HomeRoute() {
   const { user } = useAuth();
@@ -109,6 +114,11 @@ export default function App() {
         <Route path="/procurement" element={<ModuleRoute path="/procurement"><Procurement /></ModuleRoute>} />
         <Route path="/invoices" element={<ModuleRoute path="/invoices"><Invoices /></ModuleRoute>} />
         <Route path="/expenses" element={<ModuleRoute path="/expenses"><Expenses /></ModuleRoute>} />
+        <Route path="/ground-control" element={<ModuleRoute path="/ground-control"><GroundControl /></ModuleRoute>} />
+        <Route path="/ventilation" element={<ModuleRoute path="/ventilation"><VentilationHygiene /></ModuleRoute>} />
+        <Route path="/mine-rescue" element={<ModuleRoute path="/mine-rescue"><MineRescue /></ModuleRoute>} />
+        <Route path="/labour-relations" element={<ModuleRoute path="/labour-relations"><LabourRelations /></ModuleRoute>} />
+        <Route path="/resources" element={<ModuleRoute path="/resources"><ResourceManagement /></ModuleRoute>} />
         <Route path="/messages" element={<Messages />} />
         <Route path="/executive-requests" element={<ExecutiveRequests />} />
         <Route path="/settings" element={<Settings />} />

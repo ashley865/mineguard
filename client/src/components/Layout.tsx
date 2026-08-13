@@ -68,6 +68,10 @@ export default function Layout() {
         { to: "/emergency", label: t("emergency.nav") },
         { to: "/permits", label: t("permits.nav") },
         { to: "/inspection", label: t("inspection.nav") },
+        { to: "/ground-control", label: t("groundControl.nav") },
+        { to: "/ventilation", label: t("ventilation.nav") },
+        { to: "/mine-rescue", label: t("mineRescue.nav") },
+        { to: "/resources", label: t("resources.nav") },
       ],
     },
     {
@@ -77,6 +81,7 @@ export default function Layout() {
         { to: "/workers", label: t("nav.workers") },
         { to: "/workforce", label: t("workforce.nav") },
         { to: "/payroll", label: t("payroll.nav") },
+        { to: "/labour-relations", label: t("labourRelations.nav") },
       ],
     },
     {

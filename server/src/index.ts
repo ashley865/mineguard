@@ -71,6 +71,11 @@ import closureRehabilitationRoutes from "./routes/closureRehabilitation";
 import employmentEquityRoutes from "./routes/employmentEquity";
 import skillsDevelopmentRoutes from "./routes/skillsDevelopment";
 import legalComplianceRoutes from "./routes/legalCompliance";
+import groundControlRoutes from "./routes/groundControl";
+import ventilationRoutes from "./routes/ventilation";
+import mineRescueRoutes from "./routes/mineRescue";
+import labourRelationsRoutes from "./routes/labourRelations";
+import resourcesRoutes from "./routes/resources";
 import { sanitizeBody } from "./middleware/sanitize";
 import { startSimulator } from "./services/simulator";
 import { scanCompliance } from "./services/complianceScanner";
@@ -183,6 +188,11 @@ app.use("/api/closure-rehabilitation", closureRehabilitationRoutes);
 app.use("/api/employment-equity", employmentEquityRoutes);
 app.use("/api/skills-development", skillsDevelopmentRoutes);
 app.use("/api/legal-compliance", legalComplianceRoutes);
+app.use("/api/ground-control", groundControlRoutes);
+app.use("/api/ventilation", ventilationRoutes);
+app.use("/api/mine-rescue", mineRescueRoutes);
+app.use("/api/labour-relations", labourRelationsRoutes);
+app.use("/api/resources", resourcesRoutes);
 
 app.use((err: any, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
   if (err?.message === "UNSUPPORTED_FILE_TYPE") {

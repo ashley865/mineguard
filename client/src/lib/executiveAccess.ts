@@ -39,6 +39,11 @@ export const restrictedModules = [
   "/invoices",
   "/expenses",
   "/security",
+  "/ground-control",
+  "/ventilation",
+  "/mine-rescue",
+  "/labour-relations",
+  "/resources",
 ] as const;
 
 export type RestrictedModule = (typeof restrictedModules)[number];
@@ -50,8 +55,8 @@ const fullAccess: RestrictedModule[] = [...restrictedModules];
 export const executiveTitleModules: Partial<Record<ExecutiveTitle, RestrictedModule[]>> = {
   GENERAL_MANAGER: fullAccess,
   COO: fullAccess,
-  CFO: ["/reporting", "/contractors", "/permits", "/documents", "/compliance", "/incidents", "/marketplace", "/tenders", "/production", "/inventory", "/payroll", "/procurement", "/invoices", "/expenses"],
-  HR_MANAGER: ["/workers", "/workforce", "/visitors", "/documents", "/reporting", "/emergency", "/payroll", "/scanner"],
+  CFO: ["/reporting", "/contractors", "/permits", "/documents", "/compliance", "/incidents", "/marketplace", "/tenders", "/production", "/inventory", "/payroll", "/procurement", "/invoices", "/expenses", "/resources"],
+  HR_MANAGER: ["/workers", "/workforce", "/visitors", "/documents", "/reporting", "/emergency", "/payroll", "/scanner", "/labour-relations"],
   SECURITY_MANAGER: ["/visitors", "/scanner", "/trucks", "/incidents", "/alerts", "/workers", "/sites", "/safety-observations", "/emergency", "/security"],
   SAFETY_MANAGER: [
     "/sites",
@@ -68,6 +73,10 @@ export const executiveTitleModules: Partial<Record<ExecutiveTitle, RestrictedMod
     "/safety-observations",
     "/environmental",
     "/emergency",
+    "/ground-control",
+    "/ventilation",
+    "/mine-rescue",
+    "/resources",
   ],
   OPERATIONS_MANAGER: [
     "/sites",
@@ -92,6 +101,9 @@ export const executiveTitleModules: Partial<Record<ExecutiveTitle, RestrictedMod
     "/environmental",
     "/emergency",
     "/procurement",
+    "/ground-control",
+    "/ventilation",
+    "/resources",
   ],
   COMPLIANCE_OFFICER: [
     "/compliance",
@@ -106,6 +118,11 @@ export const executiveTitleModules: Partial<Record<ExecutiveTitle, RestrictedMod
     "/marketplace",
     "/safety-observations",
     "/environmental",
+    "/ground-control",
+    "/ventilation",
+    "/mine-rescue",
+    "/labour-relations",
+    "/resources",
   ],
   IT_MANAGER: ["/sites", "/sensors", "/equipment", "/alerts", "/reporting"],
 };

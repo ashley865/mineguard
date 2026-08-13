@@ -2382,3 +2382,350 @@ export interface LegalComplianceCalendar {
   withinDays: number;
   entries: LegalComplianceCalendarEntry[];
 }
+
+// ---------------------------------------------------------------------------
+// Ground Control & Geotechnical Management
+// ---------------------------------------------------------------------------
+
+export type GeotechnicalPointType = "EXTENSOMETER" | "CONVERGENCE_STATION" | "TILTMETER" | "PIEZOMETER" | "OTHER";
+export type GeotechnicalEventType = "ROCKFALL" | "ROCKBURST";
+
+export interface GroundControlDistrict {
+  id: string;
+  siteId: string;
+  site?: { id: string; name: string };
+  zoneId?: string | null;
+  zone?: { id: string; name: string } | null;
+  name: string;
+  requiredSupportStandard?: string | null;
+  status: string;
+  createdAt: string;
+}
+
+export interface GeotechnicalMonitoringPoint {
+  id: string;
+  districtId: string;
+  district?: { id: string; name: string; siteId: string };
+  pointType: GeotechnicalPointType;
+  locationDescription: string;
+  installedDate?: string | null;
+  status: string;
+  createdAt: string;
+}
+
+export interface GeotechnicalReading {
+  id: string;
+  pointId: string;
+  readingDate: string;
+  value: number;
+  unit: string;
+  alertThreshold?: number | null;
+  exceedsThreshold: boolean;
+  notes?: string | null;
+  recordedBy?: { id: string; name: string } | null;
+  createdAt: string;
+}
+
+export interface SeismicEvent {
+  id: string;
+  siteId: string;
+  zoneId?: string | null;
+  eventDate: string;
+  magnitude: number;
+  locationDescription?: string | null;
+  damageObserved: boolean;
+  damageDescription?: string | null;
+  createdAt: string;
+}
+
+export interface RockfallIncident {
+  id: string;
+  siteId: string;
+  site?: { id: string; name: string };
+  zoneId?: string | null;
+  zone?: { id: string; name: string } | null;
+  districtId?: string | null;
+  district?: { id: string; name: string } | null;
+  eventType: GeotechnicalEventType;
+  eventDate: string;
+  supportInPlace?: string | null;
+  description: string;
+  reEntryAuthorized: boolean;
+  signOffBy?: { id: string; name: string } | null;
+  signOffAt?: string | null;
+  createdAt: string;
+}
+
+// ---------------------------------------------------------------------------
+// Ventilation & Occupational Hygiene Management
+// ---------------------------------------------------------------------------
+
+export type RefugeBayStatus = "OPERATIONAL" | "OUT_OF_SERVICE";
+export type ExposurePollutant = "DUST_RESPIRABLE" | "DUST_INHALABLE" | "NOISE" | "METHANE" | "CARBON_MONOXIDE" | "DIESEL_PARTICULATE" | "SILICA" | "OTHER";
+export type ExposureSampleType = "PERSONAL" | "AREA";
+
+export interface VentilationDistrict {
+  id: string;
+  siteId: string;
+  site?: { id: string; name: string };
+  zoneId?: string | null;
+  zone?: { id: string; name: string } | null;
+  name: string;
+  requiredAirflowQuantity?: number | null;
+  unit: string;
+  status: string;
+  createdAt: string;
+}
+
+export interface VentilationReading {
+  id: string;
+  districtId: string;
+  readingDate: string;
+  airflowQuantity: number;
+  unit: string;
+  withinRequirement: boolean;
+  notes?: string | null;
+  createdAt: string;
+}
+
+export interface RefugeBay {
+  id: string;
+  siteId: string;
+  site?: { id: string; name: string };
+  zoneId?: string | null;
+  zone?: { id: string; name: string } | null;
+  name: string;
+  capacityPersons: number;
+  airSupplyDurationHours?: number | null;
+  lastInspectionDate?: string | null;
+  nextInspectionDue?: string | null;
+  status: RefugeBayStatus;
+  createdAt: string;
+}
+
+export interface OccupationalExposureRecord {
+  id: string;
+  workerId: string;
+  worker?: { id: string; name: string; category: string };
+  pollutant: ExposurePollutant;
+  sampleDate: string;
+  sampleType: ExposureSampleType;
+  measuredValue: number;
+  unit: string;
+  occupationalExposureLimit: number;
+  exceedsLimit: boolean;
+  notes?: string | null;
+  createdAt: string;
+}
+
+// ---------------------------------------------------------------------------
+// Mine Rescue Services & Emergency Readiness
+// ---------------------------------------------------------------------------
+
+export type RescueTeamRole = "TEAM_LEADER" | "MEMBER";
+export type RescueMemberStatus = "ACTIVE" | "INACTIVE";
+export type BaSetStatus = "SERVICEABLE" | "OUT_OF_SERVICE" | "DUE_FOR_SERVICE";
+export type RescueDrillResult = "PASS" | "FAIL" | "PARTIAL";
+
+export interface RescueTeamMember {
+  id: string;
+  siteId: string;
+  site?: { id: string; name: string };
+  workerId: string;
+  worker?: { id: string; name: string; category: string };
+  role: RescueTeamRole;
+  certificationNumber?: string | null;
+  certificationExpiry?: string | null;
+  status: RescueMemberStatus;
+  createdAt: string;
+}
+
+export interface BreathingApparatusSet {
+  id: string;
+  siteId: string;
+  setNumber: string;
+  manufacturer?: string | null;
+  model?: string | null;
+  lastServiceDate?: string | null;
+  nextServiceDue?: string | null;
+  lastPressureTestDate?: string | null;
+  nextPressureTestDue?: string | null;
+  status: BaSetStatus;
+  createdAt: string;
+}
+
+export interface RescueDrill {
+  id: string;
+  siteId: string;
+  drillDate: string;
+  scenario: string;
+  result: RescueDrillResult;
+  durationMinutes?: number | null;
+  notes?: string | null;
+  conductedBy?: { id: string; name: string } | null;
+  createdAt: string;
+}
+
+export interface MutualAidAgreement {
+  id: string;
+  siteId: string;
+  partnerOrganization: string;
+  agreementType?: string | null;
+  effectiveDate: string;
+  expiryDate?: string | null;
+  contactName?: string | null;
+  contactPhone?: string | null;
+  status: string;
+  notes?: string | null;
+  createdAt: string;
+}
+
+export interface RescueCallout {
+  id: string;
+  siteId: string;
+  emergencyEventId?: string | null;
+  emergencyEvent?: { id: string; eventType: string; location: string } | null;
+  calloutTime: string;
+  teamDispatched?: string | null;
+  responseTimeMinutes?: number | null;
+  outcome?: string | null;
+  notes?: string | null;
+  createdAt: string;
+}
+
+// ---------------------------------------------------------------------------
+// Industrial & Labour Relations
+// ---------------------------------------------------------------------------
+
+export type DisciplinaryOutcome = "PENDING" | "VERBAL_WARNING" | "WRITTEN_WARNING" | "FINAL_WRITTEN_WARNING" | "DISMISSAL" | "NOT_GUILTY" | "WITHDRAWN";
+export type DisciplinaryStatus = "OPEN" | "SCHEDULED" | "CONCLUDED" | "APPEALED";
+export type GrievanceStatus = "OPEN" | "UNDER_INVESTIGATION" | "RESOLVED" | "ESCALATED" | "WITHDRAWN";
+export type CcmaCaseType = "UNFAIR_DISMISSAL" | "UNFAIR_LABOUR_PRACTICE" | "DISCRIMINATION" | "WAGE_DISPUTE" | "OTHER";
+export type CcmaCaseStatus = "REFERRED" | "CONCILIATION" | "ARBITRATION" | "SETTLED" | "AWARD_ISSUED" | "WITHDRAWN";
+export type UnionAgreementStatus = "ACTIVE" | "EXPIRED" | "UNDER_NEGOTIATION";
+
+export interface DisciplinaryCase {
+  id: string;
+  workerId: string;
+  worker?: { id: string; name: string; category: string };
+  chargeDescription: string;
+  hearingDate?: string | null;
+  chairperson?: string | null;
+  outcome: DisciplinaryOutcome;
+  sanctionDetails?: string | null;
+  status: DisciplinaryStatus;
+  notes?: string | null;
+  createdBy?: { id: string; name: string } | null;
+  createdAt: string;
+}
+
+export interface GrievanceCase {
+  id: string;
+  workerId: string;
+  worker?: { id: string; name: string; category: string };
+  raisedAgainst?: string | null;
+  description: string;
+  dateRaised: string;
+  status: GrievanceStatus;
+  resolution?: string | null;
+  resolvedAt?: string | null;
+  createdAt: string;
+}
+
+export interface CcmaCase {
+  id: string;
+  workerId?: string | null;
+  worker?: { id: string; name: string } | null;
+  referralNumber?: string | null;
+  caseType: CcmaCaseType;
+  conciliationDate?: string | null;
+  arbitrationDate?: string | null;
+  outcome?: string | null;
+  status: CcmaCaseStatus;
+  notes?: string | null;
+  createdAt: string;
+}
+
+export interface UnionAgreement {
+  id: string;
+  unionName: string;
+  agreementType?: string | null;
+  recognitionThresholdPercent?: number | null;
+  membershipCount?: number | null;
+  effectiveDate: string;
+  expiryDate?: string | null;
+  status: UnionAgreementStatus;
+  notes?: string | null;
+  createdAt: string;
+}
+
+// ---------------------------------------------------------------------------
+// Water & Energy Resource Management
+// ---------------------------------------------------------------------------
+
+export type PollutionDamStatus = "ACTIVE" | "DECOMMISSIONED";
+
+export interface WaterBalanceRecord {
+  id: string;
+  siteId: string;
+  site?: { id: string; name: string };
+  recordDate: string;
+  abstractedVolume: number;
+  dischargedVolume: number;
+  recycledVolume: number;
+  unit: string;
+  licenseLimit?: number | null;
+  withinLimit: boolean;
+  notes?: string | null;
+  createdAt: string;
+}
+
+export interface PollutionControlDam {
+  id: string;
+  siteId: string;
+  site?: { id: string; name: string };
+  name: string;
+  capacity?: number | null;
+  unit?: string | null;
+  currentLevel?: number | null;
+  status: PollutionDamStatus;
+  lastInspectionDate?: string | null;
+  createdAt: string;
+}
+
+export interface AcidMineDrainageReading {
+  id: string;
+  siteId: string;
+  monitoringPoint: string;
+  readingDate: string;
+  ph: number;
+  sulfateConcentration?: number | null;
+  metalConcentration?: number | null;
+  withinLimits: boolean;
+  notes?: string | null;
+  createdAt: string;
+}
+
+export interface EnergyConsumptionRecord {
+  id: string;
+  siteId: string;
+  site?: { id: string; name: string };
+  recordMonth: string;
+  gridConsumptionKwh: number;
+  renewableConsumptionKwh: number;
+  dieselConsumptionLiters?: number | null;
+  notes?: string | null;
+  createdAt: string;
+}
+
+export interface GhgEmissionsRecord {
+  id: string;
+  mineId: string;
+  reportingYear: number;
+  scope1TonnesCO2e: number;
+  scope2TonnesCO2e: number;
+  carbonTaxLiability?: number | null;
+  currency: string;
+  notes?: string | null;
+  createdAt: string;
+}
