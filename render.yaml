@@ -20,3 +20,7 @@ services:
         sync: false
       - key: SIMULATOR_INTERVAL_MS
         value: 5000
+      # Optional: AI assistant stays dormant until this is set in the Render
+      # dashboard. Works with any OpenAI-compatible endpoint — see server/.env.example.
+      - key: AI_API_KEY
+        sync: false
