@@ -880,7 +880,10 @@
       "view": "Voir",
       "noneYet": "Aucun danger signalé pour le moment.",
       "confirmDelete": "Supprimer ce signalement de danger ?",
-      "saveError": "Impossible d'enregistrer ce signalement de danger"
+      "saveError": "Impossible d'enregistrer ce signalement de danger",
+      "summaryOpen": "Dangers Ouverts",
+      "summaryOverdue": "En Retard",
+      "summaryCritical": "Critiques (non résolus)"
     }
   },
   "permits": {
@@ -2681,7 +2684,9 @@
     "noneYet": "Aucune nomination statutaire enregistrée pour l'instant.",
     "confirmDelete": "Supprimer cette nomination ?",
     "viewLetter": "Voir la lettre",
-    "uploadLetter": "Téléverser la lettre"
+    "uploadLetter": "Téléverser la lettre",
+    "summaryVacant": "Postes Vacants",
+    "summaryExpired": "Expirés / Suspendus"
   },
   "iodClaims": {
     "nav": "Réclamations IOD / COIDA",
@@ -2698,7 +2703,9 @@
     "newTitle": "Nouvelle Réclamation IOD",
     "editTitle": "Modifier la Réclamation IOD",
     "noneYet": "Aucune réclamation pour accident du travail enregistrée pour l'instant.",
-    "confirmDelete": "Supprimer cette réclamation ?"
+    "confirmDelete": "Supprimer cette réclamation ?",
+    "summaryOpen": "Réclamations Ouvertes",
+    "summaryUnderAssessment": "En Évaluation"
   },
   "blastLogs": {
     "nav": "Registres de Minage",
@@ -3138,7 +3145,8 @@
     "newUnionAgreementTitle": "Nouvel Accord de Reconnaissance Syndicale",
     "noUnionAgreements": "Aucun accord syndical enregistré pour l'instant.",
     "summaryOpenCases": "Dossiers Ouverts",
-    "summaryDismissals": "Licenciements"
+    "summaryDismissals": "Licenciements",
+    "summaryOpenGrievances": "Griefs Ouverts"
   },
   "resources": {
     "nav": "Ressources Eau et Énergie",

@@ -880,7 +880,10 @@
       "view": "Ver",
       "noneYet": "Aún no se han reportado peligros.",
       "confirmDelete": "¿Eliminar este informe de peligro?",
-      "saveError": "No se pudo guardar este informe de peligro"
+      "saveError": "No se pudo guardar este informe de peligro",
+      "summaryOpen": "Peligros Abiertos",
+      "summaryOverdue": "Vencidos",
+      "summaryCritical": "Críticos (sin resolver)"
     }
   },
   "permits": {
@@ -2681,7 +2684,9 @@
     "noneYet": "Aún no se han registrado nombramientos estatutarios.",
     "confirmDelete": "¿Eliminar este registro de nombramiento?",
     "viewLetter": "Ver carta",
-    "uploadLetter": "Subir carta"
+    "uploadLetter": "Subir carta",
+    "summaryVacant": "Puestos Vacantes",
+    "summaryExpired": "Vencidos / Suspendidos"
   },
   "iodClaims": {
     "nav": "Reclamos IOD / COIDA",
@@ -2698,7 +2703,9 @@
     "newTitle": "Nuevo Reclamo IOD",
     "editTitle": "Editar Reclamo IOD",
     "noneYet": "Aún no se han registrado reclamos de lesiones laborales.",
-    "confirmDelete": "¿Eliminar este registro de reclamo?"
+    "confirmDelete": "¿Eliminar este registro de reclamo?",
+    "summaryOpen": "Reclamos Abiertos",
+    "summaryUnderAssessment": "En Evaluación"
   },
   "blastLogs": {
     "nav": "Registros de Voladura",
@@ -3138,7 +3145,8 @@
     "newUnionAgreementTitle": "Nuevo Acuerdo de Reconocimiento Sindical",
     "noUnionAgreements": "Aún no se han registrado acuerdos sindicales.",
     "summaryOpenCases": "Casos Abiertos",
-    "summaryDismissals": "Despidos"
+    "summaryDismissals": "Despidos",
+    "summaryOpenGrievances": "Quejas Abiertas"
   },
   "resources": {
     "nav": "Recursos de Agua y Energía",

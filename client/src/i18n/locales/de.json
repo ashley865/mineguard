@@ -880,7 +880,10 @@
       "view": "Ansehen",
       "noneYet": "Noch keine Gefahren gemeldet.",
       "confirmDelete": "Diese Gefahrenmeldung löschen?",
-      "saveError": "Diese Gefahrenmeldung konnte nicht gespeichert werden"
+      "saveError": "Diese Gefahrenmeldung konnte nicht gespeichert werden",
+      "summaryOpen": "Offene Gefahren",
+      "summaryOverdue": "Überfällig",
+      "summaryCritical": "Kritisch (ungelöst)"
     }
   },
   "permits": {
@@ -2681,7 +2684,9 @@
     "noneYet": "Noch keine gesetzlichen Bestellungen erfasst.",
     "confirmDelete": "Diesen Bestellungseintrag löschen?",
     "viewLetter": "Schreiben ansehen",
-    "uploadLetter": "Schreiben hochladen"
+    "uploadLetter": "Schreiben hochladen",
+    "summaryVacant": "Vakante Stellen",
+    "summaryExpired": "Abgelaufen / Ausgesetzt"
   },
   "iodClaims": {
     "nav": "Arbeitsunfall-/COIDA-Ansprüche",
@@ -2698,7 +2703,9 @@
     "newTitle": "Neuer Arbeitsunfallanspruch",
     "editTitle": "Arbeitsunfallanspruch Bearbeiten",
     "noneYet": "Noch keine Arbeitsunfallansprüche erfasst.",
-    "confirmDelete": "Diesen Anspruch löschen?"
+    "confirmDelete": "Diesen Anspruch löschen?",
+    "summaryOpen": "Offene Ansprüche",
+    "summaryUnderAssessment": "In Begutachtung"
   },
   "blastLogs": {
     "nav": "Sprengprotokolle",
@@ -3138,7 +3145,8 @@
     "newUnionAgreementTitle": "Neue Gewerkschaftsanerkennungsvereinbarung",
     "noUnionAgreements": "Noch keine Gewerkschaftsvereinbarungen erfasst.",
     "summaryOpenCases": "Offene Fälle",
-    "summaryDismissals": "Entlassungen"
+    "summaryDismissals": "Entlassungen",
+    "summaryOpenGrievances": "Offene Beschwerden"
   },
   "resources": {
     "nav": "Wasser- & Energieressourcen",

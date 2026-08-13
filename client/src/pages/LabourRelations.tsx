@@ -17,7 +17,7 @@ import {
 } from "../api/types";
 import { StatusBadge } from "../components/Badges";
 import Modal from "../components/Modal";
-import { buttonDanger, buttonPrimary, buttonSecondary, cardClass, inputClass, labelClass, selectClass } from "../components/ui";
+import { buttonDanger, buttonPrimary, buttonSecondary, inputClass, labelClass, selectClass } from "../components/ui";
 import DateField from "../components/DateField";
 import DataTable, { DataTableColumn } from "../components/DataTable";
 import SummaryCards from "../components/SummaryCards";
@@ -265,40 +265,43 @@ function GrievancesTab({ workers, canEdit, canDelete }: { workers: Worker[]; can
 
   if (loading) return <div className="text-mine-300">{t("common.loading")}</div>;
 
+  const openCount = cases.filter((c) => c.status === "OPEN" || c.status === "UNDER_INVESTIGATION").length;
+
+  const columns: DataTableColumn<GrievanceCase>[] = [
+    { key: "worker", header: t("labourRelations.raisedBy"), render: (c) => <span className="font-medium">{c.worker?.name}</span>, sortValue: (c) => c.worker?.name ?? "" },
+    { key: "description", header: t("common.description"), render: (c) => <div className="truncate max-w-xs" title={c.description}>{c.description}</div> },
+    { key: "dateRaised", header: t("labourRelations.dateRaised"), render: (c) => new Date(c.dateRaised).toLocaleDateString(), sortValue: (c) => c.dateRaised },
+    { key: "status", header: t("common.status"), render: (c) => <StatusBadge status={c.status} />, sortValue: (c) => c.status },
+  ];
+
   return (
     <div className="space-y-4">
+      <SummaryCards cards={[{ label: t("labourRelations.summaryOpenGrievances"), value: openCount }]} />
       {canEdit && workers.length > 0 && (
         <div className="flex justify-end">
           <button className={buttonPrimary} onClick={() => setModal(true)}>{t("labourRelations.newGrievance")}</button>
         </div>
       )}
-      <div className={`${cardClass} overflow-x-auto`}>
-        <table className="w-full text-sm">
-          <thead className="bg-mine-800/50 text-mine-300 text-xs uppercase">
-            <tr>
-              <th className="text-left px-4 py-2">{t("labourRelations.raisedBy")}</th>
-              <th className="text-left px-4 py-2">{t("common.description")}</th>
-              <th className="text-left px-4 py-2">{t("labourRelations.dateRaised")}</th>
-              <th className="text-left px-4 py-2">{t("common.status")}</th>
-              <th className="px-4 py-2"></th>
-            </tr>
-          </thead>
-          <tbody>
-            {cases.map((c) => (
-              <tr key={c.id} className="border-t border-mine-800 hover:bg-mine-800/30">
-                <td className="px-4 py-2 font-medium">{c.worker?.name}</td>
-                <td className="px-4 py-2 text-mine-300">{c.description}</td>
-                <td className="px-4 py-2 text-mine-300">{new Date(c.dateRaised).toLocaleDateString()}</td>
-                <td className="px-4 py-2"><StatusBadge status={c.status} /></td>
-                <td className="px-4 py-2 text-right">
-                  {canDelete && <button className={buttonDanger} onClick={() => remove(c.id)}>{t("common.delete")}</button>}
-                </td>
-              </tr>
-            ))}
-            {cases.length === 0 && <tr><td colSpan={5} className="px-4 py-6 text-center text-mine-400">{t("labourRelations.noGrievances")}</td></tr>}
-          </tbody>
-        </table>
-      </div>
+      <DataTable
+        columns={columns}
+        rows={cases}
+        rowKey={(c) => c.id}
+        emptyMessage={t("labourRelations.noGrievances")}
+        searchValue={(c) => `${c.worker?.name ?? ""} ${c.description}`}
+        exportFilename="grievances"
+        exportColumns={[
+          { header: t("labourRelations.raisedBy"), value: (c) => c.worker?.name ?? "" },
+          { header: t("common.description"), value: (c) => c.description },
+          { header: t("labourRelations.dateRaised"), value: (c) => c.dateRaised },
+          { header: t("common.status"), value: (c) => c.status },
+        ]}
+        actions={(c) => (
+          <div className="flex justify-end gap-2">
+            <AuditHistoryButton entityType="GrievanceCase" entityId={c.id} />
+            {canDelete && <button className={buttonDanger} onClick={() => remove(c.id)}>{t("common.delete")}</button>}
+          </div>
+        )}
+      />
       {modal && (
         <Modal title={t("labourRelations.newGrievanceTitle")} onClose={() => setModal(false)}>
           <GrievanceForm workers={workers} onSubmit={create} onCancel={() => setModal(false)} />
@@ -396,6 +399,13 @@ function CcmaTab({ workers, canEdit, canDelete }: { workers: Worker[]; canEdit: 
 
   if (loading) return <div className="text-mine-300">{t("common.loading")}</div>;
 
+  const ccmaColumns: DataTableColumn<CcmaCase>[] = [
+    { key: "referral", header: t("labourRelations.referralNumber"), render: (c) => c.referralNumber ?? "—", sortValue: (c) => c.referralNumber ?? "" },
+    { key: "worker", header: t("workers.title"), render: (c) => c.worker?.name ?? "—", sortValue: (c) => c.worker?.name ?? "" },
+    { key: "type", header: t("labourRelations.caseType"), render: (c) => t(`labourRelations.ccmaCaseTypes.${c.caseType}`), sortValue: (c) => c.caseType },
+    { key: "status", header: t("common.status"), render: (c) => <StatusBadge status={c.status} />, sortValue: (c) => c.status },
+  ];
+
   return (
     <div className="space-y-4">
       {canEdit && (
@@ -403,33 +413,26 @@ function CcmaTab({ workers, canEdit, canDelete }: { workers: Worker[]; canEdit: 
           <button className={buttonPrimary} onClick={() => setModal(true)}>{t("labourRelations.newCcmaCase")}</button>
         </div>
       )}
-      <div className={`${cardClass} overflow-x-auto`}>
-        <table className="w-full text-sm">
-          <thead className="bg-mine-800/50 text-mine-300 text-xs uppercase">
-            <tr>
-              <th className="text-left px-4 py-2">{t("labourRelations.referralNumber")}</th>
-              <th className="text-left px-4 py-2">{t("workers.title")}</th>
-              <th className="text-left px-4 py-2">{t("labourRelations.caseType")}</th>
-              <th className="text-left px-4 py-2">{t("common.status")}</th>
-              <th className="px-4 py-2"></th>
-            </tr>
-          </thead>
-          <tbody>
-            {cases.map((c) => (
-              <tr key={c.id} className="border-t border-mine-800 hover:bg-mine-800/30">
-                <td className="px-4 py-2 font-medium">{c.referralNumber ?? "—"}</td>
-                <td className="px-4 py-2 text-mine-300">{c.worker?.name ?? "—"}</td>
-                <td className="px-4 py-2 text-mine-300">{t(`labourRelations.ccmaCaseTypes.${c.caseType}`)}</td>
-                <td className="px-4 py-2"><StatusBadge status={c.status} /></td>
-                <td className="px-4 py-2 text-right">
-                  {canDelete && <button className={buttonDanger} onClick={() => remove(c.id)}>{t("common.delete")}</button>}
-                </td>
-              </tr>
-            ))}
-            {cases.length === 0 && <tr><td colSpan={5} className="px-4 py-6 text-center text-mine-400">{t("labourRelations.noCcmaCases")}</td></tr>}
-          </tbody>
-        </table>
-      </div>
+      <DataTable
+        columns={ccmaColumns}
+        rows={cases}
+        rowKey={(c) => c.id}
+        emptyMessage={t("labourRelations.noCcmaCases")}
+        searchValue={(c) => `${c.referralNumber ?? ""} ${c.worker?.name ?? ""}`}
+        exportFilename="ccma-cases"
+        exportColumns={[
+          { header: t("labourRelations.referralNumber"), value: (c) => c.referralNumber ?? "" },
+          { header: t("workers.title"), value: (c) => c.worker?.name ?? "" },
+          { header: t("labourRelations.caseType"), value: (c) => c.caseType },
+          { header: t("common.status"), value: (c) => c.status },
+        ]}
+        actions={(c) => (
+          <div className="flex justify-end gap-2">
+            <AuditHistoryButton entityType="CcmaCase" entityId={c.id} />
+            {canDelete && <button className={buttonDanger} onClick={() => remove(c.id)}>{t("common.delete")}</button>}
+          </div>
+        )}
+      />
       {modal && (
         <Modal title={t("labourRelations.newCcmaCaseTitle")} onClose={() => setModal(false)}>
           <CcmaForm workers={workers} onSubmit={create} onCancel={() => setModal(false)} />
@@ -522,6 +525,13 @@ function UnionAgreementsTab({ canEdit, canDelete }: { canEdit: boolean; canDelet
 
   if (loading) return <div className="text-mine-300">{t("common.loading")}</div>;
 
+  const unionColumns: DataTableColumn<UnionAgreement>[] = [
+    { key: "name", header: t("labourRelations.unionName"), render: (a) => <span className="font-medium">{a.unionName}</span>, sortValue: (a) => a.unionName },
+    { key: "membership", header: t("labourRelations.membershipCount"), render: (a) => a.membershipCount ?? "—", sortValue: (a) => a.membershipCount ?? 0 },
+    { key: "effective", header: t("common.startDate"), render: (a) => new Date(a.effectiveDate).toLocaleDateString(), sortValue: (a) => a.effectiveDate },
+    { key: "status", header: t("common.status"), render: (a) => <StatusBadge status={a.status} />, sortValue: (a) => a.status },
+  ];
+
   return (
     <div className="space-y-4">
       {canEdit && (
@@ -529,33 +539,26 @@ function UnionAgreementsTab({ canEdit, canDelete }: { canEdit: boolean; canDelet
           <button className={buttonPrimary} onClick={() => setModal(true)}>{t("labourRelations.newUnionAgreement")}</button>
         </div>
       )}
-      <div className={`${cardClass} overflow-x-auto`}>
-        <table className="w-full text-sm">
-          <thead className="bg-mine-800/50 text-mine-300 text-xs uppercase">
-            <tr>
-              <th className="text-left px-4 py-2">{t("labourRelations.unionName")}</th>
-              <th className="text-left px-4 py-2">{t("labourRelations.membershipCount")}</th>
-              <th className="text-left px-4 py-2">{t("common.startDate")}</th>
-              <th className="text-left px-4 py-2">{t("common.status")}</th>
-              <th className="px-4 py-2"></th>
-            </tr>
-          </thead>
-          <tbody>
-            {agreements.map((a) => (
-              <tr key={a.id} className="border-t border-mine-800 hover:bg-mine-800/30">
-                <td className="px-4 py-2 font-medium">{a.unionName}</td>
-                <td className="px-4 py-2 text-mine-300">{a.membershipCount ?? "—"}</td>
-                <td className="px-4 py-2 text-mine-300">{new Date(a.effectiveDate).toLocaleDateString()}</td>
-                <td className="px-4 py-2"><StatusBadge status={a.status} /></td>
-                <td className="px-4 py-2 text-right">
-                  {canDelete && <button className={buttonDanger} onClick={() => remove(a.id)}>{t("common.delete")}</button>}
-                </td>
-              </tr>
-            ))}
-            {agreements.length === 0 && <tr><td colSpan={5} className="px-4 py-6 text-center text-mine-400">{t("labourRelations.noUnionAgreements")}</td></tr>}
-          </tbody>
-        </table>
-      </div>
+      <DataTable
+        columns={unionColumns}
+        rows={agreements}
+        rowKey={(a) => a.id}
+        emptyMessage={t("labourRelations.noUnionAgreements")}
+        searchValue={(a) => a.unionName}
+        exportFilename="union-agreements"
+        exportColumns={[
+          { header: t("labourRelations.unionName"), value: (a) => a.unionName },
+          { header: t("labourRelations.membershipCount"), value: (a) => a.membershipCount ?? "" },
+          { header: t("common.startDate"), value: (a) => a.effectiveDate },
+          { header: t("common.status"), value: (a) => a.status },
+        ]}
+        actions={(a) => (
+          <div className="flex justify-end gap-2">
+            <AuditHistoryButton entityType="UnionAgreement" entityId={a.id} />
+            {canDelete && <button className={buttonDanger} onClick={() => remove(a.id)}>{t("common.delete")}</button>}
+          </div>
+        )}
+      />
       {modal && (
         <Modal title={t("labourRelations.newUnionAgreementTitle")} onClose={() => setModal(false)}>
           <UnionAgreementForm onSubmit={create} onCancel={() => setModal(false)} />

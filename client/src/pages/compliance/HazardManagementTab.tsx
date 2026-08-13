@@ -5,9 +5,12 @@ import { useAuth } from "../../context/AuthContext";
 import { HazardReport, HazardStatus, HazardType, RiskLevel, Site, Zone } from "../../api/types";
 import { StatusBadge, SeverityBadge } from "../../components/Badges";
 import Modal from "../../components/Modal";
-import { buttonDanger, buttonPrimary, buttonSecondary, cardClass, inputClass, labelClass, selectClass } from "../../components/ui";
+import { buttonDanger, buttonPrimary, buttonSecondary, inputClass, labelClass, selectClass } from "../../components/ui";
 import DateField from "../../components/DateField";
 import FileDropzone from "../../components/FileDropzone";
+import DataTable, { DataTableColumn } from "../../components/DataTable";
+import SummaryCards from "../../components/SummaryCards";
+import { AuditHistoryButton } from "../../components/AuditHistoryPanel";
 
 const hazardTypes: HazardType[] = [
   "GEOTECHNICAL_ROCKFALL",
@@ -219,9 +222,60 @@ export default function HazardManagementTab({ sites, zones }: { sites: Site[]; z
 
   if (loading) return <div className="text-mine-300">{t("compliance.loading")}</div>;
 
+  const openCount = items.filter((i) => i.status === "OPEN" || i.status === "IN_PROGRESS").length;
+  const overdueCount = items.filter((i) => i.status === "OVERDUE").length;
+  const criticalCount = items.filter((i) => i.riskLevel === "CRITICAL" && i.status !== "CLOSED").length;
+
+  const columns: DataTableColumn<HazardReport>[] = [
+    {
+      key: "type",
+      header: t("compliance.hazard.colType"),
+      render: (item) => (
+        <>
+          {t(`compliance.hazard.types.${item.hazardType}`)}
+          {item.media.length > 0 && <div className="text-[10px] text-mine-400">{t("compliance.hazard.mediaCount", { count: item.media.length })}</div>}
+        </>
+      ),
+      sortValue: (item) => item.hazardType,
+    },
+    {
+      key: "location",
+      header: t("compliance.hazard.location"),
+      render: (item) => (
+        <>
+          {item.location}
+          <div className="text-[10px] text-mine-400">{item.site?.name}{item.zone ? ` · ${item.zone.name}` : ""}</div>
+        </>
+      ),
+      sortValue: (item) => item.location,
+    },
+    { key: "risk", header: t("compliance.hazard.riskLevel"), render: (item) => <SeverityBadge severity={item.riskLevel} />, sortValue: (item) => item.riskLevel },
+    {
+      key: "reportedBy",
+      header: t("compliance.hazard.colReportedBy"),
+      render: (item) => (
+        <>
+          {item.reportedBy?.name ?? "—"}
+          <div className="text-[10px] text-mine-400">{new Date(item.createdAt).toLocaleString()}</div>
+        </>
+      ),
+      sortValue: (item) => item.reportedBy?.name ?? "",
+    },
+    { key: "dueDate", header: t("compliance.hazard.dueDate"), render: (item) => (item.dueDate ? new Date(item.dueDate).toLocaleDateString() : "—"), sortValue: (item) => item.dueDate ?? "" },
+    { key: "status", header: t("common.status"), render: (item) => <StatusBadge status={item.status} />, sortValue: (item) => item.status },
+  ];
+
   return (
     <div className="space-y-4">
       <p className="text-mine-300 text-sm">{t("compliance.hazard.subtitle")}</p>
+
+      <SummaryCards
+        cards={[
+          { label: t("compliance.hazard.summaryOpen"), value: openCount },
+          { label: t("compliance.hazard.summaryOverdue"), value: overdueCount, tone: overdueCount > 0 ? "danger" : "default" },
+          { label: t("compliance.hazard.summaryCritical"), value: criticalCount, tone: criticalCount > 0 ? "danger" : "default" },
+        ]}
+      />
 
       {canReport && sites.length > 0 && (
         <div className="flex justify-end">
@@ -229,68 +283,44 @@ export default function HazardManagementTab({ sites, zones }: { sites: Site[]; z
         </div>
       )}
 
-      <div className={`${cardClass} overflow-x-auto`}>
-        <table className="w-full text-sm">
-          <thead className="bg-mine-800/50 text-mine-300 text-xs uppercase">
-            <tr>
-              <th className="text-left px-4 py-2">{t("compliance.hazard.colType")}</th>
-              <th className="text-left px-4 py-2">{t("compliance.hazard.location")}</th>
-              <th className="text-left px-4 py-2">{t("compliance.hazard.riskLevel")}</th>
-              <th className="text-left px-4 py-2">{t("compliance.hazard.colReportedBy")}</th>
-              <th className="text-left px-4 py-2">{t("compliance.hazard.dueDate")}</th>
-              <th className="text-left px-4 py-2">{t("common.status")}</th>
-              <th className="px-4 py-2"></th>
-            </tr>
-          </thead>
-          <tbody>
-            {items.map((item) => (
-              <tr key={item.id} className="border-t border-mine-800 hover:bg-mine-800/30 align-top">
-                <td className="px-4 py-2 font-medium">
-                  {t(`compliance.hazard.types.${item.hazardType}`)}
-                  {item.media.length > 0 && (
-                    <div className="text-[10px] text-mine-400">{t("compliance.hazard.mediaCount", { count: item.media.length })}</div>
-                  )}
-                </td>
-                <td className="px-4 py-2 text-mine-300">
-                  {item.location}
-                  <div className="text-[10px] text-mine-400">{item.site?.name}{item.zone ? ` · ${item.zone.name}` : ""}</div>
-                </td>
-                <td className="px-4 py-2"><SeverityBadge severity={item.riskLevel} /></td>
-                <td className="px-4 py-2 text-mine-300">
-                  {item.reportedBy?.name ?? "—"}
-                  <div className="text-[10px] text-mine-400">{new Date(item.createdAt).toLocaleString()}</div>
-                </td>
-                <td className="px-4 py-2 text-mine-300">{item.dueDate ? new Date(item.dueDate).toLocaleDateString() : "—"}</td>
-                <td className="px-4 py-2"><StatusBadge status={item.status} /></td>
-                <td className="px-4 py-2 text-right">
-                  <div className="flex justify-end gap-2">
-                    {item.media.map((m) => (
-                      <a
-                        key={m.id}
-                        className="text-xs text-mine-300 hover:text-mine-50"
-                        href={`${API_URL}/api/hazards/${item.id}/media/${m.id}`}
-                        target="_blank"
-                        rel="noreferrer"
-                      >
-                        {t("compliance.hazard.view")}
-                      </a>
-                    ))}
-                    {canManage && (
-                      <>
-                        <button className="text-xs text-mine-300 hover:text-mine-50" onClick={() => setModal(item)}>{t("common.edit")}</button>
-                        <button className={buttonDanger} onClick={() => remove(item.id)}>{t("common.delete")}</button>
-                      </>
-                    )}
-                  </div>
-                </td>
-              </tr>
+      <DataTable
+        columns={columns}
+        rows={items}
+        rowKey={(item) => item.id}
+        emptyMessage={t("compliance.hazard.noneYet")}
+        searchValue={(item) => `${item.location} ${item.hazardType} ${item.reportedBy?.name ?? ""}`}
+        exportFilename="hazard-reports"
+        exportColumns={[
+          { header: t("compliance.hazard.colType"), value: (item) => item.hazardType },
+          { header: t("compliance.hazard.location"), value: (item) => item.location },
+          { header: t("compliance.hazard.riskLevel"), value: (item) => item.riskLevel },
+          { header: t("compliance.hazard.colReportedBy"), value: (item) => item.reportedBy?.name ?? "" },
+          { header: t("compliance.hazard.dueDate"), value: (item) => item.dueDate ?? "" },
+          { header: t("common.status"), value: (item) => item.status },
+        ]}
+        actions={(item) => (
+          <div className="flex justify-end gap-2">
+            {item.media.map((m) => (
+              <a
+                key={m.id}
+                className="text-xs text-mine-300 hover:text-mine-50"
+                href={`${API_URL}/api/hazards/${item.id}/media/${m.id}`}
+                target="_blank"
+                rel="noreferrer"
+              >
+                {t("compliance.hazard.view")}
+              </a>
             ))}
-            {items.length === 0 && (
-              <tr><td colSpan={7} className="px-4 py-6 text-center text-mine-400">{t("compliance.hazard.noneYet")}</td></tr>
+            <AuditHistoryButton entityType="HazardReport" entityId={item.id} />
+            {canManage && (
+              <>
+                <button className="text-xs text-mine-300 hover:text-mine-50" onClick={() => setModal(item)}>{t("common.edit")}</button>
+                <button className={buttonDanger} onClick={() => remove(item.id)}>{t("common.delete")}</button>
+              </>
             )}
-          </tbody>
-        </table>
-      </div>
+          </div>
+        )}
+      />
 
       {modal && (
         <Modal title={modal === "create" ? t("compliance.hazard.newTitle") : t("compliance.hazard.editTitle")} onClose={() => setModal(null)} size="lg">

@@ -880,7 +880,10 @@
       "view": "Bekyk",
       "noneYet": "Nog geen gevare aangemeld nie.",
       "confirmDelete": "Verwyder hierdie gevaarverslag?",
-      "saveError": "Kon nie hierdie gevaarverslag stoor nie"
+      "saveError": "Kon nie hierdie gevaarverslag stoor nie",
+      "summaryOpen": "Oop Gevare",
+      "summaryOverdue": "Agterstallig",
+      "summaryCritical": "Krities (onopgelos)"
     }
   },
   "permits": {
@@ -2681,7 +2684,9 @@
     "noneYet": "Nog geen statutêre aanstellings aangeteken nie.",
     "confirmDelete": "Skrap hierdie aanstellingsrekord?",
     "viewLetter": "Bekyk brief",
-    "uploadLetter": "Laai brief op"
+    "uploadLetter": "Laai brief op",
+    "summaryVacant": "Vakante Poste",
+    "summaryExpired": "Verstryk / Geskors"
   },
   "iodClaims": {
     "nav": "IOD / COIDA Eise",
@@ -2698,7 +2703,9 @@
     "newTitle": "Nuwe IOD-eis",
     "editTitle": "Wysig IOD-eis",
     "noneYet": "Nog geen eise vir besering-op-diens aangeteken nie.",
-    "confirmDelete": "Skrap hierdie eisrekord?"
+    "confirmDelete": "Skrap hierdie eisrekord?",
+    "summaryOpen": "Oop Eise",
+    "summaryUnderAssessment": "Onder Assessering"
   },
   "blastLogs": {
     "nav": "Skietlogboeke",
@@ -3138,7 +3145,8 @@
     "newUnionAgreementTitle": "Nuwe Vakbonderkenningsooreenkoms",
     "noUnionAgreements": "Nog geen vakbondooreenkomste aangeteken nie.",
     "summaryOpenCases": "Oop Sake",
-    "summaryDismissals": "Ontslae"
+    "summaryDismissals": "Ontslae",
+    "summaryOpenGrievances": "Oop Griewe"
   },
   "resources": {
     "nav": "Water- en Energiehulpbronne",

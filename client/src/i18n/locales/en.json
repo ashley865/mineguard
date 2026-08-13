@@ -694,7 +694,10 @@
       "view": "View",
       "noneYet": "No hazards reported yet.",
       "confirmDelete": "Delete this hazard report?",
-      "saveError": "Could not save this hazard report"
+      "saveError": "Could not save this hazard report",
+      "summaryOpen": "Open Hazards",
+      "summaryOverdue": "Overdue",
+      "summaryCritical": "Critical (unresolved)"
     },
     "cop": {
       "new": "+ New Code of Practice",
@@ -2680,7 +2683,9 @@
     "noneYet": "No statutory appointments recorded yet.",
     "confirmDelete": "Delete this appointment record?",
     "viewLetter": "View letter",
-    "uploadLetter": "Upload letter"
+    "uploadLetter": "Upload letter",
+    "summaryVacant": "Vacant Posts",
+    "summaryExpired": "Expired / Suspended"
   },
   "iodClaims": {
     "nav": "IOD / COIDA Claims",
@@ -2697,7 +2702,9 @@
     "newTitle": "New IOD Claim",
     "editTitle": "Edit IOD Claim",
     "noneYet": "No injury-on-duty claims recorded yet.",
-    "confirmDelete": "Delete this claim record?"
+    "confirmDelete": "Delete this claim record?",
+    "summaryOpen": "Open Claims",
+    "summaryUnderAssessment": "Under Assessment"
   },
   "blastLogs": {
     "nav": "Blast Logs",
@@ -3137,7 +3144,8 @@
     "newUnionAgreementTitle": "New Union Recognition Agreement",
     "noUnionAgreements": "No union agreements recorded yet.",
     "summaryOpenCases": "Open Cases",
-    "summaryDismissals": "Dismissals"
+    "summaryDismissals": "Dismissals",
+    "summaryOpenGrievances": "Open Grievances"
   },
   "resources": {
     "nav": "Water & Energy Resources",

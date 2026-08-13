@@ -5,8 +5,11 @@ import { useAuth } from "../../context/AuthContext";
 import { Site, StatutoryAppointment, StatutoryAppointmentStatus, StatutoryAppointmentType, Worker } from "../../api/types";
 import { StatusBadge } from "../../components/Badges";
 import Modal from "../../components/Modal";
-import { buttonDanger, buttonPrimary, buttonSecondary, cardClass, inputClass, labelClass, selectClass } from "../../components/ui";
+import { buttonDanger, buttonPrimary, buttonSecondary, inputClass, labelClass, selectClass } from "../../components/ui";
 import DateField from "../../components/DateField";
+import DataTable, { DataTableColumn } from "../../components/DataTable";
+import SummaryCards from "../../components/SummaryCards";
+import { AuditHistoryButton } from "../../components/AuditHistoryPanel";
 
 const appointmentTypes: StatutoryAppointmentType[] = [
   "MINE_MANAGER",
@@ -196,63 +199,70 @@ export default function StatutoryAppointmentsTab({ sites, workers }: { sites: Si
 
   if (loading) return <div className="text-mine-300">{t("common.loading")}</div>;
 
+  const vacantCount = items.filter((a) => a.status === "VACANT").length;
+  const expiredCount = items.filter((a) => a.status === "EXPIRED" || a.status === "SUSPENDED" || a.status === "REVOKED").length;
+
+  const columns: DataTableColumn<StatutoryAppointment>[] = [
+    { key: "type", header: t("statutoryAppointments.appointmentType"), render: (a) => a.appointmentType === "OTHER" ? a.customTitle : t(`statutoryAppointments.types.${a.appointmentType}`), sortValue: (a) => a.appointmentType },
+    { key: "appointee", header: t("statutoryAppointments.appointeeName"), render: (a) => a.appointeeName, sortValue: (a) => a.appointeeName },
+    { key: "site", header: t("common.site"), render: (a) => a.site?.name ?? "—", sortValue: (a) => a.site?.name ?? "" },
+    { key: "appointedDate", header: t("statutoryAppointments.appointedDate"), render: (a) => new Date(a.appointedDate).toLocaleDateString(), sortValue: (a) => a.appointedDate },
+    { key: "status", header: t("common.status"), render: (a) => <StatusBadge status={a.status} />, sortValue: (a) => a.status },
+  ];
+
   return (
     <div className="space-y-4">
       <p className="text-xs text-mine-400">{t("statutoryAppointments.hint")}</p>
+
+      <SummaryCards
+        cards={[
+          { label: t("statutoryAppointments.summaryVacant"), value: vacantCount, tone: vacantCount > 0 ? "danger" : "default" },
+          { label: t("statutoryAppointments.summaryExpired"), value: expiredCount, tone: expiredCount > 0 ? "hazard" : "default" },
+        ]}
+      />
+
       {canEdit && sites.length > 0 && (
         <div className="flex justify-end">
           <button className={buttonPrimary} onClick={() => setModal("create")}>{t("statutoryAppointments.new")}</button>
         </div>
       )}
 
-      <div className={`${cardClass} overflow-x-auto`}>
-        <table className="w-full text-sm">
-          <thead className="bg-mine-800/50 text-mine-300 text-xs uppercase">
-            <tr>
-              <th className="text-left px-4 py-2">{t("statutoryAppointments.appointmentType")}</th>
-              <th className="text-left px-4 py-2">{t("statutoryAppointments.appointeeName")}</th>
-              <th className="text-left px-4 py-2">{t("common.site")}</th>
-              <th className="text-left px-4 py-2">{t("statutoryAppointments.appointedDate")}</th>
-              <th className="text-left px-4 py-2">{t("common.status")}</th>
-              <th className="px-4 py-2"></th>
-            </tr>
-          </thead>
-          <tbody>
-            {items.map((a) => (
-              <tr key={a.id} className="border-t border-mine-800 hover:bg-mine-800/30">
-                <td className="px-4 py-2 font-medium">{a.appointmentType === "OTHER" ? a.customTitle : t(`statutoryAppointments.types.${a.appointmentType}`)}</td>
-                <td className="px-4 py-2 text-mine-300">{a.appointeeName}</td>
-                <td className="px-4 py-2 text-mine-300">{a.site?.name}</td>
-                <td className="px-4 py-2 text-mine-300">{new Date(a.appointedDate).toLocaleDateString()}</td>
-                <td className="px-4 py-2"><StatusBadge status={a.status} /></td>
-                <td className="px-4 py-2 text-right">
-                  <div className="flex justify-end items-center gap-2">
-                    {a.letterFileName ? (
-                      <a className="text-xs text-mine-300 hover:text-mine-50" href={`${API_URL}/api/statutory-appointments/${a.id}/letter`} target="_blank" rel="noreferrer">
-                        {t("statutoryAppointments.viewLetter")}
-                      </a>
-                    ) : canEdit ? (
-                      <label className="text-xs text-mine-300 hover:text-mine-50 cursor-pointer">
-                        {uploadingFor === a.id ? t("common.saving") : t("statutoryAppointments.uploadLetter")}
-                        <input type="file" className="hidden" onChange={(e) => uploadLetter(a.id, e)} disabled={uploadingFor === a.id} />
-                      </label>
-                    ) : null}
-                    {canEdit && (
-                      <button className="text-xs text-mine-300 hover:text-mine-50" onClick={() => setModal(a)}>{t("common.edit")}</button>
-                    )}
-                    {canDelete && (
-                      <button className={buttonDanger} onClick={() => remove(a.id)}>{t("common.delete")}</button>
-                    )}
-                  </div>
-                </td>
-              </tr>
-            ))}
-            {items.length === 0 && (
-              <tr><td colSpan={6} className="px-4 py-6 text-center text-mine-400">{t("statutoryAppointments.noneYet")}</td></tr>
+      <DataTable
+        columns={columns}
+        rows={items}
+        rowKey={(a) => a.id}
+        emptyMessage={t("statutoryAppointments.noneYet")}
+        searchValue={(a) => `${a.appointeeName} ${a.appointmentType} ${a.site?.name ?? ""}`}
+        exportFilename="statutory-appointments"
+        exportColumns={[
+          { header: t("statutoryAppointments.appointmentType"), value: (a) => a.appointmentType },
+          { header: t("statutoryAppointments.appointeeName"), value: (a) => a.appointeeName },
+          { header: t("common.site"), value: (a) => a.site?.name ?? "" },
+          { header: t("statutoryAppointments.appointedDate"), value: (a) => a.appointedDate },
+          { header: t("common.status"), value: (a) => a.status },
+        ]}
+        actions={(a) => (
+          <div className="flex justify-end items-center gap-2">
+            {a.letterFileName ? (
+              <a className="text-xs text-mine-300 hover:text-mine-50" href={`${API_URL}/api/statutory-appointments/${a.id}/letter`} target="_blank" rel="noreferrer">
+                {t("statutoryAppointments.viewLetter")}
+              </a>
+            ) : canEdit ? (
+              <label className="text-xs text-mine-300 hover:text-mine-50 cursor-pointer">
+                {uploadingFor === a.id ? t("common.saving") : t("statutoryAppointments.uploadLetter")}
+                <input type="file" className="hidden" onChange={(e) => uploadLetter(a.id, e)} disabled={uploadingFor === a.id} />
+              </label>
+            ) : null}
+            <AuditHistoryButton entityType="StatutoryAppointment" entityId={a.id} />
+            {canEdit && (
+              <button className="text-xs text-mine-300 hover:text-mine-50" onClick={() => setModal(a)}>{t("common.edit")}</button>
             )}
-          </tbody>
-        </table>
-      </div>
+            {canDelete && (
+              <button className={buttonDanger} onClick={() => remove(a.id)}>{t("common.delete")}</button>
+            )}
+          </div>
+        )}
+      />
 
       {modal && (
         <Modal title={modal === "create" ? t("statutoryAppointments.newTitle") : t("statutoryAppointments.editTitle")} onClose={() => setModal(null)}>

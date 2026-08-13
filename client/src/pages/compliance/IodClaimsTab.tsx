@@ -5,8 +5,11 @@ import { useAuth } from "../../context/AuthContext";
 import { IodClaim, IodClaimStatus, Incident, Worker } from "../../api/types";
 import { StatusBadge } from "../../components/Badges";
 import Modal from "../../components/Modal";
-import { buttonDanger, buttonPrimary, buttonSecondary, cardClass, inputClass, labelClass, selectClass } from "../../components/ui";
+import { buttonDanger, buttonPrimary, buttonSecondary, inputClass, labelClass, selectClass } from "../../components/ui";
 import DateField from "../../components/DateField";
+import DataTable, { DataTableColumn } from "../../components/DataTable";
+import SummaryCards from "../../components/SummaryCards";
+import { AuditHistoryButton } from "../../components/AuditHistoryPanel";
 
 const claimStatuses: IodClaimStatus[] = ["REPORTED", "SUBMITTED", "UNDER_ASSESSMENT", "ACCEPTED", "REJECTED", "CLOSED"];
 
@@ -154,51 +157,56 @@ export default function IodClaimsTab({ workers }: { workers: Worker[] }) {
 
   if (loading) return <div className="text-mine-300">{t("common.loading")}</div>;
 
+  const openCount = claims.filter((c) => c.status !== "CLOSED" && c.status !== "REJECTED").length;
+  const underAssessmentCount = claims.filter((c) => c.status === "UNDER_ASSESSMENT").length;
+
+  const columns: DataTableColumn<IodClaim>[] = [
+    { key: "worker", header: t("iodClaims.worker"), render: (c) => c.worker?.name ?? "—", sortValue: (c) => c.worker?.name ?? "" },
+    { key: "dateOfInjury", header: t("iodClaims.dateOfInjury"), render: (c) => new Date(c.dateOfInjury).toLocaleDateString(), sortValue: (c) => c.dateOfInjury },
+    { key: "nature", header: t("iodClaims.natureOfInjury"), render: (c) => <div className="truncate max-w-xs" title={c.natureOfInjury}>{c.natureOfInjury}</div> },
+    { key: "claimNumber", header: t("iodClaims.claimNumber"), render: (c) => c.claimNumber ?? "—", sortValue: (c) => c.claimNumber ?? "" },
+    { key: "status", header: t("common.status"), render: (c) => <StatusBadge status={c.status} />, sortValue: (c) => c.status },
+  ];
+
   return (
     <div className="space-y-4">
       <p className="text-xs text-mine-400">{t("iodClaims.hint")}</p>
+
+      <SummaryCards
+        cards={[
+          { label: t("iodClaims.summaryOpen"), value: openCount },
+          { label: t("iodClaims.summaryUnderAssessment"), value: underAssessmentCount, tone: underAssessmentCount > 0 ? "hazard" : "default" },
+        ]}
+      />
+
       {canEdit && workers.length > 0 && (
         <div className="flex justify-end">
           <button className={buttonPrimary} onClick={() => setModal("create")}>{t("iodClaims.new")}</button>
         </div>
       )}
 
-      <div className={`${cardClass} overflow-x-auto`}>
-        <table className="w-full text-sm">
-          <thead className="bg-mine-800/50 text-mine-300 text-xs uppercase">
-            <tr>
-              <th className="text-left px-4 py-2">{t("iodClaims.worker")}</th>
-              <th className="text-left px-4 py-2">{t("iodClaims.dateOfInjury")}</th>
-              <th className="text-left px-4 py-2">{t("iodClaims.natureOfInjury")}</th>
-              <th className="text-left px-4 py-2">{t("iodClaims.claimNumber")}</th>
-              <th className="text-left px-4 py-2">{t("common.status")}</th>
-              <th className="px-4 py-2"></th>
-            </tr>
-          </thead>
-          <tbody>
-            {claims.map((c) => (
-              <tr key={c.id} className="border-t border-mine-800 hover:bg-mine-800/30">
-                <td className="px-4 py-2 font-medium">{c.worker?.name}</td>
-                <td className="px-4 py-2 text-mine-300">{new Date(c.dateOfInjury).toLocaleDateString()}</td>
-                <td className="px-4 py-2 text-mine-300">{c.natureOfInjury}</td>
-                <td className="px-4 py-2 text-mine-300">{c.claimNumber ?? "—"}</td>
-                <td className="px-4 py-2"><StatusBadge status={c.status} /></td>
-                <td className="px-4 py-2 text-right">
-                  {canEdit && (
-                    <div className="flex justify-end gap-2">
-                      <button className="text-xs text-mine-300 hover:text-mine-50" onClick={() => setModal(c)}>{t("common.edit")}</button>
-                      {canDelete && <button className={buttonDanger} onClick={() => remove(c.id)}>{t("common.delete")}</button>}
-                    </div>
-                  )}
-                </td>
-              </tr>
-            ))}
-            {claims.length === 0 && (
-              <tr><td colSpan={6} className="px-4 py-6 text-center text-mine-400">{t("iodClaims.noneYet")}</td></tr>
-            )}
-          </tbody>
-        </table>
-      </div>
+      <DataTable
+        columns={columns}
+        rows={claims}
+        rowKey={(c) => c.id}
+        emptyMessage={t("iodClaims.noneYet")}
+        searchValue={(c) => `${c.worker?.name ?? ""} ${c.natureOfInjury} ${c.claimNumber ?? ""}`}
+        exportFilename="iod-claims"
+        exportColumns={[
+          { header: t("iodClaims.worker"), value: (c) => c.worker?.name ?? "" },
+          { header: t("iodClaims.dateOfInjury"), value: (c) => c.dateOfInjury },
+          { header: t("iodClaims.natureOfInjury"), value: (c) => c.natureOfInjury },
+          { header: t("iodClaims.claimNumber"), value: (c) => c.claimNumber ?? "" },
+          { header: t("common.status"), value: (c) => c.status },
+        ]}
+        actions={(c) => (
+          <div className="flex justify-end gap-2">
+            <AuditHistoryButton entityType="IodClaim" entityId={c.id} />
+            {canEdit && <button className="text-xs text-mine-300 hover:text-mine-50" onClick={() => setModal(c)}>{t("common.edit")}</button>}
+            {canDelete && <button className={buttonDanger} onClick={() => remove(c.id)}>{t("common.delete")}</button>}
+          </div>
+        )}
+      />
 
       {modal && (
         <Modal title={modal === "create" ? t("iodClaims.newTitle") : t("iodClaims.editTitle")} onClose={() => setModal(null)}>
