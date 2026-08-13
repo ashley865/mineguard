@@ -179,9 +179,25 @@ export type SensorType =
   | "DUST"
   | "NOISE"
   | "WATER_LEVEL"
-  | "EQUIPMENT_CONDITION";
+  | "EQUIPMENT_CONDITION"
+  | "CARBON_DIOXIDE"
+  | "NITROGEN_OXIDES"
+  | "SULFUR_DIOXIDE"
+  | "HYDROGEN_SULFIDE"
+  | "RADIATION"
+  | "SMOKE_FIRE"
+  | "VIBRATION"
+  | "PRESSURE"
+  | "FLOW_RATE"
+  | "CONVEYOR_ALIGNMENT"
+  | "PROXIMITY_COLLISION"
+  | "GPS_LOCATION"
+  | "PUMP_STATUS"
+  | "FAN_STATUS"
+  | "ACCESS_CONTROL";
 
 export type SensorStatus = "ACTIVE" | "INACTIVE" | "FAULT";
+export type SensorInstallationStatus = "REQUESTED" | "SCHEDULED" | "INSTALLED" | "COMMISSIONED";
 
 export interface Sensor {
   id: string;
@@ -194,7 +210,33 @@ export interface Sensor {
   zoneId: string;
   zone?: { id: string; name: string; siteId: string };
   readings?: SensorReading[];
+  installationStatus: SensorInstallationStatus;
+  manufacturer?: string | null;
+  model?: string | null;
+  serialNumber?: string | null;
+  installationNotes?: string | null;
+  requestedBy?: { id: string; name: string } | null;
+  requestedAt?: string | null;
+  scheduledDate?: string | null;
+  installedBy?: { id: string; name: string } | null;
+  installedAt?: string | null;
+  commissionedBy?: { id: string; name: string } | null;
+  commissionedAt?: string | null;
 }
+
+export interface SensorCatalogSiteBucket {
+  siteName: string;
+  total: number;
+  commissioned: number;
+}
+
+export interface SensorCatalogBucket {
+  total: number;
+  commissioned: number;
+  bySite: Record<string, SensorCatalogSiteBucket>;
+}
+
+export type SensorCatalog = Record<string, SensorCatalogBucket>;
 
 export interface SensorReading {
   id: string;
@@ -2727,5 +2769,184 @@ export interface GhgEmissionsRecord {
   carbonTaxLiability?: number | null;
   currency: string;
   notes?: string | null;
+  createdAt: string;
+}
+
+// ---------------------------------------------------------------------------
+// Community & Stakeholder Engagement
+// ---------------------------------------------------------------------------
+
+export type CommunityProjectStatus = "PLANNED" | "IN_PROGRESS" | "COMPLETED" | "DELAYED" | "CANCELLED";
+export type CommunityEngagementType = "PUBLIC_MEETING" | "FOCUS_GROUP" | "FORUM" | "SITE_VISIT" | "SURVEY" | "OTHER";
+export type CommunityGrievanceStatus = "OPEN" | "UNDER_INVESTIGATION" | "RESOLVED" | "ESCALATED" | "WITHDRAWN";
+
+export interface CommunityProject {
+  id: string;
+  siteId: string;
+  site?: { id: string; name: string };
+  name: string;
+  description?: string | null;
+  category?: string | null;
+  budget?: number | null;
+  spentToDate?: number | null;
+  currency: string;
+  startDate?: string | null;
+  targetCompletionDate?: string | null;
+  status: CommunityProjectStatus;
+  beneficiaries?: string | null;
+  notes?: string | null;
+  createdAt: string;
+}
+
+export interface CommunityEngagement {
+  id: string;
+  siteId: string;
+  site?: { id: string; name: string };
+  engagementType: CommunityEngagementType;
+  engagementDate: string;
+  location?: string | null;
+  attendeesCount?: number | null;
+  topicsDiscussed?: string | null;
+  outcomes?: string | null;
+  facilitatedBy?: { id: string; name: string } | null;
+  createdAt: string;
+}
+
+export interface CommunityGrievance {
+  id: string;
+  siteId: string;
+  site?: { id: string; name: string };
+  complainantName: string;
+  complainantContact?: string | null;
+  description: string;
+  dateRaised: string;
+  status: CommunityGrievanceStatus;
+  resolution?: string | null;
+  resolvedAt?: string | null;
+  createdAt: string;
+}
+
+export interface CommunitySpendRecord {
+  id: string;
+  siteId: string;
+  site?: { id: string; name: string };
+  recordDate: string;
+  category: string;
+  amount: number;
+  currency: string;
+  supplierOrBeneficiary?: string | null;
+  notes?: string | null;
+  createdAt: string;
+}
+
+// ---------------------------------------------------------------------------
+// Geology & Mineral Resource/Reserve Management
+// ---------------------------------------------------------------------------
+
+export type DrillHoleStatus = "PLANNED" | "DRILLING" | "COMPLETED" | "ABANDONED";
+export type ResourceClassification = "MEASURED" | "INDICATED" | "INFERRED" | "PROVED_RESERVE" | "PROBABLE_RESERVE";
+
+export interface AssayInterval {
+  id: string;
+  fromDepth: number;
+  toDepth: number;
+  mineralType: MineralType;
+  grade?: number | null;
+  gradeUnit?: string | null;
+  lithology?: string | null;
+}
+
+export interface DrillHole {
+  id: string;
+  siteId: string;
+  site?: { id: string; name: string };
+  holeId: string;
+  collarEasting?: number | null;
+  collarNorthing?: number | null;
+  collarElevation?: number | null;
+  azimuth?: number | null;
+  dip?: number | null;
+  totalDepth?: number | null;
+  status: DrillHoleStatus;
+  drilledDate?: string | null;
+  contractor?: string | null;
+  notes?: string | null;
+  assayIntervals?: AssayInterval[];
+  createdAt: string;
+}
+
+export interface ResourceEstimate {
+  id: string;
+  siteId: string;
+  site?: { id: string; name: string };
+  estimateDate: string;
+  mineralType: MineralType;
+  classification: ResourceClassification;
+  tonnage: number;
+  grade?: number | null;
+  gradeUnit?: string | null;
+  containedMetal?: number | null;
+  competentPerson?: string | null;
+  reportReference?: string | null;
+  version: number;
+  notes?: string | null;
+  createdAt: string;
+}
+
+// ---------------------------------------------------------------------------
+// Winder & Shaft/Conveyance Management
+// ---------------------------------------------------------------------------
+
+export type WinderInspectionResult = "PASS" | "FAIL" | "CONDITIONAL";
+export type ConveyanceStatus = "IN_SERVICE" | "DISCARDED" | "PENDING_REPLACEMENT";
+
+export interface WinderInspection {
+  id: string;
+  winderId?: string;
+  inspectionDate: string;
+  inspector: string;
+  brakeTestResult?: WinderInspectionResult | null;
+  findings?: string | null;
+  correctiveActions?: string | null;
+  nextInspectionDue?: string | null;
+}
+
+export interface ConveyanceRope {
+  id: string;
+  winderId?: string;
+  ropeIdentifier: string;
+  installedDate: string;
+  discardDate?: string | null;
+  lastTestDate?: string | null;
+  nextTestDue?: string | null;
+  status: ConveyanceStatus;
+  notes?: string | null;
+}
+
+export interface Winder {
+  id: string;
+  siteId: string;
+  site?: { id: string; name: string };
+  name: string;
+  shaftName?: string | null;
+  winderType?: string | null;
+  installedDate?: string | null;
+  status: string;
+  inspections?: WinderInspection[];
+  ropes?: ConveyanceRope[];
+  createdAt: string;
+}
+
+export interface ShaftInspection {
+  id: string;
+  siteId: string;
+  site?: { id: string; name: string };
+  shaftName: string;
+  inspectionDate: string;
+  inspector: string;
+  headgearCondition?: string | null;
+  findings?: string | null;
+  correctiveActions?: string | null;
+  nextInspectionDue?: string | null;
   createdAt: string;
 }

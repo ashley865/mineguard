@@ -56,6 +56,7 @@ export default function Layout() {
         { to: "/equipment", label: t("nav.equipment") },
         { to: "/maintenance", label: t("maintenance.nav") },
         { to: "/production", label: t("production.nav") },
+        { to: "/geology", label: t("geology.nav") },
       ],
     },
     {
@@ -72,6 +73,7 @@ export default function Layout() {
         { to: "/ventilation", label: t("ventilation.nav") },
         { to: "/mine-rescue", label: t("mineRescue.nav") },
         { to: "/resources", label: t("resources.nav") },
+        { to: "/winders", label: t("winders.nav") },
       ],
     },
     {
@@ -110,6 +112,7 @@ export default function Layout() {
       items: [
         { to: "/reporting", label: t("reporting.nav") },
         { to: "/documents", label: t("documents.nav") },
+        { to: "/community", label: t("community.nav") },
       ],
     },
     {

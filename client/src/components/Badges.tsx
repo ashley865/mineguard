@@ -93,6 +93,15 @@ const statusColors: Record<string, string> = {
   DUE: "bg-hazard-500 text-white",
   APPLIED: "bg-mine-600 text-mine-100",
   ENROLLED: "bg-hazard-500 text-white",
+  REQUESTED: "bg-mine-600 text-mine-100",
+  INSTALLED: "bg-hazard-500 text-white",
+  CONDITIONAL: "bg-hazard-500 text-white",
+  IN_SERVICE: "bg-success-600 text-white",
+  DISCARDED: "bg-mine-600 text-mine-100",
+  PENDING_REPLACEMENT: "bg-hazard-500 text-white",
+  DRILLING: "bg-hazard-500 text-white",
+  ABANDONED: "bg-mine-600 text-mine-100",
+  DELAYED: "bg-hazard-500 text-white",
 };
 
 export function StatusBadge({

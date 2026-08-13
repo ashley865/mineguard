@@ -4,11 +4,14 @@ import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, ReferenceL
 import { api } from "../api/client";
 import { useAuth } from "../context/AuthContext";
 import { useSocket } from "../context/SocketContext";
-import { Sensor, SensorReading, SensorType, Zone } from "../api/types";
+import { Sensor, SensorCatalog, SensorReading, SensorType, Zone } from "../api/types";
 import { StatusBadge } from "../components/Badges";
 import Modal from "../components/Modal";
 import { buttonDanger, buttonPrimary, buttonSecondary, cardClass, inputClass, labelClass, selectClass } from "../components/ui";
+import DateField from "../components/DateField";
 
+// The full catalog of sensor types a mine may ever need — surfaced both in the create form
+// and in the browsable Sensor Catalog reference tab below.
 const sensorTypes: SensorType[] = [
   "METHANE",
   "CARBON_MONOXIDE",
@@ -21,22 +24,43 @@ const sensorTypes: SensorType[] = [
   "NOISE",
   "WATER_LEVEL",
   "EQUIPMENT_CONDITION",
+  "CARBON_DIOXIDE",
+  "NITROGEN_OXIDES",
+  "SULFUR_DIOXIDE",
+  "HYDROGEN_SULFIDE",
+  "RADIATION",
+  "SMOKE_FIRE",
+  "VIBRATION",
+  "PRESSURE",
+  "FLOW_RATE",
+  "CONVEYOR_ALIGNMENT",
+  "PROXIMITY_COLLISION",
+  "GPS_LOCATION",
+  "PUMP_STATUS",
+  "FAN_STATUS",
+  "ACCESS_CONTROL",
 ];
 
-function SensorForm({ zones, initial, onSubmit, onCancel }: {
+function SensorForm({ zones, initial, defaultType, onSubmit, onCancel }: {
   zones: Zone[];
   initial?: Partial<Sensor>;
+  defaultType?: SensorType;
   onSubmit: (data: any) => Promise<void>;
   onCancel: () => void;
 }) {
   const { t } = useTranslation();
+  const isNew = !initial?.id;
   const [name, setName] = useState(initial?.name ?? "");
-  const [type, setType] = useState<SensorType>(initial?.type ?? "METHANE");
+  const [type, setType] = useState<SensorType>(initial?.type ?? defaultType ?? "METHANE");
   const [unit, setUnit] = useState(initial?.unit ?? "");
   const [minSafe, setMinSafe] = useState(initial?.minSafe?.toString() ?? "0");
   const [maxSafe, setMaxSafe] = useState(initial?.maxSafe?.toString() ?? "100");
   const [zoneId, setZoneId] = useState(initial?.zoneId ?? zones[0]?.id ?? "");
   const [status, setStatus] = useState(initial?.status ?? "ACTIVE");
+  const [manufacturer, setManufacturer] = useState(initial?.manufacturer ?? "");
+  const [model, setModel] = useState(initial?.model ?? "");
+  const [serialNumber, setSerialNumber] = useState(initial?.serialNumber ?? "");
+  const [requestInstallation, setRequestInstallation] = useState(false);
   const [saving, setSaving] = useState(false);
 
   async function handleSubmit(e: FormEvent) {
@@ -51,6 +75,10 @@ function SensorForm({ zones, initial, onSubmit, onCancel }: {
         maxSafe: Number(maxSafe),
         zoneId,
         status,
+        manufacturer: manufacturer || undefined,
+        model: model || undefined,
+        serialNumber: serialNumber || undefined,
+        requestInstallation: isNew ? requestInstallation : undefined,
       });
     } finally {
       setSaving(false);
@@ -103,6 +131,29 @@ function SensorForm({ zones, initial, onSubmit, onCancel }: {
           <option value="FAULT">{t("sensors.fault")}</option>
         </select>
       </div>
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+        <div>
+          <label className={labelClass}>{t("sensors.manufacturer")}</label>
+          <input className={inputClass} value={manufacturer} onChange={(e) => setManufacturer(e.target.value)} />
+        </div>
+        <div>
+          <label className={labelClass}>{t("sensors.model")}</label>
+          <input className={inputClass} value={model} onChange={(e) => setModel(e.target.value)} />
+        </div>
+        <div>
+          <label className={labelClass}>{t("sensors.serialNumber")}</label>
+          <input className={inputClass} value={serialNumber} onChange={(e) => setSerialNumber(e.target.value)} />
+        </div>
+      </div>
+      {isNew && (
+        <label className="flex items-start gap-2 text-sm border border-mine-800 rounded-md p-3">
+          <input type="checkbox" checked={requestInstallation} onChange={(e) => setRequestInstallation(e.target.checked)} className="mt-0.5" />
+          <span>
+            <span className="block">{t("sensors.requestInstallation")}</span>
+            <span className="block text-xs text-mine-400">{t("sensors.requestInstallationHint")}</span>
+          </span>
+        </label>
+      )}
       <div className="flex justify-end gap-2 pt-2">
         <button type="button" className={buttonSecondary} onClick={onCancel}>{t("common.cancel")}</button>
         <button type="submit" className={buttonPrimary} disabled={saving}>{saving ? t("common.saving") : t("common.save")}</button>
@@ -158,15 +209,108 @@ function SensorChart({ sensor, onClose }: { sensor: Sensor; onClose: () => void 
   );
 }
 
+function ScheduleModal({ sensor, onClose, onScheduled }: { sensor: Sensor; onClose: () => void; onScheduled: (date: string) => Promise<void> }) {
+  const { t } = useTranslation();
+  const [scheduledDate, setScheduledDate] = useState(sensor.scheduledDate?.slice(0, 10) ?? "");
+  const [saving, setSaving] = useState(false);
+
+  async function handleSubmit(e: FormEvent) {
+    e.preventDefault();
+    setSaving(true);
+    try {
+      await onScheduled(scheduledDate);
+      onClose();
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  return (
+    <Modal title={t("sensors.scheduleInstallation")} onClose={onClose}>
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <div>
+          <label className={labelClass}>{t("sensors.scheduledDate")}</label>
+          <DateField value={scheduledDate} onChange={setScheduledDate} required />
+        </div>
+        <div className="flex justify-end gap-2 pt-2">
+          <button type="button" className={buttonSecondary} onClick={onClose}>{t("common.cancel")}</button>
+          <button type="submit" className={buttonPrimary} disabled={saving}>{saving ? t("common.saving") : t("common.save")}</button>
+        </div>
+      </form>
+    </Modal>
+  );
+}
+
+function SensorCatalogTab({ onRequestType }: { onRequestType: (type: SensorType) => void }) {
+  const { t } = useTranslation();
+  const [catalog, setCatalog] = useState<SensorCatalog>({});
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    api.get<SensorCatalog>("/sensors/catalog").then((res) => {
+      setCatalog(res.data);
+      setLoading(false);
+    });
+  }, []);
+
+  if (loading) return <div className="text-mine-300">{t("common.loading")}</div>;
+
+  return (
+    <div className="space-y-4">
+      <p className="text-xs text-mine-400">{t("sensors.catalogHint")}</p>
+      <div className={`${cardClass} overflow-x-auto`}>
+        <table className="w-full text-sm">
+          <thead className="bg-mine-800/50 text-mine-300 text-xs uppercase">
+            <tr>
+              <th className="text-left px-4 py-2">{t("common.type")}</th>
+              <th className="text-left px-4 py-2">{t("sensors.catalogWhyNeeded")}</th>
+              <th className="text-left px-4 py-2">{t("sensors.catalogInstalled")}</th>
+              <th className="px-4 py-2"></th>
+            </tr>
+          </thead>
+          <tbody>
+            {sensorTypes.map((type) => {
+              const bucket = catalog[type];
+              return (
+                <tr key={type} className="border-t border-mine-800 hover:bg-mine-800/30 align-top">
+                  <td className="px-4 py-2 font-medium whitespace-nowrap">{t(`sensors.types.${type}`)}</td>
+                  <td className="px-4 py-2 text-mine-300">{t(`sensors.catalogDescriptions.${type}`)}</td>
+                  <td className="px-4 py-2">
+                    {bucket && bucket.total > 0 ? (
+                      <span className="text-mine-300">
+                        {t("sensors.catalogCount", { commissioned: bucket.commissioned, total: bucket.total })}
+                      </span>
+                    ) : (
+                      <span className="text-danger-500 font-semibold">{t("sensors.catalogNoneInstalled")}</span>
+                    )}
+                  </td>
+                  <td className="px-4 py-2 text-right">
+                    <button className="text-xs text-mine-300 hover:text-mine-50 underline" onClick={() => onRequestType(type)}>
+                      {t("sensors.catalogAddSensor")}
+                    </button>
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+}
+
 export default function Sensors() {
   const { t } = useTranslation();
   const { user } = useAuth();
   const canEdit = user?.role === "ADMIN" || user?.role === "SUPERVISOR" || user?.role === "EXECUTIVE";
+  const [tab, setTab] = useState<"sensors" | "catalog">("sensors");
   const [sensors, setSensors] = useState<Sensor[]>([]);
   const [zones, setZones] = useState<Zone[]>([]);
   const [loading, setLoading] = useState(true);
   const [sensorModal, setSensorModal] = useState<null | "create" | Sensor>(null);
+  const [defaultType, setDefaultType] = useState<SensorType | undefined>(undefined);
   const [chartSensor, setChartSensor] = useState<Sensor | null>(null);
+  const [schedulingSensor, setSchedulingSensor] = useState<Sensor | null>(null);
   const socket = useSocket();
 
   async function load() {
@@ -216,6 +360,27 @@ export default function Sensors() {
     await load();
   }
 
+  async function scheduleInstallation(id: string, scheduledDate: string) {
+    await api.post(`/sensors/${id}/schedule`, { scheduledDate });
+    await load();
+  }
+
+  async function installSensor(id: string) {
+    await api.post(`/sensors/${id}/install`);
+    await load();
+  }
+
+  async function commissionSensor(id: string) {
+    await api.post(`/sensors/${id}/commission`);
+    await load();
+  }
+
+  function openCreateForType(type: SensorType) {
+    setDefaultType(type);
+    setSensorModal("create");
+    setTab("sensors");
+  }
+
   if (loading) return <div className="text-mine-300">{t("sensors.loading")}</div>;
 
   return (
@@ -225,13 +390,21 @@ export default function Sensors() {
           <h1 className="text-xl font-bold">{t("sensors.title")}</h1>
           <p className="text-mine-300 text-sm">{t("sensors.subtitle")}</p>
         </div>
-        {canEdit && zones.length > 0 && (
-          <button className={buttonPrimary} onClick={() => setSensorModal("create")}>
+        {canEdit && zones.length > 0 && tab === "sensors" && (
+          <button className={buttonPrimary} onClick={() => { setDefaultType(undefined); setSensorModal("create"); }}>
             {t("sensors.newSensor")}
           </button>
         )}
       </div>
 
+      <div className="flex gap-2 flex-wrap">
+        <button className={tab === "sensors" ? buttonPrimary : buttonSecondary} onClick={() => setTab("sensors")}>{t("sensors.tabSensors")}</button>
+        <button className={tab === "catalog" ? buttonPrimary : buttonSecondary} onClick={() => setTab("catalog")}>{t("sensors.tabCatalog")}</button>
+      </div>
+
+      {tab === "catalog" && <SensorCatalogTab onRequestType={openCreateForType} />}
+
+      {tab === "sensors" && (
       <div className={`${cardClass} overflow-x-auto`}>
         <table className="w-full text-sm">
           <thead className="bg-mine-800/50 text-mine-300 text-xs uppercase">
@@ -242,6 +415,7 @@ export default function Sensors() {
               <th className="text-left px-4 py-2">{t("sensors.colLatestReading")}</th>
               <th className="text-left px-4 py-2">{t("sensors.colSafeRange")}</th>
               <th className="text-left px-4 py-2">{t("sensors.colStatus")}</th>
+              <th className="text-left px-4 py-2">{t("sensors.colInstallation")}</th>
               <th className="px-4 py-2"></th>
             </tr>
           </thead>
@@ -250,6 +424,7 @@ export default function Sensors() {
               const latest = sensor.readings?.[0];
               const outOfRange = latest && (latest.value < sensor.minSafe || latest.value > sensor.maxSafe);
               const direction = latest ? (latest.value > sensor.maxSafe ? "above" : latest.value < sensor.minSafe ? "below" : null) : null;
+              const notCommissioned = sensor.installationStatus !== "COMMISSIONED";
               return (
                 <Fragment key={sensor.id}>
                   <tr className={`border-t border-mine-800 hover:bg-mine-800/30 ${outOfRange ? "bg-danger-500/5" : ""}`}>
@@ -265,6 +440,24 @@ export default function Sensors() {
                     </td>
                     <td className="px-4 py-2 text-mine-400">{sensor.minSafe}–{sensor.maxSafe}{sensor.unit}</td>
                     <td className="px-4 py-2"><StatusBadge status={sensor.status} /></td>
+                    <td className="px-4 py-2">
+                      {notCommissioned ? (
+                        <div className="flex items-center gap-2">
+                          <StatusBadge status={sensor.installationStatus} />
+                          {canEdit && sensor.installationStatus === "REQUESTED" && (
+                            <button className="text-xs text-mine-300 hover:text-mine-50 underline" onClick={() => setSchedulingSensor(sensor)}>{t("sensors.schedule")}</button>
+                          )}
+                          {canEdit && sensor.installationStatus === "SCHEDULED" && (
+                            <button className="text-xs text-mine-300 hover:text-mine-50 underline" onClick={() => installSensor(sensor.id)}>{t("sensors.markInstalled")}</button>
+                          )}
+                          {canEdit && sensor.installationStatus === "INSTALLED" && (
+                            <button className="text-xs text-mine-300 hover:text-mine-50 underline" onClick={() => commissionSensor(sensor.id)}>{t("sensors.commission")}</button>
+                          )}
+                        </div>
+                      ) : (
+                        <span className="text-mine-500">—</span>
+                      )}
+                    </td>
                     <td className="px-4 py-2 text-right">
                       {canEdit && (
                         <div className="flex justify-end gap-2">
@@ -276,7 +469,7 @@ export default function Sensors() {
                   </tr>
                   {outOfRange && (
                     <tr className="bg-danger-500/10">
-                      <td colSpan={7} className="px-4 py-2 text-xs text-danger-500 font-semibold">
+                      <td colSpan={8} className="px-4 py-2 text-xs text-danger-500 font-semibold">
                         ⚠ {t("sensors.safetyAlertBanner", {
                           type: t(`sensors.types.${sensor.type}`),
                           zone: sensor.zone?.name ?? "",
@@ -290,7 +483,7 @@ export default function Sensors() {
             })}
             {sensors.length === 0 && (
               <tr>
-                <td colSpan={7} className="px-4 py-6 text-center text-mine-400">
+                <td colSpan={8} className="px-4 py-6 text-center text-mine-400">
                   {t("sensors.noSensorsYet")}
                 </td>
               </tr>
@@ -298,12 +491,14 @@ export default function Sensors() {
           </tbody>
         </table>
       </div>
+      )}
 
       {sensorModal && (
         <Modal title={sensorModal === "create" ? t("sensors.newSensorTitle") : t("sensors.editSensorTitle")} onClose={() => setSensorModal(null)}>
           <SensorForm
             zones={zones}
             initial={sensorModal === "create" ? undefined : sensorModal}
+            defaultType={sensorModal === "create" ? defaultType : undefined}
             onSubmit={(data) => (sensorModal === "create" ? createSensor(data) : updateSensor(sensorModal.id, data))}
             onCancel={() => setSensorModal(null)}
           />
@@ -311,6 +506,13 @@ export default function Sensors() {
       )}
 
       {chartSensor && <SensorChart sensor={chartSensor} onClose={() => setChartSensor(null)} />}
+      {schedulingSensor && (
+        <ScheduleModal
+          sensor={schedulingSensor}
+          onClose={() => setSchedulingSensor(null)}
+          onScheduled={(date) => scheduleInstallation(schedulingSensor.id, date)}
+        />
+      )}
     </div>
   );
 }

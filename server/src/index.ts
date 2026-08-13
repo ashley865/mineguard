@@ -76,6 +76,9 @@ import ventilationRoutes from "./routes/ventilation";
 import mineRescueRoutes from "./routes/mineRescue";
 import labourRelationsRoutes from "./routes/labourRelations";
 import resourcesRoutes from "./routes/resources";
+import communityRoutes from "./routes/community";
+import geologyRoutes from "./routes/geology";
+import windersRoutes from "./routes/winders";
 import { sanitizeBody } from "./middleware/sanitize";
 import { startSimulator } from "./services/simulator";
 import { scanCompliance } from "./services/complianceScanner";
@@ -193,6 +196,9 @@ app.use("/api/ventilation", ventilationRoutes);
 app.use("/api/mine-rescue", mineRescueRoutes);
 app.use("/api/labour-relations", labourRelationsRoutes);
 app.use("/api/resources", resourcesRoutes);
+app.use("/api/community", communityRoutes);
+app.use("/api/geology", geologyRoutes);
+app.use("/api/winders", windersRoutes);
 
 app.use((err: any, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
   if (err?.message === "UNSUPPORTED_FILE_TYPE") {

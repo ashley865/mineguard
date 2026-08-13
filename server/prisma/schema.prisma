@@ -39,6 +39,9 @@ enum SiteStatus {
   SHUT_DOWN
 }
 
+// The full catalog of sensor types a mine may ever need to install, not just the ones
+// currently in use — surfaced in the client as a browsable reference (Sensor Catalog) so
+// gaps in coverage per site are visible, alongside the live Sensor records below.
 enum SensorType {
   METHANE
   CARBON_MONOXIDE
@@ -51,12 +54,37 @@ enum SensorType {
   NOISE
   WATER_LEVEL
   EQUIPMENT_CONDITION
+  CARBON_DIOXIDE
+  NITROGEN_OXIDES
+  SULFUR_DIOXIDE
+  HYDROGEN_SULFIDE
+  RADIATION
+  SMOKE_FIRE
+  VIBRATION
+  PRESSURE
+  FLOW_RATE
+  CONVEYOR_ALIGNMENT
+  PROXIMITY_COLLISION
+  GPS_LOCATION
+  PUMP_STATUS
+  FAN_STATUS
+  ACCESS_CONTROL
 }
 
 enum SensorStatus {
   ACTIVE
   INACTIVE
   FAULT
+}
+
+// A sensor's physical installation lifecycle, independent of its operational SensorStatus
+// above — a sensor can be REQUESTED long before it exists, and only becomes eligible for
+// ACTIVE/readings once COMMISSIONED.
+enum SensorInstallationStatus {
+  REQUESTED
+  SCHEDULED
+  INSTALLED
+  COMMISSIONED
 }
 
 enum AlertSeverity {
@@ -256,6 +284,11 @@ model User {
   rockfallSignOffs         RockfallIncident[]    @relation("RockfallSignOffBy")
   rescueDrillsConducted    RescueDrill[]         @relation("RescueDrillConductedBy")
   disciplinaryCasesCreated DisciplinaryCase[]    @relation("DisciplinaryCaseCreatedBy")
+
+  sensorsRequested    Sensor[] @relation("SensorRequestedBy")
+  sensorsInstalled    Sensor[] @relation("SensorInstalledBy")
+  sensorsCommissioned Sensor[] @relation("SensorCommissionedBy")
+  communityEngagementsFacilitated CommunityEngagement[] @relation("CommunityEngagementFacilitatedBy")
 }
 
 model UserAttendance {
@@ -345,6 +378,15 @@ model Site {
   pollutionControlDams   PollutionControlDam[]
   acidMineDrainageReadings AcidMineDrainageReading[]
   energyConsumptionRecords EnergyConsumptionRecord[]
+
+  communityProjects     CommunityProject[]
+  communityEngagements  CommunityEngagement[]
+  communityGrievances   CommunityGrievance[]
+  communitySpendRecords CommunitySpendRecord[]
+  drillHoles            DrillHole[]
+  resourceEstimates     ResourceEstimate[]
+  winders               Winder[]
+  shaftInspections      ShaftInspection[]
 }
 
 model Zone {
@@ -391,6 +433,25 @@ model Sensor {
   status   SensorStatus @default(ACTIVE)
   zoneId   String
   zone     Zone         @relation(fields: [zoneId], references: [id], onDelete: Cascade)
+
+  installationStatus SensorInstallationStatus @default(COMMISSIONED)
+  manufacturer       String?
+  model              String?
+  serialNumber       String?
+  installationNotes  String?
+
+  requestedById String?
+  requestedBy   User?     @relation("SensorRequestedBy", fields: [requestedById], references: [id], onDelete: SetNull)
+  requestedAt   DateTime?
+  scheduledDate DateTime?
+
+  installedById String?
+  installedBy   User?     @relation("SensorInstalledBy", fields: [installedById], references: [id], onDelete: SetNull)
+  installedAt   DateTime?
+
+  commissionedById String?
+  commissionedBy   User?     @relation("SensorCommissionedBy", fields: [commissionedById], references: [id], onDelete: SetNull)
+  commissionedAt   DateTime?
 
   readings SensorReading[]
   alerts   Alert[]
@@ -3596,6 +3657,257 @@ model GhgEmissionsRecord {
   carbonTaxLiability Float?
   currency           String   @default("ZAR")
   notes              String?
+
+  createdAt DateTime @default(now())
+}
+
+// ---------------------------------------------------------------------------
+// Module: Community & Stakeholder Engagement (MPRDA Social and Labour Plan execution)
+// ---------------------------------------------------------------------------
+
+enum CommunityProjectStatus {
+  PLANNED
+  IN_PROGRESS
+  COMPLETED
+  DELAYED
+  CANCELLED
+}
+
+enum CommunityEngagementType {
+  PUBLIC_MEETING
+  FOCUS_GROUP
+  FORUM
+  SITE_VISIT
+  SURVEY
+  OTHER
+}
+
+enum CommunityGrievanceStatus {
+  OPEN
+  UNDER_INVESTIGATION
+  RESOLVED
+  ESCALATED
+  WITHDRAWN
+}
+
+// The existing Permit model only records that an SLP licence is held; this tracks actually
+// executing it — the Local Economic Development projects it commits the mine to.
+model CommunityProject {
+  id                   String                  @id @default(cuid())
+  siteId               String
+  site                 Site                    @relation(fields: [siteId], references: [id], onDelete: Cascade)
+  name                 String
+  description          String?
+  category             String?
+  budget               Float?
+  spentToDate          Float?
+  currency             String                  @default("ZAR")
+  startDate            DateTime?
+  targetCompletionDate DateTime?
+  status               CommunityProjectStatus  @default(PLANNED)
+  beneficiaries        String?
+  notes                String?
+
+  createdAt DateTime @default(now())
+}
+
+model CommunityEngagement {
+  id               String                  @id @default(cuid())
+  siteId           String
+  site             Site                    @relation(fields: [siteId], references: [id], onDelete: Cascade)
+  engagementType   CommunityEngagementType
+  engagementDate   DateTime
+  location         String?
+  attendeesCount   Int?
+  topicsDiscussed  String?
+  outcomes         String?
+  facilitatedById  String?
+  facilitatedBy    User?                   @relation("CommunityEngagementFacilitatedBy", fields: [facilitatedById], references: [id], onDelete: SetNull)
+
+  createdAt DateTime @default(now())
+}
+
+// Distinct from the worker-only GrievanceCase (Industrial & Labour Relations) — this is for
+// complaints from people outside the workforce: neighbouring residents, landowners, etc.
+model CommunityGrievance {
+  id                  String                    @id @default(cuid())
+  siteId              String
+  site                Site                      @relation(fields: [siteId], references: [id], onDelete: Cascade)
+  complainantName     String
+  complainantContact  String?
+  description         String
+  dateRaised          DateTime
+  status              CommunityGrievanceStatus  @default(OPEN)
+  resolution          String?
+  resolvedAt          DateTime?
+
+  createdAt DateTime @default(now())
+}
+
+model CommunitySpendRecord {
+  id                    String   @id @default(cuid())
+  siteId                String
+  site                  Site     @relation(fields: [siteId], references: [id], onDelete: Cascade)
+  recordDate            DateTime
+  category              String
+  amount                Float
+  currency              String   @default("ZAR")
+  supplierOrBeneficiary String?
+  notes                 String?
+
+  createdAt DateTime @default(now())
+}
+
+// ---------------------------------------------------------------------------
+// Module: Geology & Mineral Resource/Reserve Management (SAMREC Code)
+// ---------------------------------------------------------------------------
+
+enum DrillHoleStatus {
+  PLANNED
+  DRILLING
+  COMPLETED
+  ABANDONED
+}
+
+enum ResourceClassification {
+  MEASURED
+  INDICATED
+  INFERRED
+  PROVED_RESERVE
+  PROBABLE_RESERVE
+}
+
+model DrillHole {
+  id              String          @id @default(cuid())
+  siteId          String
+  site            Site            @relation(fields: [siteId], references: [id], onDelete: Cascade)
+  holeId          String
+  collarEasting   Float?
+  collarNorthing  Float?
+  collarElevation Float?
+  azimuth         Float?
+  dip             Float?
+  totalDepth      Float?
+  status          DrillHoleStatus @default(PLANNED)
+  drilledDate     DateTime?
+  contractor      String?
+  notes           String?
+
+  assayIntervals AssayInterval[]
+
+  createdAt DateTime @default(now())
+}
+
+model AssayInterval {
+  id          String     @id @default(cuid())
+  drillHoleId String
+  drillHole   DrillHole  @relation(fields: [drillHoleId], references: [id], onDelete: Cascade)
+  fromDepth   Float
+  toDepth     Float
+  mineralType MineralType
+  grade       Float?
+  gradeUnit   String?
+  lithology   String?
+
+  createdAt DateTime @default(now())
+}
+
+// Versioned so a resource/reserve figure can be revised over time without losing the
+// history of prior estimates — SAMREC classification is a point-in-time competent-person
+// judgement, not a fact that gets silently overwritten.
+model ResourceEstimate {
+  id               String                  @id @default(cuid())
+  siteId           String
+  site             Site                    @relation(fields: [siteId], references: [id], onDelete: Cascade)
+  estimateDate     DateTime
+  mineralType      MineralType
+  classification   ResourceClassification
+  tonnage          Float
+  grade            Float?
+  gradeUnit        String?
+  containedMetal   Float?
+  competentPerson  String?
+  reportReference  String?
+  version          Int                     @default(1)
+  notes            String?
+
+  createdAt DateTime @default(now())
+}
+
+// ---------------------------------------------------------------------------
+// Module: Winder & Shaft/Conveyance Management (MHSA winding plant regulations)
+// ---------------------------------------------------------------------------
+
+enum WinderInspectionResult {
+  PASS
+  FAIL
+  CONDITIONAL
+}
+
+enum ConveyanceStatus {
+  IN_SERVICE
+  DISCARDED
+  PENDING_REPLACEMENT
+}
+
+model Winder {
+  id            String   @id @default(cuid())
+  siteId        String
+  site          Site     @relation(fields: [siteId], references: [id], onDelete: Cascade)
+  name          String
+  shaftName     String?
+  winderType    String?
+  installedDate DateTime?
+  status        String   @default("OPERATIONAL")
+
+  inspections WinderInspection[]
+  ropes       ConveyanceRope[]
+
+  createdAt DateTime @default(now())
+}
+
+model WinderInspection {
+  id                  String                   @id @default(cuid())
+  winderId            String
+  winder              Winder                   @relation(fields: [winderId], references: [id], onDelete: Cascade)
+  inspectionDate      DateTime
+  inspector           String
+  brakeTestResult     WinderInspectionResult?
+  findings            String?
+  correctiveActions   String?
+  nextInspectionDue   DateTime?
+
+  createdAt DateTime @default(now())
+}
+
+// Winding ropes have a hard regulatory replacement interval — discardDate is the scheduled/
+// mandatory discard date, not just a soft reminder.
+model ConveyanceRope {
+  id             String            @id @default(cuid())
+  winderId       String
+  winder         Winder            @relation(fields: [winderId], references: [id], onDelete: Cascade)
+  ropeIdentifier String
+  installedDate  DateTime
+  discardDate    DateTime?
+  lastTestDate   DateTime?
+  nextTestDue    DateTime?
+  status         ConveyanceStatus  @default(IN_SERVICE)
+  notes          String?
+
+  createdAt DateTime @default(now())
+}
+
+model ShaftInspection {
+  id                 String    @id @default(cuid())
+  siteId             String
+  site               Site      @relation(fields: [siteId], references: [id], onDelete: Cascade)
+  shaftName          String
+  inspectionDate     DateTime
+  inspector          String
+  headgearCondition  String?
+  findings           String?
+  correctiveActions  String?
+  nextInspectionDue  DateTime?
 
   createdAt DateTime @default(now())
 }

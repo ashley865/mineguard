@@ -55,6 +55,9 @@ import VentilationHygiene from "./pages/VentilationHygiene";
 import MineRescue from "./pages/MineRescue";
 import LabourRelations from "./pages/LabourRelations";
 import ResourceManagement from "./pages/ResourceManagement";
+import CommunityEngagementPage from "./pages/CommunityEngagement";
+import Geology from "./pages/Geology";
+import WinderShaft from "./pages/WinderShaft";
 
 function HomeRoute() {
   const { user } = useAuth();
@@ -119,6 +122,9 @@ export default function App() {
         <Route path="/mine-rescue" element={<ModuleRoute path="/mine-rescue"><MineRescue /></ModuleRoute>} />
         <Route path="/labour-relations" element={<ModuleRoute path="/labour-relations"><LabourRelations /></ModuleRoute>} />
         <Route path="/resources" element={<ModuleRoute path="/resources"><ResourceManagement /></ModuleRoute>} />
+        <Route path="/community" element={<ModuleRoute path="/community"><CommunityEngagementPage /></ModuleRoute>} />
+        <Route path="/geology" element={<ModuleRoute path="/geology"><Geology /></ModuleRoute>} />
+        <Route path="/winders" element={<ModuleRoute path="/winders"><WinderShaft /></ModuleRoute>} />
         <Route path="/messages" element={<Messages />} />
         <Route path="/executive-requests" element={<ExecutiveRequests />} />
         <Route path="/settings" element={<Settings />} />
