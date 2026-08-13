@@ -702,6 +702,22 @@ export interface ExecutiveSummary {
   pendingReviews: { alerts: Alert[]; incidents: Incident[] };
 }
 
+export interface AiSummaryResponse {
+  configured: boolean;
+  summary: string | null;
+  generatedAt: string | null;
+}
+
+export type AiChatRole = "user" | "assistant";
+export interface AiChatMessage {
+  role: AiChatRole;
+  content: string;
+}
+export interface AiChatResponse {
+  configured: boolean;
+  reply: string | null;
+}
+
 export type CopCategory =
   | "ROCK_ENGINEERING"
   | "VENTILATION"

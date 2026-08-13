@@ -3354,5 +3354,17 @@
       "UPDATE": "Opgedateer",
       "DELETE": "Geskrap"
     }
+  },
+  "ai": {
+    "title": "KI-Assistent",
+    "notConfigured": "Die KI-assistent is nog nie opgestel nie. 'n Admin moet 'n KI-verskaffer se API-sleutel op die bediener byvoeg voordat dit insigte kan genereer of vrae kan beantwoord.",
+    "askQuestion": "Vra 'n vraag",
+    "hideChat": "Verberg klets",
+    "chatHint": "Vra enigiets oor jou paneelbord — bv. \"Wat is ons grootste risiko hierdie week?\"",
+    "inputPlaceholder": "Vra die KI-assistent...",
+    "send": "Stuur",
+    "clear": "Maak skoon",
+    "thinking": "Dink tans...",
+    "sendError": "Kon nie die KI-assistent bereik nie. Probeer asseblief weer."
   }
 }

@@ -3354,5 +3354,17 @@
       "UPDATE": "Aktualisiert",
       "DELETE": "Gelöscht"
     }
+  },
+  "ai": {
+    "title": "KI-Assistent",
+    "notConfigured": "Der KI-Assistent ist noch nicht eingerichtet. Ein Administrator muss einen API-Schlüssel eines KI-Anbieters auf dem Server hinzufügen, bevor er Erkenntnisse liefern oder Fragen beantworten kann.",
+    "askQuestion": "Frage stellen",
+    "hideChat": "Chat ausblenden",
+    "chatHint": "Fragen Sie irgendetwas zu Ihrem Dashboard — z. B. \"Was ist unser größtes Risiko diese Woche?\"",
+    "inputPlaceholder": "KI-Assistenten fragen...",
+    "send": "Senden",
+    "clear": "Löschen",
+    "thinking": "Denkt nach...",
+    "sendError": "Der KI-Assistent konnte nicht erreicht werden. Bitte erneut versuchen."
   }
 }

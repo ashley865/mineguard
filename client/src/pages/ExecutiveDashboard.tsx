@@ -13,6 +13,7 @@ import SecurityVisitorHistoryWidget from "../components/SecurityVisitorHistoryWi
 import ProductionAnalyticsWidget from "../components/ProductionAnalyticsWidget";
 import InventoryProcurementWidget from "../components/InventoryProcurementWidget";
 import MaintenanceDowntimeWidget from "../components/MaintenanceDowntimeWidget";
+import AiAssistantWidget from "../components/AiAssistantWidget";
 
 type Tone = "positive" | "negative" | "caution";
 
@@ -125,6 +126,7 @@ export default function ExecutiveDashboard() {
   const canSeeHrWorkforce = user?.title === "HR_MANAGER";
   const canSeeVisitorHistory = user?.title === "SECURITY_MANAGER";
   const canSeeProductionAnalytics = user?.title === "OPERATIONS_MANAGER";
+  const canSeeAiAssistant = user?.title === "GENERAL_MANAGER";
   const [summary, setSummary] = useState<ExecutiveSummary | null>(null);
   const [trends, setTrends] = useState<ReportTrends | null>(null);
 
@@ -268,6 +270,7 @@ export default function ExecutiveDashboard() {
         </div>
       )}
 
+      {canSeeAiAssistant && <AiAssistantWidget />}
       {canSeeFinancials && <FinancialSummaryWidget />}
       {canSeeHrWorkforce && <HrWorkforceWidget />}
       {canSeeVisitorHistory && <SecurityVisitorHistoryWidget />}

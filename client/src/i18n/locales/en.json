@@ -3353,5 +3353,17 @@
       "UPDATE": "Updated",
       "DELETE": "Deleted"
     }
+  },
+  "ai": {
+    "title": "AI Assistant",
+    "notConfigured": "The AI assistant isn't set up yet. An admin needs to add an AI provider API key on the server before it can generate insights or answer questions.",
+    "askQuestion": "Ask a question",
+    "hideChat": "Hide chat",
+    "chatHint": "Ask about anything on your dashboard — e.g. \"What's our biggest risk this week?\"",
+    "inputPlaceholder": "Ask the AI assistant...",
+    "send": "Send",
+    "clear": "Clear",
+    "thinking": "Thinking...",
+    "sendError": "Could not reach the AI assistant. Please try again."
   }
 }

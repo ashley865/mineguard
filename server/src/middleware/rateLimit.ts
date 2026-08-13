@@ -24,3 +24,17 @@ export const passwordChangeLimiter = rateLimit({
   legacyHeaders: false,
   message: { error: "Too many attempts. Please try again later." },
 });
+
+/**
+ * Every AI request costs real money once a provider key is configured, so this
+ * caps spend per person rather than per IP (several executives can share an
+ * office network) by keying on the authenticated user id set by requireAuth.
+ */
+export const aiLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  limit: 30,
+  standardHeaders: true,
+  legacyHeaders: false,
+  keyGenerator: (req) => req.auth?.userId || req.ip || "anonymous",
+  message: { error: "Too many AI requests. Please try again in a few minutes." },
+});

@@ -3354,5 +3354,17 @@
       "UPDATE": "Actualizado",
       "DELETE": "Eliminado"
     }
+  },
+  "ai": {
+    "title": "Asistente de IA",
+    "notConfigured": "El asistente de IA aún no está configurado. Un administrador debe agregar una clave de API del proveedor de IA en el servidor antes de que pueda generar información o responder preguntas.",
+    "askQuestion": "Hacer una pregunta",
+    "hideChat": "Ocultar chat",
+    "chatHint": "Pregunta sobre cualquier cosa en tu panel — p. ej. \"¿Cuál es nuestro mayor riesgo esta semana?\"",
+    "inputPlaceholder": "Pregúntale al asistente de IA...",
+    "send": "Enviar",
+    "clear": "Borrar",
+    "thinking": "Pensando...",
+    "sendError": "No se pudo contactar al asistente de IA. Inténtalo de nuevo."
   }
 }
