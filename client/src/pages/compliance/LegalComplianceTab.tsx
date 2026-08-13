@@ -2,11 +2,14 @@ import { FormEvent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { api } from "../../api/client";
 import { useAuth } from "../../context/AuthContext";
-import { LegalComplianceCalendar, LegalComplianceCategory, LegalComplianceItem, LegalComplianceItemStatus, Site } from "../../api/types";
+import { LegalComplianceCalendar, LegalComplianceCalendarEntry, LegalComplianceCategory, LegalComplianceItem, LegalComplianceItemStatus, Site } from "../../api/types";
 import { StatusBadge } from "../../components/Badges";
 import Modal from "../../components/Modal";
-import { buttonDanger, buttonPrimary, buttonSecondary, cardClass, inputClass, labelClass, selectClass } from "../../components/ui";
+import { buttonDanger, buttonPrimary, buttonSecondary, inputClass, labelClass, selectClass } from "../../components/ui";
 import DateField from "../../components/DateField";
+import DataTable, { DataTableColumn } from "../../components/DataTable";
+import SummaryCards from "../../components/SummaryCards";
+import { AuditHistoryButton } from "../../components/AuditHistoryPanel";
 
 const categories: LegalComplianceCategory[] = ["MINING_RIGHT", "ENVIRONMENTAL", "WATER_USE", "LABOUR", "HEALTH_SAFETY", "TAX_LEVY", "OTHER"];
 const itemStatuses: LegalComplianceItemStatus[] = ["UPCOMING", "DUE", "OVERDUE", "COMPLETED"];
@@ -139,36 +142,35 @@ export default function LegalComplianceTab({ sites }: { sites: Site[] }) {
 
   if (loading) return <div className="text-mine-300">{t("common.loading")}</div>;
 
+  const overdueCount = items.filter((i) => i.status === "OVERDUE").length;
+  const dueCount = items.filter((i) => i.status === "DUE").length;
+
+  const calendarColumns: DataTableColumn<LegalComplianceCalendarEntry>[] = [
+    { key: "dueDate", header: t("legalCompliance.dueDate"), render: (e) => <span className={e.overdue ? "text-danger-500 font-medium" : "font-medium"}>{new Date(e.dueDate).toLocaleDateString()}</span>, sortValue: (e) => e.dueDate },
+    { key: "title", header: t("legalCompliance.title"), render: (e) => e.title, sortValue: (e) => e.title },
+    { key: "relatedTo", header: t("legalCompliance.relatedTo"), render: (e) => e.relatedTo, sortValue: (e) => e.relatedTo },
+    { key: "source", header: t("legalCompliance.source"), render: (e) => <span className="text-mine-400 text-xs">{t(`legalCompliance.sources.${e.source}`)}</span>, sortValue: (e) => e.source },
+  ];
+
+  const itemColumns: DataTableColumn<LegalComplianceItem>[] = [
+    { key: "title", header: t("legalCompliance.title"), render: (i) => i.title, sortValue: (i) => i.title },
+    { key: "category", header: t("legalCompliance.category"), render: (i) => t(`legalCompliance.categories.${i.category}`), sortValue: (i) => i.category },
+    { key: "dueDate", header: t("legalCompliance.dueDate"), render: (i) => new Date(i.dueDate).toLocaleDateString(), sortValue: (i) => i.dueDate },
+    { key: "status", header: t("common.status"), render: (i) => <StatusBadge status={i.status} />, sortValue: (i) => i.status },
+  ];
+
   return (
     <div className="space-y-6">
       <div>
         <h2 className="text-sm font-semibold text-mine-200 mb-1">{t("legalCompliance.calendarTitle")}</h2>
         <p className="text-xs text-mine-400 mb-3">{t("legalCompliance.calendarHint")}</p>
-        <div className={`${cardClass} overflow-x-auto`}>
-          <table className="w-full text-sm">
-            <thead className="bg-mine-800/50 text-mine-300 text-xs uppercase">
-              <tr>
-                <th className="text-left px-4 py-2">{t("legalCompliance.dueDate")}</th>
-                <th className="text-left px-4 py-2">{t("legalCompliance.title")}</th>
-                <th className="text-left px-4 py-2">{t("legalCompliance.relatedTo")}</th>
-                <th className="text-left px-4 py-2">{t("legalCompliance.source")}</th>
-              </tr>
-            </thead>
-            <tbody>
-              {calendar?.entries.map((e) => (
-                <tr key={`${e.source}-${e.id}`} className="border-t border-mine-800 hover:bg-mine-800/30">
-                  <td className={`px-4 py-2 font-medium ${e.overdue ? "text-danger-500" : ""}`}>{new Date(e.dueDate).toLocaleDateString()}</td>
-                  <td className="px-4 py-2">{e.title}</td>
-                  <td className="px-4 py-2 text-mine-300">{e.relatedTo}</td>
-                  <td className="px-4 py-2 text-mine-400 text-xs">{t(`legalCompliance.sources.${e.source}`)}</td>
-                </tr>
-              ))}
-              {(!calendar || calendar.entries.length === 0) && (
-                <tr><td colSpan={4} className="px-4 py-6 text-center text-mine-400">{t("legalCompliance.calendarEmpty")}</td></tr>
-              )}
-            </tbody>
-          </table>
-        </div>
+        <DataTable
+          columns={calendarColumns}
+          rows={calendar?.entries ?? []}
+          rowKey={(e) => `${e.source}-${e.id}`}
+          emptyMessage={t("legalCompliance.calendarEmpty")}
+          searchValue={(e) => `${e.title} ${e.relatedTo}`}
+        />
       </div>
 
       <div>
@@ -176,40 +178,35 @@ export default function LegalComplianceTab({ sites }: { sites: Site[] }) {
           <h2 className="text-sm font-semibold text-mine-200">{t("legalCompliance.itemsTitle")}</h2>
           {canEdit && <button className={buttonPrimary} onClick={() => setModal("create")}>{t("legalCompliance.newItem")}</button>}
         </div>
-        <div className={`${cardClass} overflow-x-auto`}>
-          <table className="w-full text-sm">
-            <thead className="bg-mine-800/50 text-mine-300 text-xs uppercase">
-              <tr>
-                <th className="text-left px-4 py-2">{t("legalCompliance.title")}</th>
-                <th className="text-left px-4 py-2">{t("legalCompliance.category")}</th>
-                <th className="text-left px-4 py-2">{t("legalCompliance.dueDate")}</th>
-                <th className="text-left px-4 py-2">{t("common.status")}</th>
-                <th className="px-4 py-2"></th>
-              </tr>
-            </thead>
-            <tbody>
-              {items.map((i) => (
-                <tr key={i.id} className="border-t border-mine-800 hover:bg-mine-800/30">
-                  <td className="px-4 py-2 font-medium">{i.title}</td>
-                  <td className="px-4 py-2 text-mine-300">{t(`legalCompliance.categories.${i.category}`)}</td>
-                  <td className="px-4 py-2 text-mine-300">{new Date(i.dueDate).toLocaleDateString()}</td>
-                  <td className="px-4 py-2"><StatusBadge status={i.status} /></td>
-                  <td className="px-4 py-2 text-right">
-                    {canEdit && (
-                      <div className="flex justify-end gap-2">
-                        <button className="text-xs text-mine-300 hover:text-mine-50" onClick={() => setModal(i)}>{t("common.edit")}</button>
-                        {canDelete && <button className={buttonDanger} onClick={() => remove(i.id)}>{t("common.delete")}</button>}
-                      </div>
-                    )}
-                  </td>
-                </tr>
-              ))}
-              {items.length === 0 && (
-                <tr><td colSpan={5} className="px-4 py-6 text-center text-mine-400">{t("legalCompliance.noneYet")}</td></tr>
-              )}
-            </tbody>
-          </table>
-        </div>
+
+        <SummaryCards
+          cards={[
+            { label: t("legalCompliance.summaryOverdue"), value: overdueCount, tone: overdueCount > 0 ? "danger" : "default" },
+            { label: t("legalCompliance.summaryDue"), value: dueCount, tone: dueCount > 0 ? "hazard" : "default" },
+          ]}
+        />
+
+        <DataTable
+          columns={itemColumns}
+          rows={items}
+          rowKey={(i) => i.id}
+          emptyMessage={t("legalCompliance.noneYet")}
+          searchValue={(i) => `${i.title} ${i.category}`}
+          exportFilename="legal-compliance-items"
+          exportColumns={[
+            { header: t("legalCompliance.title"), value: (i) => i.title },
+            { header: t("legalCompliance.category"), value: (i) => i.category },
+            { header: t("legalCompliance.dueDate"), value: (i) => i.dueDate },
+            { header: t("common.status"), value: (i) => i.status },
+          ]}
+          actions={(i) => (
+            <div className="flex justify-end gap-2">
+              <AuditHistoryButton entityType="LegalComplianceItem" entityId={i.id} />
+              {canEdit && <button className="text-xs text-mine-300 hover:text-mine-50" onClick={() => setModal(i)}>{t("common.edit")}</button>}
+              {canDelete && <button className={buttonDanger} onClick={() => remove(i.id)}>{t("common.delete")}</button>}
+            </div>
+          )}
+        />
       </div>
 
       {modal && (

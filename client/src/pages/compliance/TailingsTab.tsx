@@ -5,8 +5,11 @@ import { useAuth } from "../../context/AuthContext";
 import { DamStructuralRating, Site, TailingsFacility, TailingsInspection } from "../../api/types";
 import { StatusBadge } from "../../components/Badges";
 import Modal from "../../components/Modal";
-import { buttonDanger, buttonPrimary, buttonSecondary, cardClass, inputClass, labelClass, selectClass } from "../../components/ui";
+import { buttonDanger, buttonPrimary, buttonSecondary, inputClass, labelClass, selectClass } from "../../components/ui";
 import DateField from "../../components/DateField";
+import DataTable, { DataTableColumn } from "../../components/DataTable";
+import SummaryCards from "../../components/SummaryCards";
+import { AuditHistoryButton } from "../../components/AuditHistoryPanel";
 
 const structuralRatings: DamStructuralRating[] = ["SATISFACTORY", "FAIR", "POOR", "UNSATISFACTORY", "UNKNOWN"];
 
@@ -199,6 +202,7 @@ function InspectionsModal({ facility, onClose, onChanged }: { facility: Tailings
                 {insp.seepageObserved ? t("tailings.seepageObserved") : "—"}
               </span>
               <span className="text-mine-500">{insp.engineerSignOff ? "✓" : "—"}</span>
+              <AuditHistoryButton entityType="TailingsInspection" entityId={insp.id} />
             </div>
           ))}
         </div>
@@ -248,52 +252,64 @@ export default function TailingsTab({ sites }: { sites: Site[] }) {
 
   if (loading) return <div className="text-mine-300">{t("common.loading")}</div>;
 
+  const poorRatingCount = facilities.filter((f) => f.inspections && f.inspections.length > 0 && (f.inspections[0].structuralRating === "POOR" || f.inspections[0].structuralRating === "UNSATISFACTORY")).length;
+  const seepageCount = facilities.filter((f) => f.inspections && f.inspections.length > 0 && f.inspections[0].seepageObserved).length;
+
+  const columns: DataTableColumn<TailingsFacility>[] = [
+    { key: "name", header: t("tailings.facilityName"), render: (f) => f.name, sortValue: (f) => f.name },
+    { key: "site", header: t("common.site"), render: (f) => f.site?.name ?? "—", sortValue: (f) => f.site?.name ?? "" },
+    {
+      key: "rating",
+      header: t("tailings.lastRating"),
+      render: (f) => (f.inspections && f.inspections.length > 0 ? <StatusBadge status={f.inspections[0].structuralRating} /> : "—"),
+      sortValue: (f) => f.inspections?.[0]?.structuralRating ?? "",
+    },
+    {
+      key: "lastInspection",
+      header: t("tailings.lastInspection"),
+      render: (f) => (f.inspections && f.inspections.length > 0 ? new Date(f.inspections[0].inspectionDate).toLocaleDateString() : "—"),
+      sortValue: (f) => f.inspections?.[0]?.inspectionDate ?? "",
+    },
+  ];
+
   return (
     <div className="space-y-4">
       <p className="text-xs text-mine-400">{t("tailings.hint")}</p>
+
+      <SummaryCards
+        cards={[
+          { label: t("tailings.summaryPoorRating"), value: poorRatingCount, tone: poorRatingCount > 0 ? "danger" : "default" },
+          { label: t("tailings.summarySeepage"), value: seepageCount, tone: seepageCount > 0 ? "hazard" : "default" },
+        ]}
+      />
+
       {canEdit && sites.length > 0 && (
         <div className="flex justify-end">
           <button className={buttonPrimary} onClick={() => setModal("create")}>{t("tailings.newFacility")}</button>
         </div>
       )}
 
-      <div className={`${cardClass} overflow-x-auto`}>
-        <table className="w-full text-sm">
-          <thead className="bg-mine-800/50 text-mine-300 text-xs uppercase">
-            <tr>
-              <th className="text-left px-4 py-2">{t("tailings.facilityName")}</th>
-              <th className="text-left px-4 py-2">{t("common.site")}</th>
-              <th className="text-left px-4 py-2">{t("tailings.lastRating")}</th>
-              <th className="text-left px-4 py-2">{t("tailings.lastInspection")}</th>
-              <th className="px-4 py-2"></th>
-            </tr>
-          </thead>
-          <tbody>
-            {facilities.map((f) => (
-              <tr key={f.id} className="border-t border-mine-800 hover:bg-mine-800/30">
-                <td className="px-4 py-2 font-medium">{f.name}</td>
-                <td className="px-4 py-2 text-mine-300">{f.site?.name}</td>
-                <td className="px-4 py-2">
-                  {f.inspections && f.inspections.length > 0 ? <StatusBadge status={f.inspections[0].structuralRating} /> : "—"}
-                </td>
-                <td className="px-4 py-2 text-mine-300">
-                  {f.inspections && f.inspections.length > 0 ? new Date(f.inspections[0].inspectionDate).toLocaleDateString() : "—"}
-                </td>
-                <td className="px-4 py-2 text-right">
-                  <div className="flex justify-end gap-2">
-                    <button className="text-xs text-mine-300 hover:text-mine-50" onClick={() => setInspectionsFacility(f)}>{t("tailings.inspections")}</button>
-                    {canEdit && <button className="text-xs text-mine-300 hover:text-mine-50" onClick={() => setModal(f)}>{t("common.edit")}</button>}
-                    {canDelete && <button className={buttonDanger} onClick={() => remove(f.id)}>{t("common.delete")}</button>}
-                  </div>
-                </td>
-              </tr>
-            ))}
-            {facilities.length === 0 && (
-              <tr><td colSpan={5} className="px-4 py-6 text-center text-mine-400">{t("tailings.noneYet")}</td></tr>
-            )}
-          </tbody>
-        </table>
-      </div>
+      <DataTable
+        columns={columns}
+        rows={facilities}
+        rowKey={(f) => f.id}
+        emptyMessage={t("tailings.noneYet")}
+        searchValue={(f) => `${f.name} ${f.site?.name ?? ""}`}
+        exportFilename="tailings-facilities"
+        exportColumns={[
+          { header: t("tailings.facilityName"), value: (f) => f.name },
+          { header: t("common.site"), value: (f) => f.site?.name ?? "" },
+          { header: t("tailings.lastRating"), value: (f) => f.inspections?.[0]?.structuralRating ?? "" },
+          { header: t("tailings.lastInspection"), value: (f) => f.inspections?.[0]?.inspectionDate ?? "" },
+        ]}
+        actions={(f) => (
+          <div className="flex justify-end gap-2">
+            <button className="text-xs text-mine-300 hover:text-mine-50" onClick={() => setInspectionsFacility(f)}>{t("tailings.inspections")}</button>
+            {canEdit && <button className="text-xs text-mine-300 hover:text-mine-50" onClick={() => setModal(f)}>{t("common.edit")}</button>}
+            {canDelete && <button className={buttonDanger} onClick={() => remove(f.id)}>{t("common.delete")}</button>}
+          </div>
+        )}
+      />
 
       {modal && (
         <Modal title={modal === "create" ? t("tailings.newFacilityTitle") : t("tailings.editFacilityTitle")} onClose={() => setModal(null)}>

@@ -920,7 +920,10 @@
       "OTHER": "Autre"
     },
     "documents": "Documents ({{count}})",
-    "documentsTitle": "Documents — {{number}}"
+    "documentsTitle": "Documents — {{number}}",
+    "summaryActive": "Permis Actifs",
+    "summaryExpiringSoon": "Expirent Sous 90 Jours",
+    "summaryExpired": "Expirés / Suspendus"
   },
   "workforce": {
     "nav": "Gestion du Personnel",
@@ -1511,7 +1514,9 @@
         "COMPLIANCE_OFFICER": "Responsable de la Conformité",
         "IT_MANAGER": "Responsable Informatique",
         "OTHER": "Autre"
-      }
+      },
+      "summaryPending": "Invitations en Attente",
+      "summaryAccepted": "Acceptées"
     },
     "team": {
       "title": "Équipe de direction",
@@ -2536,7 +2541,10 @@
       "colReportedBy": "Signalé Par",
       "noneYet": "Aucun incident de sécurité signalé pour le moment.",
       "confirmDelete": "Supprimer cet incident de sécurité ?",
-      "saveError": "Impossible d'enregistrer cet incident de sécurité"
+      "saveError": "Impossible d'enregistrer cet incident de sécurité",
+      "summaryOpen": "Incidents Ouverts",
+      "summaryInvestigating": "En Cours d'Enquête",
+      "summaryCritical": "Critiques (non résolus)"
     },
     "tabPatrol": "Gestion des Patrouilles"
   },
@@ -2766,7 +2774,9 @@
     "engineerSignOff": "Approbation de l'ingénieur responsable",
     "noInspections": "Aucune inspection enregistrée pour l'instant.",
     "lastRating": "Dernière Évaluation",
-    "lastInspection": "Dernière Inspection"
+    "lastInspection": "Dernière Inspection",
+    "summaryPoorRating": "Évaluation Médiocre / Insatisfaisante",
+    "summarySeepage": "Infiltration Observée"
   },
   "closureRehabilitation": {
     "nav": "Fermeture et Réhabilitation",
@@ -2831,7 +2841,9 @@
     "editItemTitle": "Modifier l'Élément de Conformité Légale",
     "noneYet": "Aucun élément légal suivi manuellement pour l'instant.",
     "confirmDelete": "Supprimer cet élément légal ?",
-    "calendarEmpty": "Rien n'échoit pendant cette période."
+    "calendarEmpty": "Rien n'échoit pendant cette période.",
+    "summaryOverdue": "En Retard",
+    "summaryDue": "À Échéance"
   },
   "employmentEquity": {
     "nav": "Équité en Emploi et Charte Minière",

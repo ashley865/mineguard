@@ -4,6 +4,9 @@ import { api } from "../../api/client";
 import { ExecutiveInvite, ExecutiveTitle } from "../../api/types";
 import { StatusBadge } from "../../components/Badges";
 import { buttonDanger, buttonPrimary, buttonSecondary, cardClass, inputClass, labelClass, selectClass } from "../../components/ui";
+import DataTable, { DataTableColumn } from "../../components/DataTable";
+import SummaryCards from "../../components/SummaryCards";
+import { AuditHistoryButton } from "../../components/AuditHistoryPanel";
 
 const executiveTitles: ExecutiveTitle[] = [
   "GENERAL_MANAGER",
@@ -138,42 +141,41 @@ export default function InvitesTab() {
         </div>
       )}
 
-      <div className={`${cardClass} overflow-x-auto`}>
-        <table className="w-full text-sm">
-          <thead className="bg-mine-800/50 text-mine-300 text-xs uppercase">
-            <tr>
-              <th className="text-left px-4 py-2">{t("settings.invites.name")}</th>
-              <th className="text-left px-4 py-2">{t("settings.invites.email")}</th>
-              <th className="text-left px-4 py-2">{t("settings.invites.titleField")}</th>
-              <th className="text-left px-4 py-2">{t("common.status")}</th>
-              <th className="text-left px-4 py-2">{t("settings.invites.invitedBy")}</th>
-              <th className="px-4 py-2"></th>
-            </tr>
-          </thead>
-          <tbody>
-            {!loading &&
-              invites.map((inv) => (
-                <tr key={inv.id} className="border-t border-mine-800 hover:bg-mine-800/30">
-                  <td className="px-4 py-2 font-medium">{inv.name}</td>
-                  <td className="px-4 py-2 text-mine-300">{inv.email}</td>
-                  <td className="px-4 py-2 text-mine-300">{t(`settings.invites.titles.${inv.title}`)}</td>
-                  <td className="px-4 py-2"><StatusBadge status={inv.status} /></td>
-                  <td className="px-4 py-2 text-mine-300">{inv.invitedBy?.name ?? "—"}</td>
-                  <td className="px-4 py-2 text-right">
-                    {inv.status === "PENDING" && (
-                      <button className={buttonDanger} onClick={() => revoke(inv.id)}>
-                        {t("settings.invites.revoke")}
-                      </button>
-                    )}
-                  </td>
-                </tr>
-              ))}
-            {!loading && invites.length === 0 && (
-              <tr><td colSpan={6} className="px-4 py-6 text-center text-mine-400">{t("settings.invites.noneYet")}</td></tr>
+      {!loading && (
+        <>
+          <SummaryCards
+            cards={[
+              { label: t("settings.invites.summaryPending"), value: invites.filter((i) => i.status === "PENDING").length },
+              { label: t("settings.invites.summaryAccepted"), value: invites.filter((i) => i.status === "ACCEPTED").length, tone: "success" },
+            ]}
+          />
+          <DataTable
+            columns={
+              [
+                { key: "name", header: t("settings.invites.name"), render: (inv) => <span className="font-medium">{inv.name}</span>, sortValue: (inv) => inv.name },
+                { key: "email", header: t("settings.invites.email"), render: (inv) => inv.email, sortValue: (inv) => inv.email },
+                { key: "title", header: t("settings.invites.titleField"), render: (inv) => t(`settings.invites.titles.${inv.title}`), sortValue: (inv) => inv.title },
+                { key: "status", header: t("common.status"), render: (inv) => <StatusBadge status={inv.status} />, sortValue: (inv) => inv.status },
+                { key: "invitedBy", header: t("settings.invites.invitedBy"), render: (inv) => inv.invitedBy?.name ?? "—", sortValue: (inv) => inv.invitedBy?.name ?? "" },
+              ] as DataTableColumn<ExecutiveInvite>[]
+            }
+            rows={invites}
+            rowKey={(inv) => inv.id}
+            emptyMessage={t("settings.invites.noneYet")}
+            searchValue={(inv) => `${inv.name} ${inv.email}`}
+            actions={(inv) => (
+              <div className="flex justify-end gap-2">
+                <AuditHistoryButton entityType="ExecutiveInvite" entityId={inv.id} />
+                {inv.status === "PENDING" && (
+                  <button className={buttonDanger} onClick={() => revoke(inv.id)}>
+                    {t("settings.invites.revoke")}
+                  </button>
+                )}
+              </div>
             )}
-          </tbody>
-        </table>
-      </div>
+          />
+        </>
+      )}
     </div>
   );
 }

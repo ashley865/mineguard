@@ -7,8 +7,11 @@ import { StatusBadge } from "../components/Badges";
 import Modal from "../components/Modal";
 import EntityDocumentsPanel from "../components/EntityDocumentsPanel";
 import PasswordConfirmModal from "../components/PasswordConfirmModal";
-import { buttonDanger, buttonPrimary, buttonSecondary, cardClass, inputClass, labelClass, selectClass } from "../components/ui";
+import { buttonDanger, buttonPrimary, buttonSecondary, inputClass, labelClass, selectClass } from "../components/ui";
 import DateField from "../components/DateField";
+import DataTable, { DataTableColumn } from "../components/DataTable";
+import SummaryCards from "../components/SummaryCards";
+import { AuditHistoryButton } from "../components/AuditHistoryPanel";
 
 const permitDocTypes: PermitDocumentType[] = [
   "PERMIT_CERTIFICATE",
@@ -233,6 +236,18 @@ export default function Permits() {
 
   if (loading) return <div className="text-mine-300">{t("permits.loading")}</div>;
 
+  const activeCount = items.filter((i) => i.status === "ACTIVE").length;
+  const expiringSoonCount = items.filter((i) => i.status === "ACTIVE" && new Date(i.expiryDate).getTime() - Date.now() < 1000 * 60 * 60 * 24 * 90).length;
+  const expiredCount = items.filter((i) => i.status === "EXPIRED" || i.status === "SUSPENDED").length;
+
+  const columns: DataTableColumn<Permit>[] = [
+    { key: "number", header: t("permits.colNumber"), render: (item) => <span className="font-medium">{item.permitNumber}</span>, sortValue: (item) => item.permitNumber },
+    { key: "type", header: t("permits.colType"), render: (item) => t(`permits.types.${item.type}`), sortValue: (item) => item.type },
+    { key: "site", header: t("permits.colSite"), render: (item) => item.site?.name ?? "—", sortValue: (item) => item.site?.name ?? "" },
+    { key: "expiry", header: t("permits.colExpiry"), render: (item) => new Date(item.expiryDate).toLocaleDateString(), sortValue: (item) => item.expiryDate },
+    { key: "status", header: t("permits.colStatus"), render: (item) => <StatusBadge status={item.status} />, sortValue: (item) => item.status },
+  ];
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between flex-wrap gap-3">
@@ -245,47 +260,43 @@ export default function Permits() {
         )}
       </div>
 
-      <div className={`${cardClass} overflow-x-auto`}>
-        <table className="w-full text-sm">
-          <thead className="bg-mine-800/50 text-mine-300 text-xs uppercase">
-            <tr>
-              <th className="text-left px-4 py-2">{t("permits.colNumber")}</th>
-              <th className="text-left px-4 py-2">{t("permits.colType")}</th>
-              <th className="text-left px-4 py-2">{t("permits.colSite")}</th>
-              <th className="text-left px-4 py-2">{t("permits.colExpiry")}</th>
-              <th className="text-left px-4 py-2">{t("permits.colStatus")}</th>
-              <th className="px-4 py-2"></th>
-            </tr>
-          </thead>
-          <tbody>
-            {items.map((item) => (
-              <tr key={item.id} className="border-t border-mine-800 hover:bg-mine-800/30">
-                <td className="px-4 py-2 font-medium">{item.permitNumber}</td>
-                <td className="px-4 py-2 text-mine-300">{t(`permits.types.${item.type}`)}</td>
-                <td className="px-4 py-2 text-mine-300">{item.site?.name}</td>
-                <td className="px-4 py-2 text-mine-300">{new Date(item.expiryDate).toLocaleDateString()}</td>
-                <td className="px-4 py-2"><StatusBadge status={item.status} /></td>
-                <td className="px-4 py-2 text-right">
-                  <div className="flex justify-end gap-2">
-                    <button className="text-xs text-mine-300 hover:text-mine-50" onClick={() => setDocsPermitId(item.id)}>
-                      {t("permits.documents", { count: item.documents.length })}
-                    </button>
-                    {canEdit && (
-                      <>
-                        <button className="text-xs text-mine-300 hover:text-mine-50" onClick={() => setModal(item)}>{t("common.edit")}</button>
-                        <button className={buttonDanger} onClick={() => remove(item.id)}>{t("common.delete")}</button>
-                      </>
-                    )}
-                  </div>
-                </td>
-              </tr>
-            ))}
-            {items.length === 0 && (
-              <tr><td colSpan={6} className="px-4 py-6 text-center text-mine-400">{t("permits.noneYet")}</td></tr>
+      <SummaryCards
+        cards={[
+          { label: t("permits.summaryActive"), value: activeCount, tone: "success" },
+          { label: t("permits.summaryExpiringSoon"), value: expiringSoonCount, tone: expiringSoonCount > 0 ? "hazard" : "default" },
+          { label: t("permits.summaryExpired"), value: expiredCount, tone: expiredCount > 0 ? "danger" : "default" },
+        ]}
+      />
+
+      <DataTable
+        columns={columns}
+        rows={items}
+        rowKey={(item) => item.id}
+        emptyMessage={t("permits.noneYet")}
+        searchValue={(item) => `${item.permitNumber} ${item.type} ${item.site?.name ?? ""}`}
+        exportFilename="permits"
+        exportColumns={[
+          { header: t("permits.colNumber"), value: (item) => item.permitNumber },
+          { header: t("permits.colType"), value: (item) => item.type },
+          { header: t("permits.colSite"), value: (item) => item.site?.name ?? "" },
+          { header: t("permits.colExpiry"), value: (item) => item.expiryDate },
+          { header: t("permits.colStatus"), value: (item) => item.status },
+        ]}
+        actions={(item) => (
+          <div className="flex justify-end gap-2">
+            <button className="text-xs text-mine-300 hover:text-mine-50" onClick={() => setDocsPermitId(item.id)}>
+              {t("permits.documents", { count: item.documents.length })}
+            </button>
+            <AuditHistoryButton entityType="Permit" entityId={item.id} />
+            {canEdit && (
+              <>
+                <button className="text-xs text-mine-300 hover:text-mine-50" onClick={() => setModal(item)}>{t("common.edit")}</button>
+                <button className={buttonDanger} onClick={() => remove(item.id)}>{t("common.delete")}</button>
+              </>
             )}
-          </tbody>
-        </table>
-      </div>
+          </div>
+        )}
+      />
 
       {modal && (
         <Modal title={modal === "create" ? t("permits.newTitle") : t("permits.editTitle")} onClose={() => setModal(null)}>

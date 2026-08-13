@@ -12,7 +12,10 @@ import {
 } from "../../api/types";
 import { StatusBadge, SeverityBadge } from "../../components/Badges";
 import Modal from "../../components/Modal";
-import { buttonDanger, buttonPrimary, buttonSecondary, cardClass, inputClass, labelClass, selectClass } from "../../components/ui";
+import { buttonDanger, buttonPrimary, buttonSecondary, inputClass, labelClass, selectClass } from "../../components/ui";
+import DataTable, { DataTableColumn } from "../../components/DataTable";
+import SummaryCards from "../../components/SummaryCards";
+import { AuditHistoryButton } from "../../components/AuditHistoryPanel";
 
 const categories: SecurityIncidentCategory[] = [
   "THEFT",
@@ -174,9 +177,40 @@ export default function IncidentManagementTab({ sites, zones }: { sites: Site[];
 
   if (loading) return <div className="text-mine-300">{t("common.loading")}</div>;
 
+  const openCount = items.filter((i) => i.status === "OPEN").length;
+  const investigatingCount = items.filter((i) => i.status === "INVESTIGATING").length;
+  const criticalCount = items.filter((i) => i.severity === "CRITICAL" && i.status !== "RESOLVED").length;
+
+  const columns: DataTableColumn<SecurityIncident>[] = [
+    { key: "occurred", header: t("security.incidents.colOccurred"), render: (item) => new Date(item.occurredAt).toLocaleString(), sortValue: (item) => item.occurredAt },
+    {
+      key: "category",
+      header: t("security.incidents.category"),
+      render: (item) => (
+        <>
+          {t(`security.incidents.categories.${item.category}`)}
+          <div className="text-[10px] text-mine-400">{item.site?.name}{item.zone ? ` · ${item.zone.name}` : ""}{item.location ? ` · ${item.location}` : ""}</div>
+        </>
+      ),
+      sortValue: (item) => item.category,
+    },
+    { key: "severity", header: t("security.incidents.severity"), render: (item) => <SeverityBadge severity={item.severity} />, sortValue: (item) => item.severity },
+    { key: "description", header: t("security.incidents.description"), render: (item) => <div className="truncate max-w-xs" title={item.description}>{item.description}</div> },
+    { key: "reportedBy", header: t("security.incidents.colReportedBy"), render: (item) => item.reportedBy?.name ?? "—", sortValue: (item) => item.reportedBy?.name ?? "" },
+    { key: "status", header: t("common.status"), render: (item) => <StatusBadge status={item.status} />, sortValue: (item) => item.status },
+  ];
+
   return (
     <div className="space-y-4">
       <p className="text-mine-300 text-sm">{t("security.incidents.subtitle")}</p>
+
+      <SummaryCards
+        cards={[
+          { label: t("security.incidents.summaryOpen"), value: openCount },
+          { label: t("security.incidents.summaryInvestigating"), value: investigatingCount },
+          { label: t("security.incidents.summaryCritical"), value: criticalCount, tone: criticalCount > 0 ? "danger" : "default" },
+        ]}
+      />
 
       {canEdit && sites.length > 0 && (
         <div className="flex justify-end">
@@ -184,49 +218,33 @@ export default function IncidentManagementTab({ sites, zones }: { sites: Site[];
         </div>
       )}
 
-      <div className={`${cardClass} overflow-x-auto`}>
-        <table className="w-full text-sm">
-          <thead className="bg-mine-800/50 text-mine-300 text-xs uppercase">
-            <tr>
-              <th className="text-left px-4 py-2">{t("security.incidents.colOccurred")}</th>
-              <th className="text-left px-4 py-2">{t("security.incidents.category")}</th>
-              <th className="text-left px-4 py-2">{t("security.incidents.severity")}</th>
-              <th className="text-left px-4 py-2">{t("security.incidents.description")}</th>
-              <th className="text-left px-4 py-2">{t("security.incidents.colReportedBy")}</th>
-              <th className="text-left px-4 py-2">{t("common.status")}</th>
-              <th className="px-4 py-2"></th>
-            </tr>
-          </thead>
-          <tbody>
-            {items.map((item) => (
-              <tr key={item.id} className="border-t border-mine-800 hover:bg-mine-800/30 align-top">
-                <td className="px-4 py-2 text-mine-300">{new Date(item.occurredAt).toLocaleString()}</td>
-                <td className="px-4 py-2 font-medium">
-                  {t(`security.incidents.categories.${item.category}`)}
-                  <div className="text-[10px] text-mine-400">{item.site?.name}{item.zone ? ` · ${item.zone.name}` : ""}{item.location ? ` · ${item.location}` : ""}</div>
-                </td>
-                <td className="px-4 py-2"><SeverityBadge severity={item.severity} /></td>
-                <td className="px-4 py-2 text-mine-300 max-w-xs">
-                  <div className="truncate" title={item.description}>{item.description}</div>
-                </td>
-                <td className="px-4 py-2 text-mine-300">{item.reportedBy?.name ?? "—"}</td>
-                <td className="px-4 py-2"><StatusBadge status={item.status} /></td>
-                <td className="px-4 py-2 text-right">
-                  {canEdit && (
-                    <div className="flex justify-end gap-2">
-                      <button className="text-xs text-mine-300 hover:text-mine-50" onClick={() => setModal(item)}>{t("common.edit")}</button>
-                      <button className={buttonDanger} onClick={() => remove(item.id)}>{t("common.delete")}</button>
-                    </div>
-                  )}
-                </td>
-              </tr>
-            ))}
-            {items.length === 0 && (
-              <tr><td colSpan={7} className="px-4 py-6 text-center text-mine-400">{t("security.incidents.noneYet")}</td></tr>
+      <DataTable
+        columns={columns}
+        rows={items}
+        rowKey={(item) => item.id}
+        emptyMessage={t("security.incidents.noneYet")}
+        searchValue={(item) => `${item.description} ${item.category} ${item.reportedBy?.name ?? ""}`}
+        exportFilename="security-incidents"
+        exportColumns={[
+          { header: t("security.incidents.colOccurred"), value: (item) => item.occurredAt },
+          { header: t("security.incidents.category"), value: (item) => item.category },
+          { header: t("security.incidents.severity"), value: (item) => item.severity },
+          { header: t("security.incidents.description"), value: (item) => item.description },
+          { header: t("security.incidents.colReportedBy"), value: (item) => item.reportedBy?.name ?? "" },
+          { header: t("common.status"), value: (item) => item.status },
+        ]}
+        actions={(item) => (
+          <div className="flex justify-end gap-2">
+            <AuditHistoryButton entityType="SecurityIncident" entityId={item.id} />
+            {canEdit && (
+              <>
+                <button className="text-xs text-mine-300 hover:text-mine-50" onClick={() => setModal(item)}>{t("common.edit")}</button>
+                <button className={buttonDanger} onClick={() => remove(item.id)}>{t("common.delete")}</button>
+              </>
             )}
-          </tbody>
-        </table>
-      </div>
+          </div>
+        )}
+      />
 
       {modal && (
         <Modal title={modal === "create" ? t("security.incidents.newTitle") : t("security.incidents.editTitle")} onClose={() => setModal(null)} size="lg">

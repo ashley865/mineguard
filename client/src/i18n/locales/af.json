@@ -920,7 +920,10 @@
       "OTHER": "Ander"
     },
     "documents": "Dokumente ({{count}})",
-    "documentsTitle": "Dokumente — {{number}}"
+    "documentsTitle": "Dokumente — {{number}}",
+    "summaryActive": "Aktiewe Permitte",
+    "summaryExpiringSoon": "Verval Binne 90 Dae",
+    "summaryExpired": "Verstryk / Geskors"
   },
   "workforce": {
     "nav": "Arbeidsmagbestuur",
@@ -1511,7 +1514,9 @@
         "COMPLIANCE_OFFICER": "Voldoeningsbeampte",
         "IT_MANAGER": "IT-bestuurder",
         "OTHER": "Ander"
-      }
+      },
+      "summaryPending": "Hangende Uitnodigings",
+      "summaryAccepted": "Aanvaar"
     },
     "team": {
       "title": "Uitvoerende Span",
@@ -2536,7 +2541,10 @@
       "colReportedBy": "Aangemeld Deur",
       "noneYet": "Nog geen sekuriteitsvoorvalle aangeteken nie.",
       "confirmDelete": "Verwyder hierdie sekuriteitsvoorval?",
-      "saveError": "Kon nie hierdie sekuriteitsvoorval stoor nie"
+      "saveError": "Kon nie hierdie sekuriteitsvoorval stoor nie",
+      "summaryOpen": "Oop Voorvalle",
+      "summaryInvestigating": "Ondersoek Word Gedoen",
+      "summaryCritical": "Krities (onopgelos)"
     },
     "tabPatrol": "Patrolliebestuur"
   },
@@ -2766,7 +2774,9 @@
     "engineerSignOff": "Ingenieur-van-Rekord-goedkeuring",
     "noInspections": "Nog geen inspeksies aangeteken nie.",
     "lastRating": "Laaste Gradering",
-    "lastInspection": "Laaste Inspeksie"
+    "lastInspection": "Laaste Inspeksie",
+    "summaryPoorRating": "Swak / Onbevredigende Gradering",
+    "summarySeepage": "Lekkasie Waargeneem"
   },
   "closureRehabilitation": {
     "nav": "Sluiting & Rehabilitasie",
@@ -2831,7 +2841,9 @@
     "editItemTitle": "Wysig Wetlike Nakomingsitem",
     "noneYet": "Nog geen handmatig-opgevolgde wetlike items nie.",
     "confirmDelete": "Skrap hierdie wetlike item?",
-    "calendarEmpty": "Niks verskuldig in hierdie tydperk nie."
+    "calendarEmpty": "Niks verskuldig in hierdie tydperk nie.",
+    "summaryOverdue": "Agterstallig",
+    "summaryDue": "Verskuldig"
   },
   "employmentEquity": {
     "nav": "Diensbillikheid & Handves",

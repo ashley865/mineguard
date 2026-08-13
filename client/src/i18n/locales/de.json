@@ -920,7 +920,10 @@
       "OTHER": "Sonstiges"
     },
     "documents": "Dokumente ({{count}})",
-    "documentsTitle": "Dokumente — {{number}}"
+    "documentsTitle": "Dokumente — {{number}}",
+    "summaryActive": "Aktive Genehmigungen",
+    "summaryExpiringSoon": "Läuft in 90 Tagen ab",
+    "summaryExpired": "Abgelaufen / Ausgesetzt"
   },
   "workforce": {
     "nav": "Personalverwaltung",
@@ -1511,7 +1514,9 @@
         "COMPLIANCE_OFFICER": "Compliance-Beauftragter",
         "IT_MANAGER": "IT-Leiter",
         "OTHER": "Sonstiges"
-      }
+      },
+      "summaryPending": "Ausstehende Einladungen",
+      "summaryAccepted": "Angenommen"
     },
     "team": {
       "title": "Führungsteam",
@@ -2536,7 +2541,10 @@
       "colReportedBy": "Gemeldet Von",
       "noneYet": "Noch keine Sicherheitsvorfälle erfasst.",
       "confirmDelete": "Diesen Sicherheitsvorfall löschen?",
-      "saveError": "Dieser Sicherheitsvorfall konnte nicht gespeichert werden"
+      "saveError": "Dieser Sicherheitsvorfall konnte nicht gespeichert werden",
+      "summaryOpen": "Offene Vorfälle",
+      "summaryInvestigating": "Wird Untersucht",
+      "summaryCritical": "Kritisch (ungelöst)"
     },
     "tabPatrol": "Patrouillenmanagement"
   },
@@ -2766,7 +2774,9 @@
     "engineerSignOff": "Freigabe des verantwortlichen Ingenieurs",
     "noInspections": "Noch keine Inspektionen erfasst.",
     "lastRating": "Letzte Bewertung",
-    "lastInspection": "Letzte Inspektion"
+    "lastInspection": "Letzte Inspektion",
+    "summaryPoorRating": "Schlechte / Unbefriedigende Bewertung",
+    "summarySeepage": "Sickerwasser Festgestellt"
   },
   "closureRehabilitation": {
     "nav": "Schließung & Rehabilitation",
@@ -2831,7 +2841,9 @@
     "editItemTitle": "Rechtliche Compliance-Position Bearbeiten",
     "noneYet": "Noch keine manuell erfassten rechtlichen Positionen.",
     "confirmDelete": "Diese rechtliche Position löschen?",
-    "calendarEmpty": "In diesem Zeitraum ist nichts fällig."
+    "calendarEmpty": "In diesem Zeitraum ist nichts fällig.",
+    "summaryOverdue": "Überfällig",
+    "summaryDue": "Fällig"
   },
   "employmentEquity": {
     "nav": "Chancengleichheit & Charta",

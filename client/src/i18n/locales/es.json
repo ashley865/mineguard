@@ -920,7 +920,10 @@
       "OTHER": "Otro"
     },
     "documents": "Documentos ({{count}})",
-    "documentsTitle": "Documentos — {{number}}"
+    "documentsTitle": "Documentos — {{number}}",
+    "summaryActive": "Permisos Activos",
+    "summaryExpiringSoon": "Vencen en 90 Días",
+    "summaryExpired": "Vencidos / Suspendidos"
   },
   "workforce": {
     "nav": "Gestión de Personal",
@@ -1511,7 +1514,9 @@
         "COMPLIANCE_OFFICER": "Oficial de Cumplimiento",
         "IT_MANAGER": "Gerente de TI",
         "OTHER": "Otro"
-      }
+      },
+      "summaryPending": "Invitaciones Pendientes",
+      "summaryAccepted": "Aceptadas"
     },
     "team": {
       "title": "Equipo Ejecutivo",
@@ -2536,7 +2541,10 @@
       "colReportedBy": "Reportado Por",
       "noneYet": "Aún no se han registrado incidentes de seguridad.",
       "confirmDelete": "¿Eliminar este incidente de seguridad?",
-      "saveError": "No se pudo guardar este incidente de seguridad"
+      "saveError": "No se pudo guardar este incidente de seguridad",
+      "summaryOpen": "Incidentes Abiertos",
+      "summaryInvestigating": "En Investigación",
+      "summaryCritical": "Críticos (sin resolver)"
     },
     "tabPatrol": "Gestión de Patrullas"
   },
@@ -2766,7 +2774,9 @@
     "engineerSignOff": "Aprobación del Ingeniero Responsable",
     "noInspections": "Aún no se han registrado inspecciones.",
     "lastRating": "Última Calificación",
-    "lastInspection": "Última Inspección"
+    "lastInspection": "Última Inspección",
+    "summaryPoorRating": "Calificación Deficiente / Insatisfactoria",
+    "summarySeepage": "Filtración Observada"
   },
   "closureRehabilitation": {
     "nav": "Cierre y Rehabilitación",
@@ -2831,7 +2841,9 @@
     "editItemTitle": "Editar Elemento de Cumplimiento Legal",
     "noneYet": "Aún no hay elementos legales registrados manualmente.",
     "confirmDelete": "¿Eliminar este elemento legal?",
-    "calendarEmpty": "Nada vence en este período."
+    "calendarEmpty": "Nada vence en este período.",
+    "summaryOverdue": "Vencidos",
+    "summaryDue": "Por Vencer"
   },
   "employmentEquity": {
     "nav": "Equidad Laboral y Carta Minera",
