@@ -195,6 +195,116 @@ async function buildHrManagerContext(mineId: string) {
   };
 }
 
+async function buildCfoContext(mineId: string) {
+  const sixMonthsAgo = new Date();
+  sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
+  sixMonthsAgo.setDate(1);
+  sixMonthsAgo.setHours(0, 0, 0, 0);
+  const thirtyDaysAgo = new Date(Date.now() - 30 * 86400000);
+  const in30Days = new Date(Date.now() + 30 * 86400000);
+
+  const [
+    mine,
+    paidInvoices,
+    paidExpensesLast6Months,
+    pendingExpenses,
+    overdueInvoices,
+    outstandingInvoices,
+    pendingPurchaseOrders,
+    recentPayslips,
+    upcomingInvoicesDue,
+  ] = await Promise.all([
+    prisma.mine.findUnique({ where: { id: mineId }, select: { name: true } }),
+    prisma.invoice.findMany({
+      where: { site: { mineId }, status: "PAID", issueDate: { gte: sixMonthsAgo } },
+      select: { vatRate: true, lines: { select: { lineTotal: true } } },
+    }),
+    prisma.expense.findMany({
+      where: { site: { mineId }, status: "PAID", expenseDate: { gte: sixMonthsAgo } },
+      select: { amount: true, category: true },
+    }),
+    prisma.expense.aggregate({ where: { status: "PENDING", site: { mineId } }, _count: true, _sum: { amount: true } }),
+    prisma.invoice.aggregate({
+      where: { site: { mineId }, status: "OVERDUE" },
+      _count: true,
+    }),
+    prisma.invoice.findMany({
+      where: { site: { mineId }, status: { in: ["SENT", "OVERDUE"] } },
+      select: { vatRate: true, dueDate: true, status: true, lines: { select: { lineTotal: true } } },
+    }),
+    prisma.purchaseOrder.aggregate({
+      where: { status: "SUBMITTED", site: { mineId } },
+      _count: true,
+      _sum: { totalAmount: true },
+    }),
+    prisma.payslip.findMany({
+      where: { worker: { site: { mineId } }, issuedAt: { gte: thirtyDaysAgo } },
+      select: { grossPay: true, netPay: true, deductions: true, workerId: true },
+    }),
+    prisma.invoice.count({
+      where: { site: { mineId }, status: "SENT", dueDate: { lte: in30Days } },
+    }),
+  ]);
+
+  const totalEarnings = paidInvoices.reduce((sum, inv) => {
+    const subtotal = inv.lines.reduce((s, l) => s + l.lineTotal, 0);
+    return sum + subtotal * (1 + inv.vatRate / 100);
+  }, 0);
+  const totalExpensesPaid = paidExpensesLast6Months.reduce((sum, e) => sum + e.amount, 0);
+
+  const categoryTotals: Record<string, number> = {};
+  for (const e of paidExpensesLast6Months) categoryTotals[e.category] = (categoryTotals[e.category] ?? 0) + e.amount;
+  const topExpenseCategories = Object.entries(categoryTotals)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 5)
+    .map(([category, total]) => ({ category, total: Math.round(total) }));
+
+  let overdueInvoiceTotal = 0;
+  let outstandingInvoiceTotal = 0;
+  for (const inv of outstandingInvoices) {
+    const subtotal = inv.lines.reduce((s, l) => s + l.lineTotal, 0);
+    const total = subtotal * (1 + inv.vatRate / 100);
+    outstandingInvoiceTotal += total;
+    if (inv.status === "OVERDUE") overdueInvoiceTotal += total;
+  }
+
+  const payrollLast30Days = recentPayslips.reduce(
+    (acc, p) => ({
+      grossPay: acc.grossPay + p.grossPay,
+      netPay: acc.netPay + p.netPay,
+      deductions: acc.deductions + p.deductions,
+    }),
+    { grossPay: 0, netPay: 0, deductions: 0 }
+  );
+
+  return {
+    mine: { name: mine?.name ?? "the mine" },
+    financialSummaryLast6Months: {
+      totalEarnings: Math.round(totalEarnings),
+      totalExpensesPaid: Math.round(totalExpensesPaid),
+      netMargin: Math.round(totalEarnings - totalExpensesPaid),
+      topExpenseCategories,
+    },
+    pendingExpenseApprovals: { count: pendingExpenses._count, totalAmount: pendingExpenses._sum.amount ?? 0 },
+    invoices: {
+      overdueCount: overdueInvoices._count,
+      overdueTotal: Math.round(overdueInvoiceTotal),
+      outstandingTotal: Math.round(outstandingInvoiceTotal),
+      dueWithin30Days: upcomingInvoicesDue,
+    },
+    pendingPurchaseOrderApprovals: {
+      count: pendingPurchaseOrders._count,
+      totalAmount: pendingPurchaseOrders._sum.totalAmount ?? 0,
+    },
+    payrollLast30Days: {
+      grossPay: Math.round(payrollLast30Days.grossPay),
+      netPay: Math.round(payrollLast30Days.netPay),
+      deductions: Math.round(payrollLast30Days.deductions),
+      workerCount: new Set(recentPayslips.map((p) => p.workerId)).size,
+    },
+  };
+}
+
 const BASE_SYSTEM_PROMPT = (mineName: string, roleTitle: string) =>
   `You are the Mine Guard AI Assistant, advising the ${roleTitle} of ${mineName}, a South African mining operation. ` +
   `Base every answer strictly on the JSON data snapshot provided in this conversation — never invent figures or names. ` +
@@ -212,6 +322,14 @@ const AI_MODULES: Record<string, AiModule> = {
       BASE_SYSTEM_PROMPT(ctx.mine.name, "HR Manager") +
       ` Focus on workforce composition, leave, new hires, certificate/training expiries, and labour relations case load ` +
       `(disciplinary cases, grievances, CCMA referrals) — this is an HR-specific assistant, not a general operations one.`,
+  },
+  CFO: {
+    buildContext: buildCfoContext,
+    systemPrompt: (ctx) =>
+      BASE_SYSTEM_PROMPT(ctx.mine.name, "CFO") +
+      ` Focus on financial performance (earnings, expenses, net margin), cost centres, cash owed to and by the mine ` +
+      `(overdue/outstanding invoices), approvals awaiting action (pending expenses, pending purchase orders), and ` +
+      `payroll cost — this is a finance-specific assistant, not a general operations one. All monetary figures are in ZAR.`,
   },
 };
 
