@@ -35,7 +35,12 @@
     "startDate": "Fecha de inicio",
     "endDate": "Fecha de fin",
     "yes": "Sí",
-    "no": "No"
+    "no": "No",
+    "search": "Buscar",
+    "exportCsv": "Exportar CSV",
+    "pageOf": "Página {{page}} de {{pages}}",
+    "previous": "Anterior",
+    "next": "Siguiente"
   },
   "nav": {
     "dashboard": "Panel",
@@ -604,7 +609,13 @@
       "PENDING_REPLACEMENT": "Reemplazo pendiente",
       "DRILLING": "Perforando",
       "ABANDONED": "Abandonado",
-      "DELAYED": "Retrasado"
+      "DELAYED": "Retrasado",
+      "SAFETY_HAZARD": "Peligro de seguridad",
+      "SUSPICIOUS_ACTIVITY": "Actividad sospechosa",
+      "SECURITY_CONCERN": "Preocupación de seguridad",
+      "MAINTENANCE_ISSUE": "Problema de mantenimiento",
+      "GENERAL_OBSERVATION": "Observación general",
+      "OTHER": "Otro"
     },
     "severity": {
       "LOW": "Baja",
@@ -820,7 +831,11 @@
       "colRequirement": "Requisito Incumplido",
       "colResponsible": "Responsable",
       "noneYet": "Aún no se han registrado hallazgos de auditoría.",
-      "confirmDelete": "¿Eliminar este hallazgo de auditoría?"
+      "confirmDelete": "¿Eliminar este hallazgo de auditoría?",
+      "summaryOpen": "Hallazgos Abiertos",
+      "summaryOverdue": "Vencidos",
+      "summaryCritical": "Críticos (sin resolver)",
+      "searchPlaceholder": "Buscar hallazgos..."
     },
     "tabHazards": "Gestión de Peligros",
     "hazard": {
@@ -2580,7 +2595,17 @@
       "evacuationSent": "Evacuación activada. Diríjase al punto de encuentro más cercano.",
       "siteNotFound": "Este enlace de sitio no es válido.",
       "genericError": "Algo salió mal. Inténtelo de nuevo.",
-      "linkInvalid": "Este enlace de servicio no es válido o ha sido revocado. Contacte a su Gerente de Seguridad para obtener un nuevo enlace."
+      "linkInvalid": "Este enlace de servicio no es válido o ha sido revocado. Contacte a su Gerente de Seguridad para obtener un nuevo enlace.",
+      "observationRequiresContent": "Agregue una foto o una nota antes de enviar.",
+      "observationCategory": "Categoría",
+      "observationCategories": {
+        "GENERAL_OBSERVATION": "Observación general",
+        "SAFETY_HAZARD": "Peligro de seguridad",
+        "SUSPICIOUS_ACTIVITY": "Actividad sospechosa",
+        "SECURITY_CONCERN": "Preocupación de seguridad",
+        "MAINTENANCE_ISSUE": "Problema de mantenimiento",
+        "OTHER": "Otro"
+      }
     },
     "tabGuards": "Guardias",
     "tabDutyLog": "Registro de Servicio",
@@ -2612,6 +2637,15 @@
       "selectAtLeastOne": "Seleccione al menos una ruta y un guardia.",
       "noRoutesAtSite": "Aún no hay rutas de patrulla activas en este sitio.",
       "resultSummary": "Se crearon {{created}} nueva(s) asignación(es). Se omitieron {{skipped}} día(s) ya asignado(s)."
+    },
+    "tabObservations": "Observaciones",
+    "observations": {
+      "hint": "Cada observación que un guardia ha registrado — durante una patrulla programada o en servicio general sin asignación — para su clasificación.",
+      "colPhoto": "Foto",
+      "colLocation": "Ubicación",
+      "viewPhoto": "Ver foto",
+      "viewLocation": "Ver en el mapa",
+      "noneYet": "Aún no se han registrado observaciones."
     }
   },
   "statutoryAppointments": {
@@ -3102,7 +3136,9 @@
     },
     "newUnionAgreement": "+ Nuevo Acuerdo Sindical",
     "newUnionAgreementTitle": "Nuevo Acuerdo de Reconocimiento Sindical",
-    "noUnionAgreements": "Aún no se han registrado acuerdos sindicales."
+    "noUnionAgreements": "Aún no se han registrado acuerdos sindicales.",
+    "summaryOpenCases": "Casos Abiertos",
+    "summaryDismissals": "Despidos"
   },
   "resources": {
     "nav": "Recursos de Agua y Energía",
@@ -3280,5 +3316,17 @@
     "newShaftInspectionTitle": "Nueva Inspección de Pozo",
     "noShaftInspections": "Aún no se han registrado inspecciones de pozo.",
     "headgearCondition": "Condición de la torre de extracción"
+  },
+  "audit": {
+    "history": "Historial",
+    "historyTitle": "Historial de Cambios",
+    "loadError": "No se pudo cargar el historial.",
+    "noHistory": "Aún no se ha registrado historial.",
+    "unknownUser": "Usuario desconocido",
+    "actions": {
+      "CREATE": "Creado",
+      "UPDATE": "Actualizado",
+      "DELETE": "Eliminado"
+    }
   }
 }

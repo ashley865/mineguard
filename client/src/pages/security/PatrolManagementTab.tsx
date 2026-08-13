@@ -1,14 +1,14 @@
 import { FormEvent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { api } from "../../api/client";
+import { api, API_URL } from "../../api/client";
 import { useAuth } from "../../context/AuthContext";
-import { DutyLogEntry, GuardSummary, PatrolAssignment, PatrolRoute, Site, Worker } from "../../api/types";
+import { DutyLogEntry, GuardSummary, PatrolAssignment, PatrolObservation, PatrolRoute, Site, Worker } from "../../api/types";
 import { StatusBadge } from "../../components/Badges";
 import Modal from "../../components/Modal";
 import { buttonDanger, buttonPrimary, buttonSecondary, cardClass, inputClass, labelClass, selectClass } from "../../components/ui";
 import DateField from "../../components/DateField";
 
-type SubTab = "routes" | "assignments" | "guards" | "dutyLog";
+type SubTab = "routes" | "assignments" | "guards" | "dutyLog" | "observations";
 
 const SUGGESTED_CHECKPOINTS = [
   "Gate 1",
@@ -353,6 +353,7 @@ export default function PatrolManagementTab({ sites }: { sites: Site[] }) {
   const [guards, setGuards] = useState<Worker[]>([]);
   const [guardSummaries, setGuardSummaries] = useState<GuardSummary[]>([]);
   const [dutyLog, setDutyLog] = useState<DutyLogEntry[]>([]);
+  const [observations, setObservations] = useState<PatrolObservation[]>([]);
   const [loading, setLoading] = useState(true);
   const [routeModal, setRouteModal] = useState<null | "create" | PatrolRoute>(null);
   const [assignmentModal, setAssignmentModal] = useState(false);
@@ -365,18 +366,20 @@ export default function PatrolManagementTab({ sites }: { sites: Site[] }) {
     // Settled rather than Promise.all: a failure fetching one section (e.g. the guard
     // duty log) must not leave every other section — routes, assignments — stuck on a
     // permanent loading spinner just because one request rejected.
-    const [r, a, g, gs, dl] = await Promise.allSettled([
+    const [r, a, g, gs, dl, ob] = await Promise.allSettled([
       api.get<PatrolRoute[]>("/patrol/routes"),
       api.get<PatrolAssignment[]>("/patrol/assignments"),
       api.get<Worker[]>("/workers", { params: { category: "SECURITY" } }),
       api.get<GuardSummary[]>("/patrol/guards"),
       api.get<DutyLogEntry[]>("/patrol/duty-log"),
+      api.get<PatrolObservation[]>("/patrol/observations"),
     ]);
     if (r.status === "fulfilled") setRoutes(r.value.data);
     if (a.status === "fulfilled") setAssignments(a.value.data);
     if (g.status === "fulfilled") setGuards(g.value.data);
     if (gs.status === "fulfilled") setGuardSummaries(gs.value.data);
     if (dl.status === "fulfilled") setDutyLog(dl.value.data);
+    if (ob.status === "fulfilled") setObservations(ob.value.data);
     setLoading(false);
   }
 
@@ -474,6 +477,9 @@ export default function PatrolManagementTab({ sites }: { sites: Site[] }) {
         </button>
         <button className={subTab === "dutyLog" ? buttonPrimary : buttonSecondary} onClick={() => setSubTab("dutyLog")}>
           {t("patrol.tabDutyLog")}
+        </button>
+        <button className={subTab === "observations" ? buttonPrimary : buttonSecondary} onClick={() => setSubTab("observations")}>
+          {t("patrol.tabObservations")}
         </button>
       </div>
 
@@ -653,6 +659,53 @@ export default function PatrolManagementTab({ sites }: { sites: Site[] }) {
                 ))}
                 {dutyLog.length === 0 && (
                   <tr><td colSpan={4} className="px-4 py-6 text-center text-mine-400">{t("patrol.dutyLog.noneYet")}</td></tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
+
+      {subTab === "observations" && (
+        <div className="space-y-3">
+          <p className="text-xs text-mine-400">{t("patrol.observations.hint")}</p>
+          <div className={`${cardClass} overflow-x-auto`}>
+            <table className="w-full text-sm">
+              <thead className="bg-mine-800/50 text-mine-300 text-xs uppercase">
+                <tr>
+                  <th className="text-left px-4 py-2">{t("patrol.dutyLog.colDate")}</th>
+                  <th className="text-left px-4 py-2">{t("patrol.guards.colGuard")}</th>
+                  <th className="text-left px-4 py-2">{t("patrol.duty.observationCategory")}</th>
+                  <th className="text-left px-4 py-2">{t("common.notes")}</th>
+                  <th className="text-left px-4 py-2">{t("patrol.observations.colPhoto")}</th>
+                  <th className="text-left px-4 py-2">{t("patrol.observations.colLocation")}</th>
+                </tr>
+              </thead>
+              <tbody>
+                {observations.map((o) => (
+                  <tr key={o.id} className="border-t border-mine-800 hover:bg-mine-800/30 align-top">
+                    <td className="px-4 py-2 text-mine-300 whitespace-nowrap">{new Date(o.loggedAt).toLocaleString()}</td>
+                    <td className="px-4 py-2 font-medium">{o.worker?.name}<div className="text-[10px] text-mine-400">{o.site?.name}</div></td>
+                    <td className="px-4 py-2">{o.category && <StatusBadge status={o.category} />}</td>
+                    <td className="px-4 py-2 text-mine-300">{o.notes ?? "—"}</td>
+                    <td className="px-4 py-2">
+                      {o.photoMimeType ? (
+                        <a className="text-xs text-mine-300 hover:text-mine-50 underline" href={`${API_URL}/api/patrol/public/log-entries/${o.id}/photo`} target="_blank" rel="noreferrer">
+                          {t("patrol.observations.viewPhoto")}
+                        </a>
+                      ) : "—"}
+                    </td>
+                    <td className="px-4 py-2">
+                      {o.latitude != null && o.longitude != null ? (
+                        <a className="text-xs text-mine-300 hover:text-mine-50 underline" href={`https://www.openstreetmap.org/?mlat=${o.latitude}&mlon=${o.longitude}#map=18/${o.latitude}/${o.longitude}`} target="_blank" rel="noreferrer">
+                          {t("patrol.observations.viewLocation")}
+                        </a>
+                      ) : "—"}
+                    </td>
+                  </tr>
+                ))}
+                {observations.length === 0 && (
+                  <tr><td colSpan={6} className="px-4 py-6 text-center text-mine-400">{t("patrol.observations.noneYet")}</td></tr>
                 )}
               </tbody>
             </table>

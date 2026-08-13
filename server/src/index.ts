@@ -79,6 +79,7 @@ import resourcesRoutes from "./routes/resources";
 import communityRoutes from "./routes/community";
 import geologyRoutes from "./routes/geology";
 import windersRoutes from "./routes/winders";
+import auditLogRoutes from "./routes/auditLog";
 import { sanitizeBody } from "./middleware/sanitize";
 import { startSimulator } from "./services/simulator";
 import { scanCompliance } from "./services/complianceScanner";
@@ -199,6 +200,7 @@ app.use("/api/resources", resourcesRoutes);
 app.use("/api/community", communityRoutes);
 app.use("/api/geology", geologyRoutes);
 app.use("/api/winders", windersRoutes);
+app.use("/api/audit-log", auditLogRoutes);
 
 app.use((err: any, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
   if (err?.message === "UNSUPPORTED_FILE_TYPE") {

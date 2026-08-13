@@ -38,10 +38,38 @@ const logEntrySelect = {
   id: true,
   checkpointId: true,
   checkpoint: { select: { id: true, name: true, sequence: true } },
+  category: true,
   photoMimeType: true,
   notes: true,
+  latitude: true,
+  longitude: true,
   loggedAt: true,
 } as const;
+
+const observationSelect = {
+  id: true,
+  assignmentId: true,
+  checkpointId: true,
+  siteId: true,
+  site: { select: { id: true, name: true } },
+  workerId: true,
+  worker: { select: { id: true, name: true, employeeId: true } },
+  category: true,
+  photoMimeType: true,
+  notes: true,
+  latitude: true,
+  longitude: true,
+  loggedAt: true,
+} as const;
+
+const observationCategoryEnum = z.enum([
+  "SAFETY_HAZARD",
+  "SUSPICIOUS_ACTIVITY",
+  "SECURITY_CONCERN",
+  "MAINTENANCE_ISSUE",
+  "GENERAL_OBSERVATION",
+  "OTHER",
+]);
 
 const assignmentSelect = {
   id: true,
@@ -186,14 +214,47 @@ router.post("/public/:siteId/duty/:workerId/assignments/:assignmentId/photo", up
     where: { id: req.params.assignmentId, siteId: req.params.siteId, workerId: guard.id },
   });
   if (!assignment) return res.status(404).json({ error: "Patrol assignment not found" });
-  if (!req.file) return res.status(400).json({ error: "A photo is required" });
+  const notes = (req.body?.notes as string) || undefined;
+  if (!req.file && !notes) return res.status(400).json({ error: "A photo or a note is required" });
+  const category = observationCategoryEnum.safeParse(req.body?.category);
 
   const entry = await prisma.patrolLogEntry.create({
     data: {
       assignmentId: assignment.id,
-      notes: (req.body?.notes as string) || undefined,
-      photoData: Uint8Array.from(req.file.buffer),
-      photoMimeType: req.file.mimetype,
+      siteId: req.params.siteId,
+      workerId: guard.id,
+      category: category.success ? category.data : "GENERAL_OBSERVATION",
+      notes,
+      photoData: req.file ? Uint8Array.from(req.file.buffer) : undefined,
+      photoMimeType: req.file?.mimetype,
+      latitude: req.body?.latitude ? Number(req.body.latitude) : undefined,
+      longitude: req.body?.longitude ? Number(req.body.longitude) : undefined,
+    },
+    select: logEntrySelect,
+  });
+  res.status(201).json(entry);
+});
+
+// A guard doesn't need a scheduled patrol assignment to report something — this is the
+// same "log an observation" capability without requiring assignment context, for a guard
+// simply on duty (or between assignments) who spots a hazard or something suspicious.
+router.post("/public/:siteId/duty/:workerId/observation", upload.single("photo"), async (req, res) => {
+  const guard = await findGuard(req.params.siteId, req.params.workerId);
+  if (!guard) return res.status(404).json({ error: "Guard not found at this site" });
+  const notes = (req.body?.notes as string) || undefined;
+  if (!req.file && !notes) return res.status(400).json({ error: "A photo or a note is required" });
+  const category = observationCategoryEnum.safeParse(req.body?.category);
+
+  const entry = await prisma.patrolLogEntry.create({
+    data: {
+      siteId: req.params.siteId,
+      workerId: guard.id,
+      category: category.success ? category.data : "GENERAL_OBSERVATION",
+      notes,
+      photoData: req.file ? Uint8Array.from(req.file.buffer) : undefined,
+      photoMimeType: req.file?.mimetype,
+      latitude: req.body?.latitude ? Number(req.body.latitude) : undefined,
+      longitude: req.body?.longitude ? Number(req.body.longitude) : undefined,
     },
     select: logEntrySelect,
   });
@@ -357,6 +418,26 @@ router.get("/duty-log", async (req, res) => {
     take: 200,
   });
   res.json(records);
+});
+
+// Every guard-logged observation — whether tied to a checkpoint/assignment or standalone
+// (assignmentId null) — surfaced in one place for the Security Manager to triage, since
+// standalone observations don't appear anywhere in the assignments list.
+router.get("/observations", async (req, res) => {
+  const mineId = requireMineId(req, res);
+  if (!mineId) return;
+  const siteId = req.query.siteId as string | undefined;
+  const observations = await prisma.patrolLogEntry.findMany({
+    where: {
+      category: { not: null },
+      site: { mineId },
+      siteId: siteId || undefined,
+    },
+    select: observationSelect,
+    orderBy: { loggedAt: "desc" },
+    take: 200,
+  });
+  res.json(observations);
 });
 
 const scheduleGenerateSchema = z.object({

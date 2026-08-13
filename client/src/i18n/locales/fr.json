@@ -35,7 +35,12 @@
     "startDate": "Date de début",
     "endDate": "Date de fin",
     "yes": "Oui",
-    "no": "Non"
+    "no": "Non",
+    "search": "Rechercher",
+    "exportCsv": "Exporter CSV",
+    "pageOf": "Page {{page}} sur {{pages}}",
+    "previous": "Précédent",
+    "next": "Suivant"
   },
   "nav": {
     "dashboard": "Tableau de bord",
@@ -604,7 +609,13 @@
       "PENDING_REPLACEMENT": "Remplacement en attente",
       "DRILLING": "Forage en cours",
       "ABANDONED": "Abandonné",
-      "DELAYED": "Retardé"
+      "DELAYED": "Retardé",
+      "SAFETY_HAZARD": "Danger pour la sécurité",
+      "SUSPICIOUS_ACTIVITY": "Activité suspecte",
+      "SECURITY_CONCERN": "Préoccupation de sécurité",
+      "MAINTENANCE_ISSUE": "Problème de maintenance",
+      "GENERAL_OBSERVATION": "Observation générale",
+      "OTHER": "Autre"
     },
     "severity": {
       "LOW": "Faible",
@@ -820,7 +831,11 @@
       "colRequirement": "Exigence Enfreinte",
       "colResponsible": "Responsable",
       "noneYet": "Aucune constatation d'audit enregistrée pour le moment.",
-      "confirmDelete": "Supprimer cette constatation d'audit ?"
+      "confirmDelete": "Supprimer cette constatation d'audit ?",
+      "summaryOpen": "Constats Ouverts",
+      "summaryOverdue": "En Retard",
+      "summaryCritical": "Critiques (non résolus)",
+      "searchPlaceholder": "Rechercher des constats..."
     },
     "tabHazards": "Gestion des Dangers",
     "hazard": {
@@ -2580,7 +2595,17 @@
       "evacuationSent": "Évacuation déclenchée. Rendez-vous au point de rassemblement le plus proche.",
       "siteNotFound": "Ce lien de site n'est pas valide.",
       "genericError": "Une erreur s'est produite. Veuillez réessayer.",
-      "linkInvalid": "Ce lien de service n'est pas valide ou a été révoqué. Contactez votre Responsable Sécurité pour un nouveau lien."
+      "linkInvalid": "Ce lien de service n'est pas valide ou a été révoqué. Contactez votre Responsable Sécurité pour un nouveau lien.",
+      "observationRequiresContent": "Ajoutez une photo ou une note avant de soumettre.",
+      "observationCategory": "Catégorie",
+      "observationCategories": {
+        "GENERAL_OBSERVATION": "Observation générale",
+        "SAFETY_HAZARD": "Danger pour la sécurité",
+        "SUSPICIOUS_ACTIVITY": "Activité suspecte",
+        "SECURITY_CONCERN": "Préoccupation de sécurité",
+        "MAINTENANCE_ISSUE": "Problème de maintenance",
+        "OTHER": "Autre"
+      }
     },
     "tabGuards": "Gardes",
     "tabDutyLog": "Journal de Service",
@@ -2612,6 +2637,15 @@
       "selectAtLeastOne": "Sélectionnez au moins un itinéraire et un garde.",
       "noRoutesAtSite": "Aucun itinéraire de patrouille actif sur ce site pour le moment.",
       "resultSummary": "{{created}} nouvelle(s) affectation(s) créée(s). {{skipped}} jour(s) déjà affecté(s) ignoré(s)."
+    },
+    "tabObservations": "Observations",
+    "observations": {
+      "hint": "Chaque observation enregistrée par un agent — pendant une patrouille programmée ou en service général sans affectation — pour triage.",
+      "colPhoto": "Photo",
+      "colLocation": "Emplacement",
+      "viewPhoto": "Voir la photo",
+      "viewLocation": "Voir sur la carte",
+      "noneYet": "Aucune observation enregistrée pour l'instant."
     }
   },
   "statutoryAppointments": {
@@ -3102,7 +3136,9 @@
     },
     "newUnionAgreement": "+ Nouvel Accord Syndical",
     "newUnionAgreementTitle": "Nouvel Accord de Reconnaissance Syndicale",
-    "noUnionAgreements": "Aucun accord syndical enregistré pour l'instant."
+    "noUnionAgreements": "Aucun accord syndical enregistré pour l'instant.",
+    "summaryOpenCases": "Dossiers Ouverts",
+    "summaryDismissals": "Licenciements"
   },
   "resources": {
     "nav": "Ressources Eau et Énergie",
@@ -3280,5 +3316,17 @@
     "newShaftInspectionTitle": "Nouvelle Inspection de Puits",
     "noShaftInspections": "Aucune inspection de puits enregistrée pour l'instant.",
     "headgearCondition": "État du chevalement"
+  },
+  "audit": {
+    "history": "Historique",
+    "historyTitle": "Historique des Modifications",
+    "loadError": "Impossible de charger l'historique.",
+    "noHistory": "Aucun historique enregistré pour l'instant.",
+    "unknownUser": "Utilisateur inconnu",
+    "actions": {
+      "CREATE": "Créé",
+      "UPDATE": "Modifié",
+      "DELETE": "Supprimé"
+    }
   }
 }

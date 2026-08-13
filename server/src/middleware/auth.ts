@@ -2,6 +2,7 @@ import { NextFunction, Request, Response } from "express";
 import { Role } from "@prisma/client";
 import { prisma } from "../prisma";
 import { verifyAuthToken } from "../lib/jwt";
+import { requestContextStorage } from "../lib/requestContext";
 
 export interface AuthPayload {
   userId: string;
@@ -51,7 +52,10 @@ export async function requireAuth(req: Request, res: Response, next: NextFunctio
       return res.status(403).json({ error: "This account has been deactivated" });
     }
     req.auth = { userId: user.id, role: user.role, mineId: user.mineId };
-    next();
+    // Everything downstream of this call — including any awaited Prisma writes deep in a
+    // route handler — runs inside this store, so the audit extension can attribute writes
+    // to the requester without every route needing to pass userId/mineId through explicitly.
+    requestContextStorage.run({ userId: user.id, mineId: user.mineId }, next);
   } catch (err) {
     next(err);
   }

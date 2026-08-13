@@ -497,13 +497,32 @@ export interface PatrolRoute {
   createdAt: string;
 }
 
+export type PatrolObservationCategory =
+  | "SAFETY_HAZARD"
+  | "SUSPICIOUS_ACTIVITY"
+  | "SECURITY_CONCERN"
+  | "MAINTENANCE_ISSUE"
+  | "GENERAL_OBSERVATION"
+  | "OTHER";
+
 export interface PatrolLogEntry {
   id: string;
   checkpointId?: string | null;
   checkpoint?: { id: string; name: string; sequence: number } | null;
+  category?: PatrolObservationCategory | null;
   photoMimeType?: string | null;
   notes?: string | null;
+  latitude?: number | null;
+  longitude?: number | null;
   loggedAt: string;
+}
+
+export interface PatrolObservation extends PatrolLogEntry {
+  assignmentId?: string | null;
+  siteId?: string | null;
+  site?: { id: string; name: string } | null;
+  workerId?: string | null;
+  worker?: { id: string; name: string; employeeId: string } | null;
 }
 
 export interface PatrolAssignment {
@@ -2948,5 +2967,15 @@ export interface ShaftInspection {
   findings?: string | null;
   correctiveActions?: string | null;
   nextInspectionDue?: string | null;
+  createdAt: string;
+}
+
+export type AuditAction = "CREATE" | "UPDATE" | "DELETE";
+
+export interface AuditLogEntry {
+  id: string;
+  action: AuditAction;
+  changedBy?: { id: string; name: string } | null;
+  snapshot?: Record<string, unknown> | null;
   createdAt: string;
 }

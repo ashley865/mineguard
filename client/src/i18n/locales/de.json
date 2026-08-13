@@ -35,7 +35,12 @@
     "startDate": "Startdatum",
     "endDate": "Enddatum",
     "yes": "Ja",
-    "no": "Nein"
+    "no": "Nein",
+    "search": "Suchen",
+    "exportCsv": "CSV exportieren",
+    "pageOf": "Seite {{page}} von {{pages}}",
+    "previous": "Zurück",
+    "next": "Weiter"
   },
   "nav": {
     "dashboard": "Übersicht",
@@ -604,7 +609,13 @@
       "PENDING_REPLACEMENT": "Austausch ausstehend",
       "DRILLING": "Bohrung läuft",
       "ABANDONED": "Aufgegeben",
-      "DELAYED": "Verzögert"
+      "DELAYED": "Verzögert",
+      "SAFETY_HAZARD": "Sicherheitsgefahr",
+      "SUSPICIOUS_ACTIVITY": "Verdächtige Aktivität",
+      "SECURITY_CONCERN": "Sicherheitsbedenken",
+      "MAINTENANCE_ISSUE": "Wartungsproblem",
+      "GENERAL_OBSERVATION": "Allgemeine Beobachtung",
+      "OTHER": "Sonstiges"
     },
     "severity": {
       "LOW": "Niedrig",
@@ -820,7 +831,11 @@
       "colRequirement": "Verletzte Anforderung",
       "colResponsible": "Verantwortlich",
       "noneYet": "Noch keine Auditfeststellungen erfasst.",
-      "confirmDelete": "Diese Auditfeststellung löschen?"
+      "confirmDelete": "Diese Auditfeststellung löschen?",
+      "summaryOpen": "Offene Feststellungen",
+      "summaryOverdue": "Überfällig",
+      "summaryCritical": "Kritisch (ungelöst)",
+      "searchPlaceholder": "Feststellungen suchen..."
     },
     "tabHazards": "Gefahrenmanagement",
     "hazard": {
@@ -2580,7 +2595,17 @@
       "evacuationSent": "Evakuierung ausgelöst. Begeben Sie sich zum nächsten Sammelpunkt.",
       "siteNotFound": "Dieser Standortlink ist ungültig.",
       "genericError": "Etwas ist schiefgelaufen. Bitte versuchen Sie es erneut.",
-      "linkInvalid": "Dieser Dienstlink ist ungültig oder wurde widerrufen. Wenden Sie sich an Ihren Sicherheitsmanager für einen neuen Link."
+      "linkInvalid": "Dieser Dienstlink ist ungültig oder wurde widerrufen. Wenden Sie sich an Ihren Sicherheitsmanager für einen neuen Link.",
+      "observationRequiresContent": "Fügen Sie ein Foto oder eine Notiz hinzu, bevor Sie absenden.",
+      "observationCategory": "Kategorie",
+      "observationCategories": {
+        "GENERAL_OBSERVATION": "Allgemeine Beobachtung",
+        "SAFETY_HAZARD": "Sicherheitsgefahr",
+        "SUSPICIOUS_ACTIVITY": "Verdächtige Aktivität",
+        "SECURITY_CONCERN": "Sicherheitsbedenken",
+        "MAINTENANCE_ISSUE": "Wartungsproblem",
+        "OTHER": "Sonstiges"
+      }
     },
     "tabGuards": "Wachen",
     "tabDutyLog": "Dienstprotokoll",
@@ -2612,6 +2637,15 @@
       "selectAtLeastOne": "Wählen Sie mindestens eine Route und eine Wache aus.",
       "noRoutesAtSite": "Noch keine aktiven Patrouillenrouten an diesem Standort.",
       "resultSummary": "{{created}} neue Zuweisung(en) erstellt. {{skipped}} bereits zugewiesene(r) Tag(e) übersprungen."
+    },
+    "tabObservations": "Beobachtungen",
+    "observations": {
+      "hint": "Jede vom Wachmann erfasste Beobachtung — während einer geplanten Patrouille oder im allgemeinen Dienst ohne Zuweisung — zur Triage.",
+      "colPhoto": "Foto",
+      "colLocation": "Standort",
+      "viewPhoto": "Foto ansehen",
+      "viewLocation": "Auf Karte ansehen",
+      "noneYet": "Noch keine Beobachtungen erfasst."
     }
   },
   "statutoryAppointments": {
@@ -3102,7 +3136,9 @@
     },
     "newUnionAgreement": "+ Neue Gewerkschaftsvereinbarung",
     "newUnionAgreementTitle": "Neue Gewerkschaftsanerkennungsvereinbarung",
-    "noUnionAgreements": "Noch keine Gewerkschaftsvereinbarungen erfasst."
+    "noUnionAgreements": "Noch keine Gewerkschaftsvereinbarungen erfasst.",
+    "summaryOpenCases": "Offene Fälle",
+    "summaryDismissals": "Entlassungen"
   },
   "resources": {
     "nav": "Wasser- & Energieressourcen",
@@ -3280,5 +3316,17 @@
     "newShaftInspectionTitle": "Neue Schachtinspektion",
     "noShaftInspections": "Noch keine Schachtinspektionen erfasst.",
     "headgearCondition": "Zustand des Förderturms"
+  },
+  "audit": {
+    "history": "Verlauf",
+    "historyTitle": "Änderungsverlauf",
+    "loadError": "Verlauf konnte nicht geladen werden.",
+    "noHistory": "Noch kein Verlauf erfasst.",
+    "unknownUser": "Unbekannter Benutzer",
+    "actions": {
+      "CREATE": "Erstellt",
+      "UPDATE": "Aktualisiert",
+      "DELETE": "Gelöscht"
+    }
   }
 }

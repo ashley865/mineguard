@@ -5,8 +5,11 @@ import { useAuth } from "../../context/AuthContext";
 import { AuditFinding, AuditFindingStatus, RiskLevel, Site } from "../../api/types";
 import { StatusBadge, SeverityBadge } from "../../components/Badges";
 import Modal from "../../components/Modal";
-import { buttonDanger, buttonPrimary, buttonSecondary, cardClass, inputClass, labelClass, selectClass } from "../../components/ui";
+import { buttonDanger, buttonPrimary, buttonSecondary, inputClass, labelClass, selectClass } from "../../components/ui";
 import DateField from "../../components/DateField";
+import DataTable, { DataTableColumn } from "../../components/DataTable";
+import SummaryCards from "../../components/SummaryCards";
+import { AuditHistoryButton } from "../../components/AuditHistoryPanel";
 
 const statuses: AuditFindingStatus[] = ["OPEN", "IN_PROGRESS", "AWAITING_VERIFICATION", "VERIFIED", "CLOSED", "OVERDUE"];
 const severities: RiskLevel[] = ["LOW", "MEDIUM", "HIGH", "CRITICAL"];
@@ -178,9 +181,30 @@ export default function AuditFindingsTab({ sites }: { sites: Site[] }) {
 
   if (loading) return <div className="text-mine-300">{t("compliance.loading")}</div>;
 
+  const openCount = items.filter((i) => i.status === "OPEN").length;
+  const overdueCount = items.filter((i) => i.status === "OVERDUE" || (i.status !== "CLOSED" && i.status !== "VERIFIED" && new Date(i.dueDate) < new Date())).length;
+  const criticalCount = items.filter((i) => i.severity === "CRITICAL" && i.status !== "CLOSED").length;
+
+  const columns: DataTableColumn<AuditFinding>[] = [
+    { key: "findingNumber", header: t("compliance.audit.colFindingNumber"), render: (i) => <span className="font-medium">{i.findingNumber}</span>, sortValue: (i) => i.findingNumber },
+    { key: "requirement", header: t("compliance.audit.colRequirement"), render: (i) => <div className="truncate max-w-xs" title={i.requirementViolated}>{i.requirementViolated}</div> },
+    { key: "severity", header: t("compliance.audit.severity"), render: (i) => <SeverityBadge severity={i.severity} />, sortValue: (i) => i.severity },
+    { key: "responsible", header: t("compliance.audit.colResponsible"), render: (i) => i.responsiblePerson?.name ?? t("common.unassigned"), sortValue: (i) => i.responsiblePerson?.name ?? "" },
+    { key: "dueDate", header: t("compliance.audit.dueDate"), render: (i) => new Date(i.dueDate).toLocaleDateString(), sortValue: (i) => i.dueDate },
+    { key: "status", header: t("common.status"), render: (i) => <StatusBadge status={i.status} />, sortValue: (i) => i.status },
+  ];
+
   return (
     <div className="space-y-4">
       <p className="text-mine-300 text-sm">{t("compliance.audit.subtitle")}</p>
+
+      <SummaryCards
+        cards={[
+          { label: t("compliance.audit.summaryOpen"), value: openCount },
+          { label: t("compliance.audit.summaryOverdue"), value: overdueCount, tone: overdueCount > 0 ? "danger" : "default" },
+          { label: t("compliance.audit.summaryCritical"), value: criticalCount, tone: criticalCount > 0 ? "danger" : "default" },
+        ]}
+      />
 
       {canEdit && sites.length > 0 && (
         <div className="flex justify-end">
@@ -188,46 +212,34 @@ export default function AuditFindingsTab({ sites }: { sites: Site[] }) {
         </div>
       )}
 
-      <div className={`${cardClass} overflow-x-auto`}>
-        <table className="w-full text-sm">
-          <thead className="bg-mine-800/50 text-mine-300 text-xs uppercase">
-            <tr>
-              <th className="text-left px-4 py-2">{t("compliance.audit.colFindingNumber")}</th>
-              <th className="text-left px-4 py-2">{t("compliance.audit.colRequirement")}</th>
-              <th className="text-left px-4 py-2">{t("compliance.audit.severity")}</th>
-              <th className="text-left px-4 py-2">{t("compliance.audit.colResponsible")}</th>
-              <th className="text-left px-4 py-2">{t("compliance.audit.dueDate")}</th>
-              <th className="text-left px-4 py-2">{t("common.status")}</th>
-              <th className="px-4 py-2"></th>
-            </tr>
-          </thead>
-          <tbody>
-            {items.map((item) => (
-              <tr key={item.id} className="border-t border-mine-800 hover:bg-mine-800/30 align-top">
-                <td className="px-4 py-2 font-medium">{item.findingNumber}</td>
-                <td className="px-4 py-2 text-mine-300 max-w-xs">
-                  <div className="truncate" title={item.requirementViolated}>{item.requirementViolated}</div>
-                </td>
-                <td className="px-4 py-2"><SeverityBadge severity={item.severity} /></td>
-                <td className="px-4 py-2 text-mine-300">{item.responsiblePerson?.name ?? t("common.unassigned")}</td>
-                <td className="px-4 py-2 text-mine-300">{new Date(item.dueDate).toLocaleDateString()}</td>
-                <td className="px-4 py-2"><StatusBadge status={item.status} /></td>
-                <td className="px-4 py-2 text-right">
-                  {canEdit && (
-                    <div className="flex justify-end gap-2">
-                      <button className="text-xs text-mine-300 hover:text-mine-50" onClick={() => setModal(item)}>{t("common.edit")}</button>
-                      <button className={buttonDanger} onClick={() => remove(item.id)}>{t("common.delete")}</button>
-                    </div>
-                  )}
-                </td>
-              </tr>
-            ))}
-            {items.length === 0 && (
-              <tr><td colSpan={7} className="px-4 py-6 text-center text-mine-400">{t("compliance.audit.noneYet")}</td></tr>
+      <DataTable
+        columns={columns}
+        rows={items}
+        rowKey={(i) => i.id}
+        emptyMessage={t("compliance.audit.noneYet")}
+        searchValue={(i) => `${i.findingNumber} ${i.requirementViolated} ${i.responsiblePerson?.name ?? ""}`}
+        searchPlaceholder={t("compliance.audit.searchPlaceholder") ?? undefined}
+        exportFilename="audit-findings"
+        exportColumns={[
+          { header: t("compliance.audit.colFindingNumber"), value: (i) => i.findingNumber },
+          { header: t("compliance.audit.colRequirement"), value: (i) => i.requirementViolated },
+          { header: t("compliance.audit.severity"), value: (i) => i.severity },
+          { header: t("compliance.audit.colResponsible"), value: (i) => i.responsiblePerson?.name ?? "" },
+          { header: t("compliance.audit.dueDate"), value: (i) => i.dueDate },
+          { header: t("common.status"), value: (i) => i.status },
+        ]}
+        actions={(item) => (
+          <div className="flex justify-end gap-2">
+            <AuditHistoryButton entityType="AuditFinding" entityId={item.id} />
+            {canEdit && (
+              <>
+                <button className="text-xs text-mine-300 hover:text-mine-50" onClick={() => setModal(item)}>{t("common.edit")}</button>
+                <button className={buttonDanger} onClick={() => remove(item.id)}>{t("common.delete")}</button>
+              </>
             )}
-          </tbody>
-        </table>
-      </div>
+          </div>
+        )}
+      />
 
       {modal && (
         <Modal title={modal === "create" ? t("compliance.audit.newTitle") : t("compliance.audit.editTitle")} onClose={() => setModal(null)} size="lg">

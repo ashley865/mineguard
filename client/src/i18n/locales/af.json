@@ -35,7 +35,12 @@
     "startDate": "Begindatum",
     "endDate": "Einddatum",
     "yes": "Ja",
-    "no": "Nee"
+    "no": "Nee",
+    "search": "Soek",
+    "exportCsv": "Voer CSV uit",
+    "pageOf": "Bladsy {{page}} van {{pages}}",
+    "previous": "Vorige",
+    "next": "Volgende"
   },
   "nav": {
     "dashboard": "Oorsig",
@@ -604,7 +609,13 @@
       "PENDING_REPLACEMENT": "Vervanging hangend",
       "DRILLING": "Besig om te boor",
       "ABANDONED": "Laat vaar",
-      "DELAYED": "Vertraag"
+      "DELAYED": "Vertraag",
+      "SAFETY_HAZARD": "Veiligheidsgevaar",
+      "SUSPICIOUS_ACTIVITY": "Verdagte aktiwiteit",
+      "SECURITY_CONCERN": "Sekuriteitskwessie",
+      "MAINTENANCE_ISSUE": "Onderhoudskwessie",
+      "GENERAL_OBSERVATION": "Algemene waarneming",
+      "OTHER": "Ander"
     },
     "severity": {
       "LOW": "Laag",
@@ -820,7 +831,11 @@
       "colRequirement": "Oortrede Vereiste",
       "colResponsible": "Verantwoordelik",
       "noneYet": "Nog geen ouditbevindinge aangeteken nie.",
-      "confirmDelete": "Verwyder hierdie ouditbevinding?"
+      "confirmDelete": "Verwyder hierdie ouditbevinding?",
+      "summaryOpen": "Oop Bevindinge",
+      "summaryOverdue": "Agterstallig",
+      "summaryCritical": "Krities (onopgelos)",
+      "searchPlaceholder": "Soek bevindinge..."
     },
     "tabHazards": "Gevaarbestuur",
     "hazard": {
@@ -2580,7 +2595,17 @@
       "evacuationSent": "Ontruiming veroorsaak. Gaan na die naaste samelpunt.",
       "siteNotFound": "Hierdie terreinskakel is nie geldig nie.",
       "genericError": "Iets het verkeerd geloop. Probeer asseblief weer.",
-      "linkInvalid": "Hierdie diensskakel is nie geldig nie of is herroep. Kontak jou Sekuriteitsbestuurder vir 'n nuwe skakel."
+      "linkInvalid": "Hierdie diensskakel is nie geldig nie of is herroep. Kontak jou Sekuriteitsbestuurder vir 'n nuwe skakel.",
+      "observationRequiresContent": "Voeg 'n foto of 'n nota by voordat jy indien.",
+      "observationCategory": "Kategorie",
+      "observationCategories": {
+        "GENERAL_OBSERVATION": "Algemene waarneming",
+        "SAFETY_HAZARD": "Veiligheidsgevaar",
+        "SUSPICIOUS_ACTIVITY": "Verdagte aktiwiteit",
+        "SECURITY_CONCERN": "Sekuriteitskwessie",
+        "MAINTENANCE_ISSUE": "Onderhoudskwessie",
+        "OTHER": "Ander"
+      }
     },
     "tabGuards": "Wagte",
     "tabDutyLog": "Diensrekord",
@@ -2612,6 +2637,15 @@
       "selectAtLeastOne": "Kies ten minste een roete en een wag.",
       "noRoutesAtSite": "Nog geen aktiewe patrollieroetes by hierdie terrein nie.",
       "resultSummary": "{{created}} nuwe toewysing(s) geskep. {{skipped}} reeds-toegewysde dag/dae oorgeslaan."
+    },
+    "tabObservations": "Waarnemings",
+    "observations": {
+      "hint": "Elke waarneming wat 'n wag aangeteken het — tydens 'n geskeduleerde patrollie of op algemene diens sonder opdrag — vir triage.",
+      "colPhoto": "Foto",
+      "colLocation": "Ligging",
+      "viewPhoto": "Bekyk foto",
+      "viewLocation": "Bekyk op kaart",
+      "noneYet": "Nog geen waarnemings aangeteken nie."
     }
   },
   "statutoryAppointments": {
@@ -3102,7 +3136,9 @@
     },
     "newUnionAgreement": "+ Nuwe Vakbondooreenkoms",
     "newUnionAgreementTitle": "Nuwe Vakbonderkenningsooreenkoms",
-    "noUnionAgreements": "Nog geen vakbondooreenkomste aangeteken nie."
+    "noUnionAgreements": "Nog geen vakbondooreenkomste aangeteken nie.",
+    "summaryOpenCases": "Oop Sake",
+    "summaryDismissals": "Ontslae"
   },
   "resources": {
     "nav": "Water- en Energiehulpbronne",
@@ -3280,5 +3316,17 @@
     "newShaftInspectionTitle": "Nuwe Skaginspeksie",
     "noShaftInspections": "Nog geen skaginspeksies aangeteken nie.",
     "headgearCondition": "Kopraamtoestand"
+  },
+  "audit": {
+    "history": "Geskiedenis",
+    "historyTitle": "Veranderingsgeskiedenis",
+    "loadError": "Kon nie geskiedenis laai nie.",
+    "noHistory": "Nog geen geskiedenis aangeteken nie.",
+    "unknownUser": "Onbekende gebruiker",
+    "actions": {
+      "CREATE": "Geskep",
+      "UPDATE": "Opgedateer",
+      "DELETE": "Geskrap"
+    }
   }
 }

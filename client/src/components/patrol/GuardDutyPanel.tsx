@@ -1,13 +1,23 @@
 import { FormEvent, useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { api } from "../../api/client";
-import { PatrolAssignment } from "../../api/types";
-import { buttonDanger, buttonPrimary, buttonSecondary, cardClass, inputClass, labelClass } from "../ui";
+import { PatrolAssignment, PatrolObservationCategory } from "../../api/types";
+import { buttonDanger, buttonPrimary, buttonSecondary, cardClass, inputClass, labelClass, selectClass } from "../ui";
 import Modal from "../Modal";
 
-function CheckpointCapture({ label, onSubmit, onCancel }: {
+const observationCategories: PatrolObservationCategory[] = [
+  "GENERAL_OBSERVATION",
+  "SAFETY_HAZARD",
+  "SUSPICIOUS_ACTIVITY",
+  "SECURITY_CONCERN",
+  "MAINTENANCE_ISSUE",
+  "OTHER",
+];
+
+function CheckpointCapture({ label, showCategory, onSubmit, onCancel }: {
   label: string;
-  onSubmit: (photo: File | null, notes: string) => Promise<void>;
+  showCategory?: boolean;
+  onSubmit: (photo: File | null, notes: string, category?: PatrolObservationCategory) => Promise<void>;
   onCancel: () => void;
 }) {
   const { t } = useTranslation();
@@ -15,7 +25,9 @@ function CheckpointCapture({ label, onSubmit, onCancel }: {
   const [photo, setPhoto] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
   const [notes, setNotes] = useState("");
+  const [category, setCategory] = useState<PatrolObservationCategory>("GENERAL_OBSERVATION");
   const [saving, setSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   function handleFile(files: FileList | null) {
     const file = files?.item(0) ?? null;
@@ -25,9 +37,14 @@ function CheckpointCapture({ label, onSubmit, onCancel }: {
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
+    if (showCategory && !photo && !notes.trim()) {
+      setError(t("patrol.duty.observationRequiresContent"));
+      return;
+    }
+    setError(null);
     setSaving(true);
     try {
-      await onSubmit(photo, notes);
+      await onSubmit(photo, notes, showCategory ? category : undefined);
     } finally {
       setSaving(false);
     }
@@ -36,6 +53,14 @@ function CheckpointCapture({ label, onSubmit, onCancel }: {
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <p className="text-sm text-mine-300">{label}</p>
+      {showCategory && (
+        <div>
+          <label className={labelClass}>{t("patrol.duty.observationCategory")}</label>
+          <select className={selectClass} value={category} onChange={(e) => setCategory(e.target.value as PatrolObservationCategory)}>
+            {observationCategories.map((c) => <option key={c} value={c}>{t(`patrol.duty.observationCategories.${c}`)}</option>)}
+          </select>
+        </div>
+      )}
       <div>
         <input
           ref={fileRef}
@@ -62,6 +87,7 @@ function CheckpointCapture({ label, onSubmit, onCancel }: {
         <label className={labelClass}>{t("common.notes")}</label>
         <textarea className={inputClass} rows={2} value={notes} onChange={(e) => setNotes(e.target.value)} />
       </div>
+      {error && <div className="text-danger-500 text-xs">{error}</div>}
       <div className="flex justify-end gap-2 pt-2">
         <button type="button" className={buttonSecondary} onClick={onCancel}>{t("common.cancel")}</button>
         <button type="submit" className={buttonPrimary} disabled={saving}>{saving ? t("common.saving") : t("common.save")}</button>
@@ -171,13 +197,21 @@ export default function GuardDutyPanel({ siteId, guardId, guardName }: {
     }
   }
 
-  async function submitAdHocPhoto(photo: File | null, notes: string) {
-    if (!assignment || !photo) return;
+  // A guard may have no assignment for the day (or be reporting something unrelated to
+  // their route) — this always works regardless of assignment state, unlike checkpoint
+  // check-ins which are necessarily tied to an assigned route.
+  async function submitAdHocPhoto(photo: File | null, notes: string, category?: PatrolObservationCategory) {
     const form = new FormData();
-    form.append("photo", photo);
+    if (photo) form.append("photo", photo);
     if (notes) form.append("notes", notes);
+    if (category) form.append("category", category);
     try {
-      await api.post(`/patrol/public/${siteId}/duty/${guardId}/assignments/${assignment.id}/photo`, form, {
+      const position = await getPosition();
+      if (position) {
+        form.append("latitude", String(position.coords.latitude));
+        form.append("longitude", String(position.coords.longitude));
+      }
+      await api.post(`/patrol/public/${siteId}/duty/${guardId}/observation`, form, {
         headers: { "Content-Type": "multipart/form-data" },
       });
       setPhotoModal(false);
@@ -185,6 +219,13 @@ export default function GuardDutyPanel({ siteId, guardId, guardName }: {
     } catch {
       setError(t("patrol.duty.genericError"));
     }
+  }
+
+  function getPosition(): Promise<GeolocationPosition | null> {
+    return new Promise((resolve) => {
+      if (!navigator.geolocation) return resolve(null);
+      navigator.geolocation.getCurrentPosition(resolve, () => resolve(null), { timeout: 3000 });
+    });
   }
 
   async function submitEvacuation(assemblyPoint: string, message: string) {
@@ -242,13 +283,14 @@ export default function GuardDutyPanel({ siteId, guardId, guardName }: {
               );
             })}
           </div>
-          <button className={`${buttonSecondary} w-full`} onClick={() => setPhotoModal(true)}>
-            {t("patrol.duty.reportObservation")}
-          </button>
         </div>
       ) : (
         <div className={`${cardClass} p-4 text-center text-mine-400 text-sm`}>{t("patrol.duty.noAssignment")}</div>
       )}
+
+      <button className={`${buttonSecondary} w-full`} onClick={() => setPhotoModal(true)}>
+        {t("patrol.duty.reportObservation")}
+      </button>
 
       {evacuationSent ? (
         <div className={`${cardClass} p-4 text-center text-danger-500 font-semibold`}>{t("patrol.duty.evacuationSent")}</div>
@@ -272,7 +314,8 @@ export default function GuardDutyPanel({ siteId, guardId, guardName }: {
         <Modal title={t("patrol.duty.reportObservation")} onClose={() => setPhotoModal(false)}>
           <CheckpointCapture
             label={t("patrol.duty.observationHint")}
-            onSubmit={(photo, notes) => submitAdHocPhoto(photo, notes)}
+            showCategory
+            onSubmit={(photo, notes, category) => submitAdHocPhoto(photo, notes, category)}
             onCancel={() => setPhotoModal(false)}
           />
         </Modal>

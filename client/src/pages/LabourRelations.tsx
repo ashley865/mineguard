@@ -19,6 +19,9 @@ import { StatusBadge } from "../components/Badges";
 import Modal from "../components/Modal";
 import { buttonDanger, buttonPrimary, buttonSecondary, cardClass, inputClass, labelClass, selectClass } from "../components/ui";
 import DateField from "../components/DateField";
+import DataTable, { DataTableColumn } from "../components/DataTable";
+import SummaryCards from "../components/SummaryCards";
+import { AuditHistoryButton } from "../components/AuditHistoryPanel";
 
 const disciplinaryOutcomes: DisciplinaryOutcome[] = ["PENDING", "VERBAL_WARNING", "WRITTEN_WARNING", "FINAL_WRITTEN_WARNING", "DISMISSAL", "NOT_GUILTY", "WITHDRAWN"];
 const disciplinaryStatuses: DisciplinaryStatus[] = ["OPEN", "SCHEDULED", "CONCLUDED", "APPEALED"];
@@ -127,40 +130,49 @@ function DisciplinaryTab({ workers, canEdit, canDelete }: { workers: Worker[]; c
 
   if (loading) return <div className="text-mine-300">{t("common.loading")}</div>;
 
+  const openCount = cases.filter((c) => c.status === "OPEN" || c.status === "SCHEDULED").length;
+  const dismissalCount = cases.filter((c) => c.outcome === "DISMISSAL").length;
+
+  const columns: DataTableColumn<DisciplinaryCase>[] = [
+    { key: "worker", header: t("workers.title"), render: (c) => <span className="font-medium">{c.worker?.name}</span>, sortValue: (c) => c.worker?.name ?? "" },
+    { key: "charge", header: t("labourRelations.chargeDescription"), render: (c) => <div className="truncate max-w-xs" title={c.chargeDescription}>{c.chargeDescription}</div> },
+    { key: "outcome", header: t("labourRelations.outcome"), render: (c) => t(`labourRelations.disciplinaryOutcomes.${c.outcome}`), sortValue: (c) => c.outcome },
+    { key: "status", header: t("common.status"), render: (c) => <StatusBadge status={c.status} />, sortValue: (c) => c.status },
+  ];
+
   return (
     <div className="space-y-4">
+      <SummaryCards
+        cards={[
+          { label: t("labourRelations.summaryOpenCases"), value: openCount },
+          { label: t("labourRelations.summaryDismissals"), value: dismissalCount, tone: dismissalCount > 0 ? "hazard" : "default" },
+        ]}
+      />
       {canEdit && workers.length > 0 && (
         <div className="flex justify-end">
           <button className={buttonPrimary} onClick={() => setModal(true)}>{t("labourRelations.newDisciplinaryCase")}</button>
         </div>
       )}
-      <div className={`${cardClass} overflow-x-auto`}>
-        <table className="w-full text-sm">
-          <thead className="bg-mine-800/50 text-mine-300 text-xs uppercase">
-            <tr>
-              <th className="text-left px-4 py-2">{t("workers.title")}</th>
-              <th className="text-left px-4 py-2">{t("labourRelations.chargeDescription")}</th>
-              <th className="text-left px-4 py-2">{t("labourRelations.outcome")}</th>
-              <th className="text-left px-4 py-2">{t("common.status")}</th>
-              <th className="px-4 py-2"></th>
-            </tr>
-          </thead>
-          <tbody>
-            {cases.map((c) => (
-              <tr key={c.id} className="border-t border-mine-800 hover:bg-mine-800/30">
-                <td className="px-4 py-2 font-medium">{c.worker?.name}</td>
-                <td className="px-4 py-2 text-mine-300">{c.chargeDescription}</td>
-                <td className="px-4 py-2 text-mine-300">{t(`labourRelations.disciplinaryOutcomes.${c.outcome}`)}</td>
-                <td className="px-4 py-2"><StatusBadge status={c.status} /></td>
-                <td className="px-4 py-2 text-right">
-                  {canDelete && <button className={buttonDanger} onClick={() => remove(c.id)}>{t("common.delete")}</button>}
-                </td>
-              </tr>
-            ))}
-            {cases.length === 0 && <tr><td colSpan={5} className="px-4 py-6 text-center text-mine-400">{t("labourRelations.noDisciplinaryCases")}</td></tr>}
-          </tbody>
-        </table>
-      </div>
+      <DataTable
+        columns={columns}
+        rows={cases}
+        rowKey={(c) => c.id}
+        emptyMessage={t("labourRelations.noDisciplinaryCases")}
+        searchValue={(c) => `${c.worker?.name ?? ""} ${c.chargeDescription}`}
+        exportFilename="disciplinary-cases"
+        exportColumns={[
+          { header: t("workers.title"), value: (c) => c.worker?.name ?? "" },
+          { header: t("labourRelations.chargeDescription"), value: (c) => c.chargeDescription },
+          { header: t("labourRelations.outcome"), value: (c) => c.outcome },
+          { header: t("common.status"), value: (c) => c.status },
+        ]}
+        actions={(c) => (
+          <div className="flex justify-end gap-2">
+            <AuditHistoryButton entityType="DisciplinaryCase" entityId={c.id} />
+            {canDelete && <button className={buttonDanger} onClick={() => remove(c.id)}>{t("common.delete")}</button>}
+          </div>
+        )}
+      />
       {modal && (
         <Modal title={t("labourRelations.newDisciplinaryCaseTitle")} onClose={() => setModal(false)}>
           <DisciplinaryForm workers={workers} onSubmit={create} onCancel={() => setModal(false)} />

@@ -289,6 +289,7 @@ model User {
   sensorsInstalled    Sensor[] @relation("SensorInstalledBy")
   sensorsCommissioned Sensor[] @relation("SensorCommissionedBy")
   communityEngagementsFacilitated CommunityEngagement[] @relation("CommunityEngagementFacilitatedBy")
+  auditLogsChanged AuditLog[]
 }
 
 model UserAttendance {
@@ -387,6 +388,7 @@ model Site {
   resourceEstimates     ResourceEstimate[]
   winders               Winder[]
   shaftInspections      ShaftInspection[]
+  patrolLogEntries      PatrolLogEntry[]
 }
 
 model Zone {
@@ -564,6 +566,7 @@ model Worker {
   disciplinaryCases           DisciplinaryCase[]
   grievanceCases               GrievanceCase[]
   ccmaCases                    CcmaCase[]
+  patrolLogEntries             PatrolLogEntry[]
 
   createdAt DateTime @default(now())
 }
@@ -835,16 +838,37 @@ model PatrolAssignment {
 
 // A checkpoint check-in (checkpointId set) or an ad-hoc "shoot a picture of this" report
 // (checkpointId null) submitted by the guard from the public duty portal.
+enum PatrolObservationCategory {
+  SAFETY_HAZARD
+  SUSPICIOUS_ACTIVITY
+  SECURITY_CONCERN
+  MAINTENANCE_ISSUE
+  GENERAL_OBSERVATION
+  OTHER
+}
+
+// A guard's observation, whether logged at a checkpoint during a scheduled patrol
+// (assignmentId set) or standalone while simply on duty with no assignment for the day
+// (assignmentId null — siteId/workerId carry attribution instead). Photo is optional so a
+// guard can log a text-only observation; category classifies standalone observations for
+// supervisor triage (checkpoint scans leave it unset).
 model PatrolLogEntry {
-  id            String            @id @default(cuid())
-  assignmentId  String
-  assignment    PatrolAssignment  @relation(fields: [assignmentId], references: [id], onDelete: Cascade)
+  id            String                     @id @default(cuid())
+  assignmentId  String?
+  assignment    PatrolAssignment?          @relation(fields: [assignmentId], references: [id], onDelete: Cascade)
   checkpointId  String?
-  checkpoint    PatrolCheckpoint? @relation(fields: [checkpointId], references: [id], onDelete: SetNull)
+  checkpoint    PatrolCheckpoint?          @relation(fields: [checkpointId], references: [id], onDelete: SetNull)
+  siteId        String?
+  site          Site?                      @relation(fields: [siteId], references: [id], onDelete: Cascade)
+  workerId      String?
+  worker        Worker?                    @relation(fields: [workerId], references: [id], onDelete: SetNull)
+  category      PatrolObservationCategory?
   photoData     Bytes?
   photoMimeType String?
   notes         String?
-  loggedAt      DateTime          @default(now())
+  latitude      Float?
+  longitude     Float?
+  loggedAt      DateTime                   @default(now())
 }
 
 model CodeOfPractice {
@@ -3910,4 +3934,35 @@ model ShaftInspection {
   nextInspectionDue  DateTime?
 
   createdAt DateTime @default(now())
+}
+
+// ---------------------------------------------------------------------------
+// Enterprise infrastructure: audit trail
+// ---------------------------------------------------------------------------
+
+enum AuditAction {
+  CREATE
+  UPDATE
+  DELETE
+}
+
+// Automatically populated by a Prisma Client Extension (server/src/lib/auditLog.ts) for a
+// curated set of compliance/security/HR-critical models — not a blanket log of every table
+// (high-volume telemetry like SensorReading would drown out anything meaningful). `snapshot`
+// is the record's state as returned by the operation (post-write for create/update, the
+// removed row itself for delete), so history is reconstructable without needing true
+// before/after diffing.
+model AuditLog {
+  id          String      @id @default(cuid())
+  mineId      String?
+  entityType  String
+  entityId    String
+  action      AuditAction
+  changedById String?
+  changedBy   User?       @relation(fields: [changedById], references: [id], onDelete: SetNull)
+  snapshot    Json?
+  createdAt   DateTime    @default(now())
+
+  @@index([entityType, entityId])
+  @@index([mineId, createdAt])
 }

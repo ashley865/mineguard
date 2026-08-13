@@ -52,7 +52,12 @@
     "startDate": "Start date",
     "endDate": "End date",
     "yes": "Yes",
-    "no": "No"
+    "no": "No",
+    "search": "Search",
+    "exportCsv": "Export CSV",
+    "pageOf": "Page {{page}} of {{pages}}",
+    "previous": "Previous",
+    "next": "Next"
   },
   "nav": {
     "dashboard": "Dashboard",
@@ -621,7 +626,13 @@
       "PENDING_REPLACEMENT": "Pending replacement",
       "DRILLING": "Drilling",
       "ABANDONED": "Abandoned",
-      "DELAYED": "Delayed"
+      "DELAYED": "Delayed",
+      "SAFETY_HAZARD": "Safety hazard",
+      "SUSPICIOUS_ACTIVITY": "Suspicious activity",
+      "SECURITY_CONCERN": "Security concern",
+      "MAINTENANCE_ISSUE": "Maintenance issue",
+      "GENERAL_OBSERVATION": "General observation",
+      "OTHER": "Other"
     },
     "severity": {
       "LOW": "Low",
@@ -821,7 +832,11 @@
       "colRequirement": "Requirement Violated",
       "colResponsible": "Responsible",
       "noneYet": "No audit findings recorded yet.",
-      "confirmDelete": "Delete this audit finding?"
+      "confirmDelete": "Delete this audit finding?",
+      "summaryOpen": "Open Findings",
+      "summaryOverdue": "Overdue",
+      "summaryCritical": "Critical (unresolved)",
+      "searchPlaceholder": "Search findings..."
     },
     "medical": {
       "new": "+ New Medical Record",
@@ -1556,7 +1571,17 @@
       "evacuationSent": "Evacuation triggered. Proceed to the nearest assembly point.",
       "siteNotFound": "This site link is not valid.",
       "linkInvalid": "This duty link is not valid or has been revoked. Contact your Security Manager for a new link.",
-      "genericError": "Something went wrong. Please try again."
+      "genericError": "Something went wrong. Please try again.",
+      "observationRequiresContent": "Add a photo or a note before submitting.",
+      "observationCategory": "Category",
+      "observationCategories": {
+        "GENERAL_OBSERVATION": "General observation",
+        "SAFETY_HAZARD": "Safety hazard",
+        "SUSPICIOUS_ACTIVITY": "Suspicious activity",
+        "SECURITY_CONCERN": "Security concern",
+        "MAINTENANCE_ISSUE": "Maintenance issue",
+        "OTHER": "Other"
+      }
     },
     "guards": {
       "hint": "Each guard gets their own secure link — generate it once and share it with them directly. No login required; the link itself identifies them.",
@@ -1586,6 +1611,15 @@
       "selectAtLeastOne": "Select at least one route and one guard.",
       "noRoutesAtSite": "No active patrol routes at this site yet.",
       "resultSummary": "Created {{created}} new assignment(s). Skipped {{skipped}} already-assigned day(s)."
+    },
+    "tabObservations": "Observations",
+    "observations": {
+      "hint": "Every observation a guard has logged — whether during a scheduled patrol or on general duty with no assignment — for triage.",
+      "colPhoto": "Photo",
+      "colLocation": "Location",
+      "viewPhoto": "View photo",
+      "viewLocation": "View on map",
+      "noneYet": "No observations logged yet."
     }
   },
   "permitToWork": {
@@ -3101,7 +3135,9 @@
     },
     "newUnionAgreement": "+ New Union Agreement",
     "newUnionAgreementTitle": "New Union Recognition Agreement",
-    "noUnionAgreements": "No union agreements recorded yet."
+    "noUnionAgreements": "No union agreements recorded yet.",
+    "summaryOpenCases": "Open Cases",
+    "summaryDismissals": "Dismissals"
   },
   "resources": {
     "nav": "Water & Energy Resources",
@@ -3279,5 +3315,17 @@
     "newShaftInspectionTitle": "New Shaft Inspection",
     "noShaftInspections": "No shaft inspections recorded yet.",
     "headgearCondition": "Headgear condition"
+  },
+  "audit": {
+    "history": "History",
+    "historyTitle": "Change History",
+    "loadError": "Could not load history.",
+    "noHistory": "No history recorded yet.",
+    "unknownUser": "Unknown user",
+    "actions": {
+      "CREATE": "Created",
+      "UPDATE": "Updated",
+      "DELETE": "Deleted"
+    }
   }
 }
