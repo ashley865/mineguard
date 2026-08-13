@@ -14,8 +14,11 @@ import {
   Zone,
 } from "../api/types";
 import Modal from "../components/Modal";
-import { buttonDanger, buttonPrimary, buttonSecondary, cardClass, inputClass, labelClass, selectClass } from "../components/ui";
+import { buttonDanger, buttonPrimary, buttonSecondary, inputClass, labelClass, selectClass } from "../components/ui";
 import DateField from "../components/DateField";
+import DataTable, { DataTableColumn } from "../components/DataTable";
+import SummaryCards from "../components/SummaryCards";
+import { AuditHistoryButton } from "../components/AuditHistoryPanel";
 
 const pointTypes: GeotechnicalPointType[] = ["EXTENSOMETER", "CONVERGENCE_STATION", "TILTMETER", "PIEZOMETER", "OTHER"];
 const eventTypes: GeotechnicalEventType[] = ["ROCKFALL", "ROCKBURST"];
@@ -108,31 +111,20 @@ function DistrictsTab({ sites, zones, canEdit, canDelete }: { sites: Site[]; zon
           <button className={buttonPrimary} onClick={() => setModal(true)}>{t("groundControl.newDistrict")}</button>
         </div>
       )}
-      <div className={`${cardClass} overflow-x-auto`}>
-        <table className="w-full text-sm">
-          <thead className="bg-mine-800/50 text-mine-300 text-xs uppercase">
-            <tr>
-              <th className="text-left px-4 py-2">{t("groundControl.districtName")}</th>
-              <th className="text-left px-4 py-2">{t("common.site")}</th>
-              <th className="text-left px-4 py-2">{t("groundControl.requiredSupportStandard")}</th>
-              <th className="px-4 py-2"></th>
-            </tr>
-          </thead>
-          <tbody>
-            {districts.map((d) => (
-              <tr key={d.id} className="border-t border-mine-800 hover:bg-mine-800/30">
-                <td className="px-4 py-2 font-medium">{d.name}</td>
-                <td className="px-4 py-2 text-mine-300">{d.site?.name}{d.zone ? ` / ${d.zone.name}` : ""}</td>
-                <td className="px-4 py-2 text-mine-300">{d.requiredSupportStandard ?? "—"}</td>
-                <td className="px-4 py-2 text-right">
-                  {canDelete && <button className={buttonDanger} onClick={() => remove(d.id)}>{t("common.delete")}</button>}
-                </td>
-              </tr>
-            ))}
-            {districts.length === 0 && <tr><td colSpan={4} className="px-4 py-6 text-center text-mine-400">{t("groundControl.noDistricts")}</td></tr>}
-          </tbody>
-        </table>
-      </div>
+      <DataTable
+        columns={
+          [
+            { key: "name", header: t("groundControl.districtName"), render: (d) => <span className="font-medium">{d.name}</span>, sortValue: (d) => d.name },
+            { key: "site", header: t("common.site"), render: (d) => `${d.site?.name ?? ""}${d.zone ? ` / ${d.zone.name}` : ""}`, sortValue: (d) => d.site?.name ?? "" },
+            { key: "standard", header: t("groundControl.requiredSupportStandard"), render: (d) => d.requiredSupportStandard ?? "—" },
+          ] as DataTableColumn<GroundControlDistrict>[]
+        }
+        rows={districts}
+        rowKey={(d) => d.id}
+        emptyMessage={t("groundControl.noDistricts")}
+        searchValue={(d) => `${d.name} ${d.site?.name ?? ""}`}
+        actions={(d) => (canDelete ? <button className={buttonDanger} onClick={() => remove(d.id)}>{t("common.delete")}</button> : null)}
+      />
       {modal && (
         <Modal title={t("groundControl.newDistrictTitle")} onClose={() => setModal(false)}>
           <DistrictForm sites={sites} zones={zones} onSubmit={create} onCancel={() => setModal(false)} />
@@ -311,34 +303,25 @@ function MonitoringTab({ canEdit, canDelete }: { canEdit: boolean; canDelete: bo
           <button className={buttonPrimary} onClick={() => setModal(true)}>{t("groundControl.newPoint")}</button>
         </div>
       )}
-      <div className={`${cardClass} overflow-x-auto`}>
-        <table className="w-full text-sm">
-          <thead className="bg-mine-800/50 text-mine-300 text-xs uppercase">
-            <tr>
-              <th className="text-left px-4 py-2">{t("groundControl.locationDescription")}</th>
-              <th className="text-left px-4 py-2">{t("groundControl.pointType")}</th>
-              <th className="text-left px-4 py-2">{t("groundControl.district")}</th>
-              <th className="px-4 py-2"></th>
-            </tr>
-          </thead>
-          <tbody>
-            {points.map((p) => (
-              <tr key={p.id} className="border-t border-mine-800 hover:bg-mine-800/30">
-                <td className="px-4 py-2 font-medium">{p.locationDescription}</td>
-                <td className="px-4 py-2 text-mine-300">{t(`groundControl.pointTypes.${p.pointType}`)}</td>
-                <td className="px-4 py-2 text-mine-300">{p.district?.name}</td>
-                <td className="px-4 py-2 text-right">
-                  <div className="flex justify-end gap-2">
-                    <button className="text-xs text-mine-300 hover:text-mine-50" onClick={() => setReadingsPoint(p)}>{t("groundControl.readings")}</button>
-                    {canDelete && <button className={buttonDanger} onClick={() => remove(p.id)}>{t("common.delete")}</button>}
-                  </div>
-                </td>
-              </tr>
-            ))}
-            {points.length === 0 && <tr><td colSpan={4} className="px-4 py-6 text-center text-mine-400">{t("groundControl.noPoints")}</td></tr>}
-          </tbody>
-        </table>
-      </div>
+      <DataTable
+        columns={
+          [
+            { key: "location", header: t("groundControl.locationDescription"), render: (p) => <span className="font-medium">{p.locationDescription}</span>, sortValue: (p) => p.locationDescription },
+            { key: "type", header: t("groundControl.pointType"), render: (p) => t(`groundControl.pointTypes.${p.pointType}`), sortValue: (p) => p.pointType },
+            { key: "district", header: t("groundControl.district"), render: (p) => p.district?.name ?? "—", sortValue: (p) => p.district?.name ?? "" },
+          ] as DataTableColumn<GeotechnicalMonitoringPoint>[]
+        }
+        rows={points}
+        rowKey={(p) => p.id}
+        emptyMessage={t("groundControl.noPoints")}
+        searchValue={(p) => `${p.locationDescription} ${p.district?.name ?? ""}`}
+        actions={(p) => (
+          <div className="flex justify-end gap-2">
+            <button className="text-xs text-mine-300 hover:text-mine-50" onClick={() => setReadingsPoint(p)}>{t("groundControl.readings")}</button>
+            {canDelete && <button className={buttonDanger} onClick={() => remove(p.id)}>{t("common.delete")}</button>}
+          </div>
+        )}
+      />
       {modal && (
         <Modal title={t("groundControl.newPointTitle")} onClose={() => setModal(false)}>
           <PointForm districts={districts} onSubmit={create} onCancel={() => setModal(false)} />
@@ -456,40 +439,36 @@ function SeismicEventsTab({ sites, zones, canEdit, canDelete }: { sites: Site[];
 
   if (loading) return <div className="text-mine-300">{t("common.loading")}</div>;
 
+  const damageCount = events.filter((ev) => ev.damageObserved).length;
+
   return (
     <div className="space-y-4">
+      <SummaryCards cards={[{ label: t("groundControl.summaryDamageObserved"), value: damageCount, tone: damageCount > 0 ? "danger" : "default" }]} />
+
       {canEdit && sites.length > 0 && (
         <div className="flex justify-end">
           <button className={buttonPrimary} onClick={() => setModal(true)}>{t("groundControl.newSeismicEvent")}</button>
         </div>
       )}
-      <div className={`${cardClass} overflow-x-auto`}>
-        <table className="w-full text-sm">
-          <thead className="bg-mine-800/50 text-mine-300 text-xs uppercase">
-            <tr>
-              <th className="text-left px-4 py-2">{t("groundControl.eventDate")}</th>
-              <th className="text-left px-4 py-2">{t("groundControl.magnitude")}</th>
-              <th className="text-left px-4 py-2">{t("groundControl.locationDescription")}</th>
-              <th className="text-left px-4 py-2">{t("groundControl.damageObserved")}</th>
-              <th className="px-4 py-2"></th>
-            </tr>
-          </thead>
-          <tbody>
-            {events.map((ev) => (
-              <tr key={ev.id} className="border-t border-mine-800 hover:bg-mine-800/30">
-                <td className="px-4 py-2 font-medium">{new Date(ev.eventDate).toLocaleDateString()}</td>
-                <td className="px-4 py-2 text-mine-300">{ev.magnitude}</td>
-                <td className="px-4 py-2 text-mine-300">{ev.locationDescription ?? "—"}</td>
-                <td className="px-4 py-2">{ev.damageObserved ? <span className="text-danger-500">{t("common.yes")}</span> : t("common.no")}</td>
-                <td className="px-4 py-2 text-right">
-                  {canDelete && <button className={buttonDanger} onClick={() => remove(ev.id)}>{t("common.delete")}</button>}
-                </td>
-              </tr>
-            ))}
-            {events.length === 0 && <tr><td colSpan={5} className="px-4 py-6 text-center text-mine-400">{t("groundControl.noSeismicEvents")}</td></tr>}
-          </tbody>
-        </table>
-      </div>
+      <DataTable
+        columns={
+          [
+            { key: "date", header: t("groundControl.eventDate"), render: (ev) => new Date(ev.eventDate).toLocaleDateString(), sortValue: (ev) => ev.eventDate },
+            { key: "magnitude", header: t("groundControl.magnitude"), render: (ev) => ev.magnitude, sortValue: (ev) => ev.magnitude },
+            { key: "location", header: t("groundControl.locationDescription"), render: (ev) => ev.locationDescription ?? "—" },
+            { key: "damage", header: t("groundControl.damageObserved"), render: (ev) => (ev.damageObserved ? <span className="text-danger-500">{t("common.yes")}</span> : t("common.no")), sortValue: (ev) => (ev.damageObserved ? 1 : 0) },
+          ] as DataTableColumn<SeismicEvent>[]
+        }
+        rows={events}
+        rowKey={(ev) => ev.id}
+        emptyMessage={t("groundControl.noSeismicEvents")}
+        actions={(ev) => (
+          <div className="flex justify-end gap-2">
+            <AuditHistoryButton entityType="SeismicEvent" entityId={ev.id} />
+            {canDelete && <button className={buttonDanger} onClick={() => remove(ev.id)}>{t("common.delete")}</button>}
+          </div>
+        )}
+      />
       {modal && (
         <Modal title={t("groundControl.newSeismicEventTitle")} onClose={() => setModal(false)}>
           <SeismicEventForm sites={sites} zones={zones} onSubmit={create} onCancel={() => setModal(false)} />
@@ -613,49 +592,50 @@ function RockfallIncidentsTab({ sites, zones, canEdit, canDelete }: { sites: Sit
 
   if (loading) return <div className="text-mine-300">{t("common.loading")}</div>;
 
+  const unauthorizedCount = incidents.filter((r) => !r.reEntryAuthorized).length;
+
   return (
     <div className="space-y-4">
       <p className="text-xs text-mine-400">{t("groundControl.rockfallHint")}</p>
+
+      <SummaryCards cards={[{ label: t("groundControl.summaryUnauthorizedReEntry"), value: unauthorizedCount, tone: unauthorizedCount > 0 ? "danger" : "default" }]} />
+
       {canEdit && sites.length > 0 && (
         <div className="flex justify-end">
           <button className={buttonPrimary} onClick={() => setModal(true)}>{t("groundControl.newRockfallIncident")}</button>
         </div>
       )}
-      <div className={`${cardClass} overflow-x-auto`}>
-        <table className="w-full text-sm">
-          <thead className="bg-mine-800/50 text-mine-300 text-xs uppercase">
-            <tr>
-              <th className="text-left px-4 py-2">{t("groundControl.eventDate")}</th>
-              <th className="text-left px-4 py-2">{t("groundControl.eventType")}</th>
-              <th className="text-left px-4 py-2">{t("common.site")}</th>
-              <th className="text-left px-4 py-2">{t("groundControl.reEntry")}</th>
-              <th className="px-4 py-2"></th>
-            </tr>
-          </thead>
-          <tbody>
-            {incidents.map((r) => (
-              <tr key={r.id} className="border-t border-mine-800 hover:bg-mine-800/30">
-                <td className="px-4 py-2 font-medium">{new Date(r.eventDate).toLocaleDateString()}</td>
-                <td className="px-4 py-2 text-mine-300">{t(`groundControl.eventTypes.${r.eventType}`)}</td>
-                <td className="px-4 py-2 text-mine-300">{r.site?.name}</td>
-                <td className="px-4 py-2">
-                  {r.reEntryAuthorized ? (
-                    <span className="text-success-500">{t("groundControl.authorizedBy", { name: r.signOffBy?.name })}</span>
-                  ) : canEdit ? (
-                    <button className="text-xs text-mine-300 hover:text-mine-50 underline" onClick={() => signOff(r.id)}>{t("groundControl.authorizeReEntry")}</button>
-                  ) : (
-                    <span className="text-danger-500">{t("groundControl.notAuthorized")}</span>
-                  )}
-                </td>
-                <td className="px-4 py-2 text-right">
-                  {canDelete && <button className={buttonDanger} onClick={() => remove(r.id)}>{t("common.delete")}</button>}
-                </td>
-              </tr>
-            ))}
-            {incidents.length === 0 && <tr><td colSpan={5} className="px-4 py-6 text-center text-mine-400">{t("groundControl.noRockfallIncidents")}</td></tr>}
-          </tbody>
-        </table>
-      </div>
+      <DataTable
+        columns={
+          [
+            { key: "date", header: t("groundControl.eventDate"), render: (r) => new Date(r.eventDate).toLocaleDateString(), sortValue: (r) => r.eventDate },
+            { key: "type", header: t("groundControl.eventType"), render: (r) => t(`groundControl.eventTypes.${r.eventType}`), sortValue: (r) => r.eventType },
+            { key: "site", header: t("common.site"), render: (r) => r.site?.name ?? "—", sortValue: (r) => r.site?.name ?? "" },
+            {
+              key: "reEntry",
+              header: t("groundControl.reEntry"),
+              render: (r) =>
+                r.reEntryAuthorized ? (
+                  <span className="text-success-500">{t("groundControl.authorizedBy", { name: r.signOffBy?.name })}</span>
+                ) : canEdit ? (
+                  <button className="text-xs text-mine-300 hover:text-mine-50 underline" onClick={() => signOff(r.id)}>{t("groundControl.authorizeReEntry")}</button>
+                ) : (
+                  <span className="text-danger-500">{t("groundControl.notAuthorized")}</span>
+                ),
+              sortValue: (r) => (r.reEntryAuthorized ? 1 : 0),
+            },
+          ] as DataTableColumn<RockfallIncident>[]
+        }
+        rows={incidents}
+        rowKey={(r) => r.id}
+        emptyMessage={t("groundControl.noRockfallIncidents")}
+        actions={(r) => (
+          <div className="flex justify-end gap-2">
+            <AuditHistoryButton entityType="RockfallIncident" entityId={r.id} />
+            {canDelete && <button className={buttonDanger} onClick={() => remove(r.id)}>{t("common.delete")}</button>}
+          </div>
+        )}
+      />
       {modal && (
         <Modal title={t("groundControl.newRockfallIncidentTitle")} onClose={() => setModal(false)}>
           <RockfallForm sites={sites} zones={zones} districts={districts} onSubmit={create} onCancel={() => setModal(false)} />

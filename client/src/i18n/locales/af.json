@@ -2983,7 +2983,9 @@
     "authorizedBy": "Gemagtig deur {{name}}",
     "authorizeReEntry": "Magtig herbetreding",
     "notAuthorized": "Nog nie gemagtig nie",
-    "noRockfallIncidents": "Nog geen rotsval/rotsbars-voorvalle aangeteken nie."
+    "noRockfallIncidents": "Nog geen rotsval/rotsbars-voorvalle aangeteken nie.",
+    "summaryDamageObserved": "Skade Waargeneem",
+    "summaryUnauthorizedReEntry": "Heringang Nog Nie Gemagtig Nie"
   },
   "ventilation": {
     "nav": "Ventilasie & Higiëne",
@@ -3269,7 +3271,8 @@
     "newSpendRecord": "+ Nuwe Uitgawerekord",
     "newSpendRecordTitle": "Nuwe Uitgawerekord",
     "noSpendRecords": "Nog geen uitgawerekords aangeteken nie.",
-    "spendHint": "Plaaslike/HDSA-verkrygingsuitgawe en korporatiewe maatskaplike belegging, apart van die algemene Verkrygingsmodule opgespoor."
+    "spendHint": "Plaaslike/HDSA-verkrygingsuitgawe en korporatiewe maatskaplike belegging, apart van die algemene Verkrygingsmodule opgespoor.",
+    "summaryOpenGrievances": "Oop Griewe"
   },
   "geology": {
     "nav": "Geologie & Hulpbronne",

@@ -5,8 +5,10 @@ import { useAuth } from "../context/AuthContext";
 import { ShaftInspection, Site, Winder, WinderInspectionResult } from "../api/types";
 import { StatusBadge } from "../components/Badges";
 import Modal from "../components/Modal";
-import { buttonDanger, buttonPrimary, buttonSecondary, cardClass, inputClass, labelClass, selectClass } from "../components/ui";
+import { buttonDanger, buttonPrimary, buttonSecondary, inputClass, labelClass, selectClass } from "../components/ui";
 import DateField from "../components/DateField";
+import DataTable, { DataTableColumn } from "../components/DataTable";
+import { AuditHistoryButton } from "../components/AuditHistoryPanel";
 
 const brakeResults: WinderInspectionResult[] = ["PASS", "FAIL", "CONDITIONAL"];
 
@@ -139,6 +141,7 @@ function WinderDetailModal({ winder, onClose, onChanged }: { winder: Winder; onC
               <div key={i.id} className="flex items-center justify-between text-xs border-t border-mine-800 pt-1.5">
                 <span>{new Date(i.inspectionDate).toLocaleDateString()} — {i.inspector}</span>
                 {i.brakeTestResult && <StatusBadge status={i.brakeTestResult} />}
+                <AuditHistoryButton entityType="WinderInspection" entityId={i.id} />
               </div>
             ))}
           </div>
@@ -169,6 +172,7 @@ function WinderDetailModal({ winder, onClose, onChanged }: { winder: Winder; onC
                 <span>{r.ropeIdentifier}</span>
                 <span className="text-mine-400">{r.discardDate ? new Date(r.discardDate).toLocaleDateString() : "—"}</span>
                 <StatusBadge status={r.status} />
+                <AuditHistoryButton entityType="ConveyanceRope" entityId={r.id} />
               </div>
             ))}
           </div>
@@ -223,38 +227,31 @@ function WindersTab({ sites, canEdit, canDelete }: { sites: Site[]; canEdit: boo
           <button className={buttonPrimary} onClick={() => setModal(true)}>{t("winders.newWinder")}</button>
         </div>
       )}
-      <div className={`${cardClass} overflow-x-auto`}>
-        <table className="w-full text-sm">
-          <thead className="bg-mine-800/50 text-mine-300 text-xs uppercase">
-            <tr>
-              <th className="text-left px-4 py-2">{t("winders.winderName")}</th>
-              <th className="text-left px-4 py-2">{t("common.site")}</th>
-              <th className="text-left px-4 py-2">{t("winders.shaftName")}</th>
-              <th className="text-left px-4 py-2">{t("winders.lastInspection")}</th>
-              <th className="px-4 py-2"></th>
-            </tr>
-          </thead>
-          <tbody>
-            {winders.map((w) => (
-              <tr key={w.id} className="border-t border-mine-800 hover:bg-mine-800/30">
-                <td className="px-4 py-2 font-medium">{w.name}</td>
-                <td className="px-4 py-2 text-mine-300">{w.site?.name}</td>
-                <td className="px-4 py-2 text-mine-300">{w.shaftName ?? "—"}</td>
-                <td className="px-4 py-2 text-mine-300">
-                  {w.inspections && w.inspections.length > 0 ? new Date(w.inspections[0].inspectionDate).toLocaleDateString() : "—"}
-                </td>
-                <td className="px-4 py-2 text-right">
-                  <div className="flex justify-end gap-2">
-                    <button className="text-xs text-mine-300 hover:text-mine-50" onClick={() => setDetailWinder(w)}>{t("winders.details")}</button>
-                    {canDelete && <button className={buttonDanger} onClick={() => remove(w.id)}>{t("common.delete")}</button>}
-                  </div>
-                </td>
-              </tr>
-            ))}
-            {winders.length === 0 && <tr><td colSpan={5} className="px-4 py-6 text-center text-mine-400">{t("winders.noWinders")}</td></tr>}
-          </tbody>
-        </table>
-      </div>
+      <DataTable
+        columns={
+          [
+            { key: "name", header: t("winders.winderName"), render: (w) => <span className="font-medium">{w.name}</span>, sortValue: (w) => w.name },
+            { key: "site", header: t("common.site"), render: (w) => w.site?.name ?? "—", sortValue: (w) => w.site?.name ?? "" },
+            { key: "shaft", header: t("winders.shaftName"), render: (w) => w.shaftName ?? "—", sortValue: (w) => w.shaftName ?? "" },
+            {
+              key: "lastInspection",
+              header: t("winders.lastInspection"),
+              render: (w) => (w.inspections && w.inspections.length > 0 ? new Date(w.inspections[0].inspectionDate).toLocaleDateString() : "—"),
+              sortValue: (w) => w.inspections?.[0]?.inspectionDate ?? "",
+            },
+          ] as DataTableColumn<Winder>[]
+        }
+        rows={winders}
+        rowKey={(w) => w.id}
+        emptyMessage={t("winders.noWinders")}
+        searchValue={(w) => `${w.name} ${w.site?.name ?? ""} ${w.shaftName ?? ""}`}
+        actions={(w) => (
+          <div className="flex justify-end gap-2">
+            <button className="text-xs text-mine-300 hover:text-mine-50" onClick={() => setDetailWinder(w)}>{t("winders.details")}</button>
+            {canDelete && <button className={buttonDanger} onClick={() => remove(w.id)}>{t("common.delete")}</button>}
+          </div>
+        )}
+      />
       {modal && (
         <Modal title={t("winders.newWinderTitle")} onClose={() => setModal(false)}>
           <WinderForm sites={sites} onSubmit={create} onCancel={() => setModal(false)} />
@@ -315,33 +312,26 @@ function ShaftInspectionsTab({ sites, canEdit, canDelete }: { sites: Site[]; can
           <button className={buttonPrimary} onClick={() => setModal(true)}>{t("winders.newShaftInspection")}</button>
         </div>
       )}
-      <div className={`${cardClass} overflow-x-auto`}>
-        <table className="w-full text-sm">
-          <thead className="bg-mine-800/50 text-mine-300 text-xs uppercase">
-            <tr>
-              <th className="text-left px-4 py-2">{t("winders.shaftName")}</th>
-              <th className="text-left px-4 py-2">{t("common.site")}</th>
-              <th className="text-left px-4 py-2">{t("tailings.inspectionDate")}</th>
-              <th className="text-left px-4 py-2">{t("winders.headgearCondition")}</th>
-              <th className="px-4 py-2"></th>
-            </tr>
-          </thead>
-          <tbody>
-            {inspections.map((i) => (
-              <tr key={i.id} className="border-t border-mine-800 hover:bg-mine-800/30">
-                <td className="px-4 py-2 font-medium">{i.shaftName}</td>
-                <td className="px-4 py-2 text-mine-300">{i.site?.name}</td>
-                <td className="px-4 py-2 text-mine-300">{new Date(i.inspectionDate).toLocaleDateString()}</td>
-                <td className="px-4 py-2 text-mine-300">{i.headgearCondition ?? "—"}</td>
-                <td className="px-4 py-2 text-right">
-                  {canDelete && <button className={buttonDanger} onClick={() => remove(i.id)}>{t("common.delete")}</button>}
-                </td>
-              </tr>
-            ))}
-            {inspections.length === 0 && <tr><td colSpan={5} className="px-4 py-6 text-center text-mine-400">{t("winders.noShaftInspections")}</td></tr>}
-          </tbody>
-        </table>
-      </div>
+      <DataTable
+        columns={
+          [
+            { key: "shaft", header: t("winders.shaftName"), render: (i) => <span className="font-medium">{i.shaftName}</span>, sortValue: (i) => i.shaftName },
+            { key: "site", header: t("common.site"), render: (i) => i.site?.name ?? "—", sortValue: (i) => i.site?.name ?? "" },
+            { key: "date", header: t("tailings.inspectionDate"), render: (i) => new Date(i.inspectionDate).toLocaleDateString(), sortValue: (i) => i.inspectionDate },
+            { key: "headgear", header: t("winders.headgearCondition"), render: (i) => i.headgearCondition ?? "—" },
+          ] as DataTableColumn<ShaftInspection>[]
+        }
+        rows={inspections}
+        rowKey={(i) => i.id}
+        emptyMessage={t("winders.noShaftInspections")}
+        searchValue={(i) => `${i.shaftName} ${i.site?.name ?? ""}`}
+        actions={(i) => (
+          <div className="flex justify-end gap-2">
+            <AuditHistoryButton entityType="ShaftInspection" entityId={i.id} />
+            {canDelete && <button className={buttonDanger} onClick={() => remove(i.id)}>{t("common.delete")}</button>}
+          </div>
+        )}
+      />
       {modal && (
         <Modal title={t("winders.newShaftInspectionTitle")} onClose={() => setModal(false)}>
           <form onSubmit={handleSubmit} className="space-y-4">

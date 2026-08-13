@@ -2983,7 +2983,9 @@
     "authorizedBy": "Autorisé par {{name}}",
     "authorizeReEntry": "Autoriser la réentrée",
     "notAuthorized": "Pas encore autorisé",
-    "noRockfallIncidents": "Aucun incident de chute/coup de terrain enregistré pour l'instant."
+    "noRockfallIncidents": "Aucun incident de chute/coup de terrain enregistré pour l'instant.",
+    "summaryDamageObserved": "Dommages Observés",
+    "summaryUnauthorizedReEntry": "Réentrée Non Encore Autorisée"
   },
   "ventilation": {
     "nav": "Ventilation et Hygiène",
@@ -3269,7 +3271,8 @@
     "newSpendRecord": "+ Nouvelle Dépense",
     "newSpendRecordTitle": "Nouvelle Dépense",
     "noSpendRecords": "Aucune dépense enregistrée pour l'instant.",
-    "spendHint": "Dépenses d'approvisionnement local/HDSA et investissement social d'entreprise, suivies séparément du module Approvisionnement général."
+    "spendHint": "Dépenses d'approvisionnement local/HDSA et investissement social d'entreprise, suivies séparément du module Approvisionnement général.",
+    "summaryOpenGrievances": "Griefs Ouverts"
   },
   "geology": {
     "nav": "Géologie et Ressources",

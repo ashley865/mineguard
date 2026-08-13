@@ -14,8 +14,11 @@ import {
 } from "../api/types";
 import { StatusBadge } from "../components/Badges";
 import Modal from "../components/Modal";
-import { buttonDanger, buttonPrimary, buttonSecondary, cardClass, inputClass, labelClass, selectClass } from "../components/ui";
+import { buttonDanger, buttonPrimary, buttonSecondary, inputClass, labelClass, selectClass } from "../components/ui";
 import DateField from "../components/DateField";
+import DataTable, { DataTableColumn } from "../components/DataTable";
+import SummaryCards from "../components/SummaryCards";
+import { AuditHistoryButton } from "../components/AuditHistoryPanel";
 
 const projectStatuses: CommunityProjectStatus[] = ["PLANNED", "IN_PROGRESS", "COMPLETED", "DELAYED", "CANCELLED"];
 const engagementTypes: CommunityEngagementType[] = ["PUBLIC_MEETING", "FOCUS_GROUP", "FORUM", "SITE_VISIT", "SURVEY", "OTHER"];
@@ -146,33 +149,21 @@ function ProjectsTab({ sites, canEdit, canDelete }: { sites: Site[]; canEdit: bo
           <button className={buttonPrimary} onClick={() => setModal(true)}>{t("community.newProject")}</button>
         </div>
       )}
-      <div className={`${cardClass} overflow-x-auto`}>
-        <table className="w-full text-sm">
-          <thead className="bg-mine-800/50 text-mine-300 text-xs uppercase">
-            <tr>
-              <th className="text-left px-4 py-2">{t("community.projectName")}</th>
-              <th className="text-left px-4 py-2">{t("common.site")}</th>
-              <th className="text-left px-4 py-2">{t("community.budget")} / {t("community.spentToDate")}</th>
-              <th className="text-left px-4 py-2">{t("common.status")}</th>
-              <th className="px-4 py-2"></th>
-            </tr>
-          </thead>
-          <tbody>
-            {projects.map((p) => (
-              <tr key={p.id} className="border-t border-mine-800 hover:bg-mine-800/30">
-                <td className="px-4 py-2 font-medium">{p.name}</td>
-                <td className="px-4 py-2 text-mine-300">{p.site?.name}</td>
-                <td className="px-4 py-2 text-mine-300">{p.currency} {(p.budget ?? 0).toLocaleString()} / {(p.spentToDate ?? 0).toLocaleString()}</td>
-                <td className="px-4 py-2"><StatusBadge status={p.status} /></td>
-                <td className="px-4 py-2 text-right">
-                  {canDelete && <button className={buttonDanger} onClick={() => remove(p.id)}>{t("common.delete")}</button>}
-                </td>
-              </tr>
-            ))}
-            {projects.length === 0 && <tr><td colSpan={5} className="px-4 py-6 text-center text-mine-400">{t("community.noProjects")}</td></tr>}
-          </tbody>
-        </table>
-      </div>
+      <DataTable
+        columns={
+          [
+            { key: "name", header: t("community.projectName"), render: (p) => <span className="font-medium">{p.name}</span>, sortValue: (p) => p.name },
+            { key: "site", header: t("common.site"), render: (p) => p.site?.name ?? "—", sortValue: (p) => p.site?.name ?? "" },
+            { key: "budget", header: `${t("community.budget")} / ${t("community.spentToDate")}`, render: (p) => `${p.currency} ${(p.budget ?? 0).toLocaleString()} / ${(p.spentToDate ?? 0).toLocaleString()}` },
+            { key: "status", header: t("common.status"), render: (p) => <StatusBadge status={p.status} />, sortValue: (p) => p.status },
+          ] as DataTableColumn<CommunityProject>[]
+        }
+        rows={projects}
+        rowKey={(p) => p.id}
+        emptyMessage={t("community.noProjects")}
+        searchValue={(p) => `${p.name} ${p.site?.name ?? ""}`}
+        actions={(p) => (canDelete ? <button className={buttonDanger} onClick={() => remove(p.id)}>{t("common.delete")}</button> : null)}
+      />
       {modal && (
         <Modal title={t("community.newProjectTitle")} onClose={() => setModal(false)}>
           <ProjectForm sites={sites} onSubmit={create} onCancel={() => setModal(false)} />
@@ -288,33 +279,20 @@ function EngagementsTab({ sites, canEdit, canDelete }: { sites: Site[]; canEdit:
           <button className={buttonPrimary} onClick={() => setModal(true)}>{t("community.newEngagement")}</button>
         </div>
       )}
-      <div className={`${cardClass} overflow-x-auto`}>
-        <table className="w-full text-sm">
-          <thead className="bg-mine-800/50 text-mine-300 text-xs uppercase">
-            <tr>
-              <th className="text-left px-4 py-2">{t("community.engagementDate")}</th>
-              <th className="text-left px-4 py-2">{t("community.engagementType")}</th>
-              <th className="text-left px-4 py-2">{t("common.site")}</th>
-              <th className="text-left px-4 py-2">{t("community.attendeesCount")}</th>
-              <th className="px-4 py-2"></th>
-            </tr>
-          </thead>
-          <tbody>
-            {engagements.map((e) => (
-              <tr key={e.id} className="border-t border-mine-800 hover:bg-mine-800/30">
-                <td className="px-4 py-2 font-medium">{new Date(e.engagementDate).toLocaleDateString()}</td>
-                <td className="px-4 py-2 text-mine-300">{t(`community.engagementTypes.${e.engagementType}`)}</td>
-                <td className="px-4 py-2 text-mine-300">{e.site?.name}</td>
-                <td className="px-4 py-2 text-mine-300">{e.attendeesCount ?? "—"}</td>
-                <td className="px-4 py-2 text-right">
-                  {canDelete && <button className={buttonDanger} onClick={() => remove(e.id)}>{t("common.delete")}</button>}
-                </td>
-              </tr>
-            ))}
-            {engagements.length === 0 && <tr><td colSpan={5} className="px-4 py-6 text-center text-mine-400">{t("community.noEngagements")}</td></tr>}
-          </tbody>
-        </table>
-      </div>
+      <DataTable
+        columns={
+          [
+            { key: "date", header: t("community.engagementDate"), render: (e) => new Date(e.engagementDate).toLocaleDateString(), sortValue: (e) => e.engagementDate },
+            { key: "type", header: t("community.engagementType"), render: (e) => t(`community.engagementTypes.${e.engagementType}`), sortValue: (e) => e.engagementType },
+            { key: "site", header: t("common.site"), render: (e) => e.site?.name ?? "—", sortValue: (e) => e.site?.name ?? "" },
+            { key: "attendees", header: t("community.attendeesCount"), render: (e) => e.attendeesCount ?? "—", sortValue: (e) => e.attendeesCount ?? 0 },
+          ] as DataTableColumn<CommunityEngagement>[]
+        }
+        rows={engagements}
+        rowKey={(e) => e.id}
+        emptyMessage={t("community.noEngagements")}
+        actions={(e) => (canDelete ? <button className={buttonDanger} onClick={() => remove(e.id)}>{t("common.delete")}</button> : null)}
+      />
       {modal && (
         <Modal title={t("community.newEngagementTitle")} onClose={() => setModal(false)}>
           <EngagementForm sites={sites} onSubmit={create} onCancel={() => setModal(false)} />
@@ -414,41 +392,39 @@ function GrievancesTab({ sites, canEdit, canDelete }: { sites: Site[]; canEdit: 
 
   if (loading) return <div className="text-mine-300">{t("common.loading")}</div>;
 
+  const openCount = grievances.filter((g) => g.status === "OPEN" || g.status === "UNDER_INVESTIGATION").length;
+
   return (
     <div className="space-y-4">
       <p className="text-xs text-mine-400">{t("community.grievancesHint")}</p>
+
+      <SummaryCards cards={[{ label: t("community.summaryOpenGrievances"), value: openCount, tone: openCount > 0 ? "hazard" : "default" }]} />
+
       {canEdit && sites.length > 0 && (
         <div className="flex justify-end">
           <button className={buttonPrimary} onClick={() => setModal(true)}>{t("community.newGrievance")}</button>
         </div>
       )}
-      <div className={`${cardClass} overflow-x-auto`}>
-        <table className="w-full text-sm">
-          <thead className="bg-mine-800/50 text-mine-300 text-xs uppercase">
-            <tr>
-              <th className="text-left px-4 py-2">{t("community.complainantName")}</th>
-              <th className="text-left px-4 py-2">{t("common.description")}</th>
-              <th className="text-left px-4 py-2">{t("labourRelations.dateRaised")}</th>
-              <th className="text-left px-4 py-2">{t("common.status")}</th>
-              <th className="px-4 py-2"></th>
-            </tr>
-          </thead>
-          <tbody>
-            {grievances.map((g) => (
-              <tr key={g.id} className="border-t border-mine-800 hover:bg-mine-800/30">
-                <td className="px-4 py-2 font-medium">{g.complainantName}</td>
-                <td className="px-4 py-2 text-mine-300">{g.description}</td>
-                <td className="px-4 py-2 text-mine-300">{new Date(g.dateRaised).toLocaleDateString()}</td>
-                <td className="px-4 py-2"><StatusBadge status={g.status} /></td>
-                <td className="px-4 py-2 text-right">
-                  {canDelete && <button className={buttonDanger} onClick={() => remove(g.id)}>{t("common.delete")}</button>}
-                </td>
-              </tr>
-            ))}
-            {grievances.length === 0 && <tr><td colSpan={5} className="px-4 py-6 text-center text-mine-400">{t("community.noGrievances")}</td></tr>}
-          </tbody>
-        </table>
-      </div>
+      <DataTable
+        columns={
+          [
+            { key: "complainant", header: t("community.complainantName"), render: (g) => <span className="font-medium">{g.complainantName}</span>, sortValue: (g) => g.complainantName },
+            { key: "description", header: t("common.description"), render: (g) => <div className="truncate max-w-xs" title={g.description}>{g.description}</div> },
+            { key: "dateRaised", header: t("labourRelations.dateRaised"), render: (g) => new Date(g.dateRaised).toLocaleDateString(), sortValue: (g) => g.dateRaised },
+            { key: "status", header: t("common.status"), render: (g) => <StatusBadge status={g.status} />, sortValue: (g) => g.status },
+          ] as DataTableColumn<CommunityGrievance>[]
+        }
+        rows={grievances}
+        rowKey={(g) => g.id}
+        emptyMessage={t("community.noGrievances")}
+        searchValue={(g) => `${g.complainantName} ${g.description}`}
+        actions={(g) => (
+          <div className="flex justify-end gap-2">
+            <AuditHistoryButton entityType="CommunityGrievance" entityId={g.id} />
+            {canDelete && <button className={buttonDanger} onClick={() => remove(g.id)}>{t("common.delete")}</button>}
+          </div>
+        )}
+      />
       {modal && (
         <Modal title={t("community.newGrievanceTitle")} onClose={() => setModal(false)}>
           <GrievanceForm sites={sites} onSubmit={create} onCancel={() => setModal(false)} />
@@ -509,33 +485,27 @@ function SpendTab({ sites, canEdit, canDelete }: { sites: Site[]; canEdit: boole
           <button className={buttonPrimary} onClick={() => setModal(true)}>{t("community.newSpendRecord")}</button>
         </div>
       )}
-      <div className={`${cardClass} overflow-x-auto`}>
-        <table className="w-full text-sm">
-          <thead className="bg-mine-800/50 text-mine-300 text-xs uppercase">
-            <tr>
-              <th className="text-left px-4 py-2">{t("resources.recordDate")}</th>
-              <th className="text-left px-4 py-2">{t("community.spendCategory")}</th>
-              <th className="text-left px-4 py-2">{t("community.amount")}</th>
-              <th className="text-left px-4 py-2">{t("community.supplierOrBeneficiary")}</th>
-              <th className="px-4 py-2"></th>
-            </tr>
-          </thead>
-          <tbody>
-            {records.map((r) => (
-              <tr key={r.id} className="border-t border-mine-800 hover:bg-mine-800/30">
-                <td className="px-4 py-2 font-medium">{new Date(r.recordDate).toLocaleDateString()}</td>
-                <td className="px-4 py-2 text-mine-300">{r.category}</td>
-                <td className="px-4 py-2 text-mine-300">{r.currency} {r.amount.toLocaleString()}</td>
-                <td className="px-4 py-2 text-mine-300">{r.supplierOrBeneficiary ?? "—"}</td>
-                <td className="px-4 py-2 text-right">
-                  {canDelete && <button className={buttonDanger} onClick={() => remove(r.id)}>{t("common.delete")}</button>}
-                </td>
-              </tr>
-            ))}
-            {records.length === 0 && <tr><td colSpan={5} className="px-4 py-6 text-center text-mine-400">{t("community.noSpendRecords")}</td></tr>}
-          </tbody>
-        </table>
-      </div>
+      <DataTable
+        columns={
+          [
+            { key: "date", header: t("resources.recordDate"), render: (r) => new Date(r.recordDate).toLocaleDateString(), sortValue: (r) => r.recordDate },
+            { key: "category", header: t("community.spendCategory"), render: (r) => r.category, sortValue: (r) => r.category },
+            { key: "amount", header: t("community.amount"), render: (r) => `${r.currency} ${r.amount.toLocaleString()}`, sortValue: (r) => r.amount },
+            { key: "supplier", header: t("community.supplierOrBeneficiary"), render: (r) => r.supplierOrBeneficiary ?? "—" },
+          ] as DataTableColumn<CommunitySpendRecord>[]
+        }
+        rows={records}
+        rowKey={(r) => r.id}
+        emptyMessage={t("community.noSpendRecords")}
+        exportFilename="community-spend"
+        exportColumns={[
+          { header: t("resources.recordDate"), value: (r) => r.recordDate },
+          { header: t("community.spendCategory"), value: (r) => r.category },
+          { header: t("community.amount"), value: (r) => r.amount },
+          { header: t("community.supplierOrBeneficiary"), value: (r) => r.supplierOrBeneficiary ?? "" },
+        ]}
+        actions={(r) => (canDelete ? <button className={buttonDanger} onClick={() => remove(r.id)}>{t("common.delete")}</button> : null)}
+      />
       {modal && (
         <Modal title={t("community.newSpendRecordTitle")} onClose={() => setModal(false)}>
           <form onSubmit={handleSubmit} className="space-y-4">

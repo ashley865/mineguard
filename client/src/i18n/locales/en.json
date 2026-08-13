@@ -2982,7 +2982,9 @@
     "authorizedBy": "Authorised by {{name}}",
     "authorizeReEntry": "Authorise re-entry",
     "notAuthorized": "Not yet authorised",
-    "noRockfallIncidents": "No rockfall/rockburst incidents recorded yet."
+    "noRockfallIncidents": "No rockfall/rockburst incidents recorded yet.",
+    "summaryDamageObserved": "Damage Observed",
+    "summaryUnauthorizedReEntry": "Re-Entry Not Yet Authorized"
   },
   "ventilation": {
     "nav": "Ventilation & Hygiene",
@@ -3268,7 +3270,8 @@
     "newSpendRecord": "+ New Spend Record",
     "newSpendRecordTitle": "New Spend Record",
     "noSpendRecords": "No spend records recorded yet.",
-    "spendHint": "Local/HDSA procurement spend and corporate social investment, tracked separately from the general Procurement module."
+    "spendHint": "Local/HDSA procurement spend and corporate social investment, tracked separately from the general Procurement module.",
+    "summaryOpenGrievances": "Open Grievances"
   },
   "geology": {
     "nav": "Geology & Resources",

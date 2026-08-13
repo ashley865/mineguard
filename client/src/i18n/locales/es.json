@@ -2983,7 +2983,9 @@
     "authorizedBy": "Autorizado por {{name}}",
     "authorizeReEntry": "Autorizar reingreso",
     "notAuthorized": "Aún no autorizado",
-    "noRockfallIncidents": "Aún no se han registrado incidentes de caída/estallido de roca."
+    "noRockfallIncidents": "Aún no se han registrado incidentes de caída/estallido de roca.",
+    "summaryDamageObserved": "Daño Observado",
+    "summaryUnauthorizedReEntry": "Reingreso Aún No Autorizado"
   },
   "ventilation": {
     "nav": "Ventilación e Higiene",
@@ -3269,7 +3271,8 @@
     "newSpendRecord": "+ Nuevo Registro de Gasto",
     "newSpendRecordTitle": "Nuevo Registro de Gasto",
     "noSpendRecords": "Aún no se han registrado registros de gasto.",
-    "spendHint": "Gasto en adquisiciones locales/HDSA e inversión social corporativa, registrado por separado del módulo general de Adquisiciones."
+    "spendHint": "Gasto en adquisiciones locales/HDSA e inversión social corporativa, registrado por separado del módulo general de Adquisiciones.",
+    "summaryOpenGrievances": "Quejas Abiertas"
   },
   "geology": {
     "nav": "Geología y Recursos",

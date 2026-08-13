@@ -5,9 +5,11 @@ import { useAuth } from "../context/AuthContext";
 import { DrillHole, DrillHoleStatus, MineralType, ResourceClassification, ResourceEstimate, Site } from "../api/types";
 import { StatusBadge } from "../components/Badges";
 import Modal from "../components/Modal";
-import { buttonDanger, buttonPrimary, buttonSecondary, cardClass, inputClass, labelClass, selectClass } from "../components/ui";
+import { buttonDanger, buttonPrimary, buttonSecondary, inputClass, labelClass, selectClass } from "../components/ui";
 import DateField from "../components/DateField";
 import { mineralTypes } from "../lib/minerals";
+import DataTable, { DataTableColumn } from "../components/DataTable";
+import { AuditHistoryButton } from "../components/AuditHistoryPanel";
 
 const drillHoleStatuses: DrillHoleStatus[] = ["PLANNED", "DRILLING", "COMPLETED", "ABANDONED"];
 const classifications: ResourceClassification[] = ["MEASURED", "INDICATED", "INFERRED", "PROVED_RESERVE", "PROBABLE_RESERVE"];
@@ -208,36 +210,26 @@ function DrillHolesTab({ sites, canEdit, canDelete }: { sites: Site[]; canEdit: 
           <button className={buttonPrimary} onClick={() => setModal(true)}>{t("geology.newDrillHole")}</button>
         </div>
       )}
-      <div className={`${cardClass} overflow-x-auto`}>
-        <table className="w-full text-sm">
-          <thead className="bg-mine-800/50 text-mine-300 text-xs uppercase">
-            <tr>
-              <th className="text-left px-4 py-2">{t("geology.holeId")}</th>
-              <th className="text-left px-4 py-2">{t("common.site")}</th>
-              <th className="text-left px-4 py-2">{t("geology.totalDepth")}</th>
-              <th className="text-left px-4 py-2">{t("common.status")}</th>
-              <th className="px-4 py-2"></th>
-            </tr>
-          </thead>
-          <tbody>
-            {holes.map((h) => (
-              <tr key={h.id} className="border-t border-mine-800 hover:bg-mine-800/30">
-                <td className="px-4 py-2 font-medium">{h.holeId}</td>
-                <td className="px-4 py-2 text-mine-300">{h.site?.name}</td>
-                <td className="px-4 py-2 text-mine-300">{h.totalDepth ?? "—"}</td>
-                <td className="px-4 py-2"><StatusBadge status={h.status} /></td>
-                <td className="px-4 py-2 text-right">
-                  <div className="flex justify-end gap-2">
-                    <button className="text-xs text-mine-300 hover:text-mine-50" onClick={() => setAssaysHole(h)}>{t("geology.assays")}</button>
-                    {canDelete && <button className={buttonDanger} onClick={() => remove(h.id)}>{t("common.delete")}</button>}
-                  </div>
-                </td>
-              </tr>
-            ))}
-            {holes.length === 0 && <tr><td colSpan={5} className="px-4 py-6 text-center text-mine-400">{t("geology.noDrillHoles")}</td></tr>}
-          </tbody>
-        </table>
-      </div>
+      <DataTable
+        columns={
+          [
+            { key: "holeId", header: t("geology.holeId"), render: (h) => <span className="font-medium">{h.holeId}</span>, sortValue: (h) => h.holeId },
+            { key: "site", header: t("common.site"), render: (h) => h.site?.name ?? "—", sortValue: (h) => h.site?.name ?? "" },
+            { key: "depth", header: t("geology.totalDepth"), render: (h) => h.totalDepth ?? "—", sortValue: (h) => h.totalDepth ?? 0 },
+            { key: "status", header: t("common.status"), render: (h) => <StatusBadge status={h.status} />, sortValue: (h) => h.status },
+          ] as DataTableColumn<DrillHole>[]
+        }
+        rows={holes}
+        rowKey={(h) => h.id}
+        emptyMessage={t("geology.noDrillHoles")}
+        searchValue={(h) => `${h.holeId} ${h.site?.name ?? ""}`}
+        actions={(h) => (
+          <div className="flex justify-end gap-2">
+            <button className="text-xs text-mine-300 hover:text-mine-50" onClick={() => setAssaysHole(h)}>{t("geology.assays")}</button>
+            {canDelete && <button className={buttonDanger} onClick={() => remove(h.id)}>{t("common.delete")}</button>}
+          </div>
+        )}
+      />
       {modal && (
         <Modal title={t("geology.newDrillHoleTitle")} onClose={() => setModal(false)}>
           <DrillHoleForm sites={sites} onSubmit={create} onCancel={() => setModal(false)} />
@@ -363,35 +355,26 @@ function ResourceEstimatesTab({ sites, canEdit, canDelete }: { sites: Site[]; ca
           <button className={buttonPrimary} onClick={() => setModal(true)}>{t("geology.newEstimate")}</button>
         </div>
       )}
-      <div className={`${cardClass} overflow-x-auto`}>
-        <table className="w-full text-sm">
-          <thead className="bg-mine-800/50 text-mine-300 text-xs uppercase">
-            <tr>
-              <th className="text-left px-4 py-2">{t("geology.estimateDate")}</th>
-              <th className="text-left px-4 py-2">{t("marketplace.mineralType")}</th>
-              <th className="text-left px-4 py-2">{t("geology.classification")}</th>
-              <th className="text-left px-4 py-2">{t("geology.tonnage")}</th>
-              <th className="text-left px-4 py-2">{t("geology.version")}</th>
-              <th className="px-4 py-2"></th>
-            </tr>
-          </thead>
-          <tbody>
-            {estimates.map((e) => (
-              <tr key={e.id} className="border-t border-mine-800 hover:bg-mine-800/30">
-                <td className="px-4 py-2 font-medium">{new Date(e.estimateDate).toLocaleDateString()}</td>
-                <td className="px-4 py-2 text-mine-300">{t(`mineralTypes.${e.mineralType}`)}</td>
-                <td className="px-4 py-2 text-mine-300">{t(`geology.classifications.${e.classification}`)}</td>
-                <td className="px-4 py-2 text-mine-300">{e.tonnage.toLocaleString()}</td>
-                <td className="px-4 py-2 text-mine-400">v{e.version}</td>
-                <td className="px-4 py-2 text-right">
-                  {canDelete && <button className={buttonDanger} onClick={() => remove(e.id)}>{t("common.delete")}</button>}
-                </td>
-              </tr>
-            ))}
-            {estimates.length === 0 && <tr><td colSpan={6} className="px-4 py-6 text-center text-mine-400">{t("geology.noEstimates")}</td></tr>}
-          </tbody>
-        </table>
-      </div>
+      <DataTable
+        columns={
+          [
+            { key: "date", header: t("geology.estimateDate"), render: (e) => new Date(e.estimateDate).toLocaleDateString(), sortValue: (e) => e.estimateDate },
+            { key: "mineral", header: t("marketplace.mineralType"), render: (e) => t(`mineralTypes.${e.mineralType}`), sortValue: (e) => e.mineralType },
+            { key: "classification", header: t("geology.classification"), render: (e) => t(`geology.classifications.${e.classification}`), sortValue: (e) => e.classification },
+            { key: "tonnage", header: t("geology.tonnage"), render: (e) => e.tonnage.toLocaleString(), sortValue: (e) => e.tonnage },
+            { key: "version", header: t("geology.version"), render: (e) => `v${e.version}`, sortValue: (e) => e.version },
+          ] as DataTableColumn<ResourceEstimate>[]
+        }
+        rows={estimates}
+        rowKey={(e) => e.id}
+        emptyMessage={t("geology.noEstimates")}
+        actions={(e) => (
+          <div className="flex justify-end gap-2">
+            <AuditHistoryButton entityType="ResourceEstimate" entityId={e.id} />
+            {canDelete && <button className={buttonDanger} onClick={() => remove(e.id)}>{t("common.delete")}</button>}
+          </div>
+        )}
+      />
       {modal && (
         <Modal title={t("geology.newEstimateTitle")} onClose={() => setModal(false)}>
           <EstimateForm sites={sites} onSubmit={create} onCancel={() => setModal(false)} />

@@ -2983,7 +2983,9 @@
     "authorizedBy": "Freigegeben von {{name}}",
     "authorizeReEntry": "Wiederbetretung freigeben",
     "notAuthorized": "Noch nicht freigegeben",
-    "noRockfallIncidents": "Noch keine Steinschlag/Gebirgsschlag-Vorfälle erfasst."
+    "noRockfallIncidents": "Noch keine Steinschlag/Gebirgsschlag-Vorfälle erfasst.",
+    "summaryDamageObserved": "Schaden Festgestellt",
+    "summaryUnauthorizedReEntry": "Wiedereintritt Noch Nicht Genehmigt"
   },
   "ventilation": {
     "nav": "Belüftung & Hygiene",
@@ -3269,7 +3271,8 @@
     "newSpendRecord": "+ Neuer Ausgabendatensatz",
     "newSpendRecordTitle": "Neuer Ausgabendatensatz",
     "noSpendRecords": "Noch keine Ausgabendatensätze erfasst.",
-    "spendHint": "Lokale/HDSA-Beschaffungsausgaben und gesellschaftliche Investitionen, getrennt vom allgemeinen Beschaffungsmodul erfasst."
+    "spendHint": "Lokale/HDSA-Beschaffungsausgaben und gesellschaftliche Investitionen, getrennt vom allgemeinen Beschaffungsmodul erfasst.",
+    "summaryOpenGrievances": "Offene Beschwerden"
   },
   "geology": {
     "nav": "Geologie & Ressourcen",
