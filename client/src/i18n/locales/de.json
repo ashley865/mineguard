@@ -3391,6 +3391,32 @@
     "insightsTitle": "KI-Einblicke ({{count}} offen)",
     "readMore": "Mehr lesen ({{count}} weitere)",
     "showLess": "Weniger anzeigen",
-    "gotIt": "Verstanden"
+    "gotIt": "Verstanden",
+    "report": {
+      "button": "Bericht Erstellen",
+      "title": "Geschäftsbericht",
+      "hint": "Erstellen Sie einen vollständigen Geschäftsbericht für die Mine, vollständig auf MineGuard-Daten basierend — jede Aussage ist auf die darunter angezeigten Zahlen rückführbar.",
+      "thisWeek": "Diese Woche",
+      "thisMonth": "Dieser Monat",
+      "generate": "Bericht Erstellen",
+      "generating": "Wird erstellt...",
+      "newReport": "Neuer Bericht",
+      "generatedAt": "Erstellt am {{date}}",
+      "executiveSummary": "Zusammenfassung",
+      "recommendedPriorities": "Empfohlene Prioritäten",
+      "aiInsights": "KI-Einblicke",
+      "sections": {
+        "production": "Produktion",
+        "operations": "Betrieb",
+        "safety": "Sicherheit",
+        "compliance": "Compliance",
+        "security": "Werksicherheit",
+        "maintenance": "Wartung",
+        "workforce": "Belegschaft",
+        "environment": "Umwelt",
+        "finance": "Finanzen",
+        "enterpriseRisks": "Unternehmensrisiken"
+      }
+    }
   }
 }

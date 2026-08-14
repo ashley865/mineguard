@@ -3390,6 +3390,32 @@
     "insightsTitle": "AI Insights ({{count}} open)",
     "readMore": "Read more ({{count}} more)",
     "showLess": "Show less",
-    "gotIt": "Got it"
+    "gotIt": "Got it",
+    "report": {
+      "button": "Generate Report",
+      "title": "Executive Report",
+      "hint": "Generate a full executive report for the mine, grounded entirely in MineGuard data — every statement is traceable to the figures shown beneath it.",
+      "thisWeek": "This Week",
+      "thisMonth": "This Month",
+      "generate": "Generate Report",
+      "generating": "Generating...",
+      "newReport": "New Report",
+      "generatedAt": "Generated {{date}}",
+      "executiveSummary": "Executive Summary",
+      "recommendedPriorities": "Recommended Priorities",
+      "aiInsights": "AI Insights",
+      "sections": {
+        "production": "Production",
+        "operations": "Operations",
+        "safety": "Safety",
+        "compliance": "Compliance",
+        "security": "Security",
+        "maintenance": "Maintenance",
+        "workforce": "Workforce",
+        "environment": "Environment",
+        "finance": "Finance",
+        "enterpriseRisks": "Enterprise Risks"
+      }
+    }
   }
 }

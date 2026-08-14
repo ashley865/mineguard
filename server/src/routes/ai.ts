@@ -925,4 +925,329 @@ router.post("/chat", aiLimiter, async (req, res) => {
   }
 });
 
+// ---------------------------------------------------------------------------
+// AI-generated executive reports: "generate this week/month's executive report"
+// ---------------------------------------------------------------------------
+
+// Mine-wide, cross-department — broader than any single title's module, so gated to the
+// same audience as the General Manager's view (the closest existing role to "the board
+// wants the full picture"), not the per-title AI_MODULES map above.
+async function requireReportAccess(req: any, res: any): Promise<boolean> {
+  if (req.auth!.role === "ADMIN") return true;
+  const me = await prisma.user.findUnique({ where: { id: req.auth!.userId }, select: { title: true } });
+  if (me?.title !== "GENERAL_MANAGER") {
+    res.status(403).json({ error: "Executive reports are currently only available to the General Manager" });
+    return false;
+  }
+  return true;
+}
+
+async function buildExecutiveReportData(mineId: string, period: "WEEK" | "MONTH") {
+  const periodDays = period === "WEEK" ? 7 : 30;
+  const start = new Date(Date.now() - periodDays * 86400000);
+  const priorStart = new Date(Date.now() - periodDays * 2 * 86400000);
+  const in30Days = new Date(Date.now() + 30 * 86400000);
+  const thirtyDaysAgo = new Date(Date.now() - 30 * 86400000);
+  const todayStart = new Date();
+  todayStart.setHours(0, 0, 0, 0);
+  const todayEnd = new Date();
+  todayEnd.setHours(23, 59, 59, 999);
+
+  const [
+    mine,
+    periodProduction,
+    priorProduction,
+    sitesByStatus,
+    totalEquipment,
+    downEquipment,
+    maintenanceEquipment,
+    openIncidentsBySeverity,
+    periodHazards,
+    criticalHazards,
+    safetyInspectionsCompleted,
+    safetyInspectionsTotal,
+    complianceScoreResult,
+    overdueLegalItems,
+    openAuditFindings,
+    criticalAuditFindings,
+    securityIncidentsBySeverity,
+    camerasOnline,
+    camerasTotal,
+    patrolsCompleted,
+    patrolsScheduled,
+    periodMaintenance,
+    overdueMaintenance,
+    totalWorkers,
+    onShiftWorkers,
+    newHires,
+    pendingLeaveRequests,
+    onLeaveToday,
+    periodEnvReadings,
+    outOfLimitsAmdReadings,
+    paidInvoices,
+    paidExpenses,
+    pendingExpenses,
+    overdueInvoicesCount,
+    pendingPurchaseOrders,
+    escalatedRiskAssessments,
+    aiInsights,
+  ] = await Promise.all([
+    prisma.mine.findUnique({ where: { id: mineId }, select: { name: true, location: true } }),
+    prisma.productionRecord.findMany({ where: { site: { mineId }, shiftDate: { gte: start } }, select: { tonnesMined: true, targetTonnes: true } }),
+    prisma.productionRecord.findMany({ where: { site: { mineId }, shiftDate: { gte: priorStart, lt: start } }, select: { tonnesMined: true } }),
+    prisma.site.groupBy({ by: ["status"], _count: true, where: { mineId } }),
+    prisma.equipment.count({ where: { site: { mineId } } }),
+    prisma.equipment.count({ where: { status: "DOWN", site: { mineId } } }),
+    prisma.equipment.count({ where: { status: "MAINTENANCE", site: { mineId } } }),
+    prisma.incident.groupBy({ by: ["severity"], where: { status: { in: ["OPEN", "INVESTIGATING"] }, site: { mineId } }, _count: true }),
+    prisma.hazardReport.count({ where: { createdAt: { gte: start }, site: { mineId } } }),
+    prisma.hazardReport.count({ where: { riskLevel: "CRITICAL", status: { not: "CLOSED" }, site: { mineId } } }),
+    prisma.safetyInspection.count({ where: { status: "COMPLETED", scheduledDate: { gte: start }, site: { mineId } } }),
+    prisma.safetyInspection.count({ where: { scheduledDate: { gte: start }, site: { mineId } } }),
+    computeComplianceScore(mineId),
+    prisma.legalComplianceItem.count({ where: { status: "OVERDUE", site: { mineId } } }),
+    prisma.auditFinding.count({ where: { status: { in: ["OPEN", "IN_PROGRESS"] }, site: { mineId } } }),
+    prisma.auditFinding.count({ where: { severity: "CRITICAL", status: { notIn: ["CLOSED", "VERIFIED"] }, site: { mineId } } }),
+    prisma.securityIncident.groupBy({ by: ["severity"], where: { occurredAt: { gte: start }, site: { mineId } }, _count: true }),
+    prisma.securityCamera.count({ where: { status: "ONLINE", site: { mineId } } }),
+    prisma.securityCamera.count({ where: { site: { mineId } } }),
+    prisma.patrolAssignment.count({ where: { status: "COMPLETED", shiftDate: { gte: start }, site: { mineId } } }),
+    prisma.patrolAssignment.count({ where: { shiftDate: { gte: start }, site: { mineId } } }),
+    prisma.maintenanceSchedule.findMany({
+      where: { equipment: { site: { mineId } }, scheduledDate: { gte: start } },
+      select: { downtimeMinutes: true, status: true },
+    }),
+    prisma.maintenanceSchedule.count({ where: { equipment: { site: { mineId } }, status: "OVERDUE" } }),
+    prisma.worker.count({ where: { site: { mineId } } }),
+    prisma.worker.count({ where: { status: "ON_SHIFT", site: { mineId } } }),
+    prisma.worker.count({ where: { site: { mineId }, createdAt: { gte: start } } }),
+    prisma.leaveRequest.count({ where: { status: "PENDING", worker: { site: { mineId } } } }),
+    prisma.leaveRequest.count({
+      where: { status: "APPROVED", worker: { site: { mineId } }, startDate: { lte: todayEnd }, endDate: { gte: todayStart } },
+    }),
+    prisma.environmentalReading.findMany({ where: { recordedAt: { gte: start }, site: { mineId } }, select: { withinLimits: true } }),
+    prisma.acidMineDrainageReading.count({ where: { withinLimits: false, readingDate: { gte: start }, site: { mineId } } }),
+    prisma.invoice.findMany({
+      where: { site: { mineId }, status: "PAID", issueDate: { gte: start } },
+      select: { vatRate: true, lines: { select: { lineTotal: true } } },
+    }),
+    prisma.expense.findMany({ where: { site: { mineId }, status: "PAID", expenseDate: { gte: start } }, select: { amount: true } }),
+    prisma.expense.aggregate({ where: { status: "PENDING", site: { mineId } }, _count: true, _sum: { amount: true } }),
+    prisma.invoice.count({ where: { site: { mineId }, status: "OVERDUE" } }),
+    prisma.purchaseOrder.aggregate({ where: { status: "SUBMITTED", site: { mineId } }, _count: true, _sum: { totalAmount: true } }),
+    prisma.riskAssessment.count({ where: { escalated: true, mitigationStatus: { in: ["OPEN", "IN_PROGRESS"] }, site: { mineId } } }),
+    prisma.aiRecommendation.findMany({
+      where: { mineId, status: { in: ["OPEN", "ACKNOWLEDGED"] } },
+      orderBy: [{ severity: "desc" }, { generatedAt: "desc" }],
+      take: 20,
+      select: { id: true, executiveTitle: true, kind: true, severity: true, title: true, detail: true, status: true, generatedAt: true },
+    }),
+  ]);
+
+  const periodTonnes = periodProduction.reduce((sum, r) => sum + r.tonnesMined, 0);
+  const priorTonnes = priorProduction.reduce((sum, r) => sum + r.tonnesMined, 0);
+  const productionChangePct = priorTonnes === 0 ? null : Math.round(((periodTonnes - priorTonnes) / priorTonnes) * 1000) / 10;
+  const targetTotal = periodProduction.reduce((sum, r) => sum + (r.targetTonnes ?? 0), 0);
+  const targetAttainmentPct = targetTotal === 0 ? null : Math.round((periodTonnes / targetTotal) * 1000) / 10;
+
+  const siteStatus = { OPERATIONAL: 0, RESTRICTED: 0, SHUT_DOWN: 0 } as Record<string, number>;
+  for (const row of sitesByStatus) siteStatus[row.status] = row._count;
+
+  const incidentSeverity = { LOW: 0, MEDIUM: 0, HIGH: 0, CRITICAL: 0 } as Record<string, number>;
+  for (const row of openIncidentsBySeverity) incidentSeverity[row.severity] = row._count;
+
+  const securitySeverity = { LOW: 0, MEDIUM: 0, HIGH: 0, CRITICAL: 0 } as Record<string, number>;
+  for (const row of securityIncidentsBySeverity) securitySeverity[row.severity] = row._count;
+
+  const totalDowntimeMinutes = periodMaintenance.reduce((sum, m) => sum + (m.downtimeMinutes ?? 0), 0);
+  const completedMaintenance = periodMaintenance.filter((m) => m.status === "COMPLETED").length;
+
+  const totalEarnings = paidInvoices.reduce((sum, inv) => {
+    const subtotal = inv.lines.reduce((s, l) => s + l.lineTotal, 0);
+    return sum + subtotal * (1 + inv.vatRate / 100);
+  }, 0);
+  const totalExpensesPaid = paidExpenses.reduce((sum, e) => sum + e.amount, 0);
+
+  const outOfLimitsEnvReadings = periodEnvReadings.filter((r) => !r.withinLimits).length;
+
+  return {
+    mine: { name: mine?.name ?? "the mine", location: mine?.location ?? null },
+    period: { type: period, start: start.toISOString(), end: new Date().toISOString() },
+    production: {
+      tonnesMined: Math.round(periodTonnes),
+      changeVsPriorPeriodPct: productionChangePct,
+      targetAttainmentPct,
+    },
+    operations: {
+      sites: siteStatus,
+      equipment: {
+        total: totalEquipment,
+        down: downEquipment,
+        inMaintenance: maintenanceEquipment,
+        availabilityPct: totalEquipment === 0 ? 100 : Math.round(((totalEquipment - downEquipment) / totalEquipment) * 1000) / 10,
+      },
+    },
+    safety: {
+      openIncidentsBySeverity: incidentSeverity,
+      hazardReportsLoggedThisPeriod: periodHazards,
+      criticalUnresolvedHazards: criticalHazards,
+      safetyInspectionCompletionPct:
+        safetyInspectionsTotal === 0 ? 100 : Math.round((safetyInspectionsCompleted / safetyInspectionsTotal) * 1000) / 10,
+    },
+    compliance: {
+      overallScorePct: complianceScoreResult.score,
+      breakdown: complianceScoreResult.breakdown,
+      overdueLegalComplianceItems: overdueLegalItems,
+      openAuditFindings,
+      criticalUnresolvedAuditFindings: criticalAuditFindings,
+    },
+    security: {
+      incidentsThisPeriodBySeverity: securitySeverity,
+      cameraUptimePct: camerasTotal === 0 ? 100 : Math.round((camerasOnline / camerasTotal) * 1000) / 10,
+      patrolCompletionPct: patrolsScheduled === 0 ? 100 : Math.round((patrolsCompleted / patrolsScheduled) * 1000) / 10,
+    },
+    maintenance: {
+      totalDowntimeMinutesThisPeriod: Math.round(totalDowntimeMinutes),
+      scheduledItemsThisPeriod: periodMaintenance.length,
+      completedItemsThisPeriod: completedMaintenance,
+      overdueMaintenanceItems: overdueMaintenance,
+    },
+    workforce: {
+      total: totalWorkers,
+      onShift: onShiftWorkers,
+      onShiftPct: totalWorkers === 0 ? 0 : Math.round((onShiftWorkers / totalWorkers) * 1000) / 10,
+      newHiresThisPeriod: newHires,
+      pendingLeaveRequests,
+      onApprovedLeaveToday: onLeaveToday,
+    },
+    environment: {
+      readingsRecordedThisPeriod: periodEnvReadings.length,
+      outOfLimitsReadingsThisPeriod: outOfLimitsEnvReadings,
+      outOfLimitsAcidMineDrainageReadingsThisPeriod: outOfLimitsAmdReadings,
+    },
+    finance: {
+      totalEarningsThisPeriod: Math.round(totalEarnings),
+      totalExpensesPaidThisPeriod: Math.round(totalExpensesPaid),
+      netMarginThisPeriod: Math.round(totalEarnings - totalExpensesPaid),
+      pendingExpenseApprovals: { count: pendingExpenses._count, totalAmount: pendingExpenses._sum.amount ?? 0 },
+      overdueInvoices: overdueInvoicesCount,
+      pendingPurchaseOrderApprovals: { count: pendingPurchaseOrders._count, totalAmount: pendingPurchaseOrders._sum.totalAmount ?? 0 },
+    },
+    enterpriseRisks: {
+      escalatedUnresolvedRiskAssessments: escalatedRiskAssessments,
+      criticalUnresolvedAuditFindings: criticalAuditFindings,
+      criticalUnresolvedHazards: criticalHazards,
+      criticalOrHighSecurityIncidentsThisPeriod: securitySeverity.CRITICAL + securitySeverity.HIGH,
+    },
+    aiInsights: aiInsights,
+  };
+}
+
+const REPORT_SECTION_KEYS = [
+  "production",
+  "operations",
+  "safety",
+  "compliance",
+  "security",
+  "maintenance",
+  "workforce",
+  "environment",
+  "finance",
+  "enterpriseRisks",
+] as const;
+
+const REPORT_INSTRUCTIONS =
+  `Write a formal executive report from the data snapshot below. Every single statement you write MUST be directly ` +
+  `traceable to a specific value in the snapshot — never state a fact, trend, name, or figure that isn't present in ` +
+  `it. If a section's data is empty or shows nothing noteworthy, say so plainly rather than inventing content ` +
+  `("No notable activity in this area during the period" is a valid and expected sentence). Do not use the hedged ` +
+  `causal-attribution style unless a section genuinely calls for it — this is a report, not a root-cause analysis, ` +
+  `though the same rule about never asserting unsupported causation still applies.\n\n` +
+  `Reply with ONLY a single JSON object, no markdown, no code fences, matching exactly this shape:\n` +
+  `{"executiveSummary": "4-6 sentence overview of the period, most important developments first", ` +
+  `"sections": {"production": "2-4 sentences", "operations": "2-4 sentences", "safety": "2-4 sentences", ` +
+  `"compliance": "2-4 sentences", "security": "2-4 sentences", "maintenance": "2-4 sentences", ` +
+  `"workforce": "2-4 sentences", "environment": "2-4 sentences", "finance": "2-4 sentences", ` +
+  `"enterpriseRisks": "2-4 sentences"}, ` +
+  `"recommendedPriorities": ["short actionable priority 1", "short actionable priority 2", "..."]}\n` +
+  `Include at most 6 recommended priorities, ordered most important first, each traceable to a specific figure in the snapshot.`;
+
+interface ReportNarrative {
+  executiveSummary: string;
+  sections: Record<(typeof REPORT_SECTION_KEYS)[number], string>;
+  recommendedPriorities: string[];
+}
+
+function parseReportNarrative(raw: string): ReportNarrative {
+  const cleaned = raw
+    .trim()
+    .replace(/^```(?:json)?\s*/i, "")
+    .replace(/```\s*$/, "");
+  const parsed = JSON.parse(cleaned);
+  if (typeof parsed.executiveSummary !== "string" || typeof parsed.sections !== "object" || parsed.sections === null) {
+    throw new Error("AI response did not match the expected report schema");
+  }
+  const sections = {} as Record<(typeof REPORT_SECTION_KEYS)[number], string>;
+  for (const key of REPORT_SECTION_KEYS) {
+    sections[key] = typeof parsed.sections[key] === "string" ? parsed.sections[key] : "No data available for this section.";
+  }
+  const recommendedPriorities = Array.isArray(parsed.recommendedPriorities)
+    ? parsed.recommendedPriorities.filter((p: unknown) => typeof p === "string").slice(0, 6)
+    : [];
+  return { executiveSummary: parsed.executiveSummary, sections, recommendedPriorities };
+}
+
+const reportRequestSchema = z.object({
+  period: z.enum(["WEEK", "MONTH"]),
+});
+
+router.post("/report", aiLimiter, async (req, res) => {
+  const mineId = requireMineId(req, res);
+  if (!mineId) return;
+  if (!(await requireReportAccess(req, res))) return;
+
+  const parsed = reportRequestSchema.safeParse(req.body);
+  if (!parsed.success) {
+    return res.status(400).json({ error: "Invalid report request — period must be WEEK or MONTH" });
+  }
+
+  if (!isAiConfigured()) {
+    return res.json({ configured: false, report: null });
+  }
+
+  try {
+    const data = await buildExecutiveReportData(mineId, parsed.data.period);
+    const messages: AiMessage[] = [
+      {
+        role: "system",
+        content:
+          `You are the Mine Guard AI Assistant, compiling an executive report for ${data.mine.name}, a South ` +
+          `African mining operation.` +
+          GUARDRAIL,
+      },
+      { role: "system", content: `Report data snapshot (JSON): ${JSON.stringify(data)}` },
+      { role: "user", content: REPORT_INSTRUCTIONS },
+    ];
+    const raw = await aiChatComplete(messages);
+    const narrative = parseReportNarrative(raw);
+
+    res.json({
+      configured: true,
+      generatedAt: new Date().toISOString(),
+      period: data.period,
+      mine: data.mine,
+      executiveSummary: narrative.executiveSummary,
+      sections: REPORT_SECTION_KEYS.map((key) => ({ key, narrative: narrative.sections[key], data: (data as any)[key] })),
+      recommendedPriorities: narrative.recommendedPriorities,
+      aiInsights: data.aiInsights,
+    });
+  } catch (err) {
+    if (err instanceof AiNotConfiguredError) {
+      return res.json({ configured: false, report: null });
+    }
+    console.error(err);
+    res.status(502).json({ error: "The AI provider could not be reached. Please try again shortly." });
+  }
+});
+
 export default router;

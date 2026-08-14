@@ -734,6 +734,23 @@ export interface AiRecommendation {
   generatedAt: string;
 }
 
+export type ReportPeriod = "WEEK" | "MONTH";
+export interface ReportSection {
+  key: string;
+  narrative: string;
+  data: Record<string, unknown>;
+}
+export interface ExecutiveReportResponse {
+  configured: boolean;
+  generatedAt: string | null;
+  period: { type: ReportPeriod; start: string; end: string } | null;
+  mine: { name: string; location: string | null } | null;
+  executiveSummary: string | null;
+  sections: ReportSection[] | null;
+  recommendedPriorities: string[] | null;
+  aiInsights: AiRecommendation[] | null;
+}
+
 export type CopCategory =
   | "ROCK_ENGINEERING"
   | "VENTILATION"

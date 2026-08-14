@@ -3391,6 +3391,32 @@
     "insightsTitle": "Analyses IA ({{count}} ouvertes)",
     "readMore": "Lire plus ({{count}} de plus)",
     "showLess": "Afficher moins",
-    "gotIt": "Compris"
+    "gotIt": "Compris",
+    "report": {
+      "button": "Générer un Rapport",
+      "title": "Rapport Exécutif",
+      "hint": "Générez un rapport exécutif complet pour la mine, entièrement basé sur les données MineGuard — chaque affirmation est traçable aux chiffres indiqués en dessous.",
+      "thisWeek": "Cette Semaine",
+      "thisMonth": "Ce Mois",
+      "generate": "Générer un Rapport",
+      "generating": "Génération...",
+      "newReport": "Nouveau Rapport",
+      "generatedAt": "Généré le {{date}}",
+      "executiveSummary": "Résumé Exécutif",
+      "recommendedPriorities": "Priorités Recommandées",
+      "aiInsights": "Analyses IA",
+      "sections": {
+        "production": "Production",
+        "operations": "Opérations",
+        "safety": "Sécurité",
+        "compliance": "Conformité",
+        "security": "Sûreté",
+        "maintenance": "Maintenance",
+        "workforce": "Effectifs",
+        "environment": "Environnement",
+        "finance": "Finances",
+        "enterpriseRisks": "Risques d'Entreprise"
+      }
+    }
   }
 }

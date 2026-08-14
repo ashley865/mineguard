@@ -3391,6 +3391,32 @@
     "insightsTitle": "KI-Insigte ({{count}} oop)",
     "readMore": "Lees meer ({{count}} meer)",
     "showLess": "Wys minder",
-    "gotIt": "Verstaan"
+    "gotIt": "Verstaan",
+    "report": {
+      "button": "Genereer Verslag",
+      "title": "Uitvoerende Verslag",
+      "hint": "Genereer 'n volledige uitvoerende verslag vir die myn, geheel en al gegrond op MineGuard-data — elke stelling is naspeurbaar na die syfers hieronder getoon.",
+      "thisWeek": "Hierdie Week",
+      "thisMonth": "Hierdie Maand",
+      "generate": "Genereer Verslag",
+      "generating": "Genereer tans...",
+      "newReport": "Nuwe Verslag",
+      "generatedAt": "Gegenereer {{date}}",
+      "executiveSummary": "Uitvoerende Opsomming",
+      "recommendedPriorities": "Aanbevole Prioriteite",
+      "aiInsights": "KI-Insigte",
+      "sections": {
+        "production": "Produksie",
+        "operations": "Bedrywighede",
+        "safety": "Veiligheid",
+        "compliance": "Nakoming",
+        "security": "Sekuriteit",
+        "maintenance": "Onderhoud",
+        "workforce": "Arbeidsmag",
+        "environment": "Omgewing",
+        "finance": "Finansies",
+        "enterpriseRisks": "Ondernemingsrisiko's"
+      }
+    }
   }
 }

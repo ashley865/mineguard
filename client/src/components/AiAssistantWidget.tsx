@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next";
 import { api } from "../api/client";
 import { AiChatMessage, AiChatResponse, AiRecommendation, AiSummaryResponse } from "../api/types";
 import { buttonPrimary, buttonSecondary, inputClass } from "./ui";
+import ExecutiveReportModal from "./ExecutiveReportModal";
 
 const URGENT_KEYWORDS = ["overdue", "critical", "urgent", "immediate", "escalat", "non-compliant", "unauthorized", "unauthorised"];
 const CAUTION_KEYWORDS = ["pending", "review", "attention", "expir", "due soon", "approval", "outstanding", "shortage"];
@@ -52,8 +53,9 @@ const KIND_BADGE: Record<AiRecommendation["kind"], string> = {
 };
 const NON_ACTIONABLE_KINDS = new Set<AiRecommendation["kind"]>(["ACHIEVEMENT", "ANNOUNCEMENT"]);
 
-export default function AiAssistantWidget() {
+export default function AiAssistantWidget({ showReportGenerator = false }: { showReportGenerator?: boolean }) {
   const { t } = useTranslation();
+  const [reportOpen, setReportOpen] = useState(false);
   const [configured, setConfigured] = useState<boolean | null>(null);
   const [summary, setSummary] = useState<string | null>(null);
   const [summaryExpanded, setSummaryExpanded] = useState(false);
@@ -156,14 +158,26 @@ export default function AiAssistantWidget() {
           <h2 className="text-sm font-extrabold text-mine-50 tracking-tight">{t("ai.title")}</h2>
         </div>
         {configured && (
-          <button
-            className="text-xs font-bold text-hazard-600 hover:text-hazard-500 bg-hazard-500/10 hover:bg-hazard-500/20 rounded-full px-3 py-1 transition-colors"
-            onClick={() => setChatOpen((v) => !v)}
-          >
-            {chatOpen ? t("ai.hideChat") : t("ai.askQuestion")}
-          </button>
+          <div className="flex items-center gap-2">
+            {showReportGenerator && (
+              <button
+                className="text-xs font-bold text-mine-300 hover:text-mine-50 bg-mine-800 hover:bg-mine-700 rounded-full px-3 py-1 transition-colors"
+                onClick={() => setReportOpen(true)}
+              >
+                {t("ai.report.button")}
+              </button>
+            )}
+            <button
+              className="text-xs font-bold text-hazard-600 hover:text-hazard-500 bg-hazard-500/10 hover:bg-hazard-500/20 rounded-full px-3 py-1 transition-colors"
+              onClick={() => setChatOpen((v) => !v)}
+            >
+              {chatOpen ? t("ai.hideChat") : t("ai.askQuestion")}
+            </button>
+          </div>
         )}
       </div>
+
+      {reportOpen && <ExecutiveReportModal onClose={() => setReportOpen(false)} />}
 
       {loadingSummary && <div className="text-mine-400 text-xs font-medium">{t("common.loading")}</div>}
 
