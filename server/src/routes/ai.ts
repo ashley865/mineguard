@@ -305,6 +305,73 @@ async function buildCfoContext(mineId: string) {
   };
 }
 
+async function buildComplianceOfficerContext(mineId: string) {
+  const now = new Date();
+  const in30Days = new Date(Date.now() + 30 * 86400000);
+
+  const [
+    mine,
+    { score: overallScore, breakdown },
+    openRegulatoryNotices,
+    escalatedRiskAssessments,
+    overdueLegalItems,
+    dueSoonLegalItems,
+    openAuditFindings,
+    criticalAuditFindings,
+    openHazardReports,
+    criticalHazardReports,
+    overdueMedicalExams,
+    unfitOrRestrictedWorkers,
+    vacantStatutoryAppointments,
+    openIodClaims,
+    permitsExpiringWithin30Days,
+    contractorsExpiringWithin30Days,
+    expiredContractors,
+    explosivesLicensesExpiringWithin30Days,
+    rehabPlansNeedingAssessment,
+  ] = await Promise.all([
+    prisma.mine.findUnique({ where: { id: mineId }, select: { name: true } }),
+    computeComplianceScore(mineId),
+    prisma.regulatoryNotice.count({ where: { status: "OPEN", site: { mineId } } }),
+    prisma.riskAssessment.count({ where: { escalated: true, mitigationStatus: { in: ["OPEN", "IN_PROGRESS"] }, site: { mineId } } }),
+    prisma.legalComplianceItem.count({ where: { status: "OVERDUE", site: { mineId } } }),
+    prisma.legalComplianceItem.count({ where: { status: "DUE", site: { mineId } } }),
+    prisma.auditFinding.count({ where: { status: { in: ["OPEN", "IN_PROGRESS"] }, site: { mineId } } }),
+    prisma.auditFinding.count({ where: { severity: "CRITICAL", status: { notIn: ["CLOSED", "VERIFIED"] }, site: { mineId } } }),
+    prisma.hazardReport.count({ where: { status: { in: ["OPEN", "IN_PROGRESS"] }, site: { mineId } } }),
+    prisma.hazardReport.count({ where: { riskLevel: "CRITICAL", status: { not: "CLOSED" }, site: { mineId } } }),
+    prisma.medicalSurveillance.count({ where: { nextExamDue: { lt: now }, worker: { site: { mineId } } } }),
+    prisma.medicalSurveillance.count({ where: { result: { in: ["UNFIT", "TEMPORARILY_UNFIT"] }, worker: { site: { mineId } } } }),
+    prisma.statutoryAppointment.count({ where: { status: "VACANT", site: { mineId } } }),
+    prisma.iodClaim.count({ where: { status: { in: ["REPORTED", "SUBMITTED", "UNDER_ASSESSMENT"] }, worker: { site: { mineId } } } }),
+    prisma.permit.count({ where: { status: "ACTIVE", site: { mineId }, expiryDate: { lte: in30Days } } }),
+    prisma.contractor.count({
+      where: { status: "ACTIVE", site: { mineId }, OR: [{ goodStandingExpiry: { lte: in30Days } }, { insuranceExpiry: { lte: in30Days } }] },
+    }),
+    prisma.contractor.count({ where: { status: "EXPIRED", site: { mineId } } }),
+    prisma.explosivesMagazine.count({ where: { status: "ACTIVE", site: { mineId }, licenseExpiry: { lte: in30Days } } }),
+    prisma.closureRehabilitationPlan.count({ where: { site: { mineId }, nextAssessmentDue: { lte: now } } }),
+  ]);
+
+  return {
+    mine: { name: mine?.name ?? "the mine" },
+    overallComplianceScorePct: overallScore,
+    complianceBreakdown: breakdown,
+    openRegulatoryNotices,
+    escalatedUnresolvedRiskAssessments: escalatedRiskAssessments,
+    legalComplianceItems: { overdue: overdueLegalItems, dueSoon: dueSoonLegalItems },
+    auditFindings: { open: openAuditFindings, criticalUnresolved: criticalAuditFindings },
+    hazardReports: { open: openHazardReports, criticalUnresolved: criticalHazardReports },
+    medicalSurveillance: { overdueExams: overdueMedicalExams, unfitOrRestrictedWorkers },
+    statutoryAppointments: { vacantPosts: vacantStatutoryAppointments },
+    iodClaims: { open: openIodClaims },
+    permitsExpiringWithin30Days,
+    contractors: { complianceDocsExpiringWithin30Days: contractorsExpiringWithin30Days, expired: expiredContractors },
+    explosivesLicensesExpiringWithin30Days,
+    closureRehabilitationPlansNeedingAssessment: rehabPlansNeedingAssessment,
+  };
+}
+
 const BASE_SYSTEM_PROMPT = (mineName: string, roleTitle: string) =>
   `You are the Mine Guard AI Assistant, advising the ${roleTitle} of ${mineName}, a South African mining operation. ` +
   `Base every answer strictly on the JSON data snapshot provided in this conversation — never invent figures or names. ` +
@@ -330,6 +397,18 @@ const AI_MODULES: Record<string, AiModule> = {
       ` Focus on financial performance (earnings, expenses, net margin), cost centres, cash owed to and by the mine ` +
       `(overdue/outstanding invoices), approvals awaiting action (pending expenses, pending purchase orders), and ` +
       `payroll cost — this is a finance-specific assistant, not a general operations one. All monetary figures are in ZAR.`,
+  },
+  COMPLIANCE_OFFICER: {
+    buildContext: buildComplianceOfficerContext,
+    systemPrompt: (ctx) =>
+      BASE_SYSTEM_PROMPT(ctx.mine.name, "Compliance Officer") +
+      ` Cover the full statutory/regulatory compliance picture under the MHSA and related South African mining law: ` +
+      `overall compliance score and its breakdown (codes of practice, risk assessments, permits, safety inspections, ` +
+      `certificates, training records, contractors), regulatory notices, escalated risk assessments, legal compliance ` +
+      `calendar items, audit findings, hazard reports, medical surveillance (overdue exams, unfit/restricted workers), ` +
+      `vacant statutory appointments, IOD claims, permits/contractor documents/explosives licenses expiring soon, and ` +
+      `closure & rehabilitation plans due for reassessment. Always name which specific compliance area is driving any ` +
+      `risk you flag, not just an overall score.`,
   },
 };
 

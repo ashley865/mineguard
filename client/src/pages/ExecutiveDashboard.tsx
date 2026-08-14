@@ -126,7 +126,11 @@ export default function ExecutiveDashboard() {
   const canSeeHrWorkforce = user?.title === "HR_MANAGER";
   const canSeeVisitorHistory = user?.title === "SECURITY_MANAGER";
   const canSeeProductionAnalytics = user?.title === "OPERATIONS_MANAGER";
-  const canSeeAiAssistant = user?.title === "GENERAL_MANAGER" || user?.title === "HR_MANAGER" || user?.title === "CFO";
+  const canSeeAiAssistant =
+    user?.title === "GENERAL_MANAGER" ||
+    user?.title === "HR_MANAGER" ||
+    user?.title === "CFO" ||
+    user?.title === "COMPLIANCE_OFFICER";
   const [summary, setSummary] = useState<ExecutiveSummary | null>(null);
   const [trends, setTrends] = useState<ReportTrends | null>(null);
 
