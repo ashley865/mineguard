@@ -130,7 +130,8 @@ export default function ExecutiveDashboard() {
     user?.title === "GENERAL_MANAGER" ||
     user?.title === "HR_MANAGER" ||
     user?.title === "CFO" ||
-    user?.title === "COMPLIANCE_OFFICER";
+    user?.title === "COMPLIANCE_OFFICER" ||
+    user?.title === "OPERATIONS_MANAGER";
   const [summary, setSummary] = useState<ExecutiveSummary | null>(null);
   const [trends, setTrends] = useState<ReportTrends | null>(null);
 

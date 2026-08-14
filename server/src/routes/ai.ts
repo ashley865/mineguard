@@ -372,6 +372,138 @@ async function buildComplianceOfficerContext(mineId: string) {
   };
 }
 
+async function buildOperationsManagerContext(mineId: string) {
+  const now = new Date();
+  const recentStart = new Date(Date.now() - 14 * 86400000);
+  const priorStart = new Date(Date.now() - 28 * 86400000);
+  const todayStart = new Date();
+  todayStart.setHours(0, 0, 0, 0);
+  const todayEnd = new Date();
+  todayEnd.setHours(23, 59, 59, 999);
+
+  const [
+    mine,
+    recentProduction,
+    priorProduction,
+    totalEquipment,
+    downEquipment,
+    maintenanceEquipment,
+    recentMaintenance,
+    overdueMaintenance,
+    totalWorkers,
+    onShiftWorkers,
+    onLeaveToday,
+    recentWeather,
+    recentIncidents,
+    recentHazards,
+    lowStockItems,
+  ] = await Promise.all([
+    prisma.mine.findUnique({ where: { id: mineId }, select: { name: true } }),
+    prisma.productionRecord.findMany({
+      where: { site: { mineId }, shiftDate: { gte: recentStart } },
+      select: { tonnesMined: true, targetTonnes: true },
+    }),
+    prisma.productionRecord.findMany({
+      where: { site: { mineId }, shiftDate: { gte: priorStart, lt: recentStart } },
+      select: { tonnesMined: true },
+    }),
+    prisma.equipment.count({ where: { site: { mineId } } }),
+    prisma.equipment.count({ where: { status: "DOWN", site: { mineId } } }),
+    prisma.equipment.count({ where: { status: "MAINTENANCE", site: { mineId } } }),
+    prisma.maintenanceSchedule.findMany({
+      where: { equipment: { site: { mineId } }, scheduledDate: { gte: recentStart } },
+      select: { status: true, downtimeMinutes: true, downtimeReason: true, maintenanceType: true },
+    }),
+    prisma.maintenanceSchedule.count({ where: { equipment: { site: { mineId } }, status: "OVERDUE" } }),
+    prisma.worker.count({ where: { site: { mineId } } }),
+    prisma.worker.count({ where: { status: "ON_SHIFT", site: { mineId } } }),
+    prisma.leaveRequest.count({
+      where: { status: "APPROVED", worker: { site: { mineId } }, startDate: { lte: todayEnd }, endDate: { gte: todayStart } },
+    }),
+    prisma.weatherReading.findMany({
+      where: { site: { mineId }, recordedAt: { gte: recentStart } },
+      select: { condition: true, alertIssued: true, windSpeed: true, precipitation: true },
+    }),
+    prisma.incident.findMany({
+      where: { site: { mineId }, createdAt: { gte: recentStart } },
+      select: { severity: true, status: true },
+    }),
+    prisma.hazardReport.count({ where: { site: { mineId }, createdAt: { gte: recentStart } } }),
+    prisma.inventoryItem.findMany({
+      where: { site: { mineId }, reorderPoint: { not: null } },
+      select: { quantityOnHand: true, reorderPoint: true },
+    }),
+  ]);
+
+  const lowStockCount = lowStockItems.filter((i) => i.quantityOnHand <= (i.reorderPoint ?? 0)).length;
+
+  const recentTonnes = recentProduction.reduce((sum, r) => sum + r.tonnesMined, 0);
+  const priorTonnes = priorProduction.reduce((sum, r) => sum + r.tonnesMined, 0);
+  const productionChangePct = priorTonnes === 0 ? null : Math.round(((recentTonnes - priorTonnes) / priorTonnes) * 1000) / 10;
+
+  const targetTotal = recentProduction.reduce((sum, r) => sum + (r.targetTonnes ?? 0), 0);
+  const targetAttainmentPct = targetTotal === 0 ? null : Math.round((recentTonnes / targetTotal) * 1000) / 10;
+
+  const downtimeByReason: Record<string, number> = {};
+  let totalDowntimeMinutes = 0;
+  let delayedMaintenanceCount = 0;
+  for (const m of recentMaintenance) {
+    if (m.downtimeMinutes) {
+      totalDowntimeMinutes += m.downtimeMinutes;
+      const reason = m.downtimeReason?.trim() || "Unspecified";
+      downtimeByReason[reason] = (downtimeByReason[reason] ?? 0) + m.downtimeMinutes;
+    }
+    if (m.status === "SCHEDULED" && m.maintenanceType !== "EMERGENCY") delayedMaintenanceCount += 1;
+  }
+  const topDowntimeReasons = Object.entries(downtimeByReason)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 5)
+    .map(([reason, minutes]) => ({ reason, minutes: Math.round(minutes) }));
+
+  const weatherDisruptiveDays = recentWeather.filter(
+    (w) => w.alertIssued || w.condition === "STORM" || w.condition === "HIGH_WIND" || w.condition === "FOG"
+  ).length;
+
+  const incidentSeverity = { LOW: 0, MEDIUM: 0, HIGH: 0, CRITICAL: 0 } as Record<string, number>;
+  for (const i of recentIncidents) incidentSeverity[i.severity] += 1;
+
+  return {
+    mine: { name: mine?.name ?? "the mine" },
+    productionLast14Days: {
+      tonnesMined: Math.round(recentTonnes),
+      changeVsPrior14DaysPct: productionChangePct,
+      targetAttainmentPct,
+      recordCount: recentProduction.length,
+    },
+    equipment: {
+      total: totalEquipment,
+      down: downEquipment,
+      inMaintenance: maintenanceEquipment,
+      availabilityPct: totalEquipment === 0 ? 100 : Math.round(((totalEquipment - downEquipment) / totalEquipment) * 1000) / 10,
+    },
+    maintenanceLast14Days: {
+      totalDowntimeMinutes: Math.round(totalDowntimeMinutes),
+      topDowntimeReasons,
+      overdueMaintenanceItems: overdueMaintenance,
+      delayedScheduledMaintenance: delayedMaintenanceCount,
+      recordCount: recentMaintenance.length,
+    },
+    workforce: {
+      total: totalWorkers,
+      onShift: onShiftWorkers,
+      onShiftPct: totalWorkers === 0 ? 0 : Math.round((onShiftWorkers / totalWorkers) * 1000) / 10,
+      onApprovedLeaveToday: onLeaveToday,
+    },
+    weatherLast14Days: {
+      readingsRecorded: recentWeather.length,
+      disruptiveConditionDays: weatherDisruptiveDays,
+      dataAvailable: recentWeather.length > 0,
+    },
+    operationalEventsLast14Days: { incidentsBySeverity: incidentSeverity, hazardReportsLogged: recentHazards },
+    supplyChain: { itemsAtOrBelowReorderPoint: lowStockCount },
+  };
+}
+
 // Guardrail applied to every title's prompt, both chat and the pipeline summary below —
 // the AI is structurally advisory-only (see AiRecommendation in schema.prisma: it can
 // create rows, but only a human review endpoint can ever change their status).
@@ -387,6 +519,24 @@ const BASE_SYSTEM_PROMPT = (mineName: string, roleTitle: string) =>
   `If the data doesn't cover something asked, say so plainly. Keep answers concise and written for a busy executive: ` +
   `short paragraphs or bullet points, leading with the most urgent or actionable item.` +
   GUARDRAIL;
+
+// Root-cause attribution methodology for the Operations Manager: when production has
+// moved, don't stop at reporting the number — correlate across every operational domain
+// in the snapshot (equipment, maintenance/downtime, workforce, weather, shift, operational
+// events, supply chain, safety events) and attribute contributing weight across them.
+const ROOT_CAUSE_METHODOLOGY =
+  ` When asked about a production change (or when the data snapshot shows one), perform root-cause attribution: ` +
+  `correlate the production trend against equipment availability, maintenance/downtime reasons, workforce ` +
+  `constraints (attendance, leave), weather disruption, operational/safety events, and supply chain signals ` +
+  `(low-stock items) in the snapshot. Present contributing factors as a percentage breakdown that sums to 100%, ` +
+  `e.g.: "PRODUCTION [UP/DOWN] X% — Potential contributing factors: Equipment availability NN%, Maintenance ` +
+  `delays NN%, Workforce constraints NN%, Weather NN%, Other NN%" — only include categories the data actually ` +
+  `supports, and always include an "Other/unexplained" share if the named factors don't plausibly account for ` +
+  `the full change. Never claim a factor CAUSED the change unless the data clearly supports it — use only ` +
+  `hedged language: "associated with", "potential contributor", "likely contributor", "requires investigation". ` +
+  `Never state or imply direct causation. If the snapshot doesn't contain enough correlated data to attribute ` +
+  `contributing factors at all (e.g. no maintenance/weather/workforce data for the period in question), say ` +
+  `exactly: "Insufficient evidence to determine the root cause." — do not guess or fabricate a breakdown.`;
 
 const AI_MODULES: Record<string, AiModule> = {
   GENERAL_MANAGER: {
@@ -419,6 +569,15 @@ const AI_MODULES: Record<string, AiModule> = {
       `vacant statutory appointments, IOD claims, permits/contractor documents/explosives licenses expiring soon, and ` +
       `closure & rehabilitation plans due for reassessment. Always name which specific compliance area is driving any ` +
       `risk you flag, not just an overall score.`,
+  },
+  OPERATIONS_MANAGER: {
+    buildContext: buildOperationsManagerContext,
+    systemPrompt: (ctx) =>
+      BASE_SYSTEM_PROMPT(ctx.mine.name, "Operations Manager") +
+      ` Focus on production performance and what's driving it: the last-14-days production trend vs the prior ` +
+      `14 days and vs target, equipment availability and downtime, maintenance delays and downtime reasons, ` +
+      `workforce coverage, weather disruption, operational/safety events, and supply chain (low-stock) signals.` +
+      ROOT_CAUSE_METHODOLOGY,
   },
 };
 
