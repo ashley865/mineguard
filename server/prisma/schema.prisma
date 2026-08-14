@@ -291,6 +291,10 @@ model User {
   communityEngagementsFacilitated CommunityEngagement[] @relation("CommunityEngagementFacilitatedBy")
   auditLogsChanged AuditLog[]
   aiRecommendationsReviewed AiRecommendation[] @relation("AiRecommendationReviewedBy")
+  requisitionsRequested JobRequisition[] @relation("RequisitionRequestedBy")
+  requisitionsApproved JobRequisition[] @relation("RequisitionApprovedBy")
+  candidatesCreated Candidate[] @relation("CandidateCreatedBy")
+  onboardingChecklistsCreated OnboardingChecklist[] @relation("OnboardingChecklistCreatedBy")
 }
 
 model UserAttendance {
@@ -390,6 +394,7 @@ model Site {
   winders               Winder[]
   shaftInspections      ShaftInspection[]
   patrolLogEntries      PatrolLogEntry[]
+  jobRequisitions       JobRequisition[]
 }
 
 model Zone {
@@ -568,6 +573,8 @@ model Worker {
   grievanceCases               GrievanceCase[]
   ccmaCases                    CcmaCase[]
   patrolLogEntries             PatrolLogEntry[]
+  hiredFromCandidate           Candidate?
+  onboardingChecklist          OnboardingChecklist?
 
   createdAt DateTime @default(now())
 }
@@ -4058,4 +4065,114 @@ model AiRecommendation {
   generatedAt    DateTime                @default(now())
 
   @@index([mineId, executiveTitle, status])
+}
+
+// ---------------------------------------------------------------------------
+// Recruitment & Onboarding
+// ---------------------------------------------------------------------------
+
+enum JobRequisitionStatus {
+  DRAFT
+  OPEN
+  ON_HOLD
+  FILLED
+  CANCELLED
+}
+
+enum CandidateSource {
+  REFERRAL
+  AGENCY
+  WALK_IN
+  ONLINE_APPLICATION
+  INTERNAL
+  OTHER
+}
+
+enum CandidateStage {
+  APPLIED
+  SHORTLISTED
+  INTERVIEWED
+  OFFERED
+  HIRED
+  REJECTED
+  WITHDRAWN
+}
+
+model JobRequisition {
+  id                String               @id @default(cuid())
+  siteId            String
+  site              Site                 @relation(fields: [siteId], references: [id], onDelete: Cascade)
+  positionTitle     String
+  category          StaffCategory        @default(OTHER)
+  numberOfPositions Int                  @default(1)
+  justification     String?
+  status            JobRequisitionStatus @default(DRAFT)
+  targetFillDate    DateTime?
+  requestedById     String?
+  requestedBy       User?                @relation("RequisitionRequestedBy", fields: [requestedById], references: [id], onDelete: SetNull)
+  approvedById      String?
+  approvedBy        User?                @relation("RequisitionApprovedBy", fields: [approvedById], references: [id], onDelete: SetNull)
+  approvedAt        DateTime?
+
+  candidates Candidate[]
+
+  createdAt DateTime @default(now())
+}
+
+// A candidate's resume is stored the same way as every other uploaded document in this
+// app (Bytes in Postgres via multer) — no external file storage dependency.
+model Candidate {
+  id              String          @id @default(cuid())
+  requisitionId   String
+  requisition     JobRequisition  @relation(fields: [requisitionId], references: [id], onDelete: Cascade)
+  fullName        String
+  idNumber        String?
+  email           String?
+  phone           String?
+  source          CandidateSource @default(OTHER)
+  stage           CandidateStage  @default(APPLIED)
+  appliedDate     DateTime        @default(now())
+  interviewDate   DateTime?
+  interviewNotes  String?
+  offerAmount     Float?
+  rejectionReason String?
+  resumeFileName  String?
+  resumeMimeType  String?
+  resumeFileSize  Int?
+  resumeFileData  Bytes?
+  // Set only once a candidate is actually converted into a real Worker record via the
+  // "hire" action — the single point where recruitment data becomes an employment record.
+  hiredWorkerId   String?         @unique
+  hiredWorker     Worker?         @relation(fields: [hiredWorkerId], references: [id], onDelete: SetNull)
+  createdById     String?
+  createdBy       User?           @relation("CandidateCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+
+  createdAt DateTime @default(now())
+}
+
+// One per newly hired worker, created automatically when a candidate is converted to a
+// Worker — fixed checklist fields (mirroring the EmployeeComplianceCheck pattern above)
+// rather than a dynamic items table, since the onboarding steps are consistent across
+// hires at a South African mine.
+model OnboardingChecklist {
+  id                      String    @id @default(cuid())
+  workerId                String    @unique
+  worker                  Worker    @relation(fields: [workerId], references: [id], onDelete: Cascade)
+  inductionCompleted      Boolean   @default(false)
+  inductionDate           DateTime?
+  medicalCompleted        Boolean   @default(false)
+  medicalDate             DateTime?
+  ppeIssued               Boolean   @default(false)
+  ppeIssuedDate           DateTime?
+  contractSigned          Boolean   @default(false)
+  contractSignedDate      DateTime?
+  bankDetailsCollected    Boolean   @default(false)
+  statutoryFormsCompleted Boolean   @default(false)
+  systemAccessGranted     Boolean   @default(false)
+  notes                   String?
+  completedAt             DateTime?
+  createdById             String?
+  createdBy               User?     @relation("OnboardingChecklistCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+
+  createdAt DateTime @default(now())
 }

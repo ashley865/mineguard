@@ -40,7 +40,8 @@
     "exportCsv": "Exportar CSV",
     "pageOf": "Página {{page}} de {{pages}}",
     "previous": "Anterior",
-    "next": "Siguiente"
+    "next": "Siguiente",
+    "email": "Correo Electrónico"
   },
   "nav": {
     "dashboard": "Panel",
@@ -615,7 +616,12 @@
       "SECURITY_CONCERN": "Preocupación de seguridad",
       "MAINTENANCE_ISSUE": "Problema de mantenimiento",
       "GENERAL_OBSERVATION": "Observación general",
-      "OTHER": "Otro"
+      "OTHER": "Otro",
+      "ON_HOLD": "En Espera",
+      "FILLED": "Cubierto",
+      "HIRED": "Contratado",
+      "INTERVIEWED": "Entrevistado",
+      "OFFERED": "Oferta Enviada"
     },
     "severity": {
       "LOW": "Baja",
@@ -3442,6 +3448,80 @@
       },
       "riskFactors": "Factores de Riesgo",
       "proceduralConsiderations": "Consideraciones de Procedimiento"
+    }
+  },
+  "recruitment": {
+    "nav": "Reclutamiento",
+    "hint": "Sigue las posiciones abiertas desde la requisición hasta la contratación — cada cambio de etapa y contratación queda en el registro de auditoría.",
+    "positionTitle": "Título del Puesto",
+    "numberOfPositions": "Número de Posiciones",
+    "justification": "Justificación",
+    "targetFillDate": "Fecha Objetivo de Cobertura",
+    "requisitionStatuses": {
+      "DRAFT": "Borrador",
+      "OPEN": "Abierta",
+      "ON_HOLD": "En Espera",
+      "FILLED": "Cubierta",
+      "CANCELLED": "Cancelada"
+    },
+    "newRequisition": "+ Nueva Requisición",
+    "newRequisitionTitle": "Nueva Requisición de Puesto",
+    "editRequisitionTitle": "Editar Requisición de Puesto",
+    "noRequisitions": "Aún no hay requisiciones.",
+    "confirmDeleteRequisition": "¿Eliminar esta requisición y todos sus candidatos?",
+    "summaryOpenRequisitions": "Requisiciones Abiertas",
+    "summaryCandidatesInPipeline": "Candidatos en Proceso",
+    "candidates": "Candidatos",
+    "viewCandidates": "Candidatos",
+    "candidatesFor": "Candidatos — {{position}}",
+    "candidateName": "Nombre del Candidato",
+    "idNumber": "Número de ID",
+    "source": "Fuente",
+    "sources": {
+      "REFERRAL": "Referencia",
+      "AGENCY": "Agencia",
+      "WALK_IN": "Presencial",
+      "ONLINE_APPLICATION": "Solicitud en Línea",
+      "INTERNAL": "Interno",
+      "OTHER": "Otro"
+    },
+    "stage": "Etapa",
+    "stages": {
+      "APPLIED": "Aplicó",
+      "SHORTLISTED": "Preseleccionado",
+      "INTERVIEWED": "Entrevistado",
+      "OFFERED": "Oferta Enviada",
+      "REJECTED": "Rechazado",
+      "WITHDRAWN": "Retirado"
+    },
+    "appliedDate": "Fecha de Solicitud",
+    "newCandidate": "+ Nuevo Candidato",
+    "newCandidateTitle": "Nuevo Candidato",
+    "noCandidates": "Aún no hay candidatos.",
+    "confirmDeleteCandidate": "¿Eliminar este candidato?",
+    "viewResume": "Ver CV",
+    "uploadResume": "Subir CV",
+    "hire": "Contratar",
+    "hireTitle": "Contratar a {{name}}",
+    "hireHint": "Esto crea un registro real de Trabajador e inicia su lista de verificación de incorporación. Esto no se puede deshacer.",
+    "employeeId": "ID de Empleado",
+    "confirmHire": "Confirmar Contratación",
+    "onboarding": {
+      "nav": "Incorporación",
+      "hint": "Lista de verificación para cada nueva contratación, creada automáticamente al convertir un candidato en trabajador.",
+      "summaryIncomplete": "Incompleto",
+      "none": "Aún no hay listas de incorporación.",
+      "progress": "Progreso",
+      "complete": "Completo",
+      "inProgress": "En Progreso",
+      "editTitle": "Incorporación — {{name}}",
+      "induction": "Inducción del sitio completada",
+      "medical": "Examen médico previo al empleo completado",
+      "ppe": "EPP entregado",
+      "contract": "Contrato de empleo firmado",
+      "bankDetails": "Datos bancarios recopilados",
+      "statutoryForms": "Formularios estatutarios completados (UI-19, impuestos)",
+      "systemAccess": "Acceso al sistema otorgado"
     }
   }
 }

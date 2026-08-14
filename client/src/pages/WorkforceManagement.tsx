@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useSearchParams } from "react-router-dom";
 import { api } from "../api/client";
-import { Worker } from "../api/types";
+import { Site, Worker } from "../api/types";
 import WorkerSafetyTab from "./workforce/WorkerSafetyTab";
 import CertificatesTab from "./workforce/CertificatesTab";
 import TrainingRecordsTab from "./workforce/TrainingRecordsTab";
@@ -11,10 +11,33 @@ import ShiftRostering from "./ShiftRostering";
 import TrainingLms from "./TrainingLms";
 import EmploymentEquityTab from "./workforce/EmploymentEquityTab";
 import SkillsDevelopmentTab from "./workforce/SkillsDevelopmentTab";
+import RecruitmentTab from "./workforce/RecruitmentTab";
+import OnboardingTab from "./workforce/OnboardingTab";
 import { buttonPrimary, buttonSecondary } from "../components/ui";
 
-type TabKey = "safety" | "certificates" | "training" | "compliance" | "roster" | "lms" | "employmentEquity" | "skillsDevelopment";
-const TAB_KEYS: TabKey[] = ["safety", "certificates", "training", "compliance", "roster", "lms", "employmentEquity", "skillsDevelopment"];
+type TabKey =
+  | "safety"
+  | "certificates"
+  | "training"
+  | "compliance"
+  | "roster"
+  | "lms"
+  | "employmentEquity"
+  | "skillsDevelopment"
+  | "recruitment"
+  | "onboarding";
+const TAB_KEYS: TabKey[] = [
+  "safety",
+  "certificates",
+  "training",
+  "compliance",
+  "roster",
+  "lms",
+  "employmentEquity",
+  "skillsDevelopment",
+  "recruitment",
+  "onboarding",
+];
 
 export default function WorkforceManagement() {
   const { t } = useTranslation();
@@ -22,12 +45,14 @@ export default function WorkforceManagement() {
   const initialTab = TAB_KEYS.includes(searchParams.get("tab") as TabKey) ? (searchParams.get("tab") as TabKey) : "safety";
   const [tab, setTab] = useState<TabKey>(initialTab);
   const [workers, setWorkers] = useState<Worker[]>([]);
+  const [sites, setSites] = useState<Site[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     async function load() {
-      const res = await api.get<Worker[]>("/workers");
-      setWorkers(res.data);
+      const [w, s] = await Promise.all([api.get<Worker[]>("/workers"), api.get<Site[]>("/sites")]);
+      setWorkers(w.data);
+      setSites(s.data);
       setLoading(false);
     }
     load();
@@ -42,6 +67,8 @@ export default function WorkforceManagement() {
     { key: "lms", label: t("trainingLms.nav") },
     { key: "employmentEquity", label: t("employmentEquity.nav") },
     { key: "skillsDevelopment", label: t("skillsDevelopment.nav") },
+    { key: "recruitment", label: t("recruitment.nav") },
+    { key: "onboarding", label: t("recruitment.onboarding.nav") },
   ];
 
   if (loading) return <div className="text-mine-300">{t("workforce.loading")}</div>;
@@ -73,6 +100,8 @@ export default function WorkforceManagement() {
       {tab === "lms" && <TrainingLms />}
       {tab === "employmentEquity" && <EmploymentEquityTab />}
       {tab === "skillsDevelopment" && <SkillsDevelopmentTab workers={workers} />}
+      {tab === "recruitment" && <RecruitmentTab sites={sites} />}
+      {tab === "onboarding" && <OnboardingTab />}
     </div>
   );
 }

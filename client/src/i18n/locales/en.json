@@ -57,7 +57,8 @@
     "exportCsv": "Export CSV",
     "pageOf": "Page {{page}} of {{pages}}",
     "previous": "Previous",
-    "next": "Next"
+    "next": "Next",
+    "email": "Email"
   },
   "nav": {
     "dashboard": "Dashboard",
@@ -632,7 +633,12 @@
       "SECURITY_CONCERN": "Security concern",
       "MAINTENANCE_ISSUE": "Maintenance issue",
       "GENERAL_OBSERVATION": "General observation",
-      "OTHER": "Other"
+      "OTHER": "Other",
+      "ON_HOLD": "On Hold",
+      "FILLED": "Filled",
+      "HIRED": "Hired",
+      "INTERVIEWED": "Interviewed",
+      "OFFERED": "Offered"
     },
     "severity": {
       "LOW": "Low",
@@ -3441,6 +3447,80 @@
       },
       "riskFactors": "Risk Factors",
       "proceduralConsiderations": "Procedural Considerations"
+    }
+  },
+  "recruitment": {
+    "nav": "Recruitment",
+    "hint": "Track open positions from requisition through to hire — every candidate stage change and hire is captured in the audit trail.",
+    "positionTitle": "Position Title",
+    "numberOfPositions": "Number of Positions",
+    "justification": "Justification",
+    "targetFillDate": "Target Fill Date",
+    "requisitionStatuses": {
+      "DRAFT": "Draft",
+      "OPEN": "Open",
+      "ON_HOLD": "On Hold",
+      "FILLED": "Filled",
+      "CANCELLED": "Cancelled"
+    },
+    "newRequisition": "+ New Requisition",
+    "newRequisitionTitle": "New Job Requisition",
+    "editRequisitionTitle": "Edit Job Requisition",
+    "noRequisitions": "No requisitions yet.",
+    "confirmDeleteRequisition": "Delete this requisition and all its candidates?",
+    "summaryOpenRequisitions": "Open Requisitions",
+    "summaryCandidatesInPipeline": "Candidates in Pipeline",
+    "candidates": "Candidates",
+    "viewCandidates": "Candidates",
+    "candidatesFor": "Candidates — {{position}}",
+    "candidateName": "Candidate Name",
+    "idNumber": "ID Number",
+    "source": "Source",
+    "sources": {
+      "REFERRAL": "Referral",
+      "AGENCY": "Agency",
+      "WALK_IN": "Walk-In",
+      "ONLINE_APPLICATION": "Online Application",
+      "INTERNAL": "Internal",
+      "OTHER": "Other"
+    },
+    "stage": "Stage",
+    "stages": {
+      "APPLIED": "Applied",
+      "SHORTLISTED": "Shortlisted",
+      "INTERVIEWED": "Interviewed",
+      "OFFERED": "Offered",
+      "REJECTED": "Rejected",
+      "WITHDRAWN": "Withdrawn"
+    },
+    "appliedDate": "Applied Date",
+    "newCandidate": "+ New Candidate",
+    "newCandidateTitle": "New Candidate",
+    "noCandidates": "No candidates yet.",
+    "confirmDeleteCandidate": "Delete this candidate?",
+    "viewResume": "View Resume",
+    "uploadResume": "Upload Resume",
+    "hire": "Hire",
+    "hireTitle": "Hire {{name}}",
+    "hireHint": "This creates a real Worker record and starts their onboarding checklist. This cannot be undone.",
+    "employeeId": "Employee ID",
+    "confirmHire": "Confirm Hire",
+    "onboarding": {
+      "nav": "Onboarding",
+      "hint": "Checklist for every new hire, created automatically when a candidate is converted to a worker.",
+      "summaryIncomplete": "Incomplete",
+      "none": "No onboarding checklists yet.",
+      "progress": "Progress",
+      "complete": "Complete",
+      "inProgress": "In Progress",
+      "editTitle": "Onboarding — {{name}}",
+      "induction": "Site induction completed",
+      "medical": "Pre-employment medical completed",
+      "ppe": "PPE issued",
+      "contract": "Employment contract signed",
+      "bankDetails": "Banking details collected",
+      "statutoryForms": "Statutory forms completed (UI-19, tax)",
+      "systemAccess": "System access granted"
     }
   }
 }

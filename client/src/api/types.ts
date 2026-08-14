@@ -3084,3 +3084,63 @@ export interface AuditLogEntry {
   snapshot?: Record<string, unknown> | null;
   createdAt: string;
 }
+
+export type JobRequisitionStatus = "DRAFT" | "OPEN" | "ON_HOLD" | "FILLED" | "CANCELLED";
+export interface JobRequisition {
+  id: string;
+  siteId: string;
+  site?: { id: string; name: string };
+  positionTitle: string;
+  category: StaffCategory;
+  numberOfPositions: number;
+  justification?: string | null;
+  status: JobRequisitionStatus;
+  targetFillDate?: string | null;
+  requestedBy?: { id: string; name: string } | null;
+  approvedBy?: { id: string; name: string } | null;
+  approvedAt?: string | null;
+  createdAt: string;
+  _count?: { candidates: number };
+}
+
+export type CandidateSource = "REFERRAL" | "AGENCY" | "WALK_IN" | "ONLINE_APPLICATION" | "INTERNAL" | "OTHER";
+export type CandidateStage = "APPLIED" | "SHORTLISTED" | "INTERVIEWED" | "OFFERED" | "HIRED" | "REJECTED" | "WITHDRAWN";
+export interface Candidate {
+  id: string;
+  requisitionId: string;
+  requisition?: { id: string; positionTitle: string };
+  fullName: string;
+  idNumber?: string | null;
+  email?: string | null;
+  phone?: string | null;
+  source: CandidateSource;
+  stage: CandidateStage;
+  appliedDate: string;
+  interviewDate?: string | null;
+  interviewNotes?: string | null;
+  offerAmount?: number | null;
+  rejectionReason?: string | null;
+  resumeFileName?: string | null;
+  hiredWorkerId?: string | null;
+  createdAt: string;
+}
+
+export interface OnboardingChecklist {
+  id: string;
+  workerId: string;
+  worker?: { id: string; name: string; employeeId: string; site?: { id: string; name: string } };
+  inductionCompleted: boolean;
+  inductionDate?: string | null;
+  medicalCompleted: boolean;
+  medicalDate?: string | null;
+  ppeIssued: boolean;
+  ppeIssuedDate?: string | null;
+  contractSigned: boolean;
+  contractSignedDate?: string | null;
+  bankDetailsCollected: boolean;
+  statutoryFormsCompleted: boolean;
+  systemAccessGranted: boolean;
+  notes?: string | null;
+  completedAt?: string | null;
+  createdAt: string;
+}

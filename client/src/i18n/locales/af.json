@@ -40,7 +40,8 @@
     "exportCsv": "Voer CSV uit",
     "pageOf": "Bladsy {{page}} van {{pages}}",
     "previous": "Vorige",
-    "next": "Volgende"
+    "next": "Volgende",
+    "email": "E-pos"
   },
   "nav": {
     "dashboard": "Oorsig",
@@ -615,7 +616,12 @@
       "SECURITY_CONCERN": "Sekuriteitskwessie",
       "MAINTENANCE_ISSUE": "Onderhoudskwessie",
       "GENERAL_OBSERVATION": "Algemene waarneming",
-      "OTHER": "Ander"
+      "OTHER": "Ander",
+      "ON_HOLD": "In Wag",
+      "FILLED": "Gevul",
+      "HIRED": "Aangestel",
+      "INTERVIEWED": "Onderhoud Gevoer",
+      "OFFERED": "Aanbod Gestuur"
     },
     "severity": {
       "LOW": "Laag",
@@ -3442,6 +3448,80 @@
       },
       "riskFactors": "Risikofaktore",
       "proceduralConsiderations": "Prosedurele Oorwegings"
+    }
+  },
+  "recruitment": {
+    "nav": "Werwing",
+    "hint": "Volg oop poste van rekwisisie tot aanstelling — elke kandidaat-stadiumverandering en aanstelling word in die ouditspoor vasgelê.",
+    "positionTitle": "Posbenaming",
+    "numberOfPositions": "Aantal Poste",
+    "justification": "Regverdiging",
+    "targetFillDate": "Teiken Vuldatum",
+    "requisitionStatuses": {
+      "DRAFT": "Konsep",
+      "OPEN": "Oop",
+      "ON_HOLD": "In Wag",
+      "FILLED": "Gevul",
+      "CANCELLED": "Gekanselleer"
+    },
+    "newRequisition": "+ Nuwe Rekwisisie",
+    "newRequisitionTitle": "Nuwe Posrekwisisie",
+    "editRequisitionTitle": "Wysig Posrekwisisie",
+    "noRequisitions": "Nog geen rekwisisies nie.",
+    "confirmDeleteRequisition": "Verwyder hierdie rekwisisie en al sy kandidate?",
+    "summaryOpenRequisitions": "Oop Rekwisisies",
+    "summaryCandidatesInPipeline": "Kandidate in Pyplyn",
+    "candidates": "Kandidate",
+    "viewCandidates": "Kandidate",
+    "candidatesFor": "Kandidate — {{position}}",
+    "candidateName": "Kandidaatnaam",
+    "idNumber": "ID-nommer",
+    "source": "Bron",
+    "sources": {
+      "REFERRAL": "Verwysing",
+      "AGENCY": "Agentskap",
+      "WALK_IN": "Instap",
+      "ONLINE_APPLICATION": "Aanlyn Aansoek",
+      "INTERNAL": "Intern",
+      "OTHER": "Ander"
+    },
+    "stage": "Stadium",
+    "stages": {
+      "APPLIED": "Aansoek Gedoen",
+      "SHORTLISTED": "Kortlys",
+      "INTERVIEWED": "Onderhoud Gevoer",
+      "OFFERED": "Aanbod Gestuur",
+      "REJECTED": "Afgekeur",
+      "WITHDRAWN": "Onttrek"
+    },
+    "appliedDate": "Aansoekdatum",
+    "newCandidate": "+ Nuwe Kandidaat",
+    "newCandidateTitle": "Nuwe Kandidaat",
+    "noCandidates": "Nog geen kandidate nie.",
+    "confirmDeleteCandidate": "Verwyder hierdie kandidaat?",
+    "viewResume": "Bekyk CV",
+    "uploadResume": "Laai CV Op",
+    "hire": "Stel Aan",
+    "hireTitle": "Stel {{name}} Aan",
+    "hireHint": "Dit skep 'n regte Werker-rekord en begin hul indiensnemingskontrolelys. Dit kan nie ongedaan gemaak word nie.",
+    "employeeId": "Werknemer-ID",
+    "confirmHire": "Bevestig Aanstelling",
+    "onboarding": {
+      "nav": "Indiensneming",
+      "hint": "Kontrolelys vir elke nuwe aanstelling, outomaties geskep wanneer 'n kandidaat na 'n werker omgeskakel word.",
+      "summaryIncomplete": "Onvolledig",
+      "none": "Nog geen indiensnemingskontrolelyste nie.",
+      "progress": "Vordering",
+      "complete": "Voltooi",
+      "inProgress": "Aan die Gang",
+      "editTitle": "Indiensneming — {{name}}",
+      "induction": "Terreininduksie voltooi",
+      "medical": "Voor-indiensneming mediese ondersoek voltooi",
+      "ppe": "PBU uitgereik",
+      "contract": "Diensooreenkoms onderteken",
+      "bankDetails": "Bankbesonderhede ingesamel",
+      "statutoryForms": "Statutêre vorms voltooi (UI-19, belasting)",
+      "systemAccess": "Stelseltoegang toegestaan"
     }
   }
 }

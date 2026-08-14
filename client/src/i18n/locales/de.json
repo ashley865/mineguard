@@ -40,7 +40,8 @@
     "exportCsv": "CSV exportieren",
     "pageOf": "Seite {{page}} von {{pages}}",
     "previous": "Zurück",
-    "next": "Weiter"
+    "next": "Weiter",
+    "email": "E-Mail"
   },
   "nav": {
     "dashboard": "Übersicht",
@@ -615,7 +616,12 @@
       "SECURITY_CONCERN": "Sicherheitsbedenken",
       "MAINTENANCE_ISSUE": "Wartungsproblem",
       "GENERAL_OBSERVATION": "Allgemeine Beobachtung",
-      "OTHER": "Sonstiges"
+      "OTHER": "Sonstiges",
+      "ON_HOLD": "Zurückgestellt",
+      "FILLED": "Besetzt",
+      "HIRED": "Eingestellt",
+      "INTERVIEWED": "Interview Geführt",
+      "OFFERED": "Angebot Gesendet"
     },
     "severity": {
       "LOW": "Niedrig",
@@ -3442,6 +3448,80 @@
       },
       "riskFactors": "Risikofaktoren",
       "proceduralConsiderations": "Verfahrensrechtliche Überlegungen"
+    }
+  },
+  "recruitment": {
+    "nav": "Rekrutierung",
+    "hint": "Verfolgen Sie offene Stellen von der Anforderung bis zur Einstellung — jeder Kandidaten-Statuswechsel und jede Einstellung wird im Prüfpfad erfasst.",
+    "positionTitle": "Stellenbezeichnung",
+    "numberOfPositions": "Anzahl der Stellen",
+    "justification": "Begründung",
+    "targetFillDate": "Ziel-Besetzungsdatum",
+    "requisitionStatuses": {
+      "DRAFT": "Entwurf",
+      "OPEN": "Offen",
+      "ON_HOLD": "Zurückgestellt",
+      "FILLED": "Besetzt",
+      "CANCELLED": "Storniert"
+    },
+    "newRequisition": "+ Neue Anforderung",
+    "newRequisitionTitle": "Neue Stellenanforderung",
+    "editRequisitionTitle": "Stellenanforderung Bearbeiten",
+    "noRequisitions": "Noch keine Anforderungen.",
+    "confirmDeleteRequisition": "Diese Anforderung und alle Kandidaten löschen?",
+    "summaryOpenRequisitions": "Offene Anforderungen",
+    "summaryCandidatesInPipeline": "Kandidaten im Prozess",
+    "candidates": "Kandidaten",
+    "viewCandidates": "Kandidaten",
+    "candidatesFor": "Kandidaten — {{position}}",
+    "candidateName": "Kandidatenname",
+    "idNumber": "Ausweisnummer",
+    "source": "Quelle",
+    "sources": {
+      "REFERRAL": "Empfehlung",
+      "AGENCY": "Agentur",
+      "WALK_IN": "Vor Ort",
+      "ONLINE_APPLICATION": "Online-Bewerbung",
+      "INTERNAL": "Intern",
+      "OTHER": "Andere"
+    },
+    "stage": "Phase",
+    "stages": {
+      "APPLIED": "Beworben",
+      "SHORTLISTED": "In Engerer Auswahl",
+      "INTERVIEWED": "Interview Geführt",
+      "OFFERED": "Angebot Gesendet",
+      "REJECTED": "Abgelehnt",
+      "WITHDRAWN": "Zurückgezogen"
+    },
+    "appliedDate": "Bewerbungsdatum",
+    "newCandidate": "+ Neuer Kandidat",
+    "newCandidateTitle": "Neuer Kandidat",
+    "noCandidates": "Noch keine Kandidaten.",
+    "confirmDeleteCandidate": "Diesen Kandidaten löschen?",
+    "viewResume": "Lebenslauf Ansehen",
+    "uploadResume": "Lebenslauf Hochladen",
+    "hire": "Einstellen",
+    "hireTitle": "{{name}} Einstellen",
+    "hireHint": "Dies erstellt einen echten Mitarbeiterdatensatz und startet die Einarbeitungs-Checkliste. Dies kann nicht rückgängig gemacht werden.",
+    "employeeId": "Mitarbeiter-ID",
+    "confirmHire": "Einstellung Bestätigen",
+    "onboarding": {
+      "nav": "Einarbeitung",
+      "hint": "Checkliste für jede Neueinstellung, automatisch erstellt, wenn ein Kandidat in einen Mitarbeiter umgewandelt wird.",
+      "summaryIncomplete": "Unvollständig",
+      "none": "Noch keine Einarbeitungs-Checklisten.",
+      "progress": "Fortschritt",
+      "complete": "Abgeschlossen",
+      "inProgress": "In Bearbeitung",
+      "editTitle": "Einarbeitung — {{name}}",
+      "induction": "Standort-Einweisung abgeschlossen",
+      "medical": "Einstellungsuntersuchung abgeschlossen",
+      "ppe": "PSA ausgegeben",
+      "contract": "Arbeitsvertrag unterschrieben",
+      "bankDetails": "Bankdaten erfasst",
+      "statutoryForms": "Gesetzliche Formulare abgeschlossen (UI-19, Steuer)",
+      "systemAccess": "Systemzugang gewährt"
     }
   }
 }

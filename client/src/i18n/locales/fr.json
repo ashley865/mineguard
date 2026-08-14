@@ -40,7 +40,8 @@
     "exportCsv": "Exporter CSV",
     "pageOf": "Page {{page}} sur {{pages}}",
     "previous": "Précédent",
-    "next": "Suivant"
+    "next": "Suivant",
+    "email": "E-mail"
   },
   "nav": {
     "dashboard": "Tableau de bord",
@@ -615,7 +616,12 @@
       "SECURITY_CONCERN": "Préoccupation de sécurité",
       "MAINTENANCE_ISSUE": "Problème de maintenance",
       "GENERAL_OBSERVATION": "Observation générale",
-      "OTHER": "Autre"
+      "OTHER": "Autre",
+      "ON_HOLD": "En Attente",
+      "FILLED": "Pourvu",
+      "HIRED": "Embauché",
+      "INTERVIEWED": "Entretien Effectué",
+      "OFFERED": "Offre Envoyée"
     },
     "severity": {
       "LOW": "Faible",
@@ -3442,6 +3448,80 @@
       },
       "riskFactors": "Facteurs de Risque",
       "proceduralConsiderations": "Considérations Procédurales"
+    }
+  },
+  "recruitment": {
+    "nav": "Recrutement",
+    "hint": "Suivez les postes ouverts, de la réquisition à l'embauche — chaque changement d'étape et embauche est consigné dans le journal d'audit.",
+    "positionTitle": "Intitulé du Poste",
+    "numberOfPositions": "Nombre de Postes",
+    "justification": "Justification",
+    "targetFillDate": "Date Cible de Pourvoi",
+    "requisitionStatuses": {
+      "DRAFT": "Brouillon",
+      "OPEN": "Ouverte",
+      "ON_HOLD": "En Attente",
+      "FILLED": "Pourvue",
+      "CANCELLED": "Annulée"
+    },
+    "newRequisition": "+ Nouvelle Réquisition",
+    "newRequisitionTitle": "Nouvelle Réquisition de Poste",
+    "editRequisitionTitle": "Modifier la Réquisition de Poste",
+    "noRequisitions": "Aucune réquisition pour le moment.",
+    "confirmDeleteRequisition": "Supprimer cette réquisition et tous ses candidats ?",
+    "summaryOpenRequisitions": "Réquisitions Ouvertes",
+    "summaryCandidatesInPipeline": "Candidats en Cours",
+    "candidates": "Candidats",
+    "viewCandidates": "Candidats",
+    "candidatesFor": "Candidats — {{position}}",
+    "candidateName": "Nom du Candidat",
+    "idNumber": "Numéro d'Identité",
+    "source": "Source",
+    "sources": {
+      "REFERRAL": "Recommandation",
+      "AGENCY": "Agence",
+      "WALK_IN": "Sur Place",
+      "ONLINE_APPLICATION": "Candidature en Ligne",
+      "INTERNAL": "Interne",
+      "OTHER": "Autre"
+    },
+    "stage": "Étape",
+    "stages": {
+      "APPLIED": "Candidature",
+      "SHORTLISTED": "Présélectionné",
+      "INTERVIEWED": "Entretien Effectué",
+      "OFFERED": "Offre Envoyée",
+      "REJECTED": "Rejeté",
+      "WITHDRAWN": "Retiré"
+    },
+    "appliedDate": "Date de Candidature",
+    "newCandidate": "+ Nouveau Candidat",
+    "newCandidateTitle": "Nouveau Candidat",
+    "noCandidates": "Aucun candidat pour le moment.",
+    "confirmDeleteCandidate": "Supprimer ce candidat ?",
+    "viewResume": "Voir le CV",
+    "uploadResume": "Téléverser le CV",
+    "hire": "Embaucher",
+    "hireTitle": "Embaucher {{name}}",
+    "hireHint": "Ceci crée un véritable enregistrement de Travailleur et démarre sa liste de contrôle d'intégration. Cette action est irréversible.",
+    "employeeId": "ID Employé",
+    "confirmHire": "Confirmer l'Embauche",
+    "onboarding": {
+      "nav": "Intégration",
+      "hint": "Liste de contrôle pour chaque nouvelle embauche, créée automatiquement lorsqu'un candidat est converti en travailleur.",
+      "summaryIncomplete": "Incomplet",
+      "none": "Aucune liste d'intégration pour le moment.",
+      "progress": "Progression",
+      "complete": "Terminé",
+      "inProgress": "En Cours",
+      "editTitle": "Intégration — {{name}}",
+      "induction": "Induction sur site effectuée",
+      "medical": "Examen médical préalable à l'emploi effectué",
+      "ppe": "EPI remis",
+      "contract": "Contrat de travail signé",
+      "bankDetails": "Coordonnées bancaires recueillies",
+      "statutoryForms": "Formulaires légaux complétés (UI-19, impôts)",
+      "systemAccess": "Accès système accordé"
     }
   }
 }
