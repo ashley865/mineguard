@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { useSearchParams } from "react-router-dom";
 import { api } from "../api/client";
 import { Site, Zone } from "../api/types";
 import CctvTab from "./security/CctvTab";
@@ -8,10 +9,13 @@ import PatrolManagementTab from "./security/PatrolManagementTab";
 import { buttonPrimary, buttonSecondary } from "../components/ui";
 
 type TabKey = "cctv" | "incidents" | "patrol";
+const TAB_KEYS: TabKey[] = ["cctv", "incidents", "patrol"];
 
 export default function SecurityHub() {
   const { t } = useTranslation();
-  const [tab, setTab] = useState<TabKey>("cctv");
+  const [searchParams] = useSearchParams();
+  const initialTab = TAB_KEYS.includes(searchParams.get("tab") as TabKey) ? (searchParams.get("tab") as TabKey) : "cctv";
+  const [tab, setTab] = useState<TabKey>(initialTab);
   const [sites, setSites] = useState<Site[]>([]);
   const [zones, setZones] = useState<Zone[]>([]);
   const [loading, setLoading] = useState(true);

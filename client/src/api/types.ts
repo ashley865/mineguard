@@ -720,6 +720,47 @@ export interface AiChatResponse {
 
 export type AiRecommendationKind = "RISK" | "PREDICTION" | "RECOMMENDATION" | "ACHIEVEMENT" | "ANNOUNCEMENT";
 export type AiRecommendationStatus = "OPEN" | "ACKNOWLEDGED" | "ACTIONED" | "DISMISSED";
+export type AiRecommendationTopic =
+  | "WORKFORCE_CERTIFICATES"
+  | "WORKFORCE_TRAINING"
+  | "WORKFORCE_LEAVE"
+  | "LABOUR_RELATIONS"
+  | "HAZARD_REPORTS"
+  | "AUDIT_FINDINGS"
+  | "LEGAL_COMPLIANCE"
+  | "RISK_ASSESSMENTS"
+  | "SAFETY_INSPECTIONS"
+  | "MEDICAL_SURVEILLANCE"
+  | "STATUTORY_APPOINTMENTS"
+  | "IOD_CLAIMS"
+  | "TAILINGS"
+  | "CLOSURE_REHABILITATION"
+  | "EXPLOSIVES"
+  | "REGULATORY_NOTICES"
+  | "PERMITS"
+  | "PERMITS_TO_WORK"
+  | "CONTRACTORS"
+  | "SECURITY_INCIDENTS"
+  | "CCTV"
+  | "PATROLS"
+  | "VISITORS"
+  | "EXPENSES"
+  | "PAYEES"
+  | "INVOICES"
+  | "PURCHASE_ORDERS"
+  | "SUPPLIERS"
+  | "PAYROLL"
+  | "MAINTENANCE"
+  | "EQUIPMENT"
+  | "PRODUCTION"
+  | "SENSORS"
+  | "ENVIRONMENT"
+  | "EMERGENCY_PREPAREDNESS"
+  | "GROUND_CONTROL"
+  | "VENTILATION"
+  | "MINE_RESCUE"
+  | "USER_ACCOUNTS"
+  | "GENERAL";
 export interface AiRecommendation {
   id: string;
   executiveTitle: ExecutiveTitle;
@@ -727,6 +768,7 @@ export interface AiRecommendation {
   severity: AlertSeverity;
   title: string;
   detail: string;
+  topic: AiRecommendationTopic | null;
   status: AiRecommendationStatus;
   reviewedBy?: { id: string; name: string } | null;
   reviewedAt: string | null;

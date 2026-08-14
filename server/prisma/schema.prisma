@@ -3993,6 +3993,54 @@ enum AiRecommendationStatus {
   DISMISSED
 }
 
+// Which in-app section a recommendation is actually about, so the client can render a
+// "Take Action" button that navigates straight to where the underlying record lives (e.g.
+// a certificate-expiry risk links to Workforce > Certificates) instead of leaving the
+// executive to go find it themselves. Assigned by the AI pipeline from this fixed
+// vocabulary — not free text — so the client-side route mapping is exhaustive and reliable.
+enum AiRecommendationTopic {
+  WORKFORCE_CERTIFICATES
+  WORKFORCE_TRAINING
+  WORKFORCE_LEAVE
+  LABOUR_RELATIONS
+  HAZARD_REPORTS
+  AUDIT_FINDINGS
+  LEGAL_COMPLIANCE
+  RISK_ASSESSMENTS
+  SAFETY_INSPECTIONS
+  MEDICAL_SURVEILLANCE
+  STATUTORY_APPOINTMENTS
+  IOD_CLAIMS
+  TAILINGS
+  CLOSURE_REHABILITATION
+  EXPLOSIVES
+  REGULATORY_NOTICES
+  PERMITS
+  PERMITS_TO_WORK
+  CONTRACTORS
+  SECURITY_INCIDENTS
+  CCTV
+  PATROLS
+  VISITORS
+  EXPENSES
+  PAYEES
+  INVOICES
+  PURCHASE_ORDERS
+  SUPPLIERS
+  PAYROLL
+  MAINTENANCE
+  EQUIPMENT
+  PRODUCTION
+  SENSORS
+  ENVIRONMENT
+  EMERGENCY_PREPAREDNESS
+  GROUND_CONTROL
+  VENTILATION
+  MINE_RESCUE
+  USER_ACCOUNTS
+  GENERAL
+}
+
 model AiRecommendation {
   id             String                  @id @default(cuid())
   mineId         String
@@ -4001,6 +4049,7 @@ model AiRecommendation {
   severity       AlertSeverity
   title          String
   detail         String
+  topic          AiRecommendationTopic?
   status         AiRecommendationStatus  @default(OPEN)
   reviewedById   String?
   reviewedBy     User?                   @relation("AiRecommendationReviewedBy", fields: [reviewedById], references: [id], onDelete: SetNull)

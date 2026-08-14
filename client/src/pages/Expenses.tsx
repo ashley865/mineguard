@@ -1,6 +1,6 @@
 import { FormEvent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer } from "recharts";
 import { api, API_URL } from "../api/client";
 import { useAuth } from "../context/AuthContext";
@@ -34,6 +34,7 @@ const paymentMethods: PaymentMethod[] = ["EFT", "CASH", "CHEQUE", "CARD", "OTHER
 const payeeTypes: PayeeType[] = ["COMPANY", "INDIVIDUAL", "BUYER", "CONTRACTOR"];
 
 type TabKey = "expenses" | "payees";
+const TAB_KEYS: TabKey[] = ["expenses", "payees"];
 
 function ExpenseForm({ sites, payees, onSubmit, onCancel }: {
   sites: Site[];
@@ -271,12 +272,14 @@ export default function Expenses() {
   const { t } = useTranslation();
   const { user } = useAuth();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const canEdit = user?.role === "ADMIN" || user?.role === "SUPERVISOR" || user?.role === "EXECUTIVE";
   const canDelete = user?.role === "ADMIN" || user?.role === "EXECUTIVE";
   const canApprove =
     user?.role === "ADMIN" ||
     (user?.role === "EXECUTIVE" && (user?.title === "CFO" || user?.title === "GENERAL_MANAGER" || user?.title === "COO"));
-  const [tab, setTab] = useState<TabKey>("expenses");
+  const initialTab = TAB_KEYS.includes(searchParams.get("tab") as TabKey) ? (searchParams.get("tab") as TabKey) : "expenses";
+  const [tab, setTab] = useState<TabKey>(initialTab);
   const [expenses, setExpenses] = useState<Expense[]>([]);
   const [payees, setPayees] = useState<Payee[]>([]);
   const [sites, setSites] = useState<Site[]>([]);

@@ -1,9 +1,11 @@
 import { FormEvent, useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { useNavigate } from "react-router-dom";
 import { api } from "../api/client";
 import { AiChatMessage, AiChatResponse, AiRecommendation, AiSummaryResponse } from "../api/types";
 import { buttonPrimary, buttonSecondary, inputClass } from "./ui";
 import ExecutiveReportModal from "./ExecutiveReportModal";
+import { routeForTopic } from "../lib/aiTopicRoutes";
 
 const URGENT_KEYWORDS = ["overdue", "critical", "urgent", "immediate", "escalat", "non-compliant", "unauthorized", "unauthorised"];
 const CAUTION_KEYWORDS = ["pending", "review", "attention", "expir", "due soon", "approval", "outstanding", "shortage"];
@@ -55,6 +57,7 @@ const NON_ACTIONABLE_KINDS = new Set<AiRecommendation["kind"]>(["ACHIEVEMENT", "
 
 export default function AiAssistantWidget({ showReportGenerator = false }: { showReportGenerator?: boolean }) {
   const { t } = useTranslation();
+  const navigate = useNavigate();
   const [reportOpen, setReportOpen] = useState(false);
   const [configured, setConfigured] = useState<boolean | null>(null);
   const [summary, setSummary] = useState<string | null>(null);
@@ -270,6 +273,15 @@ export default function AiAssistantWidget({ showReportGenerator = false }: { sho
                         </button>
                       ) : (
                         <>
+                          {routeForTopic(rec.topic) && (
+                            <button
+                              className="text-[10px] font-bold text-white bg-hazard-500 hover:bg-hazard-600 rounded px-2 py-1 transition-colors disabled:opacity-50"
+                              disabled={reviewingId === rec.id}
+                              onClick={() => navigate(routeForTopic(rec.topic)!)}
+                            >
+                              {t("ai.takeAction")}
+                            </button>
+                          )}
                           {rec.status === "OPEN" && (
                             <button
                               className="text-[10px] font-bold text-mine-300 hover:text-mine-50 bg-mine-800 hover:bg-mine-700 rounded px-2 py-1 transition-colors disabled:opacity-50"

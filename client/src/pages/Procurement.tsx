@@ -1,5 +1,6 @@
 import { FormEvent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { useSearchParams } from "react-router-dom";
 import { api } from "../api/client";
 import { useAuth } from "../context/AuthContext";
 import { PurchaseOrder, PurchaseOrderStatus, Site, Supplier, SupplierStatus } from "../api/types";
@@ -430,7 +431,10 @@ export default function Procurement() {
   const canEdit = user?.role === "ADMIN" || user?.role === "SUPERVISOR" || user?.role === "EXECUTIVE";
   const canApprove = user?.role === "ADMIN" || user?.role === "EXECUTIVE";
   const canDelete = user?.role === "ADMIN" || user?.role === "EXECUTIVE";
-  const [tab, setTab] = useState<"suppliers" | "orders">("suppliers");
+  const [searchParams] = useSearchParams();
+  const tabParam = searchParams.get("tab");
+  const initialTab = tabParam === "orders" || tabParam === "suppliers" ? tabParam : "suppliers";
+  const [tab, setTab] = useState<"suppliers" | "orders">(initialTab);
   const [sites, setSites] = useState<Site[]>([]);
   const [suppliers, setSuppliers] = useState<Supplier[]>([]);
   const [loading, setLoading] = useState(true);

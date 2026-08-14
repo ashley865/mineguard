@@ -1,9 +1,11 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
+import { useNavigate } from "react-router-dom";
 import { api } from "../api/client";
 import { AiRecommendation, ExecutiveReportResponse, ReportPeriod } from "../api/types";
 import Modal from "./Modal";
 import { buttonPrimary, buttonSecondary } from "./ui";
+import { routeForTopic } from "../lib/aiTopicRoutes";
 
 const REPORT_SECTION_ORDER = [
   "production",
@@ -52,6 +54,7 @@ const KIND_BADGE: Record<AiRecommendation["kind"], string> = {
 
 export default function ExecutiveReportModal({ onClose }: { onClose: () => void }) {
   const { t } = useTranslation();
+  const navigate = useNavigate();
   const [period, setPeriod] = useState<ReportPeriod>("WEEK");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -164,14 +167,28 @@ export default function ExecutiveReportModal({ onClose }: { onClose: () => void 
                   {t("ai.report.aiInsights")}
                 </h4>
                 <ul className="space-y-1.5">
-                  {report.aiInsights.map((rec) => (
-                    <li key={rec.id} className="flex items-center gap-2 text-xs">
-                      <span className={`text-[9px] font-extrabold uppercase tracking-wide px-1.5 py-0.5 rounded shrink-0 ${KIND_BADGE[rec.kind]}`}>
-                        {t(`ai.kind.${rec.kind}`)}
-                      </span>
-                      <span className="font-semibold text-mine-200 truncate">{rec.title}</span>
-                    </li>
-                  ))}
+                  {report.aiInsights.map((rec) => {
+                    const route = routeForTopic(rec.topic);
+                    return (
+                      <li key={rec.id} className="flex items-center gap-2 text-xs">
+                        <span className={`text-[9px] font-extrabold uppercase tracking-wide px-1.5 py-0.5 rounded shrink-0 ${KIND_BADGE[rec.kind]}`}>
+                          {t(`ai.kind.${rec.kind}`)}
+                        </span>
+                        <span className="font-semibold text-mine-200 truncate flex-1">{rec.title}</span>
+                        {route && (
+                          <button
+                            className="text-[10px] font-bold text-hazard-600 hover:text-hazard-500 shrink-0"
+                            onClick={() => {
+                              onClose();
+                              navigate(route);
+                            }}
+                          >
+                            {t("ai.takeAction")}
+                          </button>
+                        )}
+                      </li>
+                    );
+                  })}
                 </ul>
               </div>
             )}

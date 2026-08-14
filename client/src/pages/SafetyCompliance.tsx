@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { useSearchParams } from "react-router-dom";
 import { api } from "../api/client";
 import { Site, Worker, Zone } from "../api/types";
 import HazardManagementTab from "./compliance/HazardManagementTab";
@@ -35,10 +36,29 @@ type TabKey =
   | "tailings"
   | "closure"
   | "legal";
+const TAB_KEYS: TabKey[] = [
+  "hazards",
+  "cop",
+  "risk",
+  "notices",
+  "requirements",
+  "audit",
+  "medical",
+  "inspections",
+  "explosives",
+  "appointments",
+  "iodClaims",
+  "blastLogs",
+  "tailings",
+  "closure",
+  "legal",
+];
 
 export default function SafetyCompliance() {
   const { t } = useTranslation();
-  const [tab, setTab] = useState<TabKey>("hazards");
+  const [searchParams] = useSearchParams();
+  const initialTab = TAB_KEYS.includes(searchParams.get("tab") as TabKey) ? (searchParams.get("tab") as TabKey) : "hazards";
+  const [tab, setTab] = useState<TabKey>(initialTab);
   const [sites, setSites] = useState<Site[]>([]);
   const [zones, setZones] = useState<Zone[]>([]);
   const [workers, setWorkers] = useState<Worker[]>([]);

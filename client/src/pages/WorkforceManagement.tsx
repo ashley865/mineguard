@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { useSearchParams } from "react-router-dom";
 import { api } from "../api/client";
 import { Worker } from "../api/types";
 import WorkerSafetyTab from "./workforce/WorkerSafetyTab";
@@ -13,10 +14,13 @@ import SkillsDevelopmentTab from "./workforce/SkillsDevelopmentTab";
 import { buttonPrimary, buttonSecondary } from "../components/ui";
 
 type TabKey = "safety" | "certificates" | "training" | "compliance" | "roster" | "lms" | "employmentEquity" | "skillsDevelopment";
+const TAB_KEYS: TabKey[] = ["safety", "certificates", "training", "compliance", "roster", "lms", "employmentEquity", "skillsDevelopment"];
 
 export default function WorkforceManagement() {
   const { t } = useTranslation();
-  const [tab, setTab] = useState<TabKey>("safety");
+  const [searchParams] = useSearchParams();
+  const initialTab = TAB_KEYS.includes(searchParams.get("tab") as TabKey) ? (searchParams.get("tab") as TabKey) : "safety";
+  const [tab, setTab] = useState<TabKey>(initialTab);
   const [workers, setWorkers] = useState<Worker[]>([]);
   const [loading, setLoading] = useState(true);
 

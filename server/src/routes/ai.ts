@@ -909,6 +909,55 @@ async function resolveAiModule(req: any, res: any): Promise<{ title: ExecutiveTi
 // ACTION TRACKER is deliberately NOT something the AI does — it's the human review loop
 // below (PUT /recommendations/:id), which is the only thing that can ever change a row's
 // status. The AI can propose; only a person can close something out.
+// Every value must have a real client-side route mapping (see client/src/lib/aiTopicRoutes.ts)
+// — this is what lets a "Take Action" button land the executive exactly where the underlying
+// record lives (e.g. a certificate-expiry risk -> Workforce > Certificates) instead of just
+// changing a status. GENERAL is the only topic with no target page.
+const TOPIC_VOCABULARY = [
+  "WORKFORCE_CERTIFICATES",
+  "WORKFORCE_TRAINING",
+  "WORKFORCE_LEAVE",
+  "LABOUR_RELATIONS",
+  "HAZARD_REPORTS",
+  "AUDIT_FINDINGS",
+  "LEGAL_COMPLIANCE",
+  "RISK_ASSESSMENTS",
+  "SAFETY_INSPECTIONS",
+  "MEDICAL_SURVEILLANCE",
+  "STATUTORY_APPOINTMENTS",
+  "IOD_CLAIMS",
+  "TAILINGS",
+  "CLOSURE_REHABILITATION",
+  "EXPLOSIVES",
+  "REGULATORY_NOTICES",
+  "PERMITS",
+  "PERMITS_TO_WORK",
+  "CONTRACTORS",
+  "SECURITY_INCIDENTS",
+  "CCTV",
+  "PATROLS",
+  "VISITORS",
+  "EXPENSES",
+  "PAYEES",
+  "INVOICES",
+  "PURCHASE_ORDERS",
+  "SUPPLIERS",
+  "PAYROLL",
+  "MAINTENANCE",
+  "EQUIPMENT",
+  "PRODUCTION",
+  "SENSORS",
+  "ENVIRONMENT",
+  "EMERGENCY_PREPAREDNESS",
+  "GROUND_CONTROL",
+  "VENTILATION",
+  "MINE_RESCUE",
+  "USER_ACCOUNTS",
+  "GENERAL",
+] as const;
+type Topic = (typeof TOPIC_VOCABULARY)[number];
+const VALID_TOPICS = new Set<string>(TOPIC_VOCABULARY);
+
 const PIPELINE_INSTRUCTIONS =
   `Run the following pipeline over the data snapshot below:\n` +
   `1. ANALYST — identify meaningful patterns or trends in the data, positive as well as negative.\n` +
@@ -919,10 +968,15 @@ const PIPELINE_INSTRUCTIONS =
   `- ACHIEVEMENT: genuine positive results or improvements visible in the data (e.g. a metric improved, a target was met, zero incidents in the period, a backlog cleared).\n` +
   `- ANNOUNCEMENT: neutral, noteworthy updates that aren't risks or wins but are still worth knowing (e.g. a new hire, an appointment filled, a completed milestone, a status change).\n` +
   `Do not manufacture achievements or announcements that aren't supported by the data — an empty or risk-only items list is correct if that's genuinely all the data shows. But if the data does contain positive or neutral developments, you must include them; do not report only emergencies or problems.\n\n` +
+  `EVERY item must also be tagged with a "topic" — exactly one value from this fixed list, chosen for whichever ` +
+  `specific in-app record/section the item is actually about (this powers a "Take Action" button that navigates ` +
+  `the user straight to it, so pick the most specific matching topic, not a vague one; use GENERAL only if truly ` +
+  `nothing else fits):\n${TOPIC_VOCABULARY.join(", ")}\n\n` +
   `Reply with ONLY a single JSON object, no markdown, no code fences, matching exactly this shape:\n` +
   `{"summary": "3-5 sentence plain-language overview covering the most important developments of any kind, most urgent first", ` +
   `"items": [{"kind": "RISK" | "PREDICTION" | "RECOMMENDATION" | "ACHIEVEMENT" | "ANNOUNCEMENT", "title": "short headline under 12 words", ` +
-  `"detail": "1-2 sentence explanation grounded in the data snapshot", "severity": "LOW" | "MEDIUM" | "HIGH" | "CRITICAL"}]}\n` +
+  `"detail": "1-2 sentence explanation grounded in the data snapshot", "severity": "LOW" | "MEDIUM" | "HIGH" | "CRITICAL", ` +
+  `"topic": "one of the topic values above"}]}\n` +
   `Include at most 10 items total, covering a mix of kinds where the data supports it, ordered by severity descending within each kind. ` +
   `If nothing is notable at all, return an empty items array and say so in the summary.`;
 
@@ -931,6 +985,7 @@ interface PipelineItem {
   title: string;
   detail: string;
   severity: "LOW" | "MEDIUM" | "HIGH" | "CRITICAL";
+  topic: Topic;
 }
 interface PipelineResult {
   summary: string;
@@ -959,6 +1014,7 @@ function parsePipelineResult(raw: string): PipelineResult {
       title: String(it.title).slice(0, 200),
       detail: String(it.detail).slice(0, 2000),
       severity: VALID_SEVERITIES.has(it.severity) ? it.severity : "MEDIUM",
+      topic: VALID_TOPICS.has(it.topic) ? (it.topic as Topic) : "GENERAL",
     }));
   return { summary: parsed.summary, items };
 }
@@ -974,7 +1030,7 @@ async function persistNewRecommendations(mineId: string, executiveTitle: Executi
     });
     if (existing) continue;
     await prisma.aiRecommendation.create({
-      data: { mineId, executiveTitle, kind: item.kind, severity: item.severity, title: item.title, detail: item.detail },
+      data: { mineId, executiveTitle, kind: item.kind, severity: item.severity, title: item.title, detail: item.detail, topic: item.topic },
     });
   }
 }
@@ -1242,7 +1298,7 @@ async function buildExecutiveReportData(mineId: string, period: "WEEK" | "MONTH"
       where: { mineId, status: { in: ["OPEN", "ACKNOWLEDGED"] } },
       orderBy: [{ severity: "desc" }, { generatedAt: "desc" }],
       take: 20,
-      select: { id: true, executiveTitle: true, kind: true, severity: true, title: true, detail: true, status: true, generatedAt: true },
+      select: { id: true, executiveTitle: true, kind: true, severity: true, title: true, detail: true, topic: true, status: true, generatedAt: true },
     }),
   ]);
 
