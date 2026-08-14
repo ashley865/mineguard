@@ -102,6 +102,13 @@ const statusColors: Record<string, string> = {
   DRILLING: "bg-hazard-500 text-white",
   ABANDONED: "bg-mine-600 text-mine-100",
   DELAYED: "bg-hazard-500 text-white",
+  AVAILABLE: "bg-success-600 text-white",
+  ISSUED: "bg-hazard-500 text-white",
+  LOST: "bg-danger-600 text-white",
+  SUBSTANTIATED: "bg-danger-500 text-white",
+  UNSUBSTANTIATED: "bg-success-600 text-white",
+  INCONCLUSIVE: "bg-hazard-500 text-white",
+  REFERRED_EXTERNAL: "bg-hazard-600/80 text-white",
 };
 
 export function StatusBadge({

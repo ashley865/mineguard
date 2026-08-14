@@ -33,6 +33,10 @@ export const AUDITED_MODELS = new Set([
   "AiRecommendation",
   "JobRequisition",
   "Candidate",
+  "GatePass",
+  "SecurityBlacklistEntry",
+  "SecurityInvestigation",
+  "SecurityKey",
 ]);
 
 const AUDITED_OPERATIONS = new Set(["create", "update", "delete", "upsert"]);

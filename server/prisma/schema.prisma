@@ -295,6 +295,16 @@ model User {
   requisitionsApproved JobRequisition[] @relation("RequisitionApprovedBy")
   candidatesCreated Candidate[] @relation("CandidateCreatedBy")
   onboardingChecklistsCreated OnboardingChecklist[] @relation("OnboardingChecklistCreatedBy")
+
+  gatePassesIssued          GatePass[]                @relation("GatePassIssuedBy")
+  gateLogsLogged            GateLog[]                 @relation("GateLogLoggedBy")
+  blacklistEntriesAdded     SecurityBlacklistEntry[]  @relation("BlacklistAddedBy")
+  investigationsLed         SecurityInvestigation[]   @relation("InvestigationLead")
+  investigationsCreated     SecurityInvestigation[]   @relation("InvestigationCreatedBy")
+  investigationEvidenceAdded InvestigationEvidence[]  @relation("EvidenceAddedBy")
+  investigationStatementsRecorded InvestigationStatement[] @relation("StatementRecordedBy")
+  securityKeysCreated       SecurityKey[]             @relation("SecurityKeyCreatedBy")
+  keyIssueLogsLogged        KeyIssueLog[]             @relation("KeyIssueLogLoggedBy")
 }
 
 model UserAttendance {
@@ -395,6 +405,12 @@ model Site {
   shaftInspections      ShaftInspection[]
   patrolLogEntries      PatrolLogEntry[]
   jobRequisitions       JobRequisition[]
+
+  gatePasses             GatePass[]
+  gateLogs               GateLog[]
+  securityBlacklistEntries SecurityBlacklistEntry[]
+  securityInvestigations  SecurityInvestigation[]
+  securityKeys            SecurityKey[]
 }
 
 model Zone {
@@ -575,6 +591,9 @@ model Worker {
   patrolLogEntries             PatrolLogEntry[]
   hiredFromCandidate           Candidate?
   onboardingChecklist          OnboardingChecklist?
+
+  keysCurrentlyHeld  SecurityKey[]  @relation("SecurityKeyCurrentHolder")
+  keyIssueLogs       KeyIssueLog[]  @relation("KeyIssueLogWorker")
 
   createdAt DateTime @default(now())
 }
@@ -779,6 +798,8 @@ model SecurityIncident {
   status       IncidentStatus           @default(OPEN)
   actionsTaken String?
   resolvedAt   DateTime?
+
+  investigation SecurityInvestigation?
 
   createdAt DateTime @default(now())
 }
@@ -4173,6 +4194,219 @@ model OnboardingChecklist {
   completedAt             DateTime?
   createdById             String?
   createdBy               User?     @relation("OnboardingChecklistCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+
+  createdAt DateTime @default(now())
+}
+
+// ---------------------------------------------------------------------------
+// Security Officer modules: Access Control & Gate Passes, Security
+// Investigations, Key & Lock Management — real functional modules (not AI),
+// complementing the existing CCTV/Incident/Patrol tabs on the Security Hub.
+// ---------------------------------------------------------------------------
+
+enum GatePassType {
+  VISITOR
+  CONTRACTOR
+  EMPLOYEE_VEHICLE
+  DELIVERY_VEHICLE
+  EQUIPMENT_REMOVAL
+  OTHER
+}
+
+enum GatePassStatus {
+  ACTIVE
+  EXPIRED
+  REVOKED
+}
+
+// A standing permit for recurring access (a contractor's vehicle for the duration of a
+// job, a badge for a regular visitor) — distinct from GateLog, which is the actual
+// entry/exit event record. Not every GateLog entry needs a pass (e.g. a one-off visitor).
+model GatePass {
+  id            String         @id @default(cuid())
+  siteId        String
+  site          Site           @relation(fields: [siteId], references: [id], onDelete: Cascade)
+  type          GatePassType   @default(VISITOR)
+  holderName    String
+  company       String?
+  idNumber      String?
+  vehicleReg    String?
+  purpose       String?
+  validFrom     DateTime       @default(now())
+  validTo       DateTime?
+  status        GatePassStatus @default(ACTIVE)
+  revokedReason String?
+  issuedById    String?
+  issuedBy      User?          @relation("GatePassIssuedBy", fields: [issuedById], references: [id], onDelete: SetNull)
+  logs          GateLog[]
+
+  createdAt DateTime @default(now())
+}
+
+enum GateLogDirection {
+  IN
+  OUT
+}
+
+// The actual gate register: every entry/exit event, optionally tied to a standing
+// GatePass. Checked against SecurityBlacklistEntry at creation time so a guard is warned
+// immediately rather than the match only surfacing later during a review.
+model GateLog {
+  id           String            @id @default(cuid())
+  siteId       String
+  site         Site              @relation(fields: [siteId], references: [id], onDelete: Cascade)
+  gatePassId   String?
+  gatePass     GatePass?         @relation(fields: [gatePassId], references: [id], onDelete: SetNull)
+  direction    GateLogDirection
+  personName   String
+  company      String?
+  vehicleReg   String?
+  itemsCarried String?
+  gateName     String?
+  loggedAt     DateTime          @default(now())
+  loggedById   String?
+  loggedBy     User?             @relation("GateLogLoggedBy", fields: [loggedById], references: [id], onDelete: SetNull)
+
+  createdAt DateTime @default(now())
+}
+
+// A person/vehicle barred from site access. Mine-wide (siteId null) or site-specific.
+model SecurityBlacklistEntry {
+  id         String   @id @default(cuid())
+  siteId     String?
+  site       Site?    @relation(fields: [siteId], references: [id], onDelete: Cascade)
+  name       String
+  idNumber   String?
+  vehicleReg String?
+  reason     String
+  isActive   Boolean  @default(true)
+  addedById  String?
+  addedBy    User?    @relation("BlacklistAddedBy", fields: [addedById], references: [id], onDelete: SetNull)
+
+  createdAt DateTime @default(now())
+}
+
+enum InvestigationStatus {
+  OPEN
+  IN_PROGRESS
+  CLOSED
+}
+
+enum InvestigationOutcome {
+  SUBSTANTIATED
+  UNSUBSTANTIATED
+  INCONCLUSIVE
+  REFERRED_EXTERNAL
+}
+
+// A formal case file for a serious security matter (theft, sabotage, fraud) — evidence
+// log and witness statements, distinct from the quick SecurityIncident log which just
+// captures the initial report. Optionally linked back to the SecurityIncident it grew
+// out of, but can also be opened standalone (e.g. a proactive pattern investigation).
+model SecurityInvestigation {
+  id                 String                   @id @default(cuid())
+  siteId             String
+  site               Site                     @relation(fields: [siteId], references: [id], onDelete: Cascade)
+  securityIncidentId String?                  @unique
+  securityIncident   SecurityIncident?        @relation(fields: [securityIncidentId], references: [id], onDelete: SetNull)
+  title              String
+  summary            String
+  severity           AlertSeverity?
+  status             InvestigationStatus      @default(OPEN)
+  outcome            InvestigationOutcome?
+  findings           String?
+  leadInvestigatorId String?
+  leadInvestigator   User?                    @relation("InvestigationLead", fields: [leadInvestigatorId], references: [id], onDelete: SetNull)
+  openedAt           DateTime                 @default(now())
+  closedAt           DateTime?
+  createdById        String?
+  createdBy          User?                    @relation("InvestigationCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+  evidenceItems       InvestigationEvidence[]
+  statements          InvestigationStatement[]
+
+  createdAt DateTime @default(now())
+}
+
+// Evidence is stored the same way as every other uploaded document in this app (Bytes
+// in Postgres via multer) — no external file storage dependency.
+model InvestigationEvidence {
+  id              String                @id @default(cuid())
+  investigationId String
+  investigation   SecurityInvestigation @relation(fields: [investigationId], references: [id], onDelete: Cascade)
+  description     String
+  fileName        String?
+  fileMimeType    String?
+  fileSize        Int?
+  fileData        Bytes?
+  collectedAt     DateTime              @default(now())
+  addedById       String?
+  addedBy         User?                 @relation("EvidenceAddedBy", fields: [addedById], references: [id], onDelete: SetNull)
+
+  createdAt DateTime @default(now())
+}
+
+model InvestigationStatement {
+  id              String                @id @default(cuid())
+  investigationId String
+  investigation   SecurityInvestigation @relation(fields: [investigationId], references: [id], onDelete: Cascade)
+  witnessName     String
+  role            String?
+  statement       String
+  statementDate   DateTime              @default(now())
+  recordedById    String?
+  recordedBy      User?                 @relation("StatementRecordedBy", fields: [recordedById], references: [id], onDelete: SetNull)
+
+  createdAt DateTime @default(now())
+}
+
+enum SecurityKeyStatus {
+  AVAILABLE
+  ISSUED
+  LOST
+  RETIRED
+}
+
+// Register of keys/locks/safes. currentHolder (worker or ad-hoc name for a contractor
+// not in the system) is denormalised onto the key itself for a simple "who has this
+// right now" view, alongside the full history in KeyIssueLog.
+model SecurityKey {
+  id                String            @id @default(cuid())
+  siteId            String
+  site              Site              @relation(fields: [siteId], references: [id], onDelete: Cascade)
+  keyCode           String
+  description       String
+  location          String?
+  status            SecurityKeyStatus @default(AVAILABLE)
+  currentHolderName String?
+  currentWorkerId   String?
+  currentWorker     Worker?           @relation("SecurityKeyCurrentHolder", fields: [currentWorkerId], references: [id], onDelete: SetNull)
+  createdById       String?
+  createdBy         User?             @relation("SecurityKeyCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+  issueLogs         KeyIssueLog[]
+
+  createdAt DateTime @default(now())
+
+  @@unique([siteId, keyCode])
+}
+
+enum KeyIssueEventType {
+  ISSUED
+  RETURNED
+  REPORTED_LOST
+}
+
+model KeyIssueLog {
+  id           String            @id @default(cuid())
+  keyId        String
+  key          SecurityKey       @relation(fields: [keyId], references: [id], onDelete: Cascade)
+  eventType    KeyIssueEventType
+  holderName   String?
+  workerId     String?
+  worker       Worker?           @relation("KeyIssueLogWorker", fields: [workerId], references: [id], onDelete: SetNull)
+  notes        String?
+  eventAt      DateTime          @default(now())
+  loggedById   String?
+  loggedBy     User?             @relation("KeyIssueLogLoggedBy", fields: [loggedById], references: [id], onDelete: SetNull)
 
   createdAt DateTime @default(now())
 }

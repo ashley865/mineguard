@@ -3144,3 +3144,124 @@ export interface OnboardingChecklist {
   completedAt?: string | null;
   createdAt: string;
 }
+
+export type GatePassType = "VISITOR" | "CONTRACTOR" | "EMPLOYEE_VEHICLE" | "DELIVERY_VEHICLE" | "EQUIPMENT_REMOVAL" | "OTHER";
+export type GatePassStatus = "ACTIVE" | "EXPIRED" | "REVOKED";
+export interface GatePass {
+  id: string;
+  siteId: string;
+  site?: { id: string; name: string };
+  type: GatePassType;
+  holderName: string;
+  company?: string | null;
+  idNumber?: string | null;
+  vehicleReg?: string | null;
+  purpose?: string | null;
+  validFrom: string;
+  validTo?: string | null;
+  status: GatePassStatus;
+  revokedReason?: string | null;
+  issuedBy?: { id: string; name: string } | null;
+  createdAt: string;
+}
+
+export interface SecurityBlacklistEntry {
+  id: string;
+  siteId?: string | null;
+  site?: { id: string; name: string } | null;
+  name: string;
+  idNumber?: string | null;
+  vehicleReg?: string | null;
+  reason: string;
+  isActive: boolean;
+  addedBy?: { id: string; name: string } | null;
+  createdAt: string;
+}
+
+export type GateLogDirection = "IN" | "OUT";
+export interface GateLog {
+  id: string;
+  siteId: string;
+  site?: { id: string; name: string };
+  gatePassId?: string | null;
+  gatePass?: { id: string; holderName: string; type: GatePassType } | null;
+  direction: GateLogDirection;
+  personName: string;
+  company?: string | null;
+  vehicleReg?: string | null;
+  itemsCarried?: string | null;
+  gateName?: string | null;
+  loggedAt: string;
+  loggedBy?: { id: string; name: string } | null;
+  blacklistWarning?: { id: string; name: string; reason: string } | null;
+}
+
+export type InvestigationStatus = "OPEN" | "IN_PROGRESS" | "CLOSED";
+export type InvestigationOutcome = "SUBSTANTIATED" | "UNSUBSTANTIATED" | "INCONCLUSIVE" | "REFERRED_EXTERNAL";
+export interface SecurityInvestigation {
+  id: string;
+  siteId: string;
+  site?: { id: string; name: string };
+  securityIncidentId?: string | null;
+  securityIncident?: { id: string; category: string; description: string; occurredAt: string } | null;
+  title: string;
+  summary: string;
+  severity?: AlertSeverity | null;
+  status: InvestigationStatus;
+  outcome?: InvestigationOutcome | null;
+  findings?: string | null;
+  leadInvestigator?: { id: string; name: string } | null;
+  openedAt: string;
+  closedAt?: string | null;
+  createdBy?: { id: string; name: string } | null;
+  _count?: { evidenceItems: number; statements: number };
+  createdAt: string;
+}
+
+export interface InvestigationEvidence {
+  id: string;
+  description: string;
+  fileName?: string | null;
+  fileMimeType?: string | null;
+  fileSize?: number | null;
+  collectedAt: string;
+  addedBy?: { id: string; name: string } | null;
+  createdAt: string;
+}
+
+export interface InvestigationStatement {
+  id: string;
+  witnessName: string;
+  role?: string | null;
+  statement: string;
+  statementDate: string;
+  recordedBy?: { id: string; name: string } | null;
+  createdAt: string;
+}
+
+export type SecurityKeyStatus = "AVAILABLE" | "ISSUED" | "LOST" | "RETIRED";
+export interface SecurityKey {
+  id: string;
+  siteId: string;
+  site?: { id: string; name: string };
+  keyCode: string;
+  description: string;
+  location?: string | null;
+  status: SecurityKeyStatus;
+  currentHolderName?: string | null;
+  currentWorker?: { id: string; name: string; employeeId: string } | null;
+  createdBy?: { id: string; name: string } | null;
+  createdAt: string;
+}
+
+export type KeyIssueEventType = "ISSUED" | "RETURNED" | "REPORTED_LOST";
+export interface KeyIssueLog {
+  id: string;
+  keyId: string;
+  eventType: KeyIssueEventType;
+  holderName?: string | null;
+  worker?: { id: string; name: string; employeeId: string } | null;
+  notes?: string | null;
+  eventAt: string;
+  loggedBy?: { id: string; name: string } | null;
+}

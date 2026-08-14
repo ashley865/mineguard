@@ -6,10 +6,13 @@ import { Site, Zone } from "../api/types";
 import CctvTab from "./security/CctvTab";
 import IncidentManagementTab from "./security/IncidentManagementTab";
 import PatrolManagementTab from "./security/PatrolManagementTab";
+import AccessControlTab from "./security/AccessControlTab";
+import InvestigationsTab from "./security/InvestigationsTab";
+import KeyManagementTab from "./security/KeyManagementTab";
 import { buttonPrimary, buttonSecondary } from "../components/ui";
 
-type TabKey = "cctv" | "incidents" | "patrol";
-const TAB_KEYS: TabKey[] = ["cctv", "incidents", "patrol"];
+type TabKey = "cctv" | "incidents" | "patrol" | "accessControl" | "investigations" | "keyManagement";
+const TAB_KEYS: TabKey[] = ["cctv", "incidents", "patrol", "accessControl", "investigations", "keyManagement"];
 
 export default function SecurityHub() {
   const { t } = useTranslation();
@@ -34,6 +37,9 @@ export default function SecurityHub() {
     { key: "cctv", label: t("security.tabCctv") },
     { key: "incidents", label: t("security.tabIncidents") },
     { key: "patrol", label: t("security.tabPatrol") },
+    { key: "accessControl", label: t("accessControl.nav") },
+    { key: "investigations", label: t("investigations.nav") },
+    { key: "keyManagement", label: t("keyManagement.nav") },
   ];
 
   if (loading) return <div className="text-mine-300">{t("common.loading")}</div>;
@@ -60,6 +66,9 @@ export default function SecurityHub() {
       {tab === "cctv" && <CctvTab sites={sites} zones={zones} />}
       {tab === "incidents" && <IncidentManagementTab sites={sites} zones={zones} />}
       {tab === "patrol" && <PatrolManagementTab sites={sites} />}
+      {tab === "accessControl" && <AccessControlTab sites={sites} />}
+      {tab === "investigations" && <InvestigationsTab sites={sites} />}
+      {tab === "keyManagement" && <KeyManagementTab sites={sites} />}
     </div>
   );
 }
