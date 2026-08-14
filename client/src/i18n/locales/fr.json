@@ -3365,6 +3365,7 @@
     "send": "Envoyer",
     "clear": "Effacer",
     "thinking": "Réflexion en cours...",
-    "sendError": "Impossible de contacter l'assistant IA. Veuillez réessayer."
+    "sendError": "Impossible de contacter l'assistant IA. Veuillez réessayer.",
+    "you": "Vous"
   }
 }

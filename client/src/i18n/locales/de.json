@@ -3365,6 +3365,7 @@
     "send": "Senden",
     "clear": "Löschen",
     "thinking": "Denkt nach...",
-    "sendError": "Der KI-Assistent konnte nicht erreicht werden. Bitte erneut versuchen."
+    "sendError": "Der KI-Assistent konnte nicht erreicht werden. Bitte erneut versuchen.",
+    "you": "Du"
   }
 }

@@ -3365,6 +3365,7 @@
     "send": "Enviar",
     "clear": "Borrar",
     "thinking": "Pensando...",
-    "sendError": "No se pudo contactar al asistente de IA. Inténtalo de nuevo."
+    "sendError": "No se pudo contactar al asistente de IA. Inténtalo de nuevo.",
+    "you": "Tú"
   }
 }

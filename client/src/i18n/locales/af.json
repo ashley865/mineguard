@@ -3365,6 +3365,7 @@
     "send": "Stuur",
     "clear": "Maak skoon",
     "thinking": "Dink tans...",
-    "sendError": "Kon nie die KI-assistent bereik nie. Probeer asseblief weer."
+    "sendError": "Kon nie die KI-assistent bereik nie. Probeer asseblief weer.",
+    "you": "Jy"
   }
 }

@@ -3364,6 +3364,7 @@
     "send": "Send",
     "clear": "Clear",
     "thinking": "Thinking...",
-    "sendError": "Could not reach the AI assistant. Please try again."
+    "sendError": "Could not reach the AI assistant. Please try again.",
+    "you": "You"
   }
 }
