@@ -3365,6 +3365,25 @@
     "clear": "Clear",
     "thinking": "Thinking...",
     "sendError": "Could not reach the AI assistant. Please try again.",
-    "you": "You"
+    "you": "You",
+    "recommendationsTitle": "Tracked Recommendations ({{count}} open)",
+    "hideResolved": "Hide resolved",
+    "showResolved": "Show {{count}} resolved",
+    "noOpenRecommendations": "Nothing open right now.",
+    "kind": {
+      "RISK": "Risk",
+      "PREDICTION": "Prediction",
+      "RECOMMENDATION": "Action"
+    },
+    "status": {
+      "OPEN": "Open",
+      "ACKNOWLEDGED": "Acknowledged",
+      "ACTIONED": "Actioned",
+      "DISMISSED": "Dismissed"
+    },
+    "acknowledge": "Acknowledge",
+    "markActioned": "Mark actioned",
+    "dismiss": "Dismiss",
+    "dismissReasonPrompt": "Optional note on why this is being dismissed"
   }
 }

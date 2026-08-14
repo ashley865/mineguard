@@ -372,11 +372,21 @@ async function buildComplianceOfficerContext(mineId: string) {
   };
 }
 
+// Guardrail applied to every title's prompt, both chat and the pipeline summary below —
+// the AI is structurally advisory-only (see AiRecommendation in schema.prisma: it can
+// create rows, but only a human review endpoint can ever change their status).
+const GUARDRAIL =
+  ` You are strictly advisory. You never state or imply that you have made, finalized, executed, approved, or ` +
+  `authorized any decision — especially anything safety-critical, legal, disciplinary, employment-related, ` +
+  `financial-authorisation, or security-related. Every risk, prediction, or recommendation you produce is for a ` +
+  `human to review, acknowledge, act on, or dismiss — you never take or claim to take the action yourself.`;
+
 const BASE_SYSTEM_PROMPT = (mineName: string, roleTitle: string) =>
   `You are the Mine Guard AI Assistant, advising the ${roleTitle} of ${mineName}, a South African mining operation. ` +
   `Base every answer strictly on the JSON data snapshot provided in this conversation — never invent figures or names. ` +
   `If the data doesn't cover something asked, say so plainly. Keep answers concise and written for a busy executive: ` +
-  `short paragraphs or bullet points, leading with the most urgent or actionable item.`;
+  `short paragraphs or bullet points, leading with the most urgent or actionable item.` +
+  GUARDRAIL;
 
 const AI_MODULES: Record<string, AiModule> = {
   GENERAL_MANAGER: {
@@ -430,6 +440,77 @@ async function resolveAiModule(req: any, res: any): Promise<{ title: ExecutiveTi
   return { title, module: AI_MODULES[title] };
 }
 
+// The Mining Intelligence Engine pipeline: OBSERVER (context builder above) -> ANALYST ->
+// RISK DETECTOR -> PREDICTOR -> ADVISOR all happen inside one model call, constrained to
+// return structured JSON so each flagged item can become a tracked AiRecommendation row.
+// ACTION TRACKER is deliberately NOT something the AI does — it's the human review loop
+// below (PUT /recommendations/:id), which is the only thing that can ever change a row's
+// status. The AI can propose; only a person can close something out.
+const PIPELINE_INSTRUCTIONS =
+  `Run the following pipeline over the data snapshot below:\n` +
+  `1. ANALYST — identify meaningful patterns or trends in the data.\n` +
+  `2. RISK DETECTOR — flag concrete risks, each with a severity (LOW/MEDIUM/HIGH/CRITICAL).\n` +
+  `3. PREDICTOR — for each risk, project the likely near-term trajectory (days/weeks) if left unaddressed, grounded only in the given data.\n` +
+  `4. ADVISOR — recommend specific, concrete actions a human should consider.\n\n` +
+  `Reply with ONLY a single JSON object, no markdown, no code fences, matching exactly this shape:\n` +
+  `{"summary": "3-5 sentence plain-language overview, most urgent first", ` +
+  `"items": [{"kind": "RISK" | "PREDICTION" | "RECOMMENDATION", "title": "short headline under 12 words", ` +
+  `"detail": "1-2 sentence explanation grounded in the data snapshot", "severity": "LOW" | "MEDIUM" | "HIGH" | "CRITICAL"}]}\n` +
+  `Include at most 8 items, ordered by severity descending. If nothing is notable, return an empty items array and say so in the summary.`;
+
+interface PipelineItem {
+  kind: "RISK" | "PREDICTION" | "RECOMMENDATION";
+  title: string;
+  detail: string;
+  severity: "LOW" | "MEDIUM" | "HIGH" | "CRITICAL";
+}
+interface PipelineResult {
+  summary: string;
+  items: PipelineItem[];
+}
+
+const VALID_KINDS = new Set(["RISK", "PREDICTION", "RECOMMENDATION"]);
+const VALID_SEVERITIES = new Set(["LOW", "MEDIUM", "HIGH", "CRITICAL"]);
+
+// The model is instructed to return bare JSON, but LLMs sometimes wrap it in a markdown
+// fence anyway — stripped defensively rather than failing the whole pipeline over it.
+function parsePipelineResult(raw: string): PipelineResult {
+  const cleaned = raw
+    .trim()
+    .replace(/^```(?:json)?\s*/i, "")
+    .replace(/```\s*$/, "");
+  const parsed = JSON.parse(cleaned);
+  if (typeof parsed.summary !== "string" || !Array.isArray(parsed.items)) {
+    throw new Error("AI response did not match the expected pipeline schema");
+  }
+  const items: PipelineItem[] = parsed.items
+    .filter((it: any) => it && typeof it.title === "string" && typeof it.detail === "string")
+    .slice(0, 8)
+    .map((it: any) => ({
+      kind: VALID_KINDS.has(it.kind) ? it.kind : "RECOMMENDATION",
+      title: String(it.title).slice(0, 200),
+      detail: String(it.detail).slice(0, 2000),
+      severity: VALID_SEVERITIES.has(it.severity) ? it.severity : "MEDIUM",
+    }));
+  return { summary: parsed.summary, items };
+}
+
+// Skips items that already have an open (OPEN/ACKNOWLEDGED) recommendation with the same
+// title for this mine/title, so re-running the pipeline on every dashboard load doesn't
+// spam duplicate rows for a risk that's already been surfaced and is awaiting review.
+async function persistNewRecommendations(mineId: string, executiveTitle: ExecutiveTitle, items: PipelineItem[]) {
+  for (const item of items) {
+    const existing = await prisma.aiRecommendation.findFirst({
+      where: { mineId, executiveTitle, title: item.title, status: { in: ["OPEN", "ACKNOWLEDGED"] } },
+      select: { id: true },
+    });
+    if (existing) continue;
+    await prisma.aiRecommendation.create({
+      data: { mineId, executiveTitle, kind: item.kind, severity: item.severity, title: item.title, detail: item.detail },
+    });
+  }
+}
+
 router.get("/summary", aiLimiter, async (req, res) => {
   const mineId = requireMineId(req, res);
   if (!mineId) return;
@@ -445,15 +526,24 @@ router.get("/summary", aiLimiter, async (req, res) => {
     const messages: AiMessage[] = [
       { role: "system", content: resolved.module.systemPrompt(context) },
       { role: "system", content: `Current data snapshot (JSON): ${JSON.stringify(context)}` },
-      {
-        role: "user",
-        content:
-          "Give me a concise summary of the 3-5 most important things I should know right now, " +
-          "ordered by urgency. Plain text, one short bullet per line, no headings.",
-      },
+      { role: "user", content: PIPELINE_INSTRUCTIONS },
     ];
-    const summary = await aiChatComplete(messages);
-    res.json({ configured: true, summary, generatedAt: new Date().toISOString() });
+    const raw = await aiChatComplete(messages);
+
+    let pipeline: PipelineResult;
+    try {
+      pipeline = parsePipelineResult(raw);
+    } catch {
+      // Model didn't follow the JSON contract this time — fall back to showing its raw
+      // reply as the summary rather than failing the request; nothing gets tracked this round.
+      pipeline = { summary: raw, items: [] };
+    }
+
+    if (pipeline.items.length > 0) {
+      await persistNewRecommendations(mineId, resolved.title, pipeline.items);
+    }
+
+    res.json({ configured: true, summary: pipeline.summary, generatedAt: new Date().toISOString() });
   } catch (err) {
     if (err instanceof AiNotConfiguredError) {
       return res.json({ configured: false, summary: null, generatedAt: null });
@@ -461,6 +551,64 @@ router.get("/summary", aiLimiter, async (req, res) => {
     console.error(err);
     res.status(502).json({ error: "The AI provider could not be reached. Please try again shortly." });
   }
+});
+
+router.get("/recommendations", async (req, res) => {
+  const mineId = requireMineId(req, res);
+  if (!mineId) return;
+  const resolved = await resolveAiModule(req, res);
+  if (!resolved) return;
+
+  const statusParam = req.query.status as string | undefined;
+  const statusFilter =
+    statusParam && ["OPEN", "ACKNOWLEDGED", "ACTIONED", "DISMISSED"].includes(statusParam) ? (statusParam as any) : undefined;
+
+  const recommendations = await prisma.aiRecommendation.findMany({
+    where: { mineId, executiveTitle: resolved.title, status: statusFilter },
+    include: { reviewedBy: { select: { id: true, name: true } } },
+    orderBy: [{ status: "asc" }, { severity: "desc" }, { generatedAt: "desc" }],
+    take: 50,
+  });
+  res.json(recommendations);
+});
+
+const reviewSchema = z.object({
+  status: z.enum(["ACKNOWLEDGED", "ACTIONED", "DISMISSED"]),
+  reviewNote: z.string().max(1000).optional(),
+});
+
+// The only place an AiRecommendation's status can ever change — always a human, identified
+// by their own auth session, never the AI itself. This is what makes "AI recommends, human
+// decides" a structural guarantee rather than just a prompt instruction.
+router.put("/recommendations/:id", async (req, res) => {
+  const mineId = requireMineId(req, res);
+  if (!mineId) return;
+  const resolved = await resolveAiModule(req, res);
+  if (!resolved) return;
+
+  const parsed = reviewSchema.safeParse(req.body);
+  if (!parsed.success) {
+    return res.status(400).json({ error: "Invalid review payload" });
+  }
+
+  const existing = await prisma.aiRecommendation.findFirst({
+    where: { id: req.params.id, mineId, executiveTitle: resolved.title },
+  });
+  if (!existing) {
+    return res.status(404).json({ error: "Recommendation not found" });
+  }
+
+  const updated = await prisma.aiRecommendation.update({
+    where: { id: existing.id },
+    data: {
+      status: parsed.data.status,
+      reviewNote: parsed.data.reviewNote || null,
+      reviewedById: req.auth!.userId,
+      reviewedAt: new Date(),
+    },
+    include: { reviewedBy: { select: { id: true, name: true } } },
+  });
+  res.json(updated);
 });
 
 const chatSchema = z.object({

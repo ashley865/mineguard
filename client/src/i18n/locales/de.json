@@ -3366,6 +3366,25 @@
     "clear": "Löschen",
     "thinking": "Denkt nach...",
     "sendError": "Der KI-Assistent konnte nicht erreicht werden. Bitte erneut versuchen.",
-    "you": "Du"
+    "you": "Du",
+    "recommendationsTitle": "Verfolgte Empfehlungen ({{count}} offen)",
+    "hideResolved": "Erledigte ausblenden",
+    "showResolved": "{{count}} erledigte anzeigen",
+    "noOpenRecommendations": "Derzeit nichts offen.",
+    "kind": {
+      "RISK": "Risiko",
+      "PREDICTION": "Prognose",
+      "RECOMMENDATION": "Maßnahme"
+    },
+    "status": {
+      "OPEN": "Offen",
+      "ACKNOWLEDGED": "Zur Kenntnis genommen",
+      "ACTIONED": "Erledigt",
+      "DISMISSED": "Verworfen"
+    },
+    "acknowledge": "Zur Kenntnis nehmen",
+    "markActioned": "Als erledigt markieren",
+    "dismiss": "Verwerfen",
+    "dismissReasonPrompt": "Optionale Notiz, warum dies verworfen wird"
   }
 }

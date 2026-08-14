@@ -290,6 +290,7 @@ model User {
   sensorsCommissioned Sensor[] @relation("SensorCommissionedBy")
   communityEngagementsFacilitated CommunityEngagement[] @relation("CommunityEngagementFacilitatedBy")
   auditLogsChanged AuditLog[]
+  aiRecommendationsReviewed AiRecommendation[] @relation("AiRecommendationReviewedBy")
 }
 
 model UserAttendance {
@@ -3965,4 +3966,45 @@ model AuditLog {
 
   @@index([entityType, entityId])
   @@index([mineId, createdAt])
+}
+
+// ---------------------------------------------------------------------------
+// Mining Intelligence Engine: AI-generated recommendations, tracked to closure
+// ---------------------------------------------------------------------------
+
+// The AI's Risk Detector / Predictor / Advisor pipeline stages surface one row
+// each per flagged item — never a direct write to any operational model. A row
+// only ever changes status (OPEN -> ACKNOWLEDGED/ACTIONED/DISMISSED) via a human
+// acting through the review endpoint; the AI can create rows but can never
+// change their status itself. This makes "AI recommends, human decides" a
+// structural guarantee rather than just a prompt instruction.
+enum AiRecommendationKind {
+  RISK
+  PREDICTION
+  RECOMMENDATION
+}
+
+enum AiRecommendationStatus {
+  OPEN
+  ACKNOWLEDGED
+  ACTIONED
+  DISMISSED
+}
+
+model AiRecommendation {
+  id             String                  @id @default(cuid())
+  mineId         String
+  executiveTitle ExecutiveTitle
+  kind           AiRecommendationKind
+  severity       AlertSeverity
+  title          String
+  detail         String
+  status         AiRecommendationStatus  @default(OPEN)
+  reviewedById   String?
+  reviewedBy     User?                   @relation("AiRecommendationReviewedBy", fields: [reviewedById], references: [id], onDelete: SetNull)
+  reviewedAt     DateTime?
+  reviewNote     String?
+  generatedAt    DateTime                @default(now())
+
+  @@index([mineId, executiveTitle, status])
 }

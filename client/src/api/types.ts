@@ -718,6 +718,22 @@ export interface AiChatResponse {
   reply: string | null;
 }
 
+export type AiRecommendationKind = "RISK" | "PREDICTION" | "RECOMMENDATION";
+export type AiRecommendationStatus = "OPEN" | "ACKNOWLEDGED" | "ACTIONED" | "DISMISSED";
+export interface AiRecommendation {
+  id: string;
+  executiveTitle: ExecutiveTitle;
+  kind: AiRecommendationKind;
+  severity: AlertSeverity;
+  title: string;
+  detail: string;
+  status: AiRecommendationStatus;
+  reviewedBy?: { id: string; name: string } | null;
+  reviewedAt: string | null;
+  reviewNote: string | null;
+  generatedAt: string;
+}
+
 export type CopCategory =
   | "ROCK_ENGINEERING"
   | "VENTILATION"

@@ -3366,6 +3366,25 @@
     "clear": "Maak skoon",
     "thinking": "Dink tans...",
     "sendError": "Kon nie die KI-assistent bereik nie. Probeer asseblief weer.",
-    "you": "Jy"
+    "you": "Jy",
+    "recommendationsTitle": "Gevolgde Aanbevelings ({{count}} oop)",
+    "hideResolved": "Versteek opgelos",
+    "showResolved": "Wys {{count}} opgelos",
+    "noOpenRecommendations": "Niks tans oop nie.",
+    "kind": {
+      "RISK": "Risiko",
+      "PREDICTION": "Voorspelling",
+      "RECOMMENDATION": "Aksie"
+    },
+    "status": {
+      "OPEN": "Oop",
+      "ACKNOWLEDGED": "Erken",
+      "ACTIONED": "Uitgevoer",
+      "DISMISSED": "Afgewys"
+    },
+    "acknowledge": "Erken",
+    "markActioned": "Merk as uitgevoer",
+    "dismiss": "Wys af",
+    "dismissReasonPrompt": "Opsionele nota oor waarom dit afgewys word"
   }
 }

@@ -1,7 +1,7 @@
 import { FormEvent, useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { api } from "../api/client";
-import { AiChatMessage, AiChatResponse, AiSummaryResponse } from "../api/types";
+import { AiChatMessage, AiChatResponse, AiRecommendation, AiSummaryResponse } from "../api/types";
 import { buttonPrimary, buttonSecondary, inputClass } from "./ui";
 
 const URGENT_KEYWORDS = ["overdue", "critical", "urgent", "immediate", "escalat", "non-compliant", "unauthorized", "unauthorised"];
@@ -16,6 +16,12 @@ function toneOf(line: string): Tone {
   return "neutral";
 }
 
+function toneOfSeverity(severity: AiRecommendation["severity"]): Tone {
+  if (severity === "CRITICAL" || severity === "HIGH") return "urgent";
+  if (severity === "MEDIUM") return "caution";
+  return "neutral";
+}
+
 const TONE_TEXT: Record<Tone, string> = {
   urgent: "text-danger-600",
   caution: "text-hazard-600",
@@ -26,12 +32,20 @@ const TONE_DOT: Record<Tone, string> = {
   caution: "bg-hazard-500",
   neutral: "bg-mine-400",
 };
+const KIND_BADGE: Record<AiRecommendation["kind"], string> = {
+  RISK: "bg-danger-500/15 text-danger-600",
+  PREDICTION: "bg-mine-400/15 text-mine-400",
+  RECOMMENDATION: "bg-hazard-500/15 text-hazard-600",
+};
 
 export default function AiAssistantWidget() {
   const { t } = useTranslation();
   const [configured, setConfigured] = useState<boolean | null>(null);
   const [summary, setSummary] = useState<string | null>(null);
   const [loadingSummary, setLoadingSummary] = useState(true);
+  const [recommendations, setRecommendations] = useState<AiRecommendation[]>([]);
+  const [showResolved, setShowResolved] = useState(false);
+  const [reviewingId, setReviewingId] = useState<string | null>(null);
   const [chatOpen, setChatOpen] = useState(false);
   const [messages, setMessages] = useState<AiChatMessage[]>([]);
   const [draft, setDraft] = useState("");
@@ -39,12 +53,22 @@ export default function AiAssistantWidget() {
   const [error, setError] = useState<string | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
 
+  async function loadRecommendations() {
+    try {
+      const res = await api.get<AiRecommendation[]>("/ai/recommendations");
+      setRecommendations(res.data);
+    } catch {
+      // Non-fatal: the summary card still works without the tracked list.
+    }
+  }
+
   useEffect(() => {
     api
       .get<AiSummaryResponse>("/ai/summary")
       .then((res) => {
         setConfigured(res.data.configured);
         setSummary(res.data.summary);
+        if (res.data.configured) loadRecommendations();
       })
       .catch(() => setConfigured(false))
       .finally(() => setLoadingSummary(false));
@@ -53,6 +77,20 @@ export default function AiAssistantWidget() {
   useEffect(() => {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
   }, [messages, sending]);
+
+  async function reviewRecommendation(id: string, status: "ACKNOWLEDGED" | "ACTIONED" | "DISMISSED") {
+    let reviewNote: string | undefined;
+    if (status === "DISMISSED") {
+      reviewNote = window.prompt(t("ai.dismissReasonPrompt") ?? "") ?? undefined;
+    }
+    setReviewingId(id);
+    try {
+      await api.put(`/ai/recommendations/${id}`, { status, reviewNote });
+      await loadRecommendations();
+    } finally {
+      setReviewingId(null);
+    }
+  }
 
   async function sendMessage(e: FormEvent) {
     e.preventDefault();
@@ -78,6 +116,10 @@ export default function AiAssistantWidget() {
       setSending(false);
     }
   }
+
+  const activeRecommendations = recommendations.filter((r) => r.status === "OPEN" || r.status === "ACKNOWLEDGED");
+  const resolvedRecommendations = recommendations.filter((r) => r.status === "ACTIONED" || r.status === "DISMISSED");
+  const visibleRecommendations = showResolved ? recommendations : activeRecommendations;
 
   return (
     <div className="relative bg-mine-900 border-2 border-hazard-500/40 rounded-xl shadow-lg shadow-hazard-500/10 p-4 bg-gradient-to-br from-hazard-500/5 via-transparent to-transparent">
@@ -107,7 +149,7 @@ export default function AiAssistantWidget() {
       )}
 
       {!loadingSummary && configured && summary && (
-        <ul className="space-y-2 mb-2">
+        <ul className="space-y-2 mb-3">
           {summary
             .split("\n")
             .map((line) => line.replace(/^[-•*]\s*/, "").trim())
@@ -122,6 +164,83 @@ export default function AiAssistantWidget() {
               );
             })}
         </ul>
+      )}
+
+      {!loadingSummary && configured && recommendations.length > 0 && (
+        <div className="border-t-2 border-hazard-500/20 pt-3">
+          <div className="flex items-center justify-between mb-2">
+            <h3 className="text-[11px] font-extrabold uppercase tracking-wide text-mine-300">
+              {t("ai.recommendationsTitle", { count: activeRecommendations.length })}
+            </h3>
+            {resolvedRecommendations.length > 0 && (
+              <button
+                className="text-[10px] font-bold text-mine-400 hover:text-mine-200"
+                onClick={() => setShowResolved((v) => !v)}
+              >
+                {showResolved ? t("ai.hideResolved") : t("ai.showResolved", { count: resolvedRecommendations.length })}
+              </button>
+            )}
+          </div>
+          {visibleRecommendations.length === 0 && (
+            <div className="text-mine-400 text-xs font-medium mb-2">{t("ai.noOpenRecommendations")}</div>
+          )}
+          <ul className="space-y-2">
+            {visibleRecommendations.map((rec) => {
+              const tone = toneOfSeverity(rec.severity);
+              const isResolved = rec.status === "ACTIONED" || rec.status === "DISMISSED";
+              return (
+                <li key={rec.id} className={`rounded-lg border border-mine-800 p-2.5 ${isResolved ? "opacity-60" : "bg-mine-800/30"}`}>
+                  <div className="flex items-start gap-2">
+                    <span className={`w-2 h-2 rounded-full shrink-0 mt-1 ${TONE_DOT[tone]}`} />
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-1.5 flex-wrap mb-0.5">
+                        <span className={`text-[9px] font-extrabold uppercase tracking-wide px-1.5 py-0.5 rounded ${KIND_BADGE[rec.kind]}`}>
+                          {t(`ai.kind.${rec.kind}`)}
+                        </span>
+                        <span className={`font-bold text-xs ${TONE_TEXT[tone]}`}>{rec.title}</span>
+                      </div>
+                      <p className="text-[11px] text-mine-300 font-medium leading-snug">{rec.detail}</p>
+                      {isResolved && (
+                        <p className="text-[10px] text-mine-400 mt-1 font-semibold">
+                          {t(`ai.status.${rec.status}`)}
+                          {rec.reviewedBy?.name ? ` — ${rec.reviewedBy.name}` : ""}
+                          {rec.reviewNote ? `: "${rec.reviewNote}"` : ""}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                  {!isResolved && (
+                    <div className="flex justify-end gap-1.5 mt-2">
+                      {rec.status === "OPEN" && (
+                        <button
+                          className="text-[10px] font-bold text-mine-300 hover:text-mine-50 bg-mine-800 hover:bg-mine-700 rounded px-2 py-1 transition-colors disabled:opacity-50"
+                          disabled={reviewingId === rec.id}
+                          onClick={() => reviewRecommendation(rec.id, "ACKNOWLEDGED")}
+                        >
+                          {t("ai.acknowledge")}
+                        </button>
+                      )}
+                      <button
+                        className="text-[10px] font-bold text-white bg-success-500 hover:bg-success-600 rounded px-2 py-1 transition-colors disabled:opacity-50"
+                        disabled={reviewingId === rec.id}
+                        onClick={() => reviewRecommendation(rec.id, "ACTIONED")}
+                      >
+                        {t("ai.markActioned")}
+                      </button>
+                      <button
+                        className="text-[10px] font-bold text-mine-300 hover:text-danger-600 bg-mine-800 hover:bg-danger-500/10 rounded px-2 py-1 transition-colors disabled:opacity-50"
+                        disabled={reviewingId === rec.id}
+                        onClick={() => reviewRecommendation(rec.id, "DISMISSED")}
+                      >
+                        {t("ai.dismiss")}
+                      </button>
+                    </div>
+                  )}
+                </li>
+              );
+            })}
+          </ul>
+        </div>
       )}
 
       {chatOpen && configured && (

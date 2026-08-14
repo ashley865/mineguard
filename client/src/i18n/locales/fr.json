@@ -3366,6 +3366,25 @@
     "clear": "Effacer",
     "thinking": "Réflexion en cours...",
     "sendError": "Impossible de contacter l'assistant IA. Veuillez réessayer.",
-    "you": "Vous"
+    "you": "Vous",
+    "recommendationsTitle": "Recommandations Suivies ({{count}} ouvertes)",
+    "hideResolved": "Masquer résolues",
+    "showResolved": "Afficher {{count}} résolues",
+    "noOpenRecommendations": "Rien en attente pour le moment.",
+    "kind": {
+      "RISK": "Risque",
+      "PREDICTION": "Prédiction",
+      "RECOMMENDATION": "Action"
+    },
+    "status": {
+      "OPEN": "Ouverte",
+      "ACKNOWLEDGED": "Prise en compte",
+      "ACTIONED": "Traitée",
+      "DISMISSED": "Rejetée"
+    },
+    "acknowledge": "Prendre en compte",
+    "markActioned": "Marquer traitée",
+    "dismiss": "Rejeter",
+    "dismissReasonPrompt": "Note facultative sur la raison du rejet"
   }
 }

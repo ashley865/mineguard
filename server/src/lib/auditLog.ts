@@ -30,6 +30,7 @@ export const AUDITED_MODELS = new Set([
   "PurchaseOrder",
   "Invoice",
   "ExecutiveInvite",
+  "AiRecommendation",
 ]);
 
 const AUDITED_OPERATIONS = new Set(["create", "update", "delete", "upsert"]);

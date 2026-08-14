@@ -3366,6 +3366,25 @@
     "clear": "Borrar",
     "thinking": "Pensando...",
     "sendError": "No se pudo contactar al asistente de IA. Inténtalo de nuevo.",
-    "you": "Tú"
+    "you": "Tú",
+    "recommendationsTitle": "Recomendaciones Seguidas ({{count}} abiertas)",
+    "hideResolved": "Ocultar resueltas",
+    "showResolved": "Mostrar {{count}} resueltas",
+    "noOpenRecommendations": "No hay nada pendiente por ahora.",
+    "kind": {
+      "RISK": "Riesgo",
+      "PREDICTION": "Predicción",
+      "RECOMMENDATION": "Acción"
+    },
+    "status": {
+      "OPEN": "Abierta",
+      "ACKNOWLEDGED": "Reconocida",
+      "ACTIONED": "Gestionada",
+      "DISMISSED": "Descartada"
+    },
+    "acknowledge": "Reconocer",
+    "markActioned": "Marcar gestionada",
+    "dismiss": "Descartar",
+    "dismissReasonPrompt": "Nota opcional sobre por qué se descarta"
   }
 }
