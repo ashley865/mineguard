@@ -7,19 +7,6 @@ import Modal from "./Modal";
 import { buttonPrimary, buttonSecondary } from "./ui";
 import { routeForTopic } from "../lib/aiTopicRoutes";
 
-const REPORT_SECTION_ORDER = [
-  "production",
-  "operations",
-  "safety",
-  "compliance",
-  "security",
-  "maintenance",
-  "workforce",
-  "environment",
-  "finance",
-  "enterpriseRisks",
-] as const;
-
 function humanizeKey(key: string): string {
   return key
     .replace(/([a-z])([A-Z])/g, "$1 $2")
@@ -52,7 +39,26 @@ const KIND_BADGE: Record<AiRecommendation["kind"], string> = {
   ANNOUNCEMENT: "bg-mine-500/15 text-mine-300",
 };
 
-export default function ExecutiveReportModal({ onClose }: { onClose: () => void }) {
+export default function ReportModal({
+  onClose,
+  endpoint,
+  sectionKeys,
+  titleKey,
+  hintKey,
+  sectionLabelPrefix,
+}: {
+  onClose: () => void;
+  /** e.g. "/ai/report" or "/ai/hr/report" */
+  endpoint: string;
+  /** Section keys in display order — must match what the endpoint returns. */
+  sectionKeys: readonly string[];
+  /** i18n key for the modal title. */
+  titleKey: string;
+  /** i18n key for the pre-generation hint text. */
+  hintKey: string;
+  /** i18n namespace prefix for per-section labels, e.g. "ai.report.sections". */
+  sectionLabelPrefix: string;
+}) {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const [period, setPeriod] = useState<ReportPeriod>("WEEK");
@@ -64,7 +70,7 @@ export default function ExecutiveReportModal({ onClose }: { onClose: () => void 
     setLoading(true);
     setError(null);
     try {
-      const res = await api.post<ExecutiveReportResponse>("/ai/report", { period });
+      const res = await api.post<ExecutiveReportResponse>(endpoint, { period });
       if (!res.data.configured) {
         setError(t("ai.notConfigured"));
         return;
@@ -80,11 +86,11 @@ export default function ExecutiveReportModal({ onClose }: { onClose: () => void 
   const sectionsByKey = new Map((report?.sections ?? []).map((s) => [s.key, s]));
 
   return (
-    <Modal title={t("ai.report.title")} onClose={onClose} size="lg">
+    <Modal title={t(titleKey)} onClose={onClose} size="lg">
       <div className="space-y-4">
         {!report && (
           <div className="space-y-3">
-            <p className="text-sm text-mine-300">{t("ai.report.hint")}</p>
+            <p className="text-sm text-mine-300">{t(hintKey)}</p>
             <div className="flex items-center gap-2">
               <button
                 className={period === "WEEK" ? buttonPrimary : buttonSecondary}
@@ -129,13 +135,13 @@ export default function ExecutiveReportModal({ onClose }: { onClose: () => void 
             </div>
 
             <div className="space-y-3">
-              {REPORT_SECTION_ORDER.map((key) => {
+              {sectionKeys.map((key) => {
                 const section = sectionsByKey.get(key);
                 if (!section) return null;
                 return (
                   <div key={key} className="border border-mine-800 rounded-lg p-3">
                     <h4 className="text-xs font-extrabold uppercase tracking-wide text-mine-200 mb-1">
-                      {t(`ai.report.sections.${key}`)}
+                      {t(`${sectionLabelPrefix}.${key}`)}
                     </h4>
                     <p className="text-xs text-mine-100 font-medium leading-relaxed mb-2">{section.narrative}</p>
                     <p className="text-[10px] text-mine-400 font-mono leading-snug border-t border-mine-800 pt-1.5">

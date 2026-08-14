@@ -22,6 +22,7 @@ import DateField from "../components/DateField";
 import DataTable, { DataTableColumn } from "../components/DataTable";
 import SummaryCards from "../components/SummaryCards";
 import { AuditHistoryButton } from "../components/AuditHistoryPanel";
+import CaseRiskModal from "../components/CaseRiskModal";
 
 const disciplinaryOutcomes: DisciplinaryOutcome[] = ["PENDING", "VERBAL_WARNING", "WRITTEN_WARNING", "FINAL_WRITTEN_WARNING", "DISMISSAL", "NOT_GUILTY", "WITHDRAWN"];
 const disciplinaryStatuses: DisciplinaryStatus[] = ["OPEN", "SCHEDULED", "CONCLUDED", "APPEALED"];
@@ -104,9 +105,12 @@ function DisciplinaryForm({ workers, onSubmit, onCancel }: { workers: Worker[]; 
 
 function DisciplinaryTab({ workers, canEdit, canDelete }: { workers: Worker[]; canEdit: boolean; canDelete: boolean }) {
   const { t } = useTranslation();
+  const { user } = useAuth();
+  const canUseAi = user?.role === "ADMIN" || user?.title === "HR_MANAGER";
   const [cases, setCases] = useState<DisciplinaryCase[]>([]);
   const [loading, setLoading] = useState(true);
   const [modal, setModal] = useState(false);
+  const [riskCase, setRiskCase] = useState<{ id: string; label: string } | null>(null);
 
   async function load() {
     setLoading(true);
@@ -168,6 +172,14 @@ function DisciplinaryTab({ workers, canEdit, canDelete }: { workers: Worker[]; c
         ]}
         actions={(c) => (
           <div className="flex justify-end gap-2">
+            {canUseAi && (
+              <button
+                className="text-xs font-bold text-hazard-600 hover:text-hazard-500"
+                onClick={() => setRiskCase({ id: c.id, label: c.worker?.name ?? c.chargeDescription })}
+              >
+                {t("ai.caseRisk.assess")}
+              </button>
+            )}
             <AuditHistoryButton entityType="DisciplinaryCase" entityId={c.id} />
             {canDelete && <button className={buttonDanger} onClick={() => remove(c.id)}>{t("common.delete")}</button>}
           </div>
@@ -177,6 +189,9 @@ function DisciplinaryTab({ workers, canEdit, canDelete }: { workers: Worker[]; c
         <Modal title={t("labourRelations.newDisciplinaryCaseTitle")} onClose={() => setModal(false)}>
           <DisciplinaryForm workers={workers} onSubmit={create} onCancel={() => setModal(false)} />
         </Modal>
+      )}
+      {riskCase && (
+        <CaseRiskModal caseType="DISCIPLINARY" caseId={riskCase.id} caseLabel={riskCase.label} onClose={() => setRiskCase(null)} />
       )}
     </div>
   );
@@ -239,9 +254,12 @@ function GrievanceForm({ workers, onSubmit, onCancel }: { workers: Worker[]; onS
 
 function GrievancesTab({ workers, canEdit, canDelete }: { workers: Worker[]; canEdit: boolean; canDelete: boolean }) {
   const { t } = useTranslation();
+  const { user } = useAuth();
+  const canUseAi = user?.role === "ADMIN" || user?.title === "HR_MANAGER";
   const [cases, setCases] = useState<GrievanceCase[]>([]);
   const [loading, setLoading] = useState(true);
   const [modal, setModal] = useState(false);
+  const [riskCase, setRiskCase] = useState<{ id: string; label: string } | null>(null);
 
   async function load() {
     setLoading(true);
@@ -297,6 +315,14 @@ function GrievancesTab({ workers, canEdit, canDelete }: { workers: Worker[]; can
         ]}
         actions={(c) => (
           <div className="flex justify-end gap-2">
+            {canUseAi && (
+              <button
+                className="text-xs font-bold text-hazard-600 hover:text-hazard-500"
+                onClick={() => setRiskCase({ id: c.id, label: c.worker?.name ?? c.description })}
+              >
+                {t("ai.caseRisk.assess")}
+              </button>
+            )}
             <AuditHistoryButton entityType="GrievanceCase" entityId={c.id} />
             {canDelete && <button className={buttonDanger} onClick={() => remove(c.id)}>{t("common.delete")}</button>}
           </div>
@@ -306,6 +332,9 @@ function GrievancesTab({ workers, canEdit, canDelete }: { workers: Worker[]; can
         <Modal title={t("labourRelations.newGrievanceTitle")} onClose={() => setModal(false)}>
           <GrievanceForm workers={workers} onSubmit={create} onCancel={() => setModal(false)} />
         </Modal>
+      )}
+      {riskCase && (
+        <CaseRiskModal caseType="GRIEVANCE" caseId={riskCase.id} caseLabel={riskCase.label} onClose={() => setRiskCase(null)} />
       )}
     </div>
   );
@@ -373,9 +402,12 @@ function CcmaForm({ workers, onSubmit, onCancel }: { workers: Worker[]; onSubmit
 
 function CcmaTab({ workers, canEdit, canDelete }: { workers: Worker[]; canEdit: boolean; canDelete: boolean }) {
   const { t } = useTranslation();
+  const { user } = useAuth();
+  const canUseAi = user?.role === "ADMIN" || user?.title === "HR_MANAGER";
   const [cases, setCases] = useState<CcmaCase[]>([]);
   const [loading, setLoading] = useState(true);
   const [modal, setModal] = useState(false);
+  const [riskCase, setRiskCase] = useState<{ id: string; label: string } | null>(null);
 
   async function load() {
     setLoading(true);
@@ -428,6 +460,14 @@ function CcmaTab({ workers, canEdit, canDelete }: { workers: Worker[]; canEdit: 
         ]}
         actions={(c) => (
           <div className="flex justify-end gap-2">
+            {canUseAi && (
+              <button
+                className="text-xs font-bold text-hazard-600 hover:text-hazard-500"
+                onClick={() => setRiskCase({ id: c.id, label: c.worker?.name ?? c.referralNumber ?? c.id })}
+              >
+                {t("ai.caseRisk.assess")}
+              </button>
+            )}
             <AuditHistoryButton entityType="CcmaCase" entityId={c.id} />
             {canDelete && <button className={buttonDanger} onClick={() => remove(c.id)}>{t("common.delete")}</button>}
           </div>
@@ -438,6 +478,7 @@ function CcmaTab({ workers, canEdit, canDelete }: { workers: Worker[]; canEdit: 
           <CcmaForm workers={workers} onSubmit={create} onCancel={() => setModal(false)} />
         </Modal>
       )}
+      {riskCase && <CaseRiskModal caseType="CCMA" caseId={riskCase.id} caseLabel={riskCase.label} onClose={() => setRiskCase(null)} />}
     </div>
   );
 }

@@ -793,6 +793,20 @@ export interface ExecutiveReportResponse {
   aiInsights: AiRecommendation[] | null;
 }
 
+export type HrReportResponse = ExecutiveReportResponse;
+
+export type CaseRiskLevel = "LOW" | "MEDIUM" | "HIGH";
+export interface CaseRiskResult {
+  riskLevel: CaseRiskLevel;
+  riskFactors: { factor: string; detail: string }[];
+  proceduralConsiderations: string[];
+}
+export interface CaseRiskResponse {
+  configured: boolean;
+  result: CaseRiskResult | null;
+  disclaimer: string;
+}
+
 export type CopCategory =
   | "ROCK_ENGINEERING"
   | "VENTILATION"

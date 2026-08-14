@@ -3417,6 +3417,30 @@
         "enterpriseRisks": "Enterprise Risks"
       }
     },
-    "takeAction": "Take Action"
+    "takeAction": "Take Action",
+    "hrReport": {
+      "button": "Generate HR Report",
+      "title": "HR Report",
+      "hint": "Generate a full HR report for the mine, grounded entirely in MineGuard data — every statement is traceable to the figures shown beneath it.",
+      "sections": {
+        "workforceOverview": "Workforce Overview",
+        "leaveAndAttendance": "Leave & Attendance",
+        "certificatesAndTraining": "Certificates & Training",
+        "labourRelations": "Labour Relations",
+        "equityAndSkillsDevelopment": "Employment Equity & Skills Development"
+      }
+    },
+    "caseRisk": {
+      "title": "AI Risk Assessment — {{case}}",
+      "assess": "AI Risk Assessment",
+      "riskLevel": "Risk Level",
+      "level": {
+        "LOW": "Low",
+        "MEDIUM": "Medium",
+        "HIGH": "High"
+      },
+      "riskFactors": "Risk Factors",
+      "proceduralConsiderations": "Procedural Considerations"
+    }
   }
 }

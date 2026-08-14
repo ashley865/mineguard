@@ -81,6 +81,7 @@ import geologyRoutes from "./routes/geology";
 import windersRoutes from "./routes/winders";
 import auditLogRoutes from "./routes/auditLog";
 import aiRoutes from "./routes/ai";
+import aiHrRoutes from "./routes/aiHr";
 import { sanitizeBody } from "./middleware/sanitize";
 import { startSimulator } from "./services/simulator";
 import { scanCompliance } from "./services/complianceScanner";
@@ -202,6 +203,7 @@ app.use("/api/community", communityRoutes);
 app.use("/api/geology", geologyRoutes);
 app.use("/api/winders", windersRoutes);
 app.use("/api/audit-log", auditLogRoutes);
+app.use("/api/ai/hr", aiHrRoutes);
 app.use("/api/ai", aiRoutes);
 
 app.use((err: any, _req: express.Request, res: express.Response, _next: express.NextFunction) => {

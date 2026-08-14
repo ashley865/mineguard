@@ -3418,6 +3418,30 @@
         "enterpriseRisks": "Risques d'Entreprise"
       }
     },
-    "takeAction": "Passer à l'Action"
+    "takeAction": "Passer à l'Action",
+    "hrReport": {
+      "button": "Générer un Rapport RH",
+      "title": "Rapport RH",
+      "hint": "Générez un rapport RH complet pour la mine, entièrement basé sur les données MineGuard — chaque affirmation est traçable aux chiffres indiqués en dessous.",
+      "sections": {
+        "workforceOverview": "Aperçu des Effectifs",
+        "leaveAndAttendance": "Congés et Présence",
+        "certificatesAndTraining": "Certificats et Formation",
+        "labourRelations": "Relations de Travail",
+        "equityAndSkillsDevelopment": "Équité en Emploi et Développement des Compétences"
+      }
+    },
+    "caseRisk": {
+      "title": "Évaluation des Risques IA — {{case}}",
+      "assess": "Évaluation des Risques IA",
+      "riskLevel": "Niveau de Risque",
+      "level": {
+        "LOW": "Faible",
+        "MEDIUM": "Moyen",
+        "HIGH": "Élevé"
+      },
+      "riskFactors": "Facteurs de Risque",
+      "proceduralConsiderations": "Considérations Procédurales"
+    }
   }
 }

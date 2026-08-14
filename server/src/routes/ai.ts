@@ -90,6 +90,8 @@ async function buildHrManagerContext(mineId: string) {
   const todayEnd = new Date();
   todayEnd.setHours(23, 59, 59, 999);
   const thirtyDaysAgo = new Date(Date.now() - 30 * 86400000);
+  const sixtyDaysAgo = new Date(Date.now() - 60 * 86400000);
+  const currentYear = new Date().getFullYear();
 
   const [
     mine,
@@ -103,6 +105,10 @@ async function buildHrManagerContext(mineId: string) {
     openGrievances,
     activeCcmaCases,
     activeLearnerships,
+    equityTargets,
+    latestSkillsPlan,
+    approvedLeaveLast30Days,
+    approvedLeavePrior30Days,
   ] = await Promise.all([
     prisma.mine.findUnique({ where: { id: mineId }, select: { name: true } }),
     prisma.worker.findMany({ where: { site: { mineId } }, select: { category: true, status: true } }),
@@ -128,7 +134,28 @@ async function buildHrManagerContext(mineId: string) {
     prisma.grievanceCase.count({ where: { status: { in: ["OPEN", "UNDER_INVESTIGATION"] }, worker: { site: { mineId } } } }),
     prisma.ccmaCase.count({ where: { status: { in: ["REFERRED", "CONCILIATION", "ARBITRATION"] }, worker: { site: { mineId } } } }),
     prisma.learnership.count({ where: { status: { in: ["ENROLLED", "IN_PROGRESS"] }, mineId } }),
+    prisma.employmentEquityTarget.findMany({
+      where: { mineId, reportingYear: { gte: currentYear - 1 } },
+      select: { reportingYear: true, occupationalLevel: true, designatedGroup: true, targetPercent: true, actualHeadcount: true, totalHeadcountAtLevel: true },
+      orderBy: { reportingYear: "desc" },
+    }),
+    prisma.workplaceSkillsPlan.findFirst({
+      where: { mineId },
+      orderBy: { planYear: "desc" },
+      select: { planYear: true, status: true, submittedDate: true, atrSubmittedDate: true, levyPayable: true, levyGrantClaimed: true },
+    }),
+    prisma.leaveRequest.count({ where: { status: "APPROVED", worker: { site: { mineId } }, startDate: { gte: thirtyDaysAgo } } }),
+    prisma.leaveRequest.count({
+      where: { status: "APPROVED", worker: { site: { mineId } }, startDate: { gte: sixtyDaysAgo, lt: thirtyDaysAgo } },
+    }),
   ]);
+
+  const latestEquityYear = equityTargets[0]?.reportingYear;
+  const latestEquityTargets = equityTargets.filter((t) => t.reportingYear === latestEquityYear);
+  const equityGaps = latestEquityTargets.filter((t) => {
+    const actualPct = t.totalHeadcountAtLevel === 0 ? 0 : (t.actualHeadcount / t.totalHeadcountAtLevel) * 100;
+    return actualPct < t.targetPercent;
+  }).length;
 
   const byCategoryMap = new Map<string, { total: number; onShift: number }>();
   for (const w of workers) {
@@ -177,7 +204,12 @@ async function buildHrManagerContext(mineId: string) {
       onShiftPct: totalWorkers === 0 ? 0 : Math.round((onShiftWorkers / totalWorkers) * 1000) / 10,
       byCategory,
     },
-    leave: { pendingRequests: pendingLeaveRequests, onLeaveToday },
+    leave: {
+      pendingRequests: pendingLeaveRequests,
+      onLeaveToday,
+      approvedLast30Days: approvedLeaveLast30Days,
+      approvedPrior30Days: approvedLeavePrior30Days,
+    },
     newHiresLast30Days: newHires.map((w) => ({
       name: w.name,
       role: w.role,
@@ -191,7 +223,27 @@ async function buildHrManagerContext(mineId: string) {
       openGrievances,
       activeCcmaCases,
     },
-    skillsDevelopment: { activeLearnerships },
+    skillsDevelopment: {
+      activeLearnerships,
+      workplaceSkillsPlan: latestSkillsPlan
+        ? {
+            planYear: latestSkillsPlan.planYear,
+            status: latestSkillsPlan.status,
+            submitted: !!latestSkillsPlan.submittedDate,
+            annualTrainingReportSubmitted: !!latestSkillsPlan.atrSubmittedDate,
+            levyPayable: latestSkillsPlan.levyPayable,
+            levyGrantClaimed: latestSkillsPlan.levyGrantClaimed,
+          }
+        : null,
+    },
+    employmentEquity:
+      latestEquityYear === undefined
+        ? null
+        : {
+            reportingYear: latestEquityYear,
+            targetsBelowGoal: equityGaps,
+            totalTargetsTracked: latestEquityTargets.length,
+          },
   };
 }
 
@@ -774,7 +826,7 @@ async function buildItManagerContext(mineId: string) {
 // Guardrail applied to every title's prompt, both chat and the pipeline summary below —
 // the AI is structurally advisory-only (see AiRecommendation in schema.prisma: it can
 // create rows, but only a human review endpoint can ever change their status).
-const GUARDRAIL =
+export const GUARDRAIL =
   ` You are strictly advisory. You never state or imply that you have made, finalized, executed, approved, or ` +
   `authorized any decision — especially anything safety-critical, legal, disciplinary, employment-related, ` +
   `financial-authorisation, or security-related. Every risk, prediction, or recommendation you produce is for a ` +
@@ -814,8 +866,9 @@ const AI_MODULES: Record<string, AiModule> = {
     buildContext: buildHrManagerContext,
     systemPrompt: (ctx) =>
       BASE_SYSTEM_PROMPT(ctx.mine.name, "HR Manager") +
-      ` Focus on workforce composition, leave, new hires, certificate/training expiries, and labour relations case load ` +
-      `(disciplinary cases, grievances, CCMA referrals) — this is an HR-specific assistant, not a general operations one.`,
+      ` Focus on workforce composition, leave trends, new hires, certificate/training expiries, labour relations case load ` +
+      `(disciplinary cases, grievances, CCMA referrals), employment equity target gaps, and Workplace Skills Plan/annual ` +
+      `training report status — this is an HR-specific assistant, not a general operations one.`,
   },
   CFO: {
     buildContext: buildCfoContext,

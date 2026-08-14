@@ -4,8 +4,28 @@ import { useNavigate } from "react-router-dom";
 import { api } from "../api/client";
 import { AiChatMessage, AiChatResponse, AiRecommendation, AiSummaryResponse } from "../api/types";
 import { buttonPrimary, buttonSecondary, inputClass } from "./ui";
-import ExecutiveReportModal from "./ExecutiveReportModal";
+import ReportModal from "./ReportModal";
 import { routeForTopic } from "../lib/aiTopicRoutes";
+
+const EXEC_REPORT_SECTIONS = [
+  "production",
+  "operations",
+  "safety",
+  "compliance",
+  "security",
+  "maintenance",
+  "workforce",
+  "environment",
+  "finance",
+  "enterpriseRisks",
+] as const;
+const HR_REPORT_SECTIONS = [
+  "workforceOverview",
+  "leaveAndAttendance",
+  "certificatesAndTraining",
+  "labourRelations",
+  "equityAndSkillsDevelopment",
+] as const;
 
 const URGENT_KEYWORDS = ["overdue", "critical", "urgent", "immediate", "escalat", "non-compliant", "unauthorized", "unauthorised"];
 const CAUTION_KEYWORDS = ["pending", "review", "attention", "expir", "due soon", "approval", "outstanding", "shortage"];
@@ -55,10 +75,16 @@ const KIND_BADGE: Record<AiRecommendation["kind"], string> = {
 };
 const NON_ACTIONABLE_KINDS = new Set<AiRecommendation["kind"]>(["ACHIEVEMENT", "ANNOUNCEMENT"]);
 
-export default function AiAssistantWidget({ showReportGenerator = false }: { showReportGenerator?: boolean }) {
+export default function AiAssistantWidget({
+  showReportGenerator = false,
+  showHrReportGenerator = false,
+}: {
+  showReportGenerator?: boolean;
+  showHrReportGenerator?: boolean;
+}) {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const [reportOpen, setReportOpen] = useState(false);
+  const [openReport, setOpenReport] = useState<"EXEC" | "HR" | null>(null);
   const [configured, setConfigured] = useState<boolean | null>(null);
   const [summary, setSummary] = useState<string | null>(null);
   const [summaryExpanded, setSummaryExpanded] = useState(false);
@@ -165,9 +191,17 @@ export default function AiAssistantWidget({ showReportGenerator = false }: { sho
             {showReportGenerator && (
               <button
                 className="text-xs font-bold text-mine-300 hover:text-mine-50 bg-mine-800 hover:bg-mine-700 rounded-full px-3 py-1 transition-colors"
-                onClick={() => setReportOpen(true)}
+                onClick={() => setOpenReport("EXEC")}
               >
                 {t("ai.report.button")}
+              </button>
+            )}
+            {showHrReportGenerator && (
+              <button
+                className="text-xs font-bold text-mine-300 hover:text-mine-50 bg-mine-800 hover:bg-mine-700 rounded-full px-3 py-1 transition-colors"
+                onClick={() => setOpenReport("HR")}
+              >
+                {t("ai.hrReport.button")}
               </button>
             )}
             <button
@@ -180,7 +214,26 @@ export default function AiAssistantWidget({ showReportGenerator = false }: { sho
         )}
       </div>
 
-      {reportOpen && <ExecutiveReportModal onClose={() => setReportOpen(false)} />}
+      {openReport === "EXEC" && (
+        <ReportModal
+          onClose={() => setOpenReport(null)}
+          endpoint="/ai/report"
+          sectionKeys={EXEC_REPORT_SECTIONS}
+          titleKey="ai.report.title"
+          hintKey="ai.report.hint"
+          sectionLabelPrefix="ai.report.sections"
+        />
+      )}
+      {openReport === "HR" && (
+        <ReportModal
+          onClose={() => setOpenReport(null)}
+          endpoint="/ai/hr/report"
+          sectionKeys={HR_REPORT_SECTIONS}
+          titleKey="ai.hrReport.title"
+          hintKey="ai.hrReport.hint"
+          sectionLabelPrefix="ai.hrReport.sections"
+        />
+      )}
 
       {loadingSummary && <div className="text-mine-400 text-xs font-medium">{t("common.loading")}</div>}
 

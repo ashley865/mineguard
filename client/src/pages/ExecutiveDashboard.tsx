@@ -271,7 +271,12 @@ export default function ExecutiveDashboard() {
         </div>
       )}
 
-      {canSeeAiAssistant && <AiAssistantWidget showReportGenerator={user?.title === "GENERAL_MANAGER"} />}
+      {canSeeAiAssistant && (
+        <AiAssistantWidget
+          showReportGenerator={user?.title === "GENERAL_MANAGER"}
+          showHrReportGenerator={user?.title === "HR_MANAGER"}
+        />
+      )}
       {canSeeFinancials && <FinancialSummaryWidget />}
       {canSeeHrWorkforce && <HrWorkforceWidget />}
       {canSeeVisitorHistory && <SecurityVisitorHistoryWidget />}

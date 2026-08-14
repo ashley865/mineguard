@@ -3418,6 +3418,30 @@
         "enterpriseRisks": "Unternehmensrisiken"
       }
     },
-    "takeAction": "Maßnahme Ergreifen"
+    "takeAction": "Maßnahme Ergreifen",
+    "hrReport": {
+      "button": "HR-Bericht Erstellen",
+      "title": "HR-Bericht",
+      "hint": "Erstellen Sie einen vollständigen HR-Bericht für die Mine, vollständig auf MineGuard-Daten basierend — jede Aussage ist auf die darunter angezeigten Zahlen rückführbar.",
+      "sections": {
+        "workforceOverview": "Belegschaftsübersicht",
+        "leaveAndAttendance": "Urlaub und Anwesenheit",
+        "certificatesAndTraining": "Zertifikate und Schulung",
+        "labourRelations": "Arbeitsbeziehungen",
+        "equityAndSkillsDevelopment": "Beschäftigungsgleichheit und Kompetenzentwicklung"
+      }
+    },
+    "caseRisk": {
+      "title": "KI-Risikobewertung — {{case}}",
+      "assess": "KI-Risikobewertung",
+      "riskLevel": "Risikostufe",
+      "level": {
+        "LOW": "Niedrig",
+        "MEDIUM": "Mittel",
+        "HIGH": "Hoch"
+      },
+      "riskFactors": "Risikofaktoren",
+      "proceduralConsiderations": "Verfahrensrechtliche Überlegungen"
+    }
   }
 }

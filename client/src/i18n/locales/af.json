@@ -3418,6 +3418,30 @@
         "enterpriseRisks": "Ondernemingsrisiko's"
       }
     },
-    "takeAction": "Neem Aksie"
+    "takeAction": "Neem Aksie",
+    "hrReport": {
+      "button": "Genereer MH-Verslag",
+      "title": "MH-Verslag",
+      "hint": "Genereer 'n volledige MH-verslag vir die myn, geheel en al gegrond op MineGuard-data — elke stelling is naspeurbaar na die syfers hieronder getoon.",
+      "sections": {
+        "workforceOverview": "Arbeidsmag-oorsig",
+        "leaveAndAttendance": "Verlof en Bywoning",
+        "certificatesAndTraining": "Sertifikate en Opleiding",
+        "labourRelations": "Arbeidsverhoudinge",
+        "equityAndSkillsDevelopment": "Indiensbillikheid en Vaardigheidsontwikkeling"
+      }
+    },
+    "caseRisk": {
+      "title": "KI-Risikobeoordeling — {{case}}",
+      "assess": "KI-Risikobeoordeling",
+      "riskLevel": "Risikovlak",
+      "level": {
+        "LOW": "Laag",
+        "MEDIUM": "Medium",
+        "HIGH": "Hoog"
+      },
+      "riskFactors": "Risikofaktore",
+      "proceduralConsiderations": "Prosedurele Oorwegings"
+    }
   }
 }

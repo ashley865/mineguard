@@ -3418,6 +3418,30 @@
         "enterpriseRisks": "Riesgos Empresariales"
       }
     },
-    "takeAction": "Tomar Acción"
+    "takeAction": "Tomar Acción",
+    "hrReport": {
+      "button": "Generar Informe de RRHH",
+      "title": "Informe de RRHH",
+      "hint": "Genera un informe completo de RRHH para la mina, basado enteramente en datos de MineGuard — cada afirmación es trazable a las cifras mostradas debajo.",
+      "sections": {
+        "workforceOverview": "Resumen de la Fuerza Laboral",
+        "leaveAndAttendance": "Licencias y Asistencia",
+        "certificatesAndTraining": "Certificados y Capacitación",
+        "labourRelations": "Relaciones Laborales",
+        "equityAndSkillsDevelopment": "Equidad Laboral y Desarrollo de Habilidades"
+      }
+    },
+    "caseRisk": {
+      "title": "Evaluación de Riesgo IA — {{case}}",
+      "assess": "Evaluación de Riesgo IA",
+      "riskLevel": "Nivel de Riesgo",
+      "level": {
+        "LOW": "Bajo",
+        "MEDIUM": "Medio",
+        "HIGH": "Alto"
+      },
+      "riskFactors": "Factores de Riesgo",
+      "proceduralConsiderations": "Consideraciones de Procedimiento"
+    }
   }
 }
