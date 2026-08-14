@@ -126,13 +126,8 @@ export default function ExecutiveDashboard() {
   const canSeeHrWorkforce = user?.title === "HR_MANAGER";
   const canSeeVisitorHistory = user?.title === "SECURITY_MANAGER";
   const canSeeProductionAnalytics = user?.title === "OPERATIONS_MANAGER";
-  const canSeeAiAssistant =
-    user?.title === "GENERAL_MANAGER" ||
-    user?.title === "HR_MANAGER" ||
-    user?.title === "CFO" ||
-    user?.title === "COMPLIANCE_OFFICER" ||
-    user?.title === "OPERATIONS_MANAGER" ||
-    user?.title === "COO";
+  // Every executive title has an AI module now except the generic "OTHER" catch-all.
+  const canSeeAiAssistant = !!user?.title && user.title !== "OTHER";
   const [summary, setSummary] = useState<ExecutiveSummary | null>(null);
   const [trends, setTrends] = useState<ReportTrends | null>(null);
 

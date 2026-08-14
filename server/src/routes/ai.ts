@@ -596,6 +596,181 @@ async function buildCooContext(mineId: string) {
   };
 }
 
+async function buildSecurityManagerContext(mineId: string) {
+  const sevenDaysAgo = new Date(Date.now() - 7 * 86400000);
+
+  const [
+    mine,
+    incidentsBySeverity,
+    incidentsByCategory,
+    openIncidents,
+    camerasByStatus,
+    camerasTotal,
+    patrolsCompleted,
+    patrolsScheduled,
+    patrolsMissed,
+    visitorsCheckedIn,
+    pendingVisitorApprovals,
+    guardObservationsByCategory,
+    pendingPermitsToWork,
+    suspendedExplosivesMagazines,
+  ] = await Promise.all([
+    prisma.mine.findUnique({ where: { id: mineId }, select: { name: true } }),
+    prisma.securityIncident.groupBy({ by: ["severity"], where: { occurredAt: { gte: sevenDaysAgo }, site: { mineId } }, _count: true }),
+    prisma.securityIncident.groupBy({ by: ["category"], where: { occurredAt: { gte: sevenDaysAgo }, site: { mineId } }, _count: true }),
+    prisma.securityIncident.count({ where: { status: { in: ["OPEN", "INVESTIGATING"] }, site: { mineId } } }),
+    prisma.securityCamera.groupBy({ by: ["status"], where: { site: { mineId } }, _count: true }),
+    prisma.securityCamera.count({ where: { site: { mineId } } }),
+    prisma.patrolAssignment.count({ where: { status: "COMPLETED", shiftDate: { gte: sevenDaysAgo }, site: { mineId } } }),
+    prisma.patrolAssignment.count({ where: { shiftDate: { gte: sevenDaysAgo }, site: { mineId } } }),
+    prisma.patrolAssignment.count({ where: { status: "MISSED", shiftDate: { gte: sevenDaysAgo }, site: { mineId } } }),
+    prisma.visitor.count({ where: { status: "CHECKED_IN", site: { mineId } } }),
+    prisma.visitor.count({ where: { status: "PENDING_APPROVAL", site: { mineId } } }),
+    prisma.patrolLogEntry.groupBy({
+      by: ["category"],
+      where: { category: { not: null }, loggedAt: { gte: sevenDaysAgo }, site: { mineId } },
+      _count: true,
+    }),
+    prisma.permitToWork.count({ where: { status: "PENDING_EXECUTIVE", site: { mineId } } }),
+    prisma.explosivesMagazine.count({ where: { status: "SUSPENDED", site: { mineId } } }),
+  ]);
+
+  const incidentSeverity = { LOW: 0, MEDIUM: 0, HIGH: 0, CRITICAL: 0 } as Record<string, number>;
+  for (const row of incidentsBySeverity) incidentSeverity[row.severity] = row._count;
+
+  const incidentCategory: Record<string, number> = {};
+  for (const row of incidentsByCategory) incidentCategory[row.category] = row._count;
+
+  const cameraStatus = { ONLINE: 0, OFFLINE: 0, MAINTENANCE: 0, DECOMMISSIONED: 0 } as Record<string, number>;
+  for (const row of camerasByStatus) cameraStatus[row.status] = row._count;
+
+  const observationCategory: Record<string, number> = {};
+  for (const row of guardObservationsByCategory) if (row.category) observationCategory[row.category] = row._count;
+
+  return {
+    mine: { name: mine?.name ?? "the mine" },
+    incidentsLast7Days: { bySeverity: incidentSeverity, byCategory: incidentCategory, open: openIncidents },
+    cctv: {
+      total: camerasTotal,
+      byStatus: cameraStatus,
+      onlinePct: camerasTotal === 0 ? 100 : Math.round((cameraStatus.ONLINE / camerasTotal) * 1000) / 10,
+    },
+    patrolsLast7Days: {
+      completed: patrolsCompleted,
+      scheduled: patrolsScheduled,
+      missed: patrolsMissed,
+      completionPct: patrolsScheduled === 0 ? 100 : Math.round((patrolsCompleted / patrolsScheduled) * 1000) / 10,
+    },
+    visitors: { checkedInNow: visitorsCheckedIn, pendingApproval: pendingVisitorApprovals },
+    guardObservationsLast7DaysByCategory: observationCategory,
+    permitsToWorkPendingExecutiveApproval: pendingPermitsToWork,
+    suspendedExplosivesMagazines,
+  };
+}
+
+async function buildSafetyManagerContext(mineId: string) {
+  const now = new Date();
+  const sevenDaysAgo = new Date(Date.now() - 7 * 86400000);
+
+  const [
+    mine,
+    incidentsBySeverity,
+    openHazardsByRisk,
+    overdueHazards,
+    safetyInspectionsCompleted,
+    safetyInspectionsTotal,
+    overdueMedicalExams,
+    unfitOrRestrictedWorkers,
+    occupationalDiseaseFlags,
+    activeEmergencyEvents,
+    refugeBaysOverdueInspection,
+    baSetsNotServiceable,
+    activeRescueTeamMembers,
+    ventilationReadingsOutOfRequirement,
+    escalatedRiskAssessments,
+  ] = await Promise.all([
+    prisma.mine.findUnique({ where: { id: mineId }, select: { name: true } }),
+    prisma.incident.groupBy({ by: ["severity"], where: { status: { in: ["OPEN", "INVESTIGATING"] }, site: { mineId } }, _count: true }),
+    prisma.hazardReport.groupBy({ by: ["riskLevel"], where: { status: { in: ["OPEN", "IN_PROGRESS"] }, site: { mineId } }, _count: true }),
+    prisma.hazardReport.count({ where: { status: "OVERDUE", site: { mineId } } }),
+    prisma.safetyInspection.count({ where: { status: "COMPLETED", scheduledDate: { gte: sevenDaysAgo }, site: { mineId } } }),
+    prisma.safetyInspection.count({ where: { scheduledDate: { gte: sevenDaysAgo }, site: { mineId } } }),
+    prisma.medicalSurveillance.count({ where: { nextExamDue: { lt: now }, worker: { site: { mineId } } } }),
+    prisma.medicalSurveillance.count({ where: { result: { in: ["UNFIT", "TEMPORARILY_UNFIT"] }, worker: { site: { mineId } } } }),
+    prisma.medicalSurveillance.count({ where: { diseaseClassification: { not: "NONE" }, worker: { site: { mineId } } } }),
+    prisma.emergencyEvent.count({ where: { status: { in: ["ACTIVE", "RESPONDING", "CONTAINED"] }, site: { mineId } } }),
+    prisma.refugeBay.count({ where: { nextInspectionDue: { lt: now }, site: { mineId } } }),
+    prisma.breathingApparatusSet.count({ where: { status: { in: ["OUT_OF_SERVICE", "DUE_FOR_SERVICE"] }, site: { mineId } } }),
+    prisma.rescueTeamMember.count({ where: { status: "ACTIVE", site: { mineId } } }),
+    prisma.ventilationReading.count({ where: { withinRequirement: false, readingDate: { gte: sevenDaysAgo }, district: { site: { mineId } } } }),
+    prisma.riskAssessment.count({ where: { escalated: true, mitigationStatus: { in: ["OPEN", "IN_PROGRESS"] }, site: { mineId } } }),
+  ]);
+
+  const incidentSeverity = { LOW: 0, MEDIUM: 0, HIGH: 0, CRITICAL: 0 } as Record<string, number>;
+  for (const row of incidentsBySeverity) incidentSeverity[row.severity] = row._count;
+
+  const hazardRisk = { LOW: 0, MEDIUM: 0, HIGH: 0, CRITICAL: 0 } as Record<string, number>;
+  for (const row of openHazardsByRisk) hazardRisk[row.riskLevel] = row._count;
+
+  return {
+    mine: { name: mine?.name ?? "the mine" },
+    incidents: { openBySeverity: incidentSeverity },
+    hazardReports: { openByRiskLevel: hazardRisk, overdue: overdueHazards },
+    safetyInspectionsLast7Days: {
+      completed: safetyInspectionsCompleted,
+      total: safetyInspectionsTotal,
+      completionPct: safetyInspectionsTotal === 0 ? 100 : Math.round((safetyInspectionsCompleted / safetyInspectionsTotal) * 1000) / 10,
+    },
+    medicalSurveillance: { overdueExams: overdueMedicalExams, unfitOrRestrictedWorkers, occupationalDiseaseFlags },
+    emergencyPreparedness: {
+      activeEmergencyEvents,
+      refugeBaysOverdueInspection,
+      breathingApparatusSetsNeedingService: baSetsNotServiceable,
+      activeRescueTeamMembers,
+    },
+    ventilationReadingsOutOfRequirementLast7Days: ventilationReadingsOutOfRequirement,
+    escalatedUnresolvedRiskAssessments: escalatedRiskAssessments,
+  };
+}
+
+async function buildItManagerContext(mineId: string) {
+  const [
+    mine,
+    sensorsByInstallationStatus,
+    sensorsByStatus,
+    totalSensors,
+    camerasByIntegrationStatus,
+    totalUsers,
+    inactiveUsers,
+    pendingExecutiveInvites,
+  ] = await Promise.all([
+    prisma.mine.findUnique({ where: { id: mineId }, select: { name: true } }),
+    prisma.sensor.groupBy({ by: ["installationStatus"], where: { zone: { site: { mineId } } }, _count: true }),
+    prisma.sensor.groupBy({ by: ["status"], where: { zone: { site: { mineId } } }, _count: true }),
+    prisma.sensor.count({ where: { zone: { site: { mineId } } } }),
+    prisma.securityCamera.groupBy({ by: ["integrationStatus"], where: { site: { mineId } }, _count: true }),
+    prisma.user.count({ where: { mineId } }),
+    prisma.user.count({ where: { mineId, isActive: false } }),
+    prisma.executiveInvite.count({ where: { mineId, status: "PENDING" } }),
+  ]);
+
+  const installStatus = { REQUESTED: 0, SCHEDULED: 0, INSTALLED: 0, COMMISSIONED: 0 } as Record<string, number>;
+  for (const row of sensorsByInstallationStatus) installStatus[row.installationStatus] = row._count;
+
+  const sensorStatus = { ACTIVE: 0, INACTIVE: 0, FAULT: 0 } as Record<string, number>;
+  for (const row of sensorsByStatus) sensorStatus[row.status] = row._count;
+
+  const integrationStatus = { CONNECTED: 0, DISCONNECTED: 0, PENDING: 0, NOT_APPLICABLE: 0 } as Record<string, number>;
+  for (const row of camerasByIntegrationStatus) integrationStatus[row.integrationStatus] = row._count;
+
+  return {
+    mine: { name: mine?.name ?? "the mine" },
+    sensors: { total: totalSensors, byInstallationStatus: installStatus, byOperationalStatus: sensorStatus },
+    cctvVmsIntegration: { byStatus: integrationStatus },
+    userAccounts: { total: totalUsers, deactivated: inactiveUsers, pendingExecutiveInvites },
+  };
+}
+
 // Guardrail applied to every title's prompt, both chat and the pipeline summary below —
 // the AI is structurally advisory-only (see AiRecommendation in schema.prisma: it can
 // create rows, but only a human review endpoint can ever change their status).
@@ -680,6 +855,33 @@ const AI_MODULES: Record<string, AiModule> = {
       `workforce and equipment available, and is cross-department work flowing (permits to work awaiting executive ` +
       `approval, escalated risk assessments, contractor compliance). This is an execution-oversight assistant, ` +
       `complementary to the General Manager's strategic view and the Operations Manager's production deep-dive.`,
+  },
+  SECURITY_MANAGER: {
+    buildContext: buildSecurityManagerContext,
+    systemPrompt: (ctx) =>
+      BASE_SYSTEM_PROMPT(ctx.mine.name, "Security Manager") +
+      ` Focus on physical security: security incidents by severity and category, CCTV camera uptime, patrol ` +
+      `completion and missed patrols, visitor check-ins and pending approvals, guard-logged observations, permits ` +
+      `to work awaiting executive approval, and explosives magazine security status — this is a physical-security ` +
+      `assistant, distinct from occupational safety.`,
+  },
+  SAFETY_MANAGER: {
+    buildContext: buildSafetyManagerContext,
+    systemPrompt: (ctx) =>
+      BASE_SYSTEM_PROMPT(ctx.mine.name, "Safety Manager") +
+      ` Focus on occupational health and safety under the MHSA: open incidents and hazard reports by severity/risk, ` +
+      `safety inspection completion, medical surveillance (overdue exams, unfit/restricted workers, occupational ` +
+      `disease flags), emergency preparedness (active emergencies, refuge bay inspections, breathing apparatus ` +
+      `service status, active rescue team members), ventilation readings outside requirement, and escalated ` +
+      `unresolved risk assessments — this is an occupational-safety assistant, distinct from physical security.`,
+  },
+  IT_MANAGER: {
+    buildContext: buildItManagerContext,
+    systemPrompt: (ctx) =>
+      BASE_SYSTEM_PROMPT(ctx.mine.name, "IT Manager") +
+      ` Focus on the technology infrastructure MineGuard tracks: sensor network health (installation pipeline, ` +
+      `active/inactive/faulty sensors), CCTV/VMS integration status, and user account security (total accounts, ` +
+      `deactivated accounts, pending executive invites) — this is a systems/infrastructure assistant.`,
   },
 };
 
