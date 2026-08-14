@@ -718,7 +718,7 @@ export interface AiChatResponse {
   reply: string | null;
 }
 
-export type AiRecommendationKind = "RISK" | "PREDICTION" | "RECOMMENDATION";
+export type AiRecommendationKind = "RISK" | "PREDICTION" | "RECOMMENDATION" | "ACHIEVEMENT" | "ANNOUNCEMENT";
 export type AiRecommendationStatus = "OPEN" | "ACKNOWLEDGED" | "ACTIONED" | "DISMISSED";
 export interface AiRecommendation {
   id: string;

@@ -3982,6 +3982,8 @@ enum AiRecommendationKind {
   RISK
   PREDICTION
   RECOMMENDATION
+  ACHIEVEMENT
+  ANNOUNCEMENT
 }
 
 enum AiRecommendationStatus {

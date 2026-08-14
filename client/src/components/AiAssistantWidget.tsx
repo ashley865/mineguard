@@ -6,45 +6,61 @@ import { buttonPrimary, buttonSecondary, inputClass } from "./ui";
 
 const URGENT_KEYWORDS = ["overdue", "critical", "urgent", "immediate", "escalat", "non-compliant", "unauthorized", "unauthorised"];
 const CAUTION_KEYWORDS = ["pending", "review", "attention", "expir", "due soon", "approval", "outstanding", "shortage"];
+const POSITIVE_KEYWORDS = ["achiev", "improv", "met target", "zero incident", "cleared", "completed", "on track", "milestone"];
 
-type Tone = "urgent" | "caution" | "neutral";
+const SUMMARY_PREVIEW_COUNT = 3;
+const RECOMMENDATIONS_PREVIEW_COUNT = 3;
+
+type Tone = "urgent" | "caution" | "positive" | "neutral";
 
 function toneOf(line: string): Tone {
   const lower = line.toLowerCase();
   if (URGENT_KEYWORDS.some((k) => lower.includes(k))) return "urgent";
   if (CAUTION_KEYWORDS.some((k) => lower.includes(k))) return "caution";
+  if (POSITIVE_KEYWORDS.some((k) => lower.includes(k))) return "positive";
   return "neutral";
 }
 
-function toneOfSeverity(severity: AiRecommendation["severity"]): Tone {
-  if (severity === "CRITICAL" || severity === "HIGH") return "urgent";
-  if (severity === "MEDIUM") return "caution";
+// Achievements/announcements get a tone driven by their kind, not their (often
+// incidental) severity field, so a "zero incidents" achievement never reads as alarming.
+function toneOfItem(rec: AiRecommendation): Tone {
+  if (rec.kind === "ACHIEVEMENT") return "positive";
+  if (rec.kind === "ANNOUNCEMENT") return "neutral";
+  if (rec.severity === "CRITICAL" || rec.severity === "HIGH") return "urgent";
+  if (rec.severity === "MEDIUM") return "caution";
   return "neutral";
 }
 
 const TONE_TEXT: Record<Tone, string> = {
   urgent: "text-danger-600",
   caution: "text-hazard-600",
+  positive: "text-success-600",
   neutral: "text-mine-50",
 };
 const TONE_DOT: Record<Tone, string> = {
   urgent: "bg-danger-500",
   caution: "bg-hazard-500",
+  positive: "bg-success-500",
   neutral: "bg-mine-400",
 };
 const KIND_BADGE: Record<AiRecommendation["kind"], string> = {
   RISK: "bg-danger-500/15 text-danger-600",
   PREDICTION: "bg-mine-400/15 text-mine-400",
   RECOMMENDATION: "bg-hazard-500/15 text-hazard-600",
+  ACHIEVEMENT: "bg-success-500/15 text-success-600",
+  ANNOUNCEMENT: "bg-mine-500/15 text-mine-300",
 };
+const NON_ACTIONABLE_KINDS = new Set<AiRecommendation["kind"]>(["ACHIEVEMENT", "ANNOUNCEMENT"]);
 
 export default function AiAssistantWidget() {
   const { t } = useTranslation();
   const [configured, setConfigured] = useState<boolean | null>(null);
   const [summary, setSummary] = useState<string | null>(null);
+  const [summaryExpanded, setSummaryExpanded] = useState(false);
   const [loadingSummary, setLoadingSummary] = useState(true);
   const [recommendations, setRecommendations] = useState<AiRecommendation[]>([]);
   const [showResolved, setShowResolved] = useState(false);
+  const [recommendationsExpanded, setRecommendationsExpanded] = useState(false);
   const [reviewingId, setReviewingId] = useState<string | null>(null);
   const [chatOpen, setChatOpen] = useState(false);
   const [messages, setMessages] = useState<AiChatMessage[]>([]);
@@ -117,9 +133,18 @@ export default function AiAssistantWidget() {
     }
   }
 
+  const summaryLines = (summary ?? "")
+    .split("\n")
+    .map((line) => line.replace(/^[-•*]\s*/, "").trim())
+    .filter(Boolean);
+  const visibleSummaryLines = summaryExpanded ? summaryLines : summaryLines.slice(0, SUMMARY_PREVIEW_COUNT);
+
   const activeRecommendations = recommendations.filter((r) => r.status === "OPEN" || r.status === "ACKNOWLEDGED");
   const resolvedRecommendations = recommendations.filter((r) => r.status === "ACTIONED" || r.status === "DISMISSED");
-  const visibleRecommendations = showResolved ? recommendations : activeRecommendations;
+  const filteredRecommendations = showResolved ? recommendations : activeRecommendations;
+  const visibleRecommendations = recommendationsExpanded
+    ? filteredRecommendations
+    : filteredRecommendations.slice(0, RECOMMENDATIONS_PREVIEW_COUNT);
 
   return (
     <div className="relative bg-mine-900 border-2 border-hazard-500/40 rounded-xl shadow-lg shadow-hazard-500/10 p-4 bg-gradient-to-br from-hazard-500/5 via-transparent to-transparent">
@@ -148,13 +173,10 @@ export default function AiAssistantWidget() {
         </div>
       )}
 
-      {!loadingSummary && configured && summary && (
-        <ul className="space-y-2 mb-3">
-          {summary
-            .split("\n")
-            .map((line) => line.replace(/^[-•*]\s*/, "").trim())
-            .filter(Boolean)
-            .map((line, i) => {
+      {!loadingSummary && configured && summaryLines.length > 0 && (
+        <div className="mb-3">
+          <ul className="space-y-2">
+            {visibleSummaryLines.map((line, i) => {
               const tone = toneOf(line);
               return (
                 <li key={i} className="flex items-start gap-2 text-xs">
@@ -163,19 +185,31 @@ export default function AiAssistantWidget() {
                 </li>
               );
             })}
-        </ul>
+          </ul>
+          {summaryLines.length > SUMMARY_PREVIEW_COUNT && (
+            <button
+              className="text-[10px] font-bold text-hazard-600 hover:text-hazard-500 mt-1.5"
+              onClick={() => setSummaryExpanded((v) => !v)}
+            >
+              {summaryExpanded ? t("ai.showLess") : t("ai.readMore", { count: summaryLines.length - SUMMARY_PREVIEW_COUNT })}
+            </button>
+          )}
+        </div>
       )}
 
       {!loadingSummary && configured && recommendations.length > 0 && (
         <div className="border-t-2 border-hazard-500/20 pt-3">
           <div className="flex items-center justify-between mb-2">
             <h3 className="text-[11px] font-extrabold uppercase tracking-wide text-mine-300">
-              {t("ai.recommendationsTitle", { count: activeRecommendations.length })}
+              {t("ai.insightsTitle", { count: activeRecommendations.length })}
             </h3>
             {resolvedRecommendations.length > 0 && (
               <button
                 className="text-[10px] font-bold text-mine-400 hover:text-mine-200"
-                onClick={() => setShowResolved((v) => !v)}
+                onClick={() => {
+                  setShowResolved((v) => !v);
+                  setRecommendationsExpanded(false);
+                }}
               >
                 {showResolved ? t("ai.hideResolved") : t("ai.showResolved", { count: resolvedRecommendations.length })}
               </button>
@@ -186,8 +220,9 @@ export default function AiAssistantWidget() {
           )}
           <ul className="space-y-2">
             {visibleRecommendations.map((rec) => {
-              const tone = toneOfSeverity(rec.severity);
+              const tone = toneOfItem(rec);
               const isResolved = rec.status === "ACTIONED" || rec.status === "DISMISSED";
+              const nonActionable = NON_ACTIONABLE_KINDS.has(rec.kind);
               return (
                 <li key={rec.id} className={`rounded-lg border border-mine-800 p-2.5 ${isResolved ? "opacity-60" : "bg-mine-800/30"}`}>
                   <div className="flex items-start gap-2">
@@ -211,35 +246,57 @@ export default function AiAssistantWidget() {
                   </div>
                   {!isResolved && (
                     <div className="flex justify-end gap-1.5 mt-2">
-                      {rec.status === "OPEN" && (
+                      {nonActionable ? (
                         <button
-                          className="text-[10px] font-bold text-mine-300 hover:text-mine-50 bg-mine-800 hover:bg-mine-700 rounded px-2 py-1 transition-colors disabled:opacity-50"
+                          className="text-[10px] font-bold text-white bg-mine-400 hover:bg-mine-500 rounded px-2 py-1 transition-colors disabled:opacity-50"
                           disabled={reviewingId === rec.id}
-                          onClick={() => reviewRecommendation(rec.id, "ACKNOWLEDGED")}
+                          onClick={() => reviewRecommendation(rec.id, "ACTIONED")}
                         >
-                          {t("ai.acknowledge")}
+                          {t("ai.gotIt")}
                         </button>
+                      ) : (
+                        <>
+                          {rec.status === "OPEN" && (
+                            <button
+                              className="text-[10px] font-bold text-mine-300 hover:text-mine-50 bg-mine-800 hover:bg-mine-700 rounded px-2 py-1 transition-colors disabled:opacity-50"
+                              disabled={reviewingId === rec.id}
+                              onClick={() => reviewRecommendation(rec.id, "ACKNOWLEDGED")}
+                            >
+                              {t("ai.acknowledge")}
+                            </button>
+                          )}
+                          <button
+                            className="text-[10px] font-bold text-white bg-success-500 hover:bg-success-600 rounded px-2 py-1 transition-colors disabled:opacity-50"
+                            disabled={reviewingId === rec.id}
+                            onClick={() => reviewRecommendation(rec.id, "ACTIONED")}
+                          >
+                            {t("ai.markActioned")}
+                          </button>
+                          <button
+                            className="text-[10px] font-bold text-mine-300 hover:text-danger-600 bg-mine-800 hover:bg-danger-500/10 rounded px-2 py-1 transition-colors disabled:opacity-50"
+                            disabled={reviewingId === rec.id}
+                            onClick={() => reviewRecommendation(rec.id, "DISMISSED")}
+                          >
+                            {t("ai.dismiss")}
+                          </button>
+                        </>
                       )}
-                      <button
-                        className="text-[10px] font-bold text-white bg-success-500 hover:bg-success-600 rounded px-2 py-1 transition-colors disabled:opacity-50"
-                        disabled={reviewingId === rec.id}
-                        onClick={() => reviewRecommendation(rec.id, "ACTIONED")}
-                      >
-                        {t("ai.markActioned")}
-                      </button>
-                      <button
-                        className="text-[10px] font-bold text-mine-300 hover:text-danger-600 bg-mine-800 hover:bg-danger-500/10 rounded px-2 py-1 transition-colors disabled:opacity-50"
-                        disabled={reviewingId === rec.id}
-                        onClick={() => reviewRecommendation(rec.id, "DISMISSED")}
-                      >
-                        {t("ai.dismiss")}
-                      </button>
                     </div>
                   )}
                 </li>
               );
             })}
           </ul>
+          {filteredRecommendations.length > RECOMMENDATIONS_PREVIEW_COUNT && (
+            <button
+              className="text-[10px] font-bold text-hazard-600 hover:text-hazard-500 mt-2"
+              onClick={() => setRecommendationsExpanded((v) => !v)}
+            >
+              {recommendationsExpanded
+                ? t("ai.showLess")
+                : t("ai.readMore", { count: filteredRecommendations.length - RECOMMENDATIONS_PREVIEW_COUNT })}
+            </button>
+          )}
         </div>
       )}
 

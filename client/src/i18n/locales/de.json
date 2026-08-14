@@ -3374,7 +3374,9 @@
     "kind": {
       "RISK": "Risiko",
       "PREDICTION": "Prognose",
-      "RECOMMENDATION": "Maßnahme"
+      "RECOMMENDATION": "Maßnahme",
+      "ACHIEVEMENT": "Erfolg",
+      "ANNOUNCEMENT": "Update"
     },
     "status": {
       "OPEN": "Offen",
@@ -3385,6 +3387,10 @@
     "acknowledge": "Zur Kenntnis nehmen",
     "markActioned": "Als erledigt markieren",
     "dismiss": "Verwerfen",
-    "dismissReasonPrompt": "Optionale Notiz, warum dies verworfen wird"
+    "dismissReasonPrompt": "Optionale Notiz, warum dies verworfen wird",
+    "insightsTitle": "KI-Einblicke ({{count}} offen)",
+    "readMore": "Mehr lesen ({{count}} weitere)",
+    "showLess": "Weniger anzeigen",
+    "gotIt": "Verstanden"
   }
 }

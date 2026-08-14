@@ -3373,7 +3373,9 @@
     "kind": {
       "RISK": "Risk",
       "PREDICTION": "Prediction",
-      "RECOMMENDATION": "Action"
+      "RECOMMENDATION": "Action",
+      "ACHIEVEMENT": "Achievement",
+      "ANNOUNCEMENT": "Update"
     },
     "status": {
       "OPEN": "Open",
@@ -3384,6 +3386,10 @@
     "acknowledge": "Acknowledge",
     "markActioned": "Mark actioned",
     "dismiss": "Dismiss",
-    "dismissReasonPrompt": "Optional note on why this is being dismissed"
+    "dismissReasonPrompt": "Optional note on why this is being dismissed",
+    "insightsTitle": "AI Insights ({{count}} open)",
+    "readMore": "Read more ({{count}} more)",
+    "showLess": "Show less",
+    "gotIt": "Got it"
   }
 }

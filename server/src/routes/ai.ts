@@ -504,6 +504,98 @@ async function buildOperationsManagerContext(mineId: string) {
   };
 }
 
+// Distinct from both the General Manager (strategic, mine-wide) and Operations Manager
+// (production root-cause deep dive): the COO's lens is day-to-day execution across
+// departments — is the operation running, is it safe, is cross-department work flowing.
+async function buildCooContext(mineId: string) {
+  const sevenDaysAgo = new Date(Date.now() - 7 * 86400000);
+  const in30Days = new Date(Date.now() + 30 * 86400000);
+
+  const [
+    mine,
+    sitesByStatus,
+    openIncidentsBySeverity,
+    openHazards,
+    safetyInspectionsCompleted,
+    safetyInspectionsTotal,
+    recentProduction,
+    totalWorkers,
+    onShiftWorkers,
+    pendingLeaveRequests,
+    totalEquipment,
+    downEquipment,
+    overdueMaintenance,
+    pendingPermitsToWork,
+    escalatedRiskAssessments,
+    activeContractors,
+    contractorsExpiringSoon,
+  ] = await Promise.all([
+    prisma.mine.findUnique({ where: { id: mineId }, select: { name: true } }),
+    prisma.site.groupBy({ by: ["status"], _count: true, where: { mineId } }),
+    prisma.incident.groupBy({ by: ["severity"], where: { status: { in: ["OPEN", "INVESTIGATING"] }, site: { mineId } }, _count: true }),
+    prisma.hazardReport.count({ where: { status: { in: ["OPEN", "IN_PROGRESS"] }, site: { mineId } } }),
+    prisma.safetyInspection.count({ where: { status: "COMPLETED", site: { mineId } } }),
+    prisma.safetyInspection.count({ where: { site: { mineId } } }),
+    prisma.productionRecord.findMany({
+      where: { site: { mineId }, shiftDate: { gte: sevenDaysAgo } },
+      select: { tonnesMined: true, targetTonnes: true },
+    }),
+    prisma.worker.count({ where: { site: { mineId } } }),
+    prisma.worker.count({ where: { status: "ON_SHIFT", site: { mineId } } }),
+    prisma.leaveRequest.count({ where: { status: "PENDING", worker: { site: { mineId } } } }),
+    prisma.equipment.count({ where: { site: { mineId } } }),
+    prisma.equipment.count({ where: { status: "DOWN", site: { mineId } } }),
+    prisma.maintenanceSchedule.count({ where: { equipment: { site: { mineId } }, status: "OVERDUE" } }),
+    prisma.permitToWork.count({ where: { status: "PENDING_EXECUTIVE", site: { mineId } } }),
+    prisma.riskAssessment.count({ where: { escalated: true, mitigationStatus: { in: ["OPEN", "IN_PROGRESS"] }, site: { mineId } } }),
+    prisma.contractor.count({ where: { status: "ACTIVE", site: { mineId } } }),
+    prisma.contractor.count({
+      where: { status: "ACTIVE", site: { mineId }, OR: [{ goodStandingExpiry: { lte: in30Days } }, { insuranceExpiry: { lte: in30Days } }] },
+    }),
+  ]);
+
+  const incidentSeverity = { LOW: 0, MEDIUM: 0, HIGH: 0, CRITICAL: 0 } as Record<string, number>;
+  for (const row of openIncidentsBySeverity) incidentSeverity[row.severity] = row._count;
+
+  const siteStatus = { OPERATIONAL: 0, RESTRICTED: 0, SHUT_DOWN: 0 } as Record<string, number>;
+  for (const row of sitesByStatus) siteStatus[row.status] = row._count;
+
+  const tonnesMined = recentProduction.reduce((sum, r) => sum + r.tonnesMined, 0);
+  const targetTonnes = recentProduction.reduce((sum, r) => sum + (r.targetTonnes ?? 0), 0);
+
+  return {
+    mine: { name: mine?.name ?? "the mine" },
+    sites: siteStatus,
+    safety: {
+      openIncidentsBySeverity: incidentSeverity,
+      openHazardReports: openHazards,
+      safetyInspectionCompletionPct:
+        safetyInspectionsTotal === 0 ? 100 : Math.round((safetyInspectionsCompleted / safetyInspectionsTotal) * 1000) / 10,
+    },
+    productionLast7Days: {
+      tonnesMined: Math.round(tonnesMined),
+      targetAttainmentPct: targetTonnes === 0 ? null : Math.round((tonnesMined / targetTonnes) * 1000) / 10,
+    },
+    workforce: {
+      total: totalWorkers,
+      onShift: onShiftWorkers,
+      onShiftPct: totalWorkers === 0 ? 0 : Math.round((onShiftWorkers / totalWorkers) * 1000) / 10,
+      pendingLeaveRequests,
+    },
+    equipment: {
+      total: totalEquipment,
+      down: downEquipment,
+      availabilityPct: totalEquipment === 0 ? 100 : Math.round(((totalEquipment - downEquipment) / totalEquipment) * 1000) / 10,
+      overdueMaintenanceItems: overdueMaintenance,
+    },
+    crossDepartmentCoordination: {
+      permitsToWorkPendingExecutiveApproval: pendingPermitsToWork,
+      escalatedUnresolvedRiskAssessments: escalatedRiskAssessments,
+    },
+    contractors: { active: activeContractors, complianceDocsExpiringWithin30Days: contractorsExpiringSoon },
+  };
+}
+
 // Guardrail applied to every title's prompt, both chat and the pipeline summary below —
 // the AI is structurally advisory-only (see AiRecommendation in schema.prisma: it can
 // create rows, but only a human review endpoint can ever change their status).
@@ -579,6 +671,16 @@ const AI_MODULES: Record<string, AiModule> = {
       `workforce coverage, weather disruption, operational/safety events, and supply chain (low-stock) signals.` +
       ROOT_CAUSE_METHODOLOGY,
   },
+  COO: {
+    buildContext: buildCooContext,
+    systemPrompt: (ctx) =>
+      BASE_SYSTEM_PROMPT(ctx.mine.name, "COO") +
+      ` Focus on day-to-day operational execution across every department: is the operation running (site status, ` +
+      `production vs target), is it safe (open incidents, hazard reports, safety inspection completion), is the ` +
+      `workforce and equipment available, and is cross-department work flowing (permits to work awaiting executive ` +
+      `approval, escalated risk assessments, contractor compliance). This is an execution-oversight assistant, ` +
+      `complementary to the General Manager's strategic view and the Operations Manager's production deep-dive.`,
+  },
 };
 
 /** Extend this list as each executive's AI module is built out (see AI_MODULES above). */
@@ -607,18 +709,23 @@ async function resolveAiModule(req: any, res: any): Promise<{ title: ExecutiveTi
 // status. The AI can propose; only a person can close something out.
 const PIPELINE_INSTRUCTIONS =
   `Run the following pipeline over the data snapshot below:\n` +
-  `1. ANALYST — identify meaningful patterns or trends in the data.\n` +
+  `1. ANALYST — identify meaningful patterns or trends in the data, positive as well as negative.\n` +
   `2. RISK DETECTOR — flag concrete risks, each with a severity (LOW/MEDIUM/HIGH/CRITICAL).\n` +
   `3. PREDICTOR — for each risk, project the likely near-term trajectory (days/weeks) if left unaddressed, grounded only in the given data.\n` +
   `4. ADVISOR — recommend specific, concrete actions a human should consider.\n\n` +
+  `IMPORTANT — give a BALANCED picture, not just problems. Alongside risks/predictions/recommendations, also surface:\n` +
+  `- ACHIEVEMENT: genuine positive results or improvements visible in the data (e.g. a metric improved, a target was met, zero incidents in the period, a backlog cleared).\n` +
+  `- ANNOUNCEMENT: neutral, noteworthy updates that aren't risks or wins but are still worth knowing (e.g. a new hire, an appointment filled, a completed milestone, a status change).\n` +
+  `Do not manufacture achievements or announcements that aren't supported by the data — an empty or risk-only items list is correct if that's genuinely all the data shows. But if the data does contain positive or neutral developments, you must include them; do not report only emergencies or problems.\n\n` +
   `Reply with ONLY a single JSON object, no markdown, no code fences, matching exactly this shape:\n` +
-  `{"summary": "3-5 sentence plain-language overview, most urgent first", ` +
-  `"items": [{"kind": "RISK" | "PREDICTION" | "RECOMMENDATION", "title": "short headline under 12 words", ` +
+  `{"summary": "3-5 sentence plain-language overview covering the most important developments of any kind, most urgent first", ` +
+  `"items": [{"kind": "RISK" | "PREDICTION" | "RECOMMENDATION" | "ACHIEVEMENT" | "ANNOUNCEMENT", "title": "short headline under 12 words", ` +
   `"detail": "1-2 sentence explanation grounded in the data snapshot", "severity": "LOW" | "MEDIUM" | "HIGH" | "CRITICAL"}]}\n` +
-  `Include at most 8 items, ordered by severity descending. If nothing is notable, return an empty items array and say so in the summary.`;
+  `Include at most 10 items total, covering a mix of kinds where the data supports it, ordered by severity descending within each kind. ` +
+  `If nothing is notable at all, return an empty items array and say so in the summary.`;
 
 interface PipelineItem {
-  kind: "RISK" | "PREDICTION" | "RECOMMENDATION";
+  kind: "RISK" | "PREDICTION" | "RECOMMENDATION" | "ACHIEVEMENT" | "ANNOUNCEMENT";
   title: string;
   detail: string;
   severity: "LOW" | "MEDIUM" | "HIGH" | "CRITICAL";
@@ -628,7 +735,7 @@ interface PipelineResult {
   items: PipelineItem[];
 }
 
-const VALID_KINDS = new Set(["RISK", "PREDICTION", "RECOMMENDATION"]);
+const VALID_KINDS = new Set(["RISK", "PREDICTION", "RECOMMENDATION", "ACHIEVEMENT", "ANNOUNCEMENT"]);
 const VALID_SEVERITIES = new Set(["LOW", "MEDIUM", "HIGH", "CRITICAL"]);
 
 // The model is instructed to return bare JSON, but LLMs sometimes wrap it in a markdown
@@ -644,9 +751,9 @@ function parsePipelineResult(raw: string): PipelineResult {
   }
   const items: PipelineItem[] = parsed.items
     .filter((it: any) => it && typeof it.title === "string" && typeof it.detail === "string")
-    .slice(0, 8)
+    .slice(0, 10)
     .map((it: any) => ({
-      kind: VALID_KINDS.has(it.kind) ? it.kind : "RECOMMENDATION",
+      kind: VALID_KINDS.has(it.kind) ? it.kind : "ANNOUNCEMENT",
       title: String(it.title).slice(0, 200),
       detail: String(it.detail).slice(0, 2000),
       severity: VALID_SEVERITIES.has(it.severity) ? it.severity : "MEDIUM",

@@ -3374,7 +3374,9 @@
     "kind": {
       "RISK": "Risiko",
       "PREDICTION": "Voorspelling",
-      "RECOMMENDATION": "Aksie"
+      "RECOMMENDATION": "Aksie",
+      "ACHIEVEMENT": "Prestasie",
+      "ANNOUNCEMENT": "Opdatering"
     },
     "status": {
       "OPEN": "Oop",
@@ -3385,6 +3387,10 @@
     "acknowledge": "Erken",
     "markActioned": "Merk as uitgevoer",
     "dismiss": "Wys af",
-    "dismissReasonPrompt": "Opsionele nota oor waarom dit afgewys word"
+    "dismissReasonPrompt": "Opsionele nota oor waarom dit afgewys word",
+    "insightsTitle": "KI-Insigte ({{count}} oop)",
+    "readMore": "Lees meer ({{count}} meer)",
+    "showLess": "Wys minder",
+    "gotIt": "Verstaan"
   }
 }

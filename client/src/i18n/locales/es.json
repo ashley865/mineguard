@@ -3374,7 +3374,9 @@
     "kind": {
       "RISK": "Riesgo",
       "PREDICTION": "Predicción",
-      "RECOMMENDATION": "Acción"
+      "RECOMMENDATION": "Acción",
+      "ACHIEVEMENT": "Logro",
+      "ANNOUNCEMENT": "Actualización"
     },
     "status": {
       "OPEN": "Abierta",
@@ -3385,6 +3387,10 @@
     "acknowledge": "Reconocer",
     "markActioned": "Marcar gestionada",
     "dismiss": "Descartar",
-    "dismissReasonPrompt": "Nota opcional sobre por qué se descarta"
+    "dismissReasonPrompt": "Nota opcional sobre por qué se descarta",
+    "insightsTitle": "Perspectivas de IA ({{count}} abiertas)",
+    "readMore": "Leer más ({{count}} más)",
+    "showLess": "Mostrar menos",
+    "gotIt": "Entendido"
   }
 }
