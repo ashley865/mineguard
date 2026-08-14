@@ -351,6 +351,29 @@ async function resolveAiModule(req: any, res: any): Promise<{ title: ExecutiveTi
   return { title, module: AI_MODULES[title] };
 }
 
+// TEMPORARY DIAGNOSTIC — added to root-cause a "configured: false" report in production.
+// Reports only metadata about AI_API_KEY (presence, length, prefix shape) — never the
+// key value itself, and never logs it. Admin-only. Remove once the issue is resolved.
+router.get("/debug", async (req, res) => {
+  if (req.auth!.role !== "ADMIN") {
+    return res.status(403).json({ error: "Admin only" });
+  }
+  const rawKey = process.env.AI_API_KEY;
+  const keyIsSet = typeof rawKey !== "undefined";
+  const trimmedLength = rawKey ? rawKey.trim().length : 0;
+  res.json({
+    keyIsSet,
+    keyIsNonEmpty: trimmedLength > 0,
+    keyLength: rawKey ? rawKey.length : 0,
+    keyHasSurroundingWhitespace: !!rawKey && rawKey.length !== trimmedLength,
+    startsWithSk: !!rawKey && rawKey.trim().startsWith("sk-"),
+    nodeEnv: process.env.NODE_ENV ?? null,
+    aiApiBaseUrl: process.env.AI_API_BASE_URL ?? null,
+    aiModel: process.env.AI_MODEL ?? null,
+    isAiConfiguredResult: isAiConfigured(),
+  });
+});
+
 router.get("/summary", aiLimiter, async (req, res) => {
   const mineId = requireMineId(req, res);
   if (!mineId) return;
