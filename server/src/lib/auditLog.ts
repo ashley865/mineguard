@@ -37,6 +37,7 @@ export const AUDITED_MODELS = new Set([
   "SecurityBlacklistEntry",
   "SecurityInvestigation",
   "SecurityKey",
+  "SecurityAsset",
 ]);
 
 const AUDITED_OPERATIONS = new Set(["create", "update", "delete", "upsert"]);

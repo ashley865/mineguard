@@ -3265,3 +3265,46 @@ export interface KeyIssueLog {
   eventAt: string;
   loggedBy?: { id: string; name: string } | null;
 }
+
+export type SecurityAssetType =
+  | "RADIO"
+  | "BATON"
+  | "FIREARM"
+  | "ALARM_PANEL"
+  | "BARRIER"
+  | "METAL_DETECTOR"
+  | "BODY_CAMERA"
+  | "TORCH"
+  | "HANDCUFFS"
+  | "VEHICLE"
+  | "OTHER";
+export type SecurityAssetCondition = "GOOD" | "FAIR" | "DAMAGED" | "OUT_OF_SERVICE";
+export type SecurityAssetStatus = "IN_STORE" | "ASSIGNED" | "IN_MAINTENANCE" | "DECOMMISSIONED";
+export interface SecurityAsset {
+  id: string;
+  siteId: string;
+  site?: { id: string; name: string };
+  assetTag: string;
+  type: SecurityAssetType;
+  description: string;
+  serialNumber?: string | null;
+  condition: SecurityAssetCondition;
+  status: SecurityAssetStatus;
+  assignedWorker?: { id: string; name: string; employeeId: string } | null;
+  lastMaintenanceAt?: string | null;
+  nextMaintenanceDue?: string | null;
+  notes?: string | null;
+  createdBy?: { id: string; name: string } | null;
+  createdAt: string;
+}
+
+export type SecurityAssetEventType = "ASSIGNED" | "RETURNED" | "SENT_FOR_MAINTENANCE" | "RETURNED_FROM_MAINTENANCE" | "DECOMMISSIONED";
+export interface SecurityAssetAssignmentLog {
+  id: string;
+  assetId: string;
+  eventType: SecurityAssetEventType;
+  worker?: { id: string; name: string; employeeId: string } | null;
+  notes?: string | null;
+  eventAt: string;
+  loggedBy?: { id: string; name: string } | null;
+}

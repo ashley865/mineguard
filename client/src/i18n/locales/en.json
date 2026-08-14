@@ -642,7 +642,13 @@
       "OFFERED": "Offered",
       "ISSUED": "Issued",
       "LOST": "Lost",
-      "RETIRED": "Retired"
+      "RETIRED": "Retired",
+      "GOOD": "Good",
+      "DAMAGED": "Damaged",
+      "OUT_OF_SERVICE": "Out of Service",
+      "IN_STORE": "In Store",
+      "ASSIGNED": "Assigned",
+      "IN_MAINTENANCE": "In Maintenance"
     },
     "severity": {
       "LOW": "Low",
@@ -3657,6 +3663,61 @@
       "ISSUED": "Issued",
       "RETURNED": "Returned",
       "REPORTED_LOST": "Reported Lost"
+    }
+  },
+  "securityAssets": {
+    "nav": "Security Assets",
+    "subtitle": "Register of security equipment — radios, batons, firearms, alarm panels, barriers — assignment, condition and maintenance due dates.",
+    "assetTag": "Asset Tag",
+    "assetType": "Asset Type",
+    "assetTypes": {
+      "RADIO": "Radio",
+      "BATON": "Baton",
+      "FIREARM": "Firearm",
+      "ALARM_PANEL": "Alarm Panel",
+      "BARRIER": "Barrier",
+      "METAL_DETECTOR": "Metal Detector",
+      "BODY_CAMERA": "Body Camera",
+      "TORCH": "Torch",
+      "HANDCUFFS": "Handcuffs",
+      "VEHICLE": "Vehicle",
+      "OTHER": "Other"
+    },
+    "serialNumber": "Serial Number",
+    "condition": "Condition",
+    "nextMaintenanceDue": "Next Maintenance Due",
+    "newAsset": "+ New Asset",
+    "newAssetTitle": "New Security Asset",
+    "editAssetTitle": "Edit Security Asset",
+    "noneYet": "No security assets registered yet.",
+    "confirmDelete": "Delete this asset from the register?",
+    "saveError": "Could not save this asset.",
+    "summaryInStore": "In Store",
+    "summaryAssigned": "Assigned",
+    "summaryInMaintenance": "In Maintenance",
+    "summaryOverdueMaintenance": "Overdue Maintenance",
+    "assignedTo": "Assigned To",
+    "history": "History",
+    "historyTitle": "History — {{tag}}",
+    "noHistory": "No assignment history yet.",
+    "colLoggedBy": "Logged By",
+    "assign": "Assign",
+    "assignTitle": "Assign {{tag}}",
+    "selectWorker": "Select Worker",
+    "return": "Return",
+    "confirmReturn": "Mark this asset as returned to store?",
+    "sendForMaintenance": "Send for Maintenance",
+    "confirmSendForMaintenance": "Send this asset for maintenance?",
+    "returnFromMaintenance": "Return from Maintenance",
+    "returnFromMaintenanceTitle": "Return from Maintenance — {{tag}}",
+    "decommission": "Decommission",
+    "confirmDecommission": "Decommission this asset? It will no longer be assignable.",
+    "events": {
+      "ASSIGNED": "Assigned",
+      "RETURNED": "Returned",
+      "SENT_FOR_MAINTENANCE": "Sent for Maintenance",
+      "RETURNED_FROM_MAINTENANCE": "Returned from Maintenance",
+      "DECOMMISSIONED": "Decommissioned"
     }
   }
 }

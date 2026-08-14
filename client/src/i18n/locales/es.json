@@ -625,7 +625,13 @@
       "OFFERED": "Oferta Enviada",
       "ISSUED": "Emitida",
       "LOST": "Perdida",
-      "RETIRED": "Retirada"
+      "RETIRED": "Retirada",
+      "GOOD": "Bueno",
+      "DAMAGED": "Dañado",
+      "OUT_OF_SERVICE": "Fuera de Servicio",
+      "IN_STORE": "En Almacén",
+      "ASSIGNED": "Asignado",
+      "IN_MAINTENANCE": "En Mantenimiento"
     },
     "severity": {
       "LOW": "Baja",
@@ -3658,6 +3664,61 @@
       "ISSUED": "Entregada",
       "RETURNED": "Devuelta",
       "REPORTED_LOST": "Reportada Perdida"
+    }
+  },
+  "securityAssets": {
+    "nav": "Activos de Seguridad",
+    "subtitle": "Registro de equipo de seguridad — radios, bastones, armas de fuego, paneles de alarma, barreras — asignación, condición y fechas de mantenimiento.",
+    "assetTag": "Etiqueta del Activo",
+    "assetType": "Tipo de Activo",
+    "assetTypes": {
+      "RADIO": "Radio",
+      "BATON": "Bastón",
+      "FIREARM": "Arma de Fuego",
+      "ALARM_PANEL": "Panel de Alarma",
+      "BARRIER": "Barrera",
+      "METAL_DETECTOR": "Detector de Metales",
+      "BODY_CAMERA": "Cámara Corporal",
+      "TORCH": "Linterna",
+      "HANDCUFFS": "Esposas",
+      "VEHICLE": "Vehículo",
+      "OTHER": "Otro"
+    },
+    "serialNumber": "Número de Serie",
+    "condition": "Condición",
+    "nextMaintenanceDue": "Próximo Mantenimiento",
+    "newAsset": "+ Nuevo Activo",
+    "newAssetTitle": "Nuevo Activo de Seguridad",
+    "editAssetTitle": "Editar Activo de Seguridad",
+    "noneYet": "Aún no hay activos de seguridad registrados.",
+    "confirmDelete": "¿Eliminar este activo del registro?",
+    "saveError": "No se pudo guardar este activo.",
+    "summaryInStore": "En Almacén",
+    "summaryAssigned": "Asignados",
+    "summaryInMaintenance": "En Mantenimiento",
+    "summaryOverdueMaintenance": "Mantenimiento Atrasado",
+    "assignedTo": "Asignado A",
+    "history": "Historial",
+    "historyTitle": "Historial — {{tag}}",
+    "noHistory": "Aún no hay historial de asignación.",
+    "colLoggedBy": "Registrado Por",
+    "assign": "Asignar",
+    "assignTitle": "Asignar {{tag}}",
+    "selectWorker": "Seleccionar Trabajador",
+    "return": "Devolver",
+    "confirmReturn": "¿Marcar este activo como devuelto al almacén?",
+    "sendForMaintenance": "Enviar a Mantenimiento",
+    "confirmSendForMaintenance": "¿Enviar este activo a mantenimiento?",
+    "returnFromMaintenance": "Devolver de Mantenimiento",
+    "returnFromMaintenanceTitle": "Devolver de Mantenimiento — {{tag}}",
+    "decommission": "Dar de Baja",
+    "confirmDecommission": "¿Dar de baja este activo? Ya no se podrá asignar.",
+    "events": {
+      "ASSIGNED": "Asignado",
+      "RETURNED": "Devuelto",
+      "SENT_FOR_MAINTENANCE": "Enviado a Mantenimiento",
+      "RETURNED_FROM_MAINTENANCE": "Devuelto de Mantenimiento",
+      "DECOMMISSIONED": "Dado de Baja"
     }
   }
 }

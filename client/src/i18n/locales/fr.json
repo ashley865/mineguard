@@ -625,7 +625,13 @@
       "OFFERED": "Offre Envoyée",
       "ISSUED": "Remise",
       "LOST": "Perdue",
-      "RETIRED": "Retirée"
+      "RETIRED": "Retirée",
+      "GOOD": "Bon",
+      "DAMAGED": "Endommagé",
+      "OUT_OF_SERVICE": "Hors Service",
+      "IN_STORE": "En Stock",
+      "ASSIGNED": "Attribué",
+      "IN_MAINTENANCE": "En Maintenance"
     },
     "severity": {
       "LOW": "Faible",
@@ -3658,6 +3664,61 @@
       "ISSUED": "Remise",
       "RETURNED": "Retournée",
       "REPORTED_LOST": "Signalée Perdue"
+    }
+  },
+  "securityAssets": {
+    "nav": "Actifs de Sécurité",
+    "subtitle": "Registre du matériel de sécurité — radios, matraques, armes à feu, panneaux d'alarme, barrières — attribution, état et échéances de maintenance.",
+    "assetTag": "Étiquette de l'Actif",
+    "assetType": "Type d'Actif",
+    "assetTypes": {
+      "RADIO": "Radio",
+      "BATON": "Matraque",
+      "FIREARM": "Arme à Feu",
+      "ALARM_PANEL": "Panneau d'Alarme",
+      "BARRIER": "Barrière",
+      "METAL_DETECTOR": "Détecteur de Métaux",
+      "BODY_CAMERA": "Caméra Corporelle",
+      "TORCH": "Lampe Torche",
+      "HANDCUFFS": "Menottes",
+      "VEHICLE": "Véhicule",
+      "OTHER": "Autre"
+    },
+    "serialNumber": "Numéro de Série",
+    "condition": "État",
+    "nextMaintenanceDue": "Prochaine Maintenance",
+    "newAsset": "+ Nouvel Actif",
+    "newAssetTitle": "Nouvel Actif de Sécurité",
+    "editAssetTitle": "Modifier l'Actif de Sécurité",
+    "noneYet": "Aucun actif de sécurité enregistré pour le moment.",
+    "confirmDelete": "Supprimer cet actif du registre ?",
+    "saveError": "Impossible d'enregistrer cet actif.",
+    "summaryInStore": "En Stock",
+    "summaryAssigned": "Attribués",
+    "summaryInMaintenance": "En Maintenance",
+    "summaryOverdueMaintenance": "Maintenance en Retard",
+    "assignedTo": "Attribué À",
+    "history": "Historique",
+    "historyTitle": "Historique — {{tag}}",
+    "noHistory": "Aucun historique d'attribution pour le moment.",
+    "colLoggedBy": "Enregistré Par",
+    "assign": "Attribuer",
+    "assignTitle": "Attribuer {{tag}}",
+    "selectWorker": "Sélectionner un Travailleur",
+    "return": "Retourner",
+    "confirmReturn": "Marquer cet actif comme retourné au stock ?",
+    "sendForMaintenance": "Envoyer en Maintenance",
+    "confirmSendForMaintenance": "Envoyer cet actif en maintenance ?",
+    "returnFromMaintenance": "Retour de Maintenance",
+    "returnFromMaintenanceTitle": "Retour de Maintenance — {{tag}}",
+    "decommission": "Mettre Hors Service",
+    "confirmDecommission": "Mettre cet actif hors service ? Il ne pourra plus être attribué.",
+    "events": {
+      "ASSIGNED": "Attribué",
+      "RETURNED": "Retourné",
+      "SENT_FOR_MAINTENANCE": "Envoyé en Maintenance",
+      "RETURNED_FROM_MAINTENANCE": "Retourné de Maintenance",
+      "DECOMMISSIONED": "Mis Hors Service"
     }
   }
 }

@@ -625,7 +625,13 @@
       "OFFERED": "Aanbod Gestuur",
       "ISSUED": "Uitgereik",
       "LOST": "Verlore",
-      "RETIRED": "Onttrek"
+      "RETIRED": "Onttrek",
+      "GOOD": "Goed",
+      "DAMAGED": "Beskadig",
+      "OUT_OF_SERVICE": "Buite Diens",
+      "IN_STORE": "In Voorraad",
+      "ASSIGNED": "Toegeken",
+      "IN_MAINTENANCE": "In Onderhoud"
     },
     "severity": {
       "LOW": "Laag",
@@ -3658,6 +3664,61 @@
       "ISSUED": "Uitgereik",
       "RETURNED": "Terugbesorg",
       "REPORTED_LOST": "Verlore Aangemeld"
+    }
+  },
+  "securityAssets": {
+    "nav": "Sekuriteitsbates",
+    "subtitle": "Register van sekuriteitstoerusting — radios, kieries, vuurwapens, alarmpanele, slagbome — toekenning, toestand en onderhoudsvervaldatums.",
+    "assetTag": "Bate-etiket",
+    "assetType": "Batetipe",
+    "assetTypes": {
+      "RADIO": "Radio",
+      "BATON": "Kierie",
+      "FIREARM": "Vuurwapen",
+      "ALARM_PANEL": "Alarmpaneel",
+      "BARRIER": "Slagboom",
+      "METAL_DETECTOR": "Metaaldetektor",
+      "BODY_CAMERA": "Liggaamskamera",
+      "TORCH": "Flits",
+      "HANDCUFFS": "Handboeie",
+      "VEHICLE": "Voertuig",
+      "OTHER": "Ander"
+    },
+    "serialNumber": "Serienommer",
+    "condition": "Toestand",
+    "nextMaintenanceDue": "Volgende Onderhoud",
+    "newAsset": "+ Nuwe Bate",
+    "newAssetTitle": "Nuwe Sekuriteitsbate",
+    "editAssetTitle": "Wysig Sekuriteitsbate",
+    "noneYet": "Nog geen sekuriteitsbates geregistreer nie.",
+    "confirmDelete": "Verwyder hierdie bate uit die register?",
+    "saveError": "Kon nie hierdie bate stoor nie.",
+    "summaryInStore": "In Voorraad",
+    "summaryAssigned": "Toegeken",
+    "summaryInMaintenance": "In Onderhoud",
+    "summaryOverdueMaintenance": "Agterstallige Onderhoud",
+    "assignedTo": "Toegeken Aan",
+    "history": "Geskiedenis",
+    "historyTitle": "Geskiedenis — {{tag}}",
+    "noHistory": "Nog geen toekenningsgeskiedenis nie.",
+    "colLoggedBy": "Aangeteken Deur",
+    "assign": "Ken Toe",
+    "assignTitle": "Ken {{tag}} Toe",
+    "selectWorker": "Kies Werker",
+    "return": "Gee Terug",
+    "confirmReturn": "Merk hierdie bate as terugbesorg na voorraad?",
+    "sendForMaintenance": "Stuur vir Onderhoud",
+    "confirmSendForMaintenance": "Stuur hierdie bate vir onderhoud?",
+    "returnFromMaintenance": "Terug van Onderhoud",
+    "returnFromMaintenanceTitle": "Terug van Onderhoud — {{tag}}",
+    "decommission": "Trek Uit Diens",
+    "confirmDecommission": "Trek hierdie bate uit diens? Dit kan nie meer toegeken word nie.",
+    "events": {
+      "ASSIGNED": "Toegeken",
+      "RETURNED": "Terugbesorg",
+      "SENT_FOR_MAINTENANCE": "Gestuur vir Onderhoud",
+      "RETURNED_FROM_MAINTENANCE": "Terug van Onderhoud",
+      "DECOMMISSIONED": "Uit Diens Getrek"
     }
   }
 }

@@ -305,6 +305,8 @@ model User {
   investigationStatementsRecorded InvestigationStatement[] @relation("StatementRecordedBy")
   securityKeysCreated       SecurityKey[]             @relation("SecurityKeyCreatedBy")
   keyIssueLogsLogged        KeyIssueLog[]             @relation("KeyIssueLogLoggedBy")
+  securityAssetsCreated     SecurityAsset[]           @relation("SecurityAssetCreatedBy")
+  securityAssetLogsLogged   SecurityAssetAssignmentLog[] @relation("SecurityAssetLogLoggedBy")
 }
 
 model UserAttendance {
@@ -411,6 +413,7 @@ model Site {
   securityBlacklistEntries SecurityBlacklistEntry[]
   securityInvestigations  SecurityInvestigation[]
   securityKeys            SecurityKey[]
+  securityAssets          SecurityAsset[]
 }
 
 model Zone {
@@ -594,6 +597,9 @@ model Worker {
 
   keysCurrentlyHeld  SecurityKey[]  @relation("SecurityKeyCurrentHolder")
   keyIssueLogs       KeyIssueLog[]  @relation("KeyIssueLogWorker")
+
+  securityAssetsAssigned SecurityAsset[]               @relation("SecurityAssetAssignedWorker")
+  securityAssetLogs      SecurityAssetAssignmentLog[]  @relation("SecurityAssetLogWorker")
 
   createdAt DateTime @default(now())
 }
@@ -4407,6 +4413,86 @@ model KeyIssueLog {
   eventAt      DateTime          @default(now())
   loggedById   String?
   loggedBy     User?             @relation("KeyIssueLogLoggedBy", fields: [loggedById], references: [id], onDelete: SetNull)
+
+  createdAt DateTime @default(now())
+}
+
+enum SecurityAssetType {
+  RADIO
+  BATON
+  FIREARM
+  ALARM_PANEL
+  BARRIER
+  METAL_DETECTOR
+  BODY_CAMERA
+  TORCH
+  HANDCUFFS
+  VEHICLE
+  OTHER
+}
+
+enum SecurityAssetCondition {
+  GOOD
+  FAIR
+  DAMAGED
+  OUT_OF_SERVICE
+}
+
+enum SecurityAssetStatus {
+  IN_STORE
+  ASSIGNED
+  IN_MAINTENANCE
+  DECOMMISSIONED
+}
+
+// Security-specific equipment (radios, batons, firearms, alarm panels, barriers) —
+// distinct from the general Equipment model, which covers heavy mining/fleet plant
+// (excavators, haul trucks) rather than issued security gear. Mirrors the SecurityKey
+// register/assignment-log shape: current assignment denormalised on the asset itself,
+// full history in SecurityAssetAssignmentLog.
+model SecurityAsset {
+  id                 String                  @id @default(cuid())
+  siteId             String
+  site               Site                    @relation(fields: [siteId], references: [id], onDelete: Cascade)
+  assetTag           String
+  type               SecurityAssetType       @default(OTHER)
+  description        String
+  serialNumber       String?
+  condition          SecurityAssetCondition  @default(GOOD)
+  status             SecurityAssetStatus     @default(IN_STORE)
+  assignedWorkerId   String?
+  assignedWorker     Worker?                 @relation("SecurityAssetAssignedWorker", fields: [assignedWorkerId], references: [id], onDelete: SetNull)
+  lastMaintenanceAt  DateTime?
+  nextMaintenanceDue DateTime?
+  notes              String?
+  createdById        String?
+  createdBy          User?                   @relation("SecurityAssetCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+  assignmentLogs     SecurityAssetAssignmentLog[]
+
+  createdAt DateTime @default(now())
+
+  @@unique([siteId, assetTag])
+}
+
+enum SecurityAssetEventType {
+  ASSIGNED
+  RETURNED
+  SENT_FOR_MAINTENANCE
+  RETURNED_FROM_MAINTENANCE
+  DECOMMISSIONED
+}
+
+model SecurityAssetAssignmentLog {
+  id         String                  @id @default(cuid())
+  assetId    String
+  asset      SecurityAsset           @relation(fields: [assetId], references: [id], onDelete: Cascade)
+  eventType  SecurityAssetEventType
+  workerId   String?
+  worker     Worker?                 @relation("SecurityAssetLogWorker", fields: [workerId], references: [id], onDelete: SetNull)
+  notes      String?
+  eventAt    DateTime                @default(now())
+  loggedById String?
+  loggedBy   User?                   @relation("SecurityAssetLogLoggedBy", fields: [loggedById], references: [id], onDelete: SetNull)
 
   createdAt DateTime @default(now())
 }

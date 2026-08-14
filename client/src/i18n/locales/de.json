@@ -625,7 +625,13 @@
       "OFFERED": "Angebot Gesendet",
       "ISSUED": "Ausgegeben",
       "LOST": "Verloren",
-      "RETIRED": "Ausgemustert"
+      "RETIRED": "Ausgemustert",
+      "GOOD": "Gut",
+      "DAMAGED": "Beschädigt",
+      "OUT_OF_SERVICE": "Außer Betrieb",
+      "IN_STORE": "Auf Lager",
+      "ASSIGNED": "Zugewiesen",
+      "IN_MAINTENANCE": "In Wartung"
     },
     "severity": {
       "LOW": "Niedrig",
@@ -3658,6 +3664,61 @@
       "ISSUED": "Ausgegeben",
       "RETURNED": "Zurückgegeben",
       "REPORTED_LOST": "Als Verloren Gemeldet"
+    }
+  },
+  "securityAssets": {
+    "nav": "Sicherheitsausrüstung",
+    "subtitle": "Register der Sicherheitsausrüstung — Funkgeräte, Schlagstöcke, Schusswaffen, Alarmtafeln, Schranken — Zuweisung, Zustand und Wartungstermine.",
+    "assetTag": "Anlagenkennzeichen",
+    "assetType": "Anlagentyp",
+    "assetTypes": {
+      "RADIO": "Funkgerät",
+      "BATON": "Schlagstock",
+      "FIREARM": "Schusswaffe",
+      "ALARM_PANEL": "Alarmtafel",
+      "BARRIER": "Schranke",
+      "METAL_DETECTOR": "Metalldetektor",
+      "BODY_CAMERA": "Bodycam",
+      "TORCH": "Taschenlampe",
+      "HANDCUFFS": "Handschellen",
+      "VEHICLE": "Fahrzeug",
+      "OTHER": "Sonstiges"
+    },
+    "serialNumber": "Seriennummer",
+    "condition": "Zustand",
+    "nextMaintenanceDue": "Nächste Wartung Fällig",
+    "newAsset": "+ Neue Anlage",
+    "newAssetTitle": "Neue Sicherheitsanlage",
+    "editAssetTitle": "Sicherheitsanlage Bearbeiten",
+    "noneYet": "Noch keine Sicherheitsanlagen registriert.",
+    "confirmDelete": "Diese Anlage aus dem Register löschen?",
+    "saveError": "Diese Anlage konnte nicht gespeichert werden.",
+    "summaryInStore": "Auf Lager",
+    "summaryAssigned": "Zugewiesen",
+    "summaryInMaintenance": "In Wartung",
+    "summaryOverdueMaintenance": "Wartung Überfällig",
+    "assignedTo": "Zugewiesen An",
+    "history": "Historie",
+    "historyTitle": "Historie — {{tag}}",
+    "noHistory": "Noch keine Zuweisungshistorie.",
+    "colLoggedBy": "Erfasst Von",
+    "assign": "Zuweisen",
+    "assignTitle": "{{tag}} Zuweisen",
+    "selectWorker": "Mitarbeiter Auswählen",
+    "return": "Zurückgeben",
+    "confirmReturn": "Diese Anlage als ins Lager zurückgegeben markieren?",
+    "sendForMaintenance": "Zur Wartung Schicken",
+    "confirmSendForMaintenance": "Diese Anlage zur Wartung schicken?",
+    "returnFromMaintenance": "Aus Wartung Zurück",
+    "returnFromMaintenanceTitle": "Aus Wartung Zurück — {{tag}}",
+    "decommission": "Außer Betrieb Nehmen",
+    "confirmDecommission": "Diese Anlage außer Betrieb nehmen? Sie kann dann nicht mehr zugewiesen werden.",
+    "events": {
+      "ASSIGNED": "Zugewiesen",
+      "RETURNED": "Zurückgegeben",
+      "SENT_FOR_MAINTENANCE": "Zur Wartung Geschickt",
+      "RETURNED_FROM_MAINTENANCE": "Aus Wartung Zurück",
+      "DECOMMISSIONED": "Außer Betrieb Genommen"
     }
   }
 }
