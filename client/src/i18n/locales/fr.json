@@ -42,7 +42,9 @@
     "previous": "Précédent",
     "next": "Suivant",
     "email": "E-mail",
-    "none": "Aucun"
+    "none": "Aucun",
+    "loadError": "Impossible de charger — une erreur s'est produite lors de la connexion au serveur.",
+    "retry": "Réessayer"
   },
   "nav": {
     "dashboard": "Tableau de bord",
@@ -3432,7 +3434,8 @@
         "environment": "Environnement",
         "finance": "Finances",
         "enterpriseRisks": "Risques d'Entreprise"
-      }
+      },
+      "downloadPdf": "Télécharger le PDF"
     },
     "takeAction": "Passer à l'Action",
     "hrReport": {

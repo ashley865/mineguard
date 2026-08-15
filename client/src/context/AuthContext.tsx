@@ -32,7 +32,14 @@ const AuthContext = createContext<AuthContextValue | undefined>(undefined);
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(() => {
     const stored = localStorage.getItem("mineguard_user");
-    return stored ? JSON.parse(stored) : null;
+    if (!stored) return null;
+    try {
+      return JSON.parse(stored);
+    } catch {
+      localStorage.removeItem("mineguard_user");
+      localStorage.removeItem("mineguard_token");
+      return null;
+    }
   });
   const [token, setToken] = useState<string | null>(() => localStorage.getItem("mineguard_token"));
   const [loading, setLoading] = useState(true);

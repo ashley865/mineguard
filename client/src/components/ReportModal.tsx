@@ -6,6 +6,7 @@ import { AiRecommendation, ExecutiveReportResponse, ReportPeriod } from "../api/
 import Modal from "./Modal";
 import { buttonPrimary, buttonSecondary } from "./ui";
 import { routeForTopic } from "../lib/aiTopicRoutes";
+import { PdfBuilder } from "../lib/exportPdf";
 
 function humanizeKey(key: string): string {
   return key
@@ -85,6 +86,48 @@ export default function ReportModal({
 
   const sectionsByKey = new Map((report?.sections ?? []).map((s) => [s.key, s]));
 
+  function downloadPdf() {
+    if (!report) return;
+    const pdf = new PdfBuilder();
+    pdf.title(`${report.mine?.name ?? ""} — ${t(titleKey)}`.trim());
+    const periodLine = [
+      report.period ? `${new Date(report.period.start).toLocaleDateString()} – ${new Date(report.period.end).toLocaleDateString()}` : null,
+      report.generatedAt ? t("ai.report.generatedAt", { date: new Date(report.generatedAt).toLocaleString() }) : null,
+    ]
+      .filter(Boolean)
+      .join(" · ");
+    if (periodLine) pdf.subtitle(periodLine);
+    pdf.divider();
+
+    pdf.heading(t("ai.report.executiveSummary"));
+    pdf.paragraph(report.executiveSummary ?? "");
+    pdf.spacer();
+
+    sectionKeys.forEach((key) => {
+      const section = sectionsByKey.get(key);
+      if (!section) return;
+      pdf.heading(t(`${sectionLabelPrefix}.${key}`));
+      pdf.paragraph(section.narrative);
+      pdf.paragraph(factsToText(section.data), { italic: true, size: 8, muted: true });
+      pdf.spacer();
+    });
+
+    if (report.recommendedPriorities && report.recommendedPriorities.length > 0) {
+      pdf.heading(t("ai.report.recommendedPriorities"));
+      pdf.list(report.recommendedPriorities, true);
+      pdf.spacer();
+    }
+
+    if (report.aiInsights && report.aiInsights.length > 0) {
+      pdf.heading(t("ai.report.aiInsights"));
+      pdf.list(report.aiInsights.map((rec) => `[${t(`ai.kind.${rec.kind}`)}] ${rec.title}`));
+    }
+
+    const datePart = new Date(report.generatedAt ?? Date.now()).toISOString().slice(0, 10);
+    const namePart = (report.mine?.name ?? "report").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
+    pdf.save(`${namePart}-ai-report-${datePart}.pdf`);
+  }
+
   return (
     <Modal title={t(titleKey)} onClose={onClose} size="lg">
       <div className="space-y-4">
@@ -122,9 +165,14 @@ export default function ReportModal({
                   {report.generatedAt && ` · ${t("ai.report.generatedAt", { date: new Date(report.generatedAt).toLocaleString() })}`}
                 </p>
               </div>
-              <button className={buttonSecondary} onClick={() => setReport(null)}>
-                {t("ai.report.newReport")}
-              </button>
+              <div className="flex items-center gap-2">
+                <button className={buttonSecondary} onClick={downloadPdf}>
+                  {t("ai.report.downloadPdf")}
+                </button>
+                <button className={buttonSecondary} onClick={() => setReport(null)}>
+                  {t("ai.report.newReport")}
+                </button>
+              </div>
             </div>
 
             <div className="bg-hazard-500/5 border-2 border-hazard-500/30 rounded-lg p-3">

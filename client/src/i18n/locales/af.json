@@ -42,7 +42,9 @@
     "previous": "Vorige",
     "next": "Volgende",
     "email": "E-pos",
-    "none": "Geen"
+    "none": "Geen",
+    "loadError": "Kon dit nie laai nie — iets het verkeerd geloop om die bediener te bereik.",
+    "retry": "Probeer Weer"
   },
   "nav": {
     "dashboard": "Oorsig",
@@ -3432,7 +3434,8 @@
         "environment": "Omgewing",
         "finance": "Finansies",
         "enterpriseRisks": "Ondernemingsrisiko's"
-      }
+      },
+      "downloadPdf": "Laai PDF Af"
     },
     "takeAction": "Neem Aksie",
     "hrReport": {

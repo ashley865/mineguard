@@ -18,6 +18,7 @@ import DateField from "../../components/DateField";
 import DataTable, { DataTableColumn } from "../../components/DataTable";
 import SummaryCards from "../../components/SummaryCards";
 import { AuditHistoryButton } from "../../components/AuditHistoryPanel";
+import LoadError from "../../components/LoadError";
 
 const staffCategories: StaffCategory[] = [
   "MINING_OPERATIONS",
@@ -224,15 +225,22 @@ function CandidatesModal({ requisition, canEdit, canDelete, onClose }: {
   const { t } = useTranslation();
   const [candidates, setCandidates] = useState<Candidate[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
   const [modal, setModal] = useState(false);
   const [hiring, setHiring] = useState<Candidate | null>(null);
   const [uploadingFor, setUploadingFor] = useState<string | null>(null);
 
   async function load() {
     setLoading(true);
-    const res = await api.get<Candidate[]>("/recruitment/candidates", { params: { requisitionId: requisition.id } });
-    setCandidates(res.data);
-    setLoading(false);
+    setLoadError(false);
+    try {
+      const res = await api.get<Candidate[]>("/recruitment/candidates", { params: { requisitionId: requisition.id } });
+      setCandidates(res.data);
+    } catch {
+      setLoadError(true);
+    } finally {
+      setLoading(false);
+    }
   }
 
   useEffect(() => { load(); }, []); // eslint-disable-line react-hooks/exhaustive-deps
@@ -301,6 +309,13 @@ function CandidatesModal({ requisition, canEdit, canDelete, onClose }: {
   ];
 
   if (loading) return <div className="text-mine-300 text-sm">{t("common.loading")}</div>;
+  if (loadError) {
+    return (
+      <Modal title={t("recruitment.candidatesFor", { position: requisition.positionTitle })} onClose={onClose} size="lg">
+        <LoadError onRetry={load} />
+      </Modal>
+    );
+  }
 
   return (
     <Modal title={t("recruitment.candidatesFor", { position: requisition.positionTitle })} onClose={onClose} size="lg">
@@ -360,14 +375,21 @@ export default function RecruitmentTab({ sites }: { sites: Site[] }) {
   const canDelete = user?.role === "ADMIN" || user?.role === "EXECUTIVE";
   const [requisitions, setRequisitions] = useState<JobRequisition[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
   const [modal, setModal] = useState<null | "create" | JobRequisition>(null);
   const [candidatesFor, setCandidatesFor] = useState<JobRequisition | null>(null);
 
   async function load() {
     setLoading(true);
-    const res = await api.get<JobRequisition[]>("/recruitment/requisitions");
-    setRequisitions(res.data);
-    setLoading(false);
+    setLoadError(false);
+    try {
+      const res = await api.get<JobRequisition[]>("/recruitment/requisitions");
+      setRequisitions(res.data);
+    } catch {
+      setLoadError(true);
+    } finally {
+      setLoading(false);
+    }
   }
 
   useEffect(() => { load(); }, []);
@@ -391,6 +413,7 @@ export default function RecruitmentTab({ sites }: { sites: Site[] }) {
   }
 
   if (loading) return <div className="text-mine-300">{t("common.loading")}</div>;
+  if (loadError) return <LoadError onRetry={load} />;
 
   const openCount = requisitions.filter((r) => r.status === "OPEN").length;
   const inPipelineCount = requisitions.reduce((sum, r) => sum + (r._count?.candidates ?? 0), 0);

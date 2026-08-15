@@ -128,7 +128,9 @@ export default function App() {
         <Route path="/messages" element={<Messages />} />
         <Route path="/executive-requests" element={<ExecutiveRequests />} />
         <Route path="/settings" element={<Settings />} />
+        <Route path="*" element={<Navigate to="/" replace />} />
       </Route>
+      <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );
 }

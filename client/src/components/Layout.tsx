@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
-import { NavLink, Outlet } from "react-router-dom";
+import { NavLink, Outlet, useLocation } from "react-router-dom";
 import { useTranslation } from "react-i18next";
+import ErrorBoundary from "./ErrorBoundary";
 import { useAuth } from "../context/AuthContext";
 import { useAssignedSiteIds } from "../hooks/useAssignedSiteIds";
 import { api, API_URL } from "../api/client";
@@ -22,6 +23,7 @@ export default function Layout() {
   const { siteIds: assignedSiteIds } = useAssignedSiteIds();
   const { active: activeEvacuations } = useEvacuation();
   const [mine, setMine] = useState<Mine | null>(null);
+  const location = useLocation();
   const [mobileOpen, setMobileOpen] = useState(false);
   const isEvacuating = activeEvacuations.length > 0;
 
@@ -294,7 +296,9 @@ export default function Layout() {
         </header>
         <main className="flex-1 bg-mine-950 overflow-y-auto">
           <div className="max-w-7xl mx-auto p-5 sm:p-6 lg:p-8">
-            <Outlet />
+            <ErrorBoundary key={location.pathname}>
+              <Outlet />
+            </ErrorBoundary>
           </div>
         </main>
       </div>

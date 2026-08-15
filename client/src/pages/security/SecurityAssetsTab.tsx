@@ -10,6 +10,7 @@ import DataTable, { DataTableColumn } from "../../components/DataTable";
 import SummaryCards from "../../components/SummaryCards";
 import DateField from "../../components/DateField";
 import { AuditHistoryButton } from "../../components/AuditHistoryPanel";
+import LoadError from "../../components/LoadError";
 
 const assetTypes: SecurityAssetType[] = [
   "RADIO", "BATON", "FIREARM", "ALARM_PANEL", "BARRIER", "METAL_DETECTOR", "BODY_CAMERA", "TORCH", "HANDCUFFS", "VEHICLE", "OTHER",
@@ -181,18 +182,26 @@ function LogModal({ asset, onClose }: { asset: SecurityAsset; onClose: () => voi
   const { t } = useTranslation();
   const [logs, setLogs] = useState<SecurityAssetAssignmentLog[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
 
-  useEffect(() => {
-    api.get<SecurityAssetAssignmentLog[]>(`/security-assets/${asset.id}/logs`).then((res) => {
-      setLogs(res.data);
-      setLoading(false);
-    });
-  }, [asset.id]);
+  function load() {
+    setLoading(true);
+    setLoadError(false);
+    api
+      .get<SecurityAssetAssignmentLog[]>(`/security-assets/${asset.id}/logs`)
+      .then((res) => setLogs(res.data))
+      .catch(() => setLoadError(true))
+      .finally(() => setLoading(false));
+  }
+
+  useEffect(() => { load(); }, [asset.id]); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <Modal title={t("securityAssets.historyTitle", { tag: asset.assetTag })} onClose={onClose}>
       {loading ? (
         <div className="text-mine-300 text-sm">{t("common.loading")}</div>
+      ) : loadError ? (
+        <LoadError onRetry={load} />
       ) : (
         <div className="space-y-2">
           {logs.map((l) => (
@@ -220,6 +229,7 @@ export default function SecurityAssetsTab({ sites }: { sites: Site[] }) {
   const [assets, setAssets] = useState<SecurityAsset[]>([]);
   const [workers, setWorkers] = useState<Worker[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
   const [createModal, setCreateModal] = useState<null | "create" | SecurityAsset>(null);
   const [assignModal, setAssignModal] = useState<SecurityAsset | null>(null);
   const [maintenanceModal, setMaintenanceModal] = useState<SecurityAsset | null>(null);
@@ -227,13 +237,19 @@ export default function SecurityAssetsTab({ sites }: { sites: Site[] }) {
 
   async function load() {
     setLoading(true);
-    const [a, w] = await Promise.all([
-      api.get<SecurityAsset[]>("/security-assets"),
-      api.get<Worker[]>("/workers"),
-    ]);
-    setAssets(a.data);
-    setWorkers(w.data);
-    setLoading(false);
+    setLoadError(false);
+    try {
+      const [a, w] = await Promise.all([
+        api.get<SecurityAsset[]>("/security-assets"),
+        api.get<Worker[]>("/workers"),
+      ]);
+      setAssets(a.data);
+      setWorkers(w.data);
+    } catch {
+      setLoadError(true);
+    } finally {
+      setLoading(false);
+    }
   }
 
   useEffect(() => { load(); }, []);
@@ -289,6 +305,7 @@ export default function SecurityAssetsTab({ sites }: { sites: Site[] }) {
   }
 
   if (loading) return <div className="text-mine-300">{t("common.loading")}</div>;
+  if (loadError) return <LoadError onRetry={load} />;
 
   const inStoreCount = assets.filter((a) => a.status === "IN_STORE").length;
   const assignedCount = assets.filter((a) => a.status === "ASSIGNED").length;

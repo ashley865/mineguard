@@ -3,6 +3,8 @@ import { useTranslation } from "react-i18next";
 import { api } from "../api/client";
 import { CaseRiskResponse } from "../api/types";
 import Modal from "./Modal";
+import { buttonSecondary } from "./ui";
+import { PdfBuilder } from "../lib/exportPdf";
 
 const RISK_TONE: Record<string, string> = {
   LOW: "text-success-600 bg-success-500/10 border-success-500/30",
@@ -45,6 +47,38 @@ export default function CaseRiskModal({
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [caseType, caseId]);
+
+  function downloadPdf() {
+    if (!data?.result) return;
+    const pdf = new PdfBuilder();
+    pdf.title(t("ai.caseRisk.title", { case: caseLabel }));
+    pdf.subtitle(new Date().toLocaleString());
+    pdf.divider();
+
+    pdf.heading(t("ai.caseRisk.riskLevel"));
+    pdf.paragraph(t(`ai.caseRisk.level.${data.result.riskLevel}`));
+    pdf.spacer();
+
+    if (data.result.riskFactors.length > 0) {
+      pdf.heading(t("ai.caseRisk.riskFactors"));
+      pdf.list(data.result.riskFactors.map((f) => `${f.factor}: ${f.detail}`));
+      pdf.spacer();
+    }
+
+    if (data.result.proceduralConsiderations.length > 0) {
+      pdf.heading(t("ai.caseRisk.proceduralConsiderations"));
+      pdf.list(data.result.proceduralConsiderations);
+      pdf.spacer();
+    }
+
+    if (data.disclaimer) {
+      pdf.divider();
+      pdf.paragraph(data.disclaimer, { italic: true, size: 8, muted: true });
+    }
+
+    const namePart = caseLabel.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
+    pdf.save(`case-risk-${namePart}-${new Date().toISOString().slice(0, 10)}.pdf`);
+  }
 
   return (
     <Modal title={t("ai.caseRisk.title", { case: caseLabel })} onClose={onClose}>
@@ -98,6 +132,13 @@ export default function CaseRiskModal({
         {!loading && data?.disclaimer && (
           <div className="text-[11px] text-mine-400 font-medium border-t border-mine-800 pt-3 leading-relaxed">
             {data.disclaimer}
+          </div>
+        )}
+        {!loading && data?.configured && data.result && (
+          <div className="flex justify-end">
+            <button className={buttonSecondary} onClick={downloadPdf}>
+              {t("ai.report.downloadPdf")}
+            </button>
           </div>
         )}
       </div>

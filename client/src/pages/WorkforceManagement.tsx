@@ -14,6 +14,7 @@ import SkillsDevelopmentTab from "./workforce/SkillsDevelopmentTab";
 import RecruitmentTab from "./workforce/RecruitmentTab";
 import OnboardingTab from "./workforce/OnboardingTab";
 import { buttonPrimary, buttonSecondary } from "../components/ui";
+import LoadError from "../components/LoadError";
 
 type TabKey =
   | "safety"
@@ -47,16 +48,23 @@ export default function WorkforceManagement() {
   const [workers, setWorkers] = useState<Worker[]>([]);
   const [sites, setSites] = useState<Site[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
 
-  useEffect(() => {
-    async function load() {
+  async function load() {
+    setLoading(true);
+    setLoadError(false);
+    try {
       const [w, s] = await Promise.all([api.get<Worker[]>("/workers"), api.get<Site[]>("/sites")]);
       setWorkers(w.data);
       setSites(s.data);
+    } catch {
+      setLoadError(true);
+    } finally {
       setLoading(false);
     }
-    load();
-  }, []);
+  }
+
+  useEffect(() => { load(); }, []);
 
   const tabs: { key: TabKey; label: string }[] = [
     { key: "safety", label: t("workforce.tabSafety") },
@@ -72,6 +80,7 @@ export default function WorkforceManagement() {
   ];
 
   if (loading) return <div className="text-mine-300">{t("workforce.loading")}</div>;
+  if (loadError) return <LoadError onRetry={load} />;
 
   return (
     <div className="space-y-6">

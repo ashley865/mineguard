@@ -9,6 +9,7 @@ import { buttonDanger, buttonPrimary, buttonSecondary, cardClass, inputClass, la
 import DataTable, { DataTableColumn } from "../../components/DataTable";
 import SummaryCards from "../../components/SummaryCards";
 import { AuditHistoryButton } from "../../components/AuditHistoryPanel";
+import LoadError from "../../components/LoadError";
 
 function KeyForm({ sites, onSubmit, onCancel }: {
   sites: Site[];
@@ -128,18 +129,26 @@ function LogModal({ securityKey, onClose }: { securityKey: SecurityKey; onClose:
   const { t } = useTranslation();
   const [logs, setLogs] = useState<KeyIssueLog[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
 
-  useEffect(() => {
-    api.get<KeyIssueLog[]>(`/key-management/${securityKey.id}/logs`).then((res) => {
-      setLogs(res.data);
-      setLoading(false);
-    });
-  }, [securityKey.id]);
+  function load() {
+    setLoading(true);
+    setLoadError(false);
+    api
+      .get<KeyIssueLog[]>(`/key-management/${securityKey.id}/logs`)
+      .then((res) => setLogs(res.data))
+      .catch(() => setLoadError(true))
+      .finally(() => setLoading(false));
+  }
+
+  useEffect(() => { load(); }, [securityKey.id]); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <Modal title={t("keyManagement.historyTitle", { code: securityKey.keyCode })} onClose={onClose}>
       {loading ? (
         <div className="text-mine-300 text-sm">{t("common.loading")}</div>
+      ) : loadError ? (
+        <LoadError onRetry={load} />
       ) : (
         <div className="space-y-2">
           {logs.map((l) => (
@@ -167,19 +176,26 @@ export default function KeyManagementTab({ sites }: { sites: Site[] }) {
   const [keys, setKeys] = useState<SecurityKey[]>([]);
   const [workers, setWorkers] = useState<Worker[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
   const [createModal, setCreateModal] = useState(false);
   const [issueModal, setIssueModal] = useState<SecurityKey | null>(null);
   const [historyModal, setHistoryModal] = useState<SecurityKey | null>(null);
 
   async function load() {
     setLoading(true);
-    const [k, w] = await Promise.all([
-      api.get<SecurityKey[]>("/key-management"),
-      api.get<Worker[]>("/workers"),
-    ]);
-    setKeys(k.data);
-    setWorkers(w.data);
-    setLoading(false);
+    setLoadError(false);
+    try {
+      const [k, w] = await Promise.all([
+        api.get<SecurityKey[]>("/key-management"),
+        api.get<Worker[]>("/workers"),
+      ]);
+      setKeys(k.data);
+      setWorkers(w.data);
+    } catch {
+      setLoadError(true);
+    } finally {
+      setLoading(false);
+    }
   }
 
   useEffect(() => { load(); }, []);
@@ -216,6 +232,7 @@ export default function KeyManagementTab({ sites }: { sites: Site[] }) {
   }
 
   if (loading) return <div className="text-mine-300">{t("common.loading")}</div>;
+  if (loadError) return <LoadError onRetry={load} />;
 
   const availableCount = keys.filter((k) => k.status === "AVAILABLE").length;
   const issuedCount = keys.filter((k) => k.status === "ISSUED").length;

@@ -7,6 +7,7 @@ import { buttonPrimary, buttonSecondary, inputClass, labelClass } from "../../co
 import DateField from "../../components/DateField";
 import DataTable, { DataTableColumn } from "../../components/DataTable";
 import SummaryCards from "../../components/SummaryCards";
+import LoadError from "../../components/LoadError";
 
 const CHECKLIST_ITEMS: { flag: keyof OnboardingChecklist; date: keyof OnboardingChecklist | null; labelKey: string }[] = [
   { flag: "inductionCompleted", date: "inductionDate", labelKey: "recruitment.onboarding.induction" },
@@ -84,13 +85,20 @@ export default function OnboardingTab() {
   const { t } = useTranslation();
   const [checklists, setChecklists] = useState<OnboardingChecklist[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
   const [editing, setEditing] = useState<OnboardingChecklist | null>(null);
 
   async function load() {
     setLoading(true);
-    const res = await api.get<OnboardingChecklist[]>("/recruitment/onboarding");
-    setChecklists(res.data);
-    setLoading(false);
+    setLoadError(false);
+    try {
+      const res = await api.get<OnboardingChecklist[]>("/recruitment/onboarding");
+      setChecklists(res.data);
+    } catch {
+      setLoadError(true);
+    } finally {
+      setLoading(false);
+    }
   }
 
   useEffect(() => { load(); }, []);
@@ -106,6 +114,7 @@ export default function OnboardingTab() {
   }
 
   if (loading) return <div className="text-mine-300">{t("common.loading")}</div>;
+  if (loadError) return <LoadError onRetry={load} />;
 
   const incompleteCount = checklists.filter((c) => !c.completedAt).length;
 

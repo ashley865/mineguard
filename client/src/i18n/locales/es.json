@@ -42,7 +42,9 @@
     "previous": "Anterior",
     "next": "Siguiente",
     "email": "Correo Electrónico",
-    "none": "Ninguno"
+    "none": "Ninguno",
+    "loadError": "No se pudo cargar esto — algo salió mal al conectar con el servidor.",
+    "retry": "Reintentar"
   },
   "nav": {
     "dashboard": "Panel",
@@ -3432,7 +3434,8 @@
         "environment": "Medio Ambiente",
         "finance": "Finanzas",
         "enterpriseRisks": "Riesgos Empresariales"
-      }
+      },
+      "downloadPdf": "Descargar PDF"
     },
     "takeAction": "Tomar Acción",
     "hrReport": {

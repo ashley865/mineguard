@@ -42,7 +42,9 @@
     "previous": "Zurück",
     "next": "Weiter",
     "email": "E-Mail",
-    "none": "Keine"
+    "none": "Keine",
+    "loadError": "Konnte nicht geladen werden — beim Erreichen des Servers ist etwas schiefgelaufen.",
+    "retry": "Erneut Versuchen"
   },
   "nav": {
     "dashboard": "Übersicht",
@@ -3432,7 +3434,8 @@
         "environment": "Umwelt",
         "finance": "Finanzen",
         "enterpriseRisks": "Unternehmensrisiken"
-      }
+      },
+      "downloadPdf": "PDF Herunterladen"
     },
     "takeAction": "Maßnahme Ergreifen",
     "hrReport": {

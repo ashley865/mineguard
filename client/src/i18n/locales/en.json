@@ -59,7 +59,9 @@
     "previous": "Previous",
     "next": "Next",
     "email": "Email",
-    "none": "None"
+    "none": "None",
+    "loadError": "Couldn't load this — something went wrong reaching the server.",
+    "retry": "Retry"
   },
   "nav": {
     "dashboard": "Dashboard",
@@ -3431,7 +3433,8 @@
         "environment": "Environment",
         "finance": "Finance",
         "enterpriseRisks": "Enterprise Risks"
-      }
+      },
+      "downloadPdf": "Download PDF"
     },
     "takeAction": "Take Action",
     "hrReport": {

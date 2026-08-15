@@ -11,6 +11,7 @@ import InvestigationsTab from "./security/InvestigationsTab";
 import KeyManagementTab from "./security/KeyManagementTab";
 import SecurityAssetsTab from "./security/SecurityAssetsTab";
 import { buttonPrimary, buttonSecondary } from "../components/ui";
+import LoadError from "../components/LoadError";
 
 type TabKey = "cctv" | "incidents" | "patrol" | "accessControl" | "investigations" | "keyManagement" | "securityAssets";
 const TAB_KEYS: TabKey[] = ["cctv", "incidents", "patrol", "accessControl", "investigations", "keyManagement", "securityAssets"];
@@ -23,16 +24,23 @@ export default function SecurityHub() {
   const [sites, setSites] = useState<Site[]>([]);
   const [zones, setZones] = useState<Zone[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
 
-  useEffect(() => {
-    async function load() {
+  async function load() {
+    setLoading(true);
+    setLoadError(false);
+    try {
       const [s, z] = await Promise.all([api.get<Site[]>("/sites"), api.get<Zone[]>("/zones")]);
       setSites(s.data);
       setZones(z.data);
+    } catch {
+      setLoadError(true);
+    } finally {
       setLoading(false);
     }
-    load();
-  }, []);
+  }
+
+  useEffect(() => { load(); }, []);
 
   const tabs: { key: TabKey; label: string }[] = [
     { key: "cctv", label: t("security.tabCctv") },
@@ -45,6 +53,7 @@ export default function SecurityHub() {
   ];
 
   if (loading) return <div className="text-mine-300">{t("common.loading")}</div>;
+  if (loadError) return <LoadError onRetry={load} />;
 
   return (
     <div className="space-y-6">

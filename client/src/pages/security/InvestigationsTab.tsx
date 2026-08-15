@@ -17,6 +17,7 @@ import { buttonDanger, buttonPrimary, buttonSecondary, cardClass, inputClass, la
 import DataTable, { DataTableColumn } from "../../components/DataTable";
 import SummaryCards from "../../components/SummaryCards";
 import { AuditHistoryButton } from "../../components/AuditHistoryPanel";
+import LoadError from "../../components/LoadError";
 
 const severities: AlertSeverity[] = ["LOW", "MEDIUM", "HIGH", "CRITICAL"];
 const statuses: InvestigationStatus[] = ["OPEN", "IN_PROGRESS", "CLOSED"];
@@ -140,6 +141,7 @@ function DetailModal({ investigation, onClose, canEdit }: {
   const [evidence, setEvidence] = useState<InvestigationEvidence[]>([]);
   const [statements, setStatements] = useState<InvestigationStatement[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
   const [evidenceDesc, setEvidenceDesc] = useState("");
   const [evidenceFile, setEvidenceFile] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
@@ -150,13 +152,19 @@ function DetailModal({ investigation, onClose, canEdit }: {
 
   async function load() {
     setLoading(true);
-    const [e, s] = await Promise.all([
-      api.get<InvestigationEvidence[]>(`/security-investigations/${investigation.id}/evidence`),
-      api.get<InvestigationStatement[]>(`/security-investigations/${investigation.id}/statements`),
-    ]);
-    setEvidence(e.data);
-    setStatements(s.data);
-    setLoading(false);
+    setLoadError(false);
+    try {
+      const [e, s] = await Promise.all([
+        api.get<InvestigationEvidence[]>(`/security-investigations/${investigation.id}/evidence`),
+        api.get<InvestigationStatement[]>(`/security-investigations/${investigation.id}/statements`),
+      ]);
+      setEvidence(e.data);
+      setStatements(s.data);
+    } catch {
+      setLoadError(true);
+    } finally {
+      setLoading(false);
+    }
   }
 
   useEffect(() => { load(); }, []);
@@ -227,6 +235,8 @@ function DetailModal({ investigation, onClose, canEdit }: {
 
         {loading ? (
           <div className="text-mine-300 text-sm">{t("common.loading")}</div>
+        ) : loadError ? (
+          <LoadError onRetry={load} />
         ) : (
           <>
             <div className="space-y-2">
@@ -302,15 +312,22 @@ export default function InvestigationsTab({ sites }: { sites: Site[] }) {
   const canEdit = user?.role === "ADMIN" || user?.role === "SUPERVISOR" || user?.role === "EXECUTIVE";
   const [items, setItems] = useState<SecurityInvestigation[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
   const [createModal, setCreateModal] = useState(false);
   const [editModal, setEditModal] = useState<SecurityInvestigation | null>(null);
   const [detailModal, setDetailModal] = useState<SecurityInvestigation | null>(null);
 
   async function load() {
     setLoading(true);
-    const res = await api.get<SecurityInvestigation[]>("/security-investigations");
-    setItems(res.data);
-    setLoading(false);
+    setLoadError(false);
+    try {
+      const res = await api.get<SecurityInvestigation[]>("/security-investigations");
+      setItems(res.data);
+    } catch {
+      setLoadError(true);
+    } finally {
+      setLoading(false);
+    }
   }
 
   useEffect(() => { load(); }, []);
@@ -334,6 +351,7 @@ export default function InvestigationsTab({ sites }: { sites: Site[] }) {
   }
 
   if (loading) return <div className="text-mine-300">{t("common.loading")}</div>;
+  if (loadError) return <LoadError onRetry={load} />;
 
   const openCount = items.filter((i) => i.status === "OPEN").length;
   const inProgressCount = items.filter((i) => i.status === "IN_PROGRESS").length;
