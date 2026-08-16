@@ -275,6 +275,9 @@ export default function ExecutiveDashboard() {
         <AiAssistantWidget
           showReportGenerator={user?.title === "GENERAL_MANAGER"}
           showHrReportGenerator={user?.title === "HR_MANAGER"}
+          showDepartmentReportGenerator={
+            !!user?.title && !["GENERAL_MANAGER", "HR_MANAGER", "OTHER"].includes(user.title)
+          }
         />
       )}
       {canSeeFinancials && <FinancialSummaryWidget />}

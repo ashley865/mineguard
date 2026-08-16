@@ -3461,6 +3461,11 @@
       },
       "riskFactors": "Facteurs de Risque",
       "proceduralConsiderations": "Considérations Procédurales"
+    },
+    "deptReport": {
+      "button": "Générer le Rapport",
+      "title": "Rapport du Département",
+      "hint": "Générez un rapport d'état pour votre département, entièrement fondé sur les données MineGuard — chaque affirmation est traçable jusqu'aux chiffres indiqués en dessous."
     }
   },
   "recruitment": {

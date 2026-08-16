@@ -3461,6 +3461,11 @@
       },
       "riskFactors": "Risikofaktore",
       "proceduralConsiderations": "Prosedurele Oorwegings"
+    },
+    "deptReport": {
+      "button": "Genereer Verslag",
+      "title": "Departementverslag",
+      "hint": "Genereer 'n statusverslag vir jou departement, geheel en al gegrond op MineGuard-data — elke stelling is naspeurbaar na die syfers hieronder getoon."
     }
   },
   "recruitment": {

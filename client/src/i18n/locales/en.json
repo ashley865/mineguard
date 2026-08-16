@@ -3460,6 +3460,11 @@
       },
       "riskFactors": "Risk Factors",
       "proceduralConsiderations": "Procedural Considerations"
+    },
+    "deptReport": {
+      "button": "Generate Report",
+      "title": "Department Report",
+      "hint": "Generate a status report for your department, grounded entirely in MineGuard data — every statement is traceable to the figures shown beneath it."
     }
   },
   "recruitment": {

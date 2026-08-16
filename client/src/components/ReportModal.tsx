@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import { api } from "../api/client";
-import { AiRecommendation, ExecutiveReportResponse, ReportPeriod } from "../api/types";
+import { AiRecommendation, ExecutiveReportResponse, ReportPeriod, ReportSection } from "../api/types";
 import Modal from "./Modal";
 import { buttonPrimary, buttonSecondary } from "./ui";
 import { routeForTopic } from "../lib/aiTopicRoutes";
@@ -47,18 +47,27 @@ export default function ReportModal({
   titleKey,
   hintKey,
   sectionLabelPrefix,
+  showPeriodPicker = true,
 }: {
   onClose: () => void;
   /** e.g. "/ai/report" or "/ai/hr/report" */
   endpoint: string;
-  /** Section keys in display order — must match what the endpoint returns. */
-  sectionKeys: readonly string[];
+  /** Section keys in display order — must match what the endpoint returns. Omit to render
+   * whatever sections the server returns, in its own order, with an auto-humanized label
+   * (used by report types whose section shape isn't fixed ahead of time, e.g. department
+   * reports whose sections mirror that title's own AI context). */
+  sectionKeys?: readonly string[];
   /** i18n key for the modal title. */
   titleKey: string;
   /** i18n key for the pre-generation hint text. */
   hintKey: string;
-  /** i18n namespace prefix for per-section labels, e.g. "ai.report.sections". */
-  sectionLabelPrefix: string;
+  /** i18n namespace prefix for per-section labels, e.g. "ai.report.sections". Omit to always
+   * use the auto-humanized label instead of a translation lookup. */
+  sectionLabelPrefix?: string;
+  /** Set false for report types that aren't period-scoped (the request still sends a period,
+   * the server just ignores it) — hides the This Week/This Month picker so it doesn't imply
+   * a choice that has no effect. */
+  showPeriodPicker?: boolean;
 }) {
   const { t } = useTranslation();
   const navigate = useNavigate();
@@ -85,6 +94,13 @@ export default function ReportModal({
   }
 
   const sectionsByKey = new Map((report?.sections ?? []).map((s) => [s.key, s]));
+  const orderedSections: ReportSection[] =
+    sectionKeys && sectionKeys.length > 0
+      ? sectionKeys.map((key) => sectionsByKey.get(key)).filter((s): s is ReportSection => !!s)
+      : report?.sections ?? [];
+  function sectionLabel(key: string): string {
+    return sectionLabelPrefix ? t(`${sectionLabelPrefix}.${key}`, humanizeKey(key)) : humanizeKey(key);
+  }
 
   function downloadPdf() {
     if (!report) return;
@@ -103,10 +119,8 @@ export default function ReportModal({
     pdf.paragraph(report.executiveSummary ?? "");
     pdf.spacer();
 
-    sectionKeys.forEach((key) => {
-      const section = sectionsByKey.get(key);
-      if (!section) return;
-      pdf.heading(t(`${sectionLabelPrefix}.${key}`));
+    orderedSections.forEach((section) => {
+      pdf.heading(sectionLabel(section.key));
       pdf.paragraph(section.narrative);
       pdf.paragraph(factsToText(section.data), { italic: true, size: 8, muted: true });
       pdf.spacer();
@@ -134,20 +148,22 @@ export default function ReportModal({
         {!report && (
           <div className="space-y-3">
             <p className="text-sm text-mine-300">{t(hintKey)}</p>
-            <div className="flex items-center gap-2">
-              <button
-                className={period === "WEEK" ? buttonPrimary : buttonSecondary}
-                onClick={() => setPeriod("WEEK")}
-              >
-                {t("ai.report.thisWeek")}
-              </button>
-              <button
-                className={period === "MONTH" ? buttonPrimary : buttonSecondary}
-                onClick={() => setPeriod("MONTH")}
-              >
-                {t("ai.report.thisMonth")}
-              </button>
-            </div>
+            {showPeriodPicker && (
+              <div className="flex items-center gap-2">
+                <button
+                  className={period === "WEEK" ? buttonPrimary : buttonSecondary}
+                  onClick={() => setPeriod("WEEK")}
+                >
+                  {t("ai.report.thisWeek")}
+                </button>
+                <button
+                  className={period === "MONTH" ? buttonPrimary : buttonSecondary}
+                  onClick={() => setPeriod("MONTH")}
+                >
+                  {t("ai.report.thisMonth")}
+                </button>
+              </div>
+            )}
             {error && <div className="text-danger-600 text-sm font-bold">{error}</div>}
             <button className={buttonPrimary} disabled={loading} onClick={generate}>
               {loading ? t("ai.report.generating") : t("ai.report.generate")}
@@ -183,21 +199,17 @@ export default function ReportModal({
             </div>
 
             <div className="space-y-3">
-              {sectionKeys.map((key) => {
-                const section = sectionsByKey.get(key);
-                if (!section) return null;
-                return (
-                  <div key={key} className="border border-mine-800 rounded-lg p-3">
-                    <h4 className="text-xs font-extrabold uppercase tracking-wide text-mine-200 mb-1">
-                      {t(`${sectionLabelPrefix}.${key}`)}
-                    </h4>
-                    <p className="text-xs text-mine-100 font-medium leading-relaxed mb-2">{section.narrative}</p>
-                    <p className="text-[10px] text-mine-400 font-mono leading-snug border-t border-mine-800 pt-1.5">
-                      {factsToText(section.data)}
-                    </p>
-                  </div>
-                );
-              })}
+              {orderedSections.map((section) => (
+                <div key={section.key} className="border border-mine-800 rounded-lg p-3">
+                  <h4 className="text-xs font-extrabold uppercase tracking-wide text-mine-200 mb-1">
+                    {sectionLabel(section.key)}
+                  </h4>
+                  <p className="text-xs text-mine-100 font-medium leading-relaxed mb-2">{section.narrative}</p>
+                  <p className="text-[10px] text-mine-400 font-mono leading-snug border-t border-mine-800 pt-1.5">
+                    {factsToText(section.data)}
+                  </p>
+                </div>
+              ))}
             </div>
 
             {report.recommendedPriorities && report.recommendedPriorities.length > 0 && (

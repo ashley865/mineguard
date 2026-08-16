@@ -78,13 +78,15 @@ const NON_ACTIONABLE_KINDS = new Set<AiRecommendation["kind"]>(["ACHIEVEMENT", "
 export default function AiAssistantWidget({
   showReportGenerator = false,
   showHrReportGenerator = false,
+  showDepartmentReportGenerator = false,
 }: {
   showReportGenerator?: boolean;
   showHrReportGenerator?: boolean;
+  showDepartmentReportGenerator?: boolean;
 }) {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const [openReport, setOpenReport] = useState<"EXEC" | "HR" | null>(null);
+  const [openReport, setOpenReport] = useState<"EXEC" | "HR" | "DEPT" | null>(null);
   const [configured, setConfigured] = useState<boolean | null>(null);
   const [summary, setSummary] = useState<string | null>(null);
   const [summaryExpanded, setSummaryExpanded] = useState(false);
@@ -204,6 +206,14 @@ export default function AiAssistantWidget({
                 {t("ai.hrReport.button")}
               </button>
             )}
+            {showDepartmentReportGenerator && (
+              <button
+                className="text-xs font-bold text-mine-300 hover:text-mine-50 bg-mine-800 hover:bg-mine-700 rounded-full px-3 py-1 transition-colors"
+                onClick={() => setOpenReport("DEPT")}
+              >
+                {t("ai.deptReport.button")}
+              </button>
+            )}
             <button
               className="text-xs font-bold text-hazard-600 hover:text-hazard-500 bg-hazard-500/10 hover:bg-hazard-500/20 rounded-full px-3 py-1 transition-colors"
               onClick={() => setChatOpen((v) => !v)}
@@ -232,6 +242,15 @@ export default function AiAssistantWidget({
           titleKey="ai.hrReport.title"
           hintKey="ai.hrReport.hint"
           sectionLabelPrefix="ai.hrReport.sections"
+        />
+      )}
+      {openReport === "DEPT" && (
+        <ReportModal
+          onClose={() => setOpenReport(null)}
+          endpoint="/ai/department-report"
+          titleKey="ai.deptReport.title"
+          hintKey="ai.deptReport.hint"
+          showPeriodPicker={false}
         />
       )}
 

@@ -3461,6 +3461,11 @@
       },
       "riskFactors": "Factores de Riesgo",
       "proceduralConsiderations": "Consideraciones de Procedimiento"
+    },
+    "deptReport": {
+      "button": "Generar Informe",
+      "title": "Informe del Departamento",
+      "hint": "Genere un informe de estado para su departamento, basado completamente en datos de MineGuard — cada afirmación es trazable a las cifras que se muestran debajo."
     }
   },
   "recruitment": {

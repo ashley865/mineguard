@@ -1561,4 +1561,136 @@ router.post("/report", aiLimiter, async (req, res) => {
   }
 });
 
+// ---------------------------------------------------------------------------
+// Department report — the same report-generation capability as the General
+// Manager's and HR Manager's reports above, but generic across every other
+// executive title. Rather than a bespoke period-scoped data builder per
+// title (a lot of duplication for seven departments), this reuses each
+// title's existing buildContext() — already used for chat/summary/
+// recommendations — as the report's data snapshot, and lets the section
+// keys be whatever that context returns rather than a fixed list. A
+// current-status snapshot rather than a WEEK/MONTH comparison, since
+// buildContext isn't period-parameterized.
+// ---------------------------------------------------------------------------
+
+const DEPARTMENT_REPORT_TITLES: ExecutiveTitle[] = [
+  "CFO",
+  "COO",
+  "SECURITY_MANAGER",
+  "SAFETY_MANAGER",
+  "OPERATIONS_MANAGER",
+  "COMPLIANCE_OFFICER",
+  "IT_MANAGER",
+];
+
+const EXEC_TITLE_LABELS: Partial<Record<ExecutiveTitle, string>> = {
+  CFO: "CFO",
+  COO: "COO",
+  SECURITY_MANAGER: "Security Manager",
+  SAFETY_MANAGER: "Safety Manager",
+  OPERATIONS_MANAGER: "Operations Manager",
+  COMPLIANCE_OFFICER: "Compliance Officer",
+  IT_MANAGER: "IT Manager",
+};
+
+function departmentReportInstructions(sectionKeys: string[]): string {
+  const sectionSchema = sectionKeys.map((k) => `"${k}": "2-4 sentences"`).join(", ");
+  return (
+    `Write a formal status report from the data snapshot below. Every single statement you write MUST be directly ` +
+    `traceable to a specific value in the snapshot — never state a fact, trend, name, or figure that isn't present ` +
+    `in it. If a section's data is empty or shows nothing noteworthy, say so plainly rather than inventing content ` +
+    `("No notable activity in this area" is a valid and expected sentence).\n\n` +
+    `Reply with ONLY a single JSON object, no markdown, no code fences, matching exactly this shape:\n` +
+    `{"executiveSummary": "3-5 sentence overview, most important developments first", ` +
+    `"sections": {${sectionSchema}}, ` +
+    `"recommendedPriorities": ["short actionable priority 1", "short actionable priority 2", "..."]}\n` +
+    `Include at most 6 recommended priorities, ordered most important first, each traceable to a specific figure in the snapshot.`
+  );
+}
+
+interface DepartmentReportNarrative {
+  executiveSummary: string;
+  sections: Record<string, string>;
+  recommendedPriorities: string[];
+}
+
+function parseDepartmentReportNarrative(raw: string, sectionKeys: string[]): DepartmentReportNarrative {
+  const cleaned = raw
+    .trim()
+    .replace(/^```(?:json)?\s*/i, "")
+    .replace(/```\s*$/, "");
+  const parsed = JSON.parse(cleaned);
+  if (typeof parsed.executiveSummary !== "string" || typeof parsed.sections !== "object" || parsed.sections === null) {
+    throw new Error("AI response did not match the expected report schema");
+  }
+  const sections: Record<string, string> = {};
+  for (const key of sectionKeys) {
+    sections[key] = typeof parsed.sections[key] === "string" ? parsed.sections[key] : "No data available for this section.";
+  }
+  const recommendedPriorities = Array.isArray(parsed.recommendedPriorities)
+    ? parsed.recommendedPriorities.filter((p: unknown) => typeof p === "string").slice(0, 6)
+    : [];
+  return { executiveSummary: parsed.executiveSummary, sections, recommendedPriorities };
+}
+
+router.post("/department-report", aiLimiter, async (req, res) => {
+  const mineId = requireMineId(req, res);
+  if (!mineId) return;
+
+  const me = await prisma.user.findUnique({ where: { id: req.auth!.userId }, select: { title: true } });
+  const title = me?.title;
+  if (!title || !DEPARTMENT_REPORT_TITLES.includes(title)) {
+    return res.status(403).json({ error: "Department reports aren't available for your role" });
+  }
+
+  if (!isAiConfigured()) {
+    return res.json({ configured: false, report: null });
+  }
+
+  try {
+    const context = await AI_MODULES[title].buildContext(mineId);
+    const { mine, ...rest } = context as { mine?: { name?: string } };
+    const sectionEntries = Object.entries(rest);
+    const sectionKeys = sectionEntries.map(([key]) => key);
+
+    const messages: AiMessage[] = [
+      {
+        role: "system",
+        content:
+          `You are the Mine Guard AI Assistant, compiling a status report for the ${EXEC_TITLE_LABELS[title]} of ` +
+          `${mine?.name ?? "the mine"}, a South African mining operation.` +
+          GUARDRAIL,
+      },
+      { role: "system", content: `Report data snapshot (JSON): ${JSON.stringify(context)}` },
+      { role: "user", content: departmentReportInstructions(sectionKeys) },
+    ];
+    const raw = await aiChatComplete(messages);
+    const narrative = parseDepartmentReportNarrative(raw, sectionKeys);
+
+    const aiInsights = await prisma.aiRecommendation.findMany({
+      where: { mineId, executiveTitle: title, status: { in: ["OPEN", "ACKNOWLEDGED"] } },
+      select: { id: true, kind: true, severity: true, title: true, detail: true, topic: true, status: true, generatedAt: true },
+      orderBy: { generatedAt: "desc" },
+      take: 10,
+    });
+
+    res.json({
+      configured: true,
+      generatedAt: new Date().toISOString(),
+      period: null,
+      mine: mine ? { name: mine.name, location: null } : null,
+      executiveSummary: narrative.executiveSummary,
+      sections: sectionEntries.map(([key, data]) => ({ key, narrative: narrative.sections[key], data })),
+      recommendedPriorities: narrative.recommendedPriorities,
+      aiInsights,
+    });
+  } catch (err) {
+    if (err instanceof AiNotConfiguredError) {
+      return res.json({ configured: false, report: null });
+    }
+    console.error(err);
+    res.status(502).json({ error: "The AI provider could not be reached. Please try again shortly." });
+  }
+});
+
 export default router;

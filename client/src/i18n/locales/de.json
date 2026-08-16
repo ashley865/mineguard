@@ -3461,6 +3461,11 @@
       },
       "riskFactors": "Risikofaktoren",
       "proceduralConsiderations": "Verfahrensrechtliche Überlegungen"
+    },
+    "deptReport": {
+      "button": "Bericht Erstellen",
+      "title": "Abteilungsbericht",
+      "hint": "Erstellen Sie einen Statusbericht für Ihre Abteilung, vollständig auf MineGuard-Daten basierend — jede Aussage ist auf die unten gezeigten Zahlen zurückführbar."
     }
   },
   "recruitment": {
