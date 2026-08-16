@@ -3308,3 +3308,37 @@ export interface SecurityAssetAssignmentLog {
   eventAt: string;
   loggedBy?: { id: string; name: string } | null;
 }
+
+export interface SiteWeather {
+  temperatureC: number;
+  windSpeedKmh: number;
+  windDirectionDeg: number;
+  humidityPct: number;
+  precipitationMm: number;
+  condition: string;
+  icon: string;
+  observedAt: string;
+}
+export interface SiteWeatherReading {
+  siteId: string;
+  siteName: string;
+  weather: SiteWeather;
+}
+
+export interface MetalPrice {
+  key: string;
+  label: string;
+  unit: string;
+  price: number;
+  previousClose: number | null;
+  changePercent: number;
+  currency: string | null;
+}
+export interface MineralPricesResponse {
+  asOf: string;
+  prices: MetalPrice[];
+}
+
+export interface DidYouKnowResponse {
+  fact: string;
+}

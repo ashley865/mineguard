@@ -3728,5 +3728,14 @@
       "RETURNED_FROM_MAINTENANCE": "Retourné de Maintenance",
       "DECOMMISSIONED": "Mis Hors Service"
     }
+  },
+  "liveData": {
+    "title": "Données en Direct",
+    "weather": "Météo du Site",
+    "wind": "Vent",
+    "humidity": "Humidité",
+    "mineralPrices": "Prix des Minéraux",
+    "asOf": "au {{date}}",
+    "didYouKnow": "Le Saviez-Vous ?"
   }
 }

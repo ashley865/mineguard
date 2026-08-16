@@ -87,6 +87,7 @@ import auditLogRoutes from "./routes/auditLog";
 import aiRoutes from "./routes/ai";
 import aiHrRoutes from "./routes/aiHr";
 import recruitmentRoutes from "./routes/recruitment";
+import liveDataRoutes from "./routes/liveData";
 import { sanitizeBody } from "./middleware/sanitize";
 import { startSimulator } from "./services/simulator";
 import { scanCompliance } from "./services/complianceScanner";
@@ -214,6 +215,7 @@ app.use("/api/winders", windersRoutes);
 app.use("/api/audit-log", auditLogRoutes);
 app.use("/api/ai/hr", aiHrRoutes);
 app.use("/api/recruitment", recruitmentRoutes);
+app.use("/api/live-data", liveDataRoutes);
 app.use("/api/ai", aiRoutes);
 
 app.use((err: any, _req: express.Request, res: express.Response, _next: express.NextFunction) => {

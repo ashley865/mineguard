@@ -14,6 +14,7 @@ import ProductionAnalyticsWidget from "../components/ProductionAnalyticsWidget";
 import InventoryProcurementWidget from "../components/InventoryProcurementWidget";
 import MaintenanceDowntimeWidget from "../components/MaintenanceDowntimeWidget";
 import AiAssistantWidget from "../components/AiAssistantWidget";
+import LiveDataWidget from "../components/LiveDataWidget";
 
 type Tone = "positive" | "negative" | "caution";
 
@@ -272,13 +273,16 @@ export default function ExecutiveDashboard() {
       )}
 
       {canSeeAiAssistant && (
-        <AiAssistantWidget
-          showReportGenerator={user?.title === "GENERAL_MANAGER"}
-          showHrReportGenerator={user?.title === "HR_MANAGER"}
-          showDepartmentReportGenerator={
-            !!user?.title && !["GENERAL_MANAGER", "HR_MANAGER", "OTHER"].includes(user.title)
-          }
-        />
+        <>
+          <AiAssistantWidget
+            showReportGenerator={user?.title === "GENERAL_MANAGER"}
+            showHrReportGenerator={user?.title === "HR_MANAGER"}
+            showDepartmentReportGenerator={
+              !!user?.title && !["GENERAL_MANAGER", "HR_MANAGER", "OTHER"].includes(user.title)
+            }
+          />
+          <LiveDataWidget />
+        </>
       )}
       {canSeeFinancials && <FinancialSummaryWidget />}
       {canSeeHrWorkforce && <HrWorkforceWidget />}

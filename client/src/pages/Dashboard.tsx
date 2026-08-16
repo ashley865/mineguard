@@ -7,6 +7,8 @@ import { Alert, DashboardSummary } from "../api/types";
 import { SeverityBadge, StatusBadge } from "../components/Badges";
 import { cardClass } from "../components/ui";
 import FinancialSummaryWidget from "../components/FinancialSummaryWidget";
+import AiAssistantWidget from "../components/AiAssistantWidget";
+import LiveDataWidget from "../components/LiveDataWidget";
 
 function StatCard({
   label,
@@ -99,7 +101,13 @@ export default function Dashboard() {
         />
       </div>
 
-      {user?.role === "ADMIN" && <FinancialSummaryWidget />}
+      {user?.role === "ADMIN" && (
+        <>
+          <AiAssistantWidget showReportGenerator />
+          <LiveDataWidget />
+          <FinancialSummaryWidget />
+        </>
+      )}
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
         <div className={`${cardClass} p-3`}>

@@ -3728,5 +3728,14 @@
       "RETURNED_FROM_MAINTENANCE": "Aus Wartung Zurück",
       "DECOMMISSIONED": "Außer Betrieb Genommen"
     }
+  },
+  "liveData": {
+    "title": "Live-Daten",
+    "weather": "Standortwetter",
+    "wind": "Wind",
+    "humidity": "Luftfeuchtigkeit",
+    "mineralPrices": "Mineralpreise",
+    "asOf": "Stand {{date}}",
+    "didYouKnow": "Wussten Sie Schon?"
   }
 }

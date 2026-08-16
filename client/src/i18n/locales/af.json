@@ -3728,5 +3728,14 @@
       "RETURNED_FROM_MAINTENANCE": "Terug van Onderhoud",
       "DECOMMISSIONED": "Uit Diens Getrek"
     }
+  },
+  "liveData": {
+    "title": "Lewendige Data",
+    "weather": "Terrein Weer",
+    "wind": "Wind",
+    "humidity": "Humiditeit",
+    "mineralPrices": "Mineraalpryse",
+    "asOf": "vanaf {{date}}",
+    "didYouKnow": "Het Jy Geweet?"
   }
 }

@@ -3728,5 +3728,14 @@
       "RETURNED_FROM_MAINTENANCE": "Devuelto de Mantenimiento",
       "DECOMMISSIONED": "Dado de Baja"
     }
+  },
+  "liveData": {
+    "title": "Datos en Vivo",
+    "weather": "Clima del Sitio",
+    "wind": "Viento",
+    "humidity": "Humedad",
+    "mineralPrices": "Precios de Minerales",
+    "asOf": "al {{date}}",
+    "didYouKnow": "¿Sabías Que?"
   }
 }

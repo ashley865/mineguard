@@ -3727,5 +3727,14 @@
       "RETURNED_FROM_MAINTENANCE": "Returned from Maintenance",
       "DECOMMISSIONED": "Decommissioned"
     }
+  },
+  "liveData": {
+    "title": "Live Data",
+    "weather": "Site Weather",
+    "wind": "Wind",
+    "humidity": "Humidity",
+    "mineralPrices": "Mineral Prices",
+    "asOf": "as of {{date}}",
+    "didYouKnow": "Did You Know?"
   }
 }
