@@ -91,6 +91,7 @@ import liveDataRoutes from "./routes/liveData";
 import { sanitizeBody } from "./middleware/sanitize";
 import { startSimulator } from "./services/simulator";
 import { scanCompliance } from "./services/complianceScanner";
+import { sendMonthlyPayrollApprovalRequests } from "./services/payrollApprovalScheduler";
 import { verifyAuthToken } from "./lib/jwt";
 import { prisma } from "./prisma";
 
@@ -267,6 +268,10 @@ io.on("connection", (socket) => {
 });
 
 const COMPLIANCE_SCAN_INTERVAL_MS = 6 * 60 * 60 * 1000;
+// Hourly is far more often than needed for a once-a-month trigger, but the check itself is
+// cheap and idempotent (see payrollApprovalScheduler.ts), so there's no reason to build a
+// precise "next 25th" delay — same lightweight style as the compliance scanner above.
+const PAYROLL_APPROVAL_CHECK_INTERVAL_MS = 60 * 60 * 1000;
 
 const port = Number(process.env.PORT) || 4000;
 httpServer.listen(port, () => {
@@ -276,4 +281,8 @@ httpServer.listen(port, () => {
   setInterval(() => {
     scanCompliance(io).catch((err) => console.error("Compliance scan failed", err));
   }, COMPLIANCE_SCAN_INTERVAL_MS);
+  sendMonthlyPayrollApprovalRequests(io).catch((err) => console.error("Payroll approval scheduler failed", err));
+  setInterval(() => {
+    sendMonthlyPayrollApprovalRequests(io).catch((err) => console.error("Payroll approval scheduler failed", err));
+  }, PAYROLL_APPROVAL_CHECK_INTERVAL_MS);
 });
