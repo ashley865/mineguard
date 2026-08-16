@@ -2,6 +2,8 @@ import { Router } from "express";
 import { prisma } from "../prisma";
 import { requireAuth } from "../middleware/auth";
 import { requireMineId } from "../lib/mineScope";
+import { aiChatComplete, AiMessage, isAiConfigured } from "../lib/ai";
+import { GUARDRAIL } from "./ai";
 
 const router = Router();
 router.use(requireAuth);
@@ -165,6 +167,41 @@ interface MetalPrice {
 interface MineralPricesPayload {
   asOf: string;
   prices: MetalPrice[];
+  insight: string | null;
+  disclaimer: string | null;
+}
+
+const PRICE_INSIGHT_DISCLAIMER =
+  "This is general commentary generated from the prices shown, not financial or investment advice. Prices are sourced " +
+  "from an unofficial public feed and may be delayed or inaccurate — please do your own research before making any " +
+  "decisions based on it.";
+
+// Generated once per price-cache window (not per request) so this costs at most one AI
+// call every PRICE_TTL_MS across the whole app, regardless of how many users load the
+// dashboard. Purely descriptive by design — the prompt explicitly forbids anything that
+// could read as investment advice, and the disclaimer above is a fixed string the model
+// never authors, so it can't be dropped or softened by the response.
+async function generatePriceInsight(prices: MetalPrice[]): Promise<string | null> {
+  if (!isAiConfigured() || prices.length === 0) return null;
+  try {
+    const messages: AiMessage[] = [
+      {
+        role: "system",
+        content:
+          `You are the Mine Guard AI Assistant. Given a snapshot of major metal spot prices, write exactly ONE ` +
+          `short sentence (max 30 words) of plain-language, purely descriptive commentary on what's notable in the ` +
+          `snapshot — which metals moved most and in which direction. Never recommend buying, selling, holding, or ` +
+          `trading anything. Never predict future prices. Never use words like "should", "opportunity", "buy", or ` +
+          `"sell". Reply with ONLY the sentence, no markdown, no quotes.` +
+          GUARDRAIL,
+      },
+      { role: "user", content: `Price snapshot (JSON): ${JSON.stringify(prices)}` },
+    ];
+    const raw = await aiChatComplete(messages);
+    return raw.trim().replace(/^"|"$/g, "").slice(0, 300) || null;
+  } catch {
+    return null;
+  }
 }
 
 async function fetchYahooQuote(symbol: string): Promise<{ price: number; previousClose: number | null; currency: string | null } | null> {
@@ -205,9 +242,13 @@ router.get("/mineral-prices", async (_req, res) => {
       };
     })
   );
+  const prices = results.filter((r): r is MetalPrice => r !== null);
+  const insight = await generatePriceInsight(prices);
   const payload: MineralPricesPayload = {
     asOf: new Date().toISOString(),
-    prices: results.filter((r): r is MetalPrice => r !== null),
+    prices,
+    insight,
+    disclaimer: insight ? PRICE_INSIGHT_DISCLAIMER : null,
   };
   // Cache even a partial/empty result briefly, so a source outage doesn't cause every
   // concurrent dashboard load to hammer it in lockstep — the client already treats an

@@ -3337,6 +3337,8 @@ export interface MetalPrice {
 export interface MineralPricesResponse {
   asOf: string;
   prices: MetalPrice[];
+  insight: string | null;
+  disclaimer: string | null;
 }
 
 export interface DidYouKnowResponse {

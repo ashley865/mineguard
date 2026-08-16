@@ -1,12 +1,24 @@
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell, LabelList } from "recharts";
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell, LabelList, CartesianGrid } from "recharts";
 import { api } from "../api/client";
 import { DidYouKnowResponse, MineralPricesResponse, MetalPrice, SiteWeatherReading } from "../api/types";
-import { cardClass } from "./ui";
 
-const CHART_TOOLTIP_STYLE = { background: "#fafafa", border: "1px solid #e5e5e5", fontSize: 11, borderRadius: 8 };
-const CHART_TICK_STYLE = { fontSize: 10, fill: "#52525b", fontWeight: 600 };
+// A deliberately distinct "live terminal" look — dark navy rather than the app's
+// otherwise light theme — so this panel reads as live/real-time data at a glance,
+// the same way stock tickers and weather panels conventionally do.
+const NAVY_TOOLTIP_STYLE = { background: "#0f1f38", border: "1px solid rgba(255,255,255,0.12)", fontSize: 11, borderRadius: 8, color: "#fff" };
+const NAVY_TICK_STYLE = { fontSize: 10, fill: "rgba(255,255,255,0.55)", fontWeight: 600 };
+
+type Tier = "up" | "down" | "flat";
+function tierOf(changePercent: number): Tier {
+  if (changePercent > 0.15) return "up";
+  if (changePercent < -0.15) return "down";
+  return "flat";
+}
+const TIER_HEX: Record<Tier, string> = { up: "#16a34a", down: "#e13b2e", flat: "#d9a441" };
+const TIER_TEXT: Record<Tier, string> = { up: "text-success-400", down: "text-danger-400", flat: "text-hazard-400" };
+const TIER_BORDER: Record<Tier, string> = { up: "border-success-500/40", down: "border-danger-500/40", flat: "border-hazard-500/40" };
 
 function WeatherIcon({ icon, className }: { icon: string; className?: string }) {
   const common = { className, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: 1.6, strokeLinecap: "round" as const, strokeLinejoin: "round" as const };
@@ -63,17 +75,26 @@ function WeatherIcon({ icon, className }: { icon: string; className?: string }) 
   }
 }
 
+function isWeatherSevere(reading: SiteWeatherReading): boolean {
+  return reading.weather.icon === "storm" || reading.weather.windSpeedKmh >= 40;
+}
+
 function WeatherCard({ reading }: { reading: SiteWeatherReading }) {
   const { t } = useTranslation();
   const { weather } = reading;
+  const severe = isWeatherSevere(reading);
   return (
-    <div className={`${cardClass} px-3 py-2.5 flex items-center gap-3 min-w-[160px]`}>
-      <WeatherIcon icon={weather.icon} className="w-8 h-8 text-hazard-500 shrink-0" />
+    <div
+      className={`rounded-lg border px-3 py-2.5 flex items-center gap-3 min-w-[168px] backdrop-blur-sm ${
+        severe ? "border-danger-500/50 bg-danger-500/10" : "border-white/10 bg-white/[0.04]"
+      }`}
+    >
+      <WeatherIcon icon={weather.icon} className={`w-8 h-8 shrink-0 ${severe ? "text-danger-400" : "text-hazard-400"}`} />
       <div className="min-w-0">
-        <div className="text-[10px] text-mine-300 uppercase tracking-wide truncate">{reading.siteName}</div>
-        <div className="text-lg font-bold leading-tight">{Math.round(weather.temperatureC)}°C</div>
-        <div className="text-[10px] text-mine-400 truncate">{weather.condition}</div>
-        <div className="text-[10px] text-mine-400 mt-0.5">
+        <div className="text-[10px] text-white/50 uppercase tracking-wide truncate">{reading.siteName}</div>
+        <div className="text-lg font-bold leading-tight text-white">{Math.round(weather.temperatureC)}°C</div>
+        <div className="text-[10px] text-white/60 truncate">{weather.condition}</div>
+        <div className={`text-[10px] mt-0.5 ${severe ? "text-danger-300 font-semibold" : "text-white/50"}`}>
           {t("liveData.wind")} {Math.round(weather.windSpeedKmh)} km/h · {t("liveData.humidity")} {Math.round(weather.humidityPct)}%
         </div>
       </div>
@@ -89,11 +110,12 @@ function priceCurrencyLabel(p: MetalPrice) {
 function PriceChangeTooltip({ active, payload }: any) {
   if (!active || !payload?.length) return null;
   const p: MetalPrice = payload[0].payload;
+  const tier = tierOf(p.changePercent);
   return (
-    <div style={CHART_TOOLTIP_STYLE} className="px-2.5 py-1.5">
-      <div className="font-bold text-mine-50">{p.label}</div>
-      <div className="text-mine-600">{priceCurrencyLabel(p)}</div>
-      <div className={p.changePercent >= 0 ? "text-success-600 font-semibold" : "text-danger-600 font-semibold"}>
+    <div style={NAVY_TOOLTIP_STYLE} className="px-2.5 py-1.5">
+      <div className="font-bold">{p.label}</div>
+      <div className="text-white/60">{priceCurrencyLabel(p)}</div>
+      <div className={`font-semibold ${TIER_TEXT[tier]}`}>
         {p.changePercent >= 0 ? "+" : ""}
         {p.changePercent}%
       </div>
@@ -135,91 +157,109 @@ export default function LiveDataWidget() {
   if (!hasWeather && !hasPrices && !fact) return null;
 
   return (
-    <div className="space-y-3">
-      {fact && (
-        <div className="relative overflow-hidden rounded-xl border-2 border-hazard-500/30 bg-gradient-to-br from-hazard-500/10 via-transparent to-transparent p-3.5">
-          <div className="flex items-start gap-2.5">
-            <span className="flex items-center justify-center w-6 h-6 rounded-md bg-hazard-500 text-white text-[10px] font-extrabold shrink-0 mt-0.5">
-              ?
-            </span>
-            <div>
-              <div className="text-[10px] font-extrabold uppercase tracking-wide text-hazard-600 mb-0.5">
-                {t("liveData.didYouKnow")}
-              </div>
-              <p className="text-xs text-mine-100 font-semibold leading-relaxed">{fact}</p>
-            </div>
-          </div>
+    <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-gradient-to-br from-[#0a1628] via-[#0f2140] to-[#0a1628] shadow-xl shadow-black/30">
+      <div className="pointer-events-none absolute -top-20 -right-16 w-56 h-56 rounded-full bg-hazard-500/10 blur-3xl" />
+      <div className="pointer-events-none absolute -bottom-24 -left-16 w-56 h-56 rounded-full bg-success-500/10 blur-3xl" />
+
+      <div className="relative p-4 space-y-4">
+        <div className="flex items-center gap-2">
+          <span className="relative flex h-2 w-2">
+            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-success-400 opacity-75" />
+            <span className="relative inline-flex rounded-full h-2 w-2 bg-success-500" />
+          </span>
+          <h2 className="text-xs font-extrabold uppercase tracking-wide text-white">{t("liveData.title")}</h2>
         </div>
-      )}
 
-      {(hasWeather || hasPrices) && (
-        <div className={`${cardClass} p-3.5`}>
-          <div className="flex items-center gap-2 mb-3">
-            <span className="w-1.5 h-1.5 rounded-full bg-success-500 animate-pulse" />
-            <h2 className="text-xs font-extrabold uppercase tracking-wide text-mine-200">{t("liveData.title")}</h2>
-          </div>
-
-          {hasWeather && (
-            <div className="mb-4">
-              <div className="text-[10px] text-mine-400 uppercase tracking-wide mb-1.5">{t("liveData.weather")}</div>
-              <div className="flex gap-2 overflow-x-auto pb-1">
-                {weather.map((w) => (
-                  <WeatherCard key={w.siteId} reading={w} />
-                ))}
-              </div>
-            </div>
-          )}
-
-          {hasPrices && (
-            <div>
-              <div className="flex items-center justify-between mb-1.5">
-                <div className="text-[10px] text-mine-400 uppercase tracking-wide">{t("liveData.mineralPrices")}</div>
-                <div className="text-[10px] text-mine-400">
-                  {t("liveData.asOf", { date: new Date(prices!.asOf).toLocaleTimeString() })}
+        {fact && (
+          <div className="rounded-lg border border-hazard-500/30 bg-hazard-500/[0.08] p-3">
+            <div className="flex items-start gap-2.5">
+              <span className="flex items-center justify-center w-5 h-5 rounded-md bg-hazard-500 text-white text-[10px] font-extrabold shrink-0 mt-0.5">
+                ?
+              </span>
+              <div>
+                <div className="text-[10px] font-extrabold uppercase tracking-wide text-hazard-400 mb-0.5">
+                  {t("liveData.didYouKnow")}
                 </div>
-              </div>
-              <div className="h-44">
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={prices!.prices} margin={{ top: 12, right: 8, left: -20, bottom: 0 }}>
-                    <defs>
-                      <linearGradient id="priceUp" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="0%" stopColor="#16a34a" stopOpacity={0.95} />
-                        <stop offset="100%" stopColor="#16a34a" stopOpacity={0.55} />
-                      </linearGradient>
-                      <linearGradient id="priceDown" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="0%" stopColor="#e13b2e" stopOpacity={0.95} />
-                        <stop offset="100%" stopColor="#e13b2e" stopOpacity={0.55} />
-                      </linearGradient>
-                    </defs>
-                    <XAxis dataKey="label" tick={CHART_TICK_STYLE} axisLine={{ stroke: "#e5e5e5" }} tickLine={false} />
-                    <YAxis tick={CHART_TICK_STYLE} axisLine={false} tickLine={false} tickFormatter={(v) => `${v}%`} width={38} />
-                    <Tooltip content={<PriceChangeTooltip />} cursor={{ fill: "rgba(196,138,31,0.06)" }} />
-                    <Bar dataKey="changePercent" radius={[6, 6, 6, 6]} maxBarSize={36}>
-                      {prices!.prices.map((p) => (
-                        <Cell key={p.key} fill={p.changePercent >= 0 ? "url(#priceUp)" : "url(#priceDown)"} />
-                      ))}
-                      <LabelList
-                        dataKey="changePercent"
-                        position="top"
-                        formatter={(v: number) => `${v >= 0 ? "+" : ""}${v}%`}
-                        style={{ fontSize: 9, fontWeight: 700, fill: "#52525b" }}
-                      />
-                    </Bar>
-                  </BarChart>
-                </ResponsiveContainer>
-              </div>
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-1.5 mt-2">
-                {prices!.prices.map((p) => (
-                  <div key={p.key} className="border border-mine-800 rounded-md px-2 py-1.5">
-                    <div className="text-[10px] text-mine-400 uppercase tracking-wide truncate">{p.label}</div>
-                    <div className="text-xs font-bold text-mine-50 truncate">{priceCurrencyLabel(p)}</div>
-                  </div>
-                ))}
+                <p className="text-xs text-white/90 font-medium leading-relaxed">{fact}</p>
               </div>
             </div>
-          )}
-        </div>
-      )}
+          </div>
+        )}
+
+        {hasWeather && (
+          <div>
+            <div className="text-[10px] text-white/40 uppercase tracking-wide mb-1.5">{t("liveData.weather")}</div>
+            <div className="flex gap-2 overflow-x-auto pb-1">
+              {weather.map((w) => (
+                <WeatherCard key={w.siteId} reading={w} />
+              ))}
+            </div>
+          </div>
+        )}
+
+        {hasPrices && (
+          <div>
+            <div className="flex items-center justify-between mb-1.5">
+              <div className="text-[10px] text-white/40 uppercase tracking-wide">{t("liveData.mineralPrices")}</div>
+              <div className="text-[10px] text-white/40">
+                {t("liveData.asOf", { date: new Date(prices!.asOf).toLocaleTimeString() })}
+              </div>
+            </div>
+
+            <div className="h-44 -ml-2">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={prices!.prices} margin={{ top: 14, right: 8, left: 0, bottom: 0 }}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.08)" vertical={false} />
+                  <XAxis dataKey="label" tick={NAVY_TICK_STYLE} axisLine={{ stroke: "rgba(255,255,255,0.15)" }} tickLine={false} />
+                  <YAxis tick={NAVY_TICK_STYLE} axisLine={false} tickLine={false} tickFormatter={(v) => `${v}%`} width={36} />
+                  <Tooltip content={<PriceChangeTooltip />} cursor={{ fill: "rgba(255,255,255,0.05)" }} />
+                  <Bar dataKey="changePercent" radius={[6, 6, 6, 6]} maxBarSize={34}>
+                    {prices!.prices.map((p) => (
+                      <Cell key={p.key} fill={TIER_HEX[tierOf(p.changePercent)]} />
+                    ))}
+                    <LabelList
+                      dataKey="changePercent"
+                      position="top"
+                      formatter={(v: number) => `${v >= 0 ? "+" : ""}${v}%`}
+                      style={{ fontSize: 9, fontWeight: 700, fill: "rgba(255,255,255,0.75)" }}
+                    />
+                  </Bar>
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-1.5 mt-2">
+              {prices!.prices.map((p) => {
+                const tier = tierOf(p.changePercent);
+                return (
+                  <div key={p.key} className={`rounded-md border-l-2 bg-white/[0.04] px-2 py-1.5 ${TIER_BORDER[tier]}`}>
+                    <div className="flex items-center justify-between gap-1">
+                      <span className="text-[10px] text-white/50 uppercase tracking-wide truncate">{p.label}</span>
+                      <span className={`text-[10px] font-bold ${TIER_TEXT[tier]}`}>
+                        {p.changePercent >= 0 ? "+" : ""}
+                        {p.changePercent}%
+                      </span>
+                    </div>
+                    <div className="text-xs font-bold text-white truncate">{priceCurrencyLabel(p)}</div>
+                  </div>
+                );
+              })}
+            </div>
+
+            {prices!.insight && (
+              <div className="mt-3 flex items-start gap-2 rounded-lg border border-white/10 bg-white/[0.04] p-2.5">
+                <span className="flex items-center justify-center w-5 h-5 rounded bg-hazard-500 text-white text-[9px] font-extrabold shrink-0 mt-0.5">
+                  AI
+                </span>
+                <p className="text-[11px] text-white/85 font-medium leading-relaxed italic">{prices!.insight}</p>
+              </div>
+            )}
+            {prices!.disclaimer && (
+              <p className="text-[10px] text-white/35 leading-relaxed mt-2">{prices!.disclaimer}</p>
+            )}
+          </div>
+        )}
+      </div>
     </div>
   );
 }
