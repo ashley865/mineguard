@@ -104,7 +104,7 @@ export default function Dashboard() {
       {user?.role === "ADMIN" && (
         <>
           <AiAssistantWidget showReportGenerator />
-          <LiveDataWidget />
+          <LiveDataWidget showMineralPrices />
           <FinancialSummaryWidget />
         </>
       )}

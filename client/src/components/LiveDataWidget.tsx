@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell, LabelList, CartesianGrid } from "recharts";
 import { api } from "../api/client";
-import { DidYouKnowResponse, IndustryNewsItem, IndustryNewsResponse, MineralPricesResponse, MetalPrice, SiteWeatherReading } from "../api/types";
+import { DidYouKnowResponse, ExecutiveTitle, IndustryNewsItem, IndustryNewsResponse, MineralPricesResponse, MetalPrice, SiteWeatherReading } from "../api/types";
 
 // A deliberately distinct "live terminal" look — dark navy rather than the app's
 // otherwise light theme — so this panel reads as live/real-time data at a glance,
@@ -186,7 +186,12 @@ function NewsCard({ item }: { item: IndustryNewsItem }) {
   );
 }
 
-export default function LiveDataWidget() {
+// Mineral/commodity prices are financially/operationally relevant to only some
+// executive titles — everyone else sees weather, the fact of the day, and industry
+// news, but not price data that isn't meaningful to their role.
+export const MINERAL_PRICE_RELEVANT_TITLES: ExecutiveTitle[] = ["GENERAL_MANAGER", "CFO", "COO", "OPERATIONS_MANAGER"];
+
+export default function LiveDataWidget({ showMineralPrices = false }: { showMineralPrices?: boolean }) {
   const { t } = useTranslation();
   const [weather, setWeather] = useState<SiteWeatherReading[]>([]);
   const [prices, setPrices] = useState<MineralPricesResponse | null>(null);
@@ -199,7 +204,9 @@ export default function LiveDataWidget() {
     async function load() {
       const [w, p, f, n] = await Promise.all([
         api.get<SiteWeatherReading[]>("/live-data/weather").then((r) => r.data).catch(() => []),
-        api.get<MineralPricesResponse>("/live-data/mineral-prices").then((r) => r.data).catch(() => null),
+        showMineralPrices
+          ? api.get<MineralPricesResponse>("/live-data/mineral-prices").then((r) => r.data).catch(() => null)
+          : Promise.resolve(null),
         api.get<DidYouKnowResponse>("/live-data/did-you-know").then((r) => r.data).catch(() => null),
         api.get<IndustryNewsResponse>("/live-data/industry-news").then((r) => r.data).catch(() => null),
       ]);
@@ -214,12 +221,13 @@ export default function LiveDataWidget() {
     return () => {
       cancelled = true;
     };
-  }, []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [showMineralPrices]);
 
   if (loading) return null;
 
   const hasWeather = weather.length > 0;
-  const hasPrices = !!prices && prices.prices.length > 0;
+  const hasPrices = showMineralPrices && !!prices && prices.prices.length > 0;
   const hasNews = !!news && news.items.length > 0;
   if (!hasWeather && !hasPrices && !fact && !hasNews) return null;
 
