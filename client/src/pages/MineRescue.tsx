@@ -18,6 +18,7 @@ import { StatusBadge } from "../components/Badges";
 import Modal from "../components/Modal";
 import { buttonDanger, buttonPrimary, buttonSecondary, cardClass, inputClass, labelClass, selectClass } from "../components/ui";
 import DateField from "../components/DateField";
+import LoadError from "../components/LoadError";
 
 const teamRoles: RescueTeamRole[] = ["TEAM_LEADER", "MEMBER"];
 const baStatuses: BaSetStatus[] = ["SERVICEABLE", "OUT_OF_SERVICE", "DUE_FOR_SERVICE"];
@@ -86,13 +87,20 @@ function TeamTab({ sites, workers, canEdit, canDelete }: { sites: Site[]; worker
   const { t } = useTranslation();
   const [members, setMembers] = useState<RescueTeamMember[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
   const [modal, setModal] = useState(false);
 
   async function load() {
     setLoading(true);
-    const res = await api.get<RescueTeamMember[]>("/mine-rescue/team-members");
-    setMembers(res.data);
-    setLoading(false);
+    setLoadError(false);
+    try {
+      const res = await api.get<RescueTeamMember[]>("/mine-rescue/team-members");
+      setMembers(res.data);
+    } catch {
+      setLoadError(true);
+    } finally {
+      setLoading(false);
+    }
   }
 
   useEffect(() => { load(); }, []);
@@ -109,6 +117,7 @@ function TeamTab({ sites, workers, canEdit, canDelete }: { sites: Site[]; worker
   }
 
   if (loading) return <div className="text-mine-300">{t("common.loading")}</div>;
+  if (loadError) return <LoadError onRetry={load} />;
 
   return (
     <div className="space-y-4">
@@ -224,13 +233,20 @@ function BaSetsTab({ sites, canEdit, canDelete }: { sites: Site[]; canEdit: bool
   const { t } = useTranslation();
   const [sets, setSets] = useState<BreathingApparatusSet[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
   const [modal, setModal] = useState(false);
 
   async function load() {
     setLoading(true);
-    const res = await api.get<BreathingApparatusSet[]>("/mine-rescue/ba-sets");
-    setSets(res.data);
-    setLoading(false);
+    setLoadError(false);
+    try {
+      const res = await api.get<BreathingApparatusSet[]>("/mine-rescue/ba-sets");
+      setSets(res.data);
+    } catch {
+      setLoadError(true);
+    } finally {
+      setLoading(false);
+    }
   }
 
   useEffect(() => { load(); }, []);
@@ -247,6 +263,7 @@ function BaSetsTab({ sites, canEdit, canDelete }: { sites: Site[]; canEdit: bool
   }
 
   if (loading) return <div className="text-mine-300">{t("common.loading")}</div>;
+  if (loadError) return <LoadError onRetry={load} />;
 
   return (
     <div className="space-y-4">
@@ -352,13 +369,20 @@ function DrillsTab({ sites, canEdit, canDelete }: { sites: Site[]; canEdit: bool
   const { t } = useTranslation();
   const [drills, setDrills] = useState<RescueDrill[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
   const [modal, setModal] = useState(false);
 
   async function load() {
     setLoading(true);
-    const res = await api.get<RescueDrill[]>("/mine-rescue/drills");
-    setDrills(res.data);
-    setLoading(false);
+    setLoadError(false);
+    try {
+      const res = await api.get<RescueDrill[]>("/mine-rescue/drills");
+      setDrills(res.data);
+    } catch {
+      setLoadError(true);
+    } finally {
+      setLoading(false);
+    }
   }
 
   useEffect(() => { load(); }, []);
@@ -375,6 +399,7 @@ function DrillsTab({ sites, canEdit, canDelete }: { sites: Site[]; canEdit: bool
   }
 
   if (loading) return <div className="text-mine-300">{t("common.loading")}</div>;
+  if (loadError) return <LoadError onRetry={load} />;
 
   return (
     <div className="space-y-4">
@@ -421,6 +446,7 @@ function MutualAidTab({ sites, canEdit, canDelete }: { sites: Site[]; canEdit: b
   const { t } = useTranslation();
   const [agreements, setAgreements] = useState<MutualAidAgreement[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
   const [modal, setModal] = useState(false);
   const [siteId, setSiteId] = useState(sites[0]?.id ?? "");
   const [partnerOrganization, setPartnerOrganization] = useState("");
@@ -432,9 +458,15 @@ function MutualAidTab({ sites, canEdit, canDelete }: { sites: Site[]; canEdit: b
 
   async function load() {
     setLoading(true);
-    const res = await api.get<MutualAidAgreement[]>("/mine-rescue/mutual-aid");
-    setAgreements(res.data);
-    setLoading(false);
+    setLoadError(false);
+    try {
+      const res = await api.get<MutualAidAgreement[]>("/mine-rescue/mutual-aid");
+      setAgreements(res.data);
+    } catch {
+      setLoadError(true);
+    } finally {
+      setLoading(false);
+    }
   }
 
   useEffect(() => { load(); }, []);
@@ -458,6 +490,7 @@ function MutualAidTab({ sites, canEdit, canDelete }: { sites: Site[]; canEdit: b
   }
 
   if (loading) return <div className="text-mine-300">{t("common.loading")}</div>;
+  if (loadError) return <LoadError onRetry={load} />;
 
   return (
     <div className="space-y-4">
@@ -541,6 +574,7 @@ function CalloutsTab({ sites, canEdit, canDelete }: { sites: Site[]; canEdit: bo
   const { t } = useTranslation();
   const [callouts, setCallouts] = useState<RescueCallout[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
   const [modal, setModal] = useState(false);
   const [siteId, setSiteId] = useState(sites[0]?.id ?? "");
   const [calloutTime, setCalloutTime] = useState("");
@@ -550,9 +584,15 @@ function CalloutsTab({ sites, canEdit, canDelete }: { sites: Site[]; canEdit: bo
 
   async function load() {
     setLoading(true);
-    const res = await api.get<RescueCallout[]>("/mine-rescue/callouts");
-    setCallouts(res.data);
-    setLoading(false);
+    setLoadError(false);
+    try {
+      const res = await api.get<RescueCallout[]>("/mine-rescue/callouts");
+      setCallouts(res.data);
+    } catch {
+      setLoadError(true);
+    } finally {
+      setLoading(false);
+    }
   }
 
   useEffect(() => { load(); }, []);
@@ -577,6 +617,7 @@ function CalloutsTab({ sites, canEdit, canDelete }: { sites: Site[]; canEdit: bo
   }
 
   if (loading) return <div className="text-mine-300">{t("common.loading")}</div>;
+  if (loadError) return <LoadError onRetry={load} />;
 
   return (
     <div className="space-y-4">
@@ -651,16 +692,24 @@ export default function MineRescue() {
   const [sites, setSites] = useState<Site[]>([]);
   const [workers, setWorkers] = useState<Worker[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
 
-  useEffect(() => {
-    Promise.all([api.get<Site[]>("/sites"), api.get<Worker[]>("/workers")]).then(([s, w]) => {
-      setSites(s.data);
-      setWorkers(w.data);
-      setLoading(false);
-    });
-  }, []);
+  function load() {
+    setLoading(true);
+    setLoadError(false);
+    Promise.all([api.get<Site[]>("/sites"), api.get<Worker[]>("/workers")])
+      .then(([s, w]) => {
+        setSites(s.data);
+        setWorkers(w.data);
+      })
+      .catch(() => setLoadError(true))
+      .finally(() => setLoading(false));
+  }
+
+  useEffect(() => { load(); }, []);
 
   if (loading) return <div className="text-mine-300">{t("common.loading")}</div>;
+  if (loadError) return <LoadError onRetry={load} />;
 
   return (
     <div className="space-y-6">

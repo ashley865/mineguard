@@ -38,10 +38,11 @@ export default function MaintenanceDowntimeWidget() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    api.get<MaintenanceSummary>("/maintenance/summary", { params: { days: 180 } }).then((res) => {
-      setData(res.data);
-      setLoading(false);
-    });
+    api
+      .get<MaintenanceSummary>("/maintenance/summary", { params: { days: 180 } })
+      .then((res) => setData(res.data))
+      .catch(() => {})
+      .finally(() => setLoading(false));
   }, []);
 
   if (loading) {

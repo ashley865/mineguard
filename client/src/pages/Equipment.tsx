@@ -6,6 +6,7 @@ import { Equipment as EquipmentItem, EquipmentStatus, EquipmentType, Site, Worke
 import { StatusBadge } from "../components/Badges";
 import Modal from "../components/Modal";
 import { buttonDanger, buttonPrimary, buttonSecondary, cardClass, inputClass, labelClass, selectClass } from "../components/ui";
+import LoadError from "../components/LoadError";
 
 const equipmentTypes: EquipmentType[] = [
   "EXCAVATOR",
@@ -118,21 +119,28 @@ export default function Equipment() {
   const [zones, setZones] = useState<Zone[]>([]);
   const [workers, setWorkers] = useState<Worker[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
   const [modal, setModal] = useState<null | "create" | EquipmentItem>(null);
 
   async function load() {
     setLoading(true);
-    const [e, s, z, w] = await Promise.all([
-      api.get<EquipmentItem[]>("/equipment"),
-      api.get<Site[]>("/sites"),
-      api.get<Zone[]>("/zones"),
-      api.get<Worker[]>("/workers"),
-    ]);
-    setEquipment(e.data);
-    setSites(s.data);
-    setZones(z.data);
-    setWorkers(w.data);
-    setLoading(false);
+    setLoadError(false);
+    try {
+      const [e, s, z, w] = await Promise.all([
+        api.get<EquipmentItem[]>("/equipment"),
+        api.get<Site[]>("/sites"),
+        api.get<Zone[]>("/zones"),
+        api.get<Worker[]>("/workers"),
+      ]);
+      setEquipment(e.data);
+      setSites(s.data);
+      setZones(z.data);
+      setWorkers(w.data);
+    } catch {
+      setLoadError(true);
+    } finally {
+      setLoading(false);
+    }
   }
 
   useEffect(() => {
@@ -158,6 +166,7 @@ export default function Equipment() {
   }
 
   if (loading) return <div className="text-mine-300">{t("equipment.loading")}</div>;
+  if (loadError) return <LoadError onRetry={load} />;
 
   return (
     <div className="space-y-6">

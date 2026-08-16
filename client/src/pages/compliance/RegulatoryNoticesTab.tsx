@@ -7,6 +7,7 @@ import { StatusBadge } from "../../components/Badges";
 import Modal from "../../components/Modal";
 import { buttonDanger, buttonPrimary, buttonSecondary, cardClass, inputClass, labelClass, selectClass } from "../../components/ui";
 import DateField from "../../components/DateField";
+import LoadError from "../../components/LoadError";
 
 const sections: NoticeSection[] = ["SECTION_54", "SECTION_55", "SECTION_53", "OTHER"];
 const statuses: NoticeStatus[] = ["OPEN", "COMPLIED", "WITHDRAWN", "APPEALED"];
@@ -121,13 +122,20 @@ export default function RegulatoryNoticesTab({ sites, zones }: { sites: Site[]; 
   const canEdit = user?.role === "ADMIN" || user?.role === "SUPERVISOR" || user?.role === "EXECUTIVE";
   const [items, setItems] = useState<RegulatoryNotice[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
   const [modal, setModal] = useState<null | "create" | RegulatoryNotice>(null);
 
   async function load() {
     setLoading(true);
-    const res = await api.get<RegulatoryNotice[]>("/regulatory-notices");
-    setItems(res.data);
-    setLoading(false);
+    setLoadError(false);
+    try {
+      const res = await api.get<RegulatoryNotice[]>("/regulatory-notices");
+      setItems(res.data);
+    } catch {
+      setLoadError(true);
+    } finally {
+      setLoading(false);
+    }
   }
 
   useEffect(() => {
@@ -153,6 +161,7 @@ export default function RegulatoryNoticesTab({ sites, zones }: { sites: Site[]; 
   }
 
   if (loading) return <div className="text-mine-300">{t("compliance.loading")}</div>;
+  if (loadError) return <LoadError onRetry={load} />;
 
   return (
     <div className="space-y-4">

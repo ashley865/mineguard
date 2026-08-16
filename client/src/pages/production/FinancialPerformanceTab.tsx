@@ -15,6 +15,7 @@ import {
 import { api } from "../../api/client";
 import { ProductionFinancialSummary, Site } from "../../api/types";
 import { cardClass, selectClass } from "../../components/ui";
+import LoadError from "../../components/LoadError";
 
 const CHART_TOOLTIP_STYLE = { background: "#fafafa", border: "1px solid #e5e5e5", fontSize: 11 };
 const CHART_TICK_STYLE = { fontSize: 10, fill: "#52525b" };
@@ -36,14 +37,21 @@ export default function FinancialPerformanceTab({ sites }: { sites: Site[] }) {
   const [months, setMonths] = useState(6);
   const [summary, setSummary] = useState<ProductionFinancialSummary | null>(null);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
 
   async function load() {
     setLoading(true);
-    const res = await api.get<ProductionFinancialSummary>("/production/financial-summary", {
-      params: { siteId: siteId || undefined, months },
-    });
-    setSummary(res.data);
-    setLoading(false);
+    setLoadError(false);
+    try {
+      const res = await api.get<ProductionFinancialSummary>("/production/financial-summary", {
+        params: { siteId: siteId || undefined, months },
+      });
+      setSummary(res.data);
+    } catch {
+      setLoadError(true);
+    } finally {
+      setLoading(false);
+    }
   }
 
   useEffect(() => {
@@ -69,6 +77,7 @@ export default function FinancialPerformanceTab({ sites }: { sites: Site[] }) {
       </div>
 
       {loading && <div className="text-mine-300">{t("common.loading")}</div>}
+      {loadError && <LoadError onRetry={load} />}
 
       {!loading && summary && (
         <>

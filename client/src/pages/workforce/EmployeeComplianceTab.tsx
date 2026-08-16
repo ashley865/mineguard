@@ -6,6 +6,7 @@ import { EmployeeComplianceCheck, FitnessResult, Worker } from "../../api/types"
 import { StatusBadge } from "../../components/Badges";
 import Modal from "../../components/Modal";
 import { buttonDanger, buttonPrimary, buttonSecondary, cardClass, inputClass, labelClass, selectClass } from "../../components/ui";
+import LoadError from "../../components/LoadError";
 
 const fitnessOptions: FitnessResult[] = ["FIT", "FIT_WITH_RESTRICTION", "TEMPORARILY_UNFIT", "UNFIT"];
 
@@ -102,13 +103,20 @@ export default function EmployeeComplianceTab({ workers }: { workers: Worker[] }
   const canEdit = user?.role === "ADMIN" || user?.role === "SUPERVISOR" || user?.role === "EXECUTIVE";
   const [items, setItems] = useState<EmployeeComplianceCheck[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
   const [modal, setModal] = useState<null | "create" | EmployeeComplianceCheck>(null);
 
   async function load() {
     setLoading(true);
-    const res = await api.get<EmployeeComplianceCheck[]>("/employee-compliance");
-    setItems(res.data);
-    setLoading(false);
+    setLoadError(false);
+    try {
+      const res = await api.get<EmployeeComplianceCheck[]>("/employee-compliance");
+      setItems(res.data);
+    } catch {
+      setLoadError(true);
+    } finally {
+      setLoading(false);
+    }
   }
 
   useEffect(() => {
@@ -134,6 +142,7 @@ export default function EmployeeComplianceTab({ workers }: { workers: Worker[] }
   }
 
   if (loading) return <div className="text-mine-300">{t("workforce.loading")}</div>;
+  if (loadError) return <LoadError onRetry={load} />;
 
   return (
     <div className="space-y-4">

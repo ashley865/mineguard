@@ -7,6 +7,7 @@ import { StatusBadge } from "./Badges";
 import Modal from "./Modal";
 import Avatar from "./Avatar";
 import { buttonSecondary, cardClass } from "./ui";
+import LoadError from "./LoadError";
 
 const CHART_TOOLTIP_STYLE = { background: "#fafafa", border: "1px solid #e5e5e5", fontSize: 11 };
 const CHART_TICK_STYLE = { fontSize: 9, fill: "#52525b" };
@@ -43,15 +44,22 @@ export default function WorkerProfileModal({
   const { t } = useTranslation();
   const [profile, setProfile] = useState<WorkerProfile | null>(null);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [photoVersion, setPhotoVersion] = useState(0);
   const fileRef = useRef<HTMLInputElement>(null);
 
   async function load() {
     setLoading(true);
-    const res = await api.get<WorkerProfile>(`/workers/${worker.id}/profile`);
-    setProfile(res.data);
-    setLoading(false);
+    setLoadError(false);
+    try {
+      const res = await api.get<WorkerProfile>(`/workers/${worker.id}/profile`);
+      setProfile(res.data);
+    } catch {
+      setLoadError(true);
+    } finally {
+      setLoading(false);
+    }
   }
 
   useEffect(() => {
@@ -106,8 +114,9 @@ export default function WorkerProfileModal({
         </div>
 
         {loading && <div className="text-mine-300 text-sm">{t("common.loading")}</div>}
+        {loadError && <LoadError onRetry={load} />}
 
-        {!loading && profile && (
+        {!loading && !loadError && profile && (
           <>
             <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
               <StatBlock label={t("workers.daysWorked90")} value={profile.stats.daysWorkedLast90} />

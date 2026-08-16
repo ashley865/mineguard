@@ -23,6 +23,7 @@ import DataTable, { DataTableColumn } from "../components/DataTable";
 import SummaryCards from "../components/SummaryCards";
 import { AuditHistoryButton } from "../components/AuditHistoryPanel";
 import CaseRiskModal from "../components/CaseRiskModal";
+import LoadError from "../components/LoadError";
 
 const disciplinaryOutcomes: DisciplinaryOutcome[] = ["PENDING", "VERBAL_WARNING", "WRITTEN_WARNING", "FINAL_WRITTEN_WARNING", "DISMISSAL", "NOT_GUILTY", "WITHDRAWN"];
 const disciplinaryStatuses: DisciplinaryStatus[] = ["OPEN", "SCHEDULED", "CONCLUDED", "APPEALED"];
@@ -109,14 +110,21 @@ function DisciplinaryTab({ workers, canEdit, canDelete }: { workers: Worker[]; c
   const canUseAi = user?.role === "ADMIN" || user?.title === "HR_MANAGER";
   const [cases, setCases] = useState<DisciplinaryCase[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
   const [modal, setModal] = useState(false);
   const [riskCase, setRiskCase] = useState<{ id: string; label: string } | null>(null);
 
   async function load() {
     setLoading(true);
-    const res = await api.get<DisciplinaryCase[]>("/labour-relations/disciplinary");
-    setCases(res.data);
-    setLoading(false);
+    setLoadError(false);
+    try {
+      const res = await api.get<DisciplinaryCase[]>("/labour-relations/disciplinary");
+      setCases(res.data);
+    } catch {
+      setLoadError(true);
+    } finally {
+      setLoading(false);
+    }
   }
 
   useEffect(() => { load(); }, []);
@@ -133,6 +141,7 @@ function DisciplinaryTab({ workers, canEdit, canDelete }: { workers: Worker[]; c
   }
 
   if (loading) return <div className="text-mine-300">{t("common.loading")}</div>;
+  if (loadError) return <LoadError onRetry={load} />;
 
   const openCount = cases.filter((c) => c.status === "OPEN" || c.status === "SCHEDULED").length;
   const dismissalCount = cases.filter((c) => c.outcome === "DISMISSAL").length;
@@ -258,14 +267,21 @@ function GrievancesTab({ workers, canEdit, canDelete }: { workers: Worker[]; can
   const canUseAi = user?.role === "ADMIN" || user?.title === "HR_MANAGER";
   const [cases, setCases] = useState<GrievanceCase[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
   const [modal, setModal] = useState(false);
   const [riskCase, setRiskCase] = useState<{ id: string; label: string } | null>(null);
 
   async function load() {
     setLoading(true);
-    const res = await api.get<GrievanceCase[]>("/labour-relations/grievances");
-    setCases(res.data);
-    setLoading(false);
+    setLoadError(false);
+    try {
+      const res = await api.get<GrievanceCase[]>("/labour-relations/grievances");
+      setCases(res.data);
+    } catch {
+      setLoadError(true);
+    } finally {
+      setLoading(false);
+    }
   }
 
   useEffect(() => { load(); }, []);
@@ -282,6 +298,7 @@ function GrievancesTab({ workers, canEdit, canDelete }: { workers: Worker[]; can
   }
 
   if (loading) return <div className="text-mine-300">{t("common.loading")}</div>;
+  if (loadError) return <LoadError onRetry={load} />;
 
   const openCount = cases.filter((c) => c.status === "OPEN" || c.status === "UNDER_INVESTIGATION").length;
 
@@ -406,14 +423,21 @@ function CcmaTab({ workers, canEdit, canDelete }: { workers: Worker[]; canEdit: 
   const canUseAi = user?.role === "ADMIN" || user?.title === "HR_MANAGER";
   const [cases, setCases] = useState<CcmaCase[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
   const [modal, setModal] = useState(false);
   const [riskCase, setRiskCase] = useState<{ id: string; label: string } | null>(null);
 
   async function load() {
     setLoading(true);
-    const res = await api.get<CcmaCase[]>("/labour-relations/ccma-cases");
-    setCases(res.data);
-    setLoading(false);
+    setLoadError(false);
+    try {
+      const res = await api.get<CcmaCase[]>("/labour-relations/ccma-cases");
+      setCases(res.data);
+    } catch {
+      setLoadError(true);
+    } finally {
+      setLoading(false);
+    }
   }
 
   useEffect(() => { load(); }, []);
@@ -430,6 +454,7 @@ function CcmaTab({ workers, canEdit, canDelete }: { workers: Worker[]; canEdit: 
   }
 
   if (loading) return <div className="text-mine-300">{t("common.loading")}</div>;
+  if (loadError) return <LoadError onRetry={load} />;
 
   const ccmaColumns: DataTableColumn<CcmaCase>[] = [
     { key: "referral", header: t("labourRelations.referralNumber"), render: (c) => c.referralNumber ?? "—", sortValue: (c) => c.referralNumber ?? "" },
@@ -542,13 +567,20 @@ function UnionAgreementsTab({ canEdit, canDelete }: { canEdit: boolean; canDelet
   const { t } = useTranslation();
   const [agreements, setAgreements] = useState<UnionAgreement[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
   const [modal, setModal] = useState(false);
 
   async function load() {
     setLoading(true);
-    const res = await api.get<UnionAgreement[]>("/labour-relations/union-agreements");
-    setAgreements(res.data);
-    setLoading(false);
+    setLoadError(false);
+    try {
+      const res = await api.get<UnionAgreement[]>("/labour-relations/union-agreements");
+      setAgreements(res.data);
+    } catch {
+      setLoadError(true);
+    } finally {
+      setLoading(false);
+    }
   }
 
   useEffect(() => { load(); }, []);
@@ -565,6 +597,7 @@ function UnionAgreementsTab({ canEdit, canDelete }: { canEdit: boolean; canDelet
   }
 
   if (loading) return <div className="text-mine-300">{t("common.loading")}</div>;
+  if (loadError) return <LoadError onRetry={load} />;
 
   const unionColumns: DataTableColumn<UnionAgreement>[] = [
     { key: "name", header: t("labourRelations.unionName"), render: (a) => <span className="font-medium">{a.unionName}</span>, sortValue: (a) => a.unionName },
@@ -617,15 +650,22 @@ export default function LabourRelations() {
   const [tab, setTab] = useState<"disciplinary" | "grievances" | "ccma" | "unions">("disciplinary");
   const [workers, setWorkers] = useState<Worker[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
 
-  useEffect(() => {
-    api.get<Worker[]>("/workers").then((res) => {
-      setWorkers(res.data);
-      setLoading(false);
-    });
-  }, []);
+  function load() {
+    setLoading(true);
+    setLoadError(false);
+    api
+      .get<Worker[]>("/workers")
+      .then((res) => setWorkers(res.data))
+      .catch(() => setLoadError(true))
+      .finally(() => setLoading(false));
+  }
+
+  useEffect(() => { load(); }, []);
 
   if (loading) return <div className="text-mine-300">{t("common.loading")}</div>;
+  if (loadError) return <LoadError onRetry={load} />;
 
   return (
     <div className="space-y-6">

@@ -10,6 +10,7 @@ import DateField from "../../components/DateField";
 import DataTable, { DataTableColumn } from "../../components/DataTable";
 import SummaryCards from "../../components/SummaryCards";
 import { AuditHistoryButton } from "../../components/AuditHistoryPanel";
+import LoadError from "../../components/LoadError";
 
 const categories: LegalComplianceCategory[] = ["MINING_RIGHT", "ENVIRONMENTAL", "WATER_USE", "LABOUR", "HEALTH_SAFETY", "TAX_LEVY", "OTHER"];
 const itemStatuses: LegalComplianceItemStatus[] = ["UPCOMING", "DUE", "OVERDUE", "COMPLETED"];
@@ -105,17 +106,24 @@ export default function LegalComplianceTab({ sites }: { sites: Site[] }) {
   const [calendar, setCalendar] = useState<LegalComplianceCalendar | null>(null);
   const [items, setItems] = useState<LegalComplianceItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
   const [modal, setModal] = useState<null | "create" | LegalComplianceItem>(null);
 
   async function load() {
     setLoading(true);
-    const [cal, it] = await Promise.all([
-      api.get<LegalComplianceCalendar>("/legal-compliance/calendar", { params: { withinDays: 180 } }),
-      api.get<LegalComplianceItem[]>("/legal-compliance/items"),
-    ]);
-    setCalendar(cal.data);
-    setItems(it.data);
-    setLoading(false);
+    setLoadError(false);
+    try {
+      const [cal, it] = await Promise.all([
+        api.get<LegalComplianceCalendar>("/legal-compliance/calendar", { params: { withinDays: 180 } }),
+        api.get<LegalComplianceItem[]>("/legal-compliance/items"),
+      ]);
+      setCalendar(cal.data);
+      setItems(it.data);
+    } catch {
+      setLoadError(true);
+    } finally {
+      setLoading(false);
+    }
   }
 
   useEffect(() => {
@@ -141,6 +149,7 @@ export default function LegalComplianceTab({ sites }: { sites: Site[] }) {
   }
 
   if (loading) return <div className="text-mine-300">{t("common.loading")}</div>;
+  if (loadError) return <LoadError onRetry={load} />;
 
   const overdueCount = items.filter((i) => i.status === "OVERDUE").length;
   const dueCount = items.filter((i) => i.status === "DUE").length;

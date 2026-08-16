@@ -34,10 +34,11 @@ export default function InventoryProcurementWidget() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    api.get<InventoryProcurementSummary>("/inventory/summary").then((res) => {
-      setData(res.data);
-      setLoading(false);
-    });
+    api
+      .get<InventoryProcurementSummary>("/inventory/summary")
+      .then((res) => setData(res.data))
+      .catch(() => {})
+      .finally(() => setLoading(false));
   }, []);
 
   if (loading) {

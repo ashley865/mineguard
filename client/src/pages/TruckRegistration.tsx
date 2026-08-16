@@ -6,6 +6,7 @@ import { Delivery, DeliveryDirection, Site, Truck } from "../api/types";
 import { StatusBadge } from "../components/Badges";
 import Modal from "../components/Modal";
 import { buttonDanger, buttonPrimary, buttonSecondary, cardClass, inputClass, labelClass, selectClass } from "../components/ui";
+import LoadError from "../components/LoadError";
 import FleetTracking from "./FleetTracking";
 
 type TabKey = "trucks" | "deliveries" | "fleet";
@@ -175,20 +176,27 @@ export default function TruckRegistration() {
   const [sites, setSites] = useState<Site[]>([]);
   const [deliveries, setDeliveries] = useState<Delivery[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
   const [truckModal, setTruckModal] = useState<null | "create" | Truck>(null);
   const [deliveryModal, setDeliveryModal] = useState(false);
 
   async function load() {
     setLoading(true);
-    const [t1, s, d] = await Promise.all([
-      api.get<Truck[]>("/trucks"),
-      api.get<Site[]>("/sites"),
-      api.get<Delivery[]>("/trucks/deliveries/list"),
-    ]);
-    setTrucks(t1.data);
-    setSites(s.data);
-    setDeliveries(d.data);
-    setLoading(false);
+    setLoadError(false);
+    try {
+      const [t1, s, d] = await Promise.all([
+        api.get<Truck[]>("/trucks"),
+        api.get<Site[]>("/sites"),
+        api.get<Delivery[]>("/trucks/deliveries/list"),
+      ]);
+      setTrucks(t1.data);
+      setSites(s.data);
+      setDeliveries(d.data);
+    } catch {
+      setLoadError(true);
+    } finally {
+      setLoading(false);
+    }
   }
 
   useEffect(() => {
@@ -231,6 +239,7 @@ export default function TruckRegistration() {
   }
 
   if (loading) return <div className="text-mine-300">{t("trucks.loading")}</div>;
+  if (loadError) return <LoadError onRetry={load} />;
 
   const tabs: { key: TabKey; label: string }[] = [
     { key: "deliveries", label: t("trucks.tabDeliveries") },

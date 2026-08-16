@@ -6,6 +6,7 @@ import { InspectionOutcome, InspectionVisit, RegulatoryNotice, Site } from "../.
 import Modal from "../../components/Modal";
 import { buttonDanger, buttonPrimary, buttonSecondary, cardClass, inputClass, labelClass, selectClass } from "../../components/ui";
 import DateField from "../../components/DateField";
+import LoadError from "../../components/LoadError";
 
 const outcomes: InspectionOutcome[] = ["NO_ACTION", "VERBAL_WARNING", "NOTICE_ISSUED", "FOLLOW_UP_REQUIRED"];
 
@@ -122,17 +123,24 @@ export default function VisitLogTab({ sites }: { sites: Site[] }) {
   const [items, setItems] = useState<InspectionVisit[]>([]);
   const [notices, setNotices] = useState<RegulatoryNotice[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
   const [modal, setModal] = useState<null | "create" | InspectionVisit>(null);
 
   async function load() {
     setLoading(true);
-    const [v, n] = await Promise.all([
-      api.get<InspectionVisit[]>("/inspection-visits"),
-      api.get<RegulatoryNotice[]>("/regulatory-notices"),
-    ]);
-    setItems(v.data);
-    setNotices(n.data);
-    setLoading(false);
+    setLoadError(false);
+    try {
+      const [v, n] = await Promise.all([
+        api.get<InspectionVisit[]>("/inspection-visits"),
+        api.get<RegulatoryNotice[]>("/regulatory-notices"),
+      ]);
+      setItems(v.data);
+      setNotices(n.data);
+    } catch {
+      setLoadError(true);
+    } finally {
+      setLoading(false);
+    }
   }
 
   useEffect(() => {
@@ -158,6 +166,7 @@ export default function VisitLogTab({ sites }: { sites: Site[] }) {
   }
 
   if (loading) return <div className="text-mine-300">{t("inspection.loading")}</div>;
+  if (loadError) return <LoadError onRetry={load} />;
 
   return (
     <div className="space-y-4">

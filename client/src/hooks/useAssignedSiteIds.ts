@@ -20,12 +20,18 @@ export function useAssignedSiteIds() {
     }
     let cancelled = false;
     setLoading(true);
-    api.get<{ siteIds: string[] }>("/executive-sites/mine").then((res) => {
-      if (!cancelled) {
-        setSiteIds(res.data.siteIds);
-        setLoading(false);
-      }
-    });
+    api
+      .get<{ siteIds: string[] }>("/executive-sites/mine")
+      .then((res) => {
+        if (!cancelled) setSiteIds(res.data.siteIds);
+      })
+      .catch(() => {
+        // Leave siteIds as-is (null = unrestricted fallback) rather than
+        // leaving the page that gates on `loading` stuck forever.
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
     return () => {
       cancelled = true;
     };

@@ -10,6 +10,7 @@ import DateField from "../../components/DateField";
 import DataTable, { DataTableColumn } from "../../components/DataTable";
 import SummaryCards from "../../components/SummaryCards";
 import { AuditHistoryButton } from "../../components/AuditHistoryPanel";
+import LoadError from "../../components/LoadError";
 
 const claimStatuses: IodClaimStatus[] = ["REPORTED", "SUBMITTED", "UNDER_ASSESSMENT", "ACCEPTED", "REJECTED", "CLOSED"];
 
@@ -120,17 +121,24 @@ export default function IodClaimsTab({ workers }: { workers: Worker[] }) {
   const [claims, setClaims] = useState<IodClaim[]>([]);
   const [incidents, setIncidents] = useState<Incident[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
   const [modal, setModal] = useState<null | "create" | IodClaim>(null);
 
   async function load() {
     setLoading(true);
-    const [c, i] = await Promise.all([
-      api.get<IodClaim[]>("/iod-claims"),
-      api.get<Incident[]>("/incidents"),
-    ]);
-    setClaims(c.data);
-    setIncidents(i.data);
-    setLoading(false);
+    setLoadError(false);
+    try {
+      const [c, i] = await Promise.all([
+        api.get<IodClaim[]>("/iod-claims"),
+        api.get<Incident[]>("/incidents"),
+      ]);
+      setClaims(c.data);
+      setIncidents(i.data);
+    } catch {
+      setLoadError(true);
+    } finally {
+      setLoading(false);
+    }
   }
 
   useEffect(() => {
@@ -156,6 +164,7 @@ export default function IodClaimsTab({ workers }: { workers: Worker[] }) {
   }
 
   if (loading) return <div className="text-mine-300">{t("common.loading")}</div>;
+  if (loadError) return <LoadError onRetry={load} />;
 
   const openCount = claims.filter((c) => c.status !== "CLOSED" && c.status !== "REJECTED").length;
   const underAssessmentCount = claims.filter((c) => c.status === "UNDER_ASSESSMENT").length;

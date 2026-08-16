@@ -7,6 +7,7 @@ import { StatusBadge } from "../../components/Badges";
 import Modal from "../../components/Modal";
 import { buttonDanger, buttonPrimary, buttonSecondary, cardClass, inputClass, labelClass, selectClass } from "../../components/ui";
 import DateField from "../../components/DateField";
+import LoadError from "../../components/LoadError";
 
 const examTypes: ExamType[] = ["PRE_EMPLOYMENT", "PERIODICAL", "EXIT", "RETURN_TO_WORK"];
 const results: FitnessResult[] = ["FIT", "FIT_WITH_RESTRICTION", "TEMPORARILY_UNFIT", "UNFIT"];
@@ -155,13 +156,20 @@ export default function MedicalSurveillanceTab({ workers }: { workers: Worker[] 
   const canEdit = user?.role === "ADMIN" || user?.role === "SUPERVISOR" || user?.role === "EXECUTIVE";
   const [items, setItems] = useState<MedicalSurveillance[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
   const [modal, setModal] = useState<null | "create" | MedicalSurveillance>(null);
 
   async function load() {
     setLoading(true);
-    const res = await api.get<MedicalSurveillance[]>("/medical-surveillance");
-    setItems(res.data);
-    setLoading(false);
+    setLoadError(false);
+    try {
+      const res = await api.get<MedicalSurveillance[]>("/medical-surveillance");
+      setItems(res.data);
+    } catch {
+      setLoadError(true);
+    } finally {
+      setLoading(false);
+    }
   }
 
   useEffect(() => {
@@ -187,6 +195,7 @@ export default function MedicalSurveillanceTab({ workers }: { workers: Worker[] 
   }
 
   if (loading) return <div className="text-mine-300">{t("compliance.loading")}</div>;
+  if (loadError) return <LoadError onRetry={load} />;
 
   return (
     <div className="space-y-4">

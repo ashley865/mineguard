@@ -6,6 +6,7 @@ import { EnvironmentalParameterType, EnvironmentalReading, Site } from "../api/t
 import Modal from "../components/Modal";
 import { buttonDanger, buttonPrimary, buttonSecondary, cardClass, inputClass, labelClass, selectClass } from "../components/ui";
 import WeatherMonitoring from "./WeatherMonitoring";
+import LoadError from "../components/LoadError";
 
 const parameterTypes: EnvironmentalParameterType[] = ["WATER_QUALITY", "AIR_QUALITY", "DUST", "NOISE", "TAILINGS_DAM_LEVEL"];
 
@@ -111,18 +112,25 @@ export default function EnvironmentalMonitoring() {
   const [readings, setReadings] = useState<EnvironmentalReading[]>([]);
   const [sites, setSites] = useState<Site[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
   const [outOfLimitsOnly, setOutOfLimitsOnly] = useState(false);
   const [modal, setModal] = useState(false);
 
   async function load() {
     setLoading(true);
-    const [r, s] = await Promise.all([
-      api.get<EnvironmentalReading[]>("/environmental", { params: outOfLimitsOnly ? { outOfLimitsOnly: "true" } : undefined }),
-      api.get<Site[]>("/sites"),
-    ]);
-    setReadings(r.data);
-    setSites(s.data);
-    setLoading(false);
+    setLoadError(false);
+    try {
+      const [r, s] = await Promise.all([
+        api.get<EnvironmentalReading[]>("/environmental", { params: outOfLimitsOnly ? { outOfLimitsOnly: "true" } : undefined }),
+        api.get<Site[]>("/sites"),
+      ]);
+      setReadings(r.data);
+      setSites(s.data);
+    } catch {
+      setLoadError(true);
+    } finally {
+      setLoading(false);
+    }
   }
 
   useEffect(() => {
@@ -143,6 +151,7 @@ export default function EnvironmentalMonitoring() {
   }
 
   if (loading) return <div className="text-mine-300">{t("common.loading")}</div>;
+  if (loadError) return <LoadError onRetry={load} />;
 
   return (
     <div className="space-y-6">

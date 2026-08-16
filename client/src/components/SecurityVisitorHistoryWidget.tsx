@@ -10,7 +10,7 @@ export default function SecurityVisitorHistoryWidget() {
   const [visitors, setVisitors] = useState<Visitor[] | null>(null);
 
   useEffect(() => {
-    api.get<Visitor[]>("/visitors").then((res) => setVisitors(res.data.slice(0, 20)));
+    api.get<Visitor[]>("/visitors").then((res) => setVisitors(res.data.slice(0, 20))).catch(() => {});
   }, []);
 
   if (!visitors) return null;

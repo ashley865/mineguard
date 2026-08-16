@@ -6,6 +6,7 @@ import { useAuth } from "../context/AuthContext";
 import { BalanceSheet, ExportableEntity, exportableEntities, JournalEntry, ReportTrends, Site } from "../api/types";
 import { SeverityBadge } from "../components/Badges";
 import { buttonPrimary, buttonSecondary, cardClass, inputClass } from "../components/ui";
+import LoadError from "../components/LoadError";
 
 const dayOptions = [30, 90, 180, 365];
 type ReportingTab = "overview" | "balanceSheet" | "journal";
@@ -48,11 +49,18 @@ function BalanceSheetLine({ label, value, bold }: { label: string; value: number
 function BalanceSheetTab() {
   const { t } = useTranslation();
   const [sheet, setSheet] = useState<BalanceSheet | null>(null);
+  const [loadError, setLoadError] = useState(false);
   const [downloading, setDownloading] = useState(false);
 
-  useEffect(() => {
-    api.get<BalanceSheet>("/reports/balance-sheet").then((res) => setSheet(res.data));
-  }, []);
+  function load() {
+    setLoadError(false);
+    api
+      .get<BalanceSheet>("/reports/balance-sheet")
+      .then((res) => setSheet(res.data))
+      .catch(() => setLoadError(true));
+  }
+
+  useEffect(() => { load(); }, []);
 
   async function download() {
     setDownloading(true);
@@ -63,6 +71,7 @@ function BalanceSheetTab() {
     }
   }
 
+  if (loadError) return <LoadError onRetry={load} />;
   if (!sheet) return <div className="text-mine-300 text-sm">{t("common.loading")}</div>;
 
   return (
@@ -100,12 +109,19 @@ function JournalTab() {
   const { t } = useTranslation();
   const [months, setMonths] = useState(3);
   const [entries, setEntries] = useState<JournalEntry[] | null>(null);
+  const [loadError, setLoadError] = useState(false);
   const [downloading, setDownloading] = useState(false);
 
-  useEffect(() => {
+  function load() {
     setEntries(null);
-    api.get<JournalEntry[]>("/reports/journal", { params: { months } }).then((res) => setEntries(res.data));
-  }, [months]);
+    setLoadError(false);
+    api
+      .get<JournalEntry[]>("/reports/journal", { params: { months } })
+      .then((res) => setEntries(res.data))
+      .catch(() => setLoadError(true));
+  }
+
+  useEffect(() => { load(); }, [months]); // eslint-disable-line react-hooks/exhaustive-deps
 
   async function download() {
     setDownloading(true);
@@ -130,7 +146,9 @@ function JournalTab() {
           {downloading ? t("reporting.downloading") : t("reporting.downloadPdf")}
         </button>
       </div>
-      {!entries ? (
+      {loadError ? (
+        <LoadError onRetry={load} />
+      ) : !entries ? (
         <div className="text-mine-300 text-sm">{t("common.loading")}</div>
       ) : (
         <div className={`${cardClass} overflow-x-auto`}>
@@ -181,6 +199,7 @@ export default function Reporting() {
   const [days, setDays] = useState(90);
   const [data, setData] = useState<ReportTrends | null>(null);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
   const [exporting, setExporting] = useState<string | null>(null);
 
   useEffect(() => {
@@ -189,11 +208,17 @@ export default function Reporting() {
 
   async function load() {
     setLoading(true);
-    const res = await api.get<ReportTrends>("/reports/trends", {
-      params: { siteId: siteId || undefined, days },
-    });
-    setData(res.data);
-    setLoading(false);
+    setLoadError(false);
+    try {
+      const res = await api.get<ReportTrends>("/reports/trends", {
+        params: { siteId: siteId || undefined, days },
+      });
+      setData(res.data);
+    } catch {
+      setLoadError(true);
+    } finally {
+      setLoading(false);
+    }
   }
 
   useEffect(() => {
@@ -266,6 +291,7 @@ export default function Reporting() {
       </div>
 
       {loading && <div className="text-mine-300 text-sm">{t("reporting.loading")}</div>}
+      {loadError && <LoadError onRetry={load} />}
 
       {!loading && data && (
         <>

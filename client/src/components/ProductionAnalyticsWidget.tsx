@@ -18,6 +18,7 @@ import {
 import { api } from "../api/client";
 import { ProductionAnalytics } from "../api/types";
 import { cardClass, selectClass } from "./ui";
+import LoadError from "./LoadError";
 
 const CHART_TOOLTIP_STYLE = { background: "#fafafa", border: "1px solid #e5e5e5", fontSize: 11 };
 const CHART_TICK_STYLE = { fontSize: 9, fill: "#52525b" };
@@ -49,14 +50,21 @@ export default function ProductionAnalyticsWidget({ siteId }: { siteId?: string 
   const [period, setPeriod] = useState<"daily" | "weekly" | "monthly">("daily");
   const [data, setData] = useState<ProductionAnalytics | null>(null);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
 
   async function load() {
     setLoading(true);
-    const res = await api.get<ProductionAnalytics>("/production/analytics", {
-      params: { siteId: siteId || undefined, period, days: DAYS_BY_PERIOD[period] },
-    });
-    setData(res.data);
-    setLoading(false);
+    setLoadError(false);
+    try {
+      const res = await api.get<ProductionAnalytics>("/production/analytics", {
+        params: { siteId: siteId || undefined, period, days: DAYS_BY_PERIOD[period] },
+      });
+      setData(res.data);
+    } catch {
+      setLoadError(true);
+    } finally {
+      setLoading(false);
+    }
   }
 
   useEffect(() => {
@@ -78,8 +86,9 @@ export default function ProductionAnalyticsWidget({ siteId }: { siteId?: string 
       </div>
 
       {loading && <div className="text-mine-300 text-xs">{t("common.loading")}</div>}
+      {loadError && <LoadError onRetry={load} />}
 
-      {!loading && data && (
+      {!loading && !loadError && data && (
         <>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
             <StatCard label={t("production.tonnesMined")} value={data.totals.tonnesMined.toLocaleString()} />

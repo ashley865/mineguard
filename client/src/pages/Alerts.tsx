@@ -6,6 +6,7 @@ import { useSocket } from "../context/SocketContext";
 import { Alert, AlertStatus } from "../api/types";
 import { SeverityBadge, StatusBadge } from "../components/Badges";
 import { buttonPrimary, buttonSecondary, cardClass } from "../components/ui";
+import LoadError from "../components/LoadError";
 
 export default function Alerts() {
   const { t } = useTranslation();
@@ -14,6 +15,7 @@ export default function Alerts() {
   const [alerts, setAlerts] = useState<Alert[]>([]);
   const [filter, setFilter] = useState<AlertStatus | "ALL">("OPEN");
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
   const [reviewNotes, setReviewNotes] = useState<Record<string, string>>({});
   const socket = useSocket();
 
@@ -26,9 +28,15 @@ export default function Alerts() {
 
   async function load(status: AlertStatus | "ALL") {
     setLoading(true);
-    const res = await api.get<Alert[]>("/alerts", { params: status === "ALL" ? {} : { status } });
-    setAlerts(res.data);
-    setLoading(false);
+    setLoadError(false);
+    try {
+      const res = await api.get<Alert[]>("/alerts", { params: status === "ALL" ? {} : { status } });
+      setAlerts(res.data);
+    } catch {
+      setLoadError(true);
+    } finally {
+      setLoading(false);
+    }
   }
 
   useEffect(() => {
@@ -84,7 +92,8 @@ export default function Alerts() {
 
       <div className="space-y-3">
         {loading && <div className="text-mine-300">{t("alerts.loading")}</div>}
-        {!loading && alerts.length === 0 && (
+        {loadError && !loading && <LoadError onRetry={() => load(filter)} />}
+        {!loading && !loadError && alerts.length === 0 && (
           <div className={`${cardClass} p-6 text-center text-mine-400`}>{t("alerts.noAlertsInView")}</div>
         )}
         {alerts.map((alert) => (

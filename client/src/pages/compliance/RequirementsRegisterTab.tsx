@@ -7,6 +7,7 @@ import { StatusBadge, SeverityBadge } from "../../components/Badges";
 import Modal from "../../components/Modal";
 import { buttonDanger, buttonPrimary, buttonSecondary, cardClass, inputClass, labelClass, selectClass } from "../../components/ui";
 import DateField from "../../components/DateField";
+import LoadError from "../../components/LoadError";
 
 const frequencies: RequirementFrequency[] = ["DAILY", "WEEKLY", "MONTHLY", "QUARTERLY", "ANNUALLY", "ONCE_OFF", "AD_HOC"];
 const statuses: RequirementStatus[] = ["PENDING", "COMPLIANT", "NON_COMPLIANT", "IN_PROGRESS", "OVERDUE", "NOT_APPLICABLE"];
@@ -158,17 +159,24 @@ export default function RequirementsRegisterTab({ sites }: { sites: Site[] }) {
   const [items, setItems] = useState<ComplianceRequirement[]>([]);
   const [people, setPeople] = useState<ResponsiblePerson[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
   const [modal, setModal] = useState<null | "create" | ComplianceRequirement>(null);
 
   async function load() {
     setLoading(true);
-    const [reqs, ppl] = await Promise.all([
-      api.get<ComplianceRequirement[]>("/compliance-requirements"),
-      api.get<ResponsiblePerson[]>("/compliance-requirements/responsible-people"),
-    ]);
-    setItems(reqs.data);
-    setPeople(ppl.data);
-    setLoading(false);
+    setLoadError(false);
+    try {
+      const [reqs, ppl] = await Promise.all([
+        api.get<ComplianceRequirement[]>("/compliance-requirements"),
+        api.get<ResponsiblePerson[]>("/compliance-requirements/responsible-people"),
+      ]);
+      setItems(reqs.data);
+      setPeople(ppl.data);
+    } catch {
+      setLoadError(true);
+    } finally {
+      setLoading(false);
+    }
   }
 
   useEffect(() => {
@@ -194,6 +202,7 @@ export default function RequirementsRegisterTab({ sites }: { sites: Site[] }) {
   }
 
   if (loading) return <div className="text-mine-300">{t("compliance.loading")}</div>;
+  if (loadError) return <LoadError onRetry={load} />;
 
   return (
     <div className="space-y-4">

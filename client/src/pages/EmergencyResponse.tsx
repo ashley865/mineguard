@@ -18,6 +18,7 @@ import Modal from "../components/Modal";
 import { StatusBadge } from "../components/Badges";
 import { buttonDanger, buttonPrimary, buttonSecondary, cardClass, inputClass, labelClass, selectClass } from "../components/ui";
 import DateField from "../components/DateField";
+import LoadError from "../components/LoadError";
 
 const categories: EmergencyContactCategory[] = [
   "MINE_RESCUE",
@@ -290,13 +291,20 @@ function EmergencyEventsTab({ sites, zones, canEdit, canDelete }: { sites: Site[
   const { t } = useTranslation();
   const [events, setEvents] = useState<EmergencyEvent[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
   const [modal, setModal] = useState<null | "create" | EmergencyEvent>(null);
 
   async function load() {
     setLoading(true);
-    const res = await api.get<EmergencyEvent[]>("/emergency/events");
-    setEvents(res.data);
-    setLoading(false);
+    setLoadError(false);
+    try {
+      const res = await api.get<EmergencyEvent[]>("/emergency/events");
+      setEvents(res.data);
+    } catch {
+      setLoadError(true);
+    } finally {
+      setLoading(false);
+    }
   }
 
   useEffect(() => {
@@ -330,6 +338,7 @@ function EmergencyEventsTab({ sites, zones, canEdit, canDelete }: { sites: Site[
   }
 
   if (loading) return <div className="text-mine-300">{t("common.loading")}</div>;
+  if (loadError) return <LoadError onRetry={load} />;
 
   return (
     <div className="space-y-4">
@@ -413,13 +422,20 @@ function ContactsTab({ sites, canEdit, canDelete }: { sites: Site[]; canEdit: bo
   const { t } = useTranslation();
   const [contacts, setContacts] = useState<EmergencyContact[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
   const [modal, setModal] = useState(false);
 
   async function load() {
     setLoading(true);
-    const res = await api.get<EmergencyContact[]>("/emergency/contacts");
-    setContacts(res.data);
-    setLoading(false);
+    setLoadError(false);
+    try {
+      const res = await api.get<EmergencyContact[]>("/emergency/contacts");
+      setContacts(res.data);
+    } catch {
+      setLoadError(true);
+    } finally {
+      setLoading(false);
+    }
   }
 
   useEffect(() => {
@@ -439,6 +455,7 @@ function ContactsTab({ sites, canEdit, canDelete }: { sites: Site[]; canEdit: bo
   }
 
   if (loading) return <div className="text-mine-300">{t("common.loading")}</div>;
+  if (loadError) return <LoadError onRetry={load} />;
 
   return (
     <div className="space-y-4">
@@ -493,13 +510,20 @@ function DrillsTab({ sites, canEdit, canDelete }: { sites: Site[]; canEdit: bool
   const { t } = useTranslation();
   const [drills, setDrills] = useState<EvacuationDrill[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
   const [modal, setModal] = useState(false);
 
   async function load() {
     setLoading(true);
-    const res = await api.get<EvacuationDrill[]>("/emergency/drills");
-    setDrills(res.data);
-    setLoading(false);
+    setLoadError(false);
+    try {
+      const res = await api.get<EvacuationDrill[]>("/emergency/drills");
+      setDrills(res.data);
+    } catch {
+      setLoadError(true);
+    } finally {
+      setLoading(false);
+    }
   }
 
   useEffect(() => {
@@ -519,6 +543,7 @@ function DrillsTab({ sites, canEdit, canDelete }: { sites: Site[]; canEdit: bool
   }
 
   if (loading) return <div className="text-mine-300">{t("common.loading")}</div>;
+  if (loadError) return <LoadError onRetry={load} />;
 
   return (
     <div className="space-y-4">
@@ -571,15 +596,22 @@ function EvacuationsTab() {
   const { t } = useTranslation();
   const [evacuations, setEvacuations] = useState<EmergencyEvacuation[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
 
-  useEffect(() => {
-    api.get<EmergencyEvacuation[]>("/emergency/evacuations").then((res) => {
-      setEvacuations(res.data);
-      setLoading(false);
-    });
-  }, []);
+  function load() {
+    setLoading(true);
+    setLoadError(false);
+    api
+      .get<EmergencyEvacuation[]>("/emergency/evacuations")
+      .then((res) => setEvacuations(res.data))
+      .catch(() => setLoadError(true))
+      .finally(() => setLoading(false));
+  }
+
+  useEffect(() => { load(); }, []);
 
   if (loading) return <div className="text-mine-300">{t("common.loading")}</div>;
+  if (loadError) return <LoadError onRetry={load} />;
 
   return (
     <div className={`${cardClass} overflow-x-auto`}>
@@ -622,16 +654,24 @@ export default function EmergencyResponse() {
   const [sites, setSites] = useState<Site[]>([]);
   const [zones, setZones] = useState<Zone[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
 
-  useEffect(() => {
-    Promise.all([api.get<Site[]>("/sites"), api.get<Zone[]>("/zones")]).then(([s, z]) => {
-      setSites(s.data);
-      setZones(z.data);
-      setLoading(false);
-    });
-  }, []);
+  function load() {
+    setLoading(true);
+    setLoadError(false);
+    Promise.all([api.get<Site[]>("/sites"), api.get<Zone[]>("/zones")])
+      .then(([s, z]) => {
+        setSites(s.data);
+        setZones(z.data);
+      })
+      .catch(() => setLoadError(true))
+      .finally(() => setLoading(false));
+  }
+
+  useEffect(() => { load(); }, []);
 
   if (loading) return <div className="text-mine-300">{t("common.loading")}</div>;
+  if (loadError) return <LoadError onRetry={load} />;
 
   return (
     <div className="space-y-6">

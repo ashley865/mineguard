@@ -10,6 +10,7 @@ import EntityDocumentsPanel from "../components/EntityDocumentsPanel";
 import PasswordConfirmModal from "../components/PasswordConfirmModal";
 import { buttonDanger, buttonPrimary, buttonSecondary, cardClass, inputClass, labelClass, selectClass } from "../components/ui";
 import DateField from "../components/DateField";
+import LoadError from "../components/LoadError";
 
 const contractorStatuses: ContractorStatus[] = ["ACTIVE", "EXPIRED", "SUSPENDED", "TERMINATED"];
 const contractorDocTypes: ContractorDocumentType[] = [
@@ -261,16 +262,23 @@ export default function Contractors() {
   const [sites, setSites] = useState<Site[]>([]);
   const [docsContractorId, setDocsContractorId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
   const [modal, setModal] = useState<null | "create" | Contractor>(null);
   const [shareModal, setShareModal] = useState(false);
   const docsContractor = items.find((i) => i.id === docsContractorId) ?? null;
 
   async function load() {
     setLoading(true);
-    const [c, s] = await Promise.all([api.get<Contractor[]>("/contractors"), api.get<Site[]>("/sites")]);
-    setItems(c.data);
-    setSites(s.data);
-    setLoading(false);
+    setLoadError(false);
+    try {
+      const [c, s] = await Promise.all([api.get<Contractor[]>("/contractors"), api.get<Site[]>("/sites")]);
+      setItems(c.data);
+      setSites(s.data);
+    } catch {
+      setLoadError(true);
+    } finally {
+      setLoading(false);
+    }
   }
 
   useEffect(() => {
@@ -296,6 +304,7 @@ export default function Contractors() {
   }
 
   if (loading) return <div className="text-mine-300">{t("contractors.loading")}</div>;
+  if (loadError) return <LoadError onRetry={load} />;
 
   return (
     <div className="space-y-6">

@@ -19,6 +19,7 @@ import DateField from "../components/DateField";
 import DataTable, { DataTableColumn } from "../components/DataTable";
 import SummaryCards from "../components/SummaryCards";
 import { AuditHistoryButton } from "../components/AuditHistoryPanel";
+import LoadError from "../components/LoadError";
 
 const pointTypes: GeotechnicalPointType[] = ["EXTENSOMETER", "CONVERGENCE_STATION", "TILTMETER", "PIEZOMETER", "OTHER"];
 const eventTypes: GeotechnicalEventType[] = ["ROCKFALL", "ROCKBURST"];
@@ -79,13 +80,20 @@ function DistrictsTab({ sites, zones, canEdit, canDelete }: { sites: Site[]; zon
   const { t } = useTranslation();
   const [districts, setDistricts] = useState<GroundControlDistrict[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
   const [modal, setModal] = useState(false);
 
   async function load() {
     setLoading(true);
-    const res = await api.get<GroundControlDistrict[]>("/ground-control/districts");
-    setDistricts(res.data);
-    setLoading(false);
+    setLoadError(false);
+    try {
+      const res = await api.get<GroundControlDistrict[]>("/ground-control/districts");
+      setDistricts(res.data);
+    } catch {
+      setLoadError(true);
+    } finally {
+      setLoading(false);
+    }
   }
 
   useEffect(() => { load(); }, []);
@@ -102,6 +110,7 @@ function DistrictsTab({ sites, zones, canEdit, canDelete }: { sites: Site[]; zon
   }
 
   if (loading) return <div className="text-mine-300">{t("common.loading")}</div>;
+  if (loadError) return <LoadError onRetry={load} />;
 
   return (
     <div className="space-y-4">
@@ -188,6 +197,7 @@ function ReadingsModal({ point, onClose }: { point: GeotechnicalMonitoringPoint;
   const { t } = useTranslation();
   const [readings, setReadings] = useState<GeotechnicalReading[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
   const [readingDate, setReadingDate] = useState("");
   const [value, setValue] = useState("");
   const [unit, setUnit] = useState("mm");
@@ -196,9 +206,15 @@ function ReadingsModal({ point, onClose }: { point: GeotechnicalMonitoringPoint;
 
   async function load() {
     setLoading(true);
-    const res = await api.get<GeotechnicalReading[]>("/ground-control/readings", { params: { pointId: point.id } });
-    setReadings(res.data);
-    setLoading(false);
+    setLoadError(false);
+    try {
+      const res = await api.get<GeotechnicalReading[]>("/ground-control/readings", { params: { pointId: point.id } });
+      setReadings(res.data);
+    } catch {
+      setLoadError(true);
+    } finally {
+      setLoading(false);
+    }
   }
 
   useEffect(() => { load(); }, []); // eslint-disable-line react-hooks/exhaustive-deps
@@ -247,6 +263,7 @@ function ReadingsModal({ point, onClose }: { point: GeotechnicalMonitoringPoint;
           <button type="submit" className={buttonPrimary} disabled={saving}>{saving ? t("common.saving") : t("common.save")}</button>
         </form>
         {loading && <div className="text-mine-300 text-sm">{t("common.loading")}</div>}
+        {loadError && <LoadError onRetry={load} />}
         <div className="space-y-1 max-h-64 overflow-y-auto">
           {readings.map((r) => (
             <div key={r.id} className="flex items-center justify-between text-xs border-t border-mine-800 pt-1.5">
@@ -254,7 +271,7 @@ function ReadingsModal({ point, onClose }: { point: GeotechnicalMonitoringPoint;
               <span className={r.exceedsThreshold ? "text-danger-500 font-semibold" : "text-mine-300"}>{r.value} {r.unit}</span>
             </div>
           ))}
-          {!loading && readings.length === 0 && <div className="text-mine-400 text-sm">{t("groundControl.noReadings")}</div>}
+          {!loading && !loadError && readings.length === 0 && <div className="text-mine-400 text-sm">{t("groundControl.noReadings")}</div>}
         </div>
       </div>
     </Modal>
@@ -266,18 +283,25 @@ function MonitoringTab({ canEdit, canDelete }: { canEdit: boolean; canDelete: bo
   const [districts, setDistricts] = useState<GroundControlDistrict[]>([]);
   const [points, setPoints] = useState<GeotechnicalMonitoringPoint[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
   const [modal, setModal] = useState(false);
   const [readingsPoint, setReadingsPoint] = useState<GeotechnicalMonitoringPoint | null>(null);
 
   async function load() {
     setLoading(true);
-    const [d, p] = await Promise.all([
-      api.get<GroundControlDistrict[]>("/ground-control/districts"),
-      api.get<GeotechnicalMonitoringPoint[]>("/ground-control/points"),
-    ]);
-    setDistricts(d.data);
-    setPoints(p.data);
-    setLoading(false);
+    setLoadError(false);
+    try {
+      const [d, p] = await Promise.all([
+        api.get<GroundControlDistrict[]>("/ground-control/districts"),
+        api.get<GeotechnicalMonitoringPoint[]>("/ground-control/points"),
+      ]);
+      setDistricts(d.data);
+      setPoints(p.data);
+    } catch {
+      setLoadError(true);
+    } finally {
+      setLoading(false);
+    }
   }
 
   useEffect(() => { load(); }, []);
@@ -294,6 +318,7 @@ function MonitoringTab({ canEdit, canDelete }: { canEdit: boolean; canDelete: bo
   }
 
   if (loading) return <div className="text-mine-300">{t("common.loading")}</div>;
+  if (loadError) return <LoadError onRetry={load} />;
 
   return (
     <div className="space-y-4">
@@ -415,13 +440,20 @@ function SeismicEventsTab({ sites, zones, canEdit, canDelete }: { sites: Site[];
   const { t } = useTranslation();
   const [events, setEvents] = useState<SeismicEvent[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
   const [modal, setModal] = useState(false);
 
   async function load() {
     setLoading(true);
-    const res = await api.get<SeismicEvent[]>("/ground-control/seismic-events");
-    setEvents(res.data);
-    setLoading(false);
+    setLoadError(false);
+    try {
+      const res = await api.get<SeismicEvent[]>("/ground-control/seismic-events");
+      setEvents(res.data);
+    } catch {
+      setLoadError(true);
+    } finally {
+      setLoading(false);
+    }
   }
 
   useEffect(() => { load(); }, []);
@@ -438,6 +470,7 @@ function SeismicEventsTab({ sites, zones, canEdit, canDelete }: { sites: Site[];
   }
 
   if (loading) return <div className="text-mine-300">{t("common.loading")}</div>;
+  if (loadError) return <LoadError onRetry={load} />;
 
   const damageCount = events.filter((ev) => ev.damageObserved).length;
 
@@ -559,17 +592,24 @@ function RockfallIncidentsTab({ sites, zones, canEdit, canDelete }: { sites: Sit
   const [incidents, setIncidents] = useState<RockfallIncident[]>([]);
   const [districts, setDistricts] = useState<GroundControlDistrict[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
   const [modal, setModal] = useState(false);
 
   async function load() {
     setLoading(true);
-    const [i, d] = await Promise.all([
-      api.get<RockfallIncident[]>("/ground-control/rockfall-incidents"),
-      api.get<GroundControlDistrict[]>("/ground-control/districts"),
-    ]);
-    setIncidents(i.data);
-    setDistricts(d.data);
-    setLoading(false);
+    setLoadError(false);
+    try {
+      const [i, d] = await Promise.all([
+        api.get<RockfallIncident[]>("/ground-control/rockfall-incidents"),
+        api.get<GroundControlDistrict[]>("/ground-control/districts"),
+      ]);
+      setIncidents(i.data);
+      setDistricts(d.data);
+    } catch {
+      setLoadError(true);
+    } finally {
+      setLoading(false);
+    }
   }
 
   useEffect(() => { load(); }, []);
@@ -591,6 +631,7 @@ function RockfallIncidentsTab({ sites, zones, canEdit, canDelete }: { sites: Sit
   }
 
   if (loading) return <div className="text-mine-300">{t("common.loading")}</div>;
+  if (loadError) return <LoadError onRetry={load} />;
 
   const unauthorizedCount = incidents.filter((r) => !r.reEntryAuthorized).length;
 
@@ -654,16 +695,24 @@ export default function GroundControl() {
   const [sites, setSites] = useState<Site[]>([]);
   const [zones, setZones] = useState<Zone[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
 
-  useEffect(() => {
-    Promise.all([api.get<Site[]>("/sites"), api.get<Zone[]>("/zones")]).then(([s, z]) => {
-      setSites(s.data);
-      setZones(z.data);
-      setLoading(false);
-    });
-  }, []);
+  function load() {
+    setLoading(true);
+    setLoadError(false);
+    Promise.all([api.get<Site[]>("/sites"), api.get<Zone[]>("/zones")])
+      .then(([s, z]) => {
+        setSites(s.data);
+        setZones(z.data);
+      })
+      .catch(() => setLoadError(true))
+      .finally(() => setLoading(false));
+  }
+
+  useEffect(() => { load(); }, []);
 
   if (loading) return <div className="text-mine-300">{t("common.loading")}</div>;
+  if (loadError) return <LoadError onRetry={load} />;
 
   return (
     <div className="space-y-6">

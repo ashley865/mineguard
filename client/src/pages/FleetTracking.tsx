@@ -5,6 +5,7 @@ import { useAuth } from "../context/AuthContext";
 import { FleetPosition, Site, Truck } from "../api/types";
 import Modal from "../components/Modal";
 import { buttonDanger, buttonPrimary, buttonSecondary, cardClass, inputClass, labelClass, selectClass } from "../components/ui";
+import LoadError from "../components/LoadError";
 
 function PositionForm({ trucks, sites, onSubmit, onCancel }: {
   trucks: Truck[];
@@ -88,12 +89,19 @@ function HistoryModal({ truck, onClose }: { truck: Truck; onClose: () => void })
   const canDelete = user?.role === "ADMIN" || user?.role === "EXECUTIVE";
   const [positions, setPositions] = useState<FleetPosition[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
 
   async function load() {
     setLoading(true);
-    const res = await api.get<FleetPosition[]>("/fleet", { params: { truckId: truck.id } });
-    setPositions(res.data);
-    setLoading(false);
+    setLoadError(false);
+    try {
+      const res = await api.get<FleetPosition[]>("/fleet", { params: { truckId: truck.id } });
+      setPositions(res.data);
+    } catch {
+      setLoadError(true);
+    } finally {
+      setLoading(false);
+    }
   }
 
   useEffect(() => {
@@ -109,7 +117,8 @@ function HistoryModal({ truck, onClose }: { truck: Truck; onClose: () => void })
   return (
     <Modal title={t("fleet.historyFor", { name: truck.registrationNumber })} onClose={onClose}>
       {loading && <div className="text-mine-300 text-sm">{t("common.loading")}</div>}
-      {!loading && positions.length === 0 && <div className="text-mine-400 text-sm">{t("fleet.noHistory")}</div>}
+      {loadError && <LoadError onRetry={load} />}
+      {!loading && !loadError && positions.length === 0 && <div className="text-mine-400 text-sm">{t("fleet.noHistory")}</div>}
       <div className="space-y-2 max-h-96 overflow-y-auto">
         {positions.map((p) => (
           <div key={p.id} className="border border-mine-800 rounded-md p-3 flex items-center justify-between text-xs">
@@ -137,20 +146,27 @@ export default function FleetTracking() {
   const [trucks, setTrucks] = useState<Truck[]>([]);
   const [sites, setSites] = useState<Site[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
   const [logModal, setLogModal] = useState(false);
   const [historyTruck, setHistoryTruck] = useState<Truck | null>(null);
 
   async function load() {
     setLoading(true);
-    const [l, tr, s] = await Promise.all([
-      api.get<FleetPosition[]>("/fleet/latest"),
-      api.get<Truck[]>("/trucks"),
-      api.get<Site[]>("/sites"),
-    ]);
-    setLatest(l.data);
-    setTrucks(tr.data);
-    setSites(s.data);
-    setLoading(false);
+    setLoadError(false);
+    try {
+      const [l, tr, s] = await Promise.all([
+        api.get<FleetPosition[]>("/fleet/latest"),
+        api.get<Truck[]>("/trucks"),
+        api.get<Site[]>("/sites"),
+      ]);
+      setLatest(l.data);
+      setTrucks(tr.data);
+      setSites(s.data);
+    } catch {
+      setLoadError(true);
+    } finally {
+      setLoading(false);
+    }
   }
 
   useEffect(() => {
@@ -164,6 +180,7 @@ export default function FleetTracking() {
   }
 
   if (loading) return <div className="text-mine-300">{t("common.loading")}</div>;
+  if (loadError) return <LoadError onRetry={load} />;
 
   return (
     <div className="space-y-4">

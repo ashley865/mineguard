@@ -7,6 +7,7 @@ import { StatusBadge } from "../../components/Badges";
 import Modal from "../../components/Modal";
 import { buttonDanger, buttonPrimary, buttonSecondary, cardClass, inputClass, labelClass, selectClass } from "../../components/ui";
 import DateField from "../../components/DateField";
+import LoadError from "../../components/LoadError";
 
 const opportunityStatuses: ContractOpportunityStatus[] = ["OPEN", "CLOSED", "AWARDED", "CANCELLED"];
 
@@ -111,12 +112,19 @@ function BidsModal({ opportunity, onClose }: { opportunity: ContractOpportunity;
   const { t } = useTranslation();
   const [bids, setBids] = useState<ContractBid[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
 
   async function load() {
     setLoading(true);
-    const res = await api.get<ContractBid[]>("/contracts/bids/list", { params: { opportunityId: opportunity.id } });
-    setBids(res.data);
-    setLoading(false);
+    setLoadError(false);
+    try {
+      const res = await api.get<ContractBid[]>("/contracts/bids/list", { params: { opportunityId: opportunity.id } });
+      setBids(res.data);
+    } catch {
+      setLoadError(true);
+    } finally {
+      setLoading(false);
+    }
   }
 
   useEffect(() => {
@@ -131,7 +139,8 @@ function BidsModal({ opportunity, onClose }: { opportunity: ContractOpportunity;
   return (
     <Modal title={t("marketplace.bidsFor", { name: opportunity.title })} onClose={onClose}>
       {loading && <div className="text-mine-300 text-sm">{t("common.loading")}</div>}
-      {!loading && bids.length === 0 && <div className="text-mine-400 text-sm">{t("marketplace.noBids")}</div>}
+      {loadError && <LoadError onRetry={load} />}
+      {!loading && !loadError && bids.length === 0 && <div className="text-mine-400 text-sm">{t("marketplace.noBids")}</div>}
       <div className="space-y-3">
         {bids.map((b) => (
           <div key={b.id} className="border border-mine-800 rounded-md p-3 space-y-1">
@@ -165,14 +174,21 @@ export default function ContractOpportunitiesTab({ sites }: { sites: Site[] }) {
   const canDelete = user?.role === "ADMIN" || user?.role === "EXECUTIVE";
   const [items, setItems] = useState<ContractOpportunity[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
   const [modal, setModal] = useState<null | "create" | ContractOpportunity>(null);
   const [bidsOpportunity, setBidsOpportunity] = useState<ContractOpportunity | null>(null);
 
   async function load() {
     setLoading(true);
-    const res = await api.get<ContractOpportunity[]>("/contracts");
-    setItems(res.data);
-    setLoading(false);
+    setLoadError(false);
+    try {
+      const res = await api.get<ContractOpportunity[]>("/contracts");
+      setItems(res.data);
+    } catch {
+      setLoadError(true);
+    } finally {
+      setLoading(false);
+    }
   }
 
   useEffect(() => {
@@ -198,6 +214,7 @@ export default function ContractOpportunitiesTab({ sites }: { sites: Site[] }) {
   }
 
   if (loading) return <div className="text-mine-300">{t("common.loading")}</div>;
+  if (loadError) return <LoadError onRetry={load} />;
 
   return (
     <div className="space-y-4">

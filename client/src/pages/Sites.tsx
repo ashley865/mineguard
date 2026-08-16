@@ -6,6 +6,7 @@ import { Site, SiteStatus, Zone } from "../api/types";
 import { StatusBadge } from "../components/Badges";
 import Modal from "../components/Modal";
 import { buttonDanger, buttonPrimary, buttonSecondary, cardClass, inputClass, labelClass, selectClass } from "../components/ui";
+import LoadError from "../components/LoadError";
 
 function SiteForm({ initial, onSubmit, onCancel }: {
   initial?: Partial<Site>;
@@ -104,14 +105,21 @@ export default function Sites() {
   const canEdit = user?.role === "ADMIN" || user?.role === "SUPERVISOR" || user?.role === "EXECUTIVE";
   const [sites, setSites] = useState<Site[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
   const [siteModal, setSiteModal] = useState<null | "create" | Site>(null);
   const [zoneModal, setZoneModal] = useState<null | { siteId: string; zone?: Zone }>(null);
 
   async function load() {
     setLoading(true);
-    const res = await api.get<Site[]>("/sites");
-    setSites(res.data);
-    setLoading(false);
+    setLoadError(false);
+    try {
+      const res = await api.get<Site[]>("/sites");
+      setSites(res.data);
+    } catch {
+      setLoadError(true);
+    } finally {
+      setLoading(false);
+    }
   }
 
   useEffect(() => {
@@ -155,6 +163,7 @@ export default function Sites() {
   }
 
   if (loading) return <div className="text-mine-300">{t("sites.loading")}</div>;
+  if (loadError) return <LoadError onRetry={load} />;
 
   return (
     <div className="space-y-6">

@@ -31,7 +31,7 @@ export default function HrWorkforceWidget() {
   const [snapshot, setSnapshot] = useState<HrWorkforceSnapshot | null>(null);
 
   useEffect(() => {
-    api.get<HrWorkforceSnapshot>("/executive/hr-workforce").then((res) => setSnapshot(res.data));
+    api.get<HrWorkforceSnapshot>("/executive/hr-workforce").then((res) => setSnapshot(res.data)).catch(() => {});
   }, []);
 
   if (!snapshot) return null;

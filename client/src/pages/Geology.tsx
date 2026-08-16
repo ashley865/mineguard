@@ -10,6 +10,7 @@ import DateField from "../components/DateField";
 import { mineralTypes } from "../lib/minerals";
 import DataTable, { DataTableColumn } from "../components/DataTable";
 import { AuditHistoryButton } from "../components/AuditHistoryPanel";
+import LoadError from "../components/LoadError";
 
 const drillHoleStatuses: DrillHoleStatus[] = ["PLANNED", "DRILLING", "COMPLETED", "ABANDONED"];
 const classifications: ResourceClassification[] = ["MEASURED", "INDICATED", "INFERRED", "PROVED_RESERVE", "PROBABLE_RESERVE"];
@@ -169,14 +170,21 @@ function DrillHolesTab({ sites, canEdit, canDelete }: { sites: Site[]; canEdit: 
   const { t } = useTranslation();
   const [holes, setHoles] = useState<DrillHole[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
   const [modal, setModal] = useState(false);
   const [assaysHole, setAssaysHole] = useState<DrillHole | null>(null);
 
   async function load() {
     setLoading(true);
-    const res = await api.get<DrillHole[]>("/geology/drill-holes");
-    setHoles(res.data);
-    setLoading(false);
+    setLoadError(false);
+    try {
+      const res = await api.get<DrillHole[]>("/geology/drill-holes");
+      setHoles(res.data);
+    } catch {
+      setLoadError(true);
+    } finally {
+      setLoading(false);
+    }
   }
 
   useEffect(() => { load(); }, []);
@@ -202,6 +210,7 @@ function DrillHolesTab({ sites, canEdit, canDelete }: { sites: Site[]; canEdit: 
   }
 
   if (loading) return <div className="text-mine-300">{t("common.loading")}</div>;
+  if (loadError) return <LoadError onRetry={load} />;
 
   return (
     <div className="space-y-4">
@@ -323,13 +332,20 @@ function ResourceEstimatesTab({ sites, canEdit, canDelete }: { sites: Site[]; ca
   const { t } = useTranslation();
   const [estimates, setEstimates] = useState<ResourceEstimate[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
   const [modal, setModal] = useState(false);
 
   async function load() {
     setLoading(true);
-    const res = await api.get<ResourceEstimate[]>("/geology/resource-estimates");
-    setEstimates(res.data);
-    setLoading(false);
+    setLoadError(false);
+    try {
+      const res = await api.get<ResourceEstimate[]>("/geology/resource-estimates");
+      setEstimates(res.data);
+    } catch {
+      setLoadError(true);
+    } finally {
+      setLoading(false);
+    }
   }
 
   useEffect(() => { load(); }, []);
@@ -346,6 +362,7 @@ function ResourceEstimatesTab({ sites, canEdit, canDelete }: { sites: Site[]; ca
   }
 
   if (loading) return <div className="text-mine-300">{t("common.loading")}</div>;
+  if (loadError) return <LoadError onRetry={load} />;
 
   return (
     <div className="space-y-4">
@@ -392,15 +409,22 @@ export default function Geology() {
   const [tab, setTab] = useState<"drillholes" | "estimates">("drillholes");
   const [sites, setSites] = useState<Site[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
 
-  useEffect(() => {
-    api.get<Site[]>("/sites").then((res) => {
-      setSites(res.data);
-      setLoading(false);
-    });
-  }, []);
+  function load() {
+    setLoading(true);
+    setLoadError(false);
+    api
+      .get<Site[]>("/sites")
+      .then((res) => setSites(res.data))
+      .catch(() => setLoadError(true))
+      .finally(() => setLoading(false));
+  }
+
+  useEffect(() => { load(); }, []);
 
   if (loading) return <div className="text-mine-300">{t("common.loading")}</div>;
+  if (loadError) return <LoadError onRetry={load} />;
 
   return (
     <div className="space-y-6">

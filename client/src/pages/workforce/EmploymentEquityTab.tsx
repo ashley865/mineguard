@@ -5,6 +5,7 @@ import { useAuth } from "../../context/AuthContext";
 import { DesignatedGroup, EmploymentEquityTarget, MiningCharterElement, OccupationalLevel, ProcurementSpendSummary } from "../../api/types";
 import Modal from "../../components/Modal";
 import { buttonDanger, buttonPrimary, buttonSecondary, cardClass, inputClass, labelClass, selectClass } from "../../components/ui";
+import LoadError from "../../components/LoadError";
 
 const occupationalLevels: OccupationalLevel[] = [
   "TOP_MANAGEMENT",
@@ -169,20 +170,27 @@ export default function EmploymentEquityTab() {
   const [elements, setElements] = useState<MiningCharterElement[]>([]);
   const [spend, setSpend] = useState<ProcurementSpendSummary | null>(null);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
   const [targetModal, setTargetModal] = useState(false);
   const [elementModal, setElementModal] = useState(false);
 
   async function load() {
     setLoading(true);
-    const [t1, t2, t3] = await Promise.all([
-      api.get<EmploymentEquityTarget[]>("/employment-equity/targets"),
-      api.get<MiningCharterElement[]>("/employment-equity/charter-elements"),
-      api.get<ProcurementSpendSummary>("/employment-equity/procurement-spend"),
-    ]);
-    setTargets(t1.data);
-    setElements(t2.data);
-    setSpend(t3.data);
-    setLoading(false);
+    setLoadError(false);
+    try {
+      const [t1, t2, t3] = await Promise.all([
+        api.get<EmploymentEquityTarget[]>("/employment-equity/targets"),
+        api.get<MiningCharterElement[]>("/employment-equity/charter-elements"),
+        api.get<ProcurementSpendSummary>("/employment-equity/procurement-spend"),
+      ]);
+      setTargets(t1.data);
+      setElements(t2.data);
+      setSpend(t3.data);
+    } catch {
+      setLoadError(true);
+    } finally {
+      setLoading(false);
+    }
   }
 
   useEffect(() => {
@@ -212,6 +220,7 @@ export default function EmploymentEquityTab() {
   }
 
   if (loading) return <div className="text-mine-300">{t("common.loading")}</div>;
+  if (loadError) return <LoadError onRetry={load} />;
 
   return (
     <div className="space-y-6">

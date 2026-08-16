@@ -12,7 +12,7 @@ function AttendanceReport() {
   const [report, setReport] = useState<ExecutiveAttendanceReport | null>(null);
 
   useEffect(() => {
-    api.get<ExecutiveAttendanceReport>("/attendance/team", { params: { days: 9 } }).then((res) => setReport(res.data));
+    api.get<ExecutiveAttendanceReport>("/attendance/team", { params: { days: 9 } }).then((res) => setReport(res.data)).catch(() => {});
   }, []);
 
   if (!report) return null;

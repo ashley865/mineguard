@@ -8,6 +8,7 @@ import { StatusBadge } from "../components/Badges";
 import Modal from "../components/Modal";
 import { buttonDanger, buttonPrimary, buttonSecondary, cardClass, inputClass, labelClass, selectClass } from "../components/ui";
 import DateField from "../components/DateField";
+import LoadError from "../components/LoadError";
 
 function PtwForm({
   sites,
@@ -136,6 +137,7 @@ export default function PermitToWork() {
   const [contractors, setContractors] = useState<Contractor[]>([]);
   const [items, setItems] = useState<PermitToWorkType[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
   const [modal, setModal] = useState(false);
 
   const availableSites = assignedSiteIds === null ? sites : sites.filter((s) => assignedSiteIds.includes(s.id));
@@ -145,15 +147,21 @@ export default function PermitToWork() {
 
   async function load() {
     setLoading(true);
-    const [s, c, p] = await Promise.all([
-      api.get<Site[]>("/sites"),
-      api.get<Contractor[]>("/contractors"),
-      api.get<PermitToWorkType[]>("/permits-to-work"),
-    ]);
-    setSites(s.data);
-    setContractors(c.data);
-    setItems(p.data);
-    setLoading(false);
+    setLoadError(false);
+    try {
+      const [s, c, p] = await Promise.all([
+        api.get<Site[]>("/sites"),
+        api.get<Contractor[]>("/contractors"),
+        api.get<PermitToWorkType[]>("/permits-to-work"),
+      ]);
+      setSites(s.data);
+      setContractors(c.data);
+      setItems(p.data);
+    } catch {
+      setLoadError(true);
+    } finally {
+      setLoading(false);
+    }
   }
 
   useEffect(() => {
@@ -188,6 +196,7 @@ export default function PermitToWork() {
   }
 
   if (loading || loadingAssignment) return <div className="text-mine-300">{t("permitToWork.loading")}</div>;
+  if (loadError) return <LoadError onRetry={load} />;
 
   if (availableSites.length === 0) {
     return (

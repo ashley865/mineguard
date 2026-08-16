@@ -10,6 +10,7 @@ import DateField from "../../components/DateField";
 import DataTable, { DataTableColumn } from "../../components/DataTable";
 import SummaryCards from "../../components/SummaryCards";
 import { AuditHistoryButton } from "../../components/AuditHistoryPanel";
+import LoadError from "../../components/LoadError";
 
 const structuralRatings: DamStructuralRating[] = ["SATISFACTORY", "FAIR", "POOR", "UNSATISFACTORY", "UNKNOWN"];
 
@@ -97,6 +98,7 @@ function InspectionsModal({ facility, onClose, onChanged }: { facility: Tailings
   const { t } = useTranslation();
   const [inspections, setInspections] = useState<TailingsInspection[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
   const [inspectionDate, setInspectionDate] = useState("");
   const [inspector, setInspector] = useState("");
   const [freeboardMeters, setFreeboardMeters] = useState("");
@@ -109,9 +111,15 @@ function InspectionsModal({ facility, onClose, onChanged }: { facility: Tailings
 
   async function load() {
     setLoading(true);
-    const res = await api.get<TailingsInspection[]>("/tailings/inspections", { params: { facilityId: facility.id } });
-    setInspections(res.data);
-    setLoading(false);
+    setLoadError(false);
+    try {
+      const res = await api.get<TailingsInspection[]>("/tailings/inspections", { params: { facilityId: facility.id } });
+      setInspections(res.data);
+    } catch {
+      setLoadError(true);
+    } finally {
+      setLoading(false);
+    }
   }
 
   useEffect(() => {
@@ -192,7 +200,8 @@ function InspectionsModal({ facility, onClose, onChanged }: { facility: Tailings
         </form>
 
         {loading && <div className="text-mine-300 text-sm">{t("common.loading")}</div>}
-        {!loading && inspections.length === 0 && <div className="text-mine-400 text-sm">{t("tailings.noInspections")}</div>}
+        {loadError && <LoadError onRetry={load} />}
+        {!loading && !loadError && inspections.length === 0 && <div className="text-mine-400 text-sm">{t("tailings.noInspections")}</div>}
         <div className="space-y-1 max-h-72 overflow-y-auto">
           {inspections.map((insp) => (
             <div key={insp.id} className="flex items-center justify-between text-xs border-t border-mine-800 pt-1.5">
@@ -218,14 +227,21 @@ export default function TailingsTab({ sites }: { sites: Site[] }) {
   const canDelete = user?.role === "ADMIN" || user?.role === "EXECUTIVE";
   const [facilities, setFacilities] = useState<TailingsFacility[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
   const [modal, setModal] = useState<null | "create" | TailingsFacility>(null);
   const [inspectionsFacility, setInspectionsFacility] = useState<TailingsFacility | null>(null);
 
   async function load() {
     setLoading(true);
-    const res = await api.get<TailingsFacility[]>("/tailings/facilities");
-    setFacilities(res.data);
-    setLoading(false);
+    setLoadError(false);
+    try {
+      const res = await api.get<TailingsFacility[]>("/tailings/facilities");
+      setFacilities(res.data);
+    } catch {
+      setLoadError(true);
+    } finally {
+      setLoading(false);
+    }
   }
 
   useEffect(() => {
@@ -251,6 +267,7 @@ export default function TailingsTab({ sites }: { sites: Site[] }) {
   }
 
   if (loading) return <div className="text-mine-300">{t("common.loading")}</div>;
+  if (loadError) return <LoadError onRetry={load} />;
 
   const poorRatingCount = facilities.filter((f) => f.inspections && f.inspections.length > 0 && (f.inspections[0].structuralRating === "POOR" || f.inspections[0].structuralRating === "UNSATISFACTORY")).length;
   const seepageCount = facilities.filter((f) => f.inspections && f.inspections.length > 0 && f.inspections[0].seepageObserved).length;

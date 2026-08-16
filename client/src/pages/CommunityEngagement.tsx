@@ -19,6 +19,7 @@ import DateField from "../components/DateField";
 import DataTable, { DataTableColumn } from "../components/DataTable";
 import SummaryCards from "../components/SummaryCards";
 import { AuditHistoryButton } from "../components/AuditHistoryPanel";
+import LoadError from "../components/LoadError";
 
 const projectStatuses: CommunityProjectStatus[] = ["PLANNED", "IN_PROGRESS", "COMPLETED", "DELAYED", "CANCELLED"];
 const engagementTypes: CommunityEngagementType[] = ["PUBLIC_MEETING", "FOCUS_GROUP", "FORUM", "SITE_VISIT", "SURVEY", "OTHER"];
@@ -117,13 +118,20 @@ function ProjectsTab({ sites, canEdit, canDelete }: { sites: Site[]; canEdit: bo
   const { t } = useTranslation();
   const [projects, setProjects] = useState<CommunityProject[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
   const [modal, setModal] = useState(false);
 
   async function load() {
     setLoading(true);
-    const res = await api.get<CommunityProject[]>("/community/projects");
-    setProjects(res.data);
-    setLoading(false);
+    setLoadError(false);
+    try {
+      const res = await api.get<CommunityProject[]>("/community/projects");
+      setProjects(res.data);
+    } catch {
+      setLoadError(true);
+    } finally {
+      setLoading(false);
+    }
   }
 
   useEffect(() => { load(); }, []);
@@ -140,6 +148,7 @@ function ProjectsTab({ sites, canEdit, canDelete }: { sites: Site[]; canEdit: bo
   }
 
   if (loading) return <div className="text-mine-300">{t("common.loading")}</div>;
+  if (loadError) return <LoadError onRetry={load} />;
 
   return (
     <div className="space-y-4">
@@ -248,13 +257,20 @@ function EngagementsTab({ sites, canEdit, canDelete }: { sites: Site[]; canEdit:
   const { t } = useTranslation();
   const [engagements, setEngagements] = useState<CommunityEngagement[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
   const [modal, setModal] = useState(false);
 
   async function load() {
     setLoading(true);
-    const res = await api.get<CommunityEngagement[]>("/community/engagements");
-    setEngagements(res.data);
-    setLoading(false);
+    setLoadError(false);
+    try {
+      const res = await api.get<CommunityEngagement[]>("/community/engagements");
+      setEngagements(res.data);
+    } catch {
+      setLoadError(true);
+    } finally {
+      setLoading(false);
+    }
   }
 
   useEffect(() => { load(); }, []);
@@ -271,6 +287,7 @@ function EngagementsTab({ sites, canEdit, canDelete }: { sites: Site[]; canEdit:
   }
 
   if (loading) return <div className="text-mine-300">{t("common.loading")}</div>;
+  if (loadError) return <LoadError onRetry={load} />;
 
   return (
     <div className="space-y-4">
@@ -368,13 +385,20 @@ function GrievancesTab({ sites, canEdit, canDelete }: { sites: Site[]; canEdit: 
   const { t } = useTranslation();
   const [grievances, setGrievances] = useState<CommunityGrievance[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
   const [modal, setModal] = useState(false);
 
   async function load() {
     setLoading(true);
-    const res = await api.get<CommunityGrievance[]>("/community/grievances");
-    setGrievances(res.data);
-    setLoading(false);
+    setLoadError(false);
+    try {
+      const res = await api.get<CommunityGrievance[]>("/community/grievances");
+      setGrievances(res.data);
+    } catch {
+      setLoadError(true);
+    } finally {
+      setLoading(false);
+    }
   }
 
   useEffect(() => { load(); }, []);
@@ -391,6 +415,7 @@ function GrievancesTab({ sites, canEdit, canDelete }: { sites: Site[]; canEdit: 
   }
 
   if (loading) return <div className="text-mine-300">{t("common.loading")}</div>;
+  if (loadError) return <LoadError onRetry={load} />;
 
   const openCount = grievances.filter((g) => g.status === "OPEN" || g.status === "UNDER_INVESTIGATION").length;
 
@@ -438,6 +463,7 @@ function SpendTab({ sites, canEdit, canDelete }: { sites: Site[]; canEdit: boole
   const { t } = useTranslation();
   const [records, setRecords] = useState<CommunitySpendRecord[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
   const [modal, setModal] = useState(false);
   const [siteId, setSiteId] = useState(sites[0]?.id ?? "");
   const [recordDate, setRecordDate] = useState("");
@@ -448,9 +474,15 @@ function SpendTab({ sites, canEdit, canDelete }: { sites: Site[]; canEdit: boole
 
   async function load() {
     setLoading(true);
-    const res = await api.get<CommunitySpendRecord[]>("/community/spend");
-    setRecords(res.data);
-    setLoading(false);
+    setLoadError(false);
+    try {
+      const res = await api.get<CommunitySpendRecord[]>("/community/spend");
+      setRecords(res.data);
+    } catch {
+      setLoadError(true);
+    } finally {
+      setLoading(false);
+    }
   }
 
   useEffect(() => { load(); }, []);
@@ -476,6 +508,7 @@ function SpendTab({ sites, canEdit, canDelete }: { sites: Site[]; canEdit: boole
   }
 
   if (loading) return <div className="text-mine-300">{t("common.loading")}</div>;
+  if (loadError) return <LoadError onRetry={load} />;
 
   return (
     <div className="space-y-4">
@@ -554,15 +587,27 @@ export default function CommunityEngagementPage() {
   const [tab, setTab] = useState<"projects" | "engagements" | "grievances" | "spend">("projects");
   const [sites, setSites] = useState<Site[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
+
+  async function load() {
+    setLoading(true);
+    setLoadError(false);
+    try {
+      const res = await api.get<Site[]>("/sites");
+      setSites(res.data);
+    } catch {
+      setLoadError(true);
+    } finally {
+      setLoading(false);
+    }
+  }
 
   useEffect(() => {
-    api.get<Site[]>("/sites").then((res) => {
-      setSites(res.data);
-      setLoading(false);
-    });
+    load();
   }, []);
 
   if (loading) return <div className="text-mine-300">{t("common.loading")}</div>;
+  if (loadError) return <LoadError onRetry={load} />;
 
   return (
     <div className="space-y-6">

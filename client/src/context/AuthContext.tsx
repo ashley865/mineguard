@@ -51,11 +51,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           const res = await api.get<User>("/auth/me");
           setUser(res.data);
           localStorage.setItem("mineguard_user", JSON.stringify(res.data));
-        } catch {
-          setUser(null);
-          setToken(null);
-          localStorage.removeItem("mineguard_token");
-          localStorage.removeItem("mineguard_user");
+        } catch (err: any) {
+          // Only a genuine 401 means the token is actually invalid. A network
+          // error or timeout (server cold-starting, connection dropped) is not
+          // proof the session is bad — logging the user out in that case would
+          // just bounce them to /login while the server wakes up, which looks
+          // identical to "the site is broken" from their side.
+          if (err?.response?.status === 401) {
+            setUser(null);
+            setToken(null);
+            localStorage.removeItem("mineguard_token");
+            localStorage.removeItem("mineguard_user");
+          }
         }
       }
       setLoading(false);

@@ -13,6 +13,7 @@ import {
 import { StatusBadge } from "../../components/Badges";
 import Modal from "../../components/Modal";
 import { buttonDanger, buttonPrimary, buttonSecondary, cardClass, selectClass } from "../../components/ui";
+import LoadError from "../../components/LoadError";
 
 const ppeTypes: PpeType[] = [
   "HARD_HAT",
@@ -37,6 +38,7 @@ function CountFlag({ count, label, tone }: { count: number; label: string; tone:
 function WorkerSafetyDetail({ worker, canManage, onClose }: { worker: Worker; canManage: boolean; onClose: () => void }) {
   const { t } = useTranslation();
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
   const [certificates, setCertificates] = useState<Certificate[]>([]);
   const [training, setTraining] = useState<TrainingRecord[]>([]);
   const [ppe, setPpe] = useState<WorkerPpeRequirement[]>([]);
@@ -44,15 +46,21 @@ function WorkerSafetyDetail({ worker, canManage, onClose }: { worker: Worker; ca
 
   async function load() {
     setLoading(true);
-    const [c, tr, p] = await Promise.all([
-      api.get<Certificate[]>("/certificates", { params: { workerId: worker.id } }),
-      api.get<TrainingRecord[]>("/training-records", { params: { workerId: worker.id } }),
-      api.get<WorkerPpeRequirement[]>("/worker-safety/ppe", { params: { workerId: worker.id } }),
-    ]);
-    setCertificates(c.data);
-    setTraining(tr.data);
-    setPpe(p.data);
-    setLoading(false);
+    setLoadError(false);
+    try {
+      const [c, tr, p] = await Promise.all([
+        api.get<Certificate[]>("/certificates", { params: { workerId: worker.id } }),
+        api.get<TrainingRecord[]>("/training-records", { params: { workerId: worker.id } }),
+        api.get<WorkerPpeRequirement[]>("/worker-safety/ppe", { params: { workerId: worker.id } }),
+      ]);
+      setCertificates(c.data);
+      setTraining(tr.data);
+      setPpe(p.data);
+    } catch {
+      setLoadError(true);
+    } finally {
+      setLoading(false);
+    }
   }
 
   useEffect(() => {
@@ -82,6 +90,8 @@ function WorkerSafetyDetail({ worker, canManage, onClose }: { worker: Worker; ca
     <Modal title={worker.name} onClose={onClose} size="lg">
       {loading ? (
         <div className="text-mine-300 text-sm">{t("common.loading")}</div>
+      ) : loadError ? (
+        <LoadError onRetry={load} />
       ) : (
         <div className="space-y-5">
           <div>
@@ -166,13 +176,20 @@ export default function WorkerSafetyTab({ workers }: { workers: Worker[] }) {
   const canManage = user?.role === "ADMIN" || user?.role === "SUPERVISOR" || user?.role === "EXECUTIVE";
   const [summary, setSummary] = useState<WorkerSafetySummary[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
   const [selectedWorker, setSelectedWorker] = useState<Worker | null>(null);
 
   async function load() {
     setLoading(true);
-    const res = await api.get<WorkerSafetySummary[]>("/worker-safety/summary");
-    setSummary(res.data);
-    setLoading(false);
+    setLoadError(false);
+    try {
+      const res = await api.get<WorkerSafetySummary[]>("/worker-safety/summary");
+      setSummary(res.data);
+    } catch {
+      setLoadError(true);
+    } finally {
+      setLoading(false);
+    }
   }
 
   useEffect(() => {
@@ -180,6 +197,7 @@ export default function WorkerSafetyTab({ workers }: { workers: Worker[] }) {
   }, []);
 
   if (loading) return <div className="text-mine-300">{t("workforce.loading")}</div>;
+  if (loadError) return <LoadError onRetry={load} />;
 
   return (
     <div className="space-y-4">

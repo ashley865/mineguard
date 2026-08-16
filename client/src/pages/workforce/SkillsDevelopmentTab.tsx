@@ -7,6 +7,7 @@ import { StatusBadge } from "../../components/Badges";
 import Modal from "../../components/Modal";
 import { buttonDanger, buttonPrimary, buttonSecondary, cardClass, inputClass, labelClass, selectClass } from "../../components/ui";
 import DateField from "../../components/DateField";
+import LoadError from "../../components/LoadError";
 
 const learnershipStatuses: LearnershipStatus[] = ["APPLIED", "ENROLLED", "IN_PROGRESS", "COMPLETED", "WITHDRAWN"];
 
@@ -174,18 +175,25 @@ export default function SkillsDevelopmentTab({ workers }: { workers: Worker[] })
   const [plans, setPlans] = useState<WorkplaceSkillsPlan[]>([]);
   const [learnerships, setLearnerships] = useState<Learnership[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
   const [wspModal, setWspModal] = useState(false);
   const [learnershipModal, setLearnershipModal] = useState(false);
 
   async function load() {
     setLoading(true);
-    const [p, l] = await Promise.all([
-      api.get<WorkplaceSkillsPlan[]>("/skills-development/wsp"),
-      api.get<Learnership[]>("/skills-development/learnerships"),
-    ]);
-    setPlans(p.data);
-    setLearnerships(l.data);
-    setLoading(false);
+    setLoadError(false);
+    try {
+      const [p, l] = await Promise.all([
+        api.get<WorkplaceSkillsPlan[]>("/skills-development/wsp"),
+        api.get<Learnership[]>("/skills-development/learnerships"),
+      ]);
+      setPlans(p.data);
+      setLearnerships(l.data);
+    } catch {
+      setLoadError(true);
+    } finally {
+      setLoading(false);
+    }
   }
 
   useEffect(() => {
@@ -215,6 +223,7 @@ export default function SkillsDevelopmentTab({ workers }: { workers: Worker[] })
   }
 
   if (loading) return <div className="text-mine-300">{t("common.loading")}</div>;
+  if (loadError) return <LoadError onRetry={load} />;
 
   return (
     <div className="space-y-6">

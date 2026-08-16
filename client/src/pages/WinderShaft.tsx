@@ -9,6 +9,7 @@ import { buttonDanger, buttonPrimary, buttonSecondary, inputClass, labelClass, s
 import DateField from "../components/DateField";
 import DataTable, { DataTableColumn } from "../components/DataTable";
 import { AuditHistoryButton } from "../components/AuditHistoryPanel";
+import LoadError from "../components/LoadError";
 
 const brakeResults: WinderInspectionResult[] = ["PASS", "FAIL", "CONDITIONAL"];
 
@@ -186,14 +187,21 @@ function WindersTab({ sites, canEdit, canDelete }: { sites: Site[]; canEdit: boo
   const { t } = useTranslation();
   const [winders, setWinders] = useState<Winder[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
   const [modal, setModal] = useState(false);
   const [detailWinder, setDetailWinder] = useState<Winder | null>(null);
 
   async function load() {
     setLoading(true);
-    const res = await api.get<Winder[]>("/winders");
-    setWinders(res.data);
-    setLoading(false);
+    setLoadError(false);
+    try {
+      const res = await api.get<Winder[]>("/winders");
+      setWinders(res.data);
+    } catch {
+      setLoadError(true);
+    } finally {
+      setLoading(false);
+    }
   }
 
   useEffect(() => { load(); }, []);
@@ -219,6 +227,7 @@ function WindersTab({ sites, canEdit, canDelete }: { sites: Site[]; canEdit: boo
   }
 
   if (loading) return <div className="text-mine-300">{t("common.loading")}</div>;
+  if (loadError) return <LoadError onRetry={load} />;
 
   return (
     <div className="space-y-4">
@@ -266,6 +275,7 @@ function ShaftInspectionsTab({ sites, canEdit, canDelete }: { sites: Site[]; can
   const { t } = useTranslation();
   const [inspections, setInspections] = useState<ShaftInspection[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
   const [modal, setModal] = useState(false);
   const [siteId, setSiteId] = useState(sites[0]?.id ?? "");
   const [shaftName, setShaftName] = useState("");
@@ -276,9 +286,15 @@ function ShaftInspectionsTab({ sites, canEdit, canDelete }: { sites: Site[]; can
 
   async function load() {
     setLoading(true);
-    const res = await api.get<ShaftInspection[]>("/winders/shaft-inspections");
-    setInspections(res.data);
-    setLoading(false);
+    setLoadError(false);
+    try {
+      const res = await api.get<ShaftInspection[]>("/winders/shaft-inspections");
+      setInspections(res.data);
+    } catch {
+      setLoadError(true);
+    } finally {
+      setLoading(false);
+    }
   }
 
   useEffect(() => { load(); }, []);
@@ -304,6 +320,7 @@ function ShaftInspectionsTab({ sites, canEdit, canDelete }: { sites: Site[]; can
   }
 
   if (loading) return <div className="text-mine-300">{t("common.loading")}</div>;
+  if (loadError) return <LoadError onRetry={load} />;
 
   return (
     <div className="space-y-4">
@@ -380,15 +397,27 @@ export default function WinderShaft() {
   const [tab, setTab] = useState<"winders" | "shafts">("winders");
   const [sites, setSites] = useState<Site[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
+
+  async function load() {
+    setLoading(true);
+    setLoadError(false);
+    try {
+      const res = await api.get<Site[]>("/sites");
+      setSites(res.data);
+    } catch {
+      setLoadError(true);
+    } finally {
+      setLoading(false);
+    }
+  }
 
   useEffect(() => {
-    api.get<Site[]>("/sites").then((res) => {
-      setSites(res.data);
-      setLoading(false);
-    });
+    load();
   }, []);
 
   if (loading) return <div className="text-mine-300">{t("common.loading")}</div>;
+  if (loadError) return <LoadError onRetry={load} />;
 
   return (
     <div className="space-y-6">

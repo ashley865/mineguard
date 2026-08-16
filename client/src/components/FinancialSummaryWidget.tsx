@@ -25,7 +25,8 @@ export default function FinancialSummaryWidget() {
   useEffect(() => {
     api
       .get<ProductionFinancialSummary>("/production/financial-summary", { params: { months: 6 } })
-      .then((res) => setSummary(res.data));
+      .then((res) => setSummary(res.data))
+      .catch(() => {});
   }, []);
 
   if (!summary) return null;

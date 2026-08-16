@@ -6,6 +6,7 @@ import { TrainingRecord, TrainingType, Worker } from "../../api/types";
 import Modal from "../../components/Modal";
 import { buttonDanger, buttonPrimary, buttonSecondary, cardClass, inputClass, labelClass, selectClass } from "../../components/ui";
 import DateField from "../../components/DateField";
+import LoadError from "../../components/LoadError";
 
 const trainingTypes: TrainingType[] = [
   "INDUCTION",
@@ -98,13 +99,20 @@ export default function TrainingRecordsTab({ workers }: { workers: Worker[] }) {
   const canEdit = user?.role === "ADMIN" || user?.role === "SUPERVISOR" || user?.role === "EXECUTIVE";
   const [items, setItems] = useState<TrainingRecord[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
   const [modal, setModal] = useState<null | "create" | TrainingRecord>(null);
 
   async function load() {
     setLoading(true);
-    const res = await api.get<TrainingRecord[]>("/training-records");
-    setItems(res.data);
-    setLoading(false);
+    setLoadError(false);
+    try {
+      const res = await api.get<TrainingRecord[]>("/training-records");
+      setItems(res.data);
+    } catch {
+      setLoadError(true);
+    } finally {
+      setLoading(false);
+    }
   }
 
   useEffect(() => {
@@ -130,6 +138,7 @@ export default function TrainingRecordsTab({ workers }: { workers: Worker[] }) {
   }
 
   if (loading) return <div className="text-mine-300">{t("workforce.loading")}</div>;
+  if (loadError) return <LoadError onRetry={load} />;
 
   return (
     <div className="space-y-4">

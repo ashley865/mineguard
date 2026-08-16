@@ -7,6 +7,7 @@ import { SeverityBadge, StatusBadge } from "../../components/Badges";
 import Modal from "../../components/Modal";
 import { buttonDanger, buttonPrimary, buttonSecondary, cardClass, inputClass, labelClass, selectClass } from "../../components/ui";
 import DateField from "../../components/DateField";
+import LoadError from "../../components/LoadError";
 
 const riskLevels: RiskLevel[] = ["LOW", "MEDIUM", "HIGH", "CRITICAL"];
 const statuses: RiskAssessmentStatus[] = ["DRAFT", "APPROVED", "UNDER_REVIEW", "EXPIRED"];
@@ -186,13 +187,20 @@ export default function RiskAssessmentsTab({ sites, zones }: { sites: Site[]; zo
   const canEdit = user?.role === "ADMIN" || user?.role === "SUPERVISOR" || user?.role === "EXECUTIVE";
   const [items, setItems] = useState<RiskAssessment[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
   const [modal, setModal] = useState<null | "create" | RiskAssessment>(null);
 
   async function load() {
     setLoading(true);
-    const res = await api.get<RiskAssessment[]>("/risk-assessments");
-    setItems(res.data);
-    setLoading(false);
+    setLoadError(false);
+    try {
+      const res = await api.get<RiskAssessment[]>("/risk-assessments");
+      setItems(res.data);
+    } catch {
+      setLoadError(true);
+    } finally {
+      setLoading(false);
+    }
   }
 
   useEffect(() => {
@@ -218,6 +226,7 @@ export default function RiskAssessmentsTab({ sites, zones }: { sites: Site[]; zo
   }
 
   if (loading) return <div className="text-mine-300">{t("compliance.loading")}</div>;
+  if (loadError) return <LoadError onRetry={load} />;
 
   return (
     <div className="space-y-4">

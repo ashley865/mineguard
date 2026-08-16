@@ -17,6 +17,7 @@ import {
 import Modal from "../components/Modal";
 import { buttonDanger, buttonPrimary, buttonSecondary, cardClass, inputClass, labelClass, selectClass } from "../components/ui";
 import DateField from "../components/DateField";
+import LoadError from "../components/LoadError";
 
 const pollutants: ExposurePollutant[] = ["DUST_RESPIRABLE", "DUST_INHALABLE", "NOISE", "METHANE", "CARBON_MONOXIDE", "DIESEL_PARTICULATE", "SILICA", "OTHER"];
 const sampleTypes: ExposureSampleType[] = ["PERSONAL", "AREA"];
@@ -85,15 +86,22 @@ function ReadingsModal({ district, onClose }: { district: VentilationDistrict; o
   const { t } = useTranslation();
   const [readings, setReadings] = useState<VentilationReading[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
   const [readingDate, setReadingDate] = useState("");
   const [airflowQuantity, setAirflowQuantity] = useState("");
   const [saving, setSaving] = useState(false);
 
   async function load() {
     setLoading(true);
-    const res = await api.get<VentilationReading[]>("/ventilation/readings", { params: { districtId: district.id } });
-    setReadings(res.data);
-    setLoading(false);
+    setLoadError(false);
+    try {
+      const res = await api.get<VentilationReading[]>("/ventilation/readings", { params: { districtId: district.id } });
+      setReadings(res.data);
+    } catch {
+      setLoadError(true);
+    } finally {
+      setLoading(false);
+    }
   }
 
   useEffect(() => { load(); }, []); // eslint-disable-line react-hooks/exhaustive-deps
@@ -129,15 +137,18 @@ function ReadingsModal({ district, onClose }: { district: VentilationDistrict; o
           <button type="submit" className={buttonPrimary} disabled={saving}>{saving ? t("common.saving") : t("common.save")}</button>
         </form>
         {loading && <div className="text-mine-300 text-sm">{t("common.loading")}</div>}
-        <div className="space-y-1 max-h-64 overflow-y-auto">
-          {readings.map((r) => (
-            <div key={r.id} className="flex items-center justify-between text-xs border-t border-mine-800 pt-1.5">
-              <span>{new Date(r.readingDate).toLocaleDateString()}</span>
-              <span className={r.withinRequirement ? "text-mine-300" : "text-danger-500 font-semibold"}>{r.airflowQuantity} {r.unit}</span>
-            </div>
-          ))}
-          {!loading && readings.length === 0 && <div className="text-mine-400 text-sm">{t("groundControl.noReadings")}</div>}
-        </div>
+        {!loading && loadError && <LoadError onRetry={load} />}
+        {!loading && !loadError && (
+          <div className="space-y-1 max-h-64 overflow-y-auto">
+            {readings.map((r) => (
+              <div key={r.id} className="flex items-center justify-between text-xs border-t border-mine-800 pt-1.5">
+                <span>{new Date(r.readingDate).toLocaleDateString()}</span>
+                <span className={r.withinRequirement ? "text-mine-300" : "text-danger-500 font-semibold"}>{r.airflowQuantity} {r.unit}</span>
+              </div>
+            ))}
+            {readings.length === 0 && <div className="text-mine-400 text-sm">{t("groundControl.noReadings")}</div>}
+          </div>
+        )}
       </div>
     </Modal>
   );
@@ -147,14 +158,21 @@ function DistrictsTab({ sites, zones, canEdit, canDelete }: { sites: Site[]; zon
   const { t } = useTranslation();
   const [districts, setDistricts] = useState<VentilationDistrict[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
   const [modal, setModal] = useState(false);
   const [readingsDistrict, setReadingsDistrict] = useState<VentilationDistrict | null>(null);
 
   async function load() {
     setLoading(true);
-    const res = await api.get<VentilationDistrict[]>("/ventilation/districts");
-    setDistricts(res.data);
-    setLoading(false);
+    setLoadError(false);
+    try {
+      const res = await api.get<VentilationDistrict[]>("/ventilation/districts");
+      setDistricts(res.data);
+    } catch {
+      setLoadError(true);
+    } finally {
+      setLoading(false);
+    }
   }
 
   useEffect(() => { load(); }, []);
@@ -171,6 +189,7 @@ function DistrictsTab({ sites, zones, canEdit, canDelete }: { sites: Site[]; zon
   }
 
   if (loading) return <div className="text-mine-300">{t("common.loading")}</div>;
+  if (loadError) return <LoadError onRetry={load} />;
 
   return (
     <div className="space-y-4">
@@ -303,13 +322,20 @@ function RefugeBaysTab({ sites, zones, canEdit, canDelete }: { sites: Site[]; zo
   const { t } = useTranslation();
   const [bays, setBays] = useState<RefugeBay[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
   const [modal, setModal] = useState(false);
 
   async function load() {
     setLoading(true);
-    const res = await api.get<RefugeBay[]>("/ventilation/refuge-bays");
-    setBays(res.data);
-    setLoading(false);
+    setLoadError(false);
+    try {
+      const res = await api.get<RefugeBay[]>("/ventilation/refuge-bays");
+      setBays(res.data);
+    } catch {
+      setLoadError(true);
+    } finally {
+      setLoading(false);
+    }
   }
 
   useEffect(() => { load(); }, []);
@@ -326,6 +352,7 @@ function RefugeBaysTab({ sites, zones, canEdit, canDelete }: { sites: Site[]; zo
   }
 
   if (loading) return <div className="text-mine-300">{t("common.loading")}</div>;
+  if (loadError) return <LoadError onRetry={load} />;
 
   return (
     <div className="space-y-4">
@@ -451,13 +478,20 @@ function ExposureTab({ workers, canEdit, canDelete }: { workers: Worker[]; canEd
   const { t } = useTranslation();
   const [records, setRecords] = useState<OccupationalExposureRecord[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
   const [modal, setModal] = useState(false);
 
   async function load() {
     setLoading(true);
-    const res = await api.get<OccupationalExposureRecord[]>("/ventilation/exposure-records");
-    setRecords(res.data);
-    setLoading(false);
+    setLoadError(false);
+    try {
+      const res = await api.get<OccupationalExposureRecord[]>("/ventilation/exposure-records");
+      setRecords(res.data);
+    } catch {
+      setLoadError(true);
+    } finally {
+      setLoading(false);
+    }
   }
 
   useEffect(() => { load(); }, []);
@@ -474,6 +508,7 @@ function ExposureTab({ workers, canEdit, canDelete }: { workers: Worker[]; canEd
   }
 
   if (loading) return <div className="text-mine-300">{t("common.loading")}</div>;
+  if (loadError) return <LoadError onRetry={load} />;
 
   return (
     <div className="space-y-4">
@@ -531,17 +566,29 @@ export default function VentilationHygiene() {
   const [zones, setZones] = useState<Zone[]>([]);
   const [workers, setWorkers] = useState<Worker[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
 
-  useEffect(() => {
-    Promise.all([api.get<Site[]>("/sites"), api.get<Zone[]>("/zones"), api.get<Worker[]>("/workers")]).then(([s, z, w]) => {
+  async function load() {
+    setLoading(true);
+    setLoadError(false);
+    try {
+      const [s, z, w] = await Promise.all([api.get<Site[]>("/sites"), api.get<Zone[]>("/zones"), api.get<Worker[]>("/workers")]);
       setSites(s.data);
       setZones(z.data);
       setWorkers(w.data);
+    } catch {
+      setLoadError(true);
+    } finally {
       setLoading(false);
-    });
+    }
+  }
+
+  useEffect(() => {
+    load();
   }, []);
 
   if (loading) return <div className="text-mine-300">{t("common.loading")}</div>;
+  if (loadError) return <LoadError onRetry={load} />;
 
   return (
     <div className="space-y-6">

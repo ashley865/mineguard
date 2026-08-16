@@ -7,6 +7,7 @@ import { StatusBadge } from "../../components/Badges";
 import Modal from "../../components/Modal";
 import { buttonDanger, buttonPrimary, buttonSecondary, cardClass, inputClass, labelClass, selectClass } from "../../components/ui";
 import DateField from "../../components/DateField";
+import LoadError from "../../components/LoadError";
 
 const rehabStatuses: RehabilitationStatus[] = ["PLANNED", "IN_PROGRESS", "COMPLETED", "VERIFIED"];
 
@@ -167,14 +168,21 @@ export default function ClosureRehabilitationTab({ sites }: { sites: Site[] }) {
   const canEdit = user?.role === "ADMIN" || user?.role === "SUPERVISOR" || user?.role === "EXECUTIVE";
   const [plans, setPlans] = useState<ClosureRehabilitationPlan[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
   const [modal, setModal] = useState<null | "create" | ClosureRehabilitationPlan>(null);
   const [progressPlan, setProgressPlan] = useState<ClosureRehabilitationPlan | null>(null);
 
   async function load() {
     setLoading(true);
-    const res = await api.get<ClosureRehabilitationPlan[]>("/closure-rehabilitation");
-    setPlans(res.data);
-    setLoading(false);
+    setLoadError(false);
+    try {
+      const res = await api.get<ClosureRehabilitationPlan[]>("/closure-rehabilitation");
+      setPlans(res.data);
+    } catch {
+      setLoadError(true);
+    } finally {
+      setLoading(false);
+    }
   }
 
   useEffect(() => {
@@ -194,6 +202,7 @@ export default function ClosureRehabilitationTab({ sites }: { sites: Site[] }) {
   }
 
   if (loading) return <div className="text-mine-300">{t("common.loading")}</div>;
+  if (loadError) return <LoadError onRetry={load} />;
 
   return (
     <div className="space-y-4">

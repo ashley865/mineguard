@@ -12,6 +12,7 @@ import DateField from "../components/DateField";
 import DataTable, { DataTableColumn } from "../components/DataTable";
 import SummaryCards from "../components/SummaryCards";
 import { AuditHistoryButton } from "../components/AuditHistoryPanel";
+import LoadError from "../components/LoadError";
 
 const permitDocTypes: PermitDocumentType[] = [
   "PERMIT_CERTIFICATE",
@@ -200,16 +201,23 @@ export default function Permits() {
   const [items, setItems] = useState<Permit[]>([]);
   const [sites, setSites] = useState<Site[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
   const [modal, setModal] = useState<null | "create" | Permit>(null);
   const [docsPermitId, setDocsPermitId] = useState<string | null>(null);
   const docsPermit = items.find((i) => i.id === docsPermitId) ?? null;
 
   async function load() {
     setLoading(true);
-    const [p, s] = await Promise.all([api.get<Permit[]>("/permits"), api.get<Site[]>("/sites")]);
-    setItems(p.data);
-    setSites(s.data);
-    setLoading(false);
+    setLoadError(false);
+    try {
+      const [p, s] = await Promise.all([api.get<Permit[]>("/permits"), api.get<Site[]>("/sites")]);
+      setItems(p.data);
+      setSites(s.data);
+    } catch {
+      setLoadError(true);
+    } finally {
+      setLoading(false);
+    }
   }
 
   useEffect(() => {
@@ -235,6 +243,7 @@ export default function Permits() {
   }
 
   if (loading) return <div className="text-mine-300">{t("permits.loading")}</div>;
+  if (loadError) return <LoadError onRetry={load} />;
 
   const activeCount = items.filter((i) => i.status === "ACTIVE").length;
   const expiringSoonCount = items.filter((i) => i.status === "ACTIVE" && new Date(i.expiryDate).getTime() - Date.now() < 1000 * 60 * 60 * 24 * 90).length;

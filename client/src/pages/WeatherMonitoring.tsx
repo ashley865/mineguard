@@ -5,6 +5,7 @@ import { useAuth } from "../context/AuthContext";
 import { Site, WeatherCondition, WeatherReading } from "../api/types";
 import Modal from "../components/Modal";
 import { buttonDanger, buttonPrimary, buttonSecondary, cardClass, inputClass, labelClass, selectClass } from "../components/ui";
+import LoadError from "../components/LoadError";
 
 const conditions: WeatherCondition[] = ["CLEAR", "CLOUDY", "RAIN", "STORM", "FOG", "HIGH_WIND"];
 
@@ -109,17 +110,24 @@ export default function WeatherMonitoring() {
   const [readings, setReadings] = useState<WeatherReading[]>([]);
   const [sites, setSites] = useState<Site[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
   const [modal, setModal] = useState(false);
 
   async function load() {
     setLoading(true);
-    const [r, s] = await Promise.all([
-      api.get<WeatherReading[]>("/weather"),
-      api.get<Site[]>("/sites"),
-    ]);
-    setReadings(r.data);
-    setSites(s.data);
-    setLoading(false);
+    setLoadError(false);
+    try {
+      const [r, s] = await Promise.all([
+        api.get<WeatherReading[]>("/weather"),
+        api.get<Site[]>("/sites"),
+      ]);
+      setReadings(r.data);
+      setSites(s.data);
+    } catch {
+      setLoadError(true);
+    } finally {
+      setLoading(false);
+    }
   }
 
   useEffect(() => {
@@ -139,6 +147,7 @@ export default function WeatherMonitoring() {
   }
 
   if (loading) return <div className="text-mine-300">{t("common.loading")}</div>;
+  if (loadError) return <LoadError onRetry={load} />;
 
   return (
     <div className="space-y-4">

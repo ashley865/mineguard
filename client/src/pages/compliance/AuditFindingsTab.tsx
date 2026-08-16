@@ -10,6 +10,7 @@ import DateField from "../../components/DateField";
 import DataTable, { DataTableColumn } from "../../components/DataTable";
 import SummaryCards from "../../components/SummaryCards";
 import { AuditHistoryButton } from "../../components/AuditHistoryPanel";
+import LoadError from "../../components/LoadError";
 
 const statuses: AuditFindingStatus[] = ["OPEN", "IN_PROGRESS", "AWAITING_VERIFICATION", "VERIFIED", "CLOSED", "OVERDUE"];
 const severities: RiskLevel[] = ["LOW", "MEDIUM", "HIGH", "CRITICAL"];
@@ -144,17 +145,24 @@ export default function AuditFindingsTab({ sites }: { sites: Site[] }) {
   const [items, setItems] = useState<AuditFinding[]>([]);
   const [people, setPeople] = useState<ResponsiblePerson[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
   const [modal, setModal] = useState<null | "create" | AuditFinding>(null);
 
   async function load() {
     setLoading(true);
-    const [findings, ppl] = await Promise.all([
-      api.get<AuditFinding[]>("/audit-findings"),
-      api.get<ResponsiblePerson[]>("/audit-findings/responsible-people"),
-    ]);
-    setItems(findings.data);
-    setPeople(ppl.data);
-    setLoading(false);
+    setLoadError(false);
+    try {
+      const [findings, ppl] = await Promise.all([
+        api.get<AuditFinding[]>("/audit-findings"),
+        api.get<ResponsiblePerson[]>("/audit-findings/responsible-people"),
+      ]);
+      setItems(findings.data);
+      setPeople(ppl.data);
+    } catch {
+      setLoadError(true);
+    } finally {
+      setLoading(false);
+    }
   }
 
   useEffect(() => {
@@ -180,6 +188,7 @@ export default function AuditFindingsTab({ sites }: { sites: Site[] }) {
   }
 
   if (loading) return <div className="text-mine-300">{t("compliance.loading")}</div>;
+  if (loadError) return <LoadError onRetry={load} />;
 
   const openCount = items.filter((i) => i.status === "OPEN").length;
   const overdueCount = items.filter((i) => i.status === "OVERDUE" || (i.status !== "CLOSED" && i.status !== "VERIFIED" && new Date(i.dueDate) < new Date())).length;

@@ -10,6 +10,7 @@ import DateField from "../../components/DateField";
 import DataTable, { DataTableColumn } from "../../components/DataTable";
 import SummaryCards from "../../components/SummaryCards";
 import { AuditHistoryButton } from "../../components/AuditHistoryPanel";
+import LoadError from "../../components/LoadError";
 
 const certTypes: CertificateType[] = [
   "MINE_MANAGER",
@@ -112,13 +113,20 @@ export default function CertificatesTab({ workers }: { workers: Worker[] }) {
   const canEdit = user?.role === "ADMIN" || user?.role === "SUPERVISOR" || user?.role === "EXECUTIVE";
   const [items, setItems] = useState<Certificate[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
   const [modal, setModal] = useState<null | "create" | Certificate>(null);
 
   async function load() {
     setLoading(true);
-    const res = await api.get<Certificate[]>("/certificates");
-    setItems(res.data);
-    setLoading(false);
+    setLoadError(false);
+    try {
+      const res = await api.get<Certificate[]>("/certificates");
+      setItems(res.data);
+    } catch {
+      setLoadError(true);
+    } finally {
+      setLoading(false);
+    }
   }
 
   useEffect(() => {
@@ -144,6 +152,7 @@ export default function CertificatesTab({ workers }: { workers: Worker[] }) {
   }
 
   if (loading) return <div className="text-mine-300">{t("workforce.loading")}</div>;
+  if (loadError) return <LoadError onRetry={load} />;
 
   const expiredCount = items.filter((i) => i.status === "EXPIRED").length;
   const expiringSoonCount = items.filter((i) => i.status === "ACTIVE" && i.expiryDate && new Date(i.expiryDate).getTime() - Date.now() < 1000 * 60 * 60 * 24 * 90).length;

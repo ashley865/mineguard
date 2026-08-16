@@ -10,6 +10,7 @@ import DateField from "../../components/DateField";
 import DataTable, { DataTableColumn } from "../../components/DataTable";
 import SummaryCards from "../../components/SummaryCards";
 import { AuditHistoryButton } from "../../components/AuditHistoryPanel";
+import LoadError from "../../components/LoadError";
 
 const appointmentTypes: StatutoryAppointmentType[] = [
   "MINE_MANAGER",
@@ -150,14 +151,21 @@ export default function StatutoryAppointmentsTab({ sites, workers }: { sites: Si
   const canDelete = user?.role === "ADMIN" || user?.role === "EXECUTIVE";
   const [items, setItems] = useState<StatutoryAppointment[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
   const [modal, setModal] = useState<null | "create" | StatutoryAppointment>(null);
   const [uploadingFor, setUploadingFor] = useState<string | null>(null);
 
   async function load() {
     setLoading(true);
-    const res = await api.get<StatutoryAppointment[]>("/statutory-appointments");
-    setItems(res.data);
-    setLoading(false);
+    setLoadError(false);
+    try {
+      const res = await api.get<StatutoryAppointment[]>("/statutory-appointments");
+      setItems(res.data);
+    } catch {
+      setLoadError(true);
+    } finally {
+      setLoading(false);
+    }
   }
 
   useEffect(() => {
@@ -198,6 +206,7 @@ export default function StatutoryAppointmentsTab({ sites, workers }: { sites: Si
   }
 
   if (loading) return <div className="text-mine-300">{t("common.loading")}</div>;
+  if (loadError) return <LoadError onRetry={load} />;
 
   const vacantCount = items.filter((a) => a.status === "VACANT").length;
   const expiredCount = items.filter((a) => a.status === "EXPIRED" || a.status === "SUSPENDED" || a.status === "REVOKED").length;

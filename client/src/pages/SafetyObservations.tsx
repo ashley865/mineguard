@@ -7,6 +7,7 @@ import { AlertSeverity, SafetyObservation, SafetyObservationStatus, SafetyObserv
 import { StatusBadge, SeverityBadge } from "../components/Badges";
 import Modal from "../components/Modal";
 import { buttonDanger, buttonPrimary, buttonSecondary, cardClass, inputClass, labelClass, selectClass } from "../components/ui";
+import LoadError from "../components/LoadError";
 
 const types: SafetyObservationType[] = ["NEAR_MISS", "UNSAFE_ACT", "UNSAFE_CONDITION", "POSITIVE_OBSERVATION"];
 const severities: AlertSeverity[] = ["LOW", "MEDIUM", "HIGH", "CRITICAL"];
@@ -190,21 +191,28 @@ export default function SafetyObservations() {
   const [sites, setSites] = useState<Site[]>([]);
   const [zones, setZones] = useState<Zone[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
   const [modal, setModal] = useState(false);
   const [shareModal, setShareModal] = useState(false);
   const [selected, setSelected] = useState<SafetyObservation | null>(null);
 
   async function load() {
     setLoading(true);
-    const [i, s, z] = await Promise.all([
-      api.get<SafetyObservation[]>("/safety-observations"),
-      api.get<Site[]>("/sites"),
-      api.get<Zone[]>("/zones"),
-    ]);
-    setItems(i.data);
-    setSites(s.data);
-    setZones(z.data);
-    setLoading(false);
+    setLoadError(false);
+    try {
+      const [i, s, z] = await Promise.all([
+        api.get<SafetyObservation[]>("/safety-observations"),
+        api.get<Site[]>("/sites"),
+        api.get<Zone[]>("/zones"),
+      ]);
+      setItems(i.data);
+      setSites(s.data);
+      setZones(z.data);
+    } catch {
+      setLoadError(true);
+    } finally {
+      setLoading(false);
+    }
   }
 
   useEffect(() => {
@@ -224,6 +232,7 @@ export default function SafetyObservations() {
   }
 
   if (loading) return <div className="text-mine-300">{t("common.loading")}</div>;
+  if (loadError) return <LoadError onRetry={load} />;
 
   return (
     <div className="space-y-6">

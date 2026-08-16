@@ -8,6 +8,7 @@ import { buttonDanger, buttonPrimary, buttonSecondary, cardClass, inputClass, la
 import DateField from "../components/DateField";
 import FinancialPerformanceTab from "./production/FinancialPerformanceTab";
 import { mineralTypes } from "../lib/minerals";
+import LoadError from "../components/LoadError";
 
 const shifts: ProductionShift[] = ["DAY", "AFTERNOON", "NIGHT"];
 const oreGradeUnits: OreGradeUnit[] = ["PERCENT", "GRAMS_PER_TONNE", "OUNCES_PER_TONNE", "CARATS_PER_TONNE", "PARTS_PER_MILLION"];
@@ -154,20 +155,27 @@ export default function ProductionTracking() {
   const [sites, setSites] = useState<Site[]>([]);
   const [zones, setZones] = useState<Zone[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
   const [modal, setModal] = useState<null | "create" | ProductionRecord>(null);
   const [tab, setTab] = useState<TabKey>("records");
 
   async function load() {
     setLoading(true);
-    const [r, s, z] = await Promise.all([
-      api.get<ProductionRecord[]>("/production"),
-      api.get<Site[]>("/sites"),
-      api.get<Zone[]>("/zones"),
-    ]);
-    setRecords(r.data);
-    setSites(s.data);
-    setZones(z.data);
-    setLoading(false);
+    setLoadError(false);
+    try {
+      const [r, s, z] = await Promise.all([
+        api.get<ProductionRecord[]>("/production"),
+        api.get<Site[]>("/sites"),
+        api.get<Zone[]>("/zones"),
+      ]);
+      setRecords(r.data);
+      setSites(s.data);
+      setZones(z.data);
+    } catch {
+      setLoadError(true);
+    } finally {
+      setLoading(false);
+    }
   }
 
   useEffect(() => {
@@ -195,6 +203,7 @@ export default function ProductionTracking() {
   const totalTonnes = records.reduce((sum, r) => sum + r.tonnesMined, 0);
 
   if (loading) return <div className="text-mine-300">{t("common.loading")}</div>;
+  if (loadError) return <LoadError onRetry={load} />;
 
   return (
     <div className="space-y-6">

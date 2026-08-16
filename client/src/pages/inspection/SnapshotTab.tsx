@@ -4,19 +4,27 @@ import { api } from "../../api/client";
 import { ComplianceSnapshot, Site } from "../../api/types";
 import { StatusBadge } from "../../components/Badges";
 import { buttonSecondary, cardClass, inputClass } from "../../components/ui";
+import LoadError from "../../components/LoadError";
 
 export default function SnapshotTab({ sites }: { sites: Site[] }) {
   const { t } = useTranslation();
   const [siteId, setSiteId] = useState(sites[0]?.id ?? "");
   const [snapshot, setSnapshot] = useState<ComplianceSnapshot | null>(null);
   const [loading, setLoading] = useState(false);
+  const [loadError, setLoadError] = useState(false);
 
   async function load(id: string) {
     if (!id) return;
     setLoading(true);
-    const res = await api.get<ComplianceSnapshot>(`/inspection-snapshot/${id}`);
-    setSnapshot(res.data);
-    setLoading(false);
+    setLoadError(false);
+    try {
+      const res = await api.get<ComplianceSnapshot>(`/inspection-snapshot/${id}`);
+      setSnapshot(res.data);
+    } catch {
+      setLoadError(true);
+    } finally {
+      setLoading(false);
+    }
   }
 
   useEffect(() => {
@@ -38,8 +46,9 @@ export default function SnapshotTab({ sites }: { sites: Site[] }) {
       </div>
 
       {loading && <div className="text-mine-300">{t("inspection.loading")}</div>}
+      {loadError && <LoadError onRetry={() => load(siteId)} />}
 
-      {!loading && snapshot && (
+      {!loading && !loadError && snapshot && (
         <div className="space-y-6">
           <div className={`${cardClass} p-5`}>
             <h2 className="text-lg font-bold">{snapshot.site.name}</h2>

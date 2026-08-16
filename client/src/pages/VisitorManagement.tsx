@@ -8,6 +8,7 @@ import { Site, Visitor } from "../api/types";
 import { useAssignedSiteIds } from "../hooks/useAssignedSiteIds";
 import { StatusBadge } from "../components/Badges";
 import { buttonPrimary, buttonSecondary, cardClass, inputClass, labelClass, selectClass } from "../components/ui";
+import LoadError from "../components/LoadError";
 
 function QrPanel({ site }: { site: Site }) {
   const { t } = useTranslation();
@@ -64,6 +65,7 @@ export default function VisitorManagement() {
   const [visitors, setVisitors] = useState<Visitor[]>([]);
   const [siteId, setSiteId] = useState("");
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
 
   const availableSites = assignedSiteIds === null ? sites : sites.filter((s) => assignedSiteIds.includes(s.id));
 
@@ -74,9 +76,15 @@ export default function VisitorManagement() {
 
   async function loadVisitors(forSiteId: string) {
     setLoading(true);
-    const res = await api.get<Visitor[]>("/visitors", { params: forSiteId ? { siteId: forSiteId } : undefined });
-    setVisitors(res.data);
-    setLoading(false);
+    setLoadError(false);
+    try {
+      const res = await api.get<Visitor[]>("/visitors", { params: forSiteId ? { siteId: forSiteId } : undefined });
+      setVisitors(res.data);
+    } catch {
+      setLoadError(true);
+    } finally {
+      setLoading(false);
+    }
   }
 
   useEffect(() => {
@@ -168,7 +176,15 @@ export default function VisitorManagement() {
                 </tr>
               </thead>
               <tbody>
+                {!loading && loadError && (
+                  <tr>
+                    <td colSpan={7} className="px-4 py-6 text-center">
+                      <LoadError onRetry={() => loadVisitors(siteId)} />
+                    </td>
+                  </tr>
+                )}
                 {!loading &&
+                  !loadError &&
                   visitors.map((v) => (
                     <tr key={v.id} className="border-t border-mine-800 hover:bg-mine-800/30">
                       <td className="px-4 py-2 font-medium">
@@ -217,7 +233,7 @@ export default function VisitorManagement() {
                       </td>
                     </tr>
                   ))}
-                {!loading && visitors.length === 0 && (
+                {!loading && !loadError && visitors.length === 0 && (
                   <tr>
                     <td colSpan={7} className="px-4 py-6 text-center text-mine-400">
                       {t("visitors.noneYet")}

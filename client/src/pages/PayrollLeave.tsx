@@ -8,6 +8,7 @@ import Modal from "../components/Modal";
 import { buttonDanger, buttonPrimary, buttonSecondary, cardClass, inputClass, labelClass, selectClass } from "../components/ui";
 import DateField from "../components/DateField";
 import FileDropzone from "../components/FileDropzone";
+import LoadError from "../components/LoadError";
 
 const leaveTypes: LeaveType[] = ["ANNUAL", "SICK", "FAMILY_RESPONSIBILITY", "UNPAID", "STUDY", "MATERNITY_PATERNITY", "OTHER"];
 
@@ -158,13 +159,20 @@ function LeaveTab({ workers, canEdit, canDelete }: { workers: Worker[]; canEdit:
   const { t } = useTranslation();
   const [requests, setRequests] = useState<LeaveRequest[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
   const [modal, setModal] = useState(false);
 
   async function load() {
     setLoading(true);
-    const res = await api.get<LeaveRequest[]>("/payroll/leave");
-    setRequests(res.data);
-    setLoading(false);
+    setLoadError(false);
+    try {
+      const res = await api.get<LeaveRequest[]>("/payroll/leave");
+      setRequests(res.data);
+    } catch {
+      setLoadError(true);
+    } finally {
+      setLoading(false);
+    }
   }
 
   useEffect(() => {
@@ -189,6 +197,7 @@ function LeaveTab({ workers, canEdit, canDelete }: { workers: Worker[]; canEdit:
   }
 
   if (loading) return <div className="text-mine-300">{t("common.loading")}</div>;
+  if (loadError) return <LoadError onRetry={load} />;
 
   return (
     <div className="space-y-4">
@@ -251,13 +260,20 @@ function PayslipsTab({ workers, canEdit, canDelete }: { workers: Worker[]; canEd
   const { t } = useTranslation();
   const [payslips, setPayslips] = useState<Payslip[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
   const [modal, setModal] = useState(false);
 
   async function load() {
     setLoading(true);
-    const res = await api.get<Payslip[]>("/payroll/payslips");
-    setPayslips(res.data);
-    setLoading(false);
+    setLoadError(false);
+    try {
+      const res = await api.get<Payslip[]>("/payroll/payslips");
+      setPayslips(res.data);
+    } catch {
+      setLoadError(true);
+    } finally {
+      setLoading(false);
+    }
   }
 
   useEffect(() => {
@@ -289,6 +305,7 @@ function PayslipsTab({ workers, canEdit, canDelete }: { workers: Worker[]; canEd
   }
 
   if (loading) return <div className="text-mine-300">{t("common.loading")}</div>;
+  if (loadError) return <LoadError onRetry={load} />;
 
   return (
     <div className="space-y-4">
@@ -419,13 +436,20 @@ function LeaveBalancesTab({ workers, canEdit, canDelete }: { workers: Worker[]; 
   const { t } = useTranslation();
   const [balances, setBalances] = useState<LeaveBalance[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
   const [modal, setModal] = useState(false);
 
   async function load() {
     setLoading(true);
-    const res = await api.get<LeaveBalance[]>("/payroll/leave-balances");
-    setBalances(res.data);
-    setLoading(false);
+    setLoadError(false);
+    try {
+      const res = await api.get<LeaveBalance[]>("/payroll/leave-balances");
+      setBalances(res.data);
+    } catch {
+      setLoadError(true);
+    } finally {
+      setLoading(false);
+    }
   }
 
   useEffect(() => {
@@ -444,6 +468,7 @@ function LeaveBalancesTab({ workers, canEdit, canDelete }: { workers: Worker[]; 
   }
 
   if (loading) return <div className="text-mine-300">{t("common.loading")}</div>;
+  if (loadError) return <LoadError onRetry={load} />;
 
   return (
     <div className="space-y-4">
@@ -497,13 +522,20 @@ function BceaComplianceTab() {
   const { t } = useTranslation();
   const [report, setReport] = useState<BceaComplianceReport | null>(null);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
   const [days, setDays] = useState(7);
 
   async function load(d: number) {
     setLoading(true);
-    const res = await api.get<BceaComplianceReport>("/payroll/bcea-compliance", { params: { days: d } });
-    setReport(res.data);
-    setLoading(false);
+    setLoadError(false);
+    try {
+      const res = await api.get<BceaComplianceReport>("/payroll/bcea-compliance", { params: { days: d } });
+      setReport(res.data);
+    } catch {
+      setLoadError(true);
+    } finally {
+      setLoading(false);
+    }
   }
 
   useEffect(() => {
@@ -527,6 +559,7 @@ function BceaComplianceTab() {
         </select>
       </div>
       {loading && <div className="text-mine-300">{t("common.loading")}</div>}
+      {loadError && <LoadError onRetry={() => load(days)} />}
       {!loading && report && (
         <div className={`${cardClass} overflow-x-auto`}>
           <table className="w-full text-sm">
@@ -564,15 +597,22 @@ export default function PayrollLeave() {
   const [tab, setTab] = useState<"leave" | "payslips" | "balances" | "bcea">("leave");
   const [workers, setWorkers] = useState<Worker[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
 
-  useEffect(() => {
-    api.get<Worker[]>("/workers").then((res) => {
-      setWorkers(res.data);
-      setLoading(false);
-    });
-  }, []);
+  function load() {
+    setLoading(true);
+    setLoadError(false);
+    api
+      .get<Worker[]>("/workers")
+      .then((res) => setWorkers(res.data))
+      .catch(() => setLoadError(true))
+      .finally(() => setLoading(false));
+  }
+
+  useEffect(() => { load(); }, []);
 
   if (loading) return <div className="text-mine-300">{t("common.loading")}</div>;
+  if (loadError) return <LoadError onRetry={load} />;
 
   return (
     <div className="space-y-6">

@@ -15,6 +15,7 @@ import { StatusBadge } from "../components/Badges";
 import Modal from "../components/Modal";
 import { buttonDanger, buttonPrimary, buttonSecondary, cardClass, inputClass, labelClass, selectClass } from "../components/ui";
 import DateField from "../components/DateField";
+import LoadError from "../components/LoadError";
 
 const damStatuses: PollutionDamStatus[] = ["ACTIVE", "DECOMMISSIONED"];
 
@@ -85,13 +86,20 @@ function WaterBalanceTab({ sites, canEdit, canDelete }: { sites: Site[]; canEdit
   const { t } = useTranslation();
   const [records, setRecords] = useState<WaterBalanceRecord[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
   const [modal, setModal] = useState(false);
 
   async function load() {
     setLoading(true);
-    const res = await api.get<WaterBalanceRecord[]>("/resources/water-balance");
-    setRecords(res.data);
-    setLoading(false);
+    setLoadError(false);
+    try {
+      const res = await api.get<WaterBalanceRecord[]>("/resources/water-balance");
+      setRecords(res.data);
+    } catch {
+      setLoadError(true);
+    } finally {
+      setLoading(false);
+    }
   }
 
   useEffect(() => { load(); }, []);
@@ -108,6 +116,7 @@ function WaterBalanceTab({ sites, canEdit, canDelete }: { sites: Site[]; canEdit
   }
 
   if (loading) return <div className="text-mine-300">{t("common.loading")}</div>;
+  if (loadError) return <LoadError onRetry={load} />;
 
   return (
     <div className="space-y-4">
@@ -216,13 +225,20 @@ function DamsTab({ sites, canEdit, canDelete }: { sites: Site[]; canEdit: boolea
   const { t } = useTranslation();
   const [dams, setDams] = useState<PollutionControlDam[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
   const [modal, setModal] = useState(false);
 
   async function load() {
     setLoading(true);
-    const res = await api.get<PollutionControlDam[]>("/resources/pollution-dams");
-    setDams(res.data);
-    setLoading(false);
+    setLoadError(false);
+    try {
+      const res = await api.get<PollutionControlDam[]>("/resources/pollution-dams");
+      setDams(res.data);
+    } catch {
+      setLoadError(true);
+    } finally {
+      setLoading(false);
+    }
   }
 
   useEffect(() => { load(); }, []);
@@ -239,6 +255,7 @@ function DamsTab({ sites, canEdit, canDelete }: { sites: Site[]; canEdit: boolea
   }
 
   if (loading) return <div className="text-mine-300">{t("common.loading")}</div>;
+  if (loadError) return <LoadError onRetry={load} />;
 
   return (
     <div className="space-y-4">
@@ -287,6 +304,7 @@ function AmdTab({ sites, canEdit, canDelete }: { sites: Site[]; canEdit: boolean
   const { t } = useTranslation();
   const [readings, setReadings] = useState<AcidMineDrainageReading[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
   const [modal, setModal] = useState(false);
   const [siteId, setSiteId] = useState(sites[0]?.id ?? "");
   const [monitoringPoint, setMonitoringPoint] = useState("");
@@ -297,9 +315,15 @@ function AmdTab({ sites, canEdit, canDelete }: { sites: Site[]; canEdit: boolean
 
   async function load() {
     setLoading(true);
-    const res = await api.get<AcidMineDrainageReading[]>("/resources/amd-readings");
-    setReadings(res.data);
-    setLoading(false);
+    setLoadError(false);
+    try {
+      const res = await api.get<AcidMineDrainageReading[]>("/resources/amd-readings");
+      setReadings(res.data);
+    } catch {
+      setLoadError(true);
+    } finally {
+      setLoading(false);
+    }
   }
 
   useEffect(() => { load(); }, []);
@@ -325,6 +349,7 @@ function AmdTab({ sites, canEdit, canDelete }: { sites: Site[]; canEdit: boolean
   }
 
   if (loading) return <div className="text-mine-300">{t("common.loading")}</div>;
+  if (loadError) return <LoadError onRetry={load} />;
 
   return (
     <div className="space-y-4">
@@ -405,6 +430,7 @@ function EnergyTab({ sites, canEdit, canDelete }: { sites: Site[]; canEdit: bool
   const { t } = useTranslation();
   const [records, setRecords] = useState<EnergyConsumptionRecord[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
   const [modal, setModal] = useState(false);
   const [siteId, setSiteId] = useState(sites[0]?.id ?? "");
   const [recordMonth, setRecordMonth] = useState("");
@@ -415,9 +441,15 @@ function EnergyTab({ sites, canEdit, canDelete }: { sites: Site[]; canEdit: bool
 
   async function load() {
     setLoading(true);
-    const res = await api.get<EnergyConsumptionRecord[]>("/resources/energy");
-    setRecords(res.data);
-    setLoading(false);
+    setLoadError(false);
+    try {
+      const res = await api.get<EnergyConsumptionRecord[]>("/resources/energy");
+      setRecords(res.data);
+    } catch {
+      setLoadError(true);
+    } finally {
+      setLoading(false);
+    }
   }
 
   useEffect(() => { load(); }, []);
@@ -445,6 +477,7 @@ function EnergyTab({ sites, canEdit, canDelete }: { sites: Site[]; canEdit: bool
   }
 
   if (loading) return <div className="text-mine-300">{t("common.loading")}</div>;
+  if (loadError) return <LoadError onRetry={load} />;
 
   return (
     <div className="space-y-4">
@@ -524,6 +557,7 @@ function GhgTab({ canEdit, canDelete }: { canEdit: boolean; canDelete: boolean }
   const { t } = useTranslation();
   const [records, setRecords] = useState<GhgEmissionsRecord[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
   const [modal, setModal] = useState(false);
   const [reportingYear, setReportingYear] = useState(new Date().getFullYear().toString());
   const [scope1TonnesCO2e, setScope1TonnesCO2e] = useState("");
@@ -533,9 +567,15 @@ function GhgTab({ canEdit, canDelete }: { canEdit: boolean; canDelete: boolean }
 
   async function load() {
     setLoading(true);
-    const res = await api.get<GhgEmissionsRecord[]>("/resources/ghg-emissions");
-    setRecords(res.data);
-    setLoading(false);
+    setLoadError(false);
+    try {
+      const res = await api.get<GhgEmissionsRecord[]>("/resources/ghg-emissions");
+      setRecords(res.data);
+    } catch {
+      setLoadError(true);
+    } finally {
+      setLoading(false);
+    }
   }
 
   useEffect(() => { load(); }, []);
@@ -564,6 +604,7 @@ function GhgTab({ canEdit, canDelete }: { canEdit: boolean; canDelete: boolean }
   }
 
   if (loading) return <div className="text-mine-300">{t("common.loading")}</div>;
+  if (loadError) return <LoadError onRetry={load} />;
 
   return (
     <div className="space-y-4">
@@ -640,15 +681,22 @@ export default function ResourceManagement() {
   const [tab, setTab] = useState<"water" | "dams" | "amd" | "energy" | "ghg">("water");
   const [sites, setSites] = useState<Site[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
 
-  useEffect(() => {
-    api.get<Site[]>("/sites").then((res) => {
-      setSites(res.data);
-      setLoading(false);
-    });
-  }, []);
+  function load() {
+    setLoading(true);
+    setLoadError(false);
+    api
+      .get<Site[]>("/sites")
+      .then((res) => setSites(res.data))
+      .catch(() => setLoadError(true))
+      .finally(() => setLoading(false));
+  }
+
+  useEffect(() => { load(); }, []);
 
   if (loading) return <div className="text-mine-300">{t("common.loading")}</div>;
+  if (loadError) return <LoadError onRetry={load} />;
 
   return (
     <div className="space-y-6">

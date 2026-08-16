@@ -6,6 +6,7 @@ import { Site } from "../api/types";
 import ContractOpportunitiesTab from "./marketplace/ContractOpportunitiesTab";
 import Modal from "../components/Modal";
 import { buttonSecondary, inputClass } from "../components/ui";
+import LoadError from "../components/LoadError";
 
 function ShareTenderModal({ onClose }: { onClose: () => void }) {
   const { t } = useTranslation();
@@ -53,16 +54,23 @@ export default function Tenders() {
   const { t } = useTranslation();
   const [sites, setSites] = useState<Site[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
   const [shareModal, setShareModal] = useState(false);
 
-  useEffect(() => {
-    api.get<Site[]>("/sites").then((res) => {
-      setSites(res.data);
-      setLoading(false);
-    });
-  }, []);
+  function load() {
+    setLoading(true);
+    setLoadError(false);
+    api
+      .get<Site[]>("/sites")
+      .then((res) => setSites(res.data))
+      .catch(() => setLoadError(true))
+      .finally(() => setLoading(false));
+  }
+
+  useEffect(() => { load(); }, []);
 
   if (loading) return <div className="text-mine-300">{t("common.loading")}</div>;
+  if (loadError) return <LoadError onRetry={load} />;
 
   return (
     <div className="space-y-6">

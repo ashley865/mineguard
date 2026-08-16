@@ -9,6 +9,7 @@ import { StatusBadge } from "../components/Badges";
 import Modal from "../components/Modal";
 import { buttonDanger, buttonPrimary, buttonSecondary, cardClass, inputClass, labelClass, selectClass } from "../components/ui";
 import DateField from "../components/DateField";
+import LoadError from "../components/LoadError";
 
 // The full catalog of sensor types a mine may ever need — surfaced both in the create form
 // and in the browsable Sensor Catalog reference tab below.
@@ -168,7 +169,7 @@ function SensorChart({ sensor, onClose }: { sensor: Sensor; onClose: () => void 
   const socket = useSocket();
 
   useEffect(() => {
-    api.get<SensorReading[]>(`/sensors/${sensor.id}/readings?limit=50`).then((res) => setReadings(res.data));
+    api.get<SensorReading[]>(`/sensors/${sensor.id}/readings?limit=50`).then((res) => setReadings(res.data)).catch(() => {});
   }, [sensor.id]);
 
   useEffect(() => {
@@ -245,15 +246,27 @@ function SensorCatalogTab({ onRequestType }: { onRequestType: (type: SensorType)
   const { t } = useTranslation();
   const [catalog, setCatalog] = useState<SensorCatalog>({});
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
+
+  async function load() {
+    setLoading(true);
+    setLoadError(false);
+    try {
+      const res = await api.get<SensorCatalog>("/sensors/catalog");
+      setCatalog(res.data);
+    } catch {
+      setLoadError(true);
+    } finally {
+      setLoading(false);
+    }
+  }
 
   useEffect(() => {
-    api.get<SensorCatalog>("/sensors/catalog").then((res) => {
-      setCatalog(res.data);
-      setLoading(false);
-    });
+    load();
   }, []);
 
   if (loading) return <div className="text-mine-300">{t("common.loading")}</div>;
+  if (loadError) return <LoadError onRetry={load} />;
 
   return (
     <div className="space-y-4">
@@ -307,6 +320,7 @@ export default function Sensors() {
   const [sensors, setSensors] = useState<Sensor[]>([]);
   const [zones, setZones] = useState<Zone[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
   const [sensorModal, setSensorModal] = useState<null | "create" | Sensor>(null);
   const [defaultType, setDefaultType] = useState<SensorType | undefined>(undefined);
   const [chartSensor, setChartSensor] = useState<Sensor | null>(null);
@@ -315,10 +329,16 @@ export default function Sensors() {
 
   async function load() {
     setLoading(true);
-    const [sensorsRes, zonesRes] = await Promise.all([api.get<Sensor[]>("/sensors"), api.get<Zone[]>("/zones")]);
-    setSensors(sensorsRes.data);
-    setZones(zonesRes.data);
-    setLoading(false);
+    setLoadError(false);
+    try {
+      const [sensorsRes, zonesRes] = await Promise.all([api.get<Sensor[]>("/sensors"), api.get<Zone[]>("/zones")]);
+      setSensors(sensorsRes.data);
+      setZones(zonesRes.data);
+    } catch {
+      setLoadError(true);
+    } finally {
+      setLoading(false);
+    }
   }
 
   useEffect(() => {
@@ -382,6 +402,7 @@ export default function Sensors() {
   }
 
   if (loading) return <div className="text-mine-300">{t("sensors.loading")}</div>;
+  if (loadError) return <LoadError onRetry={load} />;
 
   return (
     <div className="space-y-6">
