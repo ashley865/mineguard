@@ -2414,7 +2414,9 @@
     "payslipLinked": "Betaalstaat",
     "purchaseOrderLinked": "Aankooporder",
     "maintenanceLinked": "Onderhoud",
-    "contractLinked": "Kontraktoekenning"
+    "contractLinked": "Kontraktoekenning",
+    "allPayeeTypes": "Almal",
+    "payeeTypeAutoSyncedHint": "Hierdie betaalde party se tipe word outomaties bestuur en kan nie hier verander word nie."
   },
   "executiveRequests": {
     "nav": "Versoeke",
@@ -3736,6 +3738,10 @@
     "humidity": "Humiditeit",
     "mineralPrices": "Mineraalpryse",
     "asOf": "vanaf {{date}}",
-    "didYouKnow": "Het Jy Geweet?"
+    "didYouKnow": "Het Jy Geweet?",
+    "industryNews": "Bedryfsnuus",
+    "unknownSource": "Onbekende bron",
+    "noSummary": "Nog geen opsomming beskikbaar vir hierdie artikel nie.",
+    "readFullArticle": "Lees volledige artikel"
   }
 }

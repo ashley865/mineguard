@@ -2677,7 +2677,9 @@
       "CONTRACTOR": "Contractor",
       "EMPLOYEE": "Employee",
       "SUPPLIER": "Supplier"
-    }
+    },
+    "allPayeeTypes": "All",
+    "payeeTypeAutoSyncedHint": "This payee's type is managed automatically and can't be changed here."
   },
   "statutoryAppointments": {
     "nav": "Statutory Appointments",
@@ -3735,6 +3737,10 @@
     "humidity": "Humidity",
     "mineralPrices": "Mineral Prices",
     "asOf": "as of {{date}}",
-    "didYouKnow": "Did You Know?"
+    "didYouKnow": "Did You Know?",
+    "industryNews": "Industry News",
+    "unknownSource": "Unknown source",
+    "noSummary": "No summary available for this article yet.",
+    "readFullArticle": "Read full article"
   }
 }

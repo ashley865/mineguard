@@ -2414,7 +2414,9 @@
     "payslipLinked": "Paie",
     "purchaseOrderLinked": "Bon de Commande",
     "maintenanceLinked": "Maintenance",
-    "contractLinked": "Attribution de Contrat"
+    "contractLinked": "Attribution de Contrat",
+    "allPayeeTypes": "Tous",
+    "payeeTypeAutoSyncedHint": "Le type de ce bénéficiaire est géré automatiquement et ne peut pas être modifié ici."
   },
   "executiveRequests": {
     "nav": "Demandes",
@@ -3736,6 +3738,10 @@
     "humidity": "Humidité",
     "mineralPrices": "Prix des Minéraux",
     "asOf": "au {{date}}",
-    "didYouKnow": "Le Saviez-Vous ?"
+    "didYouKnow": "Le Saviez-Vous ?",
+    "industryNews": "Actualités du Secteur",
+    "unknownSource": "Source inconnue",
+    "noSummary": "Aucun résumé disponible pour cet article pour le moment.",
+    "readFullArticle": "Lire l'article complet"
   }
 }

@@ -12,6 +12,8 @@ import DateField from "../components/DateField";
 import FileDropzone from "../components/FileDropzone";
 import DataTable, { DataTableColumn } from "../components/DataTable";
 import { AuditHistoryButton } from "../components/AuditHistoryPanel";
+import SummaryCards from "../components/SummaryCards";
+import LoadError from "../components/LoadError";
 
 const CHART_TOOLTIP_STYLE = { background: "#fafafa", border: "1px solid #e5e5e5", fontSize: 11 };
 const CHART_TICK_STYLE = { fontSize: 9, fill: "#52525b" };
@@ -32,6 +34,11 @@ const expenseCategories: ExpenseCategory[] = [
 ];
 const paymentMethods: PaymentMethod[] = ["EFT", "CASH", "CHEQUE", "CARD", "OTHER"];
 const payeeTypes: PayeeType[] = ["COMPANY", "INDIVIDUAL", "BUYER", "CONTRACTOR"];
+// Includes the two auto-synced types (EMPLOYEE from Worker/Executive records, SUPPLIER
+// from the procurement Supplier register) — not offered as manual-creation options above,
+// but needed here so the payee list can be filtered/grouped by every type that actually
+// exists, not just the manually-creatable ones.
+const ALL_PAYEE_TYPES: PayeeType[] = ["COMPANY", "INDIVIDUAL", "BUYER", "CONTRACTOR", "EMPLOYEE", "SUPPLIER"];
 
 type TabKey = "expenses" | "payees";
 const TAB_KEYS: TabKey[] = ["expenses", "payees"];
@@ -176,12 +183,18 @@ function PayeeForm({ initial, onSubmit, onCancel }: {
   const [notes, setNotes] = useState(initial?.notes ?? "");
   const [saving, setSaving] = useState(false);
 
+  const isAutoSynced = initial?.payeeType === "EMPLOYEE" || initial?.payeeType === "SUPPLIER";
+
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
     setSaving(true);
     try {
       await onSubmit({
-        payeeType,
+        // Auto-synced payees (linked to a Worker/Executive or a Supplier record) have
+        // their type and name managed automatically — omit payeeType entirely on save
+        // rather than resubmitting a value the create-only dropdown below can't represent,
+        // which would otherwise either fail validation (SUPPLIER) or silently mismatch.
+        payeeType: isAutoSynced ? undefined : payeeType,
         name,
         registrationNumber: registrationNumber || undefined,
         taxNumber: taxNumber || undefined,
@@ -204,9 +217,15 @@ function PayeeForm({ initial, onSubmit, onCancel }: {
       <div className="grid grid-cols-2 gap-3">
         <div>
           <label className={labelClass}>{t("expenses.payeeType")}</label>
-          <select className={selectClass} value={payeeType} onChange={(e) => setPayeeType(e.target.value as PayeeType)}>
-            {payeeTypes.map((p) => <option key={p} value={p}>{t(`expenses.payeeTypes.${p}`)}</option>)}
-          </select>
+          {isAutoSynced ? (
+            <div className={`${inputClass} bg-mine-800/40 text-mine-300 cursor-not-allowed`} title={t("expenses.payeeTypeAutoSyncedHint") ?? ""}>
+              {t(`expenses.payeeTypes.${initial!.payeeType}`)}
+            </div>
+          ) : (
+            <select className={selectClass} value={payeeType} onChange={(e) => setPayeeType(e.target.value as PayeeType)}>
+              {payeeTypes.map((p) => <option key={p} value={p}>{t(`expenses.payeeTypes.${p}`)}</option>)}
+            </select>
+          )}
         </div>
         <div>
           <label className={labelClass}>{t("expenses.payeeName")}</label>
@@ -284,24 +303,32 @@ export default function Expenses() {
   const [payees, setPayees] = useState<Payee[]>([]);
   const [sites, setSites] = useState<Site[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
   const [exportingPdf, setExportingPdf] = useState(false);
   const [expenseModal, setExpenseModal] = useState(false);
   const [payeeModal, setPayeeModal] = useState<null | "create" | Payee>(null);
   const [costSummary, setCostSummary] = useState<CostSummary | null>(null);
+  const [payeeTypeFilter, setPayeeTypeFilter] = useState<PayeeType | "ALL">("ALL");
 
   async function load() {
     setLoading(true);
-    const [e, p, s, c] = await Promise.all([
-      api.get<Expense[]>("/expenses"),
-      api.get<Payee[]>("/payees"),
-      api.get<Site[]>("/sites"),
-      api.get<CostSummary>("/expenses/cost-summary", { params: { months: 6 } }),
-    ]);
-    setExpenses(e.data);
-    setPayees(p.data);
-    setSites(s.data);
-    setCostSummary(c.data);
-    setLoading(false);
+    setLoadError(false);
+    try {
+      const [e, p, s, c] = await Promise.all([
+        api.get<Expense[]>("/expenses"),
+        api.get<Payee[]>("/payees"),
+        api.get<Site[]>("/sites"),
+        api.get<CostSummary>("/expenses/cost-summary", { params: { months: 6 } }),
+      ]);
+      setExpenses(e.data);
+      setPayees(p.data);
+      setSites(s.data);
+      setCostSummary(c.data);
+    } catch {
+      setLoadError(true);
+    } finally {
+      setLoading(false);
+    }
   }
 
   useEffect(() => {
@@ -366,6 +393,7 @@ export default function Expenses() {
   const totalExpenses = expenses.reduce((sum, e) => sum + (e.status === "PAID" ? e.amount : 0), 0);
 
   if (loading) return <div className="text-mine-300">{t("common.loading")}</div>;
+  if (loadError) return <LoadError onRetry={load} />;
 
   return (
     <div className="space-y-6">
@@ -550,7 +578,35 @@ export default function Expenses() {
       )}
 
       {tab === "payees" && (
-        <DataTable
+        <>
+          <SummaryCards
+            cards={ALL_PAYEE_TYPES.map((type) => ({
+              label: t(`expenses.payeeTypes.${type}`),
+              value: payees.filter((p) => p.payeeType === type).length,
+            }))}
+          />
+          <div className="flex gap-2 flex-wrap">
+            <button
+              className={payeeTypeFilter === "ALL" ? buttonPrimary : buttonSecondary}
+              onClick={() => setPayeeTypeFilter("ALL")}
+            >
+              {t("expenses.allPayeeTypes")} ({payees.length})
+            </button>
+            {ALL_PAYEE_TYPES.map((type) => {
+              const count = payees.filter((p) => p.payeeType === type).length;
+              if (count === 0) return null;
+              return (
+                <button
+                  key={type}
+                  className={payeeTypeFilter === type ? buttonPrimary : buttonSecondary}
+                  onClick={() => setPayeeTypeFilter(type)}
+                >
+                  {t(`expenses.payeeTypes.${type}`)} ({count})
+                </button>
+              );
+            })}
+          </div>
+          <DataTable
           columns={
             [
               { key: "name", header: t("expenses.payeeName"), render: (p) => <span className="font-medium">{p.name}</span>, sortValue: (p) => p.name },
@@ -560,7 +616,7 @@ export default function Expenses() {
               { key: "expenseCount", header: t("expenses.expenseCount"), render: (p) => p._count?.expenses ?? 0, sortValue: (p) => p._count?.expenses ?? 0 },
             ] as DataTableColumn<Payee>[]
           }
-          rows={payees}
+          rows={payeeTypeFilter === "ALL" ? payees : payees.filter((p) => p.payeeType === payeeTypeFilter)}
           rowKey={(p) => p.id}
           emptyMessage={t("expenses.noPayeesYet")}
           searchValue={(p) => `${p.name} ${p.contactEmail ?? ""}`}
@@ -574,7 +630,8 @@ export default function Expenses() {
               )}
             </div>
           )}
-        />
+          />
+        </>
       )}
 
       {expenseModal && (

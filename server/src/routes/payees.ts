@@ -7,7 +7,7 @@ import { requireMineId } from "../lib/mineScope";
 const router = Router();
 
 const payeeSchema = z.object({
-  payeeType: z.enum(["COMPANY", "INDIVIDUAL", "BUYER", "CONTRACTOR", "EMPLOYEE"]).optional(),
+  payeeType: z.enum(["COMPANY", "INDIVIDUAL", "BUYER", "CONTRACTOR", "EMPLOYEE", "SUPPLIER"]).optional(),
   name: z.string().min(1),
   registrationNumber: z.string().optional(),
   taxNumber: z.string().optional(),

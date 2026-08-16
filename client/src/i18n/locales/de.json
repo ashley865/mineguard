@@ -2414,7 +2414,9 @@
     "payslipLinked": "Gehaltsabrechnung",
     "purchaseOrderLinked": "Bestellung",
     "maintenanceLinked": "Wartung",
-    "contractLinked": "Vertragsvergabe"
+    "contractLinked": "Vertragsvergabe",
+    "allPayeeTypes": "Alle",
+    "payeeTypeAutoSyncedHint": "Der Typ dieses Zahlungsempfängers wird automatisch verwaltet und kann hier nicht geändert werden."
   },
   "executiveRequests": {
     "nav": "Anfragen",
@@ -3736,6 +3738,10 @@
     "humidity": "Luftfeuchtigkeit",
     "mineralPrices": "Mineralpreise",
     "asOf": "Stand {{date}}",
-    "didYouKnow": "Wussten Sie Schon?"
+    "didYouKnow": "Wussten Sie Schon?",
+    "industryNews": "Branchennachrichten",
+    "unknownSource": "Unbekannte Quelle",
+    "noSummary": "Für diesen Artikel ist noch keine Zusammenfassung verfügbar.",
+    "readFullArticle": "Vollständigen Artikel lesen"
   }
 }

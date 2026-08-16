@@ -2414,7 +2414,9 @@
     "payslipLinked": "Nómina",
     "purchaseOrderLinked": "Orden de Compra",
     "maintenanceLinked": "Mantenimiento",
-    "contractLinked": "Adjudicación de Contrato"
+    "contractLinked": "Adjudicación de Contrato",
+    "allPayeeTypes": "Todos",
+    "payeeTypeAutoSyncedHint": "El tipo de este beneficiario se gestiona automáticamente y no se puede cambiar aquí."
   },
   "executiveRequests": {
     "nav": "Solicitudes",
@@ -3736,6 +3738,10 @@
     "humidity": "Humedad",
     "mineralPrices": "Precios de Minerales",
     "asOf": "al {{date}}",
-    "didYouKnow": "¿Sabías Que?"
+    "didYouKnow": "¿Sabías Que?",
+    "industryNews": "Noticias del Sector",
+    "unknownSource": "Fuente desconocida",
+    "noSummary": "Aún no hay resumen disponible para este artículo.",
+    "readFullArticle": "Leer artículo completo"
   }
 }

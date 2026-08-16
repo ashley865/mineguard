@@ -1,4 +1,5 @@
 import { Router } from "express";
+import { XMLParser } from "fast-xml-parser";
 import { prisma } from "../prisma";
 import { requireAuth } from "../middleware/auth";
 import { requireMineId } from "../lib/mineScope";
@@ -26,10 +27,31 @@ interface CacheEntry<T> {
 
 const WEATHER_TTL_MS = 20 * 60 * 1000;
 const PRICE_TTL_MS = 15 * 60 * 1000;
+const FX_TTL_MS = 60 * 60 * 1000;
+const NEWS_TTL_MS = 30 * 60 * 1000;
 
 const geocodeCache = new Map<string, { lat: number; lon: number } | null>();
 const weatherCache = new Map<string, CacheEntry<SiteWeather>>();
 let priceCache: CacheEntry<MineralPricesPayload> | null = null;
+let fxCache: CacheEntry<number | null> | null = null;
+let newsCache: CacheEntry<IndustryNewsPayload> | null = null;
+
+// Free, no-key exchange-rate source — daily-refreshed reference rates, which is more than
+// enough freshness for converting a commodity price snapshot into ZAR alongside USD.
+async function fetchUsdToZarRate(): Promise<number | null> {
+  if (fxCache && fxCache.expiresAt > Date.now()) return fxCache.data;
+  try {
+    const res = await fetch("https://open.er-api.com/v6/latest/USD");
+    if (!res.ok) return null;
+    const data: any = await res.json();
+    const rate = data?.rates?.ZAR;
+    const result = typeof rate === "number" ? rate : null;
+    fxCache = { data: result, expiresAt: Date.now() + FX_TTL_MS };
+    return result;
+  } catch {
+    return null;
+  }
+}
 
 async function geocodeLocation(location: string): Promise<{ lat: number; lon: number } | null> {
   if (geocodeCache.has(location)) return geocodeCache.get(location)!;
@@ -159,6 +181,7 @@ interface MetalPrice {
   label: string;
   unit: string;
   price: number;
+  priceZar: number | null;
   previousClose: number | null;
   changePercent: number;
   currency: string | null;
@@ -167,6 +190,7 @@ interface MetalPrice {
 interface MineralPricesPayload {
   asOf: string;
   prices: MetalPrice[];
+  fxRateUsdZar: number | null;
   insight: string | null;
   disclaimer: string | null;
 }
@@ -226,27 +250,39 @@ router.get("/mineral-prices", async (_req, res) => {
   if (priceCache && priceCache.expiresAt > Date.now()) {
     return res.json(priceCache.data);
   }
-  const results = await Promise.all(
-    METAL_SYMBOLS.map(async (m): Promise<MetalPrice | null> => {
-      const quote = await fetchYahooQuote(m.symbol);
-      if (!quote) return null;
-      const changePercent = quote.previousClose ? ((quote.price - quote.previousClose) / quote.previousClose) * 100 : 0;
-      return {
-        key: m.key,
-        label: m.label,
-        unit: m.unit,
-        price: quote.price,
-        previousClose: quote.previousClose,
-        changePercent: Math.round(changePercent * 100) / 100,
-        currency: quote.currency,
-      };
-    })
-  );
-  const prices = results.filter((r): r is MetalPrice => r !== null);
+  const [results, fxRateUsdZar] = await Promise.all([
+    Promise.all(
+      METAL_SYMBOLS.map(async (m): Promise<Omit<MetalPrice, "priceZar"> | null> => {
+        const quote = await fetchYahooQuote(m.symbol);
+        if (!quote) return null;
+        const changePercent = quote.previousClose ? ((quote.price - quote.previousClose) / quote.previousClose) * 100 : 0;
+        return {
+          key: m.key,
+          label: m.label,
+          unit: m.unit,
+          price: quote.price,
+          previousClose: quote.previousClose,
+          changePercent: Math.round(changePercent * 100) / 100,
+          currency: quote.currency,
+        };
+      })
+    ),
+    fetchUsdToZarRate(),
+  ]);
+  // The Yahoo futures quotes are consistently USD in practice — only convert when the
+  // source actually says so, rather than assuming, so a currency change upstream can't
+  // silently produce a wrong ZAR figure.
+  const prices: MetalPrice[] = results
+    .filter((r): r is Omit<MetalPrice, "priceZar"> => r !== null)
+    .map((p) => ({
+      ...p,
+      priceZar: fxRateUsdZar && p.currency === "USD" ? Math.round(p.price * fxRateUsdZar * 100) / 100 : null,
+    }));
   const insight = await generatePriceInsight(prices);
   const payload: MineralPricesPayload = {
     asOf: new Date().toISOString(),
     prices,
+    fxRateUsdZar,
     insight,
     disclaimer: insight ? PRICE_INSIGHT_DISCLAIMER : null,
   };
@@ -254,6 +290,119 @@ router.get("/mineral-prices", async (_req, res) => {
   // concurrent dashboard load to hammer it in lockstep — the client already treats an
   // empty list as "no data available" rather than an error.
   priceCache = { data: payload, expiresAt: Date.now() + PRICE_TTL_MS };
+  res.json(payload);
+});
+
+// ---------------------------------------------------------------------------
+// Industry news — latest South African mining/government-regulatory headlines via
+// Google News' public RSS search (free, no API key; explicitly a public syndication
+// feature rather than scraping). Not scoped to a mine. Each headline gets an optional
+// AI-generated summary, expanded once per NEWS_TTL_MS window (not per click) from the
+// title + RSS snippet only — never the full article, which isn't fetched at all.
+// ---------------------------------------------------------------------------
+
+interface IndustryNewsItem {
+  title: string;
+  link: string;
+  source: string | null;
+  publishedAt: string | null;
+  snippet: string | null;
+  summary: string | null;
+}
+
+interface IndustryNewsPayload {
+  items: IndustryNewsItem[];
+  disclaimer: string | null;
+}
+
+const NEWS_RSS_URL =
+  "https://news.google.com/rss/search?q=south%20africa%20mining%20OR%20%22department%20of%20mineral%20resources%22%20OR%20MHSA%20mining&hl=en-ZA&gl=ZA&ceid=ZA:en";
+const NEWS_ITEM_LIMIT = 8;
+
+const NEWS_SUMMARY_DISCLAIMER =
+  "Summaries are AI-generated from the headline and snippet provided by the news source only — not the full " +
+  "article — and may be incomplete or miss context. Please read the original article before relying on this.";
+
+async function fetchIndustryNewsRaw(): Promise<IndustryNewsItem[]> {
+  try {
+    const res = await fetch(NEWS_RSS_URL, { headers: { "User-Agent": "Mozilla/5.0 (compatible; MineGuardBot/1.0)" } });
+    if (!res.ok) return [];
+    const xml = await res.text();
+    const parser = new XMLParser({ ignoreAttributes: false });
+    const data = parser.parse(xml);
+    const rawItems = data?.rss?.channel?.item;
+    const rawList: any[] = Array.isArray(rawItems) ? rawItems : rawItems ? [rawItems] : [];
+
+    return rawList
+      .slice(0, NEWS_ITEM_LIMIT)
+      .map((item): IndustryNewsItem => {
+        const rawTitle = typeof item.title === "string" ? item.title : String(item.title ?? "");
+        // Google News formats titles as "Headline - Source" — split that out for a clean
+        // source label rather than showing the source name twice.
+        const dashIndex = rawTitle.lastIndexOf(" - ");
+        const sourceTag = typeof item.source === "object" ? item.source?.["#text"] : item.source;
+        return {
+          title: dashIndex > 0 ? rawTitle.slice(0, dashIndex) : rawTitle,
+          link: typeof item.link === "string" ? item.link : "",
+          source: (typeof sourceTag === "string" && sourceTag) || (dashIndex > 0 ? rawTitle.slice(dashIndex + 3) : null),
+          publishedAt: typeof item.pubDate === "string" ? item.pubDate : null,
+          snippet: typeof item.description === "string" ? item.description.replace(/<[^>]+>/g, "").trim() || null : null,
+          summary: null,
+        };
+      })
+      .filter((i) => i.title && i.link);
+  } catch {
+    return [];
+  }
+}
+
+// One AI call per cache window covering every headline at once (not one call per item, and
+// never a click-triggered call) — cheap regardless of how many users open the news panel.
+async function generateNewsSummaries(items: IndustryNewsItem[]): Promise<IndustryNewsItem[]> {
+  if (!isAiConfigured() || items.length === 0) return items;
+  try {
+    const messages: AiMessage[] = [
+      {
+        role: "system",
+        content:
+          `You are the Mine Guard AI Assistant. For each news item below (identified by its 0-based index), write a ` +
+          `2-3 sentence plain-language summary of what the headline and snippet suggest the article covers. Base it ` +
+          `ONLY on the title and snippet given — never invent names, figures, or details not present in them. If the ` +
+          `snippet is too thin to add anything beyond the headline, say that plainly rather than guessing. Reply with ` +
+          `ONLY a JSON object mapping each index (as a string key) to its summary string, no markdown, no extra keys.` +
+          GUARDRAIL,
+      },
+      {
+        role: "user",
+        content: `News items (JSON): ${JSON.stringify(items.map((i, idx) => ({ index: idx, title: i.title, snippet: i.snippet })))}`,
+      },
+    ];
+    const raw = await aiChatComplete(messages);
+    const cleaned = raw
+      .trim()
+      .replace(/^```(?:json)?\s*/i, "")
+      .replace(/```\s*$/, "");
+    const parsed = JSON.parse(cleaned);
+    return items.map((item, idx) => ({
+      ...item,
+      summary: typeof parsed[String(idx)] === "string" ? parsed[String(idx)].slice(0, 500) : null,
+    }));
+  } catch {
+    return items;
+  }
+}
+
+router.get("/industry-news", async (_req, res) => {
+  if (newsCache && newsCache.expiresAt > Date.now()) {
+    return res.json(newsCache.data);
+  }
+  const rawItems = await fetchIndustryNewsRaw();
+  const items = await generateNewsSummaries(rawItems);
+  const payload: IndustryNewsPayload = {
+    items,
+    disclaimer: items.some((i) => i.summary) ? NEWS_SUMMARY_DISCLAIMER : null,
+  };
+  newsCache = { data: payload, expiresAt: Date.now() + NEWS_TTL_MS };
   res.json(payload);
 });
 

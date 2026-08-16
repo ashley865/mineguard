@@ -3330,6 +3330,7 @@ export interface MetalPrice {
   label: string;
   unit: string;
   price: number;
+  priceZar: number | null;
   previousClose: number | null;
   changePercent: number;
   currency: string | null;
@@ -3337,10 +3338,24 @@ export interface MetalPrice {
 export interface MineralPricesResponse {
   asOf: string;
   prices: MetalPrice[];
+  fxRateUsdZar: number | null;
   insight: string | null;
   disclaimer: string | null;
 }
 
 export interface DidYouKnowResponse {
   fact: string;
+}
+
+export interface IndustryNewsItem {
+  title: string;
+  link: string;
+  source: string | null;
+  publishedAt: string | null;
+  snippet: string | null;
+  summary: string | null;
+}
+export interface IndustryNewsResponse {
+  items: IndustryNewsItem[];
+  disclaimer: string | null;
 }
