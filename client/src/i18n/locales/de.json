@@ -3763,5 +3763,9 @@
     "unknownSource": "Unbekannte Quelle",
     "noSummary": "Für diesen Artikel ist noch keine Zusammenfassung verfügbar.",
     "readFullArticle": "Vollständigen Artikel lesen"
+  },
+  "financial": {
+    "nav": "Finanzielle Leistung",
+    "subtitle": "Erträge, Ausgaben und Marge über alle Ihre Standorte"
   }
 }

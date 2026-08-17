@@ -39,6 +39,7 @@ export default function Layout() {
   const canSeeExecutiveOps = isAdmin || isExecutiveWithSites;
   const canUseScanner = user?.role === "ADMIN" || user?.role === "SUPERVISOR" || user?.role === "EXECUTIVE";
   const canMessage = user?.role === "ADMIN" || user?.role === "EXECUTIVE";
+  const canSeeFinancials = isAdmin || ["GENERAL_MANAGER", "CFO", "COO"].includes(user?.title ?? "");
 
   const pinnedItems = [
     user?.role === "EXECUTIVE"
@@ -113,6 +114,7 @@ export default function Layout() {
       label: t("nav.sectionReports"),
       items: [
         { to: "/reporting", label: t("reporting.nav") },
+        ...(canSeeFinancials ? [{ to: "/financial", label: t("financial.nav") }] : []),
         { to: "/documents", label: t("documents.nav") },
         { to: "/community", label: t("community.nav") },
       ],

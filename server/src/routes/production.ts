@@ -1,11 +1,26 @@
-import { Router } from "express";
+import { Router, Request } from "express";
 import { z } from "zod";
+import { ExecutiveTitle } from "@prisma/client";
 import { prisma } from "../prisma";
 import { requireAuth, requireRole } from "../middleware/auth";
 import { requireMineId } from "../lib/mineScope";
 import { mineralTypeEnum } from "../lib/minerals";
 
 const router = Router();
+
+// Financial performance (earnings/expenses/margin) is sensitive commercial data, so it's
+// restricted to the same GM/CFO/COO + owner audience as the standalone Financial tab.
+const FINANCIAL_AUDIENCE: ExecutiveTitle[] = ["GENERAL_MANAGER", "CFO", "COO"];
+
+async function getRequesterTitle(req: Request): Promise<ExecutiveTitle | null> {
+  if (req.auth!.role !== "EXECUTIVE") return null;
+  const me = await prisma.user.findUnique({ where: { id: req.auth!.userId }, select: { title: true } });
+  return me?.title ?? null;
+}
+
+function inAudience(role: string, title: ExecutiveTitle | null, audience: ExecutiveTitle[]): boolean {
+  return role === "ADMIN" || (role === "EXECUTIVE" && !!title && audience.includes(title));
+}
 
 const ANALYTICS_PERIODS = ["daily", "weekly", "monthly"] as const;
 type AnalyticsPeriod = (typeof ANALYTICS_PERIODS)[number];
@@ -120,6 +135,9 @@ router.delete("/:id", requireRole("ADMIN", "EXECUTIVE"), async (req, res) => {
 router.get("/financial-summary", async (req, res) => {
   const mineId = requireMineId(req, res);
   if (!mineId) return;
+  if (!inAudience(req.auth!.role, await getRequesterTitle(req), FINANCIAL_AUDIENCE)) {
+    return res.status(403).json({ error: "Insufficient permissions" });
+  }
   const siteId = req.query.siteId as string | undefined;
   const months = Math.min(Math.max(Number(req.query.months) || 6, 1), 24);
 

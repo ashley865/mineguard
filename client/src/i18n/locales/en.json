@@ -2111,6 +2111,10 @@
     "earnings": "Earnings",
     "expenses": "Expenses"
   },
+  "financial": {
+    "nav": "Financial Performance",
+    "subtitle": "Earnings, expenses and margin across your sites"
+  },
   "maintenance": {
     "nav": "Maintenance Scheduling",
     "subtitle": "Planned, preventive, corrective, and emergency maintenance for equipment",

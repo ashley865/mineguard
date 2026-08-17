@@ -3763,5 +3763,9 @@
     "unknownSource": "Fuente desconocida",
     "noSummary": "Aún no hay resumen disponible para este artículo.",
     "readFullArticle": "Leer artículo completo"
+  },
+  "financial": {
+    "nav": "Rendimiento Financiero",
+    "subtitle": "Ganancias, gastos y margen en todos sus sitios"
   }
 }

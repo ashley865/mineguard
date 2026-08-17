@@ -39,6 +39,7 @@ import BuyerRegister from "./pages/BuyerRegister";
 import Tenders from "./pages/Tenders";
 import TenderBoard from "./pages/TenderBoard";
 import ProductionTracking from "./pages/ProductionTracking";
+import FinancialPerformance from "./pages/FinancialPerformance";
 import MaintenanceScheduling from "./pages/MaintenanceScheduling";
 import InventoryManagement from "./pages/InventoryManagement";
 import SafetyObservations from "./pages/SafetyObservations";
@@ -108,6 +109,7 @@ export default function App() {
         <Route path="/marketplace" element={<ModuleRoute path="/marketplace"><Marketplace /></ModuleRoute>} />
         <Route path="/tenders" element={<ModuleRoute path="/tenders"><Tenders /></ModuleRoute>} />
         <Route path="/production" element={<ModuleRoute path="/production"><ProductionTracking /></ModuleRoute>} />
+        <Route path="/financial" element={<FinancialPerformance />} />
         <Route path="/maintenance" element={<ModuleRoute path="/maintenance"><MaintenanceScheduling /></ModuleRoute>} />
         <Route path="/inventory" element={<ModuleRoute path="/inventory"><InventoryManagement /></ModuleRoute>} />
         <Route path="/safety-observations" element={<ModuleRoute path="/safety-observations"><SafetyObservations /></ModuleRoute>} />
