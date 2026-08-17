@@ -476,6 +476,14 @@
       "WINCH": "Cabrestante",
       "CRANE": "Grúa",
       "OTHER": "Otro"
+    },
+    "aiAnalysis": {
+      "button": "Análisis de Patrones de Falla IA",
+      "title": "Análisis IA de Patrones de Falla del Equipo",
+      "patterns": "Patrones Recurrentes",
+      "whatToMonitor": "Qué Monitorear",
+      "none": "No se encontró un patrón claro en el historial de mantenimiento.",
+      "noHistory": "Aún no hay historial de mantenimiento registrado para este equipo — nada que analizar."
     }
   },
   "incidents": {
@@ -497,7 +505,15 @@
     "noIncidentsReported": "No se han reportado incidentes.",
     "reportedBy": "reportado por {{name}}",
     "reportIncidentTitle": "Reportar Incidente",
-    "loading": "Cargando incidentes…"
+    "loading": "Cargando incidentes…",
+    "aiInvestigation": {
+      "button": "Asistente de Investigación IA",
+      "title": "Asistente IA de Investigación de Incidentes",
+      "likelyCauses": "Posibles Factores Contribuyentes",
+      "followUpQuestions": "Preguntas de Seguimiento",
+      "similarPast": "Incidentes Similares Anteriores",
+      "none": "No se identificaron factores contribuyentes claros a partir de los datos disponibles."
+    }
   },
   "alerts": {
     "title": "Alertas",
@@ -3897,5 +3913,33 @@
     },
     "noneYet": "Aún no se han registrado presentaciones regulatorias.",
     "confirmDelete": "¿Eliminar esta presentación?"
+  },
+  "aiDailyBriefing": {
+    "nav": "Resumen Diario IA",
+    "subtitle": "Un resumen matutino multidepartamental, generado una vez al día",
+    "refresh": "Regenerar",
+    "topPriority": "Prioridad Principal de Hoy",
+    "generatedAt": "Generado {{date}}",
+    "cached": "en caché",
+    "noneYet": "Nada que informar todavía."
+  },
+  "narrativeRiskScanner": {
+    "nav": "Escáner de Riesgo Narrativo",
+    "subtitle": "Señala reportes de peligro e incidentes cuya descripción escrita no coincide con la severidad seleccionada",
+    "rescan": "Escanear de Nuevo",
+    "scannedCount": "Se escanearon {{count}} reportes recientes",
+    "types": {
+      "HAZARD_REPORT": "Reporte de Peligro",
+      "INCIDENT": "Incidente"
+    },
+    "reported": "Reportado",
+    "suggested": "IA sugiere",
+    "noneFlagged": "Nada señalado — los reportes recientes son consistentes con la severidad seleccionada."
+  },
+  "safetyAssistant": {
+    "nav": "Asistente de Seguridad",
+    "subtitle": "Pregunte sobre procedimientos de seguridad, reporte de peligros y permisos, limitado a los datos de seguridad de su sitio",
+    "chatHint": "Pregunte sobre procedimientos de seguridad, cómo reportar un peligro, requisitos de permiso de trabajo, o cualquier otra cosa relacionada con la seguridad.",
+    "inputPlaceholder": "Haga una pregunta de seguridad…"
   }
 }

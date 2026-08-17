@@ -40,6 +40,9 @@ export default function Layout() {
   const canUseScanner = user?.role === "ADMIN" || user?.role === "SUPERVISOR" || user?.role === "EXECUTIVE";
   const canMessage = user?.role === "ADMIN" || user?.role === "EXECUTIVE";
   const canSeeFinancials = isAdmin || ["GENERAL_MANAGER", "CFO", "COO"].includes(user?.title ?? "");
+  const canSeeDailyBriefing = isAdmin || ["GENERAL_MANAGER", "COO"].includes(user?.title ?? "");
+  const canSeeNarrativeScan = isAdmin || ["SAFETY_MANAGER", "COMPLIANCE_OFFICER", "GENERAL_MANAGER"].includes(user?.title ?? "");
+  const canSeeSafetyAssistant = isAdmin || user?.role === "SUPERVISOR" || user?.role === "EXECUTIVE";
 
   const pinnedItems = [
     user?.role === "EXECUTIVE"
@@ -81,6 +84,8 @@ export default function Layout() {
         { to: "/winders", label: t("winders.nav") },
         { to: "/toolbox-talks", label: t("toolboxTalks.nav") },
         { to: "/regulatory-submissions", label: t("regulatorySubmissions.nav") },
+        ...(canSeeNarrativeScan ? [{ to: "/narrative-risk-scanner", label: t("narrativeRiskScanner.nav") }] : []),
+        ...(canSeeSafetyAssistant ? [{ to: "/safety-assistant", label: t("safetyAssistant.nav") }] : []),
       ],
     },
     {
@@ -120,6 +125,7 @@ export default function Layout() {
       items: [
         { to: "/reporting", label: t("reporting.nav") },
         ...(canSeeFinancials ? [{ to: "/financial", label: t("financial.nav") }] : []),
+        ...(canSeeDailyBriefing ? [{ to: "/ai-daily-briefing", label: t("aiDailyBriefing.nav") }] : []),
         { to: "/documents", label: t("documents.nav") },
         { to: "/community", label: t("community.nav") },
       ],

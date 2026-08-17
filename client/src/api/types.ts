@@ -3488,3 +3488,61 @@ export interface RegulatorySubmission {
   createdBy?: { id: string; name: string } | null;
   createdAt: string;
 }
+
+// --- AI modules ---
+
+export interface AiDailyBriefingSection {
+  title: string;
+  bullets: string[];
+}
+
+export interface AiDailyBriefingResponse {
+  configured: boolean;
+  cached: boolean;
+  headline: string | null;
+  topPriority: string | null;
+  sections: AiDailyBriefingSection[];
+  generatedAt?: string;
+}
+
+export interface AiIncidentInvestigationResult {
+  likelyCauses: { cause: string; detail: string }[];
+  followUpQuestions: string[];
+  similarPastIncidents: string;
+}
+
+export interface AiIncidentInvestigationResponse {
+  configured: boolean;
+  result: AiIncidentInvestigationResult | null;
+  disclaimer: string;
+}
+
+export interface AiEquipmentAnalysisResult {
+  patterns: { pattern: string; detail: string }[];
+  whatToMonitor: string[];
+}
+
+export interface AiEquipmentAnalysisResponse {
+  configured: boolean;
+  result: AiEquipmentAnalysisResult | null;
+  disclaimer: string;
+  noHistory?: boolean;
+}
+
+export interface AiNarrativeFlaggedItem {
+  id: string;
+  type: "HAZARD_REPORT" | "INCIDENT";
+  site: string;
+  reportedSeverity: string;
+  description: string;
+  createdAt: string;
+  suggestedSeverity: string;
+  reasoning: string;
+}
+
+export interface AiNarrativeRiskScanResponse {
+  configured: boolean;
+  flagged: AiNarrativeFlaggedItem[];
+  scannedCount: number;
+  disclaimer: string;
+}

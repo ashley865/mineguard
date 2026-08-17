@@ -2,11 +2,77 @@ import { FormEvent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { api } from "../api/client";
 import { useAuth } from "../context/AuthContext";
-import { AlertSeverity, Incident, IncidentStatus, Site, Zone } from "../api/types";
+import { AiIncidentInvestigationResponse, AlertSeverity, Incident, IncidentStatus, Site, Zone } from "../api/types";
 import { SeverityBadge, StatusBadge } from "../components/Badges";
 import Modal from "../components/Modal";
 import { buttonPrimary, buttonSecondary, cardClass, inputClass, labelClass, selectClass } from "../components/ui";
 import LoadError from "../components/LoadError";
+
+function IncidentInvestigationModal({ incidentId, onClose }: { incidentId: string; onClose: () => void }) {
+  const { t } = useTranslation();
+  const [data, setData] = useState<AiIncidentInvestigationResponse | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
+
+  async function load() {
+    setLoading(true);
+    setLoadError(false);
+    try {
+      const res = await api.post<AiIncidentInvestigationResponse>(`/ai/incident-investigation/${incidentId}`);
+      setData(res.data);
+    } catch {
+      setLoadError(true);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  useEffect(() => {
+    load();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  return (
+    <Modal title={t("incidents.aiInvestigation.title")} onClose={onClose}>
+      {loading && <div className="text-mine-300">{t("common.loading")}</div>}
+      {loadError && <LoadError onRetry={load} />}
+      {!loading && data && !data.configured && (
+        <div className="text-xs font-medium text-mine-300 bg-mine-800/60 border border-mine-700 rounded-md p-3">
+          {t("ai.notConfigured")}
+        </div>
+      )}
+      {!loading && data?.configured && data.result && (
+        <div className="space-y-4">
+          <div>
+            <h3 className="text-xs font-extrabold uppercase tracking-wide text-mine-300 mb-2">{t("incidents.aiInvestigation.likelyCauses")}</h3>
+            <ul className="space-y-2">
+              {data.result.likelyCauses.map((c, i) => (
+                <li key={i} className="text-sm">
+                  <span className="font-semibold">{c.cause}</span>
+                  <p className="text-xs text-mine-300 mt-0.5">{c.detail}</p>
+                </li>
+              ))}
+              {data.result.likelyCauses.length === 0 && <li className="text-xs text-mine-400">{t("incidents.aiInvestigation.none")}</li>}
+            </ul>
+          </div>
+          <div>
+            <h3 className="text-xs font-extrabold uppercase tracking-wide text-mine-300 mb-2">{t("incidents.aiInvestigation.followUpQuestions")}</h3>
+            <ul className="list-disc list-inside space-y-1 text-sm text-mine-200">
+              {data.result.followUpQuestions.map((q, i) => <li key={i}>{q}</li>)}
+            </ul>
+          </div>
+          {data.result.similarPastIncidents && (
+            <div>
+              <h3 className="text-xs font-extrabold uppercase tracking-wide text-mine-300 mb-2">{t("incidents.aiInvestigation.similarPast")}</h3>
+              <p className="text-sm text-mine-200">{data.result.similarPastIncidents}</p>
+            </div>
+          )}
+          <p className="text-[10px] text-mine-500 border-t border-mine-800 pt-2">{data.disclaimer}</p>
+        </div>
+      )}
+    </Modal>
+  );
+}
 
 function IncidentForm({ sites, zones, onSubmit, onCancel }: {
   sites: Site[];
@@ -87,6 +153,7 @@ export default function Incidents() {
   const [loadError, setLoadError] = useState(false);
   const [modal, setModal] = useState(false);
   const [reviewNotes, setReviewNotes] = useState<Record<string, string>>({});
+  const [investigatingId, setInvestigatingId] = useState<string | null>(null);
 
   async function load() {
     setLoading(true);
@@ -167,6 +234,9 @@ export default function Incidents() {
               </div>
               <div className="flex flex-col gap-2 shrink-0 items-end">
                 <div className="flex gap-2">
+                  <button className="text-xs font-bold text-hazard-600 hover:text-hazard-500 bg-hazard-500/10 hover:bg-hazard-500/20 rounded-full px-3 py-1 transition-colors" onClick={() => setInvestigatingId(incident.id)}>
+                    {t("incidents.aiInvestigation.button")}
+                  </button>
                   {incident.status === "OPEN" && (
                     <button className={buttonSecondary} onClick={() => setStatus(incident.id, "INVESTIGATING")}>
                       {t("incidents.investigate")}
@@ -207,6 +277,10 @@ export default function Incidents() {
         <Modal title={t("incidents.reportIncidentTitle")} onClose={() => setModal(false)}>
           <IncidentForm sites={sites} zones={zones} onSubmit={createIncident} onCancel={() => setModal(false)} />
         </Modal>
+      )}
+
+      {investigatingId && (
+        <IncidentInvestigationModal incidentId={investigatingId} onClose={() => setInvestigatingId(null)} />
       )}
     </div>
   );

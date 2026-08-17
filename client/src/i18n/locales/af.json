@@ -476,6 +476,14 @@
       "WINCH": "Windas",
       "CRANE": "Hyskraan",
       "OTHER": "Ander"
+    },
+    "aiAnalysis": {
+      "button": "KI-Falingspatroonontleding",
+      "title": "KI-ontleding van Toerusting-falingspatrone",
+      "patterns": "Herhalende Patrone",
+      "whatToMonitor": "Wat om Dop te Hou",
+      "none": "Geen duidelike patroon gevind in die onderhoudsgeskiedenis nie.",
+      "noHistory": "Nog geen onderhoudsgeskiedenis vir hierdie toerusting aangeteken nie — niks om te ontleed nie."
     }
   },
   "incidents": {
@@ -497,7 +505,15 @@
     "noIncidentsReported": "Geen voorvalle gerapporteer nie.",
     "reportedBy": "gerapporteer deur {{name}}",
     "reportIncidentTitle": "Rapporteer Voorval",
-    "loading": "Laai voorvalle tans…"
+    "loading": "Laai voorvalle tans…",
+    "aiInvestigation": {
+      "button": "KI-Ondersoekassistent",
+      "title": "KI-Voorvalondersoekassistent",
+      "likelyCauses": "Waarskynlike Bydraende Faktore",
+      "followUpQuestions": "Opvolgvrae om te Vra",
+      "similarPast": "Soortgelyke Vorige Voorvalle",
+      "none": "Geen duidelike bydraende faktore geïdentifiseer uit die beskikbare data nie."
+    }
   },
   "alerts": {
     "title": "Waarskuwings",
@@ -3897,5 +3913,33 @@
     },
     "noneYet": "Nog geen regulatoriese indienings aangeteken nie.",
     "confirmDelete": "Verwyder hierdie indiening?"
+  },
+  "aiDailyBriefing": {
+    "nav": "KI Daaglikse Verslag",
+    "subtitle": "'n Kruis-departementele oggendopsomming, een keer per dag gegenereer",
+    "refresh": "Herskep",
+    "topPriority": "Top Prioriteit Vandag",
+    "generatedAt": "Gegenereer {{date}}",
+    "cached": "gekas",
+    "noneYet": "Nog niks om te rapporteer nie."
+  },
+  "narrativeRiskScanner": {
+    "nav": "Narratief-risikoskandeerder",
+    "subtitle": "Merk gevaarverslae en voorvalle waarvan die geskrewe beskrywing nie ooreenstem met die gekose erns nie",
+    "rescan": "Skandeer Weer",
+    "scannedCount": "{{count}} onlangse verslae geskandeer",
+    "types": {
+      "HAZARD_REPORT": "Gevaarverslag",
+      "INCIDENT": "Voorval"
+    },
+    "reported": "Aangemeld",
+    "suggested": "KI stel voor",
+    "noneFlagged": "Niks gemerk nie — onlangse verslae stem ooreen met hul gekose erns."
+  },
+  "safetyAssistant": {
+    "nav": "Veiligheidassistent",
+    "subtitle": "Vra oor veiligheidsprosedures, gevaarrapportering en permitte — beperk tot u terrein se veiligheidsdata",
+    "chatHint": "Vra oor veiligheidsprosedures, hoe om 'n gevaar aan te meld, permit-om-te-werk vereistes, of enigiets anders veiligheidsverwant.",
+    "inputPlaceholder": "Vra 'n veiligheidsvraag…"
   }
 }

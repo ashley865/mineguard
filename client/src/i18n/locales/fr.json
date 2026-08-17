@@ -476,6 +476,14 @@
       "WINCH": "Treuil",
       "CRANE": "Grue",
       "OTHER": "Autre"
+    },
+    "aiAnalysis": {
+      "button": "Analyse IA des Pannes",
+      "title": "Analyse IA des Schémas de Panne d'Équipement",
+      "patterns": "Schémas Récurrents",
+      "whatToMonitor": "Points à Surveiller",
+      "none": "Aucun schéma clair trouvé dans l'historique de maintenance.",
+      "noHistory": "Aucun historique de maintenance enregistré pour cet équipement — rien à analyser."
     }
   },
   "incidents": {
@@ -497,7 +505,15 @@
     "noIncidentsReported": "Aucun incident signalé.",
     "reportedBy": "signalé par {{name}}",
     "reportIncidentTitle": "Signaler un incident",
-    "loading": "Chargement des incidents…"
+    "loading": "Chargement des incidents…",
+    "aiInvestigation": {
+      "button": "Assistant d'Enquête IA",
+      "title": "Assistant IA d'Enquête sur Incident",
+      "likelyCauses": "Facteurs Contributifs Probables",
+      "followUpQuestions": "Questions de Suivi à Poser",
+      "similarPast": "Incidents Similaires Passés",
+      "none": "Aucun facteur contributif clair identifié à partir des données disponibles."
+    }
   },
   "alerts": {
     "title": "Alertes",
@@ -3897,5 +3913,33 @@
     },
     "noneYet": "Aucune soumission réglementaire enregistrée pour l'instant.",
     "confirmDelete": "Supprimer cette soumission ?"
+  },
+  "aiDailyBriefing": {
+    "nav": "Briefing Quotidien IA",
+    "subtitle": "Un résumé matinal inter-départements, généré une fois par jour",
+    "refresh": "Régénérer",
+    "topPriority": "Priorité Principale du Jour",
+    "generatedAt": "Généré {{date}}",
+    "cached": "en cache",
+    "noneYet": "Rien à signaler pour l'instant."
+  },
+  "narrativeRiskScanner": {
+    "nav": "Analyseur de Risque Narratif",
+    "subtitle": "Signale les rapports de danger et incidents dont la description écrite ne correspond pas à la gravité sélectionnée",
+    "rescan": "Analyser à Nouveau",
+    "scannedCount": "{{count}} rapports récents analysés",
+    "types": {
+      "HAZARD_REPORT": "Rapport de Danger",
+      "INCIDENT": "Incident"
+    },
+    "reported": "Signalé",
+    "suggested": "L'IA suggère",
+    "noneFlagged": "Rien signalé — les rapports récents sont cohérents avec la gravité sélectionnée."
+  },
+  "safetyAssistant": {
+    "nav": "Assistant Sécurité",
+    "subtitle": "Posez des questions sur les procédures de sécurité, le signalement des dangers et les permis — limité aux données de sécurité de votre site",
+    "chatHint": "Posez des questions sur les procédures de sécurité, comment signaler un danger, les exigences de permis de travail, ou toute autre question liée à la sécurité.",
+    "inputPlaceholder": "Posez une question de sécurité…"
   }
 }

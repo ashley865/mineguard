@@ -46,6 +46,9 @@ import ITOperations from "./pages/ITOperations";
 import BudgetPlanning from "./pages/BudgetPlanning";
 import ToolboxTalks from "./pages/ToolboxTalks";
 import RegulatorySubmissions from "./pages/RegulatorySubmissions";
+import AiDailyBriefing from "./pages/AiDailyBriefing";
+import NarrativeRiskScanner from "./pages/NarrativeRiskScanner";
+import SafetyAssistant from "./pages/SafetyAssistant";
 import MaintenanceScheduling from "./pages/MaintenanceScheduling";
 import InventoryManagement from "./pages/InventoryManagement";
 import SafetyObservations from "./pages/SafetyObservations";
@@ -122,6 +125,9 @@ export default function App() {
         <Route path="/budget-planning" element={<ModuleRoute path="/budget-planning"><BudgetPlanning /></ModuleRoute>} />
         <Route path="/toolbox-talks" element={<ModuleRoute path="/toolbox-talks"><ToolboxTalks /></ModuleRoute>} />
         <Route path="/regulatory-submissions" element={<ModuleRoute path="/regulatory-submissions"><RegulatorySubmissions /></ModuleRoute>} />
+        <Route path="/ai-daily-briefing" element={<AiDailyBriefing />} />
+        <Route path="/narrative-risk-scanner" element={<NarrativeRiskScanner />} />
+        <Route path="/safety-assistant" element={<SafetyAssistant />} />
         <Route path="/maintenance" element={<ModuleRoute path="/maintenance"><MaintenanceScheduling /></ModuleRoute>} />
         <Route path="/inventory" element={<ModuleRoute path="/inventory"><InventoryManagement /></ModuleRoute>} />
         <Route path="/safety-observations" element={<ModuleRoute path="/safety-observations"><SafetyObservations /></ModuleRoute>} />

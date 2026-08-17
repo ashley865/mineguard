@@ -476,6 +476,14 @@
       "WINCH": "Winde",
       "CRANE": "Kran",
       "OTHER": "Sonstiges"
+    },
+    "aiAnalysis": {
+      "button": "KI-Ausfallmusteranalyse",
+      "title": "KI-Analyse von Geräteausfallmustern",
+      "patterns": "Wiederkehrende Muster",
+      "whatToMonitor": "Worauf zu Achten Ist",
+      "none": "Kein klares Muster in der Wartungshistorie gefunden.",
+      "noHistory": "Noch keine Wartungshistorie für dieses Gerät erfasst — nichts zu analysieren."
     }
   },
   "incidents": {
@@ -497,7 +505,15 @@
     "noIncidentsReported": "Keine Vorfälle gemeldet.",
     "reportedBy": "gemeldet von {{name}}",
     "reportIncidentTitle": "Vorfall melden",
-    "loading": "Vorfälle werden geladen…"
+    "loading": "Vorfälle werden geladen…",
+    "aiInvestigation": {
+      "button": "KI-Untersuchungsassistent",
+      "title": "KI-Vorfalluntersuchungsassistent",
+      "likelyCauses": "Wahrscheinliche Einflussfaktoren",
+      "followUpQuestions": "Anschlussfragen zum Stellen",
+      "similarPast": "Ähnliche Frühere Vorfälle",
+      "none": "Keine eindeutigen Einflussfaktoren aus den verfügbaren Daten erkennbar."
+    }
   },
   "alerts": {
     "title": "Alarme",
@@ -3897,5 +3913,33 @@
     },
     "noneYet": "Noch keine Behördeneinreichungen protokolliert.",
     "confirmDelete": "Diese Einreichung löschen?"
+  },
+  "aiDailyBriefing": {
+    "nav": "KI-Tagesbriefing",
+    "subtitle": "Eine abteilungsübergreifende Morgenübersicht, einmal täglich erstellt",
+    "refresh": "Neu Generieren",
+    "topPriority": "Höchste Priorität Heute",
+    "generatedAt": "Erstellt {{date}}",
+    "cached": "zwischengespeichert",
+    "noneYet": "Noch nichts zu berichten."
+  },
+  "narrativeRiskScanner": {
+    "nav": "Narrativ-Risikoscanner",
+    "subtitle": "Markiert Gefahrenmeldungen und Vorfälle, deren Beschreibung nicht zum gewählten Schweregrad passt",
+    "rescan": "Erneut Scannen",
+    "scannedCount": "{{count}} aktuelle Meldungen gescannt",
+    "types": {
+      "HAZARD_REPORT": "Gefahrenmeldung",
+      "INCIDENT": "Vorfall"
+    },
+    "reported": "Gemeldet",
+    "suggested": "KI schlägt vor",
+    "noneFlagged": "Nichts markiert — aktuelle Meldungen stimmen mit ihrem gewählten Schweregrad überein."
+  },
+  "safetyAssistant": {
+    "nav": "Sicherheitsassistent",
+    "subtitle": "Fragen Sie zu Sicherheitsverfahren, Gefahrenmeldung und Genehmigungen — beschränkt auf die Sicherheitsdaten Ihres Standorts",
+    "chatHint": "Fragen Sie zu Sicherheitsverfahren, wie man eine Gefahr meldet, Arbeitserlaubnis-Anforderungen oder anderen sicherheitsbezogenen Themen.",
+    "inputPlaceholder": "Stellen Sie eine Sicherheitsfrage…"
   }
 }

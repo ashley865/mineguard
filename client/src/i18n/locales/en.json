@@ -493,6 +493,14 @@
       "WINCH": "Winch",
       "CRANE": "Crane",
       "OTHER": "Other"
+    },
+    "aiAnalysis": {
+      "button": "AI Failure Pattern Analysis",
+      "title": "AI Equipment Failure Pattern Analysis",
+      "patterns": "Recurring Patterns",
+      "whatToMonitor": "What to Monitor",
+      "none": "No clear pattern found in the maintenance history.",
+      "noHistory": "No maintenance history recorded for this equipment yet — nothing to analyze."
     }
   },
   "incidents": {
@@ -514,7 +522,15 @@
     "noIncidentsReported": "No incidents reported.",
     "reportedBy": "reported by {{name}}",
     "reportIncidentTitle": "Report Incident",
-    "loading": "Loading incidents…"
+    "loading": "Loading incidents…",
+    "aiInvestigation": {
+      "button": "AI Investigation Assistant",
+      "title": "AI Incident Investigation Assistant",
+      "likelyCauses": "Likely Contributing Factors",
+      "followUpQuestions": "Follow-up Questions to Ask",
+      "similarPast": "Similar Past Incidents",
+      "none": "No clear contributing factors identified from the available data."
+    }
   },
   "alerts": {
     "title": "Alerts",
@@ -3896,5 +3912,33 @@
     },
     "noneYet": "No regulatory submissions logged yet.",
     "confirmDelete": "Delete this submission?"
+  },
+  "aiDailyBriefing": {
+    "nav": "AI Daily Briefing",
+    "subtitle": "A cross-department morning digest, generated once per day",
+    "refresh": "Regenerate",
+    "topPriority": "Top Priority Today",
+    "generatedAt": "Generated {{date}}",
+    "cached": "cached",
+    "noneYet": "Nothing to report yet."
+  },
+  "narrativeRiskScanner": {
+    "nav": "Narrative Risk Scanner",
+    "subtitle": "Flags hazard reports and incidents whose written description doesn't match the selected severity",
+    "rescan": "Scan Again",
+    "scannedCount": "Scanned {{count}} recent reports",
+    "types": {
+      "HAZARD_REPORT": "Hazard Report",
+      "INCIDENT": "Incident"
+    },
+    "reported": "Reported",
+    "suggested": "AI suggests",
+    "noneFlagged": "Nothing flagged — recent reports read consistently with their selected severity."
+  },
+  "safetyAssistant": {
+    "nav": "Safety Assistant",
+    "subtitle": "Ask about safety procedures, hazard reporting, and permits — scoped to your site's safety data",
+    "chatHint": "Ask about safety procedures, how to report a hazard, permit-to-work requirements, or anything else safety-related.",
+    "inputPlaceholder": "Ask a safety question…"
   }
 }

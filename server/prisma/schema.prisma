@@ -1490,6 +1490,7 @@ model Mine {
   itTickets               ITTicket[]
   budgetPlans             BudgetPlan[]
   regulatorySubmissions   RegulatorySubmission[]
+  aiDailyBriefings        AiDailyBriefing[]
 }
 
 enum ExecutiveRequestStatus {
@@ -4137,6 +4138,23 @@ model AiRecommendation {
   generatedAt    DateTime                @default(now())
 
   @@index([mineId, executiveTitle, status])
+}
+
+// Proactive, cross-department digest — generated at most once per calendar day (per
+// mine) and cached here, unlike everything else in the AI system which recomputes on
+// every page load. briefingDate is stored at UTC midnight so the unique constraint
+// naturally enforces "one briefing per mine per day".
+model AiDailyBriefing {
+  id           String   @id @default(cuid())
+  mineId       String
+  mine         Mine     @relation(fields: [mineId], references: [id], onDelete: Cascade)
+  briefingDate DateTime
+  headline     String
+  topPriority  String?
+  sections     Json
+  generatedAt  DateTime @default(now())
+
+  @@unique([mineId, briefingDate])
 }
 
 // ---------------------------------------------------------------------------

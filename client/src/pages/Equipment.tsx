@@ -2,11 +2,76 @@ import { FormEvent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { api } from "../api/client";
 import { useAuth } from "../context/AuthContext";
-import { Equipment as EquipmentItem, EquipmentStatus, EquipmentType, Site, Worker, Zone } from "../api/types";
+import { AiEquipmentAnalysisResponse, Equipment as EquipmentItem, EquipmentStatus, EquipmentType, Site, Worker, Zone } from "../api/types";
 import { StatusBadge } from "../components/Badges";
 import Modal from "../components/Modal";
 import { buttonDanger, buttonPrimary, buttonSecondary, cardClass, inputClass, labelClass, selectClass } from "../components/ui";
 import LoadError from "../components/LoadError";
+
+function EquipmentAnalysisModal({ equipmentId, onClose }: { equipmentId: string; onClose: () => void }) {
+  const { t } = useTranslation();
+  const [data, setData] = useState<AiEquipmentAnalysisResponse | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
+
+  async function load() {
+    setLoading(true);
+    setLoadError(false);
+    try {
+      const res = await api.post<AiEquipmentAnalysisResponse>(`/ai/equipment-analysis/${equipmentId}`);
+      setData(res.data);
+    } catch {
+      setLoadError(true);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  useEffect(() => {
+    load();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  return (
+    <Modal title={t("equipment.aiAnalysis.title")} onClose={onClose}>
+      {loading && <div className="text-mine-300">{t("common.loading")}</div>}
+      {loadError && <LoadError onRetry={load} />}
+      {!loading && data && !data.configured && (
+        <div className="text-xs font-medium text-mine-300 bg-mine-800/60 border border-mine-700 rounded-md p-3">
+          {t("ai.notConfigured")}
+        </div>
+      )}
+      {!loading && data?.configured && data.noHistory && (
+        <div className="text-xs font-medium text-mine-300 bg-mine-800/60 border border-mine-700 rounded-md p-3">
+          {t("equipment.aiAnalysis.noHistory")}
+        </div>
+      )}
+      {!loading && data?.configured && !data.noHistory && data.result && (
+        <div className="space-y-4">
+          <div>
+            <h3 className="text-xs font-extrabold uppercase tracking-wide text-mine-300 mb-2">{t("equipment.aiAnalysis.patterns")}</h3>
+            <ul className="space-y-2">
+              {data.result.patterns.map((p, i) => (
+                <li key={i} className="text-sm">
+                  <span className="font-semibold">{p.pattern}</span>
+                  <p className="text-xs text-mine-300 mt-0.5">{p.detail}</p>
+                </li>
+              ))}
+              {data.result.patterns.length === 0 && <li className="text-xs text-mine-400">{t("equipment.aiAnalysis.none")}</li>}
+            </ul>
+          </div>
+          <div>
+            <h3 className="text-xs font-extrabold uppercase tracking-wide text-mine-300 mb-2">{t("equipment.aiAnalysis.whatToMonitor")}</h3>
+            <ul className="list-disc list-inside space-y-1 text-sm text-mine-200">
+              {data.result.whatToMonitor.map((m, i) => <li key={i}>{m}</li>)}
+            </ul>
+          </div>
+          <p className="text-[10px] text-mine-500 border-t border-mine-800 pt-2">{data.disclaimer}</p>
+        </div>
+      )}
+    </Modal>
+  );
+}
 
 const equipmentTypes: EquipmentType[] = [
   "EXCAVATOR",
@@ -121,6 +186,7 @@ export default function Equipment() {
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState(false);
   const [modal, setModal] = useState<null | "create" | EquipmentItem>(null);
+  const [analyzingId, setAnalyzingId] = useState<string | null>(null);
 
   async function load() {
     setLoading(true);
@@ -203,12 +269,17 @@ export default function Equipment() {
                 <td className="px-4 py-2 text-mine-300">{eq.assignedOperator?.name ?? t("common.unassigned")}</td>
                 <td className="px-4 py-2"><StatusBadge status={eq.status} /></td>
                 <td className="px-4 py-2 text-right">
-                  {canEdit && (
-                    <div className="flex justify-end gap-2">
-                      <button className="text-xs text-mine-300 hover:text-mine-50" onClick={() => setModal(eq)}>{t("common.edit")}</button>
-                      <button className={buttonDanger} onClick={() => deleteEquipment(eq.id)}>{t("common.delete")}</button>
-                    </div>
-                  )}
+                  <div className="flex justify-end gap-2">
+                    <button className="text-xs font-bold text-hazard-600 hover:text-hazard-500" onClick={() => setAnalyzingId(eq.id)}>
+                      {t("equipment.aiAnalysis.button")}
+                    </button>
+                    {canEdit && (
+                      <>
+                        <button className="text-xs text-mine-300 hover:text-mine-50" onClick={() => setModal(eq)}>{t("common.edit")}</button>
+                        <button className={buttonDanger} onClick={() => deleteEquipment(eq.id)}>{t("common.delete")}</button>
+                      </>
+                    )}
+                  </div>
                 </td>
               </tr>
             ))}
@@ -230,6 +301,10 @@ export default function Equipment() {
             onCancel={() => setModal(null)}
           />
         </Modal>
+      )}
+
+      {analyzingId && (
+        <EquipmentAnalysisModal equipmentId={analyzingId} onClose={() => setAnalyzingId(null)} />
       )}
     </div>
   );
