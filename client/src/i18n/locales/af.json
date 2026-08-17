@@ -641,7 +641,8 @@
       "OUT_OF_SERVICE": "Buite Diens",
       "IN_STORE": "In Voorraad",
       "ASSIGNED": "Toegeken",
-      "IN_MAINTENANCE": "In Onderhoud"
+      "IN_MAINTENANCE": "In Onderhoud",
+      "IN_REPAIR": "Word herstel"
     },
     "severity": {
       "LOW": "Laag",
@@ -3768,5 +3769,133 @@
   "financial": {
     "nav": "Finansiële Prestasie",
     "subtitle": "Verdienste, uitgawes en marge oor al u terreine"
+  },
+  "shiftHandover": {
+    "nav": "Skofoordraglog",
+    "subtitle": "Kontinuïteitsnotas oorgedra tussen uitgaande en inkomende skoftoesighouers",
+    "new": "+ Nuwe Oordrag",
+    "newTitle": "Nuwe Skofoordrag",
+    "outgoingSupervisor": "Uitgaande toesighouer",
+    "summary": "Opsomming",
+    "issues": "Kwessies",
+    "actionItems": "Aksiepunte",
+    "noneYet": "Nog geen skofoordragte aangeteken nie.",
+    "confirmDelete": "Verwyder hierdie skofoordrag?"
+  },
+  "downtime": {
+    "nav": "Stilstand & Vertragings",
+    "subtitle": "Hou dop hoekom en hoe lank toerusting of prosesse gestop het",
+    "new": "+ Teken Stilstand Aan",
+    "newTitle": "Nuwe Stilstandgebeurtenis",
+    "category": "Kategorie",
+    "categories": {
+      "EQUIPMENT_BREAKDOWN": "Toerustingbreuk",
+      "POWER_OUTAGE": "Kragonderbreking",
+      "WEATHER": "Weer",
+      "SAFETY_STOPPAGE": "Veiligheidstopset",
+      "MATERIAL_SHORTAGE": "Materiaaltekort",
+      "LABOUR_SHORTAGE": "Arbeidstekort",
+      "PLANNED_MAINTENANCE": "Beplande onderhoud",
+      "OTHER": "Ander"
+    },
+    "affectedArea": "Geraakte area (opsioneel)",
+    "startedAt": "Begin om",
+    "endedAt": "Geëindig om",
+    "totalHours": "Totale Stilstand (ure)",
+    "markEnded": "Merk as nou geëindig",
+    "noneYet": "Nog geen stilstandgebeurtenisse aangeteken nie.",
+    "confirmDelete": "Verwyder hierdie stilstandgebeurtenis?"
+  },
+  "itOperations": {
+    "nav": "IT-Bedrywighede",
+    "subtitle": "IT-batevoorraad en ondersteuningskaartjie-opsporing",
+    "tabAssets": "Bates",
+    "tabTickets": "Ondersteuningskaartjies",
+    "assetTag": "Batekenteken",
+    "assetName": "Batenaam",
+    "assetType": "Batetipe",
+    "assetTypes": {
+      "COMPUTER": "Rekenaar",
+      "SERVER": "Bediener",
+      "NETWORK_DEVICE": "Netwerktoestel",
+      "MOBILE_DEVICE": "Mobiele toestel",
+      "SOFTWARE_LICENSE": "Sagteware-lisensie",
+      "PERIPHERAL": "Randapparaat",
+      "OTHER": "Ander"
+    },
+    "assetStatuses": {
+      "ACTIVE": "Aktief",
+      "IN_REPAIR": "Word herstel",
+      "RETIRED": "Onttrek",
+      "LOST": "Verlore"
+    },
+    "assignedToName": "Toegewys aan",
+    "location": "Ligging",
+    "warrantyExpiry": "Waarborgverstryking",
+    "newAsset": "+ Nuwe Bate",
+    "newAssetTitle": "Nuwe IT-bate",
+    "noneYetAssets": "Nog geen IT-bates aangeteken nie.",
+    "confirmDeleteAsset": "Verwyder hierdie IT-bate?",
+    "ticketSubject": "Onderwerp",
+    "priority": "Prioriteit",
+    "priorities": {
+      "LOW": "Laag",
+      "MEDIUM": "Medium",
+      "HIGH": "Hoog",
+      "URGENT": "Dringend"
+    },
+    "reportedByName": "Aangemeld deur",
+    "newTicket": "+ Nuwe Kaartjie",
+    "newTicketTitle": "Nuwe Ondersteuningskaartjie",
+    "noneYetTickets": "Nog geen ondersteuningskaartjies aangeteken nie.",
+    "confirmDeleteTicket": "Verwyder hierdie kaartjie?",
+    "startProgress": "Begin vordering",
+    "markResolved": "Merk as opgelos",
+    "markClosed": "Sluit kaartjie"
+  },
+  "budgetPlanning": {
+    "nav": "Begrotingsbeplanning",
+    "subtitle": "Stel begrotings per kategorie en tydperk, lewendig vergelyk met werklike besteding",
+    "new": "+ Nuwe Begroting",
+    "newTitle": "Nuwe Begrotingsplan",
+    "allSites": "Alle terreine (mynwyd)",
+    "periodStart": "Tydperk begin",
+    "periodEnd": "Tydperk eindig",
+    "period": "Tydperk",
+    "budgetedAmount": "Begrote bedrag",
+    "actualAmount": "Werklike besteding",
+    "variance": "Variansie",
+    "noneYet": "Nog geen begrotingsplanne gestel nie.",
+    "confirmDelete": "Verwyder hierdie begrotingsplan?"
+  },
+  "toolboxTalks": {
+    "nav": "Veiligheidsgesprekke",
+    "subtitle": "Teken veiligheidsgesprekke en -sessies per terrein aan",
+    "new": "+ Teken Gesprek Aan",
+    "newTitle": "Nuwe Veiligheidsgesprek",
+    "talkDate": "Gespreksdatum",
+    "topic": "Onderwerp",
+    "presenter": "Aanbieder",
+    "attendeeCount": "Bywoners",
+    "noneYet": "Nog geen veiligheidsgesprekke aangeteken nie.",
+    "confirmDelete": "Verwyder hierdie gespreksrekord?"
+  },
+  "regulatorySubmissions": {
+    "nav": "Regulatoriese Indienings",
+    "subtitle": "Hou indienings en verslae wat aan reguleerders gestuur is dop, met vervaldatums",
+    "new": "+ Nuwe Indiening",
+    "newTitle": "Nuwe Regulatoriese Indiening",
+    "regulator": "Reguleerder",
+    "referenceNumber": "Verwysingsnommer",
+    "dueDate": "Vervaldatum",
+    "attachment": "Aanhegsel (opsioneel)",
+    "statuses": {
+      "DRAFT": "Konsep",
+      "SUBMITTED": "Ingedien",
+      "ACKNOWLEDGED": "Erken",
+      "OVERDUE": "Agterstallig"
+    },
+    "noneYet": "Nog geen regulatoriese indienings aangeteken nie.",
+    "confirmDelete": "Verwyder hierdie indiening?"
   }
 }

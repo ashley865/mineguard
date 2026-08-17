@@ -641,7 +641,8 @@
       "OUT_OF_SERVICE": "Hors Service",
       "IN_STORE": "En Stock",
       "ASSIGNED": "Attribué",
-      "IN_MAINTENANCE": "En Maintenance"
+      "IN_MAINTENANCE": "En Maintenance",
+      "IN_REPAIR": "En réparation"
     },
     "severity": {
       "LOW": "Faible",
@@ -3768,5 +3769,133 @@
   "financial": {
     "nav": "Performance Financière",
     "subtitle": "Revenus, dépenses et marge sur tous vos sites"
+  },
+  "shiftHandover": {
+    "nav": "Journal de Relève d'Équipe",
+    "subtitle": "Notes de continuité transmises entre les superviseurs d'équipe sortants et entrants",
+    "new": "+ Nouvelle Relève",
+    "newTitle": "Nouvelle Relève d'Équipe",
+    "outgoingSupervisor": "Superviseur sortant",
+    "summary": "Résumé",
+    "issues": "Problèmes",
+    "actionItems": "Actions à entreprendre",
+    "noneYet": "Aucune relève d'équipe enregistrée pour l'instant.",
+    "confirmDelete": "Supprimer cette relève d'équipe ?"
+  },
+  "downtime": {
+    "nav": "Temps d'Arrêt",
+    "subtitle": "Suivez pourquoi et pendant combien de temps les équipements ou processus ont été arrêtés",
+    "new": "+ Enregistrer un Arrêt",
+    "newTitle": "Nouvel Événement d'Arrêt",
+    "category": "Catégorie",
+    "categories": {
+      "EQUIPMENT_BREAKDOWN": "Panne d'équipement",
+      "POWER_OUTAGE": "Coupure de courant",
+      "WEATHER": "Météo",
+      "SAFETY_STOPPAGE": "Arrêt de sécurité",
+      "MATERIAL_SHORTAGE": "Pénurie de matériel",
+      "LABOUR_SHORTAGE": "Pénurie de main-d'œuvre",
+      "PLANNED_MAINTENANCE": "Maintenance planifiée",
+      "OTHER": "Autre"
+    },
+    "affectedArea": "Zone touchée (facultatif)",
+    "startedAt": "Débuté à",
+    "endedAt": "Terminé à",
+    "totalHours": "Temps d'Arrêt Total (heures)",
+    "markEnded": "Marquer comme terminé maintenant",
+    "noneYet": "Aucun événement d'arrêt enregistré pour l'instant.",
+    "confirmDelete": "Supprimer cet événement d'arrêt ?"
+  },
+  "itOperations": {
+    "nav": "Opérations Informatiques",
+    "subtitle": "Inventaire des actifs informatiques et suivi des tickets d'assistance",
+    "tabAssets": "Actifs",
+    "tabTickets": "Tickets d'Assistance",
+    "assetTag": "Étiquette de l'actif",
+    "assetName": "Nom de l'actif",
+    "assetType": "Type d'actif",
+    "assetTypes": {
+      "COMPUTER": "Ordinateur",
+      "SERVER": "Serveur",
+      "NETWORK_DEVICE": "Périphérique réseau",
+      "MOBILE_DEVICE": "Appareil mobile",
+      "SOFTWARE_LICENSE": "Licence logicielle",
+      "PERIPHERAL": "Périphérique",
+      "OTHER": "Autre"
+    },
+    "assetStatuses": {
+      "ACTIVE": "Actif",
+      "IN_REPAIR": "En réparation",
+      "RETIRED": "Retiré",
+      "LOST": "Perdu"
+    },
+    "assignedToName": "Attribué à",
+    "location": "Emplacement",
+    "warrantyExpiry": "Expiration de la garantie",
+    "newAsset": "+ Nouvel Actif",
+    "newAssetTitle": "Nouvel Actif Informatique",
+    "noneYetAssets": "Aucun actif informatique enregistré pour l'instant.",
+    "confirmDeleteAsset": "Supprimer cet actif informatique ?",
+    "ticketSubject": "Sujet",
+    "priority": "Priorité",
+    "priorities": {
+      "LOW": "Faible",
+      "MEDIUM": "Moyenne",
+      "HIGH": "Élevée",
+      "URGENT": "Urgente"
+    },
+    "reportedByName": "Signalé par",
+    "newTicket": "+ Nouveau Ticket",
+    "newTicketTitle": "Nouveau Ticket d'Assistance",
+    "noneYetTickets": "Aucun ticket d'assistance enregistré pour l'instant.",
+    "confirmDeleteTicket": "Supprimer ce ticket ?",
+    "startProgress": "Démarrer le traitement",
+    "markResolved": "Marquer comme résolu",
+    "markClosed": "Fermer le ticket"
+  },
+  "budgetPlanning": {
+    "nav": "Planification Budgétaire",
+    "subtitle": "Définissez des budgets par catégorie et période, comparés en direct aux dépenses réelles",
+    "new": "+ Nouveau Budget",
+    "newTitle": "Nouveau Plan Budgétaire",
+    "allSites": "Tous les sites (à l'échelle de la mine)",
+    "periodStart": "Début de période",
+    "periodEnd": "Fin de période",
+    "period": "Période",
+    "budgetedAmount": "Montant budgété",
+    "actualAmount": "Dépense réelle",
+    "variance": "Écart",
+    "noneYet": "Aucun plan budgétaire défini pour l'instant.",
+    "confirmDelete": "Supprimer ce plan budgétaire ?"
+  },
+  "toolboxTalks": {
+    "nav": "Causeries Sécurité",
+    "subtitle": "Enregistrez les causeries et briefings de sécurité tenus par site",
+    "new": "+ Enregistrer une Causerie",
+    "newTitle": "Nouvelle Causerie Sécurité",
+    "talkDate": "Date de la causerie",
+    "topic": "Sujet",
+    "presenter": "Présentateur",
+    "attendeeCount": "Participants",
+    "noneYet": "Aucune causerie sécurité enregistrée pour l'instant.",
+    "confirmDelete": "Supprimer cet enregistrement de causerie ?"
+  },
+  "regulatorySubmissions": {
+    "nav": "Soumissions Réglementaires",
+    "subtitle": "Suivez les dépôts et rapports envoyés aux régulateurs, avec leurs échéances",
+    "new": "+ Nouvelle Soumission",
+    "newTitle": "Nouvelle Soumission Réglementaire",
+    "regulator": "Régulateur",
+    "referenceNumber": "Numéro de référence",
+    "dueDate": "Date d'échéance",
+    "attachment": "Pièce jointe (facultatif)",
+    "statuses": {
+      "DRAFT": "Brouillon",
+      "SUBMITTED": "Soumis",
+      "ACKNOWLEDGED": "Accusé de réception",
+      "OVERDUE": "En retard"
+    },
+    "noneYet": "Aucune soumission réglementaire enregistrée pour l'instant.",
+    "confirmDelete": "Supprimer cette soumission ?"
   }
 }

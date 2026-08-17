@@ -307,6 +307,14 @@ model User {
   keyIssueLogsLogged        KeyIssueLog[]             @relation("KeyIssueLogLoggedBy")
   securityAssetsCreated     SecurityAsset[]           @relation("SecurityAssetCreatedBy")
   securityAssetLogsLogged   SecurityAssetAssignmentLog[] @relation("SecurityAssetLogLoggedBy")
+
+  shiftHandoversCreated       ShiftHandover[]        @relation("ShiftHandoverCreatedBy")
+  downtimeEventsCreated       DowntimeEvent[]        @relation("DowntimeEventCreatedBy")
+  itAssetsCreated              ITAsset[]              @relation("ITAssetCreatedBy")
+  itTicketsCreated              ITTicket[]             @relation("ITTicketCreatedBy")
+  budgetPlansCreated           BudgetPlan[]           @relation("BudgetPlanCreatedBy")
+  toolboxTalksCreated          ToolboxTalk[]          @relation("ToolboxTalkCreatedBy")
+  regulatorySubmissionsCreated RegulatorySubmission[] @relation("RegulatorySubmissionCreatedBy")
 }
 
 model UserAttendance {
@@ -421,6 +429,11 @@ model Site {
   securityInvestigations  SecurityInvestigation[]
   securityKeys            SecurityKey[]
   securityAssets          SecurityAsset[]
+
+  shiftHandovers  ShiftHandover[]
+  downtimeEvents  DowntimeEvent[]
+  budgetPlans     BudgetPlan[]
+  toolboxTalks    ToolboxTalk[]
 }
 
 model Zone {
@@ -1472,6 +1485,11 @@ model Mine {
 
   unionAgreements    UnionAgreement[]
   ghgEmissionsRecords GhgEmissionsRecord[]
+
+  itAssets               ITAsset[]
+  itTickets               ITTicket[]
+  budgetPlans             BudgetPlan[]
+  regulatorySubmissions   RegulatorySubmission[]
 }
 
 enum ExecutiveRequestStatus {
@@ -4520,6 +4538,214 @@ model SecurityAssetAssignmentLog {
   eventAt    DateTime                @default(now())
   loggedById String?
   loggedBy   User?                   @relation("SecurityAssetLogLoggedBy", fields: [loggedById], references: [id], onDelete: SetNull)
+
+  createdAt DateTime @default(now())
+}
+
+// ---------------------------------------------------------------------------
+// Module: Shift Handover Log (Operations Manager)
+// Continuity notes passed between outgoing and incoming shift supervisors —
+// distinct from ShiftRoster (who is scheduled to work) and ProductionRecord
+// (mineral output per shift): this is "what happened / what needs attention".
+// ---------------------------------------------------------------------------
+
+model ShiftHandover {
+  id                 String        @id @default(cuid())
+  siteId             String
+  site               Site          @relation(fields: [siteId], references: [id], onDelete: Cascade)
+  shiftDate          DateTime
+  shift              ProductionShift
+  outgoingSupervisor String
+  summary            String
+  issues             String?
+  actionItems        String?
+  createdById        String?
+  createdBy          User?         @relation("ShiftHandoverCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+
+  createdAt DateTime @default(now())
+}
+
+// ---------------------------------------------------------------------------
+// Module: Downtime & Delay Tracker (Operations Manager)
+// Logs WHY and for how long equipment/processes were stopped — Equipment.status
+// only holds a current DOWN flag, with no reason/duration history of its own.
+// ---------------------------------------------------------------------------
+
+enum DowntimeCategory {
+  EQUIPMENT_BREAKDOWN
+  POWER_OUTAGE
+  WEATHER
+  SAFETY_STOPPAGE
+  MATERIAL_SHORTAGE
+  LABOUR_SHORTAGE
+  PLANNED_MAINTENANCE
+  OTHER
+}
+
+model DowntimeEvent {
+  id           String           @id @default(cuid())
+  siteId       String
+  site         Site             @relation(fields: [siteId], references: [id], onDelete: Cascade)
+  category     DowntimeCategory
+  description  String
+  affectedArea String?
+  startedAt    DateTime
+  endedAt      DateTime?
+  createdById  String?
+  createdBy    User?            @relation("DowntimeEventCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+
+  createdAt DateTime @default(now())
+}
+
+// ---------------------------------------------------------------------------
+// Module: IT Assets & Support Tickets (IT Manager)
+// Mine-level (not site-scoped) since servers/network gear/licenses commonly
+// aren't tied to a single site. IT Manager's first genuinely dedicated module.
+// ---------------------------------------------------------------------------
+
+enum ITAssetType {
+  COMPUTER
+  SERVER
+  NETWORK_DEVICE
+  MOBILE_DEVICE
+  SOFTWARE_LICENSE
+  PERIPHERAL
+  OTHER
+}
+
+enum ITAssetStatus {
+  ACTIVE
+  IN_REPAIR
+  RETIRED
+  LOST
+}
+
+model ITAsset {
+  id             String        @id @default(cuid())
+  mineId         String
+  mine           Mine          @relation(fields: [mineId], references: [id], onDelete: Cascade)
+  assetTag       String
+  name           String
+  assetType      ITAssetType   @default(OTHER)
+  status         ITAssetStatus @default(ACTIVE)
+  assignedToName String?
+  location       String?
+  purchaseDate   DateTime?
+  warrantyExpiry DateTime?
+  notes          String?
+  createdById    String?
+  createdBy      User?         @relation("ITAssetCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+
+  createdAt DateTime @default(now())
+
+  @@unique([mineId, assetTag])
+}
+
+enum ITTicketStatus {
+  OPEN
+  IN_PROGRESS
+  RESOLVED
+  CLOSED
+}
+
+enum ITTicketPriority {
+  LOW
+  MEDIUM
+  HIGH
+  URGENT
+}
+
+model ITTicket {
+  id             String           @id @default(cuid())
+  mineId         String
+  mine           Mine             @relation(fields: [mineId], references: [id], onDelete: Cascade)
+  subject        String
+  description    String
+  status         ITTicketStatus   @default(OPEN)
+  priority       ITTicketPriority @default(MEDIUM)
+  reportedByName String?
+  resolutionNote String?
+  resolvedAt     DateTime?
+  createdById    String?
+  createdBy      User?            @relation("ITTicketCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+
+  createdAt DateTime @default(now())
+}
+
+// ---------------------------------------------------------------------------
+// Module: Budget Planning (CFO)
+// Budgeted amount per category/period/site; actual spend is computed live
+// from Expense records rather than duplicated here, so it never drifts.
+// ---------------------------------------------------------------------------
+
+model BudgetPlan {
+  id             String          @id @default(cuid())
+  mineId         String
+  mine           Mine            @relation(fields: [mineId], references: [id], onDelete: Cascade)
+  siteId         String?
+  site           Site?           @relation(fields: [siteId], references: [id], onDelete: SetNull)
+  category       ExpenseCategory
+  periodStart    DateTime
+  periodEnd      DateTime
+  budgetedAmount Float
+  notes          String?
+  createdById    String?
+  createdBy      User?           @relation("BudgetPlanCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+
+  createdAt DateTime @default(now())
+}
+
+// ---------------------------------------------------------------------------
+// Module: Toolbox Talk Tracker (Safety Manager)
+// Logged safety briefings/toolbox talks per site — an MHSA-style recurring
+// requirement, distinct from formal training courses or safety inspections.
+// ---------------------------------------------------------------------------
+
+model ToolboxTalk {
+  id            String   @id @default(cuid())
+  siteId        String
+  site          Site     @relation(fields: [siteId], references: [id], onDelete: Cascade)
+  talkDate      DateTime
+  topic         String
+  presenter     String
+  attendeeCount Int
+  notes         String?
+  createdById   String?
+  createdBy     User?    @relation("ToolboxTalkCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+
+  createdAt DateTime @default(now())
+}
+
+// ---------------------------------------------------------------------------
+// Module: Regulatory Submissions Tracker (Compliance Officer)
+// Outbound filings/reports sent TO regulators (DMRE etc.) with due dates —
+// the complement of RegulatoryNotice, which tracks notices received FROM them.
+// ---------------------------------------------------------------------------
+
+enum RegulatorySubmissionStatus {
+  DRAFT
+  SUBMITTED
+  ACKNOWLEDGED
+  OVERDUE
+}
+
+model RegulatorySubmission {
+  id              String                     @id @default(cuid())
+  mineId          String
+  mine            Mine                       @relation(fields: [mineId], references: [id], onDelete: Cascade)
+  regulator       String
+  subject         String
+  referenceNumber String?
+  dueDate         DateTime?
+  submittedDate   DateTime?
+  status          RegulatorySubmissionStatus @default(DRAFT)
+  notes           String?
+  fileName        String?
+  fileMimeType    String?
+  fileSize        Int?
+  fileData        Bytes?
+  createdById     String?
+  createdBy       User?                      @relation("RegulatorySubmissionCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
 
   createdAt DateTime @default(now())
 }

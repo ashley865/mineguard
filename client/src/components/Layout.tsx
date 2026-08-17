@@ -60,6 +60,8 @@ export default function Layout() {
         { to: "/maintenance", label: t("maintenance.nav") },
         { to: "/production", label: t("production.nav") },
         { to: "/geology", label: t("geology.nav") },
+        { to: "/shift-handovers", label: t("shiftHandover.nav") },
+        { to: "/downtime", label: t("downtime.nav") },
       ],
     },
     {
@@ -77,6 +79,8 @@ export default function Layout() {
         { to: "/mine-rescue", label: t("mineRescue.nav") },
         { to: "/resources", label: t("resources.nav") },
         { to: "/winders", label: t("winders.nav") },
+        { to: "/toolbox-talks", label: t("toolboxTalks.nav") },
+        { to: "/regulatory-submissions", label: t("regulatorySubmissions.nav") },
       ],
     },
     {
@@ -107,6 +111,7 @@ export default function Layout() {
         { to: "/procurement", label: t("procurement.nav") },
         { to: "/invoices", label: t("invoices.nav") },
         { to: "/expenses", label: t("expenses.nav") },
+        { to: "/budget-planning", label: t("budgetPlanning.nav") },
       ],
     },
     {
@@ -139,6 +144,7 @@ export default function Layout() {
       label: t("nav.sectionTools"),
       items: [
         ...(canUseScanner ? [{ to: "/scanner", label: t("scanner.nav") }] : []),
+        { to: "/it-operations", label: t("itOperations.nav") },
         ...(canMessage ? [{ to: "/messages", label: t("messages.nav") }] : []),
         ...(canMessage ? [{ to: "/executive-requests", label: t("executiveRequests.nav") }] : []),
       ],

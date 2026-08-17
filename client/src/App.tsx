@@ -40,6 +40,12 @@ import Tenders from "./pages/Tenders";
 import TenderBoard from "./pages/TenderBoard";
 import ProductionTracking from "./pages/ProductionTracking";
 import FinancialPerformance from "./pages/FinancialPerformance";
+import ShiftHandoverLog from "./pages/ShiftHandoverLog";
+import DowntimeTracker from "./pages/DowntimeTracker";
+import ITOperations from "./pages/ITOperations";
+import BudgetPlanning from "./pages/BudgetPlanning";
+import ToolboxTalks from "./pages/ToolboxTalks";
+import RegulatorySubmissions from "./pages/RegulatorySubmissions";
 import MaintenanceScheduling from "./pages/MaintenanceScheduling";
 import InventoryManagement from "./pages/InventoryManagement";
 import SafetyObservations from "./pages/SafetyObservations";
@@ -110,6 +116,12 @@ export default function App() {
         <Route path="/tenders" element={<ModuleRoute path="/tenders"><Tenders /></ModuleRoute>} />
         <Route path="/production" element={<ModuleRoute path="/production"><ProductionTracking /></ModuleRoute>} />
         <Route path="/financial" element={<FinancialPerformance />} />
+        <Route path="/shift-handovers" element={<ModuleRoute path="/shift-handovers"><ShiftHandoverLog /></ModuleRoute>} />
+        <Route path="/downtime" element={<ModuleRoute path="/downtime"><DowntimeTracker /></ModuleRoute>} />
+        <Route path="/it-operations" element={<ModuleRoute path="/it-operations"><ITOperations /></ModuleRoute>} />
+        <Route path="/budget-planning" element={<ModuleRoute path="/budget-planning"><BudgetPlanning /></ModuleRoute>} />
+        <Route path="/toolbox-talks" element={<ModuleRoute path="/toolbox-talks"><ToolboxTalks /></ModuleRoute>} />
+        <Route path="/regulatory-submissions" element={<ModuleRoute path="/regulatory-submissions"><RegulatorySubmissions /></ModuleRoute>} />
         <Route path="/maintenance" element={<ModuleRoute path="/maintenance"><MaintenanceScheduling /></ModuleRoute>} />
         <Route path="/inventory" element={<ModuleRoute path="/inventory"><InventoryManagement /></ModuleRoute>} />
         <Route path="/safety-observations" element={<ModuleRoute path="/safety-observations"><SafetyObservations /></ModuleRoute>} />

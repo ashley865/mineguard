@@ -3370,3 +3370,121 @@ export interface IndustryNewsResponse {
   items: IndustryNewsItem[];
   disclaimer: string | null;
 }
+
+// --- Department modules ---
+
+export interface ShiftHandover {
+  id: string;
+  siteId: string;
+  site?: { id: string; name: string };
+  shiftDate: string;
+  shift: ProductionShift;
+  outgoingSupervisor: string;
+  summary: string;
+  issues?: string | null;
+  actionItems?: string | null;
+  createdBy?: { id: string; name: string } | null;
+  createdAt: string;
+}
+
+export type DowntimeCategory =
+  | "EQUIPMENT_BREAKDOWN"
+  | "POWER_OUTAGE"
+  | "WEATHER"
+  | "SAFETY_STOPPAGE"
+  | "MATERIAL_SHORTAGE"
+  | "LABOUR_SHORTAGE"
+  | "PLANNED_MAINTENANCE"
+  | "OTHER";
+
+export interface DowntimeEvent {
+  id: string;
+  siteId: string;
+  site?: { id: string; name: string };
+  category: DowntimeCategory;
+  description: string;
+  affectedArea?: string | null;
+  startedAt: string;
+  endedAt?: string | null;
+  createdBy?: { id: string; name: string } | null;
+  createdAt: string;
+}
+
+export type ITAssetType = "COMPUTER" | "SERVER" | "NETWORK_DEVICE" | "MOBILE_DEVICE" | "SOFTWARE_LICENSE" | "PERIPHERAL" | "OTHER";
+export type ITAssetStatus = "ACTIVE" | "IN_REPAIR" | "RETIRED" | "LOST";
+
+export interface ITAsset {
+  id: string;
+  assetTag: string;
+  name: string;
+  assetType: ITAssetType;
+  status: ITAssetStatus;
+  assignedToName?: string | null;
+  location?: string | null;
+  purchaseDate?: string | null;
+  warrantyExpiry?: string | null;
+  notes?: string | null;
+  createdBy?: { id: string; name: string } | null;
+  createdAt: string;
+}
+
+export type ITTicketStatus = "OPEN" | "IN_PROGRESS" | "RESOLVED" | "CLOSED";
+export type ITTicketPriority = "LOW" | "MEDIUM" | "HIGH" | "URGENT";
+
+export interface ITTicket {
+  id: string;
+  subject: string;
+  description: string;
+  status: ITTicketStatus;
+  priority: ITTicketPriority;
+  reportedByName?: string | null;
+  resolutionNote?: string | null;
+  resolvedAt?: string | null;
+  createdBy?: { id: string; name: string } | null;
+  createdAt: string;
+}
+
+export interface BudgetPlan {
+  id: string;
+  siteId?: string | null;
+  site?: { id: string; name: string } | null;
+  category: ExpenseCategory;
+  periodStart: string;
+  periodEnd: string;
+  budgetedAmount: number;
+  actualAmount: number;
+  notes?: string | null;
+  createdBy?: { id: string; name: string } | null;
+  createdAt: string;
+}
+
+export interface ToolboxTalk {
+  id: string;
+  siteId: string;
+  site?: { id: string; name: string };
+  talkDate: string;
+  topic: string;
+  presenter: string;
+  attendeeCount: number;
+  notes?: string | null;
+  createdBy?: { id: string; name: string } | null;
+  createdAt: string;
+}
+
+export type RegulatorySubmissionStatus = "DRAFT" | "SUBMITTED" | "ACKNOWLEDGED" | "OVERDUE";
+
+export interface RegulatorySubmission {
+  id: string;
+  regulator: string;
+  subject: string;
+  referenceNumber?: string | null;
+  dueDate?: string | null;
+  submittedDate?: string | null;
+  status: RegulatorySubmissionStatus;
+  notes?: string | null;
+  fileName?: string | null;
+  fileMimeType?: string | null;
+  fileSize?: number | null;
+  createdBy?: { id: string; name: string } | null;
+  createdAt: string;
+}

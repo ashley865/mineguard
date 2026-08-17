@@ -64,6 +64,13 @@ import emergencyRoutes from "./routes/emergency";
 import rosterRoutes from "./routes/roster";
 import trainingLmsRoutes from "./routes/trainingLms";
 import payrollRoutes from "./routes/payroll";
+import shiftHandoversRoutes from "./routes/shiftHandovers";
+import downtimeEventsRoutes from "./routes/downtimeEvents";
+import itAssetsRoutes from "./routes/itAssets";
+import itTicketsRoutes from "./routes/itTickets";
+import budgetPlansRoutes from "./routes/budgetPlans";
+import toolboxTalksRoutes from "./routes/toolboxTalks";
+import regulatorySubmissionsRoutes from "./routes/regulatorySubmissions";
 import procurementRoutes from "./routes/procurement";
 import invoicesRoutes from "./routes/invoices";
 import payeesRoutes from "./routes/payees";
@@ -217,6 +224,13 @@ app.use("/api/audit-log", auditLogRoutes);
 app.use("/api/ai/hr", aiHrRoutes);
 app.use("/api/recruitment", recruitmentRoutes);
 app.use("/api/live-data", liveDataRoutes);
+app.use("/api/shift-handovers", shiftHandoversRoutes);
+app.use("/api/downtime-events", downtimeEventsRoutes);
+app.use("/api/it-assets", itAssetsRoutes);
+app.use("/api/it-tickets", itTicketsRoutes);
+app.use("/api/budget-plans", budgetPlansRoutes);
+app.use("/api/toolbox-talks", toolboxTalksRoutes);
+app.use("/api/regulatory-submissions", regulatorySubmissionsRoutes);
 app.use("/api/ai", aiRoutes);
 
 app.use((err: any, _req: express.Request, res: express.Response, _next: express.NextFunction) => {

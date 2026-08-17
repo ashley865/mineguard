@@ -641,7 +641,8 @@
       "OUT_OF_SERVICE": "Außer Betrieb",
       "IN_STORE": "Auf Lager",
       "ASSIGNED": "Zugewiesen",
-      "IN_MAINTENANCE": "In Wartung"
+      "IN_MAINTENANCE": "In Wartung",
+      "IN_REPAIR": "In Reparatur"
     },
     "severity": {
       "LOW": "Niedrig",
@@ -3768,5 +3769,133 @@
   "financial": {
     "nav": "Finanzielle Leistung",
     "subtitle": "Erträge, Ausgaben und Marge über alle Ihre Standorte"
+  },
+  "shiftHandover": {
+    "nav": "Schichtübergabeprotokoll",
+    "subtitle": "Übergabenotizen zwischen abtretenden und antretenden Schichtleitern",
+    "new": "+ Neue Übergabe",
+    "newTitle": "Neue Schichtübergabe",
+    "outgoingSupervisor": "Abtretender Vorgesetzter",
+    "summary": "Zusammenfassung",
+    "issues": "Probleme",
+    "actionItems": "Maßnahmen",
+    "noneYet": "Noch keine Schichtübergaben protokolliert.",
+    "confirmDelete": "Diese Schichtübergabe löschen?"
+  },
+  "downtime": {
+    "nav": "Ausfallzeiten",
+    "subtitle": "Erfassen Sie, warum und wie lange Anlagen oder Prozesse gestoppt wurden",
+    "new": "+ Ausfall Erfassen",
+    "newTitle": "Neues Ausfallereignis",
+    "category": "Kategorie",
+    "categories": {
+      "EQUIPMENT_BREAKDOWN": "Geräteausfall",
+      "POWER_OUTAGE": "Stromausfall",
+      "WEATHER": "Wetter",
+      "SAFETY_STOPPAGE": "Sicherheitsstopp",
+      "MATERIAL_SHORTAGE": "Materialmangel",
+      "LABOUR_SHORTAGE": "Personalmangel",
+      "PLANNED_MAINTENANCE": "Geplante Wartung",
+      "OTHER": "Sonstiges"
+    },
+    "affectedArea": "Betroffener Bereich (optional)",
+    "startedAt": "Begonnen um",
+    "endedAt": "Beendet um",
+    "totalHours": "Gesamtausfallzeit (Stunden)",
+    "markEnded": "Jetzt als beendet markieren",
+    "noneYet": "Noch keine Ausfallereignisse protokolliert.",
+    "confirmDelete": "Dieses Ausfallereignis löschen?"
+  },
+  "itOperations": {
+    "nav": "IT-Betrieb",
+    "subtitle": "IT-Bestandsverwaltung und Support-Ticket-Verfolgung",
+    "tabAssets": "Bestände",
+    "tabTickets": "Support-Tickets",
+    "assetTag": "Bestandskennzeichen",
+    "assetName": "Bestandsname",
+    "assetType": "Bestandstyp",
+    "assetTypes": {
+      "COMPUTER": "Computer",
+      "SERVER": "Server",
+      "NETWORK_DEVICE": "Netzwerkgerät",
+      "MOBILE_DEVICE": "Mobilgerät",
+      "SOFTWARE_LICENSE": "Softwarelizenz",
+      "PERIPHERAL": "Peripheriegerät",
+      "OTHER": "Sonstiges"
+    },
+    "assetStatuses": {
+      "ACTIVE": "Aktiv",
+      "IN_REPAIR": "In Reparatur",
+      "RETIRED": "Ausgemustert",
+      "LOST": "Verloren"
+    },
+    "assignedToName": "Zugewiesen an",
+    "location": "Standort",
+    "warrantyExpiry": "Garantieablauf",
+    "newAsset": "+ Neuer Bestand",
+    "newAssetTitle": "Neuer IT-Bestand",
+    "noneYetAssets": "Noch keine IT-Bestände erfasst.",
+    "confirmDeleteAsset": "Diesen IT-Bestand löschen?",
+    "ticketSubject": "Betreff",
+    "priority": "Priorität",
+    "priorities": {
+      "LOW": "Niedrig",
+      "MEDIUM": "Mittel",
+      "HIGH": "Hoch",
+      "URGENT": "Dringend"
+    },
+    "reportedByName": "Gemeldet von",
+    "newTicket": "+ Neues Ticket",
+    "newTicketTitle": "Neues Support-Ticket",
+    "noneYetTickets": "Noch keine Support-Tickets erfasst.",
+    "confirmDeleteTicket": "Dieses Ticket löschen?",
+    "startProgress": "Bearbeitung starten",
+    "markResolved": "Als gelöst markieren",
+    "markClosed": "Ticket schließen"
+  },
+  "budgetPlanning": {
+    "nav": "Budgetplanung",
+    "subtitle": "Budgets nach Kategorie und Zeitraum festlegen, live mit den tatsächlichen Ausgaben verglichen",
+    "new": "+ Neues Budget",
+    "newTitle": "Neuer Budgetplan",
+    "allSites": "Alle Standorte (minenweit)",
+    "periodStart": "Zeitraum Beginn",
+    "periodEnd": "Zeitraum Ende",
+    "period": "Zeitraum",
+    "budgetedAmount": "Budgetierter Betrag",
+    "actualAmount": "Tatsächliche Ausgaben",
+    "variance": "Abweichung",
+    "noneYet": "Noch keine Budgetpläne festgelegt.",
+    "confirmDelete": "Diesen Budgetplan löschen?"
+  },
+  "toolboxTalks": {
+    "nav": "Sicherheitsunterweisungen",
+    "subtitle": "Protokollieren Sie durchgeführte Sicherheitsunterweisungen pro Standort",
+    "new": "+ Unterweisung Erfassen",
+    "newTitle": "Neue Sicherheitsunterweisung",
+    "talkDate": "Datum der Unterweisung",
+    "topic": "Thema",
+    "presenter": "Vortragender",
+    "attendeeCount": "Teilnehmer",
+    "noneYet": "Noch keine Sicherheitsunterweisungen protokolliert.",
+    "confirmDelete": "Diesen Unterweisungseintrag löschen?"
+  },
+  "regulatorySubmissions": {
+    "nav": "Behördeneinreichungen",
+    "subtitle": "Verfolgen Sie Einreichungen und Berichte an Behörden mit Fälligkeitsterminen",
+    "new": "+ Neue Einreichung",
+    "newTitle": "Neue Behördeneinreichung",
+    "regulator": "Behörde",
+    "referenceNumber": "Referenznummer",
+    "dueDate": "Fälligkeitsdatum",
+    "attachment": "Anhang (optional)",
+    "statuses": {
+      "DRAFT": "Entwurf",
+      "SUBMITTED": "Eingereicht",
+      "ACKNOWLEDGED": "Bestätigt",
+      "OVERDUE": "Überfällig"
+    },
+    "noneYet": "Noch keine Behördeneinreichungen protokolliert.",
+    "confirmDelete": "Diese Einreichung löschen?"
   }
 }

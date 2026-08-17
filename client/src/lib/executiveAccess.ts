@@ -47,6 +47,12 @@ export const restrictedModules = [
   "/community",
   "/geology",
   "/winders",
+  "/shift-handovers",
+  "/downtime",
+  "/it-operations",
+  "/budget-planning",
+  "/toolbox-talks",
+  "/regulatory-submissions",
 ] as const;
 
 export type RestrictedModule = (typeof restrictedModules)[number];
@@ -58,7 +64,7 @@ const fullAccess: RestrictedModule[] = [...restrictedModules];
 export const executiveTitleModules: Partial<Record<ExecutiveTitle, RestrictedModule[]>> = {
   GENERAL_MANAGER: fullAccess,
   COO: fullAccess,
-  CFO: ["/reporting", "/contractors", "/permits", "/documents", "/compliance", "/incidents", "/marketplace", "/tenders", "/production", "/inventory", "/payroll", "/procurement", "/invoices", "/expenses", "/resources", "/geology"],
+  CFO: ["/reporting", "/contractors", "/permits", "/documents", "/compliance", "/incidents", "/marketplace", "/tenders", "/production", "/inventory", "/payroll", "/procurement", "/invoices", "/expenses", "/resources", "/geology", "/budget-planning"],
   HR_MANAGER: ["/workers", "/workforce", "/visitors", "/documents", "/reporting", "/emergency", "/payroll", "/scanner", "/labour-relations"],
   SECURITY_MANAGER: ["/visitors", "/scanner", "/trucks", "/incidents", "/alerts", "/workers", "/sites", "/safety-observations", "/emergency", "/security"],
   SAFETY_MANAGER: [
@@ -81,6 +87,7 @@ export const executiveTitleModules: Partial<Record<ExecutiveTitle, RestrictedMod
     "/mine-rescue",
     "/resources",
     "/winders",
+    "/toolbox-talks",
   ],
   OPERATIONS_MANAGER: [
     "/sites",
@@ -111,6 +118,8 @@ export const executiveTitleModules: Partial<Record<ExecutiveTitle, RestrictedMod
     "/geology",
     "/winders",
     "/community",
+    "/shift-handovers",
+    "/downtime",
   ],
   COMPLIANCE_OFFICER: [
     "/compliance",
@@ -131,8 +140,9 @@ export const executiveTitleModules: Partial<Record<ExecutiveTitle, RestrictedMod
     "/labour-relations",
     "/resources",
     "/community",
+    "/regulatory-submissions",
   ],
-  IT_MANAGER: ["/sites", "/sensors", "/equipment", "/alerts", "/reporting", "/security", "/scanner", "/documents", "/maintenance"],
+  IT_MANAGER: ["/sites", "/sensors", "/equipment", "/alerts", "/reporting", "/security", "/scanner", "/documents", "/maintenance", "/it-operations"],
 };
 
 export function isModuleAllowed(role: Role | undefined, title: ExecutiveTitle | null | undefined, path: string): boolean {

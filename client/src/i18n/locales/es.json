@@ -641,7 +641,8 @@
       "OUT_OF_SERVICE": "Fuera de Servicio",
       "IN_STORE": "En Almacén",
       "ASSIGNED": "Asignado",
-      "IN_MAINTENANCE": "En Mantenimiento"
+      "IN_MAINTENANCE": "En Mantenimiento",
+      "IN_REPAIR": "En reparación"
     },
     "severity": {
       "LOW": "Baja",
@@ -3768,5 +3769,133 @@
   "financial": {
     "nav": "Rendimiento Financiero",
     "subtitle": "Ganancias, gastos y margen en todos sus sitios"
+  },
+  "shiftHandover": {
+    "nav": "Registro de Cambio de Turno",
+    "subtitle": "Notas de continuidad entre supervisores de turno saliente y entrante",
+    "new": "+ Nuevo Traspaso",
+    "newTitle": "Nuevo Traspaso de Turno",
+    "outgoingSupervisor": "Supervisor saliente",
+    "summary": "Resumen",
+    "issues": "Problemas",
+    "actionItems": "Acciones pendientes",
+    "noneYet": "Aún no se han registrado traspasos de turno.",
+    "confirmDelete": "¿Eliminar este traspaso de turno?"
+  },
+  "downtime": {
+    "nav": "Tiempo de Inactividad",
+    "subtitle": "Registre por qué y durante cuánto tiempo se detuvieron equipos o procesos",
+    "new": "+ Registrar Inactividad",
+    "newTitle": "Nuevo Evento de Inactividad",
+    "category": "Categoría",
+    "categories": {
+      "EQUIPMENT_BREAKDOWN": "Avería de equipo",
+      "POWER_OUTAGE": "Corte de energía",
+      "WEATHER": "Clima",
+      "SAFETY_STOPPAGE": "Parada por seguridad",
+      "MATERIAL_SHORTAGE": "Escasez de material",
+      "LABOUR_SHORTAGE": "Escasez de personal",
+      "PLANNED_MAINTENANCE": "Mantenimiento planificado",
+      "OTHER": "Otro"
+    },
+    "affectedArea": "Área afectada (opcional)",
+    "startedAt": "Iniciado a las",
+    "endedAt": "Finalizado a las",
+    "totalHours": "Inactividad Total (horas)",
+    "markEnded": "Marcar como finalizado ahora",
+    "noneYet": "Aún no se han registrado eventos de inactividad.",
+    "confirmDelete": "¿Eliminar este evento de inactividad?"
+  },
+  "itOperations": {
+    "nav": "Operaciones de TI",
+    "subtitle": "Inventario de activos de TI y seguimiento de tickets de soporte",
+    "tabAssets": "Activos",
+    "tabTickets": "Tickets de Soporte",
+    "assetTag": "Etiqueta del activo",
+    "assetName": "Nombre del activo",
+    "assetType": "Tipo de activo",
+    "assetTypes": {
+      "COMPUTER": "Computadora",
+      "SERVER": "Servidor",
+      "NETWORK_DEVICE": "Dispositivo de red",
+      "MOBILE_DEVICE": "Dispositivo móvil",
+      "SOFTWARE_LICENSE": "Licencia de software",
+      "PERIPHERAL": "Periférico",
+      "OTHER": "Otro"
+    },
+    "assetStatuses": {
+      "ACTIVE": "Activo",
+      "IN_REPAIR": "En reparación",
+      "RETIRED": "Retirado",
+      "LOST": "Perdido"
+    },
+    "assignedToName": "Asignado a",
+    "location": "Ubicación",
+    "warrantyExpiry": "Vencimiento de garantía",
+    "newAsset": "+ Nuevo Activo",
+    "newAssetTitle": "Nuevo Activo de TI",
+    "noneYetAssets": "Aún no hay activos de TI registrados.",
+    "confirmDeleteAsset": "¿Eliminar este activo de TI?",
+    "ticketSubject": "Asunto",
+    "priority": "Prioridad",
+    "priorities": {
+      "LOW": "Baja",
+      "MEDIUM": "Media",
+      "HIGH": "Alta",
+      "URGENT": "Urgente"
+    },
+    "reportedByName": "Reportado por",
+    "newTicket": "+ Nuevo Ticket",
+    "newTicketTitle": "Nuevo Ticket de Soporte",
+    "noneYetTickets": "Aún no se han registrado tickets de soporte.",
+    "confirmDeleteTicket": "¿Eliminar este ticket?",
+    "startProgress": "Iniciar progreso",
+    "markResolved": "Marcar como resuelto",
+    "markClosed": "Cerrar ticket"
+  },
+  "budgetPlanning": {
+    "nav": "Planificación de Presupuesto",
+    "subtitle": "Defina presupuestos por categoría y período, comparados en vivo con el gasto real",
+    "new": "+ Nuevo Presupuesto",
+    "newTitle": "Nuevo Plan de Presupuesto",
+    "allSites": "Todos los sitios (a nivel de mina)",
+    "periodStart": "Inicio del período",
+    "periodEnd": "Fin del período",
+    "period": "Período",
+    "budgetedAmount": "Monto presupuestado",
+    "actualAmount": "Gasto real",
+    "variance": "Variación",
+    "noneYet": "Aún no se han definido planes de presupuesto.",
+    "confirmDelete": "¿Eliminar este plan de presupuesto?"
+  },
+  "toolboxTalks": {
+    "nav": "Charlas de Seguridad",
+    "subtitle": "Registre las charlas de seguridad realizadas por sitio",
+    "new": "+ Registrar Charla",
+    "newTitle": "Nueva Charla de Seguridad",
+    "talkDate": "Fecha de la charla",
+    "topic": "Tema",
+    "presenter": "Presentador",
+    "attendeeCount": "Asistentes",
+    "noneYet": "Aún no se han registrado charlas de seguridad.",
+    "confirmDelete": "¿Eliminar este registro de charla?"
+  },
+  "regulatorySubmissions": {
+    "nav": "Presentaciones Regulatorias",
+    "subtitle": "Seguimiento de presentaciones e informes enviados a los reguladores, con fechas límite",
+    "new": "+ Nueva Presentación",
+    "newTitle": "Nueva Presentación Regulatoria",
+    "regulator": "Regulador",
+    "referenceNumber": "Número de referencia",
+    "dueDate": "Fecha límite",
+    "attachment": "Archivo adjunto (opcional)",
+    "statuses": {
+      "DRAFT": "Borrador",
+      "SUBMITTED": "Enviado",
+      "ACKNOWLEDGED": "Reconocido",
+      "OVERDUE": "Vencido"
+    },
+    "noneYet": "Aún no se han registrado presentaciones regulatorias.",
+    "confirmDelete": "¿Eliminar esta presentación?"
   }
 }

@@ -102,14 +102,12 @@ export default function Dashboard() {
         />
       </div>
 
-      {user?.role === "ADMIN" && (
-        <>
-          <AiAssistantWidget showReportGenerator />
-          <LiveDataWidget showMineralPrices />
-          <IndustryNewsWidget />
-          <FinancialSummaryWidget />
-        </>
-      )}
+      {user?.role === "ADMIN" && <AiAssistantWidget showReportGenerator />}
+
+      <LiveDataWidget showMineralPrices={user?.role === "ADMIN"} />
+      <IndustryNewsWidget />
+
+      {user?.role === "ADMIN" && <FinancialSummaryWidget />}
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
         <div className={`${cardClass} p-3`}>
