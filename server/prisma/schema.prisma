@@ -325,6 +325,13 @@ model Site {
   location    String
   description String?
   status      SiteStatus @default(OPERATIONAL)
+  // Resolved once from `location` text via the free Open-Meteo geocoder and cached here
+  // permanently (rather than re-resolved from an in-memory cache every server restart) —
+  // both so weather lookups always use a stable point rather than whatever the geocoder
+  // happens to return that day, and so the same coordinate can be plotted on the site map.
+  latitude    Float?
+  longitude   Float?
+  geocodedAt  DateTime?
   createdAt   DateTime   @default(now())
   updatedAt   DateTime   @updatedAt
 

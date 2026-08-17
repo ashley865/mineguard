@@ -30,7 +30,6 @@ const PRICE_TTL_MS = 15 * 60 * 1000;
 const FX_TTL_MS = 60 * 60 * 1000;
 const NEWS_TTL_MS = 30 * 60 * 1000;
 
-const geocodeCache = new Map<string, { lat: number; lon: number } | null>();
 const weatherCache = new Map<string, CacheEntry<SiteWeather>>();
 let priceCache: CacheEntry<MineralPricesPayload> | null = null;
 let fxCache: CacheEntry<number | null> | null = null;
@@ -54,23 +53,40 @@ async function fetchUsdToZarRate(): Promise<number | null> {
 }
 
 async function geocodeLocation(location: string): Promise<{ lat: number; lon: number } | null> {
-  if (geocodeCache.has(location)) return geocodeCache.get(location)!;
   try {
     const url = `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(location)}&count=1&language=en&format=json`;
     const res = await fetch(url);
-    if (!res.ok) {
-      geocodeCache.set(location, null);
-      return null;
-    }
+    if (!res.ok) return null;
     const data: any = await res.json();
     const first = data?.results?.[0];
-    const result = first ? { lat: first.latitude, lon: first.longitude } : null;
-    geocodeCache.set(location, result);
-    return result;
+    return first ? { lat: first.latitude, lon: first.longitude } : null;
   } catch {
-    geocodeCache.set(location, null);
     return null;
   }
+}
+
+// Resolves once and persists to the Site record — every subsequent call for this site
+// reads the stored coordinate directly rather than re-geocoding, which is both more
+// efficient and more stable/"accurate": weather (and the site map) always plot the same
+// point rather than whatever the geocoder happens to return that particular call.
+async function resolveSiteCoordinates(site: {
+  id: string;
+  location: string;
+  latitude: number | null;
+  longitude: number | null;
+}): Promise<{ lat: number; lon: number } | null> {
+  if (site.latitude != null && site.longitude != null) {
+    return { lat: site.latitude, lon: site.longitude };
+  }
+  const coords = await geocodeLocation(site.location);
+  if (!coords) return null;
+  await prisma.site
+    .update({
+      where: { id: site.id },
+      data: { latitude: coords.lat, longitude: coords.lon, geocodedAt: new Date() },
+    })
+    .catch(() => {});
+  return coords;
 }
 
 const WEATHER_CODE_MAP: Record<number, { condition: string; icon: string }> = {
@@ -108,12 +124,9 @@ interface SiteWeather {
   observedAt: string;
 }
 
-async function fetchSiteWeather(siteId: string, location: string): Promise<SiteWeather | null> {
+async function fetchSiteWeather(siteId: string, coords: { lat: number; lon: number }): Promise<SiteWeather | null> {
   const hit = weatherCache.get(siteId);
   if (hit && hit.expiresAt > Date.now()) return hit.data;
-
-  const coords = await geocodeLocation(location);
-  if (!coords) return null;
 
   try {
     const url =
@@ -147,16 +160,21 @@ router.get("/weather", async (req, res) => {
   if (!mineId) return;
   const sites = await prisma.site.findMany({
     where: { mineId },
-    select: { id: true, name: true, location: true },
+    select: { id: true, name: true, location: true, latitude: true, longitude: true },
     take: 8,
     orderBy: { name: "asc" },
   });
   const results = await Promise.all(
-    sites.map(async (site) => ({
-      siteId: site.id,
-      siteName: site.name,
-      weather: await fetchSiteWeather(site.id, site.location),
-    }))
+    sites.map(async (site) => {
+      const coords = await resolveSiteCoordinates(site);
+      return {
+        siteId: site.id,
+        siteName: site.name,
+        latitude: coords?.lat ?? null,
+        longitude: coords?.lon ?? null,
+        weather: coords ? await fetchSiteWeather(site.id, coords) : null,
+      };
+    })
   );
   res.json(results.filter((r) => r.weather !== null));
 });
@@ -317,7 +335,7 @@ interface IndustryNewsPayload {
 
 const NEWS_RSS_URL =
   "https://news.google.com/rss/search?q=south%20africa%20mining%20OR%20%22department%20of%20mineral%20resources%22%20OR%20MHSA%20mining&hl=en-ZA&gl=ZA&ceid=ZA:en";
-const NEWS_ITEM_LIMIT = 8;
+const NEWS_ITEM_LIMIT = 3;
 
 const NEWS_SUMMARY_DISCLAIMER =
   "Summaries are AI-generated from the headline and snippet provided by the news source only — not the full " +

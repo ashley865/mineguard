@@ -2,7 +2,8 @@ import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell, LabelList, CartesianGrid } from "recharts";
 import { api } from "../api/client";
-import { DidYouKnowResponse, ExecutiveTitle, IndustryNewsItem, IndustryNewsResponse, MineralPricesResponse, MetalPrice, SiteWeatherReading } from "../api/types";
+import { DidYouKnowResponse, ExecutiveTitle, MineralPricesResponse, MetalPrice, SiteWeatherReading } from "../api/types";
+import SiteLocationMap from "./SiteLocationMap";
 
 // A deliberately distinct "live terminal" look — dark navy rather than the app's
 // otherwise light theme — so this panel reads as live/real-time data at a glance,
@@ -129,63 +130,6 @@ function PriceChangeTooltip({ active, payload }: any) {
   );
 }
 
-function timeAgo(dateStr: string | null): string {
-  if (!dateStr) return "";
-  const date = new Date(dateStr);
-  if (Number.isNaN(date.getTime())) return "";
-  const hours = Math.floor((Date.now() - date.getTime()) / (1000 * 60 * 60));
-  if (hours < 1) return "<1h";
-  if (hours < 24) return `${hours}h`;
-  return `${Math.floor(hours / 24)}d`;
-}
-
-function NewsCard({ item }: { item: IndustryNewsItem }) {
-  const { t } = useTranslation();
-  const [expanded, setExpanded] = useState(false);
-  return (
-    <div className="rounded-lg border border-white/10 bg-white/[0.04] overflow-hidden">
-      <button
-        type="button"
-        className="w-full text-left px-3 py-2.5 flex items-start justify-between gap-2 hover:bg-white/[0.03] transition-colors"
-        onClick={() => setExpanded((v) => !v)}
-      >
-        <div className="min-w-0">
-          <p className="text-xs font-semibold text-white/90 leading-snug">{item.title}</p>
-          <div className="text-[10px] text-white/40 mt-1">
-            {item.source ?? t("liveData.unknownSource")}
-            {item.publishedAt ? ` · ${timeAgo(item.publishedAt)}` : ""}
-          </div>
-        </div>
-        <span className={`shrink-0 text-white/40 text-xs transition-transform ${expanded ? "rotate-180" : ""}`}>▾</span>
-      </button>
-      {expanded && (
-        <div className="px-3 pb-3 space-y-2 border-t border-white/10 pt-2">
-          {item.summary ? (
-            <div className="flex items-start gap-2">
-              <span className="flex items-center justify-center w-5 h-5 rounded bg-hazard-500 text-white text-[9px] font-extrabold shrink-0 mt-0.5">
-                AI
-              </span>
-              <p className="text-[11px] text-white/85 leading-relaxed italic">{item.summary}</p>
-            </div>
-          ) : item.snippet ? (
-            <p className="text-[11px] text-white/70 leading-relaxed">{item.snippet}</p>
-          ) : (
-            <p className="text-[11px] text-white/40 italic">{t("liveData.noSummary")}</p>
-          )}
-          <a
-            href={item.link}
-            target="_blank"
-            rel="noreferrer"
-            className="inline-block text-[11px] font-semibold text-hazard-400 hover:text-hazard-300"
-          >
-            {t("liveData.readFullArticle")} →
-          </a>
-        </div>
-      )}
-    </div>
-  );
-}
-
 // Mineral/commodity prices are financially/operationally relevant to only some
 // executive titles — everyone else sees weather, the fact of the day, and industry
 // news, but not price data that isn't meaningful to their role.
@@ -196,25 +140,22 @@ export default function LiveDataWidget({ showMineralPrices = false }: { showMine
   const [weather, setWeather] = useState<SiteWeatherReading[]>([]);
   const [prices, setPrices] = useState<MineralPricesResponse | null>(null);
   const [fact, setFact] = useState<string | null>(null);
-  const [news, setNews] = useState<IndustryNewsResponse | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     let cancelled = false;
     async function load() {
-      const [w, p, f, n] = await Promise.all([
+      const [w, p, f] = await Promise.all([
         api.get<SiteWeatherReading[]>("/live-data/weather").then((r) => r.data).catch(() => []),
         showMineralPrices
           ? api.get<MineralPricesResponse>("/live-data/mineral-prices").then((r) => r.data).catch(() => null)
           : Promise.resolve(null),
         api.get<DidYouKnowResponse>("/live-data/did-you-know").then((r) => r.data).catch(() => null),
-        api.get<IndustryNewsResponse>("/live-data/industry-news").then((r) => r.data).catch(() => null),
       ]);
       if (cancelled) return;
       setWeather(w);
       setPrices(p);
       setFact(f?.fact ?? null);
-      setNews(n);
       setLoading(false);
     }
     load();
@@ -228,8 +169,7 @@ export default function LiveDataWidget({ showMineralPrices = false }: { showMine
 
   const hasWeather = weather.length > 0;
   const hasPrices = showMineralPrices && !!prices && prices.prices.length > 0;
-  const hasNews = !!news && news.items.length > 0;
-  if (!hasWeather && !hasPrices && !fact && !hasNews) return null;
+  if (!hasWeather && !hasPrices && !fact) return null;
 
   return (
     <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-gradient-to-br from-[#0a1628] via-[#0f2140] to-[#0a1628] shadow-xl shadow-black/30">
@@ -264,11 +204,12 @@ export default function LiveDataWidget({ showMineralPrices = false }: { showMine
         {hasWeather && (
           <div>
             <div className="text-[10px] text-white/40 uppercase tracking-wide mb-1.5">{t("liveData.weather")}</div>
-            <div className="flex gap-2 overflow-x-auto pb-1">
+            <div className="flex gap-2 overflow-x-auto pb-1 mb-2">
               {weather.map((w) => (
                 <WeatherCard key={w.siteId} reading={w} />
               ))}
             </div>
+            <SiteLocationMap sites={weather} />
           </div>
         )}
 
@@ -333,20 +274,6 @@ export default function LiveDataWidget({ showMineralPrices = false }: { showMine
             )}
             {prices!.disclaimer && (
               <p className="text-[10px] text-white/35 leading-relaxed mt-2">{prices!.disclaimer}</p>
-            )}
-          </div>
-        )}
-
-        {hasNews && (
-          <div>
-            <div className="text-[10px] text-white/40 uppercase tracking-wide mb-1.5">{t("liveData.industryNews")}</div>
-            <div className="space-y-1.5">
-              {news!.items.map((item) => (
-                <NewsCard key={item.link} item={item} />
-              ))}
-            </div>
-            {news!.disclaimer && (
-              <p className="text-[10px] text-white/35 leading-relaxed mt-2">{news!.disclaimer}</p>
             )}
           </div>
         )}

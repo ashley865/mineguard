@@ -3322,6 +3322,8 @@ export interface SiteWeather {
 export interface SiteWeatherReading {
   siteId: string;
   siteName: string;
+  latitude: number | null;
+  longitude: number | null;
   weather: SiteWeather;
 }
 

@@ -9,6 +9,7 @@ import { cardClass } from "../components/ui";
 import FinancialSummaryWidget from "../components/FinancialSummaryWidget";
 import AiAssistantWidget from "../components/AiAssistantWidget";
 import LiveDataWidget from "../components/LiveDataWidget";
+import IndustryNewsWidget from "../components/IndustryNewsWidget";
 
 function StatCard({
   label,
@@ -105,6 +106,7 @@ export default function Dashboard() {
         <>
           <AiAssistantWidget showReportGenerator />
           <LiveDataWidget showMineralPrices />
+          <IndustryNewsWidget />
           <FinancialSummaryWidget />
         </>
       )}

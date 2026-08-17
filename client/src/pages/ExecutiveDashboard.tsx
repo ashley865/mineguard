@@ -15,6 +15,7 @@ import InventoryProcurementWidget from "../components/InventoryProcurementWidget
 import MaintenanceDowntimeWidget from "../components/MaintenanceDowntimeWidget";
 import AiAssistantWidget from "../components/AiAssistantWidget";
 import LiveDataWidget, { MINERAL_PRICE_RELEVANT_TITLES } from "../components/LiveDataWidget";
+import IndustryNewsWidget from "../components/IndustryNewsWidget";
 
 type Tone = "positive" | "negative" | "caution";
 
@@ -282,6 +283,7 @@ export default function ExecutiveDashboard() {
             }
           />
           <LiveDataWidget showMineralPrices={!!user?.title && MINERAL_PRICE_RELEVANT_TITLES.includes(user.title)} />
+          <IndustryNewsWidget />
         </>
       )}
       {canSeeFinancials && <FinancialSummaryWidget />}
