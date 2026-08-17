@@ -1,12 +1,25 @@
 import { Router } from "express";
 import multer from "multer";
 import { z } from "zod";
+import { ExpenseCategory } from "@prisma/client";
 import { prisma } from "../prisma";
 import { requireAuth, requireRole } from "../middleware/auth";
 import { requireMineId } from "../lib/mineScope";
 import { documentFileFilter } from "../lib/uploadFilters";
 
 const router = Router();
+
+// An approved request with an amount attached is real money leaving the business, so it
+// flows into the main Expenses ledger the same way a payslip or purchase order does —
+// mapped to the closest Expense category per request category, defaulting to OTHER.
+const CATEGORY_TO_EXPENSE_CATEGORY: Record<string, ExpenseCategory> = {
+  PAYROLL_PAYMENT: "SALARIES_WAGES",
+  INVOICE_APPROVAL: "PROFESSIONAL_SERVICES",
+  PURCHASE_APPROVAL: "EQUIPMENT_SUPPLIES",
+  BUDGET_APPROVAL: "OPERATIONS",
+  DOCUMENT_REVIEW: "OTHER",
+  GENERAL: "OTHER",
+};
 
 const upload = multer({
   storage: multer.memoryStorage(),
@@ -66,6 +79,7 @@ const requestSelect = {
   fileName: true,
   fileMimeType: true,
   fileSize: true,
+  expense: { select: { id: true } },
   createdAt: true,
 } as const;
 
@@ -157,6 +171,38 @@ router.put("/:id/respond", async (req, res) => {
   if (req.auth!.role !== "ADMIN") {
     const me = await prisma.user.findUnique({ where: { id: req.auth!.userId }, select: { title: true } });
     if (me?.title !== existing.toTitle) return res.status(403).json({ error: "Insufficient permissions" });
+  }
+
+  // Only fires on the PENDING -> APPROVED transition (not on the later APPROVED ->
+  // COMPLETED one) so a request never generates a second expense.
+  if (parsed.data.status === "APPROVED" && existing.status !== "APPROVED" && existing.amount != null) {
+    let payee = await prisma.payee.findFirst({ where: { linkedUserId: existing.fromUserId, payeeType: "EMPLOYEE" } });
+    if (!payee) {
+      const fromUser = await prisma.user.findUnique({ where: { id: existing.fromUserId }, select: { name: true } });
+      if (fromUser) {
+        payee = await prisma.payee.create({
+          data: { mineId, payeeType: "EMPLOYEE", name: fromUser.name, linkedUserId: existing.fromUserId },
+        });
+      }
+    }
+    const site = payee ? await prisma.site.findFirst({ where: { mineId }, orderBy: { createdAt: "asc" } }) : null;
+    if (payee && site) {
+      await prisma.expense.create({
+        data: {
+          siteId: site.id,
+          payeeId: payee.id,
+          expenseNumber: `REQ-${existing.id.slice(-8).toUpperCase()}`,
+          category: CATEGORY_TO_EXPENSE_CATEGORY[existing.category] ?? "OTHER",
+          description: `Executive Request - ${existing.subject}`,
+          amount: existing.amount,
+          currency: "ZAR",
+          expenseDate: new Date(),
+          paymentMethod: "EFT",
+          executiveRequestId: existing.id,
+          createdById: req.auth!.userId,
+        },
+      });
+    }
   }
 
   const request = await prisma.executiveRequest.update({

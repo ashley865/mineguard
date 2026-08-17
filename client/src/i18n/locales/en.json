@@ -1858,6 +1858,7 @@
     "attachment": "Attachment (optional)",
     "attachmentHint": "Click or drag a document or picture to attach",
     "amountNeeded": "Amount Needed",
+    "addedToExpenses": "✓ Added to Expenses",
     "emergencyMode": "Emergency Request",
     "emergencyModeHint": "Flag this as urgent — it will jump to the top of the recipient's list and trigger an urgent alert.",
     "emergencyBadge": "Emergency",

@@ -2475,7 +2475,8 @@
     "emergencyMode": "Solicitud de Emergencia",
     "emergencyModeHint": "Márquelo como urgente: aparecerá al principio de la lista del destinatario y activará una alerta urgente.",
     "emergencyBadge": "Emergencia",
-    "toastNewEmergencyTitle": "🚨 Solicitud de emergencia de {{name}}"
+    "toastNewEmergencyTitle": "🚨 Solicitud de emergencia de {{name}}",
+    "addedToExpenses": "✓ Agregado a Gastos"
   },
   "calling": {
     "incomingVideoCall": "Videollamada entrante…",

@@ -2475,7 +2475,8 @@
     "emergencyMode": "Noodversoek",
     "emergencyModeHint": "Merk dit as dringend — dit spring na die bopunt van die ontvanger se lys en aktiveer 'n dringende waarskuwing.",
     "emergencyBadge": "Noodgeval",
-    "toastNewEmergencyTitle": "🚨 Noodversoek van {{name}}"
+    "toastNewEmergencyTitle": "🚨 Noodversoek van {{name}}",
+    "addedToExpenses": "✓ By Uitgawes gevoeg"
   },
   "calling": {
     "incomingVideoCall": "Inkomende video-oproep…",

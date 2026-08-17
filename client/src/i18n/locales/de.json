@@ -2475,7 +2475,8 @@
     "emergencyMode": "Notfallanfrage",
     "emergencyModeHint": "Als dringend markieren — sie springt an die Spitze der Liste des Empfängers und löst eine dringende Warnung aus.",
     "emergencyBadge": "Notfall",
-    "toastNewEmergencyTitle": "🚨 Notfallanfrage von {{name}}"
+    "toastNewEmergencyTitle": "🚨 Notfallanfrage von {{name}}",
+    "addedToExpenses": "✓ Zu Ausgaben hinzugefügt"
   },
   "calling": {
     "incomingVideoCall": "Eingehender Videoanruf…",

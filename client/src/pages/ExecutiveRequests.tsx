@@ -1,5 +1,6 @@
 import { FormEvent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { Link } from "react-router-dom";
 import { api } from "../api/client";
 import { useAuth } from "../context/AuthContext";
 import { useSocket } from "../context/SocketContext";
@@ -170,8 +171,16 @@ function RequestCard({ request, mine, onRespond }: {
           </div>
           <div className="text-sm font-semibold">{request.subject}</div>
           {typeof request.amount === "number" && (
-            <div className="text-sm font-bold text-hazard-500 mt-0.5">
-              {t("executiveRequests.amountNeeded")}: R{request.amount.toLocaleString()}
+            <div className="text-sm font-bold text-hazard-500 mt-0.5 flex items-center gap-2 flex-wrap">
+              <span>{t("executiveRequests.amountNeeded")}: R{request.amount.toLocaleString()}</span>
+              {request.expense && (
+                <Link
+                  to="/expenses"
+                  className="text-[10px] font-bold uppercase tracking-wide text-success-600 bg-success-500/10 hover:bg-success-500/20 rounded-full px-2 py-0.5"
+                >
+                  {t("executiveRequests.addedToExpenses")}
+                </Link>
+              )}
             </div>
           )}
           <div className="text-xs text-mine-400 mt-0.5">

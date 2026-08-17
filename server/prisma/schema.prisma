@@ -1516,6 +1516,10 @@ model ExecutiveRequest {
   fileSize     Int?
   fileData     Bytes?
 
+  // Set once this request is approved with an amount attached — the same cost flows
+  // into the main Expenses ledger so Finance sees it alongside every other expense.
+  expense   Expense?
+
   createdAt DateTime @default(now())
 }
 
@@ -2836,6 +2840,8 @@ model Expense {
   maintenanceSchedule    MaintenanceSchedule? @relation(fields: [maintenanceScheduleId], references: [id], onDelete: Cascade)
   contractBidId          String?              @unique
   contractBid            ContractBid?         @relation(fields: [contractBidId], references: [id], onDelete: Cascade)
+  executiveRequestId     String?              @unique
+  executiveRequest       ExecutiveRequest?    @relation(fields: [executiveRequestId], references: [id], onDelete: Cascade)
 
   createdAt DateTime @default(now())
 }

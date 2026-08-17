@@ -132,7 +132,7 @@ export const executiveTitleModules: Partial<Record<ExecutiveTitle, RestrictedMod
     "/resources",
     "/community",
   ],
-  IT_MANAGER: ["/sites", "/sensors", "/equipment", "/alerts", "/reporting"],
+  IT_MANAGER: ["/sites", "/sensors", "/equipment", "/alerts", "/reporting", "/security", "/scanner", "/documents", "/maintenance"],
 };
 
 export function isModuleAllowed(role: Role | undefined, title: ExecutiveTitle | null | undefined, path: string): boolean {

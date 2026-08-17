@@ -2475,7 +2475,8 @@
     "emergencyMode": "Demande d'Urgence",
     "emergencyModeHint": "Marquez comme urgent : elle passera en tête de la liste du destinataire et déclenchera une alerte urgente.",
     "emergencyBadge": "Urgence",
-    "toastNewEmergencyTitle": "🚨 Demande urgente de {{name}}"
+    "toastNewEmergencyTitle": "🚨 Demande urgente de {{name}}",
+    "addedToExpenses": "✓ Ajouté aux Dépenses"
   },
   "calling": {
     "incomingVideoCall": "Appel vidéo entrant…",

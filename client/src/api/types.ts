@@ -2210,6 +2210,7 @@ export interface ExecutiveRequestItem {
   respondedAt?: string | null;
   fromUser: { id: string; name: string; title?: ExecutiveTitle | null };
   respondedBy?: { id: string; name: string } | null;
+  expense?: { id: string } | null;
   hasAttachment?: boolean;
   fileName?: string | null;
   fileMimeType?: string | null;
