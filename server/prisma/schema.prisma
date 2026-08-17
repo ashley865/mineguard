@@ -3643,6 +3643,10 @@ model DisciplinaryCase {
   sanctionDetails   String?
   status            DisciplinaryStatus  @default(OPEN)
   notes             String?
+  fileName          String?
+  fileMimeType      String?
+  fileSize          Int?
+  fileData          Bytes?
   createdById       String?
   createdBy         User?               @relation("DisciplinaryCaseCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
 
@@ -3659,6 +3663,10 @@ model GrievanceCase {
   status        GrievanceStatus @default(OPEN)
   resolution    String?
   resolvedAt    DateTime?
+  fileName      String?
+  fileMimeType  String?
+  fileSize      Int?
+  fileData      Bytes?
 
   createdAt DateTime @default(now())
 }
@@ -3674,6 +3682,10 @@ model CcmaCase {
   outcome          String?
   status           CcmaCaseStatus @default(REFERRED)
   notes            String?
+  fileName         String?
+  fileMimeType     String?
+  fileSize         Int?
+  fileData         Bytes?
 
   createdAt DateTime @default(now())
 }
@@ -3689,6 +3701,10 @@ model UnionAgreement {
   effectiveDate                DateTime
   expiryDate                   DateTime?
   status                       UnionAgreementStatus  @default(ACTIVE)
+  fileName                     String?
+  fileMimeType                 String?
+  fileSize                     Int?
+  fileData                     Bytes?
   notes                        String?
 
   createdAt DateTime @default(now())
@@ -4792,6 +4808,9 @@ model Skill {
   mine     Mine   @relation(fields: [mineId], references: [id], onDelete: Cascade)
   name     String
   category String?
+  // Optional minimum proficiency bar for this skill (e.g. "Blasting competency must be
+  // PROFICIENT+") — null means purely descriptive, no gap-tracking against a target.
+  targetLevel SkillProficiency?
 
   ratings WorkerSkillRating[]
 

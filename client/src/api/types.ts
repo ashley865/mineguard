@@ -2790,6 +2790,9 @@ export interface DisciplinaryCase {
   sanctionDetails?: string | null;
   status: DisciplinaryStatus;
   notes?: string | null;
+  fileName?: string | null;
+  fileMimeType?: string | null;
+  fileSize?: number | null;
   createdBy?: { id: string; name: string } | null;
   createdAt: string;
 }
@@ -2804,6 +2807,9 @@ export interface GrievanceCase {
   status: GrievanceStatus;
   resolution?: string | null;
   resolvedAt?: string | null;
+  fileName?: string | null;
+  fileMimeType?: string | null;
+  fileSize?: number | null;
   createdAt: string;
 }
 
@@ -2818,6 +2824,9 @@ export interface CcmaCase {
   outcome?: string | null;
   status: CcmaCaseStatus;
   notes?: string | null;
+  fileName?: string | null;
+  fileMimeType?: string | null;
+  fileSize?: number | null;
   createdAt: string;
 }
 
@@ -2831,6 +2840,9 @@ export interface UnionAgreement {
   expiryDate?: string | null;
   status: UnionAgreementStatus;
   notes?: string | null;
+  fileName?: string | null;
+  fileMimeType?: string | null;
+  fileSize?: number | null;
   createdAt: string;
 }
 
@@ -3553,6 +3565,7 @@ export interface Skill {
   id: string;
   name: string;
   category?: string | null;
+  targetLevel?: SkillProficiency | null;
   createdAt: string;
 }
 

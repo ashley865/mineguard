@@ -1033,7 +1033,9 @@
         "HAZARD_SPECIFIC": "Gevaarspesifiek",
         "SKILLS_DEVELOPMENT": "Vaardigheidsontwikkeling",
         "OTHER": "Ander"
-      }
+      },
+      "summaryExpiringSoon": "Verfrissing Binnekort Verskuldig",
+      "summaryExpired": "Verfrissing Agterstallig"
     },
     "tabCompliance": "Werknemernakoming",
     "compliance": {
@@ -2292,7 +2294,8 @@
       "hint": "'n Verlofsaldo-grootboek per werker en verloftipe, aangesien verlofversoeke alleen nie opbou of beregtiging opspoor nie.",
       "new": "+ Nuwe Saldo",
       "newTitle": "Nuwe Verlofsaldo",
-      "noneYet": "Nog geen verlofsaldo's aangeteken nie."
+      "noneYet": "Nog geen verlofsaldo's aangeteken nie.",
+      "editTitle": "Wysig Verloftegoed"
     },
     "bceaCompliance": {
       "hint": "Regstreeks bereken vanaf intyd/uittyd-rekords: gewone ure mag nie 45/week oorskry nie (BCEA a9), en 'n 12-uur daaglikse rusperiode word tussen skofte vereis (BCEA a14).",
@@ -3223,7 +3226,16 @@
     "noUnionAgreements": "Nog geen vakbondooreenkomste aangeteken nie.",
     "summaryOpenCases": "Oop Sake",
     "summaryDismissals": "Ontslae",
-    "summaryOpenGrievances": "Oop Griewe"
+    "summaryOpenGrievances": "Oop Griewe",
+    "editDisciplinaryCaseTitle": "Wysig Dissiplinêre Saak",
+    "resolution": "Oplossing",
+    "arbitrationDate": "Arbitrasiedatum",
+    "ccmaOutcome": "Uitkoms",
+    "attachment": "Aanhegsel (opsioneel)",
+    "currentFile": "Huidige lêer",
+    "editGrievanceTitle": "Wysig Griewe",
+    "editCcmaCaseTitle": "Wysig CCMA-saak",
+    "editUnionAgreementTitle": "Wysig Vakbondooreenkoms"
   },
   "resources": {
     "nav": "Water- en Energiehulpbronne",
@@ -3582,6 +3594,16 @@
       "bankDetails": "Bankbesonderhede ingesamel",
       "statutoryForms": "Statutêre vorms voltooi (UI-19, belasting)",
       "systemAccess": "Stelseltoegang toegestaan"
+    },
+    "stageDetails": "Fase-besonderhede",
+    "interviewDate": "Onderhouddatum",
+    "interviewNotes": "Onderhoudnotas",
+    "offerAmount": "Aanbodbedrag",
+    "rejectionReason": "Rede vir verwerping",
+    "stageChangeTitle": {
+      "INTERVIEWED": "Onderhoudbesonderhede — {{name}}",
+      "OFFERED": "Aanbodbesonderhede — {{name}}",
+      "REJECTED": "Rede vir Verwerping — {{name}}"
     }
   },
   "accessControl": {
@@ -3959,7 +3981,14 @@
       "EXPERT": "Kundige"
     },
     "noSkillsYet": "Nog geen vaardighede gedefinieer nie. Voeg 'n vaardigheid by om die matriks te begin.",
-    "confirmDeleteSkill": "Verwyder hierdie vaardigheid? Dit verwyder elke werker se gradering daarvoor."
+    "confirmDeleteSkill": "Verwyder hierdie vaardigheid? Dit verwyder elke werker se gradering daarvoor.",
+    "editSkillTitle": "Wysig Vaardigheid",
+    "targetLevel": "Teikenvlak (opsioneel)",
+    "targetLevelHint": "Stel 'n minimum (bv. Vaardig) om werkers wat daaronder gradeer in die matriks te merk.",
+    "noTarget": "Geen teiken nie — suiwer beskrywend",
+    "target": "Teiken",
+    "filterByCategory": "Filter volgens kategorie",
+    "allCategories": "Alle kategorieë"
   },
   "cashFlowForecast": {
     "nav": "Kontantvloeivooruitskatting",

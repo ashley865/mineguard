@@ -4,8 +4,10 @@ import { api } from "../../api/client";
 import { useAuth } from "../../context/AuthContext";
 import { TrainingRecord, TrainingType, Worker } from "../../api/types";
 import Modal from "../../components/Modal";
-import { buttonDanger, buttonPrimary, buttonSecondary, cardClass, inputClass, labelClass, selectClass } from "../../components/ui";
+import { buttonDanger, buttonPrimary, buttonSecondary, inputClass, labelClass, selectClass } from "../../components/ui";
 import DateField from "../../components/DateField";
+import DataTable, { DataTableColumn } from "../../components/DataTable";
+import SummaryCards from "../../components/SummaryCards";
 import LoadError from "../../components/LoadError";
 
 const trainingTypes: TrainingType[] = [
@@ -140,52 +142,55 @@ export default function TrainingRecordsTab({ workers }: { workers: Worker[] }) {
   if (loading) return <div className="text-mine-300">{t("workforce.loading")}</div>;
   if (loadError) return <LoadError onRetry={load} />;
 
+  const expiredCount = items.filter((i) => i.expiryDate && new Date(i.expiryDate).getTime() < Date.now()).length;
+  const expiringSoonCount = items.filter((i) => i.expiryDate && !((new Date(i.expiryDate).getTime() < Date.now())) && new Date(i.expiryDate).getTime() - Date.now() < 1000 * 60 * 60 * 24 * 90).length;
+
+  const columns: DataTableColumn<TrainingRecord>[] = [
+    { key: "worker", header: t("workforce.training.colWorker"), render: (item) => <span className="font-medium">{item.worker?.name}</span>, sortValue: (item) => item.worker?.name ?? "" },
+    { key: "course", header: t("workforce.training.colCourse"), render: (item) => item.courseName, sortValue: (item) => item.courseName },
+    { key: "type", header: t("workforce.training.colType"), render: (item) => t(`workforce.training.types.${item.trainingType}`), sortValue: (item) => item.trainingType },
+    { key: "completion", header: t("workforce.training.colCompletion"), render: (item) => new Date(item.completionDate).toLocaleDateString(), sortValue: (item) => item.completionDate },
+    { key: "expiry", header: t("workforce.training.colExpiry"), render: (item) => (item.expiryDate ? new Date(item.expiryDate).toLocaleDateString() : "—"), sortValue: (item) => item.expiryDate ?? "" },
+  ];
+
   return (
     <div className="space-y-4">
+      <SummaryCards
+        cards={[
+          { label: t("workforce.training.summaryExpiringSoon"), value: expiringSoonCount, tone: expiringSoonCount > 0 ? "hazard" : "default" },
+          { label: t("workforce.training.summaryExpired"), value: expiredCount, tone: expiredCount > 0 ? "danger" : "default" },
+        ]}
+      />
+
       {canEdit && workers.length > 0 && (
         <div className="flex justify-end">
           <button className={buttonPrimary} onClick={() => setModal("create")}>{t("workforce.training.new")}</button>
         </div>
       )}
 
-      <div className={`${cardClass} overflow-x-auto`}>
-        <table className="w-full text-sm">
-          <thead className="bg-mine-800/50 text-mine-300 text-xs uppercase">
-            <tr>
-              <th className="text-left px-4 py-2">{t("workforce.training.colWorker")}</th>
-              <th className="text-left px-4 py-2">{t("workforce.training.colCourse")}</th>
-              <th className="text-left px-4 py-2">{t("workforce.training.colType")}</th>
-              <th className="text-left px-4 py-2">{t("workforce.training.colCompletion")}</th>
-              <th className="text-left px-4 py-2">{t("workforce.training.colExpiry")}</th>
-              <th className="px-4 py-2"></th>
-            </tr>
-          </thead>
-          <tbody>
-            {items.map((item) => (
-              <tr key={item.id} className="border-t border-mine-800 hover:bg-mine-800/30">
-                <td className="px-4 py-2 font-medium">{item.worker?.name}</td>
-                <td className="px-4 py-2 text-mine-300">{item.courseName}</td>
-                <td className="px-4 py-2 text-mine-300">{t(`workforce.training.types.${item.trainingType}`)}</td>
-                <td className="px-4 py-2 text-mine-300">{new Date(item.completionDate).toLocaleDateString()}</td>
-                <td className="px-4 py-2 text-mine-300">
-                  {item.expiryDate ? new Date(item.expiryDate).toLocaleDateString() : "—"}
-                </td>
-                <td className="px-4 py-2 text-right">
-                  {canEdit && (
-                    <div className="flex justify-end gap-2">
-                      <button className="text-xs text-mine-300 hover:text-mine-50" onClick={() => setModal(item)}>{t("common.edit")}</button>
-                      <button className={buttonDanger} onClick={() => remove(item.id)}>{t("common.delete")}</button>
-                    </div>
-                  )}
-                </td>
-              </tr>
-            ))}
-            {items.length === 0 && (
-              <tr><td colSpan={6} className="px-4 py-6 text-center text-mine-400">{t("workforce.training.noneYet")}</td></tr>
-            )}
-          </tbody>
-        </table>
-      </div>
+      <DataTable
+        columns={columns}
+        rows={items}
+        rowKey={(item) => item.id}
+        emptyMessage={t("workforce.training.noneYet")}
+        searchValue={(item) => `${item.worker?.name ?? ""} ${item.courseName} ${item.trainingType}`}
+        exportFilename="training-records"
+        exportColumns={[
+          { header: t("workforce.training.colWorker"), value: (item) => item.worker?.name ?? "" },
+          { header: t("workforce.training.colCourse"), value: (item) => item.courseName },
+          { header: t("workforce.training.colType"), value: (item) => item.trainingType },
+          { header: t("workforce.training.colCompletion"), value: (item) => item.completionDate },
+          { header: t("workforce.training.colExpiry"), value: (item) => item.expiryDate ?? "" },
+        ]}
+        actions={(item) => (
+          canEdit ? (
+            <div className="flex justify-end gap-2">
+              <button className="text-xs text-mine-300 hover:text-mine-50" onClick={() => setModal(item)}>{t("common.edit")}</button>
+              <button className={buttonDanger} onClick={() => remove(item.id)}>{t("common.delete")}</button>
+            </div>
+          ) : null
+        )}
+      />
 
       {modal && (
         <Modal title={modal === "create" ? t("workforce.training.newTitle") : t("workforce.training.editTitle")} onClose={() => setModal(null)}>

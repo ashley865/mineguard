@@ -1033,7 +1033,9 @@
         "HAZARD_SPECIFIC": "Danger Spécifique",
         "SKILLS_DEVELOPMENT": "Développement des Compétences",
         "OTHER": "Autre"
-      }
+      },
+      "summaryExpiringSoon": "Recyclage Bientôt Dû",
+      "summaryExpired": "Recyclage en Retard"
     },
     "tabCompliance": "Conformité des Employés",
     "compliance": {
@@ -2292,7 +2294,8 @@
       "hint": "Un registre des soldes de congés par travailleur et type de congé, car les demandes de congé seules ne suivent pas l'accumulation ni le droit.",
       "new": "+ Nouveau Solde",
       "newTitle": "Nouveau Solde de Congés",
-      "noneYet": "Aucun solde de congés enregistré pour l'instant."
+      "noneYet": "Aucun solde de congés enregistré pour l'instant.",
+      "editTitle": "Modifier le Solde de Congé"
     },
     "bceaCompliance": {
       "hint": "Calculé en direct à partir des relevés de pointage : les heures ordinaires ne peuvent excéder 45/semaine (BCEA art. 9), et une période de repos quotidien de 12 heures est requise entre les postes (BCEA art. 14).",
@@ -3223,7 +3226,16 @@
     "noUnionAgreements": "Aucun accord syndical enregistré pour l'instant.",
     "summaryOpenCases": "Dossiers Ouverts",
     "summaryDismissals": "Licenciements",
-    "summaryOpenGrievances": "Griefs Ouverts"
+    "summaryOpenGrievances": "Griefs Ouverts",
+    "editDisciplinaryCaseTitle": "Modifier le Cas Disciplinaire",
+    "resolution": "Résolution",
+    "arbitrationDate": "Date d'arbitrage",
+    "ccmaOutcome": "Résultat",
+    "attachment": "Pièce jointe (facultatif)",
+    "currentFile": "Fichier actuel",
+    "editGrievanceTitle": "Modifier le Grief",
+    "editCcmaCaseTitle": "Modifier le Cas CCMA",
+    "editUnionAgreementTitle": "Modifier l'Accord Syndical"
   },
   "resources": {
     "nav": "Ressources Eau et Énergie",
@@ -3582,6 +3594,16 @@
       "bankDetails": "Coordonnées bancaires recueillies",
       "statutoryForms": "Formulaires légaux complétés (UI-19, impôts)",
       "systemAccess": "Accès système accordé"
+    },
+    "stageDetails": "Détails de l'Étape",
+    "interviewDate": "Date d'entretien",
+    "interviewNotes": "Notes d'entretien",
+    "offerAmount": "Montant de l'offre",
+    "rejectionReason": "Motif de rejet",
+    "stageChangeTitle": {
+      "INTERVIEWED": "Détails de l'Entretien — {{name}}",
+      "OFFERED": "Détails de l'Offre — {{name}}",
+      "REJECTED": "Motif de Rejet — {{name}}"
     }
   },
   "accessControl": {
@@ -3959,7 +3981,14 @@
       "EXPERT": "Expert"
     },
     "noSkillsYet": "Aucune compétence définie pour l'instant. Ajoutez une compétence pour commencer la matrice.",
-    "confirmDeleteSkill": "Supprimer cette compétence ? Cela supprime l'évaluation de tous les employés pour celle-ci."
+    "confirmDeleteSkill": "Supprimer cette compétence ? Cela supprime l'évaluation de tous les employés pour celle-ci.",
+    "editSkillTitle": "Modifier la Compétence",
+    "targetLevel": "Niveau cible (facultatif)",
+    "targetLevelHint": "Définissez un seuil minimum (ex. Avancé) pour signaler les employés en dessous dans la matrice.",
+    "noTarget": "Aucune cible — purement descriptif",
+    "target": "Cible",
+    "filterByCategory": "Filtrer par catégorie",
+    "allCategories": "Toutes les catégories"
   },
   "cashFlowForecast": {
     "nav": "Prévision de Trésorerie",

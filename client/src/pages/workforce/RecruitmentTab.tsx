@@ -181,6 +181,71 @@ function CandidateForm({ requisitionId, onSubmit, onCancel }: {
   );
 }
 
+function StageChangeForm({ stage, onSubmit, onCancel }: {
+  stage: "INTERVIEWED" | "OFFERED" | "REJECTED";
+  onSubmit: (data: any) => Promise<void>;
+  onCancel: () => void;
+}) {
+  const { t } = useTranslation();
+  const [interviewDate, setInterviewDate] = useState("");
+  const [interviewNotes, setInterviewNotes] = useState("");
+  const [offerAmount, setOfferAmount] = useState("");
+  const [rejectionReason, setRejectionReason] = useState("");
+  const [saving, setSaving] = useState(false);
+
+  async function handleSubmit(e: FormEvent) {
+    e.preventDefault();
+    setSaving(true);
+    try {
+      const data: any = { stage };
+      if (stage === "INTERVIEWED") {
+        data.interviewDate = interviewDate || undefined;
+        data.interviewNotes = interviewNotes || undefined;
+      } else if (stage === "OFFERED") {
+        data.offerAmount = offerAmount ? Number(offerAmount) : undefined;
+      } else if (stage === "REJECTED") {
+        data.rejectionReason = rejectionReason || undefined;
+      }
+      await onSubmit(data);
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  return (
+    <form onSubmit={handleSubmit} className="space-y-4">
+      {stage === "INTERVIEWED" && (
+        <>
+          <div>
+            <label className={labelClass}>{t("recruitment.interviewDate")}</label>
+            <DateField value={interviewDate} onChange={setInterviewDate} />
+          </div>
+          <div>
+            <label className={labelClass}>{t("recruitment.interviewNotes")}</label>
+            <textarea className={inputClass} rows={3} value={interviewNotes} onChange={(e) => setInterviewNotes(e.target.value)} />
+          </div>
+        </>
+      )}
+      {stage === "OFFERED" && (
+        <div>
+          <label className={labelClass}>{t("recruitment.offerAmount")}</label>
+          <input className={inputClass} type="number" step="any" min="0" value={offerAmount} onChange={(e) => setOfferAmount(e.target.value)} />
+        </div>
+      )}
+      {stage === "REJECTED" && (
+        <div>
+          <label className={labelClass}>{t("recruitment.rejectionReason")}</label>
+          <textarea className={inputClass} rows={3} value={rejectionReason} onChange={(e) => setRejectionReason(e.target.value)} />
+        </div>
+      )}
+      <div className="flex justify-end gap-2 pt-2">
+        <button type="button" className={buttonSecondary} onClick={onCancel}>{t("common.cancel")}</button>
+        <button type="submit" className={buttonPrimary} disabled={saving}>{saving ? t("common.saving") : t("common.save")}</button>
+      </div>
+    </form>
+  );
+}
+
 function HireForm({ onSubmit, onCancel }: { onSubmit: (employeeId: string, role: string) => Promise<void>; onCancel: () => void }) {
   const { t } = useTranslation();
   const [employeeId, setEmployeeId] = useState("");
@@ -229,6 +294,7 @@ function CandidatesModal({ requisition, canEdit, canDelete, onClose }: {
   const [modal, setModal] = useState(false);
   const [hiring, setHiring] = useState<Candidate | null>(null);
   const [uploadingFor, setUploadingFor] = useState<string | null>(null);
+  const [stageChange, setStageChange] = useState<{ candidate: Candidate; stage: "INTERVIEWED" | "OFFERED" | "REJECTED" } | null>(null);
 
   async function load() {
     setLoading(true);
@@ -254,6 +320,20 @@ function CandidatesModal({ requisition, canEdit, canDelete, onClose }: {
   async function updateStage(id: string, stage: CandidateStage) {
     await api.put(`/recruitment/candidates/${id}`, { stage });
     await load();
+  }
+
+  async function updateStageWithDetails(id: string, data: any) {
+    await api.put(`/recruitment/candidates/${id}`, data);
+    setStageChange(null);
+    await load();
+  }
+
+  function handleStageSelect(candidate: Candidate, stage: CandidateStage) {
+    if (stage === "INTERVIEWED" || stage === "OFFERED" || stage === "REJECTED") {
+      setStageChange({ candidate, stage });
+    } else {
+      updateStage(candidate.id, stage);
+    }
   }
 
   async function remove(id: string) {
@@ -297,7 +377,7 @@ function CandidatesModal({ requisition, canEdit, canDelete, onClose }: {
           <select
             className={`${selectClass} text-xs py-1`}
             value={c.stage}
-            onChange={(e) => updateStage(c.id, e.target.value as CandidateStage)}
+            onChange={(e) => handleStageSelect(c, e.target.value as CandidateStage)}
             disabled={!canEdit}
           >
             {candidateStages.map((s) => <option key={s} value={s}>{t(`recruitment.stages.${s}`)}</option>)}
@@ -306,6 +386,16 @@ function CandidatesModal({ requisition, canEdit, canDelete, onClose }: {
       sortValue: (c) => c.stage,
     },
     { key: "applied", header: t("recruitment.appliedDate"), render: (c) => new Date(c.appliedDate).toLocaleDateString(), sortValue: (c) => c.appliedDate },
+    {
+      key: "details",
+      header: t("recruitment.stageDetails"),
+      render: (c) => {
+        if (c.stage === "OFFERED" && c.offerAmount != null) return <span className="text-xs text-success-500">R{c.offerAmount.toLocaleString()}</span>;
+        if (c.stage === "REJECTED" && c.rejectionReason) return <span className="text-xs text-mine-400 truncate max-w-xs block" title={c.rejectionReason}>{c.rejectionReason}</span>;
+        if (c.stage === "INTERVIEWED" && c.interviewNotes) return <span className="text-xs text-mine-400 truncate max-w-xs block" title={c.interviewNotes}>{c.interviewNotes}</span>;
+        return "—";
+      },
+    },
   ];
 
   if (loading) return <div className="text-mine-300 text-sm">{t("common.loading")}</div>;
@@ -361,6 +451,15 @@ function CandidatesModal({ requisition, canEdit, canDelete, onClose }: {
         {hiring && (
           <Modal title={t("recruitment.hireTitle", { name: hiring.fullName })} onClose={() => setHiring(null)}>
             <HireForm onSubmit={confirmHire} onCancel={() => setHiring(null)} />
+          </Modal>
+        )}
+        {stageChange && (
+          <Modal title={t(`recruitment.stageChangeTitle.${stageChange.stage}`, { name: stageChange.candidate.fullName })} onClose={() => setStageChange(null)}>
+            <StageChangeForm
+              stage={stageChange.stage}
+              onSubmit={(data) => updateStageWithDetails(stageChange.candidate.id, data)}
+              onCancel={() => setStageChange(null)}
+            />
           </Modal>
         )}
       </div>

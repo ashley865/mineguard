@@ -19,6 +19,7 @@ import { StatusBadge } from "../components/Badges";
 import Modal from "../components/Modal";
 import { buttonDanger, buttonPrimary, buttonSecondary, inputClass, labelClass, selectClass } from "../components/ui";
 import DateField from "../components/DateField";
+import FileDropzone from "../components/FileDropzone";
 import DataTable, { DataTableColumn } from "../components/DataTable";
 import SummaryCards from "../components/SummaryCards";
 import { AuditHistoryButton } from "../components/AuditHistoryPanel";
@@ -32,25 +33,61 @@ const ccmaTypes: CcmaCaseType[] = ["UNFAIR_DISMISSAL", "UNFAIR_LABOUR_PRACTICE",
 const ccmaStatuses: CcmaCaseStatus[] = ["REFERRED", "CONCILIATION", "ARBITRATION", "SETTLED", "AWARD_ISSUED", "WITHDRAWN"];
 const unionStatuses: UnionAgreementStatus[] = ["ACTIVE", "EXPIRED", "UNDER_NEGOTIATION"];
 
-function DisciplinaryForm({ workers, onSubmit, onCancel }: { workers: Worker[]; onSubmit: (data: any) => Promise<void>; onCancel: () => void }) {
+async function downloadAttachment(url: string, fileName: string) {
+  const res = await api.get(url, { responseType: "blob" });
+  const blobUrl = window.URL.createObjectURL(res.data);
+  const a = document.createElement("a");
+  a.href = blobUrl;
+  a.download = fileName;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  window.URL.revokeObjectURL(blobUrl);
+}
+
+function AttachmentField({ fileName, onFile, t }: { fileName?: string | null; onFile: (f: File | null) => void; t: (k: string) => string }) {
+  return (
+    <div>
+      <label className={labelClass}>{t("labourRelations.attachment")}</label>
+      {fileName && <p className="text-xs text-mine-400 mb-1">{t("labourRelations.currentFile")}: {fileName}</p>}
+      <FileDropzone accept="image/*,.pdf,.doc,.docx" onFiles={(files) => onFile(files.item(0))} />
+    </div>
+  );
+}
+
+function DisciplinaryForm({ workers, initial, onSubmit, onCancel }: {
+  workers: Worker[];
+  initial?: Partial<DisciplinaryCase>;
+  onSubmit: (form: FormData) => Promise<void>;
+  onCancel: () => void;
+}) {
   const { t } = useTranslation();
-  const [workerId, setWorkerId] = useState(workers[0]?.id ?? "");
-  const [chargeDescription, setChargeDescription] = useState("");
-  const [hearingDate, setHearingDate] = useState("");
-  const [chairperson, setChairperson] = useState("");
-  const [outcome, setOutcome] = useState<DisciplinaryOutcome>("PENDING");
-  const [status, setStatus] = useState<DisciplinaryStatus>("OPEN");
-  const [sanctionDetails, setSanctionDetails] = useState("");
+  const [workerId, setWorkerId] = useState(initial?.workerId ?? workers[0]?.id ?? "");
+  const [chargeDescription, setChargeDescription] = useState(initial?.chargeDescription ?? "");
+  const [hearingDate, setHearingDate] = useState(initial?.hearingDate?.slice(0, 10) ?? "");
+  const [chairperson, setChairperson] = useState(initial?.chairperson ?? "");
+  const [outcome, setOutcome] = useState<DisciplinaryOutcome>(initial?.outcome ?? "PENDING");
+  const [status, setStatus] = useState<DisciplinaryStatus>(initial?.status ?? "OPEN");
+  const [sanctionDetails, setSanctionDetails] = useState(initial?.sanctionDetails ?? "");
+  const [notes, setNotes] = useState(initial?.notes ?? "");
+  const [file, setFile] = useState<File | null>(null);
   const [saving, setSaving] = useState(false);
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
     setSaving(true);
     try {
-      await onSubmit({
-        workerId, chargeDescription, hearingDate: hearingDate || null, chairperson: chairperson || undefined,
-        outcome, status, sanctionDetails: sanctionDetails || undefined,
-      });
+      const form = new FormData();
+      form.append("workerId", workerId);
+      form.append("chargeDescription", chargeDescription);
+      if (hearingDate) form.append("hearingDate", hearingDate);
+      if (chairperson) form.append("chairperson", chairperson);
+      form.append("outcome", outcome);
+      form.append("status", status);
+      if (sanctionDetails) form.append("sanctionDetails", sanctionDetails);
+      if (notes) form.append("notes", notes);
+      if (file) form.append("attachment", file);
+      await onSubmit(form);
     } finally {
       setSaving(false);
     }
@@ -96,6 +133,11 @@ function DisciplinaryForm({ workers, onSubmit, onCancel }: { workers: Worker[]; 
         <label className={labelClass}>{t("labourRelations.sanctionDetails")}</label>
         <textarea className={inputClass} rows={2} value={sanctionDetails} onChange={(e) => setSanctionDetails(e.target.value)} />
       </div>
+      <div>
+        <label className={labelClass}>{t("common.notes")}</label>
+        <textarea className={inputClass} rows={2} value={notes} onChange={(e) => setNotes(e.target.value)} />
+      </div>
+      <AttachmentField fileName={initial?.fileName} onFile={setFile} t={t} />
       <div className="flex justify-end gap-2 pt-2">
         <button type="button" className={buttonSecondary} onClick={onCancel}>{t("common.cancel")}</button>
         <button type="submit" className={buttonPrimary} disabled={saving}>{saving ? t("common.saving") : t("common.save")}</button>
@@ -111,7 +153,7 @@ function DisciplinaryTab({ workers, canEdit, canDelete }: { workers: Worker[]; c
   const [cases, setCases] = useState<DisciplinaryCase[]>([]);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState(false);
-  const [modal, setModal] = useState(false);
+  const [modal, setModal] = useState<null | "create" | DisciplinaryCase>(null);
   const [riskCase, setRiskCase] = useState<{ id: string; label: string } | null>(null);
 
   async function load() {
@@ -129,9 +171,15 @@ function DisciplinaryTab({ workers, canEdit, canDelete }: { workers: Worker[]; c
 
   useEffect(() => { load(); }, []);
 
-  async function create(data: any) {
-    await api.post("/labour-relations/disciplinary", data);
-    setModal(false);
+  async function create(form: FormData) {
+    await api.post("/labour-relations/disciplinary", form, { headers: { "Content-Type": "multipart/form-data" } });
+    setModal(null);
+    await load();
+  }
+
+  async function update(id: string, form: FormData) {
+    await api.put(`/labour-relations/disciplinary/${id}`, form, { headers: { "Content-Type": "multipart/form-data" } });
+    setModal(null);
     await load();
   }
 
@@ -163,7 +211,7 @@ function DisciplinaryTab({ workers, canEdit, canDelete }: { workers: Worker[]; c
       />
       {canEdit && workers.length > 0 && (
         <div className="flex justify-end">
-          <button className={buttonPrimary} onClick={() => setModal(true)}>{t("labourRelations.newDisciplinaryCase")}</button>
+          <button className={buttonPrimary} onClick={() => setModal("create")}>{t("labourRelations.newDisciplinaryCase")}</button>
         </div>
       )}
       <DataTable
@@ -181,6 +229,9 @@ function DisciplinaryTab({ workers, canEdit, canDelete }: { workers: Worker[]; c
         ]}
         actions={(c) => (
           <div className="flex justify-end gap-2">
+            {c.fileName && (
+              <button className="text-xs text-hazard-400 hover:text-hazard-300" onClick={() => downloadAttachment(`/labour-relations/disciplinary/${c.id}/attachment`, c.fileName!)}>📎</button>
+            )}
             {canUseAi && (
               <button
                 className="text-xs font-bold text-hazard-600 hover:text-hazard-500"
@@ -190,13 +241,19 @@ function DisciplinaryTab({ workers, canEdit, canDelete }: { workers: Worker[]; c
               </button>
             )}
             <AuditHistoryButton entityType="DisciplinaryCase" entityId={c.id} />
+            {canEdit && <button className="text-xs text-mine-300 hover:text-mine-50" onClick={() => setModal(c)}>{t("common.edit")}</button>}
             {canDelete && <button className={buttonDanger} onClick={() => remove(c.id)}>{t("common.delete")}</button>}
           </div>
         )}
       />
       {modal && (
-        <Modal title={t("labourRelations.newDisciplinaryCaseTitle")} onClose={() => setModal(false)}>
-          <DisciplinaryForm workers={workers} onSubmit={create} onCancel={() => setModal(false)} />
+        <Modal title={modal === "create" ? t("labourRelations.newDisciplinaryCaseTitle") : t("labourRelations.editDisciplinaryCaseTitle")} onClose={() => setModal(null)}>
+          <DisciplinaryForm
+            workers={workers}
+            initial={modal === "create" ? undefined : modal}
+            onSubmit={(form) => (modal === "create" ? create(form) : update(modal.id, form))}
+            onCancel={() => setModal(null)}
+          />
         </Modal>
       )}
       {riskCase && (
@@ -206,20 +263,35 @@ function DisciplinaryTab({ workers, canEdit, canDelete }: { workers: Worker[]; c
   );
 }
 
-function GrievanceForm({ workers, onSubmit, onCancel }: { workers: Worker[]; onSubmit: (data: any) => Promise<void>; onCancel: () => void }) {
+function GrievanceForm({ workers, initial, onSubmit, onCancel }: {
+  workers: Worker[];
+  initial?: Partial<GrievanceCase>;
+  onSubmit: (form: FormData) => Promise<void>;
+  onCancel: () => void;
+}) {
   const { t } = useTranslation();
-  const [workerId, setWorkerId] = useState(workers[0]?.id ?? "");
-  const [raisedAgainst, setRaisedAgainst] = useState("");
-  const [description, setDescription] = useState("");
-  const [dateRaised, setDateRaised] = useState("");
-  const [status, setStatus] = useState<GrievanceStatus>("OPEN");
+  const [workerId, setWorkerId] = useState(initial?.workerId ?? workers[0]?.id ?? "");
+  const [raisedAgainst, setRaisedAgainst] = useState(initial?.raisedAgainst ?? "");
+  const [description, setDescription] = useState(initial?.description ?? "");
+  const [dateRaised, setDateRaised] = useState(initial?.dateRaised?.slice(0, 10) ?? "");
+  const [status, setStatus] = useState<GrievanceStatus>(initial?.status ?? "OPEN");
+  const [resolution, setResolution] = useState(initial?.resolution ?? "");
+  const [file, setFile] = useState<File | null>(null);
   const [saving, setSaving] = useState(false);
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
     setSaving(true);
     try {
-      await onSubmit({ workerId, raisedAgainst: raisedAgainst || undefined, description, dateRaised, status });
+      const form = new FormData();
+      form.append("workerId", workerId);
+      if (raisedAgainst) form.append("raisedAgainst", raisedAgainst);
+      form.append("description", description);
+      form.append("dateRaised", dateRaised);
+      form.append("status", status);
+      if (resolution) form.append("resolution", resolution);
+      if (file) form.append("attachment", file);
+      await onSubmit(form);
     } finally {
       setSaving(false);
     }
@@ -253,6 +325,11 @@ function GrievanceForm({ workers, onSubmit, onCancel }: { workers: Worker[]; onS
           </select>
         </div>
       </div>
+      <div>
+        <label className={labelClass}>{t("labourRelations.resolution")}</label>
+        <textarea className={inputClass} rows={2} value={resolution} onChange={(e) => setResolution(e.target.value)} />
+      </div>
+      <AttachmentField fileName={initial?.fileName} onFile={setFile} t={t} />
       <div className="flex justify-end gap-2 pt-2">
         <button type="button" className={buttonSecondary} onClick={onCancel}>{t("common.cancel")}</button>
         <button type="submit" className={buttonPrimary} disabled={saving}>{saving ? t("common.saving") : t("common.save")}</button>
@@ -268,7 +345,7 @@ function GrievancesTab({ workers, canEdit, canDelete }: { workers: Worker[]; can
   const [cases, setCases] = useState<GrievanceCase[]>([]);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState(false);
-  const [modal, setModal] = useState(false);
+  const [modal, setModal] = useState<null | "create" | GrievanceCase>(null);
   const [riskCase, setRiskCase] = useState<{ id: string; label: string } | null>(null);
 
   async function load() {
@@ -286,9 +363,15 @@ function GrievancesTab({ workers, canEdit, canDelete }: { workers: Worker[]; can
 
   useEffect(() => { load(); }, []);
 
-  async function create(data: any) {
-    await api.post("/labour-relations/grievances", data);
-    setModal(false);
+  async function create(form: FormData) {
+    await api.post("/labour-relations/grievances", form, { headers: { "Content-Type": "multipart/form-data" } });
+    setModal(null);
+    await load();
+  }
+
+  async function update(id: string, form: FormData) {
+    await api.put(`/labour-relations/grievances/${id}`, form, { headers: { "Content-Type": "multipart/form-data" } });
+    setModal(null);
     await load();
   }
 
@@ -314,7 +397,7 @@ function GrievancesTab({ workers, canEdit, canDelete }: { workers: Worker[]; can
       <SummaryCards cards={[{ label: t("labourRelations.summaryOpenGrievances"), value: openCount }]} />
       {canEdit && workers.length > 0 && (
         <div className="flex justify-end">
-          <button className={buttonPrimary} onClick={() => setModal(true)}>{t("labourRelations.newGrievance")}</button>
+          <button className={buttonPrimary} onClick={() => setModal("create")}>{t("labourRelations.newGrievance")}</button>
         </div>
       )}
       <DataTable
@@ -332,6 +415,9 @@ function GrievancesTab({ workers, canEdit, canDelete }: { workers: Worker[]; can
         ]}
         actions={(c) => (
           <div className="flex justify-end gap-2">
+            {c.fileName && (
+              <button className="text-xs text-hazard-400 hover:text-hazard-300" onClick={() => downloadAttachment(`/labour-relations/grievances/${c.id}/attachment`, c.fileName!)}>📎</button>
+            )}
             {canUseAi && (
               <button
                 className="text-xs font-bold text-hazard-600 hover:text-hazard-500"
@@ -341,13 +427,19 @@ function GrievancesTab({ workers, canEdit, canDelete }: { workers: Worker[]; can
               </button>
             )}
             <AuditHistoryButton entityType="GrievanceCase" entityId={c.id} />
+            {canEdit && <button className="text-xs text-mine-300 hover:text-mine-50" onClick={() => setModal(c)}>{t("common.edit")}</button>}
             {canDelete && <button className={buttonDanger} onClick={() => remove(c.id)}>{t("common.delete")}</button>}
           </div>
         )}
       />
       {modal && (
-        <Modal title={t("labourRelations.newGrievanceTitle")} onClose={() => setModal(false)}>
-          <GrievanceForm workers={workers} onSubmit={create} onCancel={() => setModal(false)} />
+        <Modal title={modal === "create" ? t("labourRelations.newGrievanceTitle") : t("labourRelations.editGrievanceTitle")} onClose={() => setModal(null)}>
+          <GrievanceForm
+            workers={workers}
+            initial={modal === "create" ? undefined : modal}
+            onSubmit={(form) => (modal === "create" ? create(form) : update(modal.id, form))}
+            onCancel={() => setModal(null)}
+          />
         </Modal>
       )}
       {riskCase && (
@@ -357,20 +449,37 @@ function GrievancesTab({ workers, canEdit, canDelete }: { workers: Worker[]; can
   );
 }
 
-function CcmaForm({ workers, onSubmit, onCancel }: { workers: Worker[]; onSubmit: (data: any) => Promise<void>; onCancel: () => void }) {
+function CcmaForm({ workers, initial, onSubmit, onCancel }: {
+  workers: Worker[];
+  initial?: Partial<CcmaCase>;
+  onSubmit: (form: FormData) => Promise<void>;
+  onCancel: () => void;
+}) {
   const { t } = useTranslation();
-  const [workerId, setWorkerId] = useState("");
-  const [referralNumber, setReferralNumber] = useState("");
-  const [caseType, setCaseType] = useState<CcmaCaseType>("UNFAIR_DISMISSAL");
-  const [conciliationDate, setConciliationDate] = useState("");
-  const [status, setStatus] = useState<CcmaCaseStatus>("REFERRED");
+  const [workerId, setWorkerId] = useState(initial?.workerId ?? "");
+  const [referralNumber, setReferralNumber] = useState(initial?.referralNumber ?? "");
+  const [caseType, setCaseType] = useState<CcmaCaseType>(initial?.caseType ?? "UNFAIR_DISMISSAL");
+  const [conciliationDate, setConciliationDate] = useState(initial?.conciliationDate?.slice(0, 10) ?? "");
+  const [arbitrationDate, setArbitrationDate] = useState(initial?.arbitrationDate?.slice(0, 10) ?? "");
+  const [outcome, setOutcome] = useState(initial?.outcome ?? "");
+  const [status, setStatus] = useState<CcmaCaseStatus>(initial?.status ?? "REFERRED");
+  const [file, setFile] = useState<File | null>(null);
   const [saving, setSaving] = useState(false);
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
     setSaving(true);
     try {
-      await onSubmit({ workerId: workerId || null, referralNumber: referralNumber || undefined, caseType, conciliationDate: conciliationDate || null, status });
+      const form = new FormData();
+      if (workerId) form.append("workerId", workerId);
+      if (referralNumber) form.append("referralNumber", referralNumber);
+      form.append("caseType", caseType);
+      if (conciliationDate) form.append("conciliationDate", conciliationDate);
+      if (arbitrationDate) form.append("arbitrationDate", arbitrationDate);
+      if (outcome) form.append("outcome", outcome);
+      form.append("status", status);
+      if (file) form.append("attachment", file);
+      await onSubmit(form);
     } finally {
       setSaving(false);
     }
@@ -403,12 +512,23 @@ function CcmaForm({ workers, onSubmit, onCancel }: { workers: Worker[]; onSubmit
           <DateField value={conciliationDate} onChange={setConciliationDate} />
         </div>
         <div>
+          <label className={labelClass}>{t("labourRelations.arbitrationDate")}</label>
+          <DateField value={arbitrationDate} onChange={setArbitrationDate} />
+        </div>
+      </div>
+      <div className="grid grid-cols-2 gap-3">
+        <div>
+          <label className={labelClass}>{t("labourRelations.ccmaOutcome")}</label>
+          <input className={inputClass} value={outcome} onChange={(e) => setOutcome(e.target.value)} />
+        </div>
+        <div>
           <label className={labelClass}>{t("common.status")}</label>
           <select className={selectClass} value={status} onChange={(e) => setStatus(e.target.value as CcmaCaseStatus)}>
             {ccmaStatuses.map((s) => <option key={s} value={s}>{t(`labourRelations.ccmaCaseStatuses.${s}`)}</option>)}
           </select>
         </div>
       </div>
+      <AttachmentField fileName={initial?.fileName} onFile={setFile} t={t} />
       <div className="flex justify-end gap-2 pt-2">
         <button type="button" className={buttonSecondary} onClick={onCancel}>{t("common.cancel")}</button>
         <button type="submit" className={buttonPrimary} disabled={saving}>{saving ? t("common.saving") : t("common.save")}</button>
@@ -424,7 +544,7 @@ function CcmaTab({ workers, canEdit, canDelete }: { workers: Worker[]; canEdit: 
   const [cases, setCases] = useState<CcmaCase[]>([]);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState(false);
-  const [modal, setModal] = useState(false);
+  const [modal, setModal] = useState<null | "create" | CcmaCase>(null);
   const [riskCase, setRiskCase] = useState<{ id: string; label: string } | null>(null);
 
   async function load() {
@@ -442,9 +562,15 @@ function CcmaTab({ workers, canEdit, canDelete }: { workers: Worker[]; canEdit: 
 
   useEffect(() => { load(); }, []);
 
-  async function create(data: any) {
-    await api.post("/labour-relations/ccma-cases", data);
-    setModal(false);
+  async function create(form: FormData) {
+    await api.post("/labour-relations/ccma-cases", form, { headers: { "Content-Type": "multipart/form-data" } });
+    setModal(null);
+    await load();
+  }
+
+  async function update(id: string, form: FormData) {
+    await api.put(`/labour-relations/ccma-cases/${id}`, form, { headers: { "Content-Type": "multipart/form-data" } });
+    setModal(null);
     await load();
   }
 
@@ -467,7 +593,7 @@ function CcmaTab({ workers, canEdit, canDelete }: { workers: Worker[]; canEdit: 
     <div className="space-y-4">
       {canEdit && (
         <div className="flex justify-end">
-          <button className={buttonPrimary} onClick={() => setModal(true)}>{t("labourRelations.newCcmaCase")}</button>
+          <button className={buttonPrimary} onClick={() => setModal("create")}>{t("labourRelations.newCcmaCase")}</button>
         </div>
       )}
       <DataTable
@@ -485,6 +611,9 @@ function CcmaTab({ workers, canEdit, canDelete }: { workers: Worker[]; canEdit: 
         ]}
         actions={(c) => (
           <div className="flex justify-end gap-2">
+            {c.fileName && (
+              <button className="text-xs text-hazard-400 hover:text-hazard-300" onClick={() => downloadAttachment(`/labour-relations/ccma-cases/${c.id}/attachment`, c.fileName!)}>📎</button>
+            )}
             {canUseAi && (
               <button
                 className="text-xs font-bold text-hazard-600 hover:text-hazard-500"
@@ -494,13 +623,19 @@ function CcmaTab({ workers, canEdit, canDelete }: { workers: Worker[]; canEdit: 
               </button>
             )}
             <AuditHistoryButton entityType="CcmaCase" entityId={c.id} />
+            {canEdit && <button className="text-xs text-mine-300 hover:text-mine-50" onClick={() => setModal(c)}>{t("common.edit")}</button>}
             {canDelete && <button className={buttonDanger} onClick={() => remove(c.id)}>{t("common.delete")}</button>}
           </div>
         )}
       />
       {modal && (
-        <Modal title={t("labourRelations.newCcmaCaseTitle")} onClose={() => setModal(false)}>
-          <CcmaForm workers={workers} onSubmit={create} onCancel={() => setModal(false)} />
+        <Modal title={modal === "create" ? t("labourRelations.newCcmaCaseTitle") : t("labourRelations.editCcmaCaseTitle")} onClose={() => setModal(null)}>
+          <CcmaForm
+            workers={workers}
+            initial={modal === "create" ? undefined : modal}
+            onSubmit={(form) => (modal === "create" ? create(form) : update(modal.id, form))}
+            onCancel={() => setModal(null)}
+          />
         </Modal>
       )}
       {riskCase && <CaseRiskModal caseType="CCMA" caseId={riskCase.id} caseLabel={riskCase.label} onClose={() => setRiskCase(null)} />}
@@ -508,20 +643,32 @@ function CcmaTab({ workers, canEdit, canDelete }: { workers: Worker[]; canEdit: 
   );
 }
 
-function UnionAgreementForm({ onSubmit, onCancel }: { onSubmit: (data: any) => Promise<void>; onCancel: () => void }) {
+function UnionAgreementForm({ initial, onSubmit, onCancel }: {
+  initial?: Partial<UnionAgreement>;
+  onSubmit: (form: FormData) => Promise<void>;
+  onCancel: () => void;
+}) {
   const { t } = useTranslation();
-  const [unionName, setUnionName] = useState("");
-  const [membershipCount, setMembershipCount] = useState("");
-  const [effectiveDate, setEffectiveDate] = useState("");
-  const [expiryDate, setExpiryDate] = useState("");
-  const [status, setStatus] = useState<UnionAgreementStatus>("ACTIVE");
+  const [unionName, setUnionName] = useState(initial?.unionName ?? "");
+  const [membershipCount, setMembershipCount] = useState(initial?.membershipCount?.toString() ?? "");
+  const [effectiveDate, setEffectiveDate] = useState(initial?.effectiveDate?.slice(0, 10) ?? "");
+  const [expiryDate, setExpiryDate] = useState(initial?.expiryDate?.slice(0, 10) ?? "");
+  const [status, setStatus] = useState<UnionAgreementStatus>(initial?.status ?? "ACTIVE");
+  const [file, setFile] = useState<File | null>(null);
   const [saving, setSaving] = useState(false);
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
     setSaving(true);
     try {
-      await onSubmit({ unionName, membershipCount: membershipCount ? Number(membershipCount) : null, effectiveDate, expiryDate: expiryDate || null, status });
+      const form = new FormData();
+      form.append("unionName", unionName);
+      if (membershipCount) form.append("membershipCount", membershipCount);
+      form.append("effectiveDate", effectiveDate);
+      if (expiryDate) form.append("expiryDate", expiryDate);
+      form.append("status", status);
+      if (file) form.append("attachment", file);
+      await onSubmit(form);
     } finally {
       setSaving(false);
     }
@@ -555,6 +702,7 @@ function UnionAgreementForm({ onSubmit, onCancel }: { onSubmit: (data: any) => P
           <DateField value={expiryDate} onChange={setExpiryDate} />
         </div>
       </div>
+      <AttachmentField fileName={initial?.fileName} onFile={setFile} t={t} />
       <div className="flex justify-end gap-2 pt-2">
         <button type="button" className={buttonSecondary} onClick={onCancel}>{t("common.cancel")}</button>
         <button type="submit" className={buttonPrimary} disabled={saving}>{saving ? t("common.saving") : t("common.save")}</button>
@@ -568,7 +716,7 @@ function UnionAgreementsTab({ canEdit, canDelete }: { canEdit: boolean; canDelet
   const [agreements, setAgreements] = useState<UnionAgreement[]>([]);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState(false);
-  const [modal, setModal] = useState(false);
+  const [modal, setModal] = useState<null | "create" | UnionAgreement>(null);
 
   async function load() {
     setLoading(true);
@@ -585,9 +733,15 @@ function UnionAgreementsTab({ canEdit, canDelete }: { canEdit: boolean; canDelet
 
   useEffect(() => { load(); }, []);
 
-  async function create(data: any) {
-    await api.post("/labour-relations/union-agreements", data);
-    setModal(false);
+  async function create(form: FormData) {
+    await api.post("/labour-relations/union-agreements", form, { headers: { "Content-Type": "multipart/form-data" } });
+    setModal(null);
+    await load();
+  }
+
+  async function update(id: string, form: FormData) {
+    await api.put(`/labour-relations/union-agreements/${id}`, form, { headers: { "Content-Type": "multipart/form-data" } });
+    setModal(null);
     await load();
   }
 
@@ -610,7 +764,7 @@ function UnionAgreementsTab({ canEdit, canDelete }: { canEdit: boolean; canDelet
     <div className="space-y-4">
       {canEdit && (
         <div className="flex justify-end">
-          <button className={buttonPrimary} onClick={() => setModal(true)}>{t("labourRelations.newUnionAgreement")}</button>
+          <button className={buttonPrimary} onClick={() => setModal("create")}>{t("labourRelations.newUnionAgreement")}</button>
         </div>
       )}
       <DataTable
@@ -628,14 +782,22 @@ function UnionAgreementsTab({ canEdit, canDelete }: { canEdit: boolean; canDelet
         ]}
         actions={(a) => (
           <div className="flex justify-end gap-2">
+            {a.fileName && (
+              <button className="text-xs text-hazard-400 hover:text-hazard-300" onClick={() => downloadAttachment(`/labour-relations/union-agreements/${a.id}/attachment`, a.fileName!)}>📎</button>
+            )}
             <AuditHistoryButton entityType="UnionAgreement" entityId={a.id} />
+            {canEdit && <button className="text-xs text-mine-300 hover:text-mine-50" onClick={() => setModal(a)}>{t("common.edit")}</button>}
             {canDelete && <button className={buttonDanger} onClick={() => remove(a.id)}>{t("common.delete")}</button>}
           </div>
         )}
       />
       {modal && (
-        <Modal title={t("labourRelations.newUnionAgreementTitle")} onClose={() => setModal(false)}>
-          <UnionAgreementForm onSubmit={create} onCancel={() => setModal(false)} />
+        <Modal title={modal === "create" ? t("labourRelations.newUnionAgreementTitle") : t("labourRelations.editUnionAgreementTitle")} onClose={() => setModal(null)}>
+          <UnionAgreementForm
+            initial={modal === "create" ? undefined : modal}
+            onSubmit={(form) => (modal === "create" ? create(form) : update(modal.id, form))}
+            onCancel={() => setModal(null)}
+          />
         </Modal>
       )}
     </div>

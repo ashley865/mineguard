@@ -1033,7 +1033,9 @@
         "HAZARD_SPECIFIC": "Gefahrenspezifisch",
         "SKILLS_DEVELOPMENT": "Kompetenzentwicklung",
         "OTHER": "Sonstiges"
-      }
+      },
+      "summaryExpiringSoon": "Auffrischung Bald Fällig",
+      "summaryExpired": "Auffrischung Überfällig"
     },
     "tabCompliance": "Mitarbeiter-Compliance",
     "compliance": {
@@ -2292,7 +2294,8 @@
       "hint": "Ein Urlaubssaldo-Journal je Mitarbeiter und Urlaubsart, da Urlaubsanträge allein weder Ansammlung noch Anspruch erfassen.",
       "new": "+ Neuer Saldo",
       "newTitle": "Neuer Urlaubssaldo",
-      "noneYet": "Noch keine Urlaubssalden erfasst."
+      "noneYet": "Noch keine Urlaubssalden erfasst.",
+      "editTitle": "Urlaubssaldo Bearbeiten"
     },
     "bceaCompliance": {
       "hint": "Live aus den Kommt-/Geht-Aufzeichnungen berechnet: Regelarbeitszeit darf 45 Std./Woche nicht überschreiten (BCEA §9), und zwischen Schichten ist eine tägliche Ruhezeit von 12 Stunden erforderlich (BCEA §14).",
@@ -3223,7 +3226,16 @@
     "noUnionAgreements": "Noch keine Gewerkschaftsvereinbarungen erfasst.",
     "summaryOpenCases": "Offene Fälle",
     "summaryDismissals": "Entlassungen",
-    "summaryOpenGrievances": "Offene Beschwerden"
+    "summaryOpenGrievances": "Offene Beschwerden",
+    "editDisciplinaryCaseTitle": "Disziplinarfall Bearbeiten",
+    "resolution": "Lösung",
+    "arbitrationDate": "Schlichtungstermin",
+    "ccmaOutcome": "Ergebnis",
+    "attachment": "Anhang (optional)",
+    "currentFile": "Aktuelle Datei",
+    "editGrievanceTitle": "Beschwerde Bearbeiten",
+    "editCcmaCaseTitle": "CCMA-Fall Bearbeiten",
+    "editUnionAgreementTitle": "Gewerkschaftsvereinbarung Bearbeiten"
   },
   "resources": {
     "nav": "Wasser- & Energieressourcen",
@@ -3582,6 +3594,16 @@
       "bankDetails": "Bankdaten erfasst",
       "statutoryForms": "Gesetzliche Formulare abgeschlossen (UI-19, Steuer)",
       "systemAccess": "Systemzugang gewährt"
+    },
+    "stageDetails": "Phasendetails",
+    "interviewDate": "Interviewdatum",
+    "interviewNotes": "Interviewnotizen",
+    "offerAmount": "Angebotsbetrag",
+    "rejectionReason": "Ablehnungsgrund",
+    "stageChangeTitle": {
+      "INTERVIEWED": "Interviewdetails — {{name}}",
+      "OFFERED": "Angebotsdetails — {{name}}",
+      "REJECTED": "Ablehnungsgrund — {{name}}"
     }
   },
   "accessControl": {
@@ -3959,7 +3981,14 @@
       "EXPERT": "Experte"
     },
     "noSkillsYet": "Noch keine Fähigkeiten definiert. Fügen Sie eine Fähigkeit hinzu, um die Matrix zu erstellen.",
-    "confirmDeleteSkill": "Diese Fähigkeit löschen? Dadurch wird die Bewertung aller Mitarbeiter dafür entfernt."
+    "confirmDeleteSkill": "Diese Fähigkeit löschen? Dadurch wird die Bewertung aller Mitarbeiter dafür entfernt.",
+    "editSkillTitle": "Fähigkeit Bearbeiten",
+    "targetLevel": "Zielniveau (optional)",
+    "targetLevelHint": "Legen Sie eine Mindestanforderung fest (z. B. Fortgeschritten), um Mitarbeiter darunter in der Matrix zu markieren.",
+    "noTarget": "Kein Ziel — rein beschreibend",
+    "target": "Ziel",
+    "filterByCategory": "Nach Kategorie Filtern",
+    "allCategories": "Alle Kategorien"
   },
   "cashFlowForecast": {
     "nav": "Cashflow-Prognose",

@@ -1033,7 +1033,9 @@
         "HAZARD_SPECIFIC": "Peligro Específico",
         "SKILLS_DEVELOPMENT": "Desarrollo de Habilidades",
         "OTHER": "Otro"
-      }
+      },
+      "summaryExpiringSoon": "Actualización Próxima",
+      "summaryExpired": "Actualización Vencida"
     },
     "tabCompliance": "Cumplimiento del Empleado",
     "compliance": {
@@ -2292,7 +2294,8 @@
       "hint": "Un libro de saldos de licencia por trabajador y tipo de licencia, ya que las solicitudes de licencia por sí solas no registran la acumulación ni el derecho.",
       "new": "+ Nuevo Saldo",
       "newTitle": "Nuevo Saldo de Licencia",
-      "noneYet": "Aún no se han registrado saldos de licencia."
+      "noneYet": "Aún no se han registrado saldos de licencia.",
+      "editTitle": "Editar Saldo de Licencia"
     },
     "bceaCompliance": {
       "hint": "Calculado en vivo a partir de los registros de entrada/salida: las horas ordinarias no pueden exceder 45/semana (BCEA art. 9), y se requiere un período de descanso diario de 12 horas entre turnos (BCEA art. 14).",
@@ -3223,7 +3226,16 @@
     "noUnionAgreements": "Aún no se han registrado acuerdos sindicales.",
     "summaryOpenCases": "Casos Abiertos",
     "summaryDismissals": "Despidos",
-    "summaryOpenGrievances": "Quejas Abiertas"
+    "summaryOpenGrievances": "Quejas Abiertas",
+    "editDisciplinaryCaseTitle": "Editar Caso Disciplinario",
+    "resolution": "Resolución",
+    "arbitrationDate": "Fecha de arbitraje",
+    "ccmaOutcome": "Resultado",
+    "attachment": "Archivo adjunto (opcional)",
+    "currentFile": "Archivo actual",
+    "editGrievanceTitle": "Editar Queja",
+    "editCcmaCaseTitle": "Editar Caso CCMA",
+    "editUnionAgreementTitle": "Editar Acuerdo Sindical"
   },
   "resources": {
     "nav": "Recursos de Agua y Energía",
@@ -3582,6 +3594,16 @@
       "bankDetails": "Datos bancarios recopilados",
       "statutoryForms": "Formularios estatutarios completados (UI-19, impuestos)",
       "systemAccess": "Acceso al sistema otorgado"
+    },
+    "stageDetails": "Detalles de Etapa",
+    "interviewDate": "Fecha de entrevista",
+    "interviewNotes": "Notas de entrevista",
+    "offerAmount": "Monto de oferta",
+    "rejectionReason": "Motivo de rechazo",
+    "stageChangeTitle": {
+      "INTERVIEWED": "Detalles de Entrevista — {{name}}",
+      "OFFERED": "Detalles de Oferta — {{name}}",
+      "REJECTED": "Motivo de Rechazo — {{name}}"
     }
   },
   "accessControl": {
@@ -3959,7 +3981,14 @@
       "EXPERT": "Experto"
     },
     "noSkillsYet": "Aún no hay habilidades definidas. Agregue una habilidad para comenzar la matriz.",
-    "confirmDeleteSkill": "¿Eliminar esta habilidad? Esto elimina la calificación de todos los trabajadores para ella."
+    "confirmDeleteSkill": "¿Eliminar esta habilidad? Esto elimina la calificación de todos los trabajadores para ella.",
+    "editSkillTitle": "Editar Habilidad",
+    "targetLevel": "Nivel objetivo (opcional)",
+    "targetLevelHint": "Establezca un mínimo (p. ej. Competente Avanzado) para marcar a los trabajadores por debajo de él en la matriz.",
+    "noTarget": "Sin objetivo — puramente descriptivo",
+    "target": "Objetivo",
+    "filterByCategory": "Filtrar por categoría",
+    "allCategories": "Todas las categorías"
   },
   "cashFlowForecast": {
     "nav": "Pronóstico de Flujo de Caja",

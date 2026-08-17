@@ -9,6 +9,7 @@ const router = Router();
 const skillSchema = z.object({
   name: z.string().min(1),
   category: z.string().optional(),
+  targetLevel: z.enum(["NOVICE", "COMPETENT", "PROFICIENT", "EXPERT"]).optional().nullable(),
 });
 
 const ratingSchema = z.object({
@@ -37,6 +38,21 @@ router.post("/skills", requireRole("ADMIN", "SUPERVISOR", "EXECUTIVE"), async (r
   if (existing) return res.status(409).json({ error: "A skill with this name already exists" });
   const skill = await prisma.skill.create({ data: { ...parsed.data, mineId } });
   res.status(201).json(skill);
+});
+
+router.put("/skills/:id", requireRole("ADMIN", "SUPERVISOR", "EXECUTIVE"), async (req, res) => {
+  const mineId = requireMineId(req, res);
+  if (!mineId) return;
+  const parsed = skillSchema.partial().safeParse(req.body);
+  if (!parsed.success) return res.status(400).json({ error: parsed.error.flatten() });
+  const existing = await prisma.skill.findFirst({ where: { id: req.params.id, mineId } });
+  if (!existing) return res.status(404).json({ error: "Skill not found" });
+  if (parsed.data.name) {
+    const nameClash = await prisma.skill.findFirst({ where: { mineId, name: parsed.data.name, id: { not: existing.id } } });
+    if (nameClash) return res.status(409).json({ error: "A skill with this name already exists" });
+  }
+  const skill = await prisma.skill.update({ where: { id: existing.id }, data: parsed.data });
+  res.json(skill);
 });
 
 router.delete("/skills/:id", requireRole("ADMIN", "EXECUTIVE"), async (req, res) => {

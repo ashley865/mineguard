@@ -2,12 +2,13 @@ import { FormEvent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { api } from "../api/client";
 import { useAuth } from "../context/AuthContext";
-import { BceaComplianceReport, LeaveBalance, LeaveRequest, LeaveType, Payee, Payslip, Worker } from "../api/types";
+import { BceaBreach, BceaComplianceReport, LeaveBalance, LeaveRequest, LeaveType, Payee, Payslip, Worker } from "../api/types";
 import { StatusBadge } from "../components/Badges";
 import Modal from "../components/Modal";
-import { buttonDanger, buttonPrimary, buttonSecondary, cardClass, inputClass, labelClass, selectClass } from "../components/ui";
+import { buttonDanger, buttonPrimary, buttonSecondary, inputClass, labelClass, selectClass } from "../components/ui";
 import DateField from "../components/DateField";
 import FileDropzone from "../components/FileDropzone";
+import DataTable, { DataTableColumn } from "../components/DataTable";
 import LoadError from "../components/LoadError";
 
 const leaveTypes: LeaveType[] = ["ANNUAL", "SICK", "FAMILY_RESPONSIBILITY", "UNPAID", "STUDY", "MATERNITY_PATERNITY", "OTHER"];
@@ -255,6 +256,14 @@ function LeaveTab({ workers, canEdit, canDelete }: { workers: Worker[]; canEdit:
   if (loading) return <div className="text-mine-300">{t("common.loading")}</div>;
   if (loadError) return <LoadError onRetry={load} />;
 
+  const columns: DataTableColumn<LeaveRequest>[] = [
+    { key: "worker", header: t("workers.title"), render: (r) => <span className="font-medium">{r.worker?.name}</span>, sortValue: (r) => r.worker?.name ?? "" },
+    { key: "type", header: t("payroll.leaveType"), render: (r) => t(`payroll.leaveTypes.${r.leaveType}`), sortValue: (r) => r.leaveType },
+    { key: "start", header: t("payroll.startDate"), render: (r) => new Date(r.startDate).toLocaleDateString(), sortValue: (r) => r.startDate },
+    { key: "end", header: t("payroll.endDate"), render: (r) => new Date(r.endDate).toLocaleDateString(), sortValue: (r) => r.endDate },
+    { key: "status", header: t("common.status"), render: (r) => <StatusBadge status={r.status} />, sortValue: (r) => r.status },
+  ];
+
   return (
     <div className="space-y-4">
       {canEdit && workers.length > 0 && (
@@ -262,47 +271,34 @@ function LeaveTab({ workers, canEdit, canDelete }: { workers: Worker[]; canEdit:
           <button className={buttonPrimary} onClick={() => setModal(true)}>{t("payroll.newLeaveRequest")}</button>
         </div>
       )}
-      <div className={`${cardClass} overflow-x-auto`}>
-        <table className="w-full text-sm">
-          <thead className="bg-mine-800/50 text-mine-300 text-xs uppercase">
-            <tr>
-              <th className="text-left px-4 py-2">{t("workers.title")}</th>
-              <th className="text-left px-4 py-2">{t("payroll.leaveType")}</th>
-              <th className="text-left px-4 py-2">{t("payroll.startDate")}</th>
-              <th className="text-left px-4 py-2">{t("payroll.endDate")}</th>
-              <th className="text-left px-4 py-2">{t("common.status")}</th>
-              <th className="px-4 py-2"></th>
-            </tr>
-          </thead>
-          <tbody>
-            {requests.map((r) => (
-              <tr key={r.id} className="border-t border-mine-800 hover:bg-mine-800/30">
-                <td className="px-4 py-2 font-medium">{r.worker?.name}</td>
-                <td className="px-4 py-2 text-mine-300">{t(`payroll.leaveTypes.${r.leaveType}`)}</td>
-                <td className="px-4 py-2 text-mine-300">{new Date(r.startDate).toLocaleDateString()}</td>
-                <td className="px-4 py-2 text-mine-300">{new Date(r.endDate).toLocaleDateString()}</td>
-                <td className="px-4 py-2"><StatusBadge status={r.status} /></td>
-                <td className="px-4 py-2 text-right">
-                  <div className="flex justify-end gap-2">
-                    {canEdit && r.status === "PENDING" && (
-                      <>
-                        <button className={`${buttonPrimary} text-xs px-3 py-1`} onClick={() => review(r.id, "APPROVED")}>{t("common.approve")}</button>
-                        <button className={buttonSecondary} onClick={() => review(r.id, "REJECTED")}>{t("common.reject")}</button>
-                      </>
-                    )}
-                    {canDelete && (
-                      <button className={buttonDanger} onClick={() => remove(r.id)}>{t("common.delete")}</button>
-                    )}
-                  </div>
-                </td>
-              </tr>
-            ))}
-            {requests.length === 0 && (
-              <tr><td colSpan={6} className="px-4 py-6 text-center text-mine-400">{t("payroll.noneYetLeave")}</td></tr>
+      <DataTable
+        columns={columns}
+        rows={requests}
+        rowKey={(r) => r.id}
+        emptyMessage={t("payroll.noneYetLeave")}
+        searchValue={(r) => `${r.worker?.name ?? ""} ${r.leaveType}`}
+        exportFilename="leave-requests"
+        exportColumns={[
+          { header: t("workers.title"), value: (r) => r.worker?.name ?? "" },
+          { header: t("payroll.leaveType"), value: (r) => r.leaveType },
+          { header: t("payroll.startDate"), value: (r) => r.startDate },
+          { header: t("payroll.endDate"), value: (r) => r.endDate },
+          { header: t("common.status"), value: (r) => r.status },
+        ]}
+        actions={(r) => (
+          <div className="flex justify-end gap-2">
+            {canEdit && r.status === "PENDING" && (
+              <>
+                <button className={`${buttonPrimary} text-xs px-3 py-1`} onClick={() => review(r.id, "APPROVED")}>{t("common.approve")}</button>
+                <button className={buttonSecondary} onClick={() => review(r.id, "REJECTED")}>{t("common.reject")}</button>
+              </>
             )}
-          </tbody>
-        </table>
-      </div>
+            {canDelete && (
+              <button className={buttonDanger} onClick={() => remove(r.id)}>{t("common.delete")}</button>
+            )}
+          </div>
+        )}
+      />
       {modal && (
         <Modal title={t("payroll.newLeaveRequestTitle")} onClose={() => setModal(false)}>
           <LeaveForm workers={workers} onSubmit={create} onCancel={() => setModal(false)} />
@@ -368,6 +364,29 @@ function PayslipsTab({ workers, canEdit, canDelete }: { workers: Worker[]; canEd
   if (loading) return <div className="text-mine-300">{t("common.loading")}</div>;
   if (loadError) return <LoadError onRetry={load} />;
 
+  const payeeName = (p: Payslip) => p.worker?.name ?? p.payee?.name ?? "";
+
+  const columns: DataTableColumn<Payslip>[] = [
+    {
+      key: "payee",
+      header: t("payroll.payee"),
+      render: (p) => (
+        <span className="font-medium">
+          {payeeName(p)}
+          {p.payee && !p.worker && (
+            <span className="ml-1.5 text-[9px] font-extrabold uppercase tracking-wide text-mine-400 bg-mine-800 rounded px-1.5 py-0.5">
+              {t("payroll.payeeModeCompany")}
+            </span>
+          )}
+        </span>
+      ),
+      sortValue: (p) => payeeName(p),
+    },
+    { key: "period", header: t("payroll.payPeriod"), render: (p) => `${new Date(p.payPeriodStart).toLocaleDateString()} – ${new Date(p.payPeriodEnd).toLocaleDateString()}`, sortValue: (p) => p.payPeriodStart },
+    { key: "gross", header: t("payroll.grossPay"), render: (p) => p.grossPay.toLocaleString(), sortValue: (p) => p.grossPay },
+    { key: "net", header: t("payroll.netPay"), render: (p) => p.netPay.toLocaleString(), sortValue: (p) => p.netPay },
+  ];
+
   return (
     <div className="space-y-4">
       {canEdit && (workers.length > 0 || companyPayees.length > 0) && (
@@ -375,51 +394,30 @@ function PayslipsTab({ workers, canEdit, canDelete }: { workers: Worker[]; canEd
           <button className={buttonPrimary} onClick={() => setModal(true)}>{t("payroll.newPayslip")}</button>
         </div>
       )}
-      <div className={`${cardClass} overflow-x-auto`}>
-        <table className="w-full text-sm">
-          <thead className="bg-mine-800/50 text-mine-300 text-xs uppercase">
-            <tr>
-              <th className="text-left px-4 py-2">{t("payroll.payee")}</th>
-              <th className="text-left px-4 py-2">{t("payroll.payPeriod")}</th>
-              <th className="text-left px-4 py-2">{t("payroll.grossPay")}</th>
-              <th className="text-left px-4 py-2">{t("payroll.netPay")}</th>
-              <th className="px-4 py-2"></th>
-            </tr>
-          </thead>
-          <tbody>
-            {payslips.map((p) => (
-              <tr key={p.id} className="border-t border-mine-800 hover:bg-mine-800/30">
-                <td className="px-4 py-2 font-medium">
-                  {p.worker?.name ?? p.payee?.name}
-                  {p.payee && !p.worker && (
-                    <span className="ml-1.5 text-[9px] font-extrabold uppercase tracking-wide text-mine-400 bg-mine-800 rounded px-1.5 py-0.5">
-                      {t("payroll.payeeModeCompany")}
-                    </span>
-                  )}
-                </td>
-                <td className="px-4 py-2 text-mine-300">
-                  {new Date(p.payPeriodStart).toLocaleDateString()} – {new Date(p.payPeriodEnd).toLocaleDateString()}
-                </td>
-                <td className="px-4 py-2 text-mine-300">{p.grossPay.toLocaleString()}</td>
-                <td className="px-4 py-2 text-mine-300">{p.netPay.toLocaleString()}</td>
-                <td className="px-4 py-2 text-right">
-                  <div className="flex justify-end gap-2">
-                    {p.fileName && (
-                      <button className="text-xs text-mine-300 hover:text-mine-50" onClick={() => download(p)}>{t("documents.download")}</button>
-                    )}
-                    {canDelete && (
-                      <button className={buttonDanger} onClick={() => remove(p.id)}>{t("common.delete")}</button>
-                    )}
-                  </div>
-                </td>
-              </tr>
-            ))}
-            {payslips.length === 0 && (
-              <tr><td colSpan={5} className="px-4 py-6 text-center text-mine-400">{t("payroll.noneYetPayslips")}</td></tr>
+      <DataTable
+        columns={columns}
+        rows={payslips}
+        rowKey={(p) => p.id}
+        emptyMessage={t("payroll.noneYetPayslips")}
+        searchValue={(p) => payeeName(p)}
+        exportFilename="payslips"
+        exportColumns={[
+          { header: t("payroll.payee"), value: (p) => payeeName(p) },
+          { header: t("payroll.payPeriod"), value: (p) => `${p.payPeriodStart} - ${p.payPeriodEnd}` },
+          { header: t("payroll.grossPay"), value: (p) => p.grossPay },
+          { header: t("payroll.netPay"), value: (p) => p.netPay },
+        ]}
+        actions={(p) => (
+          <div className="flex justify-end gap-2">
+            {p.fileName && (
+              <button className="text-xs text-mine-300 hover:text-mine-50" onClick={() => download(p)}>{t("documents.download")}</button>
             )}
-          </tbody>
-        </table>
-      </div>
+            {canDelete && (
+              <button className={buttonDanger} onClick={() => remove(p.id)}>{t("common.delete")}</button>
+            )}
+          </div>
+        )}
+      />
       {modal && (
         <Modal title={t("payroll.newPayslipTitle")} onClose={() => setModal(false)}>
           <PayslipForm workers={workers} companyPayees={companyPayees} onSubmit={create} onCancel={() => setModal(false)} />
@@ -429,14 +427,19 @@ function PayslipsTab({ workers, canEdit, canDelete }: { workers: Worker[]; canEd
   );
 }
 
-function LeaveBalanceForm({ workers, onSubmit, onCancel }: { workers: Worker[]; onSubmit: (data: any) => Promise<void>; onCancel: () => void }) {
+function LeaveBalanceForm({ workers, initial, onSubmit, onCancel }: {
+  workers: Worker[];
+  initial?: Partial<LeaveBalance>;
+  onSubmit: (data: any) => Promise<void>;
+  onCancel: () => void;
+}) {
   const { t } = useTranslation();
-  const [workerId, setWorkerId] = useState(workers[0]?.id ?? "");
-  const [leaveType, setLeaveType] = useState<LeaveType>("ANNUAL");
-  const [cycleStartDate, setCycleStartDate] = useState("");
-  const [cycleEndDate, setCycleEndDate] = useState("");
-  const [entitlementDays, setEntitlementDays] = useState("15");
-  const [carriedOverDays, setCarriedOverDays] = useState("0");
+  const [workerId, setWorkerId] = useState(initial?.workerId ?? workers[0]?.id ?? "");
+  const [leaveType, setLeaveType] = useState<LeaveType>(initial?.leaveType ?? "ANNUAL");
+  const [cycleStartDate, setCycleStartDate] = useState(initial?.cycleStartDate?.slice(0, 10) ?? "");
+  const [cycleEndDate, setCycleEndDate] = useState(initial?.cycleEndDate?.slice(0, 10) ?? "");
+  const [entitlementDays, setEntitlementDays] = useState(initial?.entitlementDays?.toString() ?? "15");
+  const [carriedOverDays, setCarriedOverDays] = useState(initial?.carriedOverDays?.toString() ?? "0");
   const [saving, setSaving] = useState(false);
 
   async function handleSubmit(e: FormEvent) {
@@ -505,7 +508,7 @@ function LeaveBalancesTab({ workers, canEdit, canDelete }: { workers: Worker[]; 
   const [balances, setBalances] = useState<LeaveBalance[]>([]);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState(false);
-  const [modal, setModal] = useState(false);
+  const [modal, setModal] = useState<null | "create" | LeaveBalance>(null);
 
   async function load() {
     setLoading(true);
@@ -526,7 +529,13 @@ function LeaveBalancesTab({ workers, canEdit, canDelete }: { workers: Worker[]; 
 
   async function create(data: any) {
     await api.post("/payroll/leave-balances", data);
-    setModal(false);
+    setModal(null);
+    await load();
+  }
+
+  async function update(id: string, data: any) {
+    await api.put(`/payroll/leave-balances/${id}`, data);
+    setModal(null);
     await load();
   }
 
@@ -538,48 +547,51 @@ function LeaveBalancesTab({ workers, canEdit, canDelete }: { workers: Worker[]; 
   if (loading) return <div className="text-mine-300">{t("common.loading")}</div>;
   if (loadError) return <LoadError onRetry={load} />;
 
+  const columns: DataTableColumn<LeaveBalance>[] = [
+    { key: "worker", header: t("workers.title"), render: (b) => <span className="font-medium">{b.worker?.name}</span>, sortValue: (b) => b.worker?.name ?? "" },
+    { key: "type", header: t("payroll.leaveType"), render: (b) => t(`payroll.leaveTypes.${b.leaveType}`), sortValue: (b) => b.leaveType },
+    { key: "entitlement", header: t("payroll.leaveBalances.entitlementDays"), render: (b) => (b.entitlementDays + b.carriedOverDays).toFixed(1), sortValue: (b) => b.entitlementDays + b.carriedOverDays },
+    { key: "taken", header: t("payroll.leaveBalances.takenDays"), render: (b) => b.takenDays.toFixed(1), sortValue: (b) => b.takenDays },
+    { key: "remaining", header: t("payroll.leaveBalances.remainingDays"), render: (b) => <span className={b.remainingDays < 0 ? "text-danger-500 font-medium" : ""}>{b.remainingDays.toFixed(1)}</span>, sortValue: (b) => b.remainingDays },
+  ];
+
   return (
     <div className="space-y-4">
       <p className="text-xs text-mine-400">{t("payroll.leaveBalances.hint")}</p>
       {canEdit && workers.length > 0 && (
         <div className="flex justify-end">
-          <button className={buttonPrimary} onClick={() => setModal(true)}>{t("payroll.leaveBalances.new")}</button>
+          <button className={buttonPrimary} onClick={() => setModal("create")}>{t("payroll.leaveBalances.new")}</button>
         </div>
       )}
-      <div className={`${cardClass} overflow-x-auto`}>
-        <table className="w-full text-sm">
-          <thead className="bg-mine-800/50 text-mine-300 text-xs uppercase">
-            <tr>
-              <th className="text-left px-4 py-2">{t("workers.title")}</th>
-              <th className="text-left px-4 py-2">{t("payroll.leaveType")}</th>
-              <th className="text-left px-4 py-2">{t("payroll.leaveBalances.entitlementDays")}</th>
-              <th className="text-left px-4 py-2">{t("payroll.leaveBalances.takenDays")}</th>
-              <th className="text-left px-4 py-2">{t("payroll.leaveBalances.remainingDays")}</th>
-              <th className="px-4 py-2"></th>
-            </tr>
-          </thead>
-          <tbody>
-            {balances.map((b) => (
-              <tr key={b.id} className="border-t border-mine-800 hover:bg-mine-800/30">
-                <td className="px-4 py-2 font-medium">{b.worker?.name}</td>
-                <td className="px-4 py-2 text-mine-300">{t(`payroll.leaveTypes.${b.leaveType}`)}</td>
-                <td className="px-4 py-2 text-mine-300">{(b.entitlementDays + b.carriedOverDays).toFixed(1)}</td>
-                <td className="px-4 py-2 text-mine-300">{b.takenDays.toFixed(1)}</td>
-                <td className={`px-4 py-2 font-medium ${b.remainingDays < 0 ? "text-danger-500" : ""}`}>{b.remainingDays.toFixed(1)}</td>
-                <td className="px-4 py-2 text-right">
-                  {canDelete && <button className={buttonDanger} onClick={() => remove(b.id)}>{t("common.delete")}</button>}
-                </td>
-              </tr>
-            ))}
-            {balances.length === 0 && (
-              <tr><td colSpan={6} className="px-4 py-6 text-center text-mine-400">{t("payroll.leaveBalances.noneYet")}</td></tr>
-            )}
-          </tbody>
-        </table>
-      </div>
+      <DataTable
+        columns={columns}
+        rows={balances}
+        rowKey={(b) => b.id}
+        emptyMessage={t("payroll.leaveBalances.noneYet")}
+        searchValue={(b) => `${b.worker?.name ?? ""} ${b.leaveType}`}
+        exportFilename="leave-balances"
+        exportColumns={[
+          { header: t("workers.title"), value: (b) => b.worker?.name ?? "" },
+          { header: t("payroll.leaveType"), value: (b) => b.leaveType },
+          { header: t("payroll.leaveBalances.entitlementDays"), value: (b) => b.entitlementDays + b.carriedOverDays },
+          { header: t("payroll.leaveBalances.takenDays"), value: (b) => b.takenDays },
+          { header: t("payroll.leaveBalances.remainingDays"), value: (b) => b.remainingDays },
+        ]}
+        actions={(b) => (
+          <div className="flex justify-end gap-2">
+            {canEdit && <button className="text-xs text-mine-300 hover:text-mine-50" onClick={() => setModal(b)}>{t("common.edit")}</button>}
+            {canDelete && <button className={buttonDanger} onClick={() => remove(b.id)}>{t("common.delete")}</button>}
+          </div>
+        )}
+      />
       {modal && (
-        <Modal title={t("payroll.leaveBalances.newTitle")} onClose={() => setModal(false)}>
-          <LeaveBalanceForm workers={workers} onSubmit={create} onCancel={() => setModal(false)} />
+        <Modal title={modal === "create" ? t("payroll.leaveBalances.newTitle") : t("payroll.leaveBalances.editTitle")} onClose={() => setModal(null)}>
+          <LeaveBalanceForm
+            workers={workers}
+            initial={modal === "create" ? undefined : modal}
+            onSubmit={(data) => (modal === "create" ? create(data) : update(modal.id, data))}
+            onCancel={() => setModal(null)}
+          />
         </Modal>
       )}
     </div>
@@ -611,6 +623,12 @@ function BceaComplianceTab() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  const columns: DataTableColumn<BceaBreach>[] = [
+    { key: "worker", header: t("workers.title"), render: (b) => <span className="font-medium">{b.workerName}</span>, sortValue: (b) => b.workerName },
+    { key: "type", header: t("payroll.bceaCompliance.breachType"), render: (b) => <span className="text-danger-500">{t(`payroll.bceaCompliance.breachTypes.${b.type}`)}</span>, sortValue: (b) => b.type },
+    { key: "detail", header: t("common.description"), render: (b) => b.detail },
+  ];
+
   return (
     <div className="space-y-4">
       <p className="text-xs text-mine-400">{t("payroll.bceaCompliance.hint")}</p>
@@ -629,29 +647,19 @@ function BceaComplianceTab() {
       {loading && <div className="text-mine-300">{t("common.loading")}</div>}
       {loadError && <LoadError onRetry={() => load(days)} />}
       {!loading && report && (
-        <div className={`${cardClass} overflow-x-auto`}>
-          <table className="w-full text-sm">
-            <thead className="bg-mine-800/50 text-mine-300 text-xs uppercase">
-              <tr>
-                <th className="text-left px-4 py-2">{t("workers.title")}</th>
-                <th className="text-left px-4 py-2">{t("payroll.bceaCompliance.breachType")}</th>
-                <th className="text-left px-4 py-2">{t("common.description")}</th>
-              </tr>
-            </thead>
-            <tbody>
-              {report.breaches.map((b, idx) => (
-                <tr key={`${b.workerId}-${idx}`} className="border-t border-mine-800 hover:bg-mine-800/30">
-                  <td className="px-4 py-2 font-medium">{b.workerName}</td>
-                  <td className="px-4 py-2 text-danger-500">{t(`payroll.bceaCompliance.breachTypes.${b.type}`)}</td>
-                  <td className="px-4 py-2 text-mine-300">{b.detail}</td>
-                </tr>
-              ))}
-              {report.breaches.length === 0 && (
-                <tr><td colSpan={3} className="px-4 py-6 text-center text-mine-400">{t("payroll.bceaCompliance.noBreaches")}</td></tr>
-              )}
-            </tbody>
-          </table>
-        </div>
+        <DataTable
+          columns={columns}
+          rows={report.breaches}
+          rowKey={(b) => `${b.workerId}-${b.type}-${b.detail}`}
+          emptyMessage={t("payroll.bceaCompliance.noBreaches")}
+          searchValue={(b) => `${b.workerName} ${b.type} ${b.detail}`}
+          exportFilename="bcea-breaches"
+          exportColumns={[
+            { header: t("workers.title"), value: (b) => b.workerName },
+            { header: t("payroll.bceaCompliance.breachType"), value: (b) => b.type },
+            { header: t("common.description"), value: (b) => b.detail },
+          ]}
+        />
       )}
     </div>
   );

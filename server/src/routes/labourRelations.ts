@@ -1,11 +1,25 @@
 import { Router, Request, Response } from "express";
+import multer from "multer";
 import { z } from "zod";
 import { ExecutiveTitle } from "@prisma/client";
 import { prisma } from "../prisma";
 import { requireAuth, requireRole } from "../middleware/auth";
 import { requireMineId } from "../lib/mineScope";
+import { documentFileFilter } from "../lib/uploadFilters";
 
 const router = Router();
+
+const upload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 10 * 1024 * 1024 },
+  fileFilter: documentFileFilter,
+});
+
+function fileFields(req: Request) {
+  return req.file
+    ? { fileName: req.file.originalname, fileMimeType: req.file.mimetype, fileSize: req.file.size, fileData: Uint8Array.from(req.file.buffer) }
+    : {};
+}
 
 // Disciplinary/grievance/CCMA records are among the most sensitive HR data a mine holds —
 // visible only to HR, Compliance, and the GM/COO, mirroring the POPIA-style gating already
@@ -79,7 +93,59 @@ const disciplinarySelect = {
   sanctionDetails: true,
   status: true,
   notes: true,
+  fileName: true,
+  fileMimeType: true,
+  fileSize: true,
   createdBy: { select: { id: true, name: true } },
+  createdAt: true,
+} as const;
+
+const grievanceSelect = {
+  id: true,
+  workerId: true,
+  worker: { select: { id: true, name: true, category: true } },
+  raisedAgainst: true,
+  description: true,
+  dateRaised: true,
+  status: true,
+  resolution: true,
+  resolvedAt: true,
+  fileName: true,
+  fileMimeType: true,
+  fileSize: true,
+  createdAt: true,
+} as const;
+
+const ccmaSelect = {
+  id: true,
+  workerId: true,
+  worker: { select: { id: true, name: true } },
+  referralNumber: true,
+  caseType: true,
+  conciliationDate: true,
+  arbitrationDate: true,
+  outcome: true,
+  status: true,
+  notes: true,
+  fileName: true,
+  fileMimeType: true,
+  fileSize: true,
+  createdAt: true,
+} as const;
+
+const unionSelect = {
+  id: true,
+  unionName: true,
+  agreementType: true,
+  recognitionThresholdPercent: true,
+  membershipCount: true,
+  effectiveDate: true,
+  expiryDate: true,
+  status: true,
+  notes: true,
+  fileName: true,
+  fileMimeType: true,
+  fileSize: true,
   createdAt: true,
 } as const;
 
@@ -97,7 +163,7 @@ router.get("/disciplinary", async (req, res) => {
   res.json(cases);
 });
 
-router.post("/disciplinary", requireRole("ADMIN", "SUPERVISOR", "EXECUTIVE"), async (req, res) => {
+router.post("/disciplinary", requireRole("ADMIN", "SUPERVISOR", "EXECUTIVE"), upload.single("attachment"), async (req, res) => {
   const mineId = requireMineId(req, res);
   if (!mineId) return;
   if (!(await requireIrAccess(req, res))) return;
@@ -106,13 +172,13 @@ router.post("/disciplinary", requireRole("ADMIN", "SUPERVISOR", "EXECUTIVE"), as
   const worker = await prisma.worker.findFirst({ where: { id: parsed.data.workerId, site: { mineId } } });
   if (!worker) return res.status(404).json({ error: "Worker not found" });
   const created = await prisma.disciplinaryCase.create({
-    data: { ...parsed.data, createdById: req.auth!.userId },
+    data: { ...parsed.data, ...fileFields(req), createdById: req.auth!.userId },
     select: disciplinarySelect,
   });
   res.status(201).json(created);
 });
 
-router.put("/disciplinary/:id", requireRole("ADMIN", "SUPERVISOR", "EXECUTIVE"), async (req, res) => {
+router.put("/disciplinary/:id", requireRole("ADMIN", "SUPERVISOR", "EXECUTIVE"), upload.single("attachment"), async (req, res) => {
   const mineId = requireMineId(req, res);
   if (!mineId) return;
   if (!(await requireIrAccess(req, res))) return;
@@ -120,8 +186,26 @@ router.put("/disciplinary/:id", requireRole("ADMIN", "SUPERVISOR", "EXECUTIVE"),
   if (!parsed.success) return res.status(400).json({ error: parsed.error.flatten() });
   const existing = await prisma.disciplinaryCase.findFirst({ where: { id: req.params.id, worker: { site: { mineId } } } });
   if (!existing) return res.status(404).json({ error: "Case not found" });
-  const updated = await prisma.disciplinaryCase.update({ where: { id: existing.id }, data: parsed.data, select: disciplinarySelect });
+  const updated = await prisma.disciplinaryCase.update({
+    where: { id: existing.id },
+    data: { ...parsed.data, ...fileFields(req) },
+    select: disciplinarySelect,
+  });
   res.json(updated);
+});
+
+router.get("/disciplinary/:id/attachment", async (req, res) => {
+  const mineId = requireMineId(req, res);
+  if (!mineId) return;
+  if (!(await requireIrAccess(req, res))) return;
+  const existing = await prisma.disciplinaryCase.findFirst({
+    where: { id: req.params.id, worker: { site: { mineId } } },
+    select: { fileName: true, fileMimeType: true, fileData: true },
+  });
+  if (!existing?.fileData || !existing.fileMimeType) return res.status(404).json({ error: "No attachment on this case" });
+  res.setHeader("Content-Type", existing.fileMimeType);
+  res.setHeader("Content-Disposition", `attachment; filename="${existing.fileName}"`);
+  res.send(Buffer.from(existing.fileData));
 });
 
 router.delete("/disciplinary/:id", requireRole("ADMIN", "EXECUTIVE"), async (req, res) => {
@@ -140,13 +224,13 @@ router.get("/grievances", async (req, res) => {
   if (!(await requireIrAccess(req, res))) return;
   const cases = await prisma.grievanceCase.findMany({
     where: { worker: { site: { mineId } } },
-    include: { worker: { select: { id: true, name: true, category: true } } },
+    select: grievanceSelect,
     orderBy: { dateRaised: "desc" },
   });
   res.json(cases);
 });
 
-router.post("/grievances", requireRole("ADMIN", "SUPERVISOR", "EXECUTIVE"), async (req, res) => {
+router.post("/grievances", requireRole("ADMIN", "SUPERVISOR", "EXECUTIVE"), upload.single("attachment"), async (req, res) => {
   const mineId = requireMineId(req, res);
   if (!mineId) return;
   if (!(await requireIrAccess(req, res))) return;
@@ -154,11 +238,11 @@ router.post("/grievances", requireRole("ADMIN", "SUPERVISOR", "EXECUTIVE"), asyn
   if (!parsed.success) return res.status(400).json({ error: parsed.error.flatten() });
   const worker = await prisma.worker.findFirst({ where: { id: parsed.data.workerId, site: { mineId } } });
   if (!worker) return res.status(404).json({ error: "Worker not found" });
-  const created = await prisma.grievanceCase.create({ data: parsed.data });
+  const created = await prisma.grievanceCase.create({ data: { ...parsed.data, ...fileFields(req) }, select: grievanceSelect });
   res.status(201).json(created);
 });
 
-router.put("/grievances/:id", requireRole("ADMIN", "SUPERVISOR", "EXECUTIVE"), async (req, res) => {
+router.put("/grievances/:id", requireRole("ADMIN", "SUPERVISOR", "EXECUTIVE"), upload.single("attachment"), async (req, res) => {
   const mineId = requireMineId(req, res);
   if (!mineId) return;
   if (!(await requireIrAccess(req, res))) return;
@@ -166,9 +250,23 @@ router.put("/grievances/:id", requireRole("ADMIN", "SUPERVISOR", "EXECUTIVE"), a
   if (!parsed.success) return res.status(400).json({ error: parsed.error.flatten() });
   const existing = await prisma.grievanceCase.findFirst({ where: { id: req.params.id, worker: { site: { mineId } } } });
   if (!existing) return res.status(404).json({ error: "Grievance not found" });
-  const data = { ...parsed.data, resolvedAt: parsed.data.status === "RESOLVED" ? new Date() : existing.resolvedAt };
-  const updated = await prisma.grievanceCase.update({ where: { id: existing.id }, data });
+  const data = { ...parsed.data, ...fileFields(req), resolvedAt: parsed.data.status === "RESOLVED" ? new Date() : existing.resolvedAt };
+  const updated = await prisma.grievanceCase.update({ where: { id: existing.id }, data, select: grievanceSelect });
   res.json(updated);
+});
+
+router.get("/grievances/:id/attachment", async (req, res) => {
+  const mineId = requireMineId(req, res);
+  if (!mineId) return;
+  if (!(await requireIrAccess(req, res))) return;
+  const existing = await prisma.grievanceCase.findFirst({
+    where: { id: req.params.id, worker: { site: { mineId } } },
+    select: { fileName: true, fileMimeType: true, fileData: true },
+  });
+  if (!existing?.fileData || !existing.fileMimeType) return res.status(404).json({ error: "No attachment on this grievance" });
+  res.setHeader("Content-Type", existing.fileMimeType);
+  res.setHeader("Content-Disposition", `attachment; filename="${existing.fileName}"`);
+  res.send(Buffer.from(existing.fileData));
 });
 
 router.delete("/grievances/:id", requireRole("ADMIN", "EXECUTIVE"), async (req, res) => {
@@ -187,13 +285,13 @@ router.get("/ccma-cases", async (req, res) => {
   if (!(await requireIrAccess(req, res))) return;
   const cases = await prisma.ccmaCase.findMany({
     where: { OR: [{ worker: { site: { mineId } } }, { workerId: null }] },
-    include: { worker: { select: { id: true, name: true } } },
+    select: ccmaSelect,
     orderBy: { createdAt: "desc" },
   });
   res.json(cases);
 });
 
-router.post("/ccma-cases", requireRole("ADMIN", "SUPERVISOR", "EXECUTIVE"), async (req, res) => {
+router.post("/ccma-cases", requireRole("ADMIN", "SUPERVISOR", "EXECUTIVE"), upload.single("attachment"), async (req, res) => {
   const mineId = requireMineId(req, res);
   if (!mineId) return;
   if (!(await requireIrAccess(req, res))) return;
@@ -203,11 +301,11 @@ router.post("/ccma-cases", requireRole("ADMIN", "SUPERVISOR", "EXECUTIVE"), asyn
     const worker = await prisma.worker.findFirst({ where: { id: parsed.data.workerId, site: { mineId } } });
     if (!worker) return res.status(404).json({ error: "Worker not found" });
   }
-  const created = await prisma.ccmaCase.create({ data: parsed.data });
+  const created = await prisma.ccmaCase.create({ data: { ...parsed.data, ...fileFields(req) }, select: ccmaSelect });
   res.status(201).json(created);
 });
 
-router.put("/ccma-cases/:id", requireRole("ADMIN", "SUPERVISOR", "EXECUTIVE"), async (req, res) => {
+router.put("/ccma-cases/:id", requireRole("ADMIN", "SUPERVISOR", "EXECUTIVE"), upload.single("attachment"), async (req, res) => {
   const mineId = requireMineId(req, res);
   if (!mineId) return;
   if (!(await requireIrAccess(req, res))) return;
@@ -217,8 +315,22 @@ router.put("/ccma-cases/:id", requireRole("ADMIN", "SUPERVISOR", "EXECUTIVE"), a
     where: { id: req.params.id, OR: [{ worker: { site: { mineId } } }, { workerId: null }] },
   });
   if (!existing) return res.status(404).json({ error: "Case not found" });
-  const updated = await prisma.ccmaCase.update({ where: { id: existing.id }, data: parsed.data });
+  const updated = await prisma.ccmaCase.update({ where: { id: existing.id }, data: { ...parsed.data, ...fileFields(req) }, select: ccmaSelect });
   res.json(updated);
+});
+
+router.get("/ccma-cases/:id/attachment", async (req, res) => {
+  const mineId = requireMineId(req, res);
+  if (!mineId) return;
+  if (!(await requireIrAccess(req, res))) return;
+  const existing = await prisma.ccmaCase.findFirst({
+    where: { id: req.params.id, OR: [{ worker: { site: { mineId } } }, { workerId: null }] },
+    select: { fileName: true, fileMimeType: true, fileData: true },
+  });
+  if (!existing?.fileData || !existing.fileMimeType) return res.status(404).json({ error: "No attachment on this case" });
+  res.setHeader("Content-Type", existing.fileMimeType);
+  res.setHeader("Content-Disposition", `attachment; filename="${existing.fileName}"`);
+  res.send(Buffer.from(existing.fileData));
 });
 
 router.delete("/ccma-cases/:id", requireRole("ADMIN", "EXECUTIVE"), async (req, res) => {
@@ -236,21 +348,21 @@ router.delete("/ccma-cases/:id", requireRole("ADMIN", "EXECUTIVE"), async (req, 
 router.get("/union-agreements", async (req, res) => {
   const mineId = requireMineId(req, res);
   if (!mineId) return;
-  const agreements = await prisma.unionAgreement.findMany({ where: { mineId }, orderBy: { effectiveDate: "desc" } });
+  const agreements = await prisma.unionAgreement.findMany({ where: { mineId }, select: unionSelect, orderBy: { effectiveDate: "desc" } });
   res.json(agreements);
 });
 
-router.post("/union-agreements", requireRole("ADMIN", "SUPERVISOR", "EXECUTIVE"), async (req, res) => {
+router.post("/union-agreements", requireRole("ADMIN", "SUPERVISOR", "EXECUTIVE"), upload.single("attachment"), async (req, res) => {
   const mineId = requireMineId(req, res);
   if (!mineId) return;
   if (!(await requireIrAccess(req, res))) return;
   const parsed = unionAgreementSchema.safeParse(req.body);
   if (!parsed.success) return res.status(400).json({ error: parsed.error.flatten() });
-  const created = await prisma.unionAgreement.create({ data: { ...parsed.data, mineId } });
+  const created = await prisma.unionAgreement.create({ data: { ...parsed.data, ...fileFields(req), mineId }, select: unionSelect });
   res.status(201).json(created);
 });
 
-router.put("/union-agreements/:id", requireRole("ADMIN", "SUPERVISOR", "EXECUTIVE"), async (req, res) => {
+router.put("/union-agreements/:id", requireRole("ADMIN", "SUPERVISOR", "EXECUTIVE"), upload.single("attachment"), async (req, res) => {
   const mineId = requireMineId(req, res);
   if (!mineId) return;
   if (!(await requireIrAccess(req, res))) return;
@@ -258,8 +370,21 @@ router.put("/union-agreements/:id", requireRole("ADMIN", "SUPERVISOR", "EXECUTIV
   if (!parsed.success) return res.status(400).json({ error: parsed.error.flatten() });
   const existing = await prisma.unionAgreement.findFirst({ where: { id: req.params.id, mineId } });
   if (!existing) return res.status(404).json({ error: "Agreement not found" });
-  const updated = await prisma.unionAgreement.update({ where: { id: existing.id }, data: parsed.data });
+  const updated = await prisma.unionAgreement.update({ where: { id: existing.id }, data: { ...parsed.data, ...fileFields(req) }, select: unionSelect });
   res.json(updated);
+});
+
+router.get("/union-agreements/:id/attachment", async (req, res) => {
+  const mineId = requireMineId(req, res);
+  if (!mineId) return;
+  const existing = await prisma.unionAgreement.findFirst({
+    where: { id: req.params.id, mineId },
+    select: { fileName: true, fileMimeType: true, fileData: true },
+  });
+  if (!existing?.fileData || !existing.fileMimeType) return res.status(404).json({ error: "No attachment on this agreement" });
+  res.setHeader("Content-Type", existing.fileMimeType);
+  res.setHeader("Content-Disposition", `attachment; filename="${existing.fileName}"`);
+  res.send(Buffer.from(existing.fileData));
 });
 
 router.delete("/union-agreements/:id", requireRole("ADMIN", "EXECUTIVE"), async (req, res) => {
