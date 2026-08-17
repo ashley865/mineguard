@@ -2284,7 +2284,14 @@
         "DAILY_REST_SHORT": "Período de descanso diario insuficiente"
       },
       "noBreaches": "No se detectaron infracciones de tiempo de trabajo BCEA en este período."
-    }
+    },
+    "payee": "Beneficiario",
+    "payeeMode": "Pagar a",
+    "payeeModeEmployee": "Empleado",
+    "payeeModeCompany": "Empresa",
+    "companyPayee": "Beneficiario empresa",
+    "noCompanyPayees": "No se encontraron beneficiarios de tipo empresa. Agregue uno como beneficiario de tipo Empresa en Gastos primero.",
+    "amount": "Monto"
   },
   "procurement": {
     "nav": "Adquisiciones y Proveedores",
@@ -2463,7 +2470,12 @@
       "APPROVED": "{{name}} aprobó su solicitud",
       "REJECTED": "{{name}} rechazó su solicitud",
       "COMPLETED": "{{name}} marcó su solicitud como completada"
-    }
+    },
+    "amountNeeded": "Monto Necesario",
+    "emergencyMode": "Solicitud de Emergencia",
+    "emergencyModeHint": "Márquelo como urgente: aparecerá al principio de la lista del destinatario y activará una alerta urgente.",
+    "emergencyBadge": "Emergencia",
+    "toastNewEmergencyTitle": "🚨 Solicitud de emergencia de {{name}}"
   },
   "calling": {
     "incomingVideoCall": "Videollamada entrante…",

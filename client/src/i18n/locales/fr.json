@@ -2284,7 +2284,14 @@
         "DAILY_REST_SHORT": "Période de repos quotidien trop courte"
       },
       "noBreaches": "Aucune infraction au temps de travail BCEA détectée durant cette période."
-    }
+    },
+    "payee": "Bénéficiaire",
+    "payeeMode": "Payer à",
+    "payeeModeEmployee": "Employé",
+    "payeeModeCompany": "Entreprise",
+    "companyPayee": "Bénéficiaire entreprise",
+    "noCompanyPayees": "Aucun bénéficiaire de type entreprise trouvé. Ajoutez-en un comme bénéficiaire de type Entreprise dans Dépenses d'abord.",
+    "amount": "Montant"
   },
   "procurement": {
     "nav": "Achats et Fournisseurs",
@@ -2463,7 +2470,12 @@
       "APPROVED": "{{name}} a approuvé votre demande",
       "REJECTED": "{{name}} a rejeté votre demande",
       "COMPLETED": "{{name}} a marqué votre demande comme terminée"
-    }
+    },
+    "amountNeeded": "Montant Nécessaire",
+    "emergencyMode": "Demande d'Urgence",
+    "emergencyModeHint": "Marquez comme urgent : elle passera en tête de la liste du destinataire et déclenchera une alerte urgente.",
+    "emergencyBadge": "Urgence",
+    "toastNewEmergencyTitle": "🚨 Demande urgente de {{name}}"
   },
   "calling": {
     "incomingVideoCall": "Appel vidéo entrant…",

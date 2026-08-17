@@ -2005,8 +2005,10 @@ export interface LeaveRequest {
 
 export interface Payslip {
   id: string;
-  workerId: string;
-  worker?: { id: string; name: string; employeeId: string };
+  workerId?: string | null;
+  worker?: { id: string; name: string; employeeId: string } | null;
+  payeeId?: string | null;
+  payee?: { id: string; name: string; payeeType: PayeeType } | null;
   payPeriodStart: string;
   payPeriodEnd: string;
   grossPay: number;
@@ -2193,6 +2195,7 @@ export type ExecutiveRequestCategory =
   | "GENERAL";
 
 export type ExecutiveRequestStatus = "PENDING" | "APPROVED" | "REJECTED" | "COMPLETED";
+export type ExecutiveRequestPriority = "NORMAL" | "EMERGENCY";
 
 export interface ExecutiveRequestItem {
   id: string;
@@ -2200,6 +2203,8 @@ export interface ExecutiveRequestItem {
   category: ExecutiveRequestCategory;
   subject: string;
   message: string;
+  amount?: number | null;
+  priority: ExecutiveRequestPriority;
   status: ExecutiveRequestStatus;
   responseNote?: string | null;
   respondedAt?: string | null;

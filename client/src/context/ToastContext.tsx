@@ -4,6 +4,7 @@ export interface ToastInput {
   title: string;
   body?: string;
   onClick?: () => void;
+  variant?: "default" | "emergency";
 }
 
 interface Toast extends ToastInput {
@@ -19,6 +20,7 @@ interface ToastContextValue {
 const ToastContext = createContext<ToastContextValue | null>(null);
 
 const AUTO_DISMISS_MS = 8000;
+const EMERGENCY_AUTO_DISMISS_MS = 20000;
 
 export function ToastProvider({ children }: { children: ReactNode }) {
   const [toasts, setToasts] = useState<Toast[]>([]);
@@ -31,7 +33,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
     (toast: ToastInput) => {
       const id = `${Date.now()}-${Math.random().toString(36).slice(2)}`;
       setToasts((prev) => [...prev, { ...toast, id }]);
-      setTimeout(() => dismissToast(id), AUTO_DISMISS_MS);
+      setTimeout(() => dismissToast(id), toast.variant === "emergency" ? EMERGENCY_AUTO_DISMISS_MS : AUTO_DISMISS_MS);
     },
     [dismissToast]
   );

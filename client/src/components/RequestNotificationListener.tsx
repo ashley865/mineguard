@@ -19,10 +19,14 @@ export default function RequestNotificationListener() {
     function onNew(request: ExecutiveRequestItem) {
       const isRecipient = user!.role === "ADMIN" || user!.title === request.toTitle;
       if (!isRecipient || request.fromUser.id === user!.id) return;
+      const isEmergency = request.priority === "EMERGENCY";
       showToast({
-        title: t("executiveRequests.toastNewTitle", { name: request.fromUser.name }),
+        title: isEmergency
+          ? t("executiveRequests.toastNewEmergencyTitle", { name: request.fromUser.name })
+          : t("executiveRequests.toastNewTitle", { name: request.fromUser.name }),
         body: request.subject,
         onClick: () => navigate("/executive-requests"),
+        variant: isEmergency ? "emergency" : "default",
       });
     }
 

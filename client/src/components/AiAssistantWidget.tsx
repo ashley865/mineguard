@@ -111,16 +111,23 @@ export default function AiAssistantWidget({
     }
   }
 
+  async function loadSummary({ silent = false }: { silent?: boolean } = {}) {
+    if (!silent) setLoadingSummary(true);
+    try {
+      const res = await api.get<AiSummaryResponse>("/ai/summary");
+      setConfigured(res.data.configured);
+      setSummary(res.data.summary);
+      if (res.data.configured) await loadRecommendations();
+    } catch {
+      setConfigured(false);
+    } finally {
+      if (!silent) setLoadingSummary(false);
+    }
+  }
+
   useEffect(() => {
-    api
-      .get<AiSummaryResponse>("/ai/summary")
-      .then((res) => {
-        setConfigured(res.data.configured);
-        setSummary(res.data.summary);
-        if (res.data.configured) loadRecommendations();
-      })
-      .catch(() => setConfigured(false))
-      .finally(() => setLoadingSummary(false));
+    loadSummary();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {

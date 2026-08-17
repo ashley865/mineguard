@@ -2,7 +2,7 @@ import { FormEvent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { api } from "../api/client";
 import { useAuth } from "../context/AuthContext";
-import { BceaComplianceReport, LeaveBalance, LeaveRequest, LeaveType, Payslip, Worker } from "../api/types";
+import { BceaComplianceReport, LeaveBalance, LeaveRequest, LeaveType, Payee, Payslip, Worker } from "../api/types";
 import { StatusBadge } from "../components/Badges";
 import Modal from "../components/Modal";
 import { buttonDanger, buttonPrimary, buttonSecondary, cardClass, inputClass, labelClass, selectClass } from "../components/ui";
@@ -78,18 +78,22 @@ function LeaveForm({ workers, onSubmit, onCancel }: {
   );
 }
 
-function PayslipForm({ workers, onSubmit, onCancel }: {
+function PayslipForm({ workers, companyPayees, onSubmit, onCancel }: {
   workers: Worker[];
+  companyPayees: Payee[];
   onSubmit: (data: FormData) => Promise<void>;
   onCancel: () => void;
 }) {
   const { t } = useTranslation();
+  const [payeeMode, setPayeeMode] = useState<"EMPLOYEE" | "COMPANY">("EMPLOYEE");
   const [workerId, setWorkerId] = useState(workers[0]?.id ?? "");
+  const [payeeId, setPayeeId] = useState(companyPayees[0]?.id ?? "");
   const [payPeriodStart, setPayPeriodStart] = useState("");
   const [payPeriodEnd, setPayPeriodEnd] = useState("");
   const [grossPay, setGrossPay] = useState("");
   const [deductions, setDeductions] = useState("");
   const [netPay, setNetPay] = useState("");
+  const [amount, setAmount] = useState("");
   const [file, setFile] = useState<File | null>(null);
   const [saving, setSaving] = useState(false);
 
@@ -98,12 +102,19 @@ function PayslipForm({ workers, onSubmit, onCancel }: {
     setSaving(true);
     try {
       const form = new FormData();
-      form.append("workerId", workerId);
+      if (payeeMode === "EMPLOYEE") {
+        form.append("workerId", workerId);
+        form.append("grossPay", grossPay);
+        form.append("deductions", deductions);
+        form.append("netPay", netPay);
+      } else {
+        form.append("payeeId", payeeId);
+        form.append("grossPay", amount);
+        form.append("deductions", "0");
+        form.append("netPay", amount);
+      }
       form.append("payPeriodStart", payPeriodStart);
       form.append("payPeriodEnd", payPeriodEnd);
-      form.append("grossPay", grossPay);
-      form.append("deductions", deductions);
-      form.append("netPay", netPay);
       if (file) form.append("file", file);
       await onSubmit(form);
     } finally {
@@ -114,11 +125,43 @@ function PayslipForm({ workers, onSubmit, onCancel }: {
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <div>
-        <label className={labelClass}>{t("workers.title")}</label>
-        <select className={selectClass} value={workerId} onChange={(e) => setWorkerId(e.target.value)}>
-          {workers.map((w) => <option key={w.id} value={w.id}>{w.name}</option>)}
-        </select>
+        <label className={labelClass}>{t("payroll.payeeMode")}</label>
+        <div className="flex gap-2">
+          <button
+            type="button"
+            className={payeeMode === "EMPLOYEE" ? buttonPrimary : buttonSecondary}
+            onClick={() => setPayeeMode("EMPLOYEE")}
+          >
+            {t("payroll.payeeModeEmployee")}
+          </button>
+          <button
+            type="button"
+            className={payeeMode === "COMPANY" ? buttonPrimary : buttonSecondary}
+            onClick={() => setPayeeMode("COMPANY")}
+          >
+            {t("payroll.payeeModeCompany")}
+          </button>
+        </div>
       </div>
+      {payeeMode === "EMPLOYEE" ? (
+        <div>
+          <label className={labelClass}>{t("workers.title")}</label>
+          <select className={selectClass} value={workerId} onChange={(e) => setWorkerId(e.target.value)}>
+            {workers.map((w) => <option key={w.id} value={w.id}>{w.name}</option>)}
+          </select>
+        </div>
+      ) : (
+        <div>
+          <label className={labelClass}>{t("payroll.companyPayee")}</label>
+          {companyPayees.length === 0 ? (
+            <p className="text-xs text-mine-400">{t("payroll.noCompanyPayees")}</p>
+          ) : (
+            <select className={selectClass} value={payeeId} onChange={(e) => setPayeeId(e.target.value)}>
+              {companyPayees.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
+            </select>
+          )}
+        </div>
+      )}
       <div className="grid grid-cols-2 gap-3">
         <div>
           <label className={labelClass}>{t("payroll.payPeriodStart")}</label>
@@ -129,27 +172,40 @@ function PayslipForm({ workers, onSubmit, onCancel }: {
           <DateField value={payPeriodEnd} onChange={setPayPeriodEnd} required />
         </div>
       </div>
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-        <div>
-          <label className={labelClass}>{t("payroll.grossPay")}</label>
-          <input className={inputClass} type="number" step="any" value={grossPay} onChange={(e) => setGrossPay(e.target.value)} required />
+      {payeeMode === "EMPLOYEE" ? (
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          <div>
+            <label className={labelClass}>{t("payroll.grossPay")}</label>
+            <input className={inputClass} type="number" step="any" value={grossPay} onChange={(e) => setGrossPay(e.target.value)} required />
+          </div>
+          <div>
+            <label className={labelClass}>{t("payroll.deductions")}</label>
+            <input className={inputClass} type="number" step="any" value={deductions} onChange={(e) => setDeductions(e.target.value)} required />
+          </div>
+          <div>
+            <label className={labelClass}>{t("payroll.netPay")}</label>
+            <input className={inputClass} type="number" step="any" value={netPay} onChange={(e) => setNetPay(e.target.value)} required />
+          </div>
         </div>
+      ) : (
         <div>
-          <label className={labelClass}>{t("payroll.deductions")}</label>
-          <input className={inputClass} type="number" step="any" value={deductions} onChange={(e) => setDeductions(e.target.value)} required />
+          <label className={labelClass}>{t("payroll.amount")}</label>
+          <input className={inputClass} type="number" step="any" value={amount} onChange={(e) => setAmount(e.target.value)} required />
         </div>
-        <div>
-          <label className={labelClass}>{t("payroll.netPay")}</label>
-          <input className={inputClass} type="number" step="any" value={netPay} onChange={(e) => setNetPay(e.target.value)} required />
-        </div>
-      </div>
+      )}
       <div>
         <label className={labelClass}>{t("payroll.payslipFile")}</label>
         <FileDropzone accept="image/*,.pdf" onFiles={(files) => setFile(files.item(0))} />
       </div>
       <div className="flex justify-end gap-2 pt-2">
         <button type="button" className={buttonSecondary} onClick={onCancel}>{t("common.cancel")}</button>
-        <button type="submit" className={buttonPrimary} disabled={saving}>{saving ? t("common.saving") : t("common.save")}</button>
+        <button
+          type="submit"
+          className={buttonPrimary}
+          disabled={saving || (payeeMode === "COMPANY" && companyPayees.length === 0)}
+        >
+          {saving ? t("common.saving") : t("common.save")}
+        </button>
       </div>
     </form>
   );
@@ -259,6 +315,7 @@ function LeaveTab({ workers, canEdit, canDelete }: { workers: Worker[]; canEdit:
 function PayslipsTab({ workers, canEdit, canDelete }: { workers: Worker[]; canEdit: boolean; canDelete: boolean }) {
   const { t } = useTranslation();
   const [payslips, setPayslips] = useState<Payslip[]>([]);
+  const [companyPayees, setCompanyPayees] = useState<Payee[]>([]);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState(false);
   const [modal, setModal] = useState(false);
@@ -267,8 +324,12 @@ function PayslipsTab({ workers, canEdit, canDelete }: { workers: Worker[]; canEd
     setLoading(true);
     setLoadError(false);
     try {
-      const res = await api.get<Payslip[]>("/payroll/payslips");
-      setPayslips(res.data);
+      const [payslipsRes, payeesRes] = await Promise.all([
+        api.get<Payslip[]>("/payroll/payslips"),
+        api.get<Payee[]>("/payees"),
+      ]);
+      setPayslips(payslipsRes.data);
+      setCompanyPayees(payeesRes.data.filter((p) => p.payeeType === "COMPANY"));
     } catch {
       setLoadError(true);
     } finally {
@@ -309,7 +370,7 @@ function PayslipsTab({ workers, canEdit, canDelete }: { workers: Worker[]; canEd
 
   return (
     <div className="space-y-4">
-      {canEdit && workers.length > 0 && (
+      {canEdit && (workers.length > 0 || companyPayees.length > 0) && (
         <div className="flex justify-end">
           <button className={buttonPrimary} onClick={() => setModal(true)}>{t("payroll.newPayslip")}</button>
         </div>
@@ -318,7 +379,7 @@ function PayslipsTab({ workers, canEdit, canDelete }: { workers: Worker[]; canEd
         <table className="w-full text-sm">
           <thead className="bg-mine-800/50 text-mine-300 text-xs uppercase">
             <tr>
-              <th className="text-left px-4 py-2">{t("workers.title")}</th>
+              <th className="text-left px-4 py-2">{t("payroll.payee")}</th>
               <th className="text-left px-4 py-2">{t("payroll.payPeriod")}</th>
               <th className="text-left px-4 py-2">{t("payroll.grossPay")}</th>
               <th className="text-left px-4 py-2">{t("payroll.netPay")}</th>
@@ -328,7 +389,14 @@ function PayslipsTab({ workers, canEdit, canDelete }: { workers: Worker[]; canEd
           <tbody>
             {payslips.map((p) => (
               <tr key={p.id} className="border-t border-mine-800 hover:bg-mine-800/30">
-                <td className="px-4 py-2 font-medium">{p.worker?.name}</td>
+                <td className="px-4 py-2 font-medium">
+                  {p.worker?.name ?? p.payee?.name}
+                  {p.payee && !p.worker && (
+                    <span className="ml-1.5 text-[9px] font-extrabold uppercase tracking-wide text-mine-400 bg-mine-800 rounded px-1.5 py-0.5">
+                      {t("payroll.payeeModeCompany")}
+                    </span>
+                  )}
+                </td>
                 <td className="px-4 py-2 text-mine-300">
                   {new Date(p.payPeriodStart).toLocaleDateString()} – {new Date(p.payPeriodEnd).toLocaleDateString()}
                 </td>
@@ -354,7 +422,7 @@ function PayslipsTab({ workers, canEdit, canDelete }: { workers: Worker[]; canEd
       </div>
       {modal && (
         <Modal title={t("payroll.newPayslipTitle")} onClose={() => setModal(false)}>
-          <PayslipForm workers={workers} onSubmit={create} onCancel={() => setModal(false)} />
+          <PayslipForm workers={workers} companyPayees={companyPayees} onSubmit={create} onCancel={() => setModal(false)} />
         </Modal>
       )}
     </div>

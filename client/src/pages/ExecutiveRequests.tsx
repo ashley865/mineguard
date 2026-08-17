@@ -30,6 +30,13 @@ const categories: ExecutiveRequestCategory[] = [
   "GENERAL",
 ];
 
+// Extensible per-department form config: departments not listed here just get the
+// generic subject/message form. Add an entry here when a department's requests need
+// a structured field the generic form doesn't cover (e.g. CFO requests need an amount).
+const DEPARTMENT_EXTRA_FIELDS: Partial<Record<ExecutiveTitle, { amount?: boolean }>> = {
+  CFO: { amount: true },
+};
+
 type TabKey = "received" | "sent";
 
 function NewRequestForm({ onSubmit, onCancel }: {
@@ -41,9 +48,13 @@ function NewRequestForm({ onSubmit, onCancel }: {
   const [category, setCategory] = useState<ExecutiveRequestCategory>("GENERAL");
   const [subject, setSubject] = useState("");
   const [message, setMessage] = useState("");
+  const [amount, setAmount] = useState("");
+  const [priority, setPriority] = useState<"NORMAL" | "EMERGENCY">("NORMAL");
   const [attachment, setAttachment] = useState<File | null>(null);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const extraFields = DEPARTMENT_EXTRA_FIELDS[toTitle];
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
@@ -55,6 +66,8 @@ function NewRequestForm({ onSubmit, onCancel }: {
       form.append("category", category);
       form.append("subject", subject);
       form.append("message", message);
+      form.append("priority", priority);
+      if (extraFields?.amount && amount) form.append("amount", amount);
       if (attachment) form.append("attachment", attachment);
       await onSubmit(form);
     } catch (err: any) {
@@ -84,6 +97,12 @@ function NewRequestForm({ onSubmit, onCancel }: {
         <label className={labelClass}>{t("executiveRequests.subject")}</label>
         <input className={inputClass} value={subject} onChange={(e) => setSubject(e.target.value)} required />
       </div>
+      {extraFields?.amount && (
+        <div>
+          <label className={labelClass}>{t("executiveRequests.amountNeeded")}</label>
+          <input className={inputClass} type="number" step="any" min="0" value={amount} onChange={(e) => setAmount(e.target.value)} required />
+        </div>
+      )}
       <div>
         <label className={labelClass}>{t("executiveRequests.message")}</label>
         <textarea className={inputClass} rows={4} value={message} onChange={(e) => setMessage(e.target.value)} required />
@@ -92,6 +111,18 @@ function NewRequestForm({ onSubmit, onCancel }: {
         <label className={labelClass}>{t("executiveRequests.attachment")}</label>
         <FileDropzone accept="image/*,.pdf,.doc,.docx,.xls,.xlsx,.csv" hint={t("executiveRequests.attachmentHint") ?? ""} onFiles={(files) => setAttachment(files.item(0))} />
       </div>
+      <label className="flex items-center gap-2 text-xs font-semibold text-mine-200 bg-mine-800/40 border border-mine-800 rounded-lg px-3 py-2 cursor-pointer">
+        <input
+          type="checkbox"
+          checked={priority === "EMERGENCY"}
+          onChange={(e) => setPriority(e.target.checked ? "EMERGENCY" : "NORMAL")}
+        />
+        <span>
+          <span className="text-danger-500 font-bold">{t("executiveRequests.emergencyMode")}</span>
+          {" — "}
+          {t("executiveRequests.emergencyModeHint")}
+        </span>
+      </label>
       {error && <div className="text-danger-500 text-xs">{error}</div>}
       <div className="flex justify-end gap-2 pt-2">
         <button type="button" className={buttonSecondary} onClick={onCancel}>{t("common.cancel")}</button>
@@ -120,17 +151,29 @@ function RequestCard({ request, mine, onRespond }: {
     }
   }
 
+  const isEmergency = request.priority === "EMERGENCY";
+
   return (
-    <div className={`${cardClass} p-4 space-y-2`}>
+    <div className={`${cardClass} p-4 space-y-2 ${isEmergency ? "border-2 border-danger-500/60 shadow-lg shadow-danger-500/10" : ""}`}>
       <div className="flex items-start justify-between gap-3 flex-wrap">
         <div>
           <div className="flex items-center gap-2 flex-wrap mb-1">
+            {isEmergency && (
+              <span className="text-[10px] font-extrabold uppercase tracking-wide text-white bg-danger-500 px-2 py-0.5 rounded-full animate-pulse">
+                {t("executiveRequests.emergencyBadge")}
+              </span>
+            )}
             <span className="text-[10px] uppercase tracking-wide text-mine-400 bg-mine-800 px-2 py-0.5 rounded-full">
               {t(`executiveRequests.categories.${request.category}`)}
             </span>
             <StatusBadge status={request.status} />
           </div>
           <div className="text-sm font-semibold">{request.subject}</div>
+          {typeof request.amount === "number" && (
+            <div className="text-sm font-bold text-hazard-500 mt-0.5">
+              {t("executiveRequests.amountNeeded")}: R{request.amount.toLocaleString()}
+            </div>
+          )}
           <div className="text-xs text-mine-400 mt-0.5">
             {mine
               ? t("executiveRequests.toLine", { title: t(`settings.invites.titles.${request.toTitle}`) })

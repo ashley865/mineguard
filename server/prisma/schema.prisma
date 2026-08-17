@@ -1481,6 +1481,11 @@ enum ExecutiveRequestStatus {
   COMPLETED
 }
 
+enum ExecutiveRequestPriority {
+  NORMAL
+  EMERGENCY
+}
+
 // A lightweight inter-executive workflow: one executive (or admin) asks a
 // specific executive title to act on something outside their own module —
 // e.g. HR sending a payroll list to the CFO for payment. Routed by title
@@ -1496,6 +1501,10 @@ model ExecutiveRequest {
   category      String
   subject       String
   message       String
+  // Optional monetary amount for categories/departments where a request is
+  // inherently about a sum of money (e.g. a CFO payment approval).
+  amount        Float?
+  priority      ExecutiveRequestPriority @default(NORMAL)
   status        ExecutiveRequestStatus @default(PENDING)
   responseNote  String?
   respondedById String?
@@ -2573,8 +2582,12 @@ model LeaveRequest {
 
 model Payslip {
   id             String   @id @default(cuid())
-  workerId       String
-  worker         Worker   @relation(fields: [workerId], references: [id], onDelete: Cascade)
+  // Either workerId (employee payslip, the original flow) or payeeId (a direct
+  // payment to a company payee, e.g. a labour broker) is set — never both.
+  workerId       String?
+  worker         Worker?  @relation(fields: [workerId], references: [id], onDelete: Cascade)
+  payeeId        String?
+  payee          Payee?   @relation(fields: [payeeId], references: [id], onDelete: Restrict)
   payPeriodStart DateTime
   payPeriodEnd   DateTime
   grossPay       Float
@@ -2751,6 +2764,7 @@ model Payee {
   contractBid    ContractBid? @relation(fields: [contractBidId], references: [id], onDelete: SetNull)
 
   expenses Expense[]
+  payslips Payslip[]
 
   createdAt DateTime @default(now())
 }

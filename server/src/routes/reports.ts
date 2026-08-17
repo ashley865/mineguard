@@ -127,8 +127,8 @@ async function computeJournal(mineId: string, months: number) {
       select: { id: true, expenseNumber: true, description: true, amount: true, currency: true, expenseDate: true, payee: { select: { name: true } } },
     }),
     prisma.payslip.findMany({
-      where: { worker: { site: { mineId } }, payPeriodEnd: { gte: since } },
-      select: { id: true, grossPay: true, payPeriodEnd: true, worker: { select: { name: true } } },
+      where: { OR: [{ worker: { site: { mineId } } }, { payee: { mineId } }], payPeriodEnd: { gte: since } },
+      select: { id: true, grossPay: true, payPeriodEnd: true, worker: { select: { name: true } }, payee: { select: { name: true } } },
     }),
     prisma.purchaseOrder.findMany({
       where: { site: { mineId }, status: { in: ["ORDERED", "RECEIVED"] }, orderDate: { gte: since } },
@@ -157,7 +157,7 @@ async function computeJournal(mineId: string, months: number) {
       id: `payroll-${p.id}`,
       date: p.payPeriodEnd,
       type: "EXPENSE" as const,
-      description: `Payroll — ${p.worker.name}`,
+      description: `Payroll — ${p.worker?.name ?? p.payee?.name ?? "Unknown"}`,
       amount: Math.round(p.grossPay),
       currency: "ZAR",
     })),

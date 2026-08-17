@@ -35,14 +35,19 @@ const leaveBalanceSchema = z.object({
   notes: z.string().optional(),
 });
 
-const payslipMetaSchema = z.object({
-  workerId: z.string().min(1),
-  payPeriodStart: z.coerce.date(),
-  payPeriodEnd: z.coerce.date(),
-  grossPay: z.coerce.number(),
-  deductions: z.coerce.number(),
-  netPay: z.coerce.number(),
-});
+const payslipMetaSchema = z
+  .object({
+    workerId: z.string().min(1).optional(),
+    payeeId: z.string().min(1).optional(),
+    payPeriodStart: z.coerce.date(),
+    payPeriodEnd: z.coerce.date(),
+    grossPay: z.coerce.number(),
+    deductions: z.coerce.number(),
+    netPay: z.coerce.number(),
+  })
+  .refine((d) => Boolean(d.workerId) !== Boolean(d.payeeId), {
+    message: "Provide either workerId (employee) or payeeId (company), not both",
+  });
 
 const leaveSelect = {
   id: true,
@@ -63,6 +68,8 @@ const payslipSelect = {
   id: true,
   workerId: true,
   worker: { select: { id: true, name: true, employeeId: true } },
+  payeeId: true,
+  payee: { select: { id: true, name: true, payeeType: true } },
   payPeriodStart: true,
   payPeriodEnd: true,
   grossPay: true,
@@ -131,7 +138,10 @@ router.get("/payslips", async (req, res) => {
   if (!mineId) return;
   const workerId = req.query.workerId as string | undefined;
   const payslips = await prisma.payslip.findMany({
-    where: { worker: { site: { mineId } }, workerId: workerId || undefined },
+    where: {
+      OR: [{ worker: { site: { mineId } } }, { payee: { mineId } }],
+      workerId: workerId || undefined,
+    },
     select: payslipSelect,
     orderBy: { issuedAt: "desc" },
   });
@@ -143,11 +153,50 @@ router.post("/payslips", requireRole("ADMIN", "SUPERVISOR", "EXECUTIVE"), upload
   if (!mineId) return;
   const parsed = payslipMetaSchema.safeParse(req.body);
   if (!parsed.success) return res.status(400).json({ error: parsed.error.flatten() });
-  const worker = await prisma.worker.findFirst({ where: { id: parsed.data.workerId, site: { mineId } } });
-  if (!worker) return res.status(404).json({ error: "Worker not found" });
+
+  let worker: { id: string; siteId: string; name: string; employeeId: string } | null = null;
+  let payee: { id: string; name: string };
+  let siteId: string;
+  let expenseNumber: string;
+
+  if (parsed.data.workerId) {
+    worker = await prisma.worker.findFirst({
+      where: { id: parsed.data.workerId, site: { mineId } },
+      select: { id: true, siteId: true, name: true, employeeId: true },
+    });
+    if (!worker) return res.status(404).json({ error: "Worker not found" });
+    siteId = worker.siteId;
+    expenseNumber = `PS-${worker.employeeId}-${parsed.data.payPeriodEnd.toISOString().slice(0, 10)}`;
+
+    // Every payslip also shows up in the expense ledger so payroll cost flows through the
+    // same CFO approval pipeline as any other expense, reusing the worker's auto-synced
+    // EMPLOYEE payee rather than creating a duplicate payee entry.
+    let employeePayee = await prisma.payee.findFirst({ where: { workerId: worker.id, payeeType: "EMPLOYEE" } });
+    if (!employeePayee) {
+      employeePayee = await prisma.payee.create({ data: { mineId, payeeType: "EMPLOYEE", name: worker.name, workerId: worker.id } });
+    }
+    payee = employeePayee;
+  } else {
+    const companyPayee = await prisma.payee.findFirst({ where: { id: parsed.data.payeeId, mineId } });
+    if (!companyPayee) return res.status(404).json({ error: "Payee not found" });
+    // Company-level payroll payments (e.g. a labour broker) aren't tied to one worker's
+    // site, so they're booked against the mine's primary site.
+    const site = await prisma.site.findFirst({ where: { mineId }, orderBy: { createdAt: "asc" } });
+    if (!site) return res.status(400).json({ error: "No site found for this mine" });
+    siteId = site.id;
+    payee = companyPayee;
+    expenseNumber = `PS-CO-${companyPayee.id.slice(-6)}-${parsed.data.payPeriodEnd.toISOString().slice(0, 10)}`;
+  }
+
   const payslip = await prisma.payslip.create({
     data: {
-      ...parsed.data,
+      workerId: worker?.id,
+      payeeId: worker ? undefined : payee.id,
+      payPeriodStart: parsed.data.payPeriodStart,
+      payPeriodEnd: parsed.data.payPeriodEnd,
+      grossPay: parsed.data.grossPay,
+      deductions: parsed.data.deductions,
+      netPay: parsed.data.netPay,
       fileName: req.file?.originalname,
       fileMimeType: req.file?.mimetype,
       fileSize: req.file?.size,
@@ -157,20 +206,13 @@ router.post("/payslips", requireRole("ADMIN", "SUPERVISOR", "EXECUTIVE"), upload
     select: payslipSelect,
   });
 
-  // Every payslip also shows up in the expense ledger so payroll cost flows through the
-  // same CFO approval pipeline as any other expense, reusing the worker's auto-synced
-  // EMPLOYEE payee rather than creating a duplicate payee entry.
-  let payee = await prisma.payee.findFirst({ where: { workerId: worker.id, payeeType: "EMPLOYEE" } });
-  if (!payee) {
-    payee = await prisma.payee.create({ data: { mineId, payeeType: "EMPLOYEE", name: worker.name, workerId: worker.id } });
-  }
   await prisma.expense.create({
     data: {
-      siteId: worker.siteId,
+      siteId,
       payeeId: payee.id,
-      expenseNumber: `PS-${worker.employeeId}-${parsed.data.payPeriodEnd.toISOString().slice(0, 10)}`,
+      expenseNumber,
       category: "SALARIES_WAGES",
-      description: `Payslip - ${worker.name} (${parsed.data.payPeriodStart.toISOString().slice(0, 10)} to ${parsed.data.payPeriodEnd.toISOString().slice(0, 10)})`,
+      description: `Payslip - ${payee.name} (${parsed.data.payPeriodStart.toISOString().slice(0, 10)} to ${parsed.data.payPeriodEnd.toISOString().slice(0, 10)})`,
       amount: parsed.data.grossPay,
       currency: "ZAR",
       expenseDate: parsed.data.payPeriodEnd,
@@ -186,7 +228,9 @@ router.post("/payslips", requireRole("ADMIN", "SUPERVISOR", "EXECUTIVE"), upload
 router.get("/payslips/:id/download", async (req, res) => {
   const mineId = requireMineId(req, res);
   if (!mineId) return;
-  const payslip = await prisma.payslip.findFirst({ where: { id: req.params.id, worker: { site: { mineId } } } });
+  const payslip = await prisma.payslip.findFirst({
+    where: { id: req.params.id, OR: [{ worker: { site: { mineId } } }, { payee: { mineId } }] },
+  });
   if (!payslip || !payslip.fileData) return res.status(404).json({ error: "Payslip file not found" });
   res.setHeader("Content-Type", payslip.fileMimeType || "application/octet-stream");
   res.setHeader("Content-Disposition", `attachment; filename="${encodeURIComponent(payslip.fileName || "payslip")}"`);
@@ -196,7 +240,9 @@ router.get("/payslips/:id/download", async (req, res) => {
 router.delete("/payslips/:id", requireRole("ADMIN", "EXECUTIVE"), async (req, res) => {
   const mineId = requireMineId(req, res);
   if (!mineId) return;
-  const existing = await prisma.payslip.findFirst({ where: { id: req.params.id, worker: { site: { mineId } } } });
+  const existing = await prisma.payslip.findFirst({
+    where: { id: req.params.id, OR: [{ worker: { site: { mineId } } }, { payee: { mineId } }] },
+  });
   if (!existing) return res.status(404).json({ error: "Payslip not found" });
   await prisma.payslip.delete({ where: { id: existing.id } });
   res.status(204).send();

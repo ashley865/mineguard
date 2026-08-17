@@ -2284,7 +2284,14 @@
         "DAILY_REST_SHORT": "Daaglikse rusperiode te kort"
       },
       "noBreaches": "Geen BCEA-werktyd-oortredings in hierdie tydperk opgespoor nie."
-    }
+    },
+    "payee": "Betaalontvanger",
+    "payeeMode": "Betaal aan",
+    "payeeModeEmployee": "Werknemer",
+    "payeeModeCompany": "Maatskappy",
+    "companyPayee": "Maatskappy-betaalontvanger",
+    "noCompanyPayees": "Geen maatskappy-betaalontvangers gevind nie. Voeg eers een by as 'n Maatskappy-tipe betaalontvanger onder Uitgawes.",
+    "amount": "Bedrag"
   },
   "procurement": {
     "nav": "Verkryging & Verskaffers",
@@ -2463,7 +2470,12 @@
       "APPROVED": "{{name}} het jou versoek goedgekeur",
       "REJECTED": "{{name}} het jou versoek afgekeur",
       "COMPLETED": "{{name}} het jou versoek as voltooi gemerk"
-    }
+    },
+    "amountNeeded": "Bedrag Nodig",
+    "emergencyMode": "Noodversoek",
+    "emergencyModeHint": "Merk dit as dringend — dit spring na die bopunt van die ontvanger se lys en aktiveer 'n dringende waarskuwing.",
+    "emergencyBadge": "Noodgeval",
+    "toastNewEmergencyTitle": "🚨 Noodversoek van {{name}}"
   },
   "calling": {
     "incomingVideoCall": "Inkomende video-oproep…",

@@ -41,6 +41,8 @@ const createSchema = z.object({
   category: categoryEnum,
   subject: z.string().min(1),
   message: z.string().min(1),
+  amount: z.coerce.number().positive().optional(),
+  priority: z.enum(["NORMAL", "EMERGENCY"]).optional(),
 });
 
 const respondSchema = z.object({
@@ -54,6 +56,8 @@ const requestSelect = {
   category: true,
   subject: true,
   message: true,
+  amount: true,
+  priority: true,
   status: true,
   responseNote: true,
   respondedAt: true,
@@ -87,7 +91,7 @@ router.get("/", async (req, res) => {
   const requests = await prisma.executiveRequest.findMany({
     where,
     select: requestSelect,
-    orderBy: { createdAt: "desc" },
+    orderBy: [{ priority: "desc" }, { createdAt: "desc" }],
     take: 100,
   });
   res.json(requests.map(withHasAttachment));

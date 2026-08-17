@@ -2284,7 +2284,14 @@
         "DAILY_REST_SHORT": "Tägliche Ruhezeit zu kurz"
       },
       "noBreaches": "Keine BCEA-Arbeitszeitverstöße in diesem Zeitraum festgestellt."
-    }
+    },
+    "payee": "Zahlungsempfänger",
+    "payeeMode": "Zahlen an",
+    "payeeModeEmployee": "Mitarbeiter",
+    "payeeModeCompany": "Unternehmen",
+    "companyPayee": "Unternehmens-Zahlungsempfänger",
+    "noCompanyPayees": "Keine Unternehmens-Zahlungsempfänger gefunden. Fügen Sie zuerst einen als Zahlungsempfänger vom Typ Unternehmen unter Ausgaben hinzu.",
+    "amount": "Betrag"
   },
   "procurement": {
     "nav": "Beschaffung & Lieferanten",
@@ -2463,7 +2470,12 @@
       "APPROVED": "{{name}} hat Ihre Anfrage genehmigt",
       "REJECTED": "{{name}} hat Ihre Anfrage abgelehnt",
       "COMPLETED": "{{name}} hat Ihre Anfrage als erledigt markiert"
-    }
+    },
+    "amountNeeded": "Benötigter Betrag",
+    "emergencyMode": "Notfallanfrage",
+    "emergencyModeHint": "Als dringend markieren — sie springt an die Spitze der Liste des Empfängers und löst eine dringende Warnung aus.",
+    "emergencyBadge": "Notfall",
+    "toastNewEmergencyTitle": "🚨 Notfallanfrage von {{name}}"
   },
   "calling": {
     "incomingVideoCall": "Eingehender Videoanruf…",
