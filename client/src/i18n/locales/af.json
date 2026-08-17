@@ -658,7 +658,9 @@
       "IN_STORE": "In Voorraad",
       "ASSIGNED": "Toegeken",
       "IN_MAINTENANCE": "In Onderhoud",
-      "IN_REPAIR": "Word herstel"
+      "IN_REPAIR": "Word herstel",
+      "PASSED": "Geslaag",
+      "FAILED": "Gedruip"
     },
     "severity": {
       "LOW": "Laag",
@@ -3941,5 +3943,77 @@
     "subtitle": "Vra oor veiligheidsprosedures, gevaarrapportering en permitte — beperk tot u terrein se veiligheidsdata",
     "chatHint": "Vra oor veiligheidsprosedures, hoe om 'n gevaar aan te meld, permit-om-te-werk vereistes, of enigiets anders veiligheidsverwant.",
     "inputPlaceholder": "Vra 'n veiligheidsvraag…"
+  },
+  "skillsMatrix": {
+    "nav": "Vaardigheidsmatriks",
+    "subtitle": "Per-werker bevoegdheidsgraderings oor gedefinieerde vaardighede",
+    "newSkill": "+ Nuwe Vaardigheid",
+    "newSkillTitle": "Nuwe Vaardigheid",
+    "skillName": "Vaardigheidsnaam",
+    "category": "Kategorie (opsioneel)",
+    "notRated": "Nie gegradeer nie",
+    "levels": {
+      "NOVICE": "Beginner",
+      "COMPETENT": "Bevoeg",
+      "PROFICIENT": "Vaardig",
+      "EXPERT": "Kundige"
+    },
+    "noSkillsYet": "Nog geen vaardighede gedefinieer nie. Voeg 'n vaardigheid by om die matriks te begin.",
+    "confirmDeleteSkill": "Verwyder hierdie vaardigheid? Dit verwyder elke werker se gradering daarvoor."
+  },
+  "cashFlowForecast": {
+    "nav": "Kontantvloeivooruitskatting",
+    "subtitle": "Deurlopende kontantprojeksie en belangrike finansiële verhoudings",
+    "currentRatio": "Huidige Verhouding",
+    "quickRatio": "Vinnige Verhouding",
+    "debtToEquity": "Skuld-tot-Ekwiteit",
+    "chartTitle": "Netto Kontantvloei: Werklik vs Geprojekteer",
+    "chartHint": "Projeksie is 'n eenvoudige 3-maande sleeptouwerkende gemiddelde, nie 'n gepaste tendenslyn nie.",
+    "actual": "Werklik",
+    "projected": "Geprojekteer",
+    "cash": "Kontant en Ekwivalente",
+    "receivable": "Debiteure",
+    "inventory": "Voorraad",
+    "payable": "Krediteure",
+    "disclaimer": "Syfers is afgelei van reeds-aangetekende fakture, uitgawes en betaalstate in MineGuard. Dit is 'n beplanningshulpmiddel, nie 'n geouditeerde finansiële staat nie."
+  },
+  "documentAcknowledgements": {
+    "nav": "Dokumenterkennings",
+    "subtitle": "Hou dop watter werkers 'n beleid of SOP gelees en erken het",
+    "noDocuments": "Nog geen dokumente in die kluis nie — laai eers een op onder Dokumente.",
+    "selectWorker": "Kies 'n werker…",
+    "recordAcknowledgement": "Teken Erkenning Aan",
+    "acknowledgedDate": "Erken",
+    "recordedBy": "Aangeteken deur",
+    "noneYet": "Nog geen werkers het hierdie dokument erken nie.",
+    "coverage": "{{acknowledged}} van {{total}} werkers het hierdie dokument erken"
+  },
+  "vettingTracker": {
+    "nav": "Siftingopspoorder",
+    "subtitle": "Agtergrond-/verwysings-/ID-toetse op kontrakteurs en besoekers voor terreintoegang",
+    "new": "+ Nuwe Siftingsrekord",
+    "newTitle": "Nuwe Siftingsrekord",
+    "subjectType": "Onderwerptipe",
+    "subjectTypes": {
+      "CONTRACTOR": "Kontrakteur",
+      "VISITOR": "Besoeker",
+      "WORKER": "Werker",
+      "OTHER": "Ander"
+    },
+    "subjectName": "Onderwerpnaam",
+    "idNumber": "ID-nommer (opsioneel)",
+    "checkType": "Toetstipe",
+    "checkTypes": {
+      "CRIMINAL_RECORD": "Kriminele rekordtoets",
+      "ID_VERIFICATION": "ID-verifikasie",
+      "REFERENCE_CHECK": "Verwysingstoets",
+      "COMPETENCY_VERIFICATION": "Bevoegdheidsverifikasie",
+      "OTHER": "Ander"
+    },
+    "expiryDate": "Vervaldatum (opsioneel)",
+    "markPassed": "Merk Geslaag",
+    "markFailed": "Merk Gedruip",
+    "noneYet": "Nog geen siftingsrekords aangeteken nie.",
+    "confirmDelete": "Verwyder hierdie siftingsrekord?"
   }
 }

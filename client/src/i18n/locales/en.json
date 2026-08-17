@@ -551,6 +551,8 @@
       "ACKNOWLEDGED": "Acknowledged",
       "RESOLVED": "Resolved",
       "IN_REPAIR": "In repair",
+      "PASSED": "Passed",
+      "FAILED": "Failed",
       "INVESTIGATING": "Investigating",
       "ACTIVE": "Active",
       "INACTIVE": "Inactive",
@@ -3940,5 +3942,77 @@
     "subtitle": "Ask about safety procedures, hazard reporting, and permits — scoped to your site's safety data",
     "chatHint": "Ask about safety procedures, how to report a hazard, permit-to-work requirements, or anything else safety-related.",
     "inputPlaceholder": "Ask a safety question…"
+  },
+  "skillsMatrix": {
+    "nav": "Skills Matrix",
+    "subtitle": "Per-worker competency ratings across defined skills",
+    "newSkill": "+ New Skill",
+    "newSkillTitle": "New Skill",
+    "skillName": "Skill name",
+    "category": "Category (optional)",
+    "notRated": "Not rated",
+    "levels": {
+      "NOVICE": "Novice",
+      "COMPETENT": "Competent",
+      "PROFICIENT": "Proficient",
+      "EXPERT": "Expert"
+    },
+    "noSkillsYet": "No skills defined yet. Add a skill to start building the matrix.",
+    "confirmDeleteSkill": "Delete this skill? This removes every worker's rating for it."
+  },
+  "cashFlowForecast": {
+    "nav": "Cash Flow Forecast",
+    "subtitle": "Rolling cash projection and key financial ratios",
+    "currentRatio": "Current Ratio",
+    "quickRatio": "Quick Ratio",
+    "debtToEquity": "Debt-to-Equity",
+    "chartTitle": "Net Cash Flow: Actual vs Projected",
+    "chartHint": "Projection is a simple 3-month trailing average carried forward, not a fitted trend line.",
+    "actual": "Actual",
+    "projected": "Projected",
+    "cash": "Cash & Equivalents",
+    "receivable": "Accounts Receivable",
+    "inventory": "Inventory",
+    "payable": "Accounts Payable",
+    "disclaimer": "Figures are derived from paid/pending invoices, expenses, and payroll already logged in MineGuard. This is a planning aid, not an audited financial statement."
+  },
+  "documentAcknowledgements": {
+    "nav": "Document Acknowledgements",
+    "subtitle": "Track which workers have read and acknowledged a policy or SOP",
+    "noDocuments": "No documents in the vault yet — upload one under Documents first.",
+    "selectWorker": "Select a worker…",
+    "recordAcknowledgement": "Record Acknowledgement",
+    "acknowledgedDate": "Acknowledged",
+    "recordedBy": "Recorded by",
+    "noneYet": "No workers have acknowledged this document yet.",
+    "coverage": "{{acknowledged}} of {{total}} workers have acknowledged this document"
+  },
+  "vettingTracker": {
+    "nav": "Vetting Tracker",
+    "subtitle": "Background/reference/ID checks on contractors and visitors before site access",
+    "new": "+ New Vetting Record",
+    "newTitle": "New Vetting Record",
+    "subjectType": "Subject type",
+    "subjectTypes": {
+      "CONTRACTOR": "Contractor",
+      "VISITOR": "Visitor",
+      "WORKER": "Worker",
+      "OTHER": "Other"
+    },
+    "subjectName": "Subject name",
+    "idNumber": "ID number (optional)",
+    "checkType": "Check type",
+    "checkTypes": {
+      "CRIMINAL_RECORD": "Criminal record check",
+      "ID_VERIFICATION": "ID verification",
+      "REFERENCE_CHECK": "Reference check",
+      "COMPETENCY_VERIFICATION": "Competency verification",
+      "OTHER": "Other"
+    },
+    "expiryDate": "Expiry date (optional)",
+    "markPassed": "Mark Passed",
+    "markFailed": "Mark Failed",
+    "noneYet": "No vetting records logged yet.",
+    "confirmDelete": "Delete this vetting record?"
   }
 }

@@ -315,6 +315,10 @@ model User {
   budgetPlansCreated           BudgetPlan[]           @relation("BudgetPlanCreatedBy")
   toolboxTalksCreated          ToolboxTalk[]          @relation("ToolboxTalkCreatedBy")
   regulatorySubmissionsCreated RegulatorySubmission[] @relation("RegulatorySubmissionCreatedBy")
+
+  workerSkillRatingsAssessed        WorkerSkillRating[]       @relation("WorkerSkillRatingAssessedBy")
+  documentAcknowledgementsRecorded  DocumentAcknowledgement[] @relation("DocumentAcknowledgementRecordedBy")
+  vettingRecordsConducted           VettingRecord[]           @relation("VettingRecordConductedBy")
 }
 
 model UserAttendance {
@@ -620,6 +624,9 @@ model Worker {
 
   securityAssetsAssigned SecurityAsset[]               @relation("SecurityAssetAssignedWorker")
   securityAssetLogs      SecurityAssetAssignmentLog[]  @relation("SecurityAssetLogWorker")
+
+  skillRatings             WorkerSkillRating[]
+  documentAcknowledgements DocumentAcknowledgement[]
 
   createdAt DateTime @default(now())
 }
@@ -1418,6 +1425,7 @@ model Document {
 
   invoices Invoice[]
   expenses Expense[]
+  acknowledgements DocumentAcknowledgement[]
 
   createdAt DateTime @default(now())
 }
@@ -1491,6 +1499,8 @@ model Mine {
   budgetPlans             BudgetPlan[]
   regulatorySubmissions   RegulatorySubmission[]
   aiDailyBriefings        AiDailyBriefing[]
+  skills                  Skill[]
+  vettingRecords          VettingRecord[]
 }
 
 enum ExecutiveRequestStatus {
@@ -4764,6 +4774,124 @@ model RegulatorySubmission {
   fileData        Bytes?
   createdById     String?
   createdBy       User?                      @relation("RegulatorySubmissionCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+
+  createdAt DateTime @default(now())
+}
+
+// ---------------------------------------------------------------------------
+// Module: Skills Matrix (HR Manager)
+// A per-worker, per-skill competency rating — distinct from WorkplaceSkillsPlan/
+// Learnership (the statutory MQA/Skills Development Levy reporting obligation) and
+// from TrainingRecord/Certificate (course completions): this is an internal,
+// operational view of who can actually do what, at what proficiency.
+// ---------------------------------------------------------------------------
+
+model Skill {
+  id       String @id @default(cuid())
+  mineId   String
+  mine     Mine   @relation(fields: [mineId], references: [id], onDelete: Cascade)
+  name     String
+  category String?
+
+  ratings WorkerSkillRating[]
+
+  createdAt DateTime @default(now())
+
+  @@unique([mineId, name])
+}
+
+enum SkillProficiency {
+  NOVICE
+  COMPETENT
+  PROFICIENT
+  EXPERT
+}
+
+model WorkerSkillRating {
+  id           String           @id @default(cuid())
+  workerId     String
+  worker       Worker           @relation(fields: [workerId], references: [id], onDelete: Cascade)
+  skillId      String
+  skill        Skill            @relation(fields: [skillId], references: [id], onDelete: Cascade)
+  level        SkillProficiency
+  assessedDate DateTime?
+  assessedById String?
+  assessedBy   User?            @relation("WorkerSkillRatingAssessedBy", fields: [assessedById], references: [id], onDelete: SetNull)
+  notes        String?
+
+  createdAt DateTime @default(now())
+
+  @@unique([workerId, skillId])
+}
+
+// ---------------------------------------------------------------------------
+// Module: Document Acknowledgement Tracker (Compliance Officer)
+// Extends Document Vault rather than competing with it: workers have no login of
+// their own, so acknowledgement is recorded by whoever briefed them (a supervisor
+// or compliance officer), the same pattern already used for ToolboxTalk attendance.
+// ---------------------------------------------------------------------------
+
+model DocumentAcknowledgement {
+  id               String   @id @default(cuid())
+  documentId       String
+  document         Document @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  workerId         String
+  worker           Worker   @relation(fields: [workerId], references: [id], onDelete: Cascade)
+  acknowledgedDate DateTime @default(now())
+  recordedById     String?
+  recordedBy       User?    @relation("DocumentAcknowledgementRecordedBy", fields: [recordedById], references: [id], onDelete: SetNull)
+  notes            String?
+
+  createdAt DateTime @default(now())
+
+  @@unique([documentId, workerId])
+}
+
+// ---------------------------------------------------------------------------
+// Module: Contractor/Visitor Vetting Tracker (Security Manager)
+// A real gap: contracts.ts already assumes "vetting happens if/when the mine
+// decides to award the contract" but nothing tracked it. Free-text subject name/ID
+// (not an FK to Contractor/Visitor) mirrors SecurityBlacklistEntry's existing
+// pattern, since a vetting check often happens before the subject exists in either
+// system yet.
+// ---------------------------------------------------------------------------
+
+enum VettingSubjectType {
+  CONTRACTOR
+  VISITOR
+  WORKER
+  OTHER
+}
+
+enum VettingCheckType {
+  CRIMINAL_RECORD
+  ID_VERIFICATION
+  REFERENCE_CHECK
+  COMPETENCY_VERIFICATION
+  OTHER
+}
+
+enum VettingStatus {
+  PENDING
+  PASSED
+  FAILED
+  EXPIRED
+}
+
+model VettingRecord {
+  id            String             @id @default(cuid())
+  mineId        String
+  mine          Mine               @relation(fields: [mineId], references: [id], onDelete: Cascade)
+  subjectType   VettingSubjectType
+  subjectName   String
+  idNumber      String?
+  checkType     VettingCheckType
+  status        VettingStatus      @default(PENDING)
+  checkedDate   DateTime?
+  expiryDate    DateTime?
+  notes         String?
+  conductedById String?
+  conductedBy   User?              @relation("VettingRecordConductedBy", fields: [conductedById], references: [id], onDelete: SetNull)
 
   createdAt DateTime @default(now())
 }

@@ -3546,3 +3546,70 @@ export interface AiNarrativeRiskScanResponse {
   scannedCount: number;
   disclaimer: string;
 }
+
+// --- Skills Matrix (HR) ---
+
+export interface Skill {
+  id: string;
+  name: string;
+  category?: string | null;
+  createdAt: string;
+}
+
+export type SkillProficiency = "NOVICE" | "COMPETENT" | "PROFICIENT" | "EXPERT";
+
+export interface WorkerSkillRating {
+  id: string;
+  workerId: string;
+  worker: { id: string; name: string; employeeId: string };
+  skillId: string;
+  skill: { id: string; name: string; category?: string | null };
+  level: SkillProficiency;
+  assessedDate?: string | null;
+  notes?: string | null;
+  assessedBy?: { id: string; name: string } | null;
+  createdAt: string;
+}
+
+// --- Cash Flow Forecast (CFO) ---
+
+export interface CashFlowForecastResponse {
+  history: { month: string; income: number; outgoings: number; netCashFlow: number }[];
+  forecast: { month: string; projectedNetCashFlow: number; projectedCumulative: number }[];
+  ratios: { currentRatio: number | null; quickRatio: number | null; debtToEquity: number | null };
+  balanceSnapshot: { cashAndEquivalents: number; accountsReceivable: number; inventory: number; accountsPayable: number };
+}
+
+// --- Document Acknowledgement Tracker (Compliance) ---
+
+export interface DocumentAcknowledgement {
+  id: string;
+  documentId: string;
+  document: { id: string; title: string; type: string; version: string };
+  workerId: string;
+  worker: { id: string; name: string; employeeId: string };
+  acknowledgedDate: string;
+  notes?: string | null;
+  recordedBy?: { id: string; name: string } | null;
+  createdAt: string;
+}
+
+// --- Vetting Tracker (Security) ---
+
+export type VettingSubjectType = "CONTRACTOR" | "VISITOR" | "WORKER" | "OTHER";
+export type VettingCheckType = "CRIMINAL_RECORD" | "ID_VERIFICATION" | "REFERENCE_CHECK" | "COMPETENCY_VERIFICATION" | "OTHER";
+export type VettingStatus = "PENDING" | "PASSED" | "FAILED" | "EXPIRED";
+
+export interface VettingRecord {
+  id: string;
+  subjectType: VettingSubjectType;
+  subjectName: string;
+  idNumber?: string | null;
+  checkType: VettingCheckType;
+  status: VettingStatus;
+  checkedDate?: string | null;
+  expiryDate?: string | null;
+  notes?: string | null;
+  conductedBy?: { id: string; name: string } | null;
+  createdAt: string;
+}

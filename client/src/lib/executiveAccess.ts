@@ -53,6 +53,9 @@ export const restrictedModules = [
   "/budget-planning",
   "/toolbox-talks",
   "/regulatory-submissions",
+  "/skills-matrix",
+  "/document-acknowledgements",
+  "/vetting-records",
 ] as const;
 
 export type RestrictedModule = (typeof restrictedModules)[number];
@@ -65,8 +68,8 @@ export const executiveTitleModules: Partial<Record<ExecutiveTitle, RestrictedMod
   GENERAL_MANAGER: fullAccess,
   COO: fullAccess,
   CFO: ["/reporting", "/contractors", "/permits", "/documents", "/compliance", "/incidents", "/marketplace", "/tenders", "/production", "/inventory", "/payroll", "/procurement", "/invoices", "/expenses", "/resources", "/geology", "/budget-planning"],
-  HR_MANAGER: ["/workers", "/workforce", "/visitors", "/documents", "/reporting", "/emergency", "/payroll", "/scanner", "/labour-relations"],
-  SECURITY_MANAGER: ["/visitors", "/scanner", "/trucks", "/incidents", "/alerts", "/workers", "/sites", "/safety-observations", "/emergency", "/security"],
+  HR_MANAGER: ["/workers", "/workforce", "/visitors", "/documents", "/reporting", "/emergency", "/payroll", "/scanner", "/labour-relations", "/skills-matrix"],
+  SECURITY_MANAGER: ["/visitors", "/scanner", "/trucks", "/incidents", "/alerts", "/workers", "/sites", "/safety-observations", "/emergency", "/security", "/vetting-records"],
   SAFETY_MANAGER: [
     "/sites",
     "/sensors",
@@ -141,6 +144,7 @@ export const executiveTitleModules: Partial<Record<ExecutiveTitle, RestrictedMod
     "/resources",
     "/community",
     "/regulatory-submissions",
+    "/document-acknowledgements",
   ],
   IT_MANAGER: ["/sites", "/sensors", "/equipment", "/alerts", "/reporting", "/security", "/scanner", "/documents", "/maintenance", "/it-operations"],
 };

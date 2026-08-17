@@ -49,6 +49,10 @@ import RegulatorySubmissions from "./pages/RegulatorySubmissions";
 import AiDailyBriefing from "./pages/AiDailyBriefing";
 import NarrativeRiskScanner from "./pages/NarrativeRiskScanner";
 import SafetyAssistant from "./pages/SafetyAssistant";
+import SkillsMatrix from "./pages/SkillsMatrix";
+import CashFlowForecast from "./pages/CashFlowForecast";
+import DocumentAcknowledgements from "./pages/DocumentAcknowledgements";
+import VettingTracker from "./pages/VettingTracker";
 import MaintenanceScheduling from "./pages/MaintenanceScheduling";
 import InventoryManagement from "./pages/InventoryManagement";
 import SafetyObservations from "./pages/SafetyObservations";
@@ -128,6 +132,10 @@ export default function App() {
         <Route path="/ai-daily-briefing" element={<AiDailyBriefing />} />
         <Route path="/narrative-risk-scanner" element={<NarrativeRiskScanner />} />
         <Route path="/safety-assistant" element={<SafetyAssistant />} />
+        <Route path="/skills-matrix" element={<ModuleRoute path="/skills-matrix"><SkillsMatrix /></ModuleRoute>} />
+        <Route path="/cash-flow-forecast" element={<CashFlowForecast />} />
+        <Route path="/document-acknowledgements" element={<ModuleRoute path="/document-acknowledgements"><DocumentAcknowledgements /></ModuleRoute>} />
+        <Route path="/vetting-records" element={<ModuleRoute path="/vetting-records"><VettingTracker /></ModuleRoute>} />
         <Route path="/maintenance" element={<ModuleRoute path="/maintenance"><MaintenanceScheduling /></ModuleRoute>} />
         <Route path="/inventory" element={<ModuleRoute path="/inventory"><InventoryManagement /></ModuleRoute>} />
         <Route path="/safety-observations" element={<ModuleRoute path="/safety-observations"><SafetyObservations /></ModuleRoute>} />

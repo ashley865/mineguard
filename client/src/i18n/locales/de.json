@@ -658,7 +658,9 @@
       "IN_STORE": "Auf Lager",
       "ASSIGNED": "Zugewiesen",
       "IN_MAINTENANCE": "In Wartung",
-      "IN_REPAIR": "In Reparatur"
+      "IN_REPAIR": "In Reparatur",
+      "PASSED": "Bestanden",
+      "FAILED": "Nicht Bestanden"
     },
     "severity": {
       "LOW": "Niedrig",
@@ -3941,5 +3943,77 @@
     "subtitle": "Fragen Sie zu Sicherheitsverfahren, Gefahrenmeldung und Genehmigungen — beschränkt auf die Sicherheitsdaten Ihres Standorts",
     "chatHint": "Fragen Sie zu Sicherheitsverfahren, wie man eine Gefahr meldet, Arbeitserlaubnis-Anforderungen oder anderen sicherheitsbezogenen Themen.",
     "inputPlaceholder": "Stellen Sie eine Sicherheitsfrage…"
+  },
+  "skillsMatrix": {
+    "nav": "Kompetenzmatrix",
+    "subtitle": "Kompetenzbewertungen pro Mitarbeiter über definierte Fähigkeiten",
+    "newSkill": "+ Neue Fähigkeit",
+    "newSkillTitle": "Neue Fähigkeit",
+    "skillName": "Name der Fähigkeit",
+    "category": "Kategorie (optional)",
+    "notRated": "Nicht bewertet",
+    "levels": {
+      "NOVICE": "Anfänger",
+      "COMPETENT": "Kompetent",
+      "PROFICIENT": "Fortgeschritten",
+      "EXPERT": "Experte"
+    },
+    "noSkillsYet": "Noch keine Fähigkeiten definiert. Fügen Sie eine Fähigkeit hinzu, um die Matrix zu erstellen.",
+    "confirmDeleteSkill": "Diese Fähigkeit löschen? Dadurch wird die Bewertung aller Mitarbeiter dafür entfernt."
+  },
+  "cashFlowForecast": {
+    "nav": "Cashflow-Prognose",
+    "subtitle": "Rollierende Cashflow-Projektion und wichtige Finanzkennzahlen",
+    "currentRatio": "Liquiditätsgrad 3",
+    "quickRatio": "Liquiditätsgrad 2",
+    "debtToEquity": "Verschuldungsgrad",
+    "chartTitle": "Netto-Cashflow: Tatsächlich vs. Prognostiziert",
+    "chartHint": "Die Prognose ist ein einfacher gleitender 3-Monats-Durchschnitt, keine angepasste Trendlinie.",
+    "actual": "Tatsächlich",
+    "projected": "Prognostiziert",
+    "cash": "Zahlungsmittel und Äquivalente",
+    "receivable": "Forderungen",
+    "inventory": "Bestand",
+    "payable": "Verbindlichkeiten",
+    "disclaimer": "Zahlen stammen aus bereits in MineGuard erfassten Rechnungen, Ausgaben und Gehaltsabrechnungen. Dies ist ein Planungshilfsmittel, kein geprüfter Jahresabschluss."
+  },
+  "documentAcknowledgements": {
+    "nav": "Dokumentbestätigungen",
+    "subtitle": "Verfolgen Sie, welche Mitarbeiter eine Richtlinie oder SOP gelesen und bestätigt haben",
+    "noDocuments": "Noch keine Dokumente im Archiv — laden Sie zuerst eines unter Dokumente hoch.",
+    "selectWorker": "Mitarbeiter auswählen…",
+    "recordAcknowledgement": "Bestätigung Erfassen",
+    "acknowledgedDate": "Bestätigt am",
+    "recordedBy": "Erfasst von",
+    "noneYet": "Noch kein Mitarbeiter hat dieses Dokument bestätigt.",
+    "coverage": "{{acknowledged}} von {{total}} Mitarbeitern haben dieses Dokument bestätigt"
+  },
+  "vettingTracker": {
+    "nav": "Überprüfungsverfolgung",
+    "subtitle": "Hintergrund-/Referenz-/ID-Prüfungen von Auftragnehmern und Besuchern vor dem Standortzugang",
+    "new": "+ Neuer Überprüfungseintrag",
+    "newTitle": "Neuer Überprüfungseintrag",
+    "subjectType": "Subjekttyp",
+    "subjectTypes": {
+      "CONTRACTOR": "Auftragnehmer",
+      "VISITOR": "Besucher",
+      "WORKER": "Mitarbeiter",
+      "OTHER": "Sonstiges"
+    },
+    "subjectName": "Name des Subjekts",
+    "idNumber": "Ausweisnummer (optional)",
+    "checkType": "Prüfungstyp",
+    "checkTypes": {
+      "CRIMINAL_RECORD": "Führungszeugnisprüfung",
+      "ID_VERIFICATION": "Identitätsprüfung",
+      "REFERENCE_CHECK": "Referenzprüfung",
+      "COMPETENCY_VERIFICATION": "Kompetenzprüfung",
+      "OTHER": "Sonstiges"
+    },
+    "expiryDate": "Ablaufdatum (optional)",
+    "markPassed": "Als Bestanden Markieren",
+    "markFailed": "Als Nicht Bestanden Markieren",
+    "noneYet": "Noch keine Überprüfungseinträge erfasst.",
+    "confirmDelete": "Diesen Überprüfungseintrag löschen?"
   }
 }

@@ -658,7 +658,9 @@
       "IN_STORE": "En Almacén",
       "ASSIGNED": "Asignado",
       "IN_MAINTENANCE": "En Mantenimiento",
-      "IN_REPAIR": "En reparación"
+      "IN_REPAIR": "En reparación",
+      "PASSED": "Aprobado",
+      "FAILED": "Reprobado"
     },
     "severity": {
       "LOW": "Baja",
@@ -3941,5 +3943,77 @@
     "subtitle": "Pregunte sobre procedimientos de seguridad, reporte de peligros y permisos, limitado a los datos de seguridad de su sitio",
     "chatHint": "Pregunte sobre procedimientos de seguridad, cómo reportar un peligro, requisitos de permiso de trabajo, o cualquier otra cosa relacionada con la seguridad.",
     "inputPlaceholder": "Haga una pregunta de seguridad…"
+  },
+  "skillsMatrix": {
+    "nav": "Matriz de Habilidades",
+    "subtitle": "Calificaciones de competencia por trabajador en habilidades definidas",
+    "newSkill": "+ Nueva Habilidad",
+    "newSkillTitle": "Nueva Habilidad",
+    "skillName": "Nombre de la habilidad",
+    "category": "Categoría (opcional)",
+    "notRated": "Sin calificar",
+    "levels": {
+      "NOVICE": "Novato",
+      "COMPETENT": "Competente",
+      "PROFICIENT": "Competente Avanzado",
+      "EXPERT": "Experto"
+    },
+    "noSkillsYet": "Aún no hay habilidades definidas. Agregue una habilidad para comenzar la matriz.",
+    "confirmDeleteSkill": "¿Eliminar esta habilidad? Esto elimina la calificación de todos los trabajadores para ella."
+  },
+  "cashFlowForecast": {
+    "nav": "Pronóstico de Flujo de Caja",
+    "subtitle": "Proyección continua de caja y ratios financieros clave",
+    "currentRatio": "Ratio Corriente",
+    "quickRatio": "Ratio Rápido",
+    "debtToEquity": "Deuda-Capital",
+    "chartTitle": "Flujo de Caja Neto: Real vs Proyectado",
+    "chartHint": "La proyección es un promedio móvil simple de 3 meses, no una línea de tendencia ajustada.",
+    "actual": "Real",
+    "projected": "Proyectado",
+    "cash": "Efectivo y Equivalentes",
+    "receivable": "Cuentas por Cobrar",
+    "inventory": "Inventario",
+    "payable": "Cuentas por Pagar",
+    "disclaimer": "Las cifras se derivan de facturas, gastos y nómina ya registrados en MineGuard. Esta es una ayuda de planificación, no un estado financiero auditado."
+  },
+  "documentAcknowledgements": {
+    "nav": "Reconocimientos de Documentos",
+    "subtitle": "Rastree qué trabajadores han leído y reconocido una política o SOP",
+    "noDocuments": "Aún no hay documentos en el archivo — suba uno en Documentos primero.",
+    "selectWorker": "Seleccione un trabajador…",
+    "recordAcknowledgement": "Registrar Reconocimiento",
+    "acknowledgedDate": "Reconocido",
+    "recordedBy": "Registrado por",
+    "noneYet": "Ningún trabajador ha reconocido este documento todavía.",
+    "coverage": "{{acknowledged}} de {{total}} trabajadores han reconocido este documento"
+  },
+  "vettingTracker": {
+    "nav": "Rastreador de Verificación",
+    "subtitle": "Verificaciones de antecedentes/referencias/identidad de contratistas y visitantes antes del acceso al sitio",
+    "new": "+ Nuevo Registro de Verificación",
+    "newTitle": "Nuevo Registro de Verificación",
+    "subjectType": "Tipo de sujeto",
+    "subjectTypes": {
+      "CONTRACTOR": "Contratista",
+      "VISITOR": "Visitante",
+      "WORKER": "Trabajador",
+      "OTHER": "Otro"
+    },
+    "subjectName": "Nombre del sujeto",
+    "idNumber": "Número de identificación (opcional)",
+    "checkType": "Tipo de verificación",
+    "checkTypes": {
+      "CRIMINAL_RECORD": "Verificación de antecedentes penales",
+      "ID_VERIFICATION": "Verificación de identidad",
+      "REFERENCE_CHECK": "Verificación de referencias",
+      "COMPETENCY_VERIFICATION": "Verificación de competencia",
+      "OTHER": "Otro"
+    },
+    "expiryDate": "Fecha de vencimiento (opcional)",
+    "markPassed": "Marcar Aprobado",
+    "markFailed": "Marcar Reprobado",
+    "noneYet": "Aún no se han registrado verificaciones.",
+    "confirmDelete": "¿Eliminar este registro de verificación?"
   }
 }

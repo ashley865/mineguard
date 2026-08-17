@@ -117,6 +117,8 @@ const statusColors: Record<string, string> = {
   OUT_OF_SERVICE: "bg-danger-600 text-white",
   IN_REPAIR: "bg-hazard-500 text-white",
   SUBMITTED: "bg-hazard-500 text-white",
+  PASSED: "bg-success-600 text-white",
+  FAILED: "bg-danger-500 text-white",
 };
 
 export function StatusBadge({

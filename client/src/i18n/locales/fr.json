@@ -658,7 +658,9 @@
       "IN_STORE": "En Stock",
       "ASSIGNED": "Attribué",
       "IN_MAINTENANCE": "En Maintenance",
-      "IN_REPAIR": "En réparation"
+      "IN_REPAIR": "En réparation",
+      "PASSED": "Réussi",
+      "FAILED": "Échoué"
     },
     "severity": {
       "LOW": "Faible",
@@ -3941,5 +3943,77 @@
     "subtitle": "Posez des questions sur les procédures de sécurité, le signalement des dangers et les permis — limité aux données de sécurité de votre site",
     "chatHint": "Posez des questions sur les procédures de sécurité, comment signaler un danger, les exigences de permis de travail, ou toute autre question liée à la sécurité.",
     "inputPlaceholder": "Posez une question de sécurité…"
+  },
+  "skillsMatrix": {
+    "nav": "Matrice de Compétences",
+    "subtitle": "Évaluations de compétence par employé sur des compétences définies",
+    "newSkill": "+ Nouvelle Compétence",
+    "newSkillTitle": "Nouvelle Compétence",
+    "skillName": "Nom de la compétence",
+    "category": "Catégorie (facultatif)",
+    "notRated": "Non évalué",
+    "levels": {
+      "NOVICE": "Novice",
+      "COMPETENT": "Compétent",
+      "PROFICIENT": "Avancé",
+      "EXPERT": "Expert"
+    },
+    "noSkillsYet": "Aucune compétence définie pour l'instant. Ajoutez une compétence pour commencer la matrice.",
+    "confirmDeleteSkill": "Supprimer cette compétence ? Cela supprime l'évaluation de tous les employés pour celle-ci."
+  },
+  "cashFlowForecast": {
+    "nav": "Prévision de Trésorerie",
+    "subtitle": "Projection de trésorerie continue et ratios financiers clés",
+    "currentRatio": "Ratio de Liquidité Générale",
+    "quickRatio": "Ratio de Liquidité Immédiate",
+    "debtToEquity": "Dette sur Capitaux Propres",
+    "chartTitle": "Flux de Trésorerie Net : Réel vs Projeté",
+    "chartHint": "La projection est une simple moyenne mobile sur 3 mois, pas une ligne de tendance ajustée.",
+    "actual": "Réel",
+    "projected": "Projeté",
+    "cash": "Trésorerie et Équivalents",
+    "receivable": "Comptes Clients",
+    "inventory": "Inventaire",
+    "payable": "Comptes Fournisseurs",
+    "disclaimer": "Les chiffres proviennent des factures, dépenses et paie déjà enregistrées dans MineGuard. Il s'agit d'un outil de planification, pas d'un état financier audité."
+  },
+  "documentAcknowledgements": {
+    "nav": "Accusés de Réception de Documents",
+    "subtitle": "Suivez quels employés ont lu et accusé réception d'une politique ou d'une procédure",
+    "noDocuments": "Aucun document dans le coffre pour l'instant — téléchargez-en un dans Documents d'abord.",
+    "selectWorker": "Sélectionnez un employé…",
+    "recordAcknowledgement": "Enregistrer l'Accusé de Réception",
+    "acknowledgedDate": "Accusé le",
+    "recordedBy": "Enregistré par",
+    "noneYet": "Aucun employé n'a encore accusé réception de ce document.",
+    "coverage": "{{acknowledged}} sur {{total}} employés ont accusé réception de ce document"
+  },
+  "vettingTracker": {
+    "nav": "Suivi de Vérification",
+    "subtitle": "Vérifications des antécédents/références/identité des sous-traitants et visiteurs avant l'accès au site",
+    "new": "+ Nouvel Enregistrement de Vérification",
+    "newTitle": "Nouvel Enregistrement de Vérification",
+    "subjectType": "Type de sujet",
+    "subjectTypes": {
+      "CONTRACTOR": "Sous-traitant",
+      "VISITOR": "Visiteur",
+      "WORKER": "Employé",
+      "OTHER": "Autre"
+    },
+    "subjectName": "Nom du sujet",
+    "idNumber": "Numéro d'identité (facultatif)",
+    "checkType": "Type de vérification",
+    "checkTypes": {
+      "CRIMINAL_RECORD": "Vérification du casier judiciaire",
+      "ID_VERIFICATION": "Vérification d'identité",
+      "REFERENCE_CHECK": "Vérification des références",
+      "COMPETENCY_VERIFICATION": "Vérification des compétences",
+      "OTHER": "Autre"
+    },
+    "expiryDate": "Date d'expiration (facultatif)",
+    "markPassed": "Marquer Réussi",
+    "markFailed": "Marquer Échoué",
+    "noneYet": "Aucun enregistrement de vérification pour l'instant.",
+    "confirmDelete": "Supprimer cet enregistrement de vérification ?"
   }
 }

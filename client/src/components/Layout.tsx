@@ -86,6 +86,7 @@ export default function Layout() {
         { to: "/regulatory-submissions", label: t("regulatorySubmissions.nav") },
         ...(canSeeNarrativeScan ? [{ to: "/narrative-risk-scanner", label: t("narrativeRiskScanner.nav") }] : []),
         ...(canSeeSafetyAssistant ? [{ to: "/safety-assistant", label: t("safetyAssistant.nav") }] : []),
+        { to: "/document-acknowledgements", label: t("documentAcknowledgements.nav") },
       ],
     },
     {
@@ -96,6 +97,7 @@ export default function Layout() {
         { to: "/workforce", label: t("workforce.nav") },
         { to: "/payroll", label: t("payroll.nav") },
         { to: "/labour-relations", label: t("labourRelations.nav") },
+        { to: "/skills-matrix", label: t("skillsMatrix.nav") },
       ],
     },
     {
@@ -117,6 +119,7 @@ export default function Layout() {
         { to: "/invoices", label: t("invoices.nav") },
         { to: "/expenses", label: t("expenses.nav") },
         { to: "/budget-planning", label: t("budgetPlanning.nav") },
+        ...(canSeeFinancials ? [{ to: "/cash-flow-forecast", label: t("cashFlowForecast.nav") }] : []),
       ],
     },
     {
@@ -143,7 +146,10 @@ export default function Layout() {
     {
       key: "security",
       label: t("nav.sectionSecurity"),
-      items: [{ to: "/security", label: t("security.nav") }],
+      items: [
+        { to: "/security", label: t("security.nav") },
+        { to: "/vetting-records", label: t("vettingTracker.nav") },
+      ],
     },
     {
       key: "tools",
