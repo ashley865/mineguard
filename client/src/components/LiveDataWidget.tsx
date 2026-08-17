@@ -133,7 +133,7 @@ function PriceChangeTooltip({ active, payload }: any) {
 // Mineral/commodity prices are financially/operationally relevant to only some
 // executive titles — everyone else sees weather, the fact of the day, and industry
 // news, but not price data that isn't meaningful to their role.
-export const MINERAL_PRICE_RELEVANT_TITLES: ExecutiveTitle[] = ["GENERAL_MANAGER", "CFO", "COO", "OPERATIONS_MANAGER"];
+export const MINERAL_PRICE_RELEVANT_TITLES: ExecutiveTitle[] = ["GENERAL_MANAGER", "CFO"];
 
 export default function LiveDataWidget({ showMineralPrices = false }: { showMineralPrices?: boolean }) {
   const { t } = useTranslation();

@@ -264,38 +264,84 @@ async function fetchYahooQuote(symbol: string): Promise<{ price: number; previou
   }
 }
 
+// Optional, more authoritative current-price source layered on top of the free Yahoo feed
+// above rather than replacing it — metals-api.com's /latest endpoint only gives a current
+// snapshot (no previousClose without a second, quota-costing call), so Yahoo's
+// previousClose is still used for the % change calculation even when this is configured.
+// Dormant (silently skipped) whenever METALS_API_KEY isn't set, same pattern as AI_API_KEY.
+const METALS_API_SYMBOLS: Record<string, string> = {
+  GOLD: "XAU",
+  PLATINUM: "XPT",
+  SILVER: "XAG",
+  PALLADIUM: "XPD",
+  COPPER: "XCU",
+};
+
+async function fetchMetalsApiPrices(): Promise<Record<string, number> | null> {
+  const apiKey = process.env.METALS_API_KEY;
+  if (!apiKey) return null;
+  try {
+    const symbols = Object.values(METALS_API_SYMBOLS).join(",");
+    const url = `https://metals-api.com/api/latest?access_key=${apiKey}&base=USD&symbols=${symbols}`;
+    const res = await fetch(url);
+    if (!res.ok) return null;
+    const data: any = await res.json();
+    if (!data?.success || !data?.rates) return null;
+    // metals-api quotes metals like forex currencies against the base — rates.XAU is "how
+    // many ounces of gold equal 1 USD", so the USD price per ounce is the inverse.
+    const prices: Record<string, number> = {};
+    for (const [key, symbol] of Object.entries(METALS_API_SYMBOLS)) {
+      const rate = data.rates[symbol];
+      if (typeof rate === "number" && rate > 0) {
+        prices[key] = 1 / rate;
+      }
+    }
+    return Object.keys(prices).length > 0 ? prices : null;
+  } catch {
+    return null;
+  }
+}
+
 router.get("/mineral-prices", async (_req, res) => {
   if (priceCache && priceCache.expiresAt > Date.now()) {
     return res.json(priceCache.data);
   }
-  const [results, fxRateUsdZar] = await Promise.all([
+  const [results, fxRateUsdZar, metalsApiPrices] = await Promise.all([
     Promise.all(
       METAL_SYMBOLS.map(async (m): Promise<Omit<MetalPrice, "priceZar"> | null> => {
         const quote = await fetchYahooQuote(m.symbol);
         if (!quote) return null;
-        const changePercent = quote.previousClose ? ((quote.price - quote.previousClose) / quote.previousClose) * 100 : 0;
         return {
           key: m.key,
           label: m.label,
           unit: m.unit,
           price: quote.price,
           previousClose: quote.previousClose,
-          changePercent: Math.round(changePercent * 100) / 100,
+          changePercent: 0, // recomputed below once the final (possibly metals-api-overridden) price is known
           currency: quote.currency,
         };
       })
     ),
     fetchUsdToZarRate(),
+    fetchMetalsApiPrices(),
   ]);
   // The Yahoo futures quotes are consistently USD in practice — only convert when the
   // source actually says so, rather than assuming, so a currency change upstream can't
-  // silently produce a wrong ZAR figure.
+  // silently produce a wrong ZAR figure. When metals-api.com is configured, its current
+  // price replaces Yahoo's for that metal (more authoritative), but Yahoo's previousClose
+  // is still what % change is measured against either way.
   const prices: MetalPrice[] = results
     .filter((r): r is Omit<MetalPrice, "priceZar"> => r !== null)
-    .map((p) => ({
-      ...p,
-      priceZar: fxRateUsdZar && p.currency === "USD" ? Math.round(p.price * fxRateUsdZar * 100) / 100 : null,
-    }));
+    .map((p) => {
+      const price = metalsApiPrices?.[p.key] ?? p.price;
+      const changePercent = p.previousClose ? ((price - p.previousClose) / p.previousClose) * 100 : 0;
+      return {
+        ...p,
+        price: Math.round(price * 100) / 100,
+        changePercent: Math.round(changePercent * 100) / 100,
+        priceZar: fxRateUsdZar && p.currency === "USD" ? Math.round(price * fxRateUsdZar * 100) / 100 : null,
+      };
+    });
   const insight = await generatePriceInsight(prices);
   const payload: MineralPricesPayload = {
     asOf: new Date().toISOString(),
