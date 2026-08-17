@@ -152,6 +152,9 @@ export interface Site {
   location: string;
   description?: string | null;
   status: SiteStatus;
+  latitude?: number | null;
+  longitude?: number | null;
+  geocodedAt?: string | null;
   createdAt: string;
   zones?: Zone[];
   _count?: { workers: number; incidents: number; equipment: number; alerts: number };

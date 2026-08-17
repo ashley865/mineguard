@@ -10,7 +10,7 @@ import LoadError from "../components/LoadError";
 
 function SiteForm({ initial, onSubmit, onCancel }: {
   initial?: Partial<Site>;
-  onSubmit: (data: { name: string; location: string; description?: string; status: SiteStatus }) => Promise<void>;
+  onSubmit: (data: { name: string; location: string; description?: string; status: SiteStatus; latitude?: number | null; longitude?: number | null }) => Promise<void>;
   onCancel: () => void;
 }) {
   const { t } = useTranslation();
@@ -18,13 +18,29 @@ function SiteForm({ initial, onSubmit, onCancel }: {
   const [location, setLocation] = useState(initial?.location ?? "");
   const [description, setDescription] = useState(initial?.description ?? "");
   const [status, setStatus] = useState<SiteStatus>(initial?.status ?? "OPERATIONAL");
+  const [latitude, setLatitude] = useState(initial?.latitude != null ? String(initial.latitude) : "");
+  const [longitude, setLongitude] = useState(initial?.longitude != null ? String(initial.longitude) : "");
   const [saving, setSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
+    setError(null);
+    const hasLat = latitude.trim() !== "";
+    const hasLon = longitude.trim() !== "";
+    if (hasLat !== hasLon) {
+      setError(t("sites.coordinatesBothRequired"));
+      return;
+    }
+    const lat = hasLat ? Number(latitude) : null;
+    const lon = hasLon ? Number(longitude) : null;
+    if ((hasLat && Number.isNaN(lat)) || (hasLon && Number.isNaN(lon))) {
+      setError(t("sites.coordinatesInvalid"));
+      return;
+    }
     setSaving(true);
     try {
-      await onSubmit({ name, location, description, status });
+      await onSubmit({ name, location, description, status, latitude: lat, longitude: lon });
     } finally {
       setSaving(false);
     }
@@ -52,6 +68,35 @@ function SiteForm({ initial, onSubmit, onCancel }: {
           <option value="SHUT_DOWN">{t("sites.shutDown")}</option>
         </select>
       </div>
+      <div className="border-t border-mine-800 pt-3 space-y-2">
+        <div className="text-xs font-semibold text-mine-300 uppercase">{t("sites.mapLocation")}</div>
+        <p className="text-[11px] text-mine-400">{t("sites.mapLocationHint")}</p>
+        <div className="grid grid-cols-2 gap-3">
+          <div>
+            <label className={labelClass}>{t("sites.latitude")}</label>
+            <input
+              className={inputClass}
+              type="number"
+              step="any"
+              placeholder={t("sites.latitudePlaceholder") ?? ""}
+              value={latitude}
+              onChange={(e) => setLatitude(e.target.value)}
+            />
+          </div>
+          <div>
+            <label className={labelClass}>{t("sites.longitude")}</label>
+            <input
+              className={inputClass}
+              type="number"
+              step="any"
+              placeholder={t("sites.longitudePlaceholder") ?? ""}
+              value={longitude}
+              onChange={(e) => setLongitude(e.target.value)}
+            />
+          </div>
+        </div>
+      </div>
+      {error && <div className="text-danger-500 text-xs">{error}</div>}
       <div className="flex justify-end gap-2 pt-2">
         <button type="button" className={buttonSecondary} onClick={onCancel}>{t("common.cancel")}</button>
         <button type="submit" className={buttonPrimary} disabled={saving}>{saving ? t("common.saving") : t("common.save")}</button>

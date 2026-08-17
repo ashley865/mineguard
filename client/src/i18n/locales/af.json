@@ -244,7 +244,15 @@
     "confirmDeleteZone": "Skrap hierdie sone en al sy sensors?",
     "loading": "Laai terreine tans…",
     "present": "teenwoordig",
-    "notPresent": "afwesig"
+    "notPresent": "afwesig",
+    "mapLocation": "Kaartligging (Opsioneel)",
+    "mapLocationHint": "Los leeg om outomaties vanaf die adres hierbo te bepaal — stel presiese koördinate hier as die terrein afgeleë genoeg is dat die adres alleen dit nie akkuraat sal aandui nie.",
+    "latitude": "Breedtegraad",
+    "longitude": "Lengtegraad",
+    "latitudePlaceholder": "bv. -25.7463",
+    "longitudePlaceholder": "bv. 27.2421",
+    "coordinatesBothRequired": "Voer beide breedtegraad en lengtegraad in, of los albei leeg.",
+    "coordinatesInvalid": "Breedtegraad en lengtegraad moet geldige getalle wees."
   },
   "sensors": {
     "title": "Sensors",

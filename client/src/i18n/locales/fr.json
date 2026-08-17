@@ -244,7 +244,15 @@
     "confirmDeleteZone": "Supprimer cette zone et tous ses capteurs ?",
     "loading": "Chargement des sites…",
     "present": "présents",
-    "notPresent": "absents"
+    "notPresent": "absents",
+    "mapLocation": "Emplacement sur la Carte (Facultatif)",
+    "mapLocationHint": "Laissez vide pour une localisation automatique à partir de l'adresse ci-dessus — indiquez des coordonnées exactes ici si le site est assez isolé pour que l'adresse seule ne le localise pas précisément.",
+    "latitude": "Latitude",
+    "longitude": "Longitude",
+    "latitudePlaceholder": "p. ex. -25.7463",
+    "longitudePlaceholder": "p. ex. 27.2421",
+    "coordinatesBothRequired": "Saisissez la latitude et la longitude, ou laissez les deux vides.",
+    "coordinatesInvalid": "La latitude et la longitude doivent être des nombres valides."
   },
   "sensors": {
     "title": "Capteurs",

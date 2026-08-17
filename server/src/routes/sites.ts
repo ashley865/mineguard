@@ -11,6 +11,12 @@ const siteSchema = z.object({
   location: z.string().min(1),
   description: z.string().optional(),
   status: z.enum(["OPERATIONAL", "RESTRICTED", "SHUT_DOWN"]).optional(),
+  // Optional manual override for the site's map position — mine sites are often remote
+  // enough that geocoding the address text alone can land on the nearest town rather than
+  // the actual site. Left null/omitted, the weather/map feature auto-geocodes from
+  // `location` instead (see server/src/routes/liveData.ts).
+  latitude: z.number().min(-90).max(90).nullable().optional(),
+  longitude: z.number().min(-180).max(180).nullable().optional(),
 });
 
 router.use(requireAuth);
@@ -68,12 +74,23 @@ router.get("/:id", async (req, res) => {
   res.json(site);
 });
 
+// Explicitly touching either coordinate field (setting a value, or clearing back to null
+// to revert to auto-geocoding) means the site's location is no longer "resolved from an
+// address the last time we checked" — clear geocodedAt either way so that distinction
+// stays meaningful rather than silently stale.
+function withGeocodedAtReset<T extends { latitude?: number | null; longitude?: number | null }>(data: T) {
+  if (data.latitude !== undefined || data.longitude !== undefined) {
+    return { ...data, geocodedAt: null };
+  }
+  return data;
+}
+
 router.post("/", requireRole("ADMIN", "SUPERVISOR", "EXECUTIVE"), async (req, res) => {
   const mineId = requireMineId(req, res);
   if (!mineId) return;
   const parsed = siteSchema.safeParse(req.body);
   if (!parsed.success) return res.status(400).json({ error: parsed.error.flatten() });
-  const site = await prisma.site.create({ data: { ...parsed.data, mineId } });
+  const site = await prisma.site.create({ data: { ...withGeocodedAtReset(parsed.data), mineId } });
   res.status(201).json(site);
 });
 
@@ -84,7 +101,7 @@ router.put("/:id", requireRole("ADMIN", "SUPERVISOR", "EXECUTIVE"), async (req, 
   if (!parsed.success) return res.status(400).json({ error: parsed.error.flatten() });
   const existing = await prisma.site.findFirst({ where: { id: req.params.id, mineId } });
   if (!existing) return res.status(404).json({ error: "Site not found" });
-  const site = await prisma.site.update({ where: { id: existing.id }, data: parsed.data });
+  const site = await prisma.site.update({ where: { id: existing.id }, data: withGeocodedAtReset(parsed.data) });
   res.json(site);
 });
 

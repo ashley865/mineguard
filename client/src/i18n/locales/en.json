@@ -261,7 +261,15 @@
     "editZoneTitle": "Edit Zone",
     "confirmDeleteSite": "Delete this site and all its zones, sensors, workers, and equipment?",
     "confirmDeleteZone": "Delete this zone and all its sensors?",
-    "loading": "Loading sites…"
+    "loading": "Loading sites…",
+    "mapLocation": "Map Location (Optional)",
+    "mapLocationHint": "Leave blank to auto-locate from the address above — set exact coordinates here if the site is remote enough that the address alone won't pinpoint it accurately.",
+    "latitude": "Latitude",
+    "longitude": "Longitude",
+    "latitudePlaceholder": "e.g. -25.7463",
+    "longitudePlaceholder": "e.g. 27.2421",
+    "coordinatesBothRequired": "Enter both latitude and longitude, or leave both blank.",
+    "coordinatesInvalid": "Latitude and longitude must be valid numbers."
   },
   "sensors": {
     "title": "Sensors",
