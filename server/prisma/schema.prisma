@@ -1919,6 +1919,11 @@ model Buyer {
   contactName             String
   contactPhone            String
   contactEmail            String      @unique
+  // Nullable because staff-onboarded buyers (created via the internal registration
+  // form) don't set one at creation time — staff hand them a password separately via
+  // POST /buyers/:id/set-password. Self-registered buyers (POST /buyers/register)
+  // always set this at signup.
+  passwordHash            String?
   bankName                String?
   bankAccountHolder       String?
   bankAccountNumber       String?

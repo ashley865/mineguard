@@ -1,5 +1,6 @@
 import { Router, Request, Response } from "express";
 import multer from "multer";
+import bcrypt from "bcryptjs";
 import { z } from "zod";
 import { ExecutiveTitle } from "@prisma/client";
 import { prisma } from "../prisma";
@@ -7,6 +8,8 @@ import { requireAuth, requireRole } from "../middleware/auth";
 import { verifyAdminPassword } from "../lib/verifyPassword";
 import { isValidIdOrPassport } from "../lib/saId";
 import { documentFileFilter } from "../lib/uploadFilters";
+import { signBuyerAuthToken } from "../lib/jwt";
+import { authLimiter } from "../middleware/rateLimit";
 
 const router = Router();
 
@@ -117,8 +120,10 @@ const buyerSelect = {
 } as const;
 
 // Public: strict FICA-style buyer registration. Requires the three compliance declarations
-// and, if applicable, an ID/registration number appropriate to the buyer type.
-router.post("/register", upload.array("documents", 6), async (req, res) => {
+// and, if applicable, an ID/registration number appropriate to the buyer type. Also sets
+// the buyer's own login password — unlike the staff-initiated route below, there is no
+// other party who could set this on the buyer's behalf, so it's mandatory here.
+router.post("/register", authLimiter, upload.array("documents", 6), async (req, res) => {
   const parsed = registerSchema.safeParse(req.body);
   if (!parsed.success) return res.status(400).json({ error: parsed.error.flatten() });
   const { popiaConsentAccepted, ficaDeclarationAccepted, amlDeclarationAccepted } = parsed.data;
@@ -127,14 +132,20 @@ router.post("/register", upload.array("documents", 6), async (req, res) => {
       error: "The POPIA consent, FICA, and anti-money-laundering declarations must all be accepted",
     });
   }
+  const password = typeof req.body.password === "string" ? req.body.password : "";
+  if (password.length < 8) {
+    return res.status(400).json({ error: "Password must be at least 8 characters" });
+  }
 
   const existing = await prisma.buyer.findUnique({ where: { contactEmail: parsed.data.contactEmail } });
   if (existing) return res.status(409).json({ error: "A buyer with this email is already registered" });
 
+  const passwordHash = await bcrypt.hash(password, 10);
   const files = (req.files as Express.Multer.File[] | undefined) ?? [];
   const buyer = await prisma.buyer.create({
     data: {
       ...parsed.data,
+      passwordHash,
       documents: {
         create: files.map((f) => ({
           docType: "OTHER" as const,
@@ -147,7 +158,8 @@ router.post("/register", upload.array("documents", 6), async (req, res) => {
     },
     select: buyerSelect,
   });
-  res.status(201).json(buyer);
+  const token = signBuyerAuthToken(buyer.id);
+  res.status(201).json({ token, buyer });
 });
 
 // Public: lets a buyer check their own approval status without exposing anyone else's data.
@@ -194,6 +206,20 @@ router.post("/", upload.array("documents", 6), async (req, res) => {
     select: buyerSelect,
   });
   res.status(201).json(buyer);
+});
+
+// Staff-created buyers (see POST / above) have no password until staff hands them one —
+// e.g. after verifying identity over the phone, matching how mine passkeys and executive
+// invites are already communicated out-of-band in this app. Also lets staff reset a
+// self-registered buyer's forgotten password, since there is no automated email flow.
+router.post("/:id/set-password", async (req, res) => {
+  const password = typeof req.body?.password === "string" ? req.body.password : "";
+  if (password.length < 8) return res.status(400).json({ error: "Password must be at least 8 characters" });
+  const buyer = await prisma.buyer.findUnique({ where: { id: req.params.id } });
+  if (!buyer) return res.status(404).json({ error: "Buyer not found" });
+  const passwordHash = await bcrypt.hash(password, 10);
+  await prisma.buyer.update({ where: { id: buyer.id }, data: { passwordHash } });
+  res.status(204).send();
 });
 
 router.get("/", async (req, res) => {

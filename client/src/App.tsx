@@ -36,6 +36,8 @@ import Messages from "./pages/Messages";
 import Marketplace from "./pages/Marketplace";
 import MarketplaceBrowse from "./pages/MarketplaceBrowse";
 import BuyerRegister from "./pages/BuyerRegister";
+import BuyerLogin from "./pages/BuyerLogin";
+import BuyerPortal from "./pages/BuyerPortal";
 import Tenders from "./pages/Tenders";
 import TenderBoard from "./pages/TenderBoard";
 import ProductionTracking from "./pages/ProductionTracking";
@@ -99,6 +101,8 @@ export default function App() {
       <Route path="/join-executive/:inviteId" element={<AcceptExecutiveInvite />} />
       <Route path="/buy" element={<MarketplaceBrowse />} />
       <Route path="/buyer-register" element={<BuyerRegister />} />
+      <Route path="/buyer-login" element={<BuyerLogin />} />
+      <Route path="/buyer-portal" element={<BuyerPortal />} />
       <Route path="/tender-board" element={<TenderBoard />} />
       <Route path="/safety-report/:siteId" element={<SafetyObservationReport />} />
       <Route element={<ProtectedRoute />}>

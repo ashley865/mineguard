@@ -1,7 +1,8 @@
 import { FormEvent, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { api } from "../api/client";
 import { BuyerType } from "../api/types";
+import { useBuyerAuth } from "../context/BuyerAuthContext";
 import { buttonPrimary, cardClass, inputClass, labelClass, selectClass } from "../components/ui";
 import LanguageSwitcher from "../components/LanguageSwitcher";
 import DateField from "../components/DateField";
@@ -12,6 +13,8 @@ const buyerTypes: BuyerType[] = ["INDIVIDUAL", "COMPANY", "TRUST", "PARTNERSHIP"
 
 export default function BuyerRegister() {
   const { t } = useTranslation();
+  const { registerWithForm } = useBuyerAuth();
+  const navigate = useNavigate();
 
   const [buyerType, setBuyerType] = useState<BuyerType>("COMPANY");
   const [legalName, setLegalName] = useState("");
@@ -35,13 +38,14 @@ export default function BuyerRegister() {
   const [bbbeeLevel, setBbbeeLevel] = useState("");
   const [sourceOfFunds, setSourceOfFunds] = useState("");
   const [documents, setDocuments] = useState<FileList | null>(null);
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [popiaConsentAccepted, setPopiaConsentAccepted] = useState(false);
   const [ficaDeclarationAccepted, setFicaDeclarationAccepted] = useState(false);
   const [amlDeclarationAccepted, setAmlDeclarationAccepted] = useState(false);
 
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [done, setDone] = useState(false);
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
@@ -65,6 +69,14 @@ export default function BuyerRegister() {
     }
     if (!documents || documents.length === 0) {
       setError(t("buyerRegister.documentsRequired"));
+      return;
+    }
+    if (password.length < 8) {
+      setError(t("buyerRegister.passwordTooShort"));
+      return;
+    }
+    if (password !== confirmPassword) {
+      setError(t("buyerRegister.passwordMismatch"));
       return;
     }
 
@@ -95,26 +107,16 @@ export default function BuyerRegister() {
       form.append("popiaConsentAccepted", "true");
       form.append("ficaDeclarationAccepted", "true");
       form.append("amlDeclarationAccepted", "true");
+      form.append("password", password);
       Array.from(documents).forEach((file) => form.append("documents", file));
 
-      await api.post("/buyers/register", form, { headers: { "Content-Type": "multipart/form-data" } });
-      setDone(true);
+      await registerWithForm(form);
+      navigate("/buyer-portal");
     } catch (err: any) {
       setError(err.response?.data?.error ?? t("buyerRegister.submitError"));
     } finally {
       setSubmitting(false);
     }
-  }
-
-  if (done) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-mine-950 p-4">
-        <div className={`${cardClass} p-6 sm:p-8 max-w-md text-center space-y-3`}>
-          <h1 className="text-lg font-bold">{t("buyerRegister.successTitle")}</h1>
-          <p className="text-mine-300 text-sm">{t("buyerRegister.successBody")}</p>
-        </div>
-      </div>
-    );
   }
 
   return (
@@ -261,6 +263,21 @@ export default function BuyerRegister() {
           <div>
             <label className={labelClass}>{t("buyerRegister.documents")}</label>
             <FileDropzone multiple accept="image/*,.pdf" hint={t("buyerRegister.documentsHint")} onFiles={setDocuments} />
+          </div>
+
+          <div className="text-xs font-semibold text-mine-300 uppercase pt-2 border-t border-mine-800">
+            {t("buyerRegister.sectionAccount")}
+          </div>
+          <p className="text-xs text-mine-400">{t("buyerRegister.accountHint")}</p>
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className={labelClass}>{t("buyerRegister.password")}</label>
+              <input className={inputClass} type="password" value={password} onChange={(e) => setPassword(e.target.value)} minLength={8} required />
+            </div>
+            <div>
+              <label className={labelClass}>{t("buyerRegister.confirmPassword")}</label>
+              <input className={inputClass} type="password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} minLength={8} required />
+            </div>
           </div>
 
           <div className="space-y-2 border border-mine-800 rounded-md p-3 bg-mine-900/40">

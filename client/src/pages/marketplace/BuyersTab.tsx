@@ -190,8 +190,30 @@ function BuyerDetailModal({ buyer, onClose, onReviewed }: { buyer: Buyer; onClos
   const { user } = useAuth();
   const [note, setNote] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const [newPassword, setNewPassword] = useState("");
+  const [passwordSet, setPasswordSet] = useState(false);
+  const [passwordError, setPasswordError] = useState<string | null>(null);
   const canSeeDocuments =
     user?.role === "ADMIN" || (user?.role === "EXECUTIVE" && !!user.title && BUYER_DOCUMENT_AUDIENCE.includes(user.title));
+
+  async function setPassword() {
+    setPasswordError(null);
+    setPasswordSet(false);
+    if (newPassword.length < 8) {
+      setPasswordError(t("marketplace.buyerPasswordTooShort"));
+      return;
+    }
+    setSubmitting(true);
+    try {
+      await api.post(`/buyers/${buyer.id}/set-password`, { password: newPassword });
+      setNewPassword("");
+      setPasswordSet(true);
+    } catch (err: any) {
+      setPasswordError(err.response?.data?.error ?? t("marketplace.buyerPasswordError"));
+    } finally {
+      setSubmitting(false);
+    }
+  }
 
   async function review(decision: "APPROVED" | "REJECTED") {
     setSubmitting(true);
@@ -290,6 +312,26 @@ function BuyerDetailModal({ buyer, onClose, onReviewed }: { buyer: Buyer; onClos
         {buyer.reviewNote && (
           <div className="text-xs text-mine-400 italic">{t("marketplace.reviewNote")}: "{buyer.reviewNote}"</div>
         )}
+
+        <div className="border-t border-mine-800 pt-3 space-y-2">
+          <div className="text-xs font-semibold text-mine-300 uppercase">{t("marketplace.buyerPortalAccess")}</div>
+          <p className="text-xs text-mine-400">{t("marketplace.buyerPortalAccessHint")}</p>
+          <div className="flex gap-2">
+            <input
+              className={inputClass}
+              type="password"
+              placeholder={t("marketplace.buyerNewPassword") ?? ""}
+              value={newPassword}
+              onChange={(e) => setNewPassword(e.target.value)}
+              minLength={8}
+            />
+            <button className={`${buttonSecondary} shrink-0`} disabled={submitting || !newPassword} onClick={setPassword}>
+              {t("marketplace.setBuyerPassword")}
+            </button>
+          </div>
+          {passwordError && <div className="text-danger-500 text-xs">{passwordError}</div>}
+          {passwordSet && <div className="text-success-500 text-xs">{t("marketplace.buyerPasswordSetSuccess")}</div>}
+        </div>
 
         {buyer.status === "PENDING_REVIEW" && (
           <div className="border-t border-mine-800 pt-3 space-y-2">

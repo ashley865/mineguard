@@ -4,6 +4,7 @@ import { z } from "zod";
 import { MineralType } from "@prisma/client";
 import { prisma } from "../prisma";
 import { requireAuth, requireRole } from "../middleware/auth";
+import { requireBuyerAuth } from "../middleware/buyerAuth";
 import { imageFileFilter } from "../lib/uploadFilters";
 import { requireMineId } from "../lib/mineScope";
 import { mineralTypeEnum } from "../lib/minerals";
@@ -63,7 +64,6 @@ const listingSchema = z.object({
 });
 
 const bidSchema = z.object({
-  buyerEmail: z.string().email(),
   quantity: z.coerce.number().positive(),
   offerPrice: z.coerce.number().positive(),
   notes: z.string().optional(),
@@ -124,8 +124,10 @@ router.get("/:id/images/:imageId", async (req, res) => {
   res.send(Buffer.from(image.fileData));
 });
 
-// Public: submit a bid, but only an APPROVED registered buyer may do so.
-router.post("/:id/bids", async (req, res) => {
+// Requires a logged-in, APPROVED buyer — the buyer's identity comes from their auth
+// token (requireBuyerAuth), never from a client-supplied email, so one buyer can no
+// longer submit a bid "as" another registered buyer just by typing their address.
+router.post("/:id/bids", requireBuyerAuth, async (req, res) => {
   const parsed = bidSchema.safeParse(req.body);
   if (!parsed.success) return res.status(400).json({ error: parsed.error.flatten() });
 
@@ -133,16 +135,14 @@ router.post("/:id/bids", async (req, res) => {
   if (!listing) return res.status(404).json({ error: "Listing not found" });
   if (listing.status !== "AVAILABLE") return res.status(409).json({ error: "This listing is no longer available" });
 
-  const buyer = await prisma.buyer.findUnique({ where: { contactEmail: parsed.data.buyerEmail } });
-  if (!buyer) return res.status(404).json({ error: "No registered buyer found for this email. Please register first." });
-  if (buyer.status !== "APPROVED") {
+  if (req.buyerAuth!.status !== "APPROVED") {
     return res.status(403).json({ error: "Your buyer registration must be approved before you can bid" });
   }
 
   const bid = await prisma.mineralBid.create({
     data: {
       listingId: listing.id,
-      buyerId: buyer.id,
+      buyerId: req.buyerAuth!.buyerId,
       quantity: parsed.data.quantity,
       offerPrice: parsed.data.offerPrice,
       notes: parsed.data.notes,

@@ -2,14 +2,16 @@ import { FormEvent, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { api, API_URL } from "../api/client";
+import { buyerApi } from "../api/buyerClient";
+import { useBuyerAuth } from "../context/BuyerAuthContext";
 import { MineralListing } from "../api/types";
 import { StatusBadge } from "../components/Badges";
 import Modal from "../components/Modal";
-import { buttonPrimary, cardClass, inputClass, labelClass } from "../components/ui";
+import { buttonPrimary, buttonSecondary, cardClass, inputClass, labelClass } from "../components/ui";
 
 function MineralBidForm({ listing, onDone }: { listing: MineralListing; onDone: () => void }) {
   const { t } = useTranslation();
-  const [buyerEmail, setBuyerEmail] = useState("");
+  const { buyer } = useBuyerAuth();
   const [quantity, setQuantity] = useState("");
   const [offerPrice, setOfferPrice] = useState("");
   const [notes, setNotes] = useState("");
@@ -22,7 +24,7 @@ function MineralBidForm({ listing, onDone }: { listing: MineralListing; onDone: 
     setError(null);
     setSubmitting(true);
     try {
-      await api.post(`/minerals/${listing.id}/bids`, { buyerEmail, quantity, offerPrice, notes: notes || undefined });
+      await buyerApi.post(`/minerals/${listing.id}/bids`, { quantity, offerPrice, notes: notes || undefined });
       setDone(true);
     } catch (err: any) {
       setError(err.response?.data?.error ?? t("marketplace.bidError"));
@@ -40,13 +42,21 @@ function MineralBidForm({ listing, onDone }: { listing: MineralListing; onDone: 
     );
   }
 
+  if (!buyer) {
+    return (
+      <div className="text-center space-y-4 py-4">
+        <p className="text-sm text-mine-300">{t("marketplace.loginRequiredToBid")}</p>
+        <div className="flex justify-center gap-2">
+          <Link to="/buyer-login" className={buttonPrimary}>{t("buyerLogin.signIn")}</Link>
+          <Link to="/buyer-register" className={buttonSecondary}>{t("marketplace.registerAsBuyer")}</Link>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
-      <p className="text-xs text-mine-400">{t("marketplace.bidBuyerHint")}</p>
-      <div>
-        <label className={labelClass}>{t("marketplace.buyerEmail")}</label>
-        <input className={inputClass} type="email" value={buyerEmail} onChange={(e) => setBuyerEmail(e.target.value)} required />
-      </div>
+      <p className="text-xs text-mine-400">{t("marketplace.bidBuyerHint", { name: buyer.legalName })}</p>
       <div className="grid grid-cols-2 gap-3">
         <div>
           <label className={labelClass}>{t("marketplace.bidQuantity", { unit: listing.unit })}</label>
@@ -71,6 +81,7 @@ function MineralBidForm({ listing, onDone }: { listing: MineralListing; onDone: 
 
 export default function MarketplaceBrowse() {
   const { t } = useTranslation();
+  const { buyer } = useBuyerAuth();
   const [listings, setListings] = useState<MineralListing[]>([]);
   const [loading, setLoading] = useState(true);
   const [bidListing, setBidListing] = useState<MineralListing | null>(null);
@@ -94,7 +105,16 @@ export default function MarketplaceBrowse() {
             <div className="text-lg font-bold tracking-tight">⛏ Mine Guard {t("marketplace.nav")}</div>
             <p className="text-mine-300 text-sm">{t("marketplace.publicSubtitle")}</p>
           </div>
-          <Link to="/buyer-register" className={buttonPrimary}>{t("marketplace.registerAsBuyer")}</Link>
+          <div className="flex items-center gap-2">
+            {buyer ? (
+              <Link to="/buyer-portal" className={buttonPrimary}>{t("marketplace.myPortal")}</Link>
+            ) : (
+              <>
+                <Link to="/buyer-login" className={buttonSecondary}>{t("marketplace.buyerLogin")}</Link>
+                <Link to="/buyer-register" className={buttonPrimary}>{t("marketplace.registerAsBuyer")}</Link>
+              </>
+            )}
+          </div>
         </div>
       </div>
 
