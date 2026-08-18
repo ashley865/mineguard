@@ -718,9 +718,22 @@ model Incident {
   reviewedBy   User?            @relation("IncidentReviewedBy", fields: [reviewedById], references: [id], onDelete: SetNull)
 
   iodClaims IodClaim[]
+  media     IncidentMedia[]
 
   createdAt  DateTime  @default(now())
   resolvedAt DateTime?
+}
+
+model IncidentMedia {
+  id           String   @id @default(cuid())
+  incidentId   String
+  incident     Incident @relation(fields: [incidentId], references: [id], onDelete: Cascade)
+  fileName     String
+  fileMimeType String
+  fileSize     Int
+  fileData     Bytes
+
+  createdAt DateTime @default(now())
 }
 
 enum EquipmentType {

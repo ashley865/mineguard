@@ -520,6 +520,9 @@
     "reportedBy": "gerapporteer deur {{name}}",
     "reportIncidentTitle": "Rapporteer Voorval",
     "loading": "Laai voorvalle tans…",
+    "photos": "Foto's",
+    "photosHint": "Heg tot 6 foto's as bewys aan (JPEG, PNG, WEBP of GIF)",
+    "saveError": "Kon nie voorval rapporteer nie. Probeer asseblief weer.",
     "aiInvestigation": {
       "button": "KI-Ondersoekassistent",
       "title": "KI-Voorvalondersoekassistent",

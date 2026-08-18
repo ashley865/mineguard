@@ -368,6 +368,14 @@ export interface WorkerProfile {
 
 export type IncidentStatus = "OPEN" | "INVESTIGATING" | "RESOLVED";
 
+export interface IncidentMedia {
+  id: string;
+  fileName: string;
+  fileMimeType: string;
+  fileSize: number;
+  createdAt: string;
+}
+
 export interface Incident {
   id: string;
   title: string;
@@ -385,6 +393,7 @@ export interface Incident {
   reviewNote?: string | null;
   reviewedAt?: string | null;
   reviewedBy?: { id: string; name: string } | null;
+  media: IncidentMedia[];
 }
 
 export type EquipmentStatus = "OPERATIONAL" | "MAINTENANCE" | "DOWN";

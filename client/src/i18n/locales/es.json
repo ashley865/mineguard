@@ -520,6 +520,9 @@
     "reportedBy": "reportado por {{name}}",
     "reportIncidentTitle": "Reportar Incidente",
     "loading": "Cargando incidentes…",
+    "photos": "Fotos",
+    "photosHint": "Adjunte hasta 6 fotos como evidencia (JPEG, PNG, WEBP o GIF)",
+    "saveError": "No se pudo reportar el incidente. Inténtelo de nuevo.",
     "aiInvestigation": {
       "button": "Asistente de Investigación IA",
       "title": "Asistente IA de Investigación de Incidentes",

@@ -520,6 +520,9 @@
     "reportedBy": "gemeldet von {{name}}",
     "reportIncidentTitle": "Vorfall melden",
     "loading": "Vorfälle werden geladen…",
+    "photos": "Fotos",
+    "photosHint": "Bis zu 6 Fotos als Nachweis anhängen (JPEG, PNG, WEBP oder GIF)",
+    "saveError": "Vorfall konnte nicht gemeldet werden. Bitte versuchen Sie es erneut.",
     "aiInvestigation": {
       "button": "KI-Untersuchungsassistent",
       "title": "KI-Vorfalluntersuchungsassistent",

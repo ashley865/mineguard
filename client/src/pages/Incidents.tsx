@@ -2,11 +2,41 @@ import { FormEvent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { api } from "../api/client";
 import { useAuth } from "../context/AuthContext";
-import { AiIncidentInvestigationResponse, AlertSeverity, Incident, IncidentStatus, Site, Zone } from "../api/types";
+import { AiIncidentInvestigationResponse, AlertSeverity, Incident, IncidentMedia, IncidentStatus, Site, Zone } from "../api/types";
 import { SeverityBadge, StatusBadge } from "../components/Badges";
 import Modal from "../components/Modal";
 import { buttonPrimary, buttonSecondary, cardClass, inputClass, labelClass, selectClass } from "../components/ui";
 import LoadError from "../components/LoadError";
+import FileDropzone from "../components/FileDropzone";
+
+// The media GET endpoint requires the normal Bearer auth header, which a plain
+// <img src="..."> / <a href="..."> can't send (the browser never attaches it) — so the
+// image is fetched through the authenticated `api` client as a blob and displayed via a
+// local object URL instead of pointing an element straight at the API URL.
+function IncidentPhotoThumb({ incidentId, media }: { incidentId: string; media: IncidentMedia }) {
+  const [url, setUrl] = useState<string | null>(null);
+
+  useEffect(() => {
+    let objectUrl: string | null = null;
+    let cancelled = false;
+    api.get(`/incidents/${incidentId}/media/${media.id}`, { responseType: "blob" }).then((res) => {
+      if (cancelled) return;
+      objectUrl = URL.createObjectURL(res.data);
+      setUrl(objectUrl);
+    });
+    return () => {
+      cancelled = true;
+      if (objectUrl) URL.revokeObjectURL(objectUrl);
+    };
+  }, [incidentId, media.id]);
+
+  if (!url) return <div className="w-16 h-16 rounded-md border border-mine-800 bg-mine-800/40 animate-pulse" />;
+  return (
+    <a href={url} target="_blank" rel="noreferrer" className="block">
+      <img src={url} alt={media.fileName} className="w-16 h-16 object-cover rounded-md border border-mine-800 hover:border-mine-600" />
+    </a>
+  );
+}
 
 function IncidentInvestigationModal({ incidentId, onClose }: { incidentId: string; onClose: () => void }) {
   const { t } = useTranslation();
@@ -77,7 +107,7 @@ function IncidentInvestigationModal({ incidentId, onClose }: { incidentId: strin
 function IncidentForm({ sites, zones, onSubmit, onCancel }: {
   sites: Site[];
   zones: Zone[];
-  onSubmit: (data: any) => Promise<void>;
+  onSubmit: (form: FormData) => Promise<void>;
   onCancel: () => void;
 }) {
   const { t } = useTranslation();
@@ -86,15 +116,27 @@ function IncidentForm({ sites, zones, onSubmit, onCancel }: {
   const [severity, setSeverity] = useState<AlertSeverity>("MEDIUM");
   const [siteId, setSiteId] = useState(sites[0]?.id ?? "");
   const [zoneId, setZoneId] = useState("");
+  const [media, setMedia] = useState<FileList | null>(null);
   const [saving, setSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const zonesForSite = zones.filter((z) => z.siteId === siteId);
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
+    setError(null);
     setSaving(true);
     try {
-      await onSubmit({ title, description, severity, siteId, zoneId: zoneId || null });
+      const form = new FormData();
+      form.append("title", title);
+      form.append("description", description);
+      form.append("severity", severity);
+      form.append("siteId", siteId);
+      if (zoneId) form.append("zoneId", zoneId);
+      if (media) Array.from(media).forEach((file) => form.append("media", file));
+      await onSubmit(form);
+    } catch (err: any) {
+      setError(err.response?.data?.error ?? t("incidents.saveError"));
     } finally {
       setSaving(false);
     }
@@ -134,6 +176,11 @@ function IncidentForm({ sites, zones, onSubmit, onCancel }: {
           {zonesForSite.map((z) => <option key={z.id} value={z.id}>{z.name}</option>)}
         </select>
       </div>
+      <div>
+        <label className={labelClass}>{t("incidents.photos")}</label>
+        <FileDropzone multiple accept="image/*" hint={t("incidents.photosHint") ?? ""} onFiles={setMedia} />
+      </div>
+      {error && <div className="text-danger-500 text-xs">{error}</div>}
       <div className="flex justify-end gap-2 pt-2">
         <button type="button" className={buttonSecondary} onClick={onCancel}>{t("common.cancel")}</button>
         <button type="submit" className={buttonPrimary} disabled={saving}>{saving ? t("incidents.reporting") : t("incidents.reportIncidentBtn")}</button>
@@ -178,8 +225,8 @@ export default function Incidents() {
     load();
   }, []);
 
-  async function createIncident(data: any) {
-    await api.post("/incidents", data);
+  async function createIncident(form: FormData) {
+    await api.post("/incidents", form, { headers: { "Content-Type": "multipart/form-data" } });
     setModal(false);
     await load();
   }
@@ -230,6 +277,13 @@ export default function Incidents() {
                 </div>
                 {incident.reviewedBy && (
                   <div className="text-xs text-mine-500 mt-1">{t("common.reviewedBy", { name: incident.reviewedBy.name })}</div>
+                )}
+                {incident.media.length > 0 && (
+                  <div className="flex flex-wrap gap-2 mt-2">
+                    {incident.media.map((m) => (
+                      <IncidentPhotoThumb key={m.id} incidentId={incident.id} media={m} />
+                    ))}
+                  </div>
                 )}
               </div>
               <div className="flex flex-col gap-2 shrink-0 items-end">

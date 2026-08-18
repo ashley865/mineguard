@@ -520,6 +520,9 @@
     "reportedBy": "signalé par {{name}}",
     "reportIncidentTitle": "Signaler un incident",
     "loading": "Chargement des incidents…",
+    "photos": "Photos",
+    "photosHint": "Joignez jusqu'à 6 photos comme preuve (JPEG, PNG, WEBP ou GIF)",
+    "saveError": "Échec du signalement de l'incident. Veuillez réessayer.",
     "aiInvestigation": {
       "button": "Assistant d'Enquête IA",
       "title": "Assistant IA d'Enquête sur Incident",
