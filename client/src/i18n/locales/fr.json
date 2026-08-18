@@ -4023,7 +4023,10 @@
       "noneYet": "Aucune demande de changement consignée pour le moment.",
       "confirmDelete": "Supprimer cette demande de changement ?",
       "summaryPlanned": "Planifiés",
-      "summaryHighRisk": "Risque élevé (ouverts)"
+      "summaryHighRisk": "Risque élevé (ouverts)",
+      "startImplementation": "Démarrer la mise en œuvre",
+      "markCompleted": "Marquer comme terminé",
+      "markRolledBack": "Annuler (rollback)"
     },
     "vendors": {
       "new": "+ Nouveau contrat fournisseur",
@@ -4070,7 +4073,25 @@
       "requestedDate": "Demandé",
       "noneYet": "Aucune demande d'accès consignée pour le moment.",
       "confirmDelete": "Supprimer cette demande d'accès ?",
-      "summaryPending": "Demandes en attente"
+      "summaryPending": "Demandes en attente",
+      "deny": "Refuser",
+      "provision": "Provisionner",
+      "revoke": "Révoquer"
+    },
+    "tabOverview": "Vue d'ensemble",
+    "editAssetTitle": "Modifier l'actif informatique",
+    "editTicketTitle": "Modifier le ticket de support",
+    "overview": {
+      "subtitle": "Signaux de risque en un coup d'œil dans tous les modules IT — cliquez sur une carte pour y accéder.",
+      "urgentTickets": "Tickets ouverts urgents/élevés",
+      "criticalIncidents": "Incidents critiques non résolus",
+      "openIncidents": "Incidents de sécurité ouverts",
+      "failedBackups": "Sauvegardes échouées",
+      "untestedDr": "PRA non testé",
+      "expiringLicenses": "Licences à renouveler bientôt",
+      "expiringVendors": "Contrats fournisseurs à renouveler bientôt",
+      "highRiskChanges": "Changements ouverts à risque élevé",
+      "pendingAccess": "Demandes d'accès en attente"
     }
   },
   "budgetPlanning": {

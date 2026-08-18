@@ -4023,7 +4023,10 @@
       "noneYet": "Nog geen veranderingsversoeke aangeteken nie.",
       "confirmDelete": "Verwyder hierdie veranderingsversoek?",
       "summaryPlanned": "Beplan",
-      "summaryHighRisk": "Hoë risiko (oop)"
+      "summaryHighRisk": "Hoë risiko (oop)",
+      "startImplementation": "Begin implementering",
+      "markCompleted": "Merk as voltooi",
+      "markRolledBack": "Rol terug"
     },
     "vendors": {
       "new": "+ Nuwe verskafferkontrak",
@@ -4070,7 +4073,25 @@
       "requestedDate": "Versoek",
       "noneYet": "Nog geen toegangsversoeke aangeteken nie.",
       "confirmDelete": "Verwyder hierdie toegangsversoek?",
-      "summaryPending": "Hangende versoeke"
+      "summaryPending": "Hangende versoeke",
+      "deny": "Weier",
+      "provision": "Voorsien",
+      "revoke": "Herroep"
+    },
+    "tabOverview": "Oorsig",
+    "editAssetTitle": "Wysig IT-bate",
+    "editTicketTitle": "Wysig ondersteuningskaartjie",
+    "overview": {
+      "subtitle": "Risikoseine op 'n oogopslag oor elke IT-module — klik op 'n kaart om daarheen te spring.",
+      "urgentTickets": "Dringende/Hoë oop kaartjies",
+      "criticalIncidents": "Onopgeloste kritieke insidente",
+      "openIncidents": "Oop sekuriteitsinsidente",
+      "failedBackups": "Mislukte rugsteune",
+      "untestedDr": "RP nie getoets nie",
+      "expiringLicenses": "Lisensies wat binnekort hernu",
+      "expiringVendors": "Verskafferkontrakte wat binnekort hernu",
+      "highRiskChanges": "Oop veranderinge met hoë risiko",
+      "pendingAccess": "Hangende toegangsversoeke"
     }
   },
   "budgetPlanning": {

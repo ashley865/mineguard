@@ -4023,7 +4023,10 @@
       "noneYet": "Noch keine Änderungsanträge erfasst.",
       "confirmDelete": "Diesen Änderungsantrag löschen?",
       "summaryPlanned": "Geplant",
-      "summaryHighRisk": "Hohes Risiko (offen)"
+      "summaryHighRisk": "Hohes Risiko (offen)",
+      "startImplementation": "Umsetzung starten",
+      "markCompleted": "Als abgeschlossen markieren",
+      "markRolledBack": "Zurücksetzen"
     },
     "vendors": {
       "new": "+ Neuer Anbietervertrag",
@@ -4070,7 +4073,25 @@
       "requestedDate": "Angefragt",
       "noneYet": "Noch keine Zugriffsanfragen erfasst.",
       "confirmDelete": "Diese Zugriffsanfrage löschen?",
-      "summaryPending": "Ausstehende Anfragen"
+      "summaryPending": "Ausstehende Anfragen",
+      "deny": "Ablehnen",
+      "provision": "Bereitstellen",
+      "revoke": "Entziehen"
+    },
+    "tabOverview": "Übersicht",
+    "editAssetTitle": "IT-Asset bearbeiten",
+    "editTicketTitle": "Support-Ticket bearbeiten",
+    "overview": {
+      "subtitle": "Risikosignale auf einen Blick über alle IT-Module hinweg — auf eine Karte klicken, um dorthin zu springen.",
+      "urgentTickets": "Dringende/Hohe offene Tickets",
+      "criticalIncidents": "Ungelöste kritische Vorfälle",
+      "openIncidents": "Offene Sicherheitsvorfälle",
+      "failedBackups": "Fehlgeschlagene Backups",
+      "untestedDr": "DR nicht getestet",
+      "expiringLicenses": "Bald zu verlängernde Lizenzen",
+      "expiringVendors": "Bald zu verlängernde Anbieterverträge",
+      "highRiskChanges": "Offene Änderungen mit hohem Risiko",
+      "pendingAccess": "Ausstehende Zugriffsanfragen"
     }
   },
   "budgetPlanning": {

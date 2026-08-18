@@ -31,16 +31,110 @@ const PRIORITY_COLORS: Record<ITTicketPriority, string> = {
   URGENT: "bg-danger-600 text-white animate-pulse",
 };
 
-function AssetForm({ onSubmit, onCancel }: { onSubmit: (data: any) => Promise<void>; onCancel: () => void }) {
+function OverviewCard({ label, value, tone, onClick }: { label: string; value: number; tone: "default" | "hazard" | "danger"; onClick: () => void }) {
+  const toneClass = tone === "danger" ? "text-danger-500" : tone === "hazard" ? "text-hazard-500" : "text-mine-50";
+  return (
+    <button type="button" onClick={onClick} className={`${cardClass} p-3 text-left hover:border-mine-600 transition-colors`}>
+      <div className="text-xs text-mine-400 uppercase tracking-wide">{label}</div>
+      <div className={`text-2xl font-bold ${toneClass}`}>{value}</div>
+    </button>
+  );
+}
+
+function OverviewTab({ onNavigate }: { onNavigate: (tab: ITOperationsTab) => void }) {
   const { t } = useTranslation();
-  const [assetTag, setAssetTag] = useState("");
-  const [name, setName] = useState("");
-  const [assetType, setAssetType] = useState<ITAssetType>("COMPUTER");
-  const [status, setStatus] = useState<ITAssetStatus>("ACTIVE");
-  const [assignedToName, setAssignedToName] = useState("");
-  const [location, setLocation] = useState("");
-  const [warrantyExpiry, setWarrantyExpiry] = useState("");
-  const [notes, setNotes] = useState("");
+  const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
+  const [data, setData] = useState<{
+    assets: ITAsset[];
+    tickets: ITTicket[];
+    licenses: ITSoftwareLicense[];
+    backups: ITBackupRecord[];
+    incidents: ITSecurityIncident[];
+    changes: ITChangeRequest[];
+    vendors: ITVendorContract[];
+    access: ITAccessRequest[];
+  } | null>(null);
+
+  async function load() {
+    setLoading(true);
+    setLoadError(false);
+    try {
+      const [assets, tickets, licenses, backups, incidents, changes, vendors, access] = await Promise.all([
+        api.get<ITAsset[]>("/it-assets"),
+        api.get<ITTicket[]>("/it-tickets"),
+        api.get<ITSoftwareLicense[]>("/it-software-licenses"),
+        api.get<ITBackupRecord[]>("/it-backup-records"),
+        api.get<ITSecurityIncident[]>("/it-security-incidents"),
+        api.get<ITChangeRequest[]>("/it-change-requests"),
+        api.get<ITVendorContract[]>("/it-vendor-contracts"),
+        api.get<ITAccessRequest[]>("/it-access-requests"),
+      ]);
+      setData({
+        assets: assets.data,
+        tickets: tickets.data,
+        licenses: licenses.data,
+        backups: backups.data,
+        incidents: incidents.data,
+        changes: changes.data,
+        vendors: vendors.data,
+        access: access.data,
+      });
+    } catch {
+      setLoadError(true);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  useEffect(() => { load(); }, []);
+
+  if (loading) return <div className="text-mine-300">{t("common.loading")}</div>;
+  if (loadError) return <LoadError onRetry={load} />;
+  if (!data) return null;
+
+  const urgentTickets = data.tickets.filter((tk) => tk.status !== "CLOSED" && (tk.priority === "URGENT" || tk.priority === "HIGH"));
+  const expiringLicenses = data.licenses.filter(
+    (l) => l.status === "ACTIVE" && l.renewalDate && new Date(l.renewalDate).getTime() - Date.now() < EXPIRY_WINDOW_MS
+  );
+  const failedBackups = data.backups.filter((b) => b.lastRunStatus === "FAILED");
+  const untestedDr = data.backups.filter((b) => b.lastDrTestResult === "NOT_TESTED");
+  const openIncidents = data.incidents.filter((i) => i.status === "OPEN" || i.status === "INVESTIGATING");
+  const criticalIncidents = openIncidents.filter((i) => i.severity === "CRITICAL");
+  const highRiskChanges = data.changes.filter((c) => c.riskLevel === "HIGH" && !["COMPLETED", "CANCELLED", "ROLLED_BACK"].includes(c.status));
+  const expiringVendors = data.vendors.filter(
+    (v) => v.status === "ACTIVE" && v.renewalDate && new Date(v.renewalDate).getTime() - Date.now() < EXPIRY_WINDOW_MS
+  );
+  const pendingAccess = data.access.filter((r) => r.status === "REQUESTED");
+
+  return (
+    <div className="space-y-4">
+      <p className="text-mine-300 text-sm">{t("itOperations.overview.subtitle")}</p>
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
+        <OverviewCard label={t("itOperations.overview.urgentTickets")} value={urgentTickets.length} tone={urgentTickets.length > 0 ? "danger" : "default"} onClick={() => onNavigate("tickets")} />
+        <OverviewCard label={t("itOperations.overview.criticalIncidents")} value={criticalIncidents.length} tone={criticalIncidents.length > 0 ? "danger" : "default"} onClick={() => onNavigate("incidents")} />
+        <OverviewCard label={t("itOperations.overview.openIncidents")} value={openIncidents.length} tone={openIncidents.length > 0 ? "hazard" : "default"} onClick={() => onNavigate("incidents")} />
+        <OverviewCard label={t("itOperations.overview.failedBackups")} value={failedBackups.length} tone={failedBackups.length > 0 ? "danger" : "default"} onClick={() => onNavigate("backups")} />
+        <OverviewCard label={t("itOperations.overview.untestedDr")} value={untestedDr.length} tone={untestedDr.length > 0 ? "hazard" : "default"} onClick={() => onNavigate("backups")} />
+        <OverviewCard label={t("itOperations.overview.expiringLicenses")} value={expiringLicenses.length} tone={expiringLicenses.length > 0 ? "hazard" : "default"} onClick={() => onNavigate("licenses")} />
+        <OverviewCard label={t("itOperations.overview.expiringVendors")} value={expiringVendors.length} tone={expiringVendors.length > 0 ? "hazard" : "default"} onClick={() => onNavigate("vendors")} />
+        <OverviewCard label={t("itOperations.overview.highRiskChanges")} value={highRiskChanges.length} tone={highRiskChanges.length > 0 ? "hazard" : "default"} onClick={() => onNavigate("changes")} />
+        <OverviewCard label={t("itOperations.overview.pendingAccess")} value={pendingAccess.length} tone={pendingAccess.length > 0 ? "hazard" : "default"} onClick={() => onNavigate("access")} />
+      </div>
+    </div>
+  );
+}
+
+function AssetForm({ initial, onSubmit, onCancel }: { initial?: ITAsset; onSubmit: (data: any) => Promise<void>; onCancel: () => void }) {
+  const { t } = useTranslation();
+  const [assetTag, setAssetTag] = useState(initial?.assetTag ?? "");
+  const [name, setName] = useState(initial?.name ?? "");
+  const [assetType, setAssetType] = useState<ITAssetType>(initial?.assetType ?? "COMPUTER");
+  const [status, setStatus] = useState<ITAssetStatus>(initial?.status ?? "ACTIVE");
+  const [assignedToName, setAssignedToName] = useState(initial?.assignedToName ?? "");
+  const [location, setLocation] = useState(initial?.location ?? "");
+  const [warrantyExpiry, setWarrantyExpiry] = useState(initial?.warrantyExpiry?.slice(0, 10) ?? "");
+  const [notes, setNotes] = useState(initial?.notes ?? "");
   const [saving, setSaving] = useState(false);
 
   async function handleSubmit(e: FormEvent) {
@@ -111,12 +205,12 @@ function AssetForm({ onSubmit, onCancel }: { onSubmit: (data: any) => Promise<vo
   );
 }
 
-function TicketForm({ onSubmit, onCancel }: { onSubmit: (data: any) => Promise<void>; onCancel: () => void }) {
+function TicketForm({ initial, onSubmit, onCancel }: { initial?: ITTicket; onSubmit: (data: any) => Promise<void>; onCancel: () => void }) {
   const { t } = useTranslation();
-  const [subject, setSubject] = useState("");
-  const [description, setDescription] = useState("");
-  const [priority, setPriority] = useState<ITTicketPriority>("MEDIUM");
-  const [reportedByName, setReportedByName] = useState("");
+  const [subject, setSubject] = useState(initial?.subject ?? "");
+  const [description, setDescription] = useState(initial?.description ?? "");
+  const [priority, setPriority] = useState<ITTicketPriority>(initial?.priority ?? "MEDIUM");
+  const [reportedByName, setReportedByName] = useState(initial?.reportedByName ?? "");
   const [saving, setSaving] = useState(false);
 
   async function handleSubmit(e: FormEvent) {
@@ -164,7 +258,7 @@ function AssetsTab({ canEdit, canDelete }: { canEdit: boolean; canDelete: boolea
   const [assets, setAssets] = useState<ITAsset[]>([]);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState(false);
-  const [modal, setModal] = useState(false);
+  const [modal, setModal] = useState<null | "create" | ITAsset>(null);
 
   async function load() {
     setLoading(true);
@@ -183,7 +277,13 @@ function AssetsTab({ canEdit, canDelete }: { canEdit: boolean; canDelete: boolea
 
   async function create(data: any) {
     await api.post("/it-assets", data);
-    setModal(false);
+    setModal(null);
+    await load();
+  }
+
+  async function update(id: string, data: any) {
+    await api.put(`/it-assets/${id}`, data);
+    setModal(null);
     await load();
   }
 
@@ -200,43 +300,46 @@ function AssetsTab({ canEdit, canDelete }: { canEdit: boolean; canDelete: boolea
     <div className="space-y-4">
       {canEdit && (
         <div className="flex justify-end">
-          <button className={buttonPrimary} onClick={() => setModal(true)}>{t("itOperations.newAsset")}</button>
+          <button className={buttonPrimary} onClick={() => setModal("create")}>{t("itOperations.newAsset")}</button>
         </div>
       )}
-      <div className={`${cardClass} overflow-x-auto`}>
-        <table className="w-full text-sm">
-          <thead className="bg-mine-800/50 text-mine-300 text-xs uppercase">
-            <tr>
-              <th className="text-left px-4 py-2">{t("itOperations.assetTag")}</th>
-              <th className="text-left px-4 py-2">{t("itOperations.assetName")}</th>
-              <th className="text-left px-4 py-2">{t("itOperations.assetType")}</th>
-              <th className="text-left px-4 py-2">{t("common.status")}</th>
-              <th className="text-left px-4 py-2">{t("itOperations.assignedToName")}</th>
-              <th className="px-4 py-2"></th>
-            </tr>
-          </thead>
-          <tbody>
-            {assets.map((a) => (
-              <tr key={a.id} className="border-t border-mine-800 hover:bg-mine-800/30">
-                <td className="px-4 py-2 font-medium">{a.assetTag}</td>
-                <td className="px-4 py-2 text-mine-300">{a.name}</td>
-                <td className="px-4 py-2 text-mine-300">{t(`itOperations.assetTypes.${a.assetType}`)}</td>
-                <td className="px-4 py-2"><StatusBadge status={a.status} /></td>
-                <td className="px-4 py-2 text-mine-300">{a.assignedToName ?? "—"}</td>
-                <td className="px-4 py-2 text-right">
-                  {canDelete && <button className={buttonDanger} onClick={() => remove(a.id)}>{t("common.delete")}</button>}
-                </td>
-              </tr>
-            ))}
-            {assets.length === 0 && (
-              <tr><td colSpan={6} className="px-4 py-6 text-center text-mine-400">{t("itOperations.noneYetAssets")}</td></tr>
-            )}
-          </tbody>
-        </table>
-      </div>
+      <DataTable
+        columns={
+          [
+            { key: "assetTag", header: t("itOperations.assetTag"), render: (a) => a.assetTag, sortValue: (a) => a.assetTag },
+            { key: "name", header: t("itOperations.assetName"), render: (a) => a.name, sortValue: (a) => a.name },
+            { key: "type", header: t("itOperations.assetType"), render: (a) => t(`itOperations.assetTypes.${a.assetType}`), sortValue: (a) => a.assetType },
+            { key: "status", header: t("common.status"), render: (a) => <StatusBadge status={a.status} />, sortValue: (a) => a.status },
+            { key: "assignedTo", header: t("itOperations.assignedToName"), render: (a) => a.assignedToName ?? "—" },
+          ] as DataTableColumn<ITAsset>[]
+        }
+        rows={assets}
+        rowKey={(a) => a.id}
+        emptyMessage={t("itOperations.noneYetAssets")}
+        searchValue={(a) => `${a.assetTag} ${a.name} ${a.assignedToName ?? ""}`}
+        exportFilename="it-assets"
+        exportColumns={[
+          { header: t("itOperations.assetTag"), value: (a) => a.assetTag },
+          { header: t("itOperations.assetName"), value: (a) => a.name },
+          { header: t("itOperations.assetType"), value: (a) => t(`itOperations.assetTypes.${a.assetType}`) },
+          { header: t("common.status"), value: (a) => a.status },
+          { header: t("itOperations.assignedToName"), value: (a) => a.assignedToName ?? "" },
+        ]}
+        actions={(a) => (
+          <div className="flex justify-end gap-2">
+            <AuditHistoryButton entityType="ITAsset" entityId={a.id} />
+            {canEdit && <button className="text-xs text-mine-300 hover:text-mine-50" onClick={() => setModal(a)}>{t("common.edit")}</button>}
+            {canDelete && <button className={buttonDanger} onClick={() => remove(a.id)}>{t("common.delete")}</button>}
+          </div>
+        )}
+      />
       {modal && (
-        <Modal title={t("itOperations.newAssetTitle")} onClose={() => setModal(false)}>
-          <AssetForm onSubmit={create} onCancel={() => setModal(false)} />
+        <Modal title={modal === "create" ? t("itOperations.newAssetTitle") : t("itOperations.editAssetTitle")} onClose={() => setModal(null)}>
+          <AssetForm
+            initial={modal === "create" ? undefined : modal}
+            onSubmit={(data) => (modal === "create" ? create(data) : update(modal.id, data))}
+            onCancel={() => setModal(null)}
+          />
         </Modal>
       )}
     </div>
@@ -248,7 +351,7 @@ function TicketsTab({ canEdit, canDelete }: { canEdit: boolean; canDelete: boole
   const [tickets, setTickets] = useState<ITTicket[]>([]);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState(false);
-  const [modal, setModal] = useState(false);
+  const [modal, setModal] = useState<null | "create" | ITTicket>(null);
 
   async function load() {
     setLoading(true);
@@ -267,7 +370,13 @@ function TicketsTab({ canEdit, canDelete }: { canEdit: boolean; canDelete: boole
 
   async function create(data: any) {
     await api.post("/it-tickets", data);
-    setModal(false);
+    setModal(null);
+    await load();
+  }
+
+  async function update(id: string, data: any) {
+    await api.put(`/it-tickets/${id}`, data);
+    setModal(null);
     await load();
   }
 
@@ -289,28 +398,37 @@ function TicketsTab({ canEdit, canDelete }: { canEdit: boolean; canDelete: boole
     <div className="space-y-4">
       {canEdit && (
         <div className="flex justify-end">
-          <button className={buttonPrimary} onClick={() => setModal(true)}>{t("itOperations.newTicket")}</button>
+          <button className={buttonPrimary} onClick={() => setModal("create")}>{t("itOperations.newTicket")}</button>
         </div>
       )}
-      <div className="space-y-3">
-        {tickets.map((tk) => (
-          <div key={tk.id} className={`${cardClass} p-4 space-y-2`}>
-            <div className="flex items-start justify-between gap-3 flex-wrap">
-              <div>
-                <div className="flex items-center gap-2 flex-wrap mb-1">
-                  <span className={`text-[10px] font-extrabold uppercase tracking-wide px-2 py-0.5 rounded-full ${PRIORITY_COLORS[tk.priority]}`}>
-                    {t(`itOperations.priorities.${tk.priority}`)}
-                  </span>
-                  <StatusBadge status={tk.status} />
-                </div>
-                <div className="text-sm font-semibold">{tk.subject}</div>
-                {tk.reportedByName && <div className="text-xs text-mine-400 mt-0.5">{t("itOperations.reportedByName")}: {tk.reportedByName}</div>}
-              </div>
-              {canDelete && <button className={buttonDanger} onClick={() => remove(tk.id)}>{t("common.delete")}</button>}
-            </div>
-            <p className="text-sm text-mine-200 whitespace-pre-line">{tk.description}</p>
+      <DataTable
+        columns={
+          [
+            { key: "subject", header: t("itOperations.ticketSubject"), render: (tk) => tk.subject, sortValue: (tk) => tk.subject },
+            {
+              key: "priority",
+              header: t("itOperations.priority"),
+              render: (tk) => (
+                <span className={`text-[10px] font-extrabold uppercase tracking-wide px-2 py-0.5 rounded-full ${PRIORITY_COLORS[tk.priority]}`}>
+                  {t(`itOperations.priorities.${tk.priority}`)}
+                </span>
+              ),
+              sortValue: (tk) => tk.priority,
+            },
+            { key: "status", header: t("common.status"), render: (tk) => <StatusBadge status={tk.status} />, sortValue: (tk) => tk.status },
+            { key: "reportedBy", header: t("itOperations.reportedByName"), render: (tk) => tk.reportedByName ?? "—" },
+          ] as DataTableColumn<ITTicket>[]
+        }
+        rows={tickets}
+        rowKey={(tk) => tk.id}
+        emptyMessage={t("itOperations.noneYetTickets")}
+        searchValue={(tk) => `${tk.subject} ${tk.description}`}
+        actions={(tk) => (
+          <div className="flex justify-end gap-2 flex-wrap">
+            <AuditHistoryButton entityType="ITTicket" entityId={tk.id} />
+            {canEdit && <button className="text-xs text-mine-300 hover:text-mine-50" onClick={() => setModal(tk)}>{t("common.edit")}</button>}
             {canEdit && tk.status !== "CLOSED" && (
-              <div className="flex gap-2 border-t border-mine-800 pt-2">
+              <>
                 {tk.status === "OPEN" && (
                   <button className={`${buttonSecondary} text-xs px-3 py-1`} onClick={() => updateStatus(tk.id, "IN_PROGRESS")}>{t("itOperations.startProgress")}</button>
                 )}
@@ -318,17 +436,19 @@ function TicketsTab({ canEdit, canDelete }: { canEdit: boolean; canDelete: boole
                   <button className={`${buttonPrimary} text-xs px-3 py-1`} onClick={() => updateStatus(tk.id, "RESOLVED")}>{t("itOperations.markResolved")}</button>
                 )}
                 <button className={`${buttonSecondary} text-xs px-3 py-1`} onClick={() => updateStatus(tk.id, "CLOSED")}>{t("itOperations.markClosed")}</button>
-              </div>
+              </>
             )}
+            {canDelete && <button className={buttonDanger} onClick={() => remove(tk.id)}>{t("common.delete")}</button>}
           </div>
-        ))}
-        {tickets.length === 0 && (
-          <div className={`${cardClass} p-6 text-center text-mine-400`}>{t("itOperations.noneYetTickets")}</div>
         )}
-      </div>
+      />
       {modal && (
-        <Modal title={t("itOperations.newTicketTitle")} onClose={() => setModal(false)}>
-          <TicketForm onSubmit={create} onCancel={() => setModal(false)} />
+        <Modal title={modal === "create" ? t("itOperations.newTicketTitle") : t("itOperations.editTicketTitle")} onClose={() => setModal(null)}>
+          <TicketForm
+            initial={modal === "create" ? undefined : modal}
+            onSubmit={(data) => (modal === "create" ? create(data) : update(modal.id, data))}
+            onCancel={() => setModal(null)}
+          />
         </Modal>
       )}
     </div>
@@ -1030,6 +1150,11 @@ function ChangesTab({ canEdit, canApprove, canDelete }: { canEdit: boolean; canA
     await load();
   }
 
+  async function setStatus(id: string, status: ITChangeStatus) {
+    await api.put(`/it-change-requests/${id}`, { status });
+    await load();
+  }
+
   async function remove(id: string) {
     if (!confirm(t("itOperations.changes.confirmDelete"))) return;
     await api.delete(`/it-change-requests/${id}`);
@@ -1075,6 +1200,15 @@ function ChangesTab({ canEdit, canApprove, canDelete }: { canEdit: boolean; canA
             {canEdit && <button className="text-xs text-mine-300 hover:text-mine-50" onClick={() => setModal(c)}>{t("common.edit")}</button>}
             {canApprove && c.status === "PLANNED" && (
               <button className={`${buttonPrimary} text-xs px-3 py-1`} onClick={() => approve(c.id)}>{t("common.approve")}</button>
+            )}
+            {canEdit && c.status === "APPROVED" && (
+              <button className={`${buttonSecondary} text-xs px-3 py-1`} onClick={() => setStatus(c.id, "IN_PROGRESS")}>{t("itOperations.changes.startImplementation")}</button>
+            )}
+            {canEdit && c.status === "IN_PROGRESS" && (
+              <>
+                <button className={`${buttonPrimary} text-xs px-3 py-1`} onClick={() => setStatus(c.id, "COMPLETED")}>{t("itOperations.changes.markCompleted")}</button>
+                <button className={`${buttonSecondary} text-xs px-3 py-1`} onClick={() => setStatus(c.id, "ROLLED_BACK")}>{t("itOperations.changes.markRolledBack")}</button>
+              </>
             )}
             {canDelete && <button className={buttonDanger} onClick={() => remove(c.id)}>{t("common.delete")}</button>}
           </div>
@@ -1433,7 +1567,16 @@ function AccessRequestsTab({ canEdit, canApprove, canDelete }: { canEdit: boolea
             <AuditHistoryButton entityType="ITAccessRequest" entityId={r.id} />
             {canEdit && <button className="text-xs text-mine-300 hover:text-mine-50" onClick={() => setModal(r)}>{t("common.edit")}</button>}
             {canApprove && r.status === "REQUESTED" && (
-              <button className={`${buttonPrimary} text-xs px-3 py-1`} onClick={() => setStatus(r.id, "APPROVED")}>{t("common.approve")}</button>
+              <>
+                <button className={`${buttonPrimary} text-xs px-3 py-1`} onClick={() => setStatus(r.id, "APPROVED")}>{t("common.approve")}</button>
+                <button className={buttonDanger} onClick={() => setStatus(r.id, "DENIED")}>{t("itOperations.access.deny")}</button>
+              </>
+            )}
+            {canEdit && r.status === "APPROVED" && (
+              <button className={`${buttonPrimary} text-xs px-3 py-1`} onClick={() => setStatus(r.id, "PROVISIONED")}>{t("itOperations.access.provision")}</button>
+            )}
+            {canEdit && r.status === "PROVISIONED" && (
+              <button className={buttonDanger} onClick={() => setStatus(r.id, "REVOKED")}>{t("itOperations.access.revoke")}</button>
             )}
             {canDelete && <button className={buttonDanger} onClick={() => remove(r.id)}>{t("common.delete")}</button>}
           </div>
@@ -1452,7 +1595,7 @@ function AccessRequestsTab({ canEdit, canApprove, canDelete }: { canEdit: boolea
   );
 }
 
-type ITOperationsTab = "assets" | "tickets" | "licenses" | "backups" | "incidents" | "changes" | "vendors" | "access";
+type ITOperationsTab = "overview" | "assets" | "tickets" | "licenses" | "backups" | "incidents" | "changes" | "vendors" | "access";
 
 export default function ITOperations() {
   const { t } = useTranslation();
@@ -1460,9 +1603,10 @@ export default function ITOperations() {
   const canEdit = user?.role === "ADMIN" || user?.role === "SUPERVISOR" || user?.role === "EXECUTIVE";
   const canApprove = user?.role === "ADMIN" || user?.role === "EXECUTIVE";
   const canDelete = user?.role === "ADMIN" || user?.role === "EXECUTIVE";
-  const [tab, setTab] = useState<ITOperationsTab>("assets");
+  const [tab, setTab] = useState<ITOperationsTab>("overview");
 
   const tabs: { key: ITOperationsTab; label: string }[] = [
+    { key: "overview", label: t("itOperations.tabOverview") },
     { key: "assets", label: t("itOperations.tabAssets") },
     { key: "tickets", label: t("itOperations.tabTickets") },
     { key: "licenses", label: t("itOperations.tabLicenses") },
@@ -1488,6 +1632,7 @@ export default function ITOperations() {
         ))}
       </div>
 
+      {tab === "overview" && <OverviewTab onNavigate={setTab} />}
       {tab === "assets" && <AssetsTab canEdit={canEdit} canDelete={canDelete} />}
       {tab === "tickets" && <TicketsTab canEdit={canEdit} canDelete={canDelete} />}
       {tab === "licenses" && <LicensesTab canEdit={canEdit} canDelete={canDelete} />}

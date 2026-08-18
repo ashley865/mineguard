@@ -4023,7 +4023,10 @@
       "noneYet": "No change requests logged yet.",
       "confirmDelete": "Delete this change request?",
       "summaryPlanned": "Planned",
-      "summaryHighRisk": "High Risk (Open)"
+      "summaryHighRisk": "High Risk (Open)",
+      "startImplementation": "Start implementation",
+      "markCompleted": "Mark completed",
+      "markRolledBack": "Roll back"
     },
     "vendors": {
       "new": "+ New Vendor Contract",
@@ -4070,7 +4073,25 @@
       "requestedDate": "Requested",
       "noneYet": "No access requests logged yet.",
       "confirmDelete": "Delete this access request?",
-      "summaryPending": "Pending Requests"
+      "summaryPending": "Pending Requests",
+      "deny": "Deny",
+      "provision": "Provision",
+      "revoke": "Revoke"
+    },
+    "tabOverview": "Overview",
+    "editAssetTitle": "Edit IT Asset",
+    "editTicketTitle": "Edit Support Ticket",
+    "overview": {
+      "subtitle": "At-a-glance risk signals across every IT module — click a card to jump to it.",
+      "urgentTickets": "Urgent/High Open Tickets",
+      "criticalIncidents": "Unresolved Critical Incidents",
+      "openIncidents": "Open Security Incidents",
+      "failedBackups": "Failed Backups",
+      "untestedDr": "DR Not Tested",
+      "expiringLicenses": "Licenses Renewing Soon",
+      "expiringVendors": "Vendor Contracts Renewing Soon",
+      "highRiskChanges": "High-Risk Open Changes",
+      "pendingAccess": "Pending Access Requests"
     }
   },
   "budgetPlanning": {

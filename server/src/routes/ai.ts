@@ -847,6 +847,8 @@ async function buildSafetyManagerContext(mineId: string) {
 }
 
 async function buildItManagerContext(mineId: string) {
+  const in90Days = new Date(Date.now() + 90 * 86400000);
+
   const [
     mine,
     sensorsByInstallationStatus,
@@ -856,6 +858,17 @@ async function buildItManagerContext(mineId: string) {
     totalUsers,
     inactiveUsers,
     pendingExecutiveInvites,
+    assetsByStatus,
+    openTickets,
+    urgentOpenTickets,
+    licenses,
+    backupRecords,
+    openIncidents,
+    unresolvedCriticalIncidents,
+    plannedChanges,
+    openHighRiskChanges,
+    vendorContracts,
+    pendingAccessRequests,
   ] = await Promise.all([
     prisma.mine.findUnique({ where: { id: mineId }, select: { name: true } }),
     prisma.sensor.groupBy({ by: ["installationStatus"], where: { zone: { site: { mineId } } }, _count: true }),
@@ -865,6 +878,17 @@ async function buildItManagerContext(mineId: string) {
     prisma.user.count({ where: { mineId } }),
     prisma.user.count({ where: { mineId, isActive: false } }),
     prisma.executiveInvite.count({ where: { mineId, status: "PENDING" } }),
+    prisma.iTAsset.groupBy({ by: ["status"], where: { mineId }, _count: true }),
+    prisma.iTTicket.count({ where: { mineId, status: { in: ["OPEN", "IN_PROGRESS"] } } }),
+    prisma.iTTicket.count({ where: { mineId, status: { in: ["OPEN", "IN_PROGRESS"] }, priority: "URGENT" } }),
+    prisma.iTSoftwareLicense.findMany({ where: { mineId, status: "ACTIVE" }, select: { productName: true, seatsTotal: true, seatsUsed: true, renewalDate: true } }),
+    prisma.iTBackupRecord.findMany({ where: { mineId }, select: { systemName: true, lastRunStatus: true, lastDrTestResult: true } }),
+    prisma.iTSecurityIncident.count({ where: { mineId, status: { in: ["OPEN", "INVESTIGATING"] } } }),
+    prisma.iTSecurityIncident.count({ where: { mineId, severity: "CRITICAL", status: { not: "RESOLVED" } } }),
+    prisma.iTChangeRequest.count({ where: { mineId, status: "PLANNED" } }),
+    prisma.iTChangeRequest.count({ where: { mineId, riskLevel: "HIGH", status: { in: ["PLANNED", "APPROVED", "IN_PROGRESS"] } } }),
+    prisma.iTVendorContract.findMany({ where: { mineId, status: "ACTIVE" }, select: { vendorName: true, annualCost: true, renewalDate: true } }),
+    prisma.iTAccessRequest.count({ where: { mineId, status: "REQUESTED" } }),
   ]);
 
   const installStatus = { REQUESTED: 0, SCHEDULED: 0, INSTALLED: 0, COMMISSIONED: 0 } as Record<string, number>;
@@ -876,11 +900,29 @@ async function buildItManagerContext(mineId: string) {
   const integrationStatus = { CONNECTED: 0, DISCONNECTED: 0, PENDING: 0, NOT_APPLICABLE: 0 } as Record<string, number>;
   for (const row of camerasByIntegrationStatus) integrationStatus[row.integrationStatus] = row._count;
 
+  const assetStatus = { ACTIVE: 0, IN_REPAIR: 0, RETIRED: 0, LOST: 0 } as Record<string, number>;
+  for (const row of assetsByStatus) assetStatus[row.status] = row._count;
+
+  const licensesExpiringSoon = licenses.filter((l) => l.renewalDate && l.renewalDate <= in90Days).map((l) => l.productName);
+  const overAllocatedLicenses = licenses.filter((l) => l.seatsUsed > l.seatsTotal).map((l) => l.productName);
+  const failedBackups = backupRecords.filter((b) => b.lastRunStatus === "FAILED").map((b) => b.systemName);
+  const untestedDrSystems = backupRecords.filter((b) => b.lastDrTestResult === "NOT_TESTED").map((b) => b.systemName);
+  const vendorContractsExpiringSoon = vendorContracts.filter((v) => v.renewalDate && v.renewalDate <= in90Days).map((v) => v.vendorName);
+  const totalActiveVendorSpend = vendorContracts.reduce((sum, v) => sum + (v.annualCost ?? 0), 0);
+
   return {
     mine: { name: mine?.name ?? "the mine" },
     sensors: { total: totalSensors, byInstallationStatus: installStatus, byOperationalStatus: sensorStatus },
     cctvVmsIntegration: { byStatus: integrationStatus },
     userAccounts: { total: totalUsers, deactivated: inactiveUsers, pendingExecutiveInvites },
+    itAssets: { byStatus: assetStatus },
+    supportTickets: { openOrInProgress: openTickets, urgentOpen: urgentOpenTickets },
+    softwareLicenses: { activeCount: licenses.length, expiringSoon: licensesExpiringSoon, overAllocated: overAllocatedLicenses },
+    backups: { totalSystems: backupRecords.length, failedLastRun: failedBackups, drNotTested: untestedDrSystems },
+    securityIncidents: { openOrInvestigating: openIncidents, unresolvedCritical: unresolvedCriticalIncidents },
+    changeRequests: { planned: plannedChanges, openHighRisk: openHighRiskChanges },
+    vendorContracts: { activeCount: vendorContracts.length, expiringSoon: vendorContractsExpiringSoon, totalAnnualCost: Math.round(totalActiveVendorSpend) },
+    accessRequests: { pending: pendingAccessRequests },
   };
 }
 
@@ -994,8 +1036,11 @@ const AI_MODULES: Record<string, AiModule> = {
     systemPrompt: (ctx) =>
       BASE_SYSTEM_PROMPT(ctx.mine.name, "IT Manager") +
       ` Focus on the technology infrastructure MineGuard tracks: sensor network health (installation pipeline, ` +
-      `active/inactive/faulty sensors), CCTV/VMS integration status, and user account security (total accounts, ` +
-      `deactivated accounts, pending executive invites) — this is a systems/infrastructure assistant.`,
+      `active/inactive/faulty sensors), CCTV/VMS integration status, user account security (total accounts, ` +
+      `deactivated accounts, pending executive invites), IT asset inventory and open support tickets (especially ` +
+      `urgent ones), software license renewals/over-allocation, backup failures and untested disaster-recovery ` +
+      `plans, open/unresolved cybersecurity incidents, high-risk pending change requests, IT vendor contract ` +
+      `renewals and spend, and pending access provisioning requests — this is a systems/infrastructure assistant.`,
   },
 };
 

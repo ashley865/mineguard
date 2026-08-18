@@ -4023,7 +4023,10 @@
       "noneYet": "Aún no se han registrado solicitudes de cambio.",
       "confirmDelete": "¿Eliminar esta solicitud de cambio?",
       "summaryPlanned": "Planificados",
-      "summaryHighRisk": "Alto riesgo (abiertos)"
+      "summaryHighRisk": "Alto riesgo (abiertos)",
+      "startImplementation": "Iniciar implementación",
+      "markCompleted": "Marcar como completado",
+      "markRolledBack": "Revertir"
     },
     "vendors": {
       "new": "+ Nuevo contrato de proveedor",
@@ -4070,7 +4073,25 @@
       "requestedDate": "Solicitado",
       "noneYet": "Aún no se han registrado solicitudes de acceso.",
       "confirmDelete": "¿Eliminar esta solicitud de acceso?",
-      "summaryPending": "Solicitudes pendientes"
+      "summaryPending": "Solicitudes pendientes",
+      "deny": "Denegar",
+      "provision": "Aprovisionar",
+      "revoke": "Revocar"
+    },
+    "tabOverview": "Resumen",
+    "editAssetTitle": "Editar activo de TI",
+    "editTicketTitle": "Editar ticket de soporte",
+    "overview": {
+      "subtitle": "Señales de riesgo de un vistazo en todos los módulos de TI: haga clic en una tarjeta para ir a ella.",
+      "urgentTickets": "Tickets abiertos urgentes/altos",
+      "criticalIncidents": "Incidentes críticos sin resolver",
+      "openIncidents": "Incidentes de seguridad abiertos",
+      "failedBackups": "Respaldos fallidos",
+      "untestedDr": "RD sin probar",
+      "expiringLicenses": "Licencias por renovar pronto",
+      "expiringVendors": "Contratos de proveedores por renovar pronto",
+      "highRiskChanges": "Cambios abiertos de alto riesgo",
+      "pendingAccess": "Solicitudes de acceso pendientes"
     }
   },
   "budgetPlanning": {
