@@ -1,9 +1,10 @@
-import { useEffect, useState } from "react";
+import { FormEvent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { api } from "../../api/client";
-import { CyberIdentityOverview } from "../../api/types";
-import { CyberTheme, StatusPill, cyberButtonSecondary } from "./cyberTheme";
+import { CyberAccessThreats, CyberBlockedIp, CyberDevice, CyberIdentityOverview } from "../../api/types";
+import { CyberTheme, StatusPill, cyberButtonDanger, cyberButtonPrimary, cyberButtonSecondary } from "./cyberTheme";
 import CyberTable, { CyberTableColumn } from "./CyberTable";
+import CyberModal from "./CyberModal";
 
 function StatBlock({ theme, label, value, tone }: { theme: CyberTheme; label: string; value: string | number; tone?: string }) {
   return (
@@ -14,17 +15,70 @@ function StatBlock({ theme, label, value, tone }: { theme: CyberTheme; label: st
   );
 }
 
+function BlockIpForm({ theme, onSubmit, onCancel }: { theme: CyberTheme; onSubmit: (data: { ipOrCidr: string; reason?: string }) => Promise<void>; onCancel: () => void }) {
+  const { t } = useTranslation();
+  const [ipOrCidr, setIpOrCidr] = useState("");
+  const [reason, setReason] = useState("");
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const label = `block text-xs font-semibold mb-1 ${theme.subtext}`;
+
+  async function handleSubmit(e: FormEvent) {
+    e.preventDefault();
+    setSaving(true);
+    setError(null);
+    try {
+      await onSubmit({ ipOrCidr, reason: reason || undefined });
+    } catch (err: any) {
+      setError(err.response?.data?.error ?? t("cyber.identity.blockError"));
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  return (
+    <form onSubmit={handleSubmit} className="space-y-3">
+      <div>
+        <label className={label}>{t("cyber.identity.ipOrCidr")}</label>
+        <input className={theme.input} value={ipOrCidr} onChange={(e) => setIpOrCidr(e.target.value)} placeholder="41.0.0.0/8" required />
+        <p className={`text-[10px] mt-1 ${theme.mutedText}`}>{t("cyber.identity.ipOrCidrHint")}</p>
+      </div>
+      <div>
+        <label className={label}>{t("cyber.identity.blockReason")}</label>
+        <input className={theme.input} value={reason} onChange={(e) => setReason(e.target.value)} placeholder={t("cyber.identity.blockReasonPlaceholder") ?? ""} />
+      </div>
+      {error && <div className="text-xs text-red-500">{error}</div>}
+      <div className="flex justify-end gap-2 pt-2">
+        <button type="button" className={cyberButtonSecondary(theme)} onClick={onCancel}>{t("common.cancel")}</button>
+        <button type="submit" className={cyberButtonDanger} disabled={saving}>{saving ? t("common.saving") : t("cyber.identity.blockAction")}</button>
+      </div>
+    </form>
+  );
+}
+
 export default function IdentityTab({ theme, canEdit }: { theme: CyberTheme; canEdit: boolean }) {
   const { t } = useTranslation();
   const [data, setData] = useState<CyberIdentityOverview | null>(null);
+  const [devices, setDevices] = useState<CyberDevice[]>([]);
+  const [threats, setThreats] = useState<CyberAccessThreats | null>(null);
+  const [blocklist, setBlocklist] = useState<CyberBlockedIp[]>([]);
   const [loading, setLoading] = useState(true);
   const [busyId, setBusyId] = useState<string | null>(null);
+  const [blockModal, setBlockModal] = useState(false);
 
   async function load() {
     setLoading(true);
     try {
-      const res = await api.get<CyberIdentityOverview>("/cyber-identity/overview");
-      setData(res.data);
+      const [overview, deviceList, threatData, blocked] = await Promise.all([
+        api.get<CyberIdentityOverview>("/cyber-identity/overview"),
+        api.get<CyberDevice[]>("/cyber-access-control/devices"),
+        api.get<CyberAccessThreats>("/cyber-access-control/threats"),
+        api.get<CyberBlockedIp[]>("/cyber-access-control/blocklist"),
+      ]);
+      setData(overview.data);
+      setDevices(deviceList.data);
+      setThreats(threatData.data);
+      setBlocklist(blocked.data);
     } finally {
       setLoading(false);
     }
@@ -42,15 +96,110 @@ export default function IdentityTab({ theme, canEdit }: { theme: CyberTheme; can
     }
   }
 
-  if (loading || !data) return <div className={theme.subtext}>{t("common.loading")}</div>;
+  async function blockIp(data: { ipOrCidr: string; reason?: string }) {
+    await api.post("/cyber-access-control/blocklist", data);
+    setBlockModal(false);
+    await load();
+  }
+
+  async function unblockIp(id: string) {
+    if (!confirm(t("cyber.identity.confirmUnblock"))) return;
+    await api.delete(`/cyber-access-control/blocklist/${id}`);
+    await load();
+  }
+
+  if (loading || !data || !threats) return <div className={theme.subtext}>{t("common.loading")}</div>;
+
+  const threatCount = threats.bruteForceIps.length + threats.multiAccountIps.length;
 
   return (
     <div className="space-y-6">
       <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
-        <StatBlock theme={theme} label={t("cyber.identity.totalUsers")} value={data.totalUsers} />
-        <StatBlock theme={theme} label={t("cyber.identity.privilegedAccounts")} value={data.privilegedAccounts.length} />
-        <StatBlock theme={theme} label={t("cyber.identity.dormantUsers")} value={data.dormantUsers.length} tone={data.dormantUsers.length > 0 ? "text-amber-500" : undefined} />
+        <StatBlock theme={theme} label={t("cyber.identity.devicesUsingSoftware")} value={devices.length} />
+        <StatBlock theme={theme} label={t("cyber.identity.blockedIps")} value={blocklist.length} />
+        <StatBlock theme={theme} label={t("cyber.identity.accessThreats")} value={threatCount} tone={threatCount > 0 ? "text-red-500" : undefined} />
         <StatBlock theme={theme} label={t("cyber.identity.mfaGap")} value={data.mfaGapCount} tone={data.mfaGapCount > 0 ? "text-red-500" : undefined} />
+      </div>
+
+      <div className="space-y-2">
+        <h3 className={`text-sm font-semibold ${theme.text}`}>{t("cyber.identity.tabDevices")}</h3>
+        <p className={`text-xs ${theme.mutedText}`}>{t("cyber.identity.devicesHint", { days: 90 })}</p>
+        <CyberTable
+          theme={theme}
+          columns={
+            [
+              { key: "user", header: t("cyber.identity.name"), render: (d) => <span className={theme.text}>{d.userName}</span>, sortValue: (d) => d.userName },
+              { key: "ip", header: t("cyber.identity.ipAddress"), render: (d) => d.ipAddress ?? "—" },
+              { key: "device", header: t("cyber.identity.device"), render: (d) => d.deviceLabel },
+              { key: "logins", header: t("cyber.identity.loginCount"), render: (d) => d.loginCount, sortValue: (d) => d.loginCount },
+              { key: "lastSeen", header: t("cyber.identity.lastSeenAt"), render: (d) => (d.lastSeenAt ? new Date(d.lastSeenAt).toLocaleString() : "—"), sortValue: (d) => d.lastSeenAt ?? "" },
+              { key: "status", header: t("common.status"), render: (d) => (d.isBlocked ? <StatusPill status="BLOCKED" /> : <StatusPill status="SECURE" />) },
+            ] as CyberTableColumn<CyberDevice>[]
+          }
+          rows={devices}
+          rowKey={(d) => `${d.userId ?? "unknown"}-${d.ipAddress ?? "noip"}-${d.deviceLabel}`}
+          emptyMessage={t("cyber.identity.noDevices")}
+          searchValue={(d) => `${d.userName} ${d.ipAddress ?? ""} ${d.deviceLabel}`}
+        />
+      </div>
+
+      <div className="space-y-2">
+        <h3 className={`text-sm font-semibold ${theme.text}`}>{t("cyber.identity.tabThreats")}</h3>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+          <div className={`${theme.panel} p-3`}>
+            <div className={`text-xs font-semibold mb-2 ${theme.text}`}>{t("cyber.identity.bruteForceTitle")}</div>
+            {threats.bruteForceIps.length === 0 ? (
+              <div className={`text-xs ${theme.mutedText}`}>{t("cyber.identity.noBruteForce")}</div>
+            ) : (
+              <div className="space-y-1.5">
+                {threats.bruteForceIps.map((b) => (
+                  <div key={b.ipAddress} className={`flex items-center justify-between text-xs border-t ${theme.rowBorder} pt-1.5 first:border-t-0 first:pt-0`}>
+                    <span className={theme.text}>{b.ipAddress}</span>
+                    <span className="text-red-500 font-semibold">{t("cyber.identity.failedAttempts", { count: b.failedAttempts })}</span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+          <div className={`${theme.panel} p-3`}>
+            <div className={`text-xs font-semibold mb-2 ${theme.text}`}>{t("cyber.identity.multiAccountTitle")}</div>
+            {threats.multiAccountIps.length === 0 ? (
+              <div className={`text-xs ${theme.mutedText}`}>{t("cyber.identity.noMultiAccount")}</div>
+            ) : (
+              <div className="space-y-1.5">
+                {threats.multiAccountIps.map((m) => (
+                  <div key={m.ipAddress} className={`flex items-center justify-between text-xs border-t ${theme.rowBorder} pt-1.5 first:border-t-0 first:pt-0`}>
+                    <span className={theme.text}>{m.ipAddress}</span>
+                    <span className="text-amber-500 font-semibold">{t("cyber.identity.distinctAccounts", { count: m.distinctAccounts })}</span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+
+      <div className="space-y-2">
+        <div className="flex items-center justify-between">
+          <h3 className={`text-sm font-semibold ${theme.text}`}>{t("cyber.identity.tabBlocklist")}</h3>
+          {canEdit && <button className={cyberButtonPrimary} onClick={() => setBlockModal(true)}>{t("cyber.identity.blockNew")}</button>}
+        </div>
+        <p className={`text-xs ${theme.mutedText}`}>{t("cyber.identity.blocklistHint")}</p>
+        <CyberTable
+          theme={theme}
+          columns={
+            [
+              { key: "ip", header: t("cyber.identity.ipOrCidr"), render: (b) => <span className={theme.text}>{b.ipOrCidr}</span>, sortValue: (b) => b.ipOrCidr },
+              { key: "reason", header: t("cyber.identity.blockReason"), render: (b) => b.reason ?? "—" },
+              { key: "blockedBy", header: t("cyber.identity.blockedBy"), render: (b) => b.blockedBy?.name ?? "—" },
+              { key: "createdAt", header: t("cyber.createdAt"), render: (b) => new Date(b.createdAt).toLocaleDateString(), sortValue: (b) => b.createdAt },
+            ] as CyberTableColumn<CyberBlockedIp>[]
+          }
+          rows={blocklist}
+          rowKey={(b) => b.id}
+          emptyMessage={t("cyber.identity.noneBlocked")}
+          actions={canEdit ? (b) => <button className={cyberButtonDanger} onClick={() => unblockIp(b.id)}>{t("cyber.identity.unblock")}</button> : undefined}
+        />
       </div>
 
       <p className={`text-[10px] ${theme.mutedText}`}>{t("cyber.identity.mfaDisclaimer")}</p>
@@ -106,7 +255,7 @@ export default function IdentityTab({ theme, canEdit }: { theme: CyberTheme; can
           columns={
             [
               { key: "user", header: t("cyber.identity.name"), render: (e) => e.user?.name ?? "—" },
-              { key: "type", header: t("cyber.identity.eventType"), render: (e) => <StatusPill status={e.eventType === "LOGIN_SUCCESS" ? "PROTECTED" : "MISSING"} /> },
+              { key: "type", header: t("cyber.identity.eventType"), render: (e) => <StatusPill status={e.eventType === "LOGIN_SUCCESS" ? "PROTECTED" : e.eventType === "BLOCKED" ? "BLOCKED" : "MISSING"} /> },
               { key: "ip", header: t("cyber.identity.ipAddress"), render: (e) => e.ipAddress ?? "—" },
               { key: "occurred", header: t("cyber.identity.occurredAt"), render: (e) => new Date(e.occurredAt).toLocaleString() },
               { key: "flagged", header: t("cyber.identity.flagged"), render: (e) => (e.flagged ? <StatusPill status="WARNING" /> : "—") },
@@ -117,6 +266,12 @@ export default function IdentityTab({ theme, canEdit }: { theme: CyberTheme; can
           emptyMessage={t("cyber.identity.noActivity")}
         />
       </div>
+
+      {blockModal && (
+        <CyberModal theme={theme} title={t("cyber.identity.blockNewTitle")} onClose={() => setBlockModal(false)}>
+          <BlockIpForm theme={theme} onSubmit={blockIp} onCancel={() => setBlockModal(false)} />
+        </CyberModal>
+      )}
     </div>
   );
 }

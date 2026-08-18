@@ -3601,7 +3601,7 @@ export type CyberNetworkAssetStatus = "SECURE" | "WARNING" | "COMPROMISED" | "UN
 export type CyberVulnerabilityStatus = "OPEN" | "IN_PROGRESS" | "PATCHED" | "ACCEPTED_RISK" | "FALSE_POSITIVE";
 export type CyberCompliancePolicyStatus = "COMPLIANT" | "NON_COMPLIANT" | "IN_PROGRESS" | "NOT_ASSESSED";
 export type CyberFindingStatus = "OPEN" | "IN_PROGRESS" | "RESOLVED" | "ACCEPTED_RISK";
-export type CyberLoginEventType = "LOGIN_SUCCESS" | "LOGIN_FAILED";
+export type CyberLoginEventType = "LOGIN_SUCCESS" | "LOGIN_FAILED" | "BLOCKED";
 
 export interface CyberEndpoint {
   id: string;
@@ -3795,6 +3795,49 @@ export interface CyberCorrelationResult {
   recommendedActions: string[];
   summary: string;
   alertIds: string[];
+}
+
+export interface CyberDevice {
+  userId: string | null;
+  userName: string;
+  ipAddress: string | null;
+  deviceLabel: string;
+  loginCount: number;
+  firstSeenAt: string | null;
+  lastSeenAt: string | null;
+  isBlocked: boolean;
+}
+
+export interface CyberBruteForceIp {
+  ipAddress: string;
+  failedAttempts: number;
+  targetedAccounts: string[];
+  lastAttemptAt: string;
+}
+
+export interface CyberMultiAccountIp {
+  ipAddress: string;
+  distinctAccounts: number;
+}
+
+export interface CyberBlockedAttempt {
+  ipAddress: string | null;
+  userName: string | null;
+  occurredAt: string;
+}
+
+export interface CyberAccessThreats {
+  bruteForceIps: CyberBruteForceIp[];
+  multiAccountIps: CyberMultiAccountIp[];
+  recentBlockedAttempts: CyberBlockedAttempt[];
+}
+
+export interface CyberBlockedIp {
+  id: string;
+  ipOrCidr: string;
+  reason?: string | null;
+  blockedBy?: { id: string; name: string } | null;
+  createdAt: string;
 }
 
 export interface BudgetPlan {

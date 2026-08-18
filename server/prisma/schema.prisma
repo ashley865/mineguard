@@ -345,6 +345,7 @@ model User {
   cyberCompliancePoliciesCreated CyberCompliancePolicy[] @relation("CyberCompliancePolicyCreatedBy")
   cyberAuditFindingsCreated    CyberAuditFinding[]       @relation("CyberAuditFindingCreatedBy")
   cyberLoginEvents             CyberLoginEvent[]         @relation("CyberLoginEventUser")
+  cyberBlockedIpsBlocked       CyberBlockedIp[]          @relation("CyberBlockedIpBlockedBy")
 }
 
 model UserAttendance {
@@ -1550,6 +1551,7 @@ model Mine {
   cyberAuditFindings       CyberAuditFinding[]
   cyberLoginEvents         CyberLoginEvent[]
   cyberScoreSnapshots      CyberScoreSnapshot[]
+  cyberBlockedIps          CyberBlockedIp[]
 }
 
 enum ExecutiveRequestStatus {
@@ -5478,6 +5480,7 @@ model CyberAuditFinding {
 enum CyberLoginEventType {
   LOGIN_SUCCESS
   LOGIN_FAILED
+  BLOCKED
 }
 
 // Written directly from the real /auth/login flow (see auth.ts) — not manually
@@ -5506,4 +5509,24 @@ model CyberScoreSnapshot {
   capturedDate DateTime
 
   @@unique([mineId, capturedDate])
+}
+
+// Enforced directly in the requireAuth middleware (see lib/ipBlocklist.ts) — once an
+// IP or CIDR range is blocked, every authenticated request from it is rejected
+// immediately, even with an already-issued, still-valid JWT. This is the module's
+// actual "block VPN/hostile network access" control, distinct from everything else
+// in the Cyber Command Center which is passive tracking/logging rather than an
+// enforced control.
+model CyberBlockedIp {
+  id          String   @id @default(cuid())
+  mineId      String
+  mine        Mine     @relation(fields: [mineId], references: [id], onDelete: Cascade)
+  ipOrCidr    String
+  reason      String?
+  blockedById String?
+  blockedBy   User?    @relation("CyberBlockedIpBlockedBy", fields: [blockedById], references: [id], onDelete: SetNull)
+
+  createdAt DateTime @default(now())
+
+  @@unique([mineId, ipOrCidr])
 }

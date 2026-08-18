@@ -8,6 +8,7 @@ import { imageFileFilter } from "../lib/uploadFilters";
 import { signAuthToken } from "../lib/jwt";
 import { authLimiter, passwordChangeLimiter } from "../middleware/rateLimit";
 import { verifyAdminPassword } from "../lib/verifyPassword";
+import { isIpBlocked } from "../lib/ipBlocklist";
 
 const router = Router();
 
@@ -88,6 +89,12 @@ router.post("/login", authLimiter, async (req, res) => {
   const user = await prisma.user.findUnique({ where: { email } });
   if (!user) {
     return res.status(401).json({ error: "Invalid email or password" });
+  }
+  if (user.mineId && (await isIpBlocked(user.mineId, ipAddress))) {
+    await prisma.cyberLoginEvent
+      .create({ data: { mineId: user.mineId, userId: user.id, eventType: "BLOCKED", ipAddress, userAgent, flagged: true } })
+      .catch(() => {});
+    return res.status(403).json({ error: "Access blocked from this network" });
   }
   const valid = await bcrypt.compare(password, user.passwordHash);
   if (!valid) {

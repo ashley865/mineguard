@@ -112,6 +112,7 @@ const STATUS_COLORS: Record<string, string> = {
   SECURE: "bg-green-600",
   WARNING: "bg-amber-500",
   COMPROMISED: "bg-red-600",
+  BLOCKED: "bg-red-600",
 };
 
 export function StatusPill({ status }: { status: string }) {

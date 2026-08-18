@@ -3,6 +3,7 @@ import { Role } from "@prisma/client";
 import { prisma } from "../prisma";
 import { verifyAuthToken } from "../lib/jwt";
 import { requestContextStorage } from "../lib/requestContext";
+import { isIpBlocked } from "../lib/ipBlocklist";
 
 export interface AuthPayload {
   userId: string;
@@ -50,6 +51,12 @@ export async function requireAuth(req: Request, res: Response, next: NextFunctio
     // token to expire — a removed executive can't keep using an already-issued token.
     if (!user.isActive) {
       return res.status(403).json({ error: "This account has been deactivated" });
+    }
+    // Rejects every request from a blocked IP/CIDR immediately, even one carrying an
+    // already-issued, still-valid token — the Cyber Command Center's actual enforced
+    // "block VPN/hostile network access" control, not just a login-time check.
+    if (user.mineId && (await isIpBlocked(user.mineId, req.ip))) {
+      return res.status(403).json({ error: "Access blocked from this network" });
     }
     req.auth = { userId: user.id, role: user.role, mineId: user.mineId };
     // Everything downstream of this call — including any awaited Prisma writes deep in a

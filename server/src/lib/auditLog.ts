@@ -54,6 +54,7 @@ export const AUDITED_MODELS = new Set([
   "CyberAlert",
   "CyberCompliancePolicy",
   "CyberAuditFinding",
+  "CyberBlockedIp",
 ]);
 
 const AUDITED_OPERATIONS = new Set(["create", "update", "delete", "upsert"]);
