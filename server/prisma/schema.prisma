@@ -319,6 +319,15 @@ model User {
   workerSkillRatingsAssessed        WorkerSkillRating[]       @relation("WorkerSkillRatingAssessedBy")
   documentAcknowledgementsRecorded  DocumentAcknowledgement[] @relation("DocumentAcknowledgementRecordedBy")
   vettingRecordsConducted           VettingRecord[]           @relation("VettingRecordConductedBy")
+
+  itSoftwareLicensesCreated ITSoftwareLicense[] @relation("ITSoftwareLicenseCreatedBy")
+  itBackupRecordsCreated    ITBackupRecord[]    @relation("ITBackupRecordCreatedBy")
+  itSecurityIncidentsCreated ITSecurityIncident[] @relation("ITSecurityIncidentCreatedBy")
+  itChangeRequestsApproved  ITChangeRequest[]   @relation("ITChangeRequestApprovedBy")
+  itChangeRequestsCreated   ITChangeRequest[]   @relation("ITChangeRequestCreatedBy")
+  itVendorContractsCreated  ITVendorContract[]  @relation("ITVendorContractCreatedBy")
+  itAccessRequestsApproved  ITAccessRequest[]   @relation("ITAccessRequestApprovedBy")
+  itAccessRequestsCreated   ITAccessRequest[]   @relation("ITAccessRequestCreatedBy")
 }
 
 model UserAttendance {
@@ -1501,6 +1510,13 @@ model Mine {
   aiDailyBriefings        AiDailyBriefing[]
   skills                  Skill[]
   vettingRecords          VettingRecord[]
+
+  itSoftwareLicenses  ITSoftwareLicense[]
+  itBackupRecords     ITBackupRecord[]
+  itSecurityIncidents ITSecurityIncident[]
+  itChangeRequests    ITChangeRequest[]
+  itVendorContracts   ITVendorContract[]
+  itAccessRequests    ITAccessRequest[]
 }
 
 enum ExecutiveRequestStatus {
@@ -4712,6 +4728,243 @@ model ITTicket {
   resolvedAt     DateTime?
   createdById    String?
   createdBy      User?            @relation("ITTicketCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+
+  createdAt DateTime @default(now())
+}
+
+// ---------------------------------------------------------------------------
+// Module: IT Software License Register (IT Manager)
+// ---------------------------------------------------------------------------
+
+enum ITLicenseStatus {
+  ACTIVE
+  EXPIRED
+  CANCELLED
+}
+
+enum ITBillingCycle {
+  MONTHLY
+  ANNUAL
+  ONE_TIME
+  OTHER
+}
+
+model ITSoftwareLicense {
+  id           String          @id @default(cuid())
+  mineId       String
+  mine         Mine            @relation(fields: [mineId], references: [id], onDelete: Cascade)
+  productName  String
+  vendor       String?
+  seatsTotal   Int
+  seatsUsed    Int             @default(0)
+  cost         Float?
+  currency     String          @default("ZAR")
+  billingCycle ITBillingCycle  @default(ANNUAL)
+  status       ITLicenseStatus @default(ACTIVE)
+  purchaseDate DateTime?
+  renewalDate  DateTime?
+  notes        String?
+  createdById  String?
+  createdBy    User?           @relation("ITSoftwareLicenseCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+
+  createdAt DateTime @default(now())
+}
+
+// ---------------------------------------------------------------------------
+// Module: IT Backup & Disaster Recovery Log (IT Manager)
+// ---------------------------------------------------------------------------
+
+enum ITBackupRunStatus {
+  SUCCESS
+  FAILED
+  PARTIAL
+  NOT_RUN
+}
+
+enum ITDrTestResult {
+  PASSED
+  FAILED
+  NOT_TESTED
+}
+
+model ITBackupRecord {
+  id               String            @id @default(cuid())
+  mineId           String
+  mine             Mine              @relation(fields: [mineId], references: [id], onDelete: Cascade)
+  systemName       String
+  schedule         String?
+  retentionDays    Int?
+  lastRunAt        DateTime?
+  lastRunStatus    ITBackupRunStatus @default(NOT_RUN)
+  lastDrTestDate   DateTime?
+  lastDrTestResult ITDrTestResult    @default(NOT_TESTED)
+  notes            String?
+  createdById      String?
+  createdBy        User?             @relation("ITBackupRecordCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+
+  createdAt DateTime @default(now())
+}
+
+// ---------------------------------------------------------------------------
+// Module: IT Cybersecurity Incident Log (IT Manager)
+// ---------------------------------------------------------------------------
+
+enum ITIncidentType {
+  PHISHING
+  MALWARE
+  UNAUTHORIZED_ACCESS
+  DATA_BREACH
+  DENIAL_OF_SERVICE
+  VULNERABILITY
+  OTHER
+}
+
+enum ITIncidentSeverity {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+enum ITIncidentStatus {
+  OPEN
+  INVESTIGATING
+  CONTAINED
+  RESOLVED
+}
+
+model ITSecurityIncident {
+  id              String             @id @default(cuid())
+  mineId          String
+  mine            Mine               @relation(fields: [mineId], references: [id], onDelete: Cascade)
+  title           String
+  incidentType    ITIncidentType     @default(OTHER)
+  severity        ITIncidentSeverity @default(MEDIUM)
+  status          ITIncidentStatus   @default(OPEN)
+  description     String
+  affectedSystems String?
+  detectedAt      DateTime           @default(now())
+  resolvedAt      DateTime?
+  remediation     String?
+  reportedByName  String?
+  createdById     String?
+  createdBy       User?              @relation("ITSecurityIncidentCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+
+  createdAt DateTime @default(now())
+}
+
+// ---------------------------------------------------------------------------
+// Module: IT Change & Deployment Log (IT Manager)
+// ---------------------------------------------------------------------------
+
+enum ITChangeType {
+  STANDARD
+  NORMAL
+  EMERGENCY
+}
+
+enum ITChangeRisk {
+  LOW
+  MEDIUM
+  HIGH
+}
+
+enum ITChangeStatus {
+  PLANNED
+  APPROVED
+  IN_PROGRESS
+  COMPLETED
+  ROLLED_BACK
+  CANCELLED
+}
+
+model ITChangeRequest {
+  id              String         @id @default(cuid())
+  mineId          String
+  mine            Mine           @relation(fields: [mineId], references: [id], onDelete: Cascade)
+  title           String
+  changeType      ITChangeType   @default(STANDARD)
+  systemAffected  String?
+  description     String
+  riskLevel       ITChangeRisk   @default(LOW)
+  status          ITChangeStatus @default(PLANNED)
+  scheduledDate   DateTime?
+  implementedDate DateTime?
+  rollbackPlan    String?
+  outcome         String?
+  approvedById    String?
+  approvedBy      User?          @relation("ITChangeRequestApprovedBy", fields: [approvedById], references: [id], onDelete: SetNull)
+  createdById     String?
+  createdBy       User?          @relation("ITChangeRequestCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+
+  createdAt DateTime @default(now())
+}
+
+// ---------------------------------------------------------------------------
+// Module: IT Vendor & Contract Register (IT Manager)
+// ---------------------------------------------------------------------------
+
+enum ITVendorContractStatus {
+  ACTIVE
+  EXPIRED
+  CANCELLED
+}
+
+model ITVendorContract {
+  id                 String                 @id @default(cuid())
+  mineId             String
+  mine               Mine                   @relation(fields: [mineId], references: [id], onDelete: Cascade)
+  vendorName         String
+  serviceDescription String
+  contactName        String?
+  contactEmail       String?
+  annualCost         Float?
+  currency           String                 @default("ZAR")
+  status             ITVendorContractStatus @default(ACTIVE)
+  startDate          DateTime?
+  renewalDate        DateTime?
+  ownerName          String?
+  notes              String?
+  createdById        String?
+  createdBy          User?                  @relation("ITVendorContractCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+
+  createdAt DateTime @default(now())
+}
+
+// ---------------------------------------------------------------------------
+// Module: IT Access & Account Provisioning Log (IT Manager)
+// ---------------------------------------------------------------------------
+
+enum ITAccessRequestType {
+  GRANT
+  MODIFY
+  REVOKE
+}
+
+enum ITAccessRequestStatus {
+  REQUESTED
+  APPROVED
+  PROVISIONED
+  DENIED
+  REVOKED
+}
+
+model ITAccessRequest {
+  id            String                @id @default(cuid())
+  mineId        String
+  mine          Mine                  @relation(fields: [mineId], references: [id], onDelete: Cascade)
+  subjectName   String
+  systemName    String
+  accessLevel   String?
+  requestType   ITAccessRequestType   @default(GRANT)
+  status        ITAccessRequestStatus @default(REQUESTED)
+  requestedDate DateTime              @default(now())
+  actionedDate  DateTime?
+  approvedById  String?
+  approvedBy    User?                 @relation("ITAccessRequestApprovedBy", fields: [approvedById], references: [id], onDelete: SetNull)
+  notes         String?
+  createdById   String?
+  createdBy     User?                 @relation("ITAccessRequestCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
 
   createdAt DateTime @default(now())
 }

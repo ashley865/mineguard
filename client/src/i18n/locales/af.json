@@ -3901,7 +3901,177 @@
     "confirmDeleteTicket": "Verwyder hierdie kaartjie?",
     "startProgress": "Begin vordering",
     "markResolved": "Merk as opgelos",
-    "markClosed": "Sluit kaartjie"
+    "markClosed": "Sluit kaartjie",
+    "tabLicenses": "Sagteware-lisensies",
+    "tabBackups": "Rugsteun & Rampherstel",
+    "tabIncidents": "Sekuriteitsinsidente",
+    "tabChanges": "Verandering & Ontplooiing",
+    "tabVendors": "Verskaffers & Kontrakte",
+    "tabAccess": "Toegangversoeke",
+    "licenses": {
+      "new": "+ Nuwe lisensie",
+      "newTitle": "Nuwe sagtewarelisensie",
+      "editTitle": "Wysig sagtewarelisensie",
+      "productName": "Produknaam",
+      "vendor": "Verskaffer",
+      "seatsTotal": "Setels (totaal)",
+      "seatsUsed": "Setels (gebruik)",
+      "seats": "Setels",
+      "cost": "Koste",
+      "billingCycle": "Faktureringsiklus",
+      "billingCycles": {
+        "MONTHLY": "Maandeliks",
+        "ANNUAL": "Jaarliks",
+        "ONE_TIME": "Eenmalig",
+        "OTHER": "Ander"
+      },
+      "purchaseDate": "Aankoopdatum",
+      "renewalDate": "Hernuwingsdatum",
+      "statuses": {
+        "ACTIVE": "Aktief",
+        "EXPIRED": "Verval",
+        "CANCELLED": "Gekanselleer"
+      },
+      "noneYet": "Nog geen sagtewarelisensies aangeteken nie.",
+      "confirmDelete": "Verwyder hierdie sagtewarelisensie?",
+      "summaryExpiringSoon": "Hernu binne 90 dae"
+    },
+    "backups": {
+      "new": "+ Nuwe rugsteunrekord",
+      "newTitle": "Nuwe rugsteunrekord",
+      "editTitle": "Wysig rugsteunrekord",
+      "systemName": "Stelselnaam",
+      "schedule": "Skedule",
+      "schedulePlaceholder": "bv. Daagliks 02:00",
+      "retentionDays": "Retensie (dae)",
+      "lastRunAt": "Laaste loop",
+      "lastRunStatus": "Status van laaste loop",
+      "runStatuses": {
+        "SUCCESS": "Suksesvol",
+        "FAILED": "Misluk",
+        "PARTIAL": "Gedeeltelik",
+        "NOT_RUN": "Nie uitgevoer nie"
+      },
+      "lastDrTestDate": "Laaste RP-toetsdatum",
+      "lastDrTestResult": "Uitslag van laaste RP-toets",
+      "drTestResults": {
+        "PASSED": "Geslaag",
+        "FAILED": "Gedruip",
+        "NOT_TESTED": "Nie getoets nie"
+      },
+      "noneYet": "Nog geen rugsteunrekords opgestel nie.",
+      "confirmDelete": "Verwyder hierdie rugsteunrekord?",
+      "summaryFailed": "Misluk laaste loop",
+      "summaryNotTested": "RP nie getoets nie"
+    },
+    "incidents": {
+      "new": "+ Nuwe insident",
+      "newTitle": "Nuwe sekuriteitsinsident",
+      "editTitle": "Wysig sekuriteitsinsident",
+      "title": "Titel",
+      "incidentType": "Insidenttipe",
+      "incidentTypes": {
+        "PHISHING": "Uitvissing",
+        "MALWARE": "Kwaadwillige sagteware",
+        "UNAUTHORIZED_ACCESS": "Ongemagtigde toegang",
+        "DATA_BREACH": "Data-oortreding",
+        "DENIAL_OF_SERVICE": "Diensweiering",
+        "VULNERABILITY": "Kwesbaarheid",
+        "OTHER": "Ander"
+      },
+      "severity": "Erns",
+      "affectedSystems": "Geaffekteerde stelsels",
+      "detectedAt": "Opgespoor",
+      "remediation": "Regstelling",
+      "reportedByName": "Aangemeld deur",
+      "statuses": {
+        "OPEN": "Oop",
+        "INVESTIGATING": "Ondersoek",
+        "CONTAINED": "Bevat",
+        "RESOLVED": "Opgelos"
+      },
+      "noneYet": "Nog geen sekuriteitsinsidente aangeteken nie.",
+      "confirmDelete": "Verwyder hierdie sekuriteitsinsident?",
+      "summaryOpen": "Oop / Ondersoek",
+      "summaryCritical": "Onopgeloste kritieke"
+    },
+    "changes": {
+      "new": "+ Nuwe veranderingsversoek",
+      "newTitle": "Nuwe veranderingsversoek",
+      "editTitle": "Wysig veranderingsversoek",
+      "title": "Titel",
+      "changeType": "Veranderingstipe",
+      "changeTypes": {
+        "STANDARD": "Standaard",
+        "NORMAL": "Normaal",
+        "EMERGENCY": "Noodgeval"
+      },
+      "systemAffected": "Geaffekteerde stelsel",
+      "riskLevel": "Risikovlak",
+      "scheduledDate": "Geskeduleerde datum",
+      "implementedDate": "Geïmplementeerde datum",
+      "rollbackPlan": "Terugrolplan",
+      "outcome": "Uitkoms",
+      "statuses": {
+        "PLANNED": "Beplan",
+        "APPROVED": "Goedgekeur",
+        "IN_PROGRESS": "In proses",
+        "COMPLETED": "Voltooi",
+        "ROLLED_BACK": "Teruggerol",
+        "CANCELLED": "Gekanselleer"
+      },
+      "noneYet": "Nog geen veranderingsversoeke aangeteken nie.",
+      "confirmDelete": "Verwyder hierdie veranderingsversoek?",
+      "summaryPlanned": "Beplan",
+      "summaryHighRisk": "Hoë risiko (oop)"
+    },
+    "vendors": {
+      "new": "+ Nuwe verskafferkontrak",
+      "newTitle": "Nuwe verskafferkontrak",
+      "editTitle": "Wysig verskafferkontrak",
+      "vendorName": "Verskaffernaam",
+      "serviceDescription": "Diensbeskrywing",
+      "contactName": "Kontaknaam",
+      "contactEmail": "Kontak-e-pos",
+      "annualCost": "Jaarlikse koste",
+      "statuses": {
+        "ACTIVE": "Aktief",
+        "EXPIRED": "Verval",
+        "CANCELLED": "Gekanselleer"
+      },
+      "startDate": "Begindatum",
+      "renewalDate": "Hernuwingsdatum",
+      "ownerName": "Interne eienaar",
+      "noneYet": "Nog geen IT-verskafferkontrakte aangeteken nie.",
+      "confirmDelete": "Verwyder hierdie verskafferkontrak?",
+      "summaryExpiringSoon": "Hernu binne 90 dae",
+      "summaryTotalAnnualCost": "Aktiewe jaarlikse besteding"
+    },
+    "access": {
+      "new": "+ Nuwe toegangsversoek",
+      "newTitle": "Nuwe toegangsversoek",
+      "editTitle": "Wysig toegangsversoek",
+      "subjectName": "Persoon",
+      "systemName": "Stelsel",
+      "accessLevel": "Toegangsvlak",
+      "requestType": "Versoektipe",
+      "requestTypes": {
+        "GRANT": "Verleen",
+        "MODIFY": "Wysig",
+        "REVOKE": "Herroep"
+      },
+      "statuses": {
+        "REQUESTED": "Versoek",
+        "APPROVED": "Goedgekeur",
+        "PROVISIONED": "Voorsien",
+        "DENIED": "Geweier",
+        "REVOKED": "Herroep"
+      },
+      "requestedDate": "Versoek",
+      "noneYet": "Nog geen toegangsversoeke aangeteken nie.",
+      "confirmDelete": "Verwyder hierdie toegangsversoek?",
+      "summaryPending": "Hangende versoeke"
+    }
   },
   "budgetPlanning": {
     "nav": "Begrotingsbeplanning",

@@ -3901,7 +3901,177 @@
     "confirmDeleteTicket": "Delete this ticket?",
     "startProgress": "Start progress",
     "markResolved": "Mark resolved",
-    "markClosed": "Close ticket"
+    "markClosed": "Close ticket",
+    "tabLicenses": "Software Licenses",
+    "tabBackups": "Backup & DR",
+    "tabIncidents": "Security Incidents",
+    "tabChanges": "Change & Deployment",
+    "tabVendors": "Vendors & Contracts",
+    "tabAccess": "Access Requests",
+    "licenses": {
+      "new": "+ New License",
+      "newTitle": "New Software License",
+      "editTitle": "Edit Software License",
+      "productName": "Product name",
+      "vendor": "Vendor",
+      "seatsTotal": "Seats (total)",
+      "seatsUsed": "Seats (used)",
+      "seats": "Seats",
+      "cost": "Cost",
+      "billingCycle": "Billing cycle",
+      "billingCycles": {
+        "MONTHLY": "Monthly",
+        "ANNUAL": "Annual",
+        "ONE_TIME": "One-time",
+        "OTHER": "Other"
+      },
+      "purchaseDate": "Purchase date",
+      "renewalDate": "Renewal date",
+      "statuses": {
+        "ACTIVE": "Active",
+        "EXPIRED": "Expired",
+        "CANCELLED": "Cancelled"
+      },
+      "noneYet": "No software licenses recorded yet.",
+      "confirmDelete": "Delete this software license?",
+      "summaryExpiringSoon": "Renewing Within 90 Days"
+    },
+    "backups": {
+      "new": "+ New Backup Record",
+      "newTitle": "New Backup Record",
+      "editTitle": "Edit Backup Record",
+      "systemName": "System name",
+      "schedule": "Schedule",
+      "schedulePlaceholder": "e.g. Daily 02:00",
+      "retentionDays": "Retention (days)",
+      "lastRunAt": "Last run",
+      "lastRunStatus": "Last run status",
+      "runStatuses": {
+        "SUCCESS": "Success",
+        "FAILED": "Failed",
+        "PARTIAL": "Partial",
+        "NOT_RUN": "Not run"
+      },
+      "lastDrTestDate": "Last DR test date",
+      "lastDrTestResult": "Last DR test result",
+      "drTestResults": {
+        "PASSED": "Passed",
+        "FAILED": "Failed",
+        "NOT_TESTED": "Not tested"
+      },
+      "noneYet": "No backup records set up yet.",
+      "confirmDelete": "Delete this backup record?",
+      "summaryFailed": "Failed Last Run",
+      "summaryNotTested": "DR Not Tested"
+    },
+    "incidents": {
+      "new": "+ New Incident",
+      "newTitle": "New Security Incident",
+      "editTitle": "Edit Security Incident",
+      "title": "Title",
+      "incidentType": "Incident type",
+      "incidentTypes": {
+        "PHISHING": "Phishing",
+        "MALWARE": "Malware",
+        "UNAUTHORIZED_ACCESS": "Unauthorized access",
+        "DATA_BREACH": "Data breach",
+        "DENIAL_OF_SERVICE": "Denial of service",
+        "VULNERABILITY": "Vulnerability",
+        "OTHER": "Other"
+      },
+      "severity": "Severity",
+      "affectedSystems": "Affected systems",
+      "detectedAt": "Detected",
+      "remediation": "Remediation",
+      "reportedByName": "Reported by",
+      "statuses": {
+        "OPEN": "Open",
+        "INVESTIGATING": "Investigating",
+        "CONTAINED": "Contained",
+        "RESOLVED": "Resolved"
+      },
+      "noneYet": "No security incidents logged yet.",
+      "confirmDelete": "Delete this security incident?",
+      "summaryOpen": "Open / Investigating",
+      "summaryCritical": "Unresolved Critical"
+    },
+    "changes": {
+      "new": "+ New Change Request",
+      "newTitle": "New Change Request",
+      "editTitle": "Edit Change Request",
+      "title": "Title",
+      "changeType": "Change type",
+      "changeTypes": {
+        "STANDARD": "Standard",
+        "NORMAL": "Normal",
+        "EMERGENCY": "Emergency"
+      },
+      "systemAffected": "System affected",
+      "riskLevel": "Risk level",
+      "scheduledDate": "Scheduled date",
+      "implementedDate": "Implemented date",
+      "rollbackPlan": "Rollback plan",
+      "outcome": "Outcome",
+      "statuses": {
+        "PLANNED": "Planned",
+        "APPROVED": "Approved",
+        "IN_PROGRESS": "In progress",
+        "COMPLETED": "Completed",
+        "ROLLED_BACK": "Rolled back",
+        "CANCELLED": "Cancelled"
+      },
+      "noneYet": "No change requests logged yet.",
+      "confirmDelete": "Delete this change request?",
+      "summaryPlanned": "Planned",
+      "summaryHighRisk": "High Risk (Open)"
+    },
+    "vendors": {
+      "new": "+ New Vendor Contract",
+      "newTitle": "New Vendor Contract",
+      "editTitle": "Edit Vendor Contract",
+      "vendorName": "Vendor name",
+      "serviceDescription": "Service description",
+      "contactName": "Contact name",
+      "contactEmail": "Contact email",
+      "annualCost": "Annual cost",
+      "statuses": {
+        "ACTIVE": "Active",
+        "EXPIRED": "Expired",
+        "CANCELLED": "Cancelled"
+      },
+      "startDate": "Start date",
+      "renewalDate": "Renewal date",
+      "ownerName": "Internal owner",
+      "noneYet": "No IT vendor contracts recorded yet.",
+      "confirmDelete": "Delete this vendor contract?",
+      "summaryExpiringSoon": "Renewing Within 90 Days",
+      "summaryTotalAnnualCost": "Active Annual Spend"
+    },
+    "access": {
+      "new": "+ New Access Request",
+      "newTitle": "New Access Request",
+      "editTitle": "Edit Access Request",
+      "subjectName": "Person",
+      "systemName": "System",
+      "accessLevel": "Access level",
+      "requestType": "Request type",
+      "requestTypes": {
+        "GRANT": "Grant",
+        "MODIFY": "Modify",
+        "REVOKE": "Revoke"
+      },
+      "statuses": {
+        "REQUESTED": "Requested",
+        "APPROVED": "Approved",
+        "PROVISIONED": "Provisioned",
+        "DENIED": "Denied",
+        "REVOKED": "Revoked"
+      },
+      "requestedDate": "Requested",
+      "noneYet": "No access requests logged yet.",
+      "confirmDelete": "Delete this access request?",
+      "summaryPending": "Pending Requests"
+    }
   },
   "budgetPlanning": {
     "nav": "Budget Planning",

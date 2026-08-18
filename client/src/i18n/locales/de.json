@@ -3901,7 +3901,177 @@
     "confirmDeleteTicket": "Dieses Ticket löschen?",
     "startProgress": "Bearbeitung starten",
     "markResolved": "Als gelöst markieren",
-    "markClosed": "Ticket schließen"
+    "markClosed": "Ticket schließen",
+    "tabLicenses": "Softwarelizenzen",
+    "tabBackups": "Backup & Notfallwiederherstellung",
+    "tabIncidents": "Sicherheitsvorfälle",
+    "tabChanges": "Änderungen & Deployments",
+    "tabVendors": "Anbieter & Verträge",
+    "tabAccess": "Zugriffsanfragen",
+    "licenses": {
+      "new": "+ Neue Lizenz",
+      "newTitle": "Neue Softwarelizenz",
+      "editTitle": "Softwarelizenz bearbeiten",
+      "productName": "Produktname",
+      "vendor": "Anbieter",
+      "seatsTotal": "Plätze (gesamt)",
+      "seatsUsed": "Plätze (belegt)",
+      "seats": "Plätze",
+      "cost": "Kosten",
+      "billingCycle": "Abrechnungszyklus",
+      "billingCycles": {
+        "MONTHLY": "Monatlich",
+        "ANNUAL": "Jährlich",
+        "ONE_TIME": "Einmalig",
+        "OTHER": "Sonstiges"
+      },
+      "purchaseDate": "Kaufdatum",
+      "renewalDate": "Verlängerungsdatum",
+      "statuses": {
+        "ACTIVE": "Aktiv",
+        "EXPIRED": "Abgelaufen",
+        "CANCELLED": "Gekündigt"
+      },
+      "noneYet": "Noch keine Softwarelizenzen erfasst.",
+      "confirmDelete": "Diese Softwarelizenz löschen?",
+      "summaryExpiringSoon": "Verlängerung in 90 Tagen"
+    },
+    "backups": {
+      "new": "+ Neuer Backup-Eintrag",
+      "newTitle": "Neuer Backup-Eintrag",
+      "editTitle": "Backup-Eintrag bearbeiten",
+      "systemName": "Systemname",
+      "schedule": "Zeitplan",
+      "schedulePlaceholder": "z. B. Täglich 02:00",
+      "retentionDays": "Aufbewahrung (Tage)",
+      "lastRunAt": "Letzter Lauf",
+      "lastRunStatus": "Status des letzten Laufs",
+      "runStatuses": {
+        "SUCCESS": "Erfolgreich",
+        "FAILED": "Fehlgeschlagen",
+        "PARTIAL": "Teilweise",
+        "NOT_RUN": "Nicht ausgeführt"
+      },
+      "lastDrTestDate": "Letztes DR-Testdatum",
+      "lastDrTestResult": "Ergebnis des letzten DR-Tests",
+      "drTestResults": {
+        "PASSED": "Bestanden",
+        "FAILED": "Fehlgeschlagen",
+        "NOT_TESTED": "Nicht getestet"
+      },
+      "noneYet": "Noch keine Backup-Einträge eingerichtet.",
+      "confirmDelete": "Diesen Backup-Eintrag löschen?",
+      "summaryFailed": "Letzter Lauf fehlgeschlagen",
+      "summaryNotTested": "DR nicht getestet"
+    },
+    "incidents": {
+      "new": "+ Neuer Vorfall",
+      "newTitle": "Neuer Sicherheitsvorfall",
+      "editTitle": "Sicherheitsvorfall bearbeiten",
+      "title": "Titel",
+      "incidentType": "Vorfallstyp",
+      "incidentTypes": {
+        "PHISHING": "Phishing",
+        "MALWARE": "Malware",
+        "UNAUTHORIZED_ACCESS": "Unbefugter Zugriff",
+        "DATA_BREACH": "Datenschutzverletzung",
+        "DENIAL_OF_SERVICE": "Dienstverweigerung",
+        "VULNERABILITY": "Schwachstelle",
+        "OTHER": "Sonstiges"
+      },
+      "severity": "Schweregrad",
+      "affectedSystems": "Betroffene Systeme",
+      "detectedAt": "Erkannt",
+      "remediation": "Behebung",
+      "reportedByName": "Gemeldet von",
+      "statuses": {
+        "OPEN": "Offen",
+        "INVESTIGATING": "In Untersuchung",
+        "CONTAINED": "Eingedämmt",
+        "RESOLVED": "Gelöst"
+      },
+      "noneYet": "Noch keine Sicherheitsvorfälle erfasst.",
+      "confirmDelete": "Diesen Sicherheitsvorfall löschen?",
+      "summaryOpen": "Offen / In Untersuchung",
+      "summaryCritical": "Ungelöst kritisch"
+    },
+    "changes": {
+      "new": "+ Neuer Änderungsantrag",
+      "newTitle": "Neuer Änderungsantrag",
+      "editTitle": "Änderungsantrag bearbeiten",
+      "title": "Titel",
+      "changeType": "Änderungstyp",
+      "changeTypes": {
+        "STANDARD": "Standard",
+        "NORMAL": "Normal",
+        "EMERGENCY": "Notfall"
+      },
+      "systemAffected": "Betroffenes System",
+      "riskLevel": "Risikostufe",
+      "scheduledDate": "Geplantes Datum",
+      "implementedDate": "Umsetzungsdatum",
+      "rollbackPlan": "Rollback-Plan",
+      "outcome": "Ergebnis",
+      "statuses": {
+        "PLANNED": "Geplant",
+        "APPROVED": "Genehmigt",
+        "IN_PROGRESS": "In Bearbeitung",
+        "COMPLETED": "Abgeschlossen",
+        "ROLLED_BACK": "Zurückgesetzt",
+        "CANCELLED": "Storniert"
+      },
+      "noneYet": "Noch keine Änderungsanträge erfasst.",
+      "confirmDelete": "Diesen Änderungsantrag löschen?",
+      "summaryPlanned": "Geplant",
+      "summaryHighRisk": "Hohes Risiko (offen)"
+    },
+    "vendors": {
+      "new": "+ Neuer Anbietervertrag",
+      "newTitle": "Neuer Anbietervertrag",
+      "editTitle": "Anbietervertrag bearbeiten",
+      "vendorName": "Anbietername",
+      "serviceDescription": "Leistungsbeschreibung",
+      "contactName": "Kontaktname",
+      "contactEmail": "Kontakt-E-Mail",
+      "annualCost": "Jahreskosten",
+      "statuses": {
+        "ACTIVE": "Aktiv",
+        "EXPIRED": "Abgelaufen",
+        "CANCELLED": "Storniert"
+      },
+      "startDate": "Startdatum",
+      "renewalDate": "Verlängerungsdatum",
+      "ownerName": "Interner Verantwortlicher",
+      "noneYet": "Noch keine IT-Anbieterverträge erfasst.",
+      "confirmDelete": "Diesen Anbietervertrag löschen?",
+      "summaryExpiringSoon": "Verlängerung in 90 Tagen",
+      "summaryTotalAnnualCost": "Aktive Jahresausgaben"
+    },
+    "access": {
+      "new": "+ Neue Zugriffsanfrage",
+      "newTitle": "Neue Zugriffsanfrage",
+      "editTitle": "Zugriffsanfrage bearbeiten",
+      "subjectName": "Person",
+      "systemName": "System",
+      "accessLevel": "Zugriffsebene",
+      "requestType": "Anfragetyp",
+      "requestTypes": {
+        "GRANT": "Gewähren",
+        "MODIFY": "Ändern",
+        "REVOKE": "Entziehen"
+      },
+      "statuses": {
+        "REQUESTED": "Angefragt",
+        "APPROVED": "Genehmigt",
+        "PROVISIONED": "Bereitgestellt",
+        "DENIED": "Abgelehnt",
+        "REVOKED": "Entzogen"
+      },
+      "requestedDate": "Angefragt",
+      "noneYet": "Noch keine Zugriffsanfragen erfasst.",
+      "confirmDelete": "Diese Zugriffsanfrage löschen?",
+      "summaryPending": "Ausstehende Anfragen"
+    }
   },
   "budgetPlanning": {
     "nav": "Budgetplanung",

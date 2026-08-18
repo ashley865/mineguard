@@ -41,6 +41,12 @@ export const AUDITED_MODELS = new Set([
   "BudgetPlan",
   "ToolboxTalk",
   "RegulatorySubmission",
+  "ITSoftwareLicense",
+  "ITBackupRecord",
+  "ITSecurityIncident",
+  "ITChangeRequest",
+  "ITVendorContract",
+  "ITAccessRequest",
 ]);
 
 const AUDITED_OPERATIONS = new Set(["create", "update", "delete", "upsert"]);

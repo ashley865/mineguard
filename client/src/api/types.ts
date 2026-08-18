@@ -3461,6 +3461,121 @@ export interface ITTicket {
   createdAt: string;
 }
 
+export type ITLicenseStatus = "ACTIVE" | "EXPIRED" | "CANCELLED";
+export type ITBillingCycle = "MONTHLY" | "ANNUAL" | "ONE_TIME" | "OTHER";
+
+export interface ITSoftwareLicense {
+  id: string;
+  productName: string;
+  vendor?: string | null;
+  seatsTotal: number;
+  seatsUsed: number;
+  cost?: number | null;
+  currency: string;
+  billingCycle: ITBillingCycle;
+  status: ITLicenseStatus;
+  purchaseDate?: string | null;
+  renewalDate?: string | null;
+  notes?: string | null;
+  createdBy?: { id: string; name: string } | null;
+  createdAt: string;
+}
+
+export type ITBackupRunStatus = "SUCCESS" | "FAILED" | "PARTIAL" | "NOT_RUN";
+export type ITDrTestResult = "PASSED" | "FAILED" | "NOT_TESTED";
+
+export interface ITBackupRecord {
+  id: string;
+  systemName: string;
+  schedule?: string | null;
+  retentionDays?: number | null;
+  lastRunAt?: string | null;
+  lastRunStatus: ITBackupRunStatus;
+  lastDrTestDate?: string | null;
+  lastDrTestResult: ITDrTestResult;
+  notes?: string | null;
+  createdBy?: { id: string; name: string } | null;
+  createdAt: string;
+}
+
+export type ITIncidentType = "PHISHING" | "MALWARE" | "UNAUTHORIZED_ACCESS" | "DATA_BREACH" | "DENIAL_OF_SERVICE" | "VULNERABILITY" | "OTHER";
+export type ITIncidentSeverity = "LOW" | "MEDIUM" | "HIGH" | "CRITICAL";
+export type ITIncidentStatus = "OPEN" | "INVESTIGATING" | "CONTAINED" | "RESOLVED";
+
+export interface ITSecurityIncident {
+  id: string;
+  title: string;
+  incidentType: ITIncidentType;
+  severity: ITIncidentSeverity;
+  status: ITIncidentStatus;
+  description: string;
+  affectedSystems?: string | null;
+  detectedAt: string;
+  resolvedAt?: string | null;
+  remediation?: string | null;
+  reportedByName?: string | null;
+  createdBy?: { id: string; name: string } | null;
+  createdAt: string;
+}
+
+export type ITChangeType = "STANDARD" | "NORMAL" | "EMERGENCY";
+export type ITChangeRisk = "LOW" | "MEDIUM" | "HIGH";
+export type ITChangeStatus = "PLANNED" | "APPROVED" | "IN_PROGRESS" | "COMPLETED" | "ROLLED_BACK" | "CANCELLED";
+
+export interface ITChangeRequest {
+  id: string;
+  title: string;
+  changeType: ITChangeType;
+  systemAffected?: string | null;
+  description: string;
+  riskLevel: ITChangeRisk;
+  status: ITChangeStatus;
+  scheduledDate?: string | null;
+  implementedDate?: string | null;
+  rollbackPlan?: string | null;
+  outcome?: string | null;
+  approvedBy?: { id: string; name: string } | null;
+  createdBy?: { id: string; name: string } | null;
+  createdAt: string;
+}
+
+export type ITVendorContractStatus = "ACTIVE" | "EXPIRED" | "CANCELLED";
+
+export interface ITVendorContract {
+  id: string;
+  vendorName: string;
+  serviceDescription: string;
+  contactName?: string | null;
+  contactEmail?: string | null;
+  annualCost?: number | null;
+  currency: string;
+  status: ITVendorContractStatus;
+  startDate?: string | null;
+  renewalDate?: string | null;
+  ownerName?: string | null;
+  notes?: string | null;
+  createdBy?: { id: string; name: string } | null;
+  createdAt: string;
+}
+
+export type ITAccessRequestType = "GRANT" | "MODIFY" | "REVOKE";
+export type ITAccessRequestStatus = "REQUESTED" | "APPROVED" | "PROVISIONED" | "DENIED" | "REVOKED";
+
+export interface ITAccessRequest {
+  id: string;
+  subjectName: string;
+  systemName: string;
+  accessLevel?: string | null;
+  requestType: ITAccessRequestType;
+  status: ITAccessRequestStatus;
+  requestedDate: string;
+  actionedDate?: string | null;
+  approvedBy?: { id: string; name: string } | null;
+  notes?: string | null;
+  createdBy?: { id: string; name: string } | null;
+  createdAt: string;
+}
+
 export interface BudgetPlan {
   id: string;
   siteId?: string | null;

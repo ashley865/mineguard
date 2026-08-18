@@ -3901,7 +3901,177 @@
     "confirmDeleteTicket": "¿Eliminar este ticket?",
     "startProgress": "Iniciar progreso",
     "markResolved": "Marcar como resuelto",
-    "markClosed": "Cerrar ticket"
+    "markClosed": "Cerrar ticket",
+    "tabLicenses": "Licencias de software",
+    "tabBackups": "Copias de seguridad y RD",
+    "tabIncidents": "Incidentes de seguridad",
+    "tabChanges": "Cambios y despliegues",
+    "tabVendors": "Proveedores y contratos",
+    "tabAccess": "Solicitudes de acceso",
+    "licenses": {
+      "new": "+ Nueva licencia",
+      "newTitle": "Nueva licencia de software",
+      "editTitle": "Editar licencia de software",
+      "productName": "Nombre del producto",
+      "vendor": "Proveedor",
+      "seatsTotal": "Asientos (total)",
+      "seatsUsed": "Asientos (usados)",
+      "seats": "Asientos",
+      "cost": "Costo",
+      "billingCycle": "Ciclo de facturación",
+      "billingCycles": {
+        "MONTHLY": "Mensual",
+        "ANNUAL": "Anual",
+        "ONE_TIME": "Pago único",
+        "OTHER": "Otro"
+      },
+      "purchaseDate": "Fecha de compra",
+      "renewalDate": "Fecha de renovación",
+      "statuses": {
+        "ACTIVE": "Activa",
+        "EXPIRED": "Vencida",
+        "CANCELLED": "Cancelada"
+      },
+      "noneYet": "Aún no se han registrado licencias de software.",
+      "confirmDelete": "¿Eliminar esta licencia de software?",
+      "summaryExpiringSoon": "Renuevan en 90 días"
+    },
+    "backups": {
+      "new": "+ Nuevo registro de respaldo",
+      "newTitle": "Nuevo registro de respaldo",
+      "editTitle": "Editar registro de respaldo",
+      "systemName": "Nombre del sistema",
+      "schedule": "Programación",
+      "schedulePlaceholder": "p. ej. Diario 02:00",
+      "retentionDays": "Retención (días)",
+      "lastRunAt": "Última ejecución",
+      "lastRunStatus": "Estado de la última ejecución",
+      "runStatuses": {
+        "SUCCESS": "Exitoso",
+        "FAILED": "Fallido",
+        "PARTIAL": "Parcial",
+        "NOT_RUN": "Sin ejecutar"
+      },
+      "lastDrTestDate": "Última prueba de RD",
+      "lastDrTestResult": "Resultado de última prueba de RD",
+      "drTestResults": {
+        "PASSED": "Aprobada",
+        "FAILED": "Fallida",
+        "NOT_TESTED": "Sin probar"
+      },
+      "noneYet": "Aún no hay registros de respaldo configurados.",
+      "confirmDelete": "¿Eliminar este registro de respaldo?",
+      "summaryFailed": "Fallaron última ejecución",
+      "summaryNotTested": "RD sin probar"
+    },
+    "incidents": {
+      "new": "+ Nuevo incidente",
+      "newTitle": "Nuevo incidente de seguridad",
+      "editTitle": "Editar incidente de seguridad",
+      "title": "Título",
+      "incidentType": "Tipo de incidente",
+      "incidentTypes": {
+        "PHISHING": "Phishing",
+        "MALWARE": "Malware",
+        "UNAUTHORIZED_ACCESS": "Acceso no autorizado",
+        "DATA_BREACH": "Filtración de datos",
+        "DENIAL_OF_SERVICE": "Denegación de servicio",
+        "VULNERABILITY": "Vulnerabilidad",
+        "OTHER": "Otro"
+      },
+      "severity": "Severidad",
+      "affectedSystems": "Sistemas afectados",
+      "detectedAt": "Detectado",
+      "remediation": "Remediación",
+      "reportedByName": "Reportado por",
+      "statuses": {
+        "OPEN": "Abierto",
+        "INVESTIGATING": "Investigando",
+        "CONTAINED": "Contenido",
+        "RESOLVED": "Resuelto"
+      },
+      "noneYet": "Aún no se han registrado incidentes de seguridad.",
+      "confirmDelete": "¿Eliminar este incidente de seguridad?",
+      "summaryOpen": "Abiertos / Investigando",
+      "summaryCritical": "Críticos sin resolver"
+    },
+    "changes": {
+      "new": "+ Nueva solicitud de cambio",
+      "newTitle": "Nueva solicitud de cambio",
+      "editTitle": "Editar solicitud de cambio",
+      "title": "Título",
+      "changeType": "Tipo de cambio",
+      "changeTypes": {
+        "STANDARD": "Estándar",
+        "NORMAL": "Normal",
+        "EMERGENCY": "Emergencia"
+      },
+      "systemAffected": "Sistema afectado",
+      "riskLevel": "Nivel de riesgo",
+      "scheduledDate": "Fecha programada",
+      "implementedDate": "Fecha implementada",
+      "rollbackPlan": "Plan de reversión",
+      "outcome": "Resultado",
+      "statuses": {
+        "PLANNED": "Planificado",
+        "APPROVED": "Aprobado",
+        "IN_PROGRESS": "En curso",
+        "COMPLETED": "Completado",
+        "ROLLED_BACK": "Revertido",
+        "CANCELLED": "Cancelado"
+      },
+      "noneYet": "Aún no se han registrado solicitudes de cambio.",
+      "confirmDelete": "¿Eliminar esta solicitud de cambio?",
+      "summaryPlanned": "Planificados",
+      "summaryHighRisk": "Alto riesgo (abiertos)"
+    },
+    "vendors": {
+      "new": "+ Nuevo contrato de proveedor",
+      "newTitle": "Nuevo contrato de proveedor",
+      "editTitle": "Editar contrato de proveedor",
+      "vendorName": "Nombre del proveedor",
+      "serviceDescription": "Descripción del servicio",
+      "contactName": "Nombre de contacto",
+      "contactEmail": "Correo de contacto",
+      "annualCost": "Costo anual",
+      "statuses": {
+        "ACTIVE": "Activo",
+        "EXPIRED": "Vencido",
+        "CANCELLED": "Cancelado"
+      },
+      "startDate": "Fecha de inicio",
+      "renewalDate": "Fecha de renovación",
+      "ownerName": "Propietario interno",
+      "noneYet": "Aún no se han registrado contratos de proveedores de TI.",
+      "confirmDelete": "¿Eliminar este contrato de proveedor?",
+      "summaryExpiringSoon": "Renuevan en 90 días",
+      "summaryTotalAnnualCost": "Gasto anual activo"
+    },
+    "access": {
+      "new": "+ Nueva solicitud de acceso",
+      "newTitle": "Nueva solicitud de acceso",
+      "editTitle": "Editar solicitud de acceso",
+      "subjectName": "Persona",
+      "systemName": "Sistema",
+      "accessLevel": "Nivel de acceso",
+      "requestType": "Tipo de solicitud",
+      "requestTypes": {
+        "GRANT": "Otorgar",
+        "MODIFY": "Modificar",
+        "REVOKE": "Revocar"
+      },
+      "statuses": {
+        "REQUESTED": "Solicitado",
+        "APPROVED": "Aprobado",
+        "PROVISIONED": "Aprovisionado",
+        "DENIED": "Denegado",
+        "REVOKED": "Revocado"
+      },
+      "requestedDate": "Solicitado",
+      "noneYet": "Aún no se han registrado solicitudes de acceso.",
+      "confirmDelete": "¿Eliminar esta solicitud de acceso?",
+      "summaryPending": "Solicitudes pendientes"
+    }
   },
   "budgetPlanning": {
     "nav": "Planificación de Presupuesto",

@@ -3901,7 +3901,177 @@
     "confirmDeleteTicket": "Supprimer ce ticket ?",
     "startProgress": "Démarrer le traitement",
     "markResolved": "Marquer comme résolu",
-    "markClosed": "Fermer le ticket"
+    "markClosed": "Fermer le ticket",
+    "tabLicenses": "Licences logicielles",
+    "tabBackups": "Sauvegarde et PRA",
+    "tabIncidents": "Incidents de sécurité",
+    "tabChanges": "Changements et déploiements",
+    "tabVendors": "Fournisseurs et contrats",
+    "tabAccess": "Demandes d'accès",
+    "licenses": {
+      "new": "+ Nouvelle licence",
+      "newTitle": "Nouvelle licence logicielle",
+      "editTitle": "Modifier la licence logicielle",
+      "productName": "Nom du produit",
+      "vendor": "Fournisseur",
+      "seatsTotal": "Sièges (total)",
+      "seatsUsed": "Sièges (utilisés)",
+      "seats": "Sièges",
+      "cost": "Coût",
+      "billingCycle": "Cycle de facturation",
+      "billingCycles": {
+        "MONTHLY": "Mensuel",
+        "ANNUAL": "Annuel",
+        "ONE_TIME": "Unique",
+        "OTHER": "Autre"
+      },
+      "purchaseDate": "Date d'achat",
+      "renewalDate": "Date de renouvellement",
+      "statuses": {
+        "ACTIVE": "Active",
+        "EXPIRED": "Expirée",
+        "CANCELLED": "Annulée"
+      },
+      "noneYet": "Aucune licence logicielle enregistrée pour le moment.",
+      "confirmDelete": "Supprimer cette licence logicielle ?",
+      "summaryExpiringSoon": "Renouvellement sous 90 jours"
+    },
+    "backups": {
+      "new": "+ Nouvel enregistrement de sauvegarde",
+      "newTitle": "Nouvel enregistrement de sauvegarde",
+      "editTitle": "Modifier l'enregistrement de sauvegarde",
+      "systemName": "Nom du système",
+      "schedule": "Planification",
+      "schedulePlaceholder": "ex. Quotidien 02:00",
+      "retentionDays": "Rétention (jours)",
+      "lastRunAt": "Dernière exécution",
+      "lastRunStatus": "Statut de la dernière exécution",
+      "runStatuses": {
+        "SUCCESS": "Réussie",
+        "FAILED": "Échouée",
+        "PARTIAL": "Partielle",
+        "NOT_RUN": "Non exécutée"
+      },
+      "lastDrTestDate": "Date du dernier test PRA",
+      "lastDrTestResult": "Résultat du dernier test PRA",
+      "drTestResults": {
+        "PASSED": "Réussi",
+        "FAILED": "Échoué",
+        "NOT_TESTED": "Non testé"
+      },
+      "noneYet": "Aucun enregistrement de sauvegarde configuré pour le moment.",
+      "confirmDelete": "Supprimer cet enregistrement de sauvegarde ?",
+      "summaryFailed": "Échec dernière exécution",
+      "summaryNotTested": "PRA non testé"
+    },
+    "incidents": {
+      "new": "+ Nouvel incident",
+      "newTitle": "Nouvel incident de sécurité",
+      "editTitle": "Modifier l'incident de sécurité",
+      "title": "Titre",
+      "incidentType": "Type d'incident",
+      "incidentTypes": {
+        "PHISHING": "Hameçonnage",
+        "MALWARE": "Logiciel malveillant",
+        "UNAUTHORIZED_ACCESS": "Accès non autorisé",
+        "DATA_BREACH": "Violation de données",
+        "DENIAL_OF_SERVICE": "Déni de service",
+        "VULNERABILITY": "Vulnérabilité",
+        "OTHER": "Autre"
+      },
+      "severity": "Gravité",
+      "affectedSystems": "Systèmes affectés",
+      "detectedAt": "Détecté",
+      "remediation": "Remédiation",
+      "reportedByName": "Signalé par",
+      "statuses": {
+        "OPEN": "Ouvert",
+        "INVESTIGATING": "En investigation",
+        "CONTAINED": "Contenu",
+        "RESOLVED": "Résolu"
+      },
+      "noneYet": "Aucun incident de sécurité consigné pour le moment.",
+      "confirmDelete": "Supprimer cet incident de sécurité ?",
+      "summaryOpen": "Ouverts / En investigation",
+      "summaryCritical": "Critiques non résolus"
+    },
+    "changes": {
+      "new": "+ Nouvelle demande de changement",
+      "newTitle": "Nouvelle demande de changement",
+      "editTitle": "Modifier la demande de changement",
+      "title": "Titre",
+      "changeType": "Type de changement",
+      "changeTypes": {
+        "STANDARD": "Standard",
+        "NORMAL": "Normal",
+        "EMERGENCY": "Urgence"
+      },
+      "systemAffected": "Système affecté",
+      "riskLevel": "Niveau de risque",
+      "scheduledDate": "Date planifiée",
+      "implementedDate": "Date de mise en œuvre",
+      "rollbackPlan": "Plan de retour arrière",
+      "outcome": "Résultat",
+      "statuses": {
+        "PLANNED": "Planifié",
+        "APPROVED": "Approuvé",
+        "IN_PROGRESS": "En cours",
+        "COMPLETED": "Terminé",
+        "ROLLED_BACK": "Annulé (rollback)",
+        "CANCELLED": "Annulé"
+      },
+      "noneYet": "Aucune demande de changement consignée pour le moment.",
+      "confirmDelete": "Supprimer cette demande de changement ?",
+      "summaryPlanned": "Planifiés",
+      "summaryHighRisk": "Risque élevé (ouverts)"
+    },
+    "vendors": {
+      "new": "+ Nouveau contrat fournisseur",
+      "newTitle": "Nouveau contrat fournisseur",
+      "editTitle": "Modifier le contrat fournisseur",
+      "vendorName": "Nom du fournisseur",
+      "serviceDescription": "Description du service",
+      "contactName": "Nom du contact",
+      "contactEmail": "E-mail du contact",
+      "annualCost": "Coût annuel",
+      "statuses": {
+        "ACTIVE": "Actif",
+        "EXPIRED": "Expiré",
+        "CANCELLED": "Annulé"
+      },
+      "startDate": "Date de début",
+      "renewalDate": "Date de renouvellement",
+      "ownerName": "Propriétaire interne",
+      "noneYet": "Aucun contrat fournisseur informatique enregistré pour le moment.",
+      "confirmDelete": "Supprimer ce contrat fournisseur ?",
+      "summaryExpiringSoon": "Renouvellement sous 90 jours",
+      "summaryTotalAnnualCost": "Dépense annuelle active"
+    },
+    "access": {
+      "new": "+ Nouvelle demande d'accès",
+      "newTitle": "Nouvelle demande d'accès",
+      "editTitle": "Modifier la demande d'accès",
+      "subjectName": "Personne",
+      "systemName": "Système",
+      "accessLevel": "Niveau d'accès",
+      "requestType": "Type de demande",
+      "requestTypes": {
+        "GRANT": "Octroyer",
+        "MODIFY": "Modifier",
+        "REVOKE": "Révoquer"
+      },
+      "statuses": {
+        "REQUESTED": "Demandé",
+        "APPROVED": "Approuvé",
+        "PROVISIONED": "Provisionné",
+        "DENIED": "Refusé",
+        "REVOKED": "Révoqué"
+      },
+      "requestedDate": "Demandé",
+      "noneYet": "Aucune demande d'accès consignée pour le moment.",
+      "confirmDelete": "Supprimer cette demande d'accès ?",
+      "summaryPending": "Demandes en attente"
+    }
   },
   "budgetPlanning": {
     "nav": "Planification Budgétaire",
