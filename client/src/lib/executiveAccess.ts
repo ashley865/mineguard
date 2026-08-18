@@ -39,6 +39,7 @@ export const restrictedModules = [
   "/invoices",
   "/expenses",
   "/security",
+  "/cyber-command-center",
   "/ground-control",
   "/ventilation",
   "/mine-rescue",
@@ -146,7 +147,7 @@ export const executiveTitleModules: Partial<Record<ExecutiveTitle, RestrictedMod
     "/regulatory-submissions",
     "/document-acknowledgements",
   ],
-  IT_MANAGER: ["/sites", "/sensors", "/equipment", "/alerts", "/reporting", "/security", "/scanner", "/documents", "/maintenance", "/it-operations"],
+  IT_MANAGER: ["/sites", "/sensors", "/equipment", "/alerts", "/reporting", "/security", "/scanner", "/documents", "/maintenance", "/it-operations", "/cyber-command-center"],
 };
 
 export function isModuleAllowed(role: Role | undefined, title: ExecutiveTitle | null | undefined, path: string): boolean {

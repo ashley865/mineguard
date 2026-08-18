@@ -158,6 +158,7 @@ export default function Layout() {
       items: [
         ...(canUseScanner ? [{ to: "/scanner", label: t("scanner.nav") }] : []),
         { to: "/it-operations", label: t("itOperations.nav") },
+        { to: "/cyber-command-center", label: t("cyber.nav") },
         ...(canMessage ? [{ to: "/messages", label: t("messages.nav") }] : []),
         ...(canMessage ? [{ to: "/executive-requests", label: t("executiveRequests.nav") }] : []),
       ],

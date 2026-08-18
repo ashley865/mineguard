@@ -43,6 +43,7 @@ import FinancialPerformance from "./pages/FinancialPerformance";
 import ShiftHandoverLog from "./pages/ShiftHandoverLog";
 import DowntimeTracker from "./pages/DowntimeTracker";
 import ITOperations from "./pages/ITOperations";
+import CyberCommandCenter from "./pages/CyberCommandCenter";
 import BudgetPlanning from "./pages/BudgetPlanning";
 import ToolboxTalks from "./pages/ToolboxTalks";
 import RegulatorySubmissions from "./pages/RegulatorySubmissions";
@@ -127,6 +128,7 @@ export default function App() {
         <Route path="/shift-handovers" element={<ModuleRoute path="/shift-handovers"><ShiftHandoverLog /></ModuleRoute>} />
         <Route path="/downtime" element={<ModuleRoute path="/downtime"><DowntimeTracker /></ModuleRoute>} />
         <Route path="/it-operations" element={<ModuleRoute path="/it-operations"><ITOperations /></ModuleRoute>} />
+        <Route path="/cyber-command-center" element={<ModuleRoute path="/cyber-command-center"><CyberCommandCenter /></ModuleRoute>} />
         <Route path="/budget-planning" element={<ModuleRoute path="/budget-planning"><BudgetPlanning /></ModuleRoute>} />
         <Route path="/toolbox-talks" element={<ModuleRoute path="/toolbox-talks"><ToolboxTalks /></ModuleRoute>} />
         <Route path="/regulatory-submissions" element={<ModuleRoute path="/regulatory-submissions"><RegulatorySubmissions /></ModuleRoute>} />

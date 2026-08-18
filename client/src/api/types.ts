@@ -3586,6 +3586,217 @@ export interface ITAccessRequest {
   createdAt: string;
 }
 
+// --- Cybersecurity Command Center (IT Manager) ---
+
+export type CyberSeverity = "CRITICAL" | "HIGH" | "MEDIUM" | "LOW" | "INFORMATIONAL";
+export type CyberDomain = "ENDPOINT" | "IDENTITY" | "NETWORK" | "VULNERABILITY" | "EMAIL" | "BACKUP" | "OT_IOT" | "COMPLIANCE" | "OTHER";
+export type CyberAlertStatus = "NEW" | "INVESTIGATING" | "CONTAINED" | "RESOLVED" | "FALSE_POSITIVE";
+export type CyberIncidentStatus = "OPEN" | "INVESTIGATING" | "CONTAINED" | "RESOLVED";
+export type CyberEndpointDeviceType = "COMPUTER" | "SERVER" | "MOBILE" | "IOT" | "OT_EQUIPMENT";
+export type CyberEndpointAvStatus = "PROTECTED" | "OUTDATED" | "MISSING" | "DISABLED";
+export type CyberEndpointPatchStatus = "UP_TO_DATE" | "PENDING" | "OVERDUE" | "UNKNOWN";
+export type CyberEndpointEncryptionStatus = "ENCRYPTED" | "NOT_ENCRYPTED" | "UNKNOWN";
+export type CyberNetworkAssetType = "FIREWALL" | "VPN_GATEWAY" | "ROUTER_SWITCH" | "IDS_IPS" | "ROGUE_DEVICE" | "OPEN_PORT" | "SUSPICIOUS_CONNECTION";
+export type CyberNetworkAssetStatus = "SECURE" | "WARNING" | "COMPROMISED" | "UNKNOWN";
+export type CyberVulnerabilityStatus = "OPEN" | "IN_PROGRESS" | "PATCHED" | "ACCEPTED_RISK" | "FALSE_POSITIVE";
+export type CyberCompliancePolicyStatus = "COMPLIANT" | "NON_COMPLIANT" | "IN_PROGRESS" | "NOT_ASSESSED";
+export type CyberFindingStatus = "OPEN" | "IN_PROGRESS" | "RESOLVED" | "ACCEPTED_RISK";
+export type CyberLoginEventType = "LOGIN_SUCCESS" | "LOGIN_FAILED";
+
+export interface CyberEndpoint {
+  id: string;
+  hostname: string;
+  deviceType: CyberEndpointDeviceType;
+  ownerName?: string | null;
+  operatingSystem?: string | null;
+  avEdrStatus: CyberEndpointAvStatus;
+  avEdrProduct?: string | null;
+  patchStatus: CyberEndpointPatchStatus;
+  lastPatchedAt?: string | null;
+  encryptionStatus: CyberEndpointEncryptionStatus;
+  isCompromised: boolean;
+  lastSeenAt?: string | null;
+  notes?: string | null;
+  createdBy?: { id: string; name: string } | null;
+  createdAt: string;
+}
+
+export interface CyberNetworkAsset {
+  id: string;
+  assetType: CyberNetworkAssetType;
+  name: string;
+  ipAddress?: string | null;
+  status: CyberNetworkAssetStatus;
+  description?: string | null;
+  detectedAt: string;
+  resolvedAt?: string | null;
+  notes?: string | null;
+  createdBy?: { id: string; name: string } | null;
+  createdAt: string;
+}
+
+export interface CyberVulnerability {
+  id: string;
+  cveId?: string | null;
+  title: string;
+  description: string;
+  cvssScore?: number | null;
+  severity: CyberSeverity;
+  affectedAssetName?: string | null;
+  status: CyberVulnerabilityStatus;
+  discoveredAt: string;
+  remediationDeadline?: string | null;
+  assignedTo?: { id: string; name: string } | null;
+  remediatedAt?: string | null;
+  notes?: string | null;
+  createdBy?: { id: string; name: string } | null;
+  createdAt: string;
+}
+
+export interface CyberAlert {
+  id: string;
+  title: string;
+  description: string;
+  domain: CyberDomain;
+  severity: CyberSeverity;
+  status: CyberAlertStatus;
+  source?: string | null;
+  affectedAssetName?: string | null;
+  assignedTo?: { id: string; name: string } | null;
+  incidentId?: string | null;
+  incident?: { id: string; title: string } | null;
+  detectedAt: string;
+  resolvedAt?: string | null;
+  notes?: string | null;
+  createdBy?: { id: string; name: string } | null;
+  createdAt: string;
+}
+
+export interface CyberIncidentAlertSummary {
+  id: string;
+  title: string;
+  severity: CyberSeverity;
+  status: CyberAlertStatus;
+  domain: CyberDomain;
+  detectedAt: string;
+}
+
+export interface CyberIncident {
+  id: string;
+  title: string;
+  description: string;
+  severity: CyberSeverity;
+  status: CyberIncidentStatus;
+  affectedAssets?: string | null;
+  riskScore?: number | null;
+  aiSummary?: string | null;
+  assignedTo?: { id: string; name: string } | null;
+  containedAt?: string | null;
+  resolvedAt?: string | null;
+  createdBy?: { id: string; name: string } | null;
+  createdAt: string;
+  alerts: CyberIncidentAlertSummary[];
+}
+
+export interface CyberCompliancePolicy {
+  id: string;
+  name: string;
+  framework?: string | null;
+  status: CyberCompliancePolicyStatus;
+  ownerName?: string | null;
+  lastReviewedAt?: string | null;
+  nextReviewDue?: string | null;
+  notes?: string | null;
+  createdBy?: { id: string; name: string } | null;
+  createdAt: string;
+}
+
+export interface CyberAuditFinding {
+  id: string;
+  title: string;
+  description: string;
+  severity: CyberSeverity;
+  status: CyberFindingStatus;
+  policyId?: string | null;
+  policy?: { id: string; name: string } | null;
+  dueDate?: string | null;
+  resolvedAt?: string | null;
+  notes?: string | null;
+  createdBy?: { id: string; name: string } | null;
+  createdAt: string;
+}
+
+export interface CyberLoginEvent {
+  id: string;
+  eventType: CyberLoginEventType;
+  ipAddress?: string | null;
+  userAgent?: string | null;
+  flagged: boolean;
+  occurredAt: string;
+  user?: { id: string; name: string } | null;
+}
+
+export interface CyberPrivilegedAccount {
+  id: string;
+  name: string;
+  email: string;
+  role: Role;
+  title?: ExecutiveTitle | null;
+  mfaEnabled: boolean;
+}
+
+export interface CyberDormantUser {
+  id: string;
+  name: string;
+  email: string;
+  lastLoginAt?: string | null;
+}
+
+export interface CyberIdentityOverview {
+  totalUsers: number;
+  privilegedAccounts: CyberPrivilegedAccount[];
+  dormantUsers: CyberDormantUser[];
+  mfaGapCount: number;
+  recentEvents: CyberLoginEvent[];
+  accessViolations: CyberLoginEvent[];
+}
+
+export interface CyberScoreBreakdownItem {
+  label: string;
+  count: number;
+  pointsDeducted: number;
+}
+
+export interface CyberDashboard {
+  score: number;
+  scoreBreakdown: CyberScoreBreakdownItem[];
+  trend: { date: string; score: number }[];
+  trendDirection: "up" | "down" | "flat" | null;
+  activeThreats: {
+    openAlerts: number;
+    openIncidents: number;
+    criticalCount: number;
+    byAlertSeverity: Record<CyberSeverity, number>;
+    byIncidentSeverity: Record<CyberSeverity, number>;
+  };
+  endpoints: { total: number; compromised: number; unprotected: number; overduePatch: number };
+  vulnerabilities: { total: number; openBySeverity: Record<CyberSeverity, number>; overdueCritical: number; overdueHigh: number };
+  compliance: { totalPolicies: number; nonCompliantPolicies: number; openFindings: number };
+  recentAlerts: { id: string; title: string; severity: CyberSeverity; domain: CyberDomain; detectedAt: string }[];
+  recentIncidents: { id: string; title: string; severity: CyberSeverity; status: CyberIncidentStatus; createdAt: string }[];
+}
+
+export interface CyberCorrelationResult {
+  title: string;
+  description: string;
+  severity: CyberSeverity;
+  riskScore: number | null;
+  affectedAssets: string;
+  recommendedActions: string[];
+  summary: string;
+  alertIds: string[];
+}
+
 export interface BudgetPlan {
   id: string;
   siteId?: string | null;

@@ -47,6 +47,13 @@ export const AUDITED_MODELS = new Set([
   "ITChangeRequest",
   "ITVendorContract",
   "ITAccessRequest",
+  "CyberEndpoint",
+  "CyberNetworkAsset",
+  "CyberVulnerability",
+  "CyberIncident",
+  "CyberAlert",
+  "CyberCompliancePolicy",
+  "CyberAuditFinding",
 ]);
 
 const AUDITED_OPERATIONS = new Set(["create", "update", "delete", "upsert"]);

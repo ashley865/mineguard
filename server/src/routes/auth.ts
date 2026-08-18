@@ -82,6 +82,8 @@ router.post("/login", authLimiter, async (req, res) => {
     return res.status(400).json({ error: parsed.error.flatten() });
   }
   const { email, password } = parsed.data;
+  const ipAddress = req.ip;
+  const userAgent = req.headers["user-agent"];
 
   const user = await prisma.user.findUnique({ where: { email } });
   if (!user) {
@@ -89,11 +91,27 @@ router.post("/login", authLimiter, async (req, res) => {
   }
   const valid = await bcrypt.compare(password, user.passwordHash);
   if (!valid) {
+    // Feeds Identity & Access Security's "access violations" view — logged against the
+    // real account since the email did resolve to one, unlike a nonexistent-email
+    // attempt (which the rate limiter already covers and this table doesn't need to
+    // retain arbitrary attacker-supplied strings for).
+    if (user.mineId) {
+      await prisma.cyberLoginEvent
+        .create({ data: { mineId: user.mineId, userId: user.id, eventType: "LOGIN_FAILED", ipAddress, userAgent, flagged: true } })
+        .catch(() => {});
+    }
     return res.status(401).json({ error: "Invalid email or password" });
   }
   if (!user.isActive) {
     return res.status(403).json({ error: "This account has been deactivated. Contact your mine owner for access." });
   }
+
+  if (user.mineId) {
+    await prisma.cyberLoginEvent
+      .create({ data: { mineId: user.mineId, userId: user.id, eventType: "LOGIN_SUCCESS", ipAddress, userAgent } })
+      .catch(() => {});
+  }
+  await prisma.user.update({ where: { id: user.id }, data: { lastLoginAt: new Date() } }).catch(() => {});
 
   // Executives are clocked in automatically the moment they log in, rather than
   // relying on them to remember to use the header clock-in widget themselves.

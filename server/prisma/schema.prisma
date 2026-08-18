@@ -206,6 +206,11 @@ model User {
   // Set to false when an owner removes an executive: blocks login entirely rather than
   // just demoting the role, so a removed executive can't fall back to viewer access.
   isActive     Boolean         @default(true)
+  // Self-reported/admin-attested for visibility in Identity & Access Security — MineGuard
+  // does not itself implement an MFA challenge at login, so this tracks whether MFA is
+  // enforced via the mine's identity provider rather than claiming to enforce it here.
+  mfaEnabled   Boolean         @default(false)
+  lastLoginAt  DateTime?
   createdAt    DateTime        @default(now())
 
   mineId String?
@@ -328,6 +333,18 @@ model User {
   itVendorContractsCreated  ITVendorContract[]  @relation("ITVendorContractCreatedBy")
   itAccessRequestsApproved  ITAccessRequest[]   @relation("ITAccessRequestApprovedBy")
   itAccessRequestsCreated   ITAccessRequest[]   @relation("ITAccessRequestCreatedBy")
+
+  cyberEndpointsCreated        CyberEndpoint[]           @relation("CyberEndpointCreatedBy")
+  cyberNetworkAssetsCreated    CyberNetworkAsset[]       @relation("CyberNetworkAssetCreatedBy")
+  cyberVulnerabilitiesAssigned CyberVulnerability[]      @relation("CyberVulnerabilityAssignedTo")
+  cyberVulnerabilitiesCreated  CyberVulnerability[]      @relation("CyberVulnerabilityCreatedBy")
+  cyberIncidentsAssigned       CyberIncident[]           @relation("CyberIncidentAssignedTo")
+  cyberIncidentsCreated        CyberIncident[]           @relation("CyberIncidentCreatedBy")
+  cyberAlertsAssigned          CyberAlert[]              @relation("CyberAlertAssignedTo")
+  cyberAlertsCreated           CyberAlert[]              @relation("CyberAlertCreatedBy")
+  cyberCompliancePoliciesCreated CyberCompliancePolicy[] @relation("CyberCompliancePolicyCreatedBy")
+  cyberAuditFindingsCreated    CyberAuditFinding[]       @relation("CyberAuditFindingCreatedBy")
+  cyberLoginEvents             CyberLoginEvent[]         @relation("CyberLoginEventUser")
 }
 
 model UserAttendance {
@@ -1523,6 +1540,16 @@ model Mine {
   itChangeRequests    ITChangeRequest[]
   itVendorContracts   ITVendorContract[]
   itAccessRequests    ITAccessRequest[]
+
+  cyberEndpoints           CyberEndpoint[]
+  cyberNetworkAssets       CyberNetworkAsset[]
+  cyberVulnerabilities     CyberVulnerability[]
+  cyberIncidents           CyberIncident[]
+  cyberAlerts              CyberAlert[]
+  cyberCompliancePolicies  CyberCompliancePolicy[]
+  cyberAuditFindings       CyberAuditFinding[]
+  cyberLoginEvents         CyberLoginEvent[]
+  cyberScoreSnapshots      CyberScoreSnapshot[]
 }
 
 enum ExecutiveRequestStatus {
@@ -5172,4 +5199,311 @@ model VettingRecord {
   conductedBy   User?              @relation("VettingRecordConductedBy", fields: [conductedById], references: [id], onDelete: SetNull)
 
   createdAt DateTime @default(now())
+}
+
+// ---------------------------------------------------------------------------
+// Module: Cybersecurity Command Center (IT Manager)
+//
+// A SOC-style module distinct from the physical Security domain (accessControl,
+// keyManagement, patrol, SecurityIncident/SecurityInvestigation, etc.) and from
+// the lightweight itSecurityIncidents log — this is the full digital-security
+// surface: endpoints, identity, network, vulnerabilities, correlated
+// incidents/alerts, and compliance, all sharing one severity taxonomy so they
+// roll up into a single explainable security score. Named with a "Cyber" prefix
+// throughout (models, relations, routes) specifically to stay unambiguous
+// alongside the existing physical-security "Security*" models. Everything here
+// is real, IT-team-entered operational data (same as every other CRUD module in
+// the app) — there is no fabricated/demo telemetry. Live third-party threat-intel
+// feeds (Defender, VirusTotal, Shodan, etc.) are a deliberately separate,
+// not-yet-built follow-on phase.
+// ---------------------------------------------------------------------------
+
+enum CyberSeverity {
+  CRITICAL
+  HIGH
+  MEDIUM
+  LOW
+  INFORMATIONAL
+}
+
+enum CyberDomain {
+  ENDPOINT
+  IDENTITY
+  NETWORK
+  VULNERABILITY
+  EMAIL
+  BACKUP
+  OT_IOT
+  COMPLIANCE
+  OTHER
+}
+
+enum CyberAlertStatus {
+  NEW
+  INVESTIGATING
+  CONTAINED
+  RESOLVED
+  FALSE_POSITIVE
+}
+
+enum CyberIncidentStatus {
+  OPEN
+  INVESTIGATING
+  CONTAINED
+  RESOLVED
+}
+
+enum CyberEndpointDeviceType {
+  COMPUTER
+  SERVER
+  MOBILE
+  IOT
+  OT_EQUIPMENT
+}
+
+enum CyberEndpointAvStatus {
+  PROTECTED
+  OUTDATED
+  MISSING
+  DISABLED
+}
+
+enum CyberEndpointPatchStatus {
+  UP_TO_DATE
+  PENDING
+  OVERDUE
+  UNKNOWN
+}
+
+enum CyberEndpointEncryptionStatus {
+  ENCRYPTED
+  NOT_ENCRYPTED
+  UNKNOWN
+}
+
+model CyberEndpoint {
+  id               String                         @id @default(cuid())
+  mineId           String
+  mine             Mine                           @relation(fields: [mineId], references: [id], onDelete: Cascade)
+  hostname         String
+  deviceType       CyberEndpointDeviceType         @default(COMPUTER)
+  ownerName        String?
+  operatingSystem  String?
+  // Defaults are deliberately the "needs attention" state rather than a falsely
+  // reassuring one — an endpoint with unknown/unset protection should surface as a
+  // gap, not silently count as secure until someone confirms otherwise.
+  avEdrStatus      CyberEndpointAvStatus           @default(MISSING)
+  avEdrProduct     String?
+  patchStatus      CyberEndpointPatchStatus        @default(UNKNOWN)
+  lastPatchedAt    DateTime?
+  encryptionStatus CyberEndpointEncryptionStatus   @default(UNKNOWN)
+  isCompromised    Boolean                        @default(false)
+  lastSeenAt       DateTime?
+  notes            String?
+  createdById      String?
+  createdBy        User?                          @relation("CyberEndpointCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+
+  createdAt DateTime @default(now())
+}
+
+enum CyberNetworkAssetType {
+  FIREWALL
+  VPN_GATEWAY
+  ROUTER_SWITCH
+  IDS_IPS
+  ROGUE_DEVICE
+  OPEN_PORT
+  SUSPICIOUS_CONNECTION
+}
+
+enum CyberNetworkAssetStatus {
+  SECURE
+  WARNING
+  COMPROMISED
+  UNKNOWN
+}
+
+model CyberNetworkAsset {
+  id          String                   @id @default(cuid())
+  mineId      String
+  mine        Mine                     @relation(fields: [mineId], references: [id], onDelete: Cascade)
+  assetType   CyberNetworkAssetType
+  name        String
+  ipAddress   String?
+  status      CyberNetworkAssetStatus  @default(UNKNOWN)
+  description String?
+  detectedAt  DateTime                 @default(now())
+  resolvedAt  DateTime?
+  notes       String?
+  createdById String?
+  createdBy   User?                    @relation("CyberNetworkAssetCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+
+  createdAt DateTime @default(now())
+}
+
+enum CyberVulnerabilityStatus {
+  OPEN
+  IN_PROGRESS
+  PATCHED
+  ACCEPTED_RISK
+  FALSE_POSITIVE
+}
+
+model CyberVulnerability {
+  id                  String                    @id @default(cuid())
+  mineId              String
+  mine                Mine                      @relation(fields: [mineId], references: [id], onDelete: Cascade)
+  cveId               String?
+  title               String
+  description         String
+  cvssScore           Float?
+  severity            CyberSeverity             @default(MEDIUM)
+  affectedAssetName   String?
+  status              CyberVulnerabilityStatus  @default(OPEN)
+  discoveredAt        DateTime                  @default(now())
+  remediationDeadline DateTime?
+  assignedToId        String?
+  assignedTo          User?                     @relation("CyberVulnerabilityAssignedTo", fields: [assignedToId], references: [id], onDelete: SetNull)
+  remediatedAt        DateTime?
+  notes               String?
+  createdById         String?
+  createdBy           User?                     @relation("CyberVulnerabilityCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+
+  createdAt DateTime @default(now())
+}
+
+model CyberIncident {
+  id             String                @id @default(cuid())
+  mineId         String
+  mine           Mine                  @relation(fields: [mineId], references: [id], onDelete: Cascade)
+  title          String
+  description    String
+  severity       CyberSeverity         @default(MEDIUM)
+  status         CyberIncidentStatus   @default(OPEN)
+  affectedAssets String?
+  // 0-100 either set manually or by the AI correlation action below — a second,
+  // more holistic signal alongside severity, not a replacement for it.
+  riskScore      Int?
+  aiSummary      String?
+  assignedToId   String?
+  assignedTo     User?                 @relation("CyberIncidentAssignedTo", fields: [assignedToId], references: [id], onDelete: SetNull)
+  containedAt    DateTime?
+  resolvedAt     DateTime?
+  createdById    String?
+  createdBy      User?                 @relation("CyberIncidentCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+
+  alerts CyberAlert[]
+
+  createdAt DateTime @default(now())
+}
+
+model CyberAlert {
+  id                String            @id @default(cuid())
+  mineId            String
+  mine              Mine              @relation(fields: [mineId], references: [id], onDelete: Cascade)
+  title             String
+  description       String
+  domain            CyberDomain       @default(OTHER)
+  severity          CyberSeverity     @default(MEDIUM)
+  status            CyberAlertStatus  @default(NEW)
+  source            String?
+  affectedAssetName String?
+  assignedToId      String?
+  assignedTo        User?             @relation("CyberAlertAssignedTo", fields: [assignedToId], references: [id], onDelete: SetNull)
+  // Set once this alert has been correlated into a case by the AI Security Analyst
+  // (or manually) — an alert can exist standalone until then.
+  incidentId        String?
+  incident          CyberIncident?    @relation(fields: [incidentId], references: [id], onDelete: SetNull)
+  detectedAt        DateTime          @default(now())
+  resolvedAt        DateTime?
+  notes             String?
+  createdById       String?
+  createdBy         User?             @relation("CyberAlertCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+
+  createdAt DateTime @default(now())
+}
+
+enum CyberCompliancePolicyStatus {
+  COMPLIANT
+  NON_COMPLIANT
+  IN_PROGRESS
+  NOT_ASSESSED
+}
+
+model CyberCompliancePolicy {
+  id             String                        @id @default(cuid())
+  mineId         String
+  mine           Mine                          @relation(fields: [mineId], references: [id], onDelete: Cascade)
+  name           String
+  framework      String?
+  status         CyberCompliancePolicyStatus   @default(NOT_ASSESSED)
+  ownerName      String?
+  lastReviewedAt DateTime?
+  nextReviewDue  DateTime?
+  notes          String?
+  createdById    String?
+  createdBy      User?                         @relation("CyberCompliancePolicyCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+
+  findings CyberAuditFinding[]
+
+  createdAt DateTime @default(now())
+}
+
+enum CyberFindingStatus {
+  OPEN
+  IN_PROGRESS
+  RESOLVED
+  ACCEPTED_RISK
+}
+
+model CyberAuditFinding {
+  id          String                  @id @default(cuid())
+  mineId      String
+  mine        Mine                    @relation(fields: [mineId], references: [id], onDelete: Cascade)
+  title       String
+  description String
+  severity    CyberSeverity           @default(MEDIUM)
+  status      CyberFindingStatus      @default(OPEN)
+  policyId    String?
+  policy      CyberCompliancePolicy?  @relation(fields: [policyId], references: [id], onDelete: SetNull)
+  dueDate     DateTime?
+  resolvedAt  DateTime?
+  notes       String?
+  createdById String?
+  createdBy   User?                   @relation("CyberAuditFindingCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+
+  createdAt DateTime @default(now())
+}
+
+enum CyberLoginEventType {
+  LOGIN_SUCCESS
+  LOGIN_FAILED
+}
+
+// Written directly from the real /auth/login flow (see auth.ts) — not manually
+// logged — so identity security reflects actual authentication activity.
+model CyberLoginEvent {
+  id         String               @id @default(cuid())
+  mineId     String
+  mine       Mine                 @relation(fields: [mineId], references: [id], onDelete: Cascade)
+  userId     String?
+  user       User?                @relation("CyberLoginEventUser", fields: [userId], references: [id], onDelete: SetNull)
+  eventType  CyberLoginEventType
+  ipAddress  String?
+  userAgent  String?
+  flagged    Boolean              @default(false)
+  occurredAt DateTime             @default(now())
+}
+
+// One row per mine per calendar day, upserted whenever the dashboard is loaded
+// (no cron/scheduler in this app) — gives an organically-built score trend without
+// needing scheduled infrastructure.
+model CyberScoreSnapshot {
+  id           String   @id @default(cuid())
+  mineId       String
+  mine         Mine     @relation(fields: [mineId], references: [id], onDelete: Cascade)
+  score        Int
+  capturedDate DateTime
+
+  @@unique([mineId, capturedDate])
 }
