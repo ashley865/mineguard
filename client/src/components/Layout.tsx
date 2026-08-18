@@ -43,6 +43,7 @@ export default function Layout() {
   const canSeeDailyBriefing = isAdmin || ["GENERAL_MANAGER", "COO"].includes(user?.title ?? "");
   const canSeeNarrativeScan = isAdmin || ["SAFETY_MANAGER", "COMPLIANCE_OFFICER", "GENERAL_MANAGER"].includes(user?.title ?? "");
   const canSeeSafetyAssistant = isAdmin || user?.role === "SUPERVISOR" || user?.role === "EXECUTIVE";
+  const canSeeCyberCommandCenter = isAdmin || (user?.role === "EXECUTIVE" && user?.title === "IT_MANAGER");
 
   const pinnedItems = [
     user?.role === "EXECUTIVE"
@@ -158,7 +159,7 @@ export default function Layout() {
       items: [
         ...(canUseScanner ? [{ to: "/scanner", label: t("scanner.nav") }] : []),
         { to: "/it-operations", label: t("itOperations.nav") },
-        { to: "/cyber-command-center", label: t("cyber.nav") },
+        ...(canSeeCyberCommandCenter ? [{ to: "/cyber-command-center", label: t("cyber.nav") }] : []),
         ...(canMessage ? [{ to: "/messages", label: t("messages.nav") }] : []),
         ...(canMessage ? [{ to: "/executive-requests", label: t("executiveRequests.nav") }] : []),
       ],

@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
+import { Navigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { getCyberTheme } from "./cyber/cyberTheme";
 import DashboardTab from "./cyber/DashboardTab";
@@ -18,12 +19,15 @@ const THEME_STORAGE_KEY = "mineguard.cyberCommandCenter.dark";
 export default function CyberCommandCenter() {
   const { t } = useTranslation();
   const { user } = useAuth();
-  const canEdit = user?.role === "ADMIN" || user?.role === "SUPERVISOR" || user?.role === "EXECUTIVE";
-  const canDelete = user?.role === "ADMIN" || user?.role === "EXECUTIVE";
-  // High-risk approvals (closing a CRITICAL incident, accepting risk on a CRITICAL
-  // vulnerability) are additionally restricted to the mine owner or the IT Manager
-  // specifically — mirrors requireCyberApprovalAccess on the server.
-  const canApprove = user?.role === "ADMIN" || (user?.role === "EXECUTIVE" && user?.title === "IT_MANAGER");
+  // The whole Cyber Command Center is restricted to the mine owner and the IT Manager
+  // specifically — cybersecurity data (vulnerabilities, incidents, other users' login
+  // activity) isn't broadly appropriate for every Supervisor/Viewer or unrelated
+  // executive to see. Mirrors requireCyberAccess enforced server-side on every route;
+  // this client-side check is UX only (redirect before rendering), not the real gate.
+  const canAccess = user?.role === "ADMIN" || (user?.role === "EXECUTIVE" && user?.title === "IT_MANAGER");
+  const canEdit = canAccess;
+  const canDelete = canAccess;
+  const canApprove = canAccess;
 
   const [dark, setDark] = useState(() => {
     const stored = localStorage.getItem(THEME_STORAGE_KEY);
@@ -50,6 +54,8 @@ export default function CyberCommandCenter() {
     { key: "compliance", label: t("cyber.tabCompliance") },
     { key: "ai", label: t("cyber.tabAi") },
   ];
+
+  if (!canAccess) return <Navigate to="/" replace />;
 
   return (
     <div className={`-m-5 sm:-m-6 lg:-m-8 p-5 sm:p-6 lg:p-8 min-h-[calc(100vh-4rem)] ${theme.page}`}>

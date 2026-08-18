@@ -1,11 +1,12 @@
 import { Router } from "express";
 import { prisma } from "../prisma";
-import { requireAuth } from "../middleware/auth";
+import { requireAuth, requireRole } from "../middleware/auth";
 import { requireMineId } from "../lib/mineScope";
+import { requireCyberAccess } from "../lib/cyberAccess";
 
 const router = Router();
 
-router.use(requireAuth);
+router.use(requireAuth, requireRole("ADMIN", "EXECUTIVE"));
 
 const OPEN_ALERT_STATUSES = ["NEW", "INVESTIGATING", "CONTAINED"] as const;
 const OPEN_INCIDENT_STATUSES = ["OPEN", "INVESTIGATING", "CONTAINED"] as const;
@@ -49,6 +50,7 @@ function todayUtcDate(): Date {
 router.get("/", async (req, res) => {
   const mineId = requireMineId(req, res);
   if (!mineId) return;
+  if (!(await requireCyberAccess(req, res))) return;
   const now = new Date();
 
   const [

@@ -3,12 +3,13 @@ import { z } from "zod";
 import { prisma } from "../prisma";
 import { requireAuth, requireRole } from "../middleware/auth";
 import { requireMineId } from "../lib/mineScope";
+import { requireCyberAccess } from "../lib/cyberAccess";
 import { aiChatComplete, AiMessage, isAiConfigured } from "../lib/ai";
 import { GUARDRAIL } from "./ai";
 
 const router = Router();
 
-router.use(requireAuth, requireRole("ADMIN", "SUPERVISOR", "EXECUTIVE"));
+router.use(requireAuth, requireRole("ADMIN", "EXECUTIVE"));
 
 const SYSTEM_PROMPT =
   `You are the Mine Guard AI Security Analyst, advising the IT Manager of a South African mining operation. ` +
@@ -21,6 +22,7 @@ const correlateSchema = z.object({ alertIds: z.array(z.string().min(1)).min(1).m
 router.post("/correlate", async (req, res) => {
   const mineId = requireMineId(req, res);
   if (!mineId) return;
+  if (!(await requireCyberAccess(req, res))) return;
   if (!isAiConfigured()) return res.status(503).json({ error: "AI is not configured for this deployment" });
   const parsed = correlateSchema.safeParse(req.body);
   if (!parsed.success) return res.status(400).json({ error: parsed.error.flatten() });
@@ -71,6 +73,7 @@ const explainSchema = z.object({ type: z.enum(["alert", "incident", "vulnerabili
 router.post("/explain", async (req, res) => {
   const mineId = requireMineId(req, res);
   if (!mineId) return;
+  if (!(await requireCyberAccess(req, res))) return;
   if (!isAiConfigured()) return res.status(503).json({ error: "AI is not configured for this deployment" });
   const parsed = explainSchema.safeParse(req.body);
   if (!parsed.success) return res.status(400).json({ error: parsed.error.flatten() });

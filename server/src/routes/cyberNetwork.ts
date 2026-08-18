@@ -3,6 +3,7 @@ import { z } from "zod";
 import { prisma } from "../prisma";
 import { requireAuth, requireRole } from "../middleware/auth";
 import { requireMineId } from "../lib/mineScope";
+import { requireCyberAccess } from "../lib/cyberAccess";
 
 const router = Router();
 
@@ -31,11 +32,12 @@ const networkAssetSelect = {
   createdAt: true,
 } as const;
 
-router.use(requireAuth);
+router.use(requireAuth, requireRole("ADMIN", "EXECUTIVE"));
 
 router.get("/", async (req, res) => {
   const mineId = requireMineId(req, res);
   if (!mineId) return;
+  if (!(await requireCyberAccess(req, res))) return;
   const assets = await prisma.cyberNetworkAsset.findMany({
     where: { mineId },
     select: networkAssetSelect,
@@ -44,9 +46,10 @@ router.get("/", async (req, res) => {
   res.json(assets);
 });
 
-router.post("/", requireRole("ADMIN", "SUPERVISOR", "EXECUTIVE"), async (req, res) => {
+router.post("/", async (req, res) => {
   const mineId = requireMineId(req, res);
   if (!mineId) return;
+  if (!(await requireCyberAccess(req, res))) return;
   const parsed = networkAssetSchema.safeParse(req.body);
   if (!parsed.success) return res.status(400).json({ error: parsed.error.flatten() });
   const asset = await prisma.cyberNetworkAsset.create({
@@ -56,9 +59,10 @@ router.post("/", requireRole("ADMIN", "SUPERVISOR", "EXECUTIVE"), async (req, re
   res.status(201).json(asset);
 });
 
-router.put("/:id", requireRole("ADMIN", "SUPERVISOR", "EXECUTIVE"), async (req, res) => {
+router.put("/:id", async (req, res) => {
   const mineId = requireMineId(req, res);
   if (!mineId) return;
+  if (!(await requireCyberAccess(req, res))) return;
   const parsed = networkAssetSchema.partial().safeParse(req.body);
   if (!parsed.success) return res.status(400).json({ error: parsed.error.flatten() });
   const existing = await prisma.cyberNetworkAsset.findFirst({ where: { id: req.params.id, mineId } });
@@ -67,9 +71,10 @@ router.put("/:id", requireRole("ADMIN", "SUPERVISOR", "EXECUTIVE"), async (req, 
   res.json(asset);
 });
 
-router.delete("/:id", requireRole("ADMIN", "EXECUTIVE"), async (req, res) => {
+router.delete("/:id", async (req, res) => {
   const mineId = requireMineId(req, res);
   if (!mineId) return;
+  if (!(await requireCyberAccess(req, res))) return;
   const existing = await prisma.cyberNetworkAsset.findFirst({ where: { id: req.params.id, mineId } });
   if (!existing) return res.status(404).json({ error: "Network asset not found" });
   await prisma.cyberNetworkAsset.delete({ where: { id: existing.id } });

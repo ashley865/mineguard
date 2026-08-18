@@ -3,6 +3,7 @@ import { z } from "zod";
 import { prisma } from "../prisma";
 import { requireAuth, requireRole } from "../middleware/auth";
 import { requireMineId } from "../lib/mineScope";
+import { requireCyberAccess } from "../lib/cyberAccess";
 
 const router = Router();
 
@@ -54,11 +55,12 @@ const findingSelect = {
   createdAt: true,
 } as const;
 
-router.use(requireAuth);
+router.use(requireAuth, requireRole("ADMIN", "EXECUTIVE"));
 
 router.get("/policies", async (req, res) => {
   const mineId = requireMineId(req, res);
   if (!mineId) return;
+  if (!(await requireCyberAccess(req, res))) return;
   const policies = await prisma.cyberCompliancePolicy.findMany({
     where: { mineId },
     select: policySelect,
@@ -67,9 +69,10 @@ router.get("/policies", async (req, res) => {
   res.json(policies);
 });
 
-router.post("/policies", requireRole("ADMIN", "SUPERVISOR", "EXECUTIVE"), async (req, res) => {
+router.post("/policies", async (req, res) => {
   const mineId = requireMineId(req, res);
   if (!mineId) return;
+  if (!(await requireCyberAccess(req, res))) return;
   const parsed = policySchema.safeParse(req.body);
   if (!parsed.success) return res.status(400).json({ error: parsed.error.flatten() });
   const policy = await prisma.cyberCompliancePolicy.create({
@@ -79,9 +82,10 @@ router.post("/policies", requireRole("ADMIN", "SUPERVISOR", "EXECUTIVE"), async 
   res.status(201).json(policy);
 });
 
-router.put("/policies/:id", requireRole("ADMIN", "SUPERVISOR", "EXECUTIVE"), async (req, res) => {
+router.put("/policies/:id", async (req, res) => {
   const mineId = requireMineId(req, res);
   if (!mineId) return;
+  if (!(await requireCyberAccess(req, res))) return;
   const parsed = policySchema.partial().safeParse(req.body);
   if (!parsed.success) return res.status(400).json({ error: parsed.error.flatten() });
   const existing = await prisma.cyberCompliancePolicy.findFirst({ where: { id: req.params.id, mineId } });
@@ -90,9 +94,10 @@ router.put("/policies/:id", requireRole("ADMIN", "SUPERVISOR", "EXECUTIVE"), asy
   res.json(policy);
 });
 
-router.delete("/policies/:id", requireRole("ADMIN", "EXECUTIVE"), async (req, res) => {
+router.delete("/policies/:id", async (req, res) => {
   const mineId = requireMineId(req, res);
   if (!mineId) return;
+  if (!(await requireCyberAccess(req, res))) return;
   const existing = await prisma.cyberCompliancePolicy.findFirst({ where: { id: req.params.id, mineId } });
   if (!existing) return res.status(404).json({ error: "Policy not found" });
   await prisma.cyberCompliancePolicy.delete({ where: { id: existing.id } });
@@ -102,6 +107,7 @@ router.delete("/policies/:id", requireRole("ADMIN", "EXECUTIVE"), async (req, re
 router.get("/findings", async (req, res) => {
   const mineId = requireMineId(req, res);
   if (!mineId) return;
+  if (!(await requireCyberAccess(req, res))) return;
   const findings = await prisma.cyberAuditFinding.findMany({
     where: { mineId },
     select: findingSelect,
@@ -110,9 +116,10 @@ router.get("/findings", async (req, res) => {
   res.json(findings);
 });
 
-router.post("/findings", requireRole("ADMIN", "SUPERVISOR", "EXECUTIVE"), async (req, res) => {
+router.post("/findings", async (req, res) => {
   const mineId = requireMineId(req, res);
   if (!mineId) return;
+  if (!(await requireCyberAccess(req, res))) return;
   const parsed = findingSchema.safeParse(req.body);
   if (!parsed.success) return res.status(400).json({ error: parsed.error.flatten() });
   if (parsed.data.policyId) {
@@ -126,9 +133,10 @@ router.post("/findings", requireRole("ADMIN", "SUPERVISOR", "EXECUTIVE"), async 
   res.status(201).json(finding);
 });
 
-router.put("/findings/:id", requireRole("ADMIN", "SUPERVISOR", "EXECUTIVE"), async (req, res) => {
+router.put("/findings/:id", async (req, res) => {
   const mineId = requireMineId(req, res);
   if (!mineId) return;
+  if (!(await requireCyberAccess(req, res))) return;
   const parsed = findingSchema.partial().safeParse(req.body);
   if (!parsed.success) return res.status(400).json({ error: parsed.error.flatten() });
   const existing = await prisma.cyberAuditFinding.findFirst({ where: { id: req.params.id, mineId } });
@@ -141,9 +149,10 @@ router.put("/findings/:id", requireRole("ADMIN", "SUPERVISOR", "EXECUTIVE"), asy
   res.json(finding);
 });
 
-router.delete("/findings/:id", requireRole("ADMIN", "EXECUTIVE"), async (req, res) => {
+router.delete("/findings/:id", async (req, res) => {
   const mineId = requireMineId(req, res);
   if (!mineId) return;
+  if (!(await requireCyberAccess(req, res))) return;
   const existing = await prisma.cyberAuditFinding.findFirst({ where: { id: req.params.id, mineId } });
   if (!existing) return res.status(404).json({ error: "Finding not found" });
   await prisma.cyberAuditFinding.delete({ where: { id: existing.id } });

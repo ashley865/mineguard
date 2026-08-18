@@ -3,7 +3,7 @@ import { z } from "zod";
 import { prisma } from "../prisma";
 import { requireAuth, requireRole } from "../middleware/auth";
 import { requireMineId } from "../lib/mineScope";
-import { requireCyberApprovalAccess } from "../lib/cyberAccess";
+import { requireCyberAccess } from "../lib/cyberAccess";
 
 const router = Router();
 
@@ -39,11 +39,12 @@ const vulnerabilitySelect = {
   createdAt: true,
 } as const;
 
-router.use(requireAuth);
+router.use(requireAuth, requireRole("ADMIN", "EXECUTIVE"));
 
 router.get("/", async (req, res) => {
   const mineId = requireMineId(req, res);
   if (!mineId) return;
+  if (!(await requireCyberAccess(req, res))) return;
   const vulnerabilities = await prisma.cyberVulnerability.findMany({
     where: { mineId },
     select: vulnerabilitySelect,
@@ -52,9 +53,10 @@ router.get("/", async (req, res) => {
   res.json(vulnerabilities);
 });
 
-router.post("/", requireRole("ADMIN", "SUPERVISOR", "EXECUTIVE"), async (req, res) => {
+router.post("/", async (req, res) => {
   const mineId = requireMineId(req, res);
   if (!mineId) return;
+  if (!(await requireCyberAccess(req, res))) return;
   const parsed = vulnerabilitySchema.safeParse(req.body);
   if (!parsed.success) return res.status(400).json({ error: parsed.error.flatten() });
   const vulnerability = await prisma.cyberVulnerability.create({
@@ -64,21 +66,14 @@ router.post("/", requireRole("ADMIN", "SUPERVISOR", "EXECUTIVE"), async (req, re
   res.status(201).json(vulnerability);
 });
 
-router.put("/:id", requireRole("ADMIN", "SUPERVISOR", "EXECUTIVE"), async (req, res) => {
+router.put("/:id", async (req, res) => {
   const mineId = requireMineId(req, res);
   if (!mineId) return;
+  if (!(await requireCyberAccess(req, res))) return;
   const parsed = vulnerabilitySchema.partial().safeParse(req.body);
   if (!parsed.success) return res.status(400).json({ error: parsed.error.flatten() });
   const existing = await prisma.cyberVulnerability.findFirst({ where: { id: req.params.id, mineId } });
   if (!existing) return res.status(404).json({ error: "Vulnerability not found" });
-
-  // Accepting risk on a CRITICAL vulnerability — i.e. deliberately leaving a known
-  // severe exposure unpatched — needs the same sign-off as any other high-risk
-  // cybersecurity action, not just anyone who can edit the record.
-  if (parsed.data.status === "ACCEPTED_RISK" && existing.severity === "CRITICAL") {
-    if (!(await requireCyberApprovalAccess(req, res))) return;
-  }
-
   const data = {
     ...parsed.data,
     remediatedAt: parsed.data.status === "PATCHED" && !existing.remediatedAt ? new Date() : undefined,
@@ -87,9 +82,10 @@ router.put("/:id", requireRole("ADMIN", "SUPERVISOR", "EXECUTIVE"), async (req, 
   res.json(vulnerability);
 });
 
-router.delete("/:id", requireRole("ADMIN", "EXECUTIVE"), async (req, res) => {
+router.delete("/:id", async (req, res) => {
   const mineId = requireMineId(req, res);
   if (!mineId) return;
+  if (!(await requireCyberAccess(req, res))) return;
   const existing = await prisma.cyberVulnerability.findFirst({ where: { id: req.params.id, mineId } });
   if (!existing) return res.status(404).json({ error: "Vulnerability not found" });
   await prisma.cyberVulnerability.delete({ where: { id: existing.id } });
