@@ -73,12 +73,29 @@ router.get("/suppliers", async (req, res) => {
   const mineId = requireMineId(req, res);
   if (!mineId) return;
   const status = req.query.status as string | undefined;
-  const suppliers = await prisma.supplier.findMany({
-    where: { mineId, status: (status as any) || undefined },
-    select: supplierSelect,
-    orderBy: { name: "asc" },
-  });
-  res.json(suppliers);
+  const [suppliers, orderStats] = await Promise.all([
+    prisma.supplier.findMany({
+      where: { mineId, status: (status as any) || undefined },
+      select: supplierSelect,
+      orderBy: { name: "asc" },
+    }),
+    // Spend rollup per supplier — only orders that represent a real commitment (approved
+    // onward), mirroring the same status set the balance sheet treats as a liability.
+    prisma.purchaseOrder.groupBy({
+      by: ["supplierId"],
+      where: { site: { mineId }, status: { in: ["APPROVED", "ORDERED", "RECEIVED"] } },
+      _sum: { totalAmount: true },
+      _count: true,
+    }),
+  ]);
+  const statsBySupplier = new Map(orderStats.map((s) => [s.supplierId, s]));
+  res.json(
+    suppliers.map((s) => ({
+      ...s,
+      totalSpend: statsBySupplier.get(s.id)?._sum.totalAmount ?? 0,
+      orderCount: statsBySupplier.get(s.id)?._count ?? 0,
+    }))
+  );
 });
 
 router.post("/suppliers", requireRole("ADMIN", "SUPERVISOR", "EXECUTIVE"), async (req, res) => {
@@ -163,7 +180,17 @@ router.put("/orders/:id", requireRole("ADMIN", "SUPERVISOR", "EXECUTIVE"), async
   const { lines, ...orderData } = parsed.data;
   const order = await prisma.purchaseOrder.update({
     where: { id: existing.id },
-    data: orderData,
+    data: {
+      ...orderData,
+      // Line items are a nested relation, not a scalar field — replacing the whole set
+      // (and recomputing the total from it) is simpler and safer than diffing individual rows.
+      ...(lines
+        ? {
+            totalAmount: lines.reduce((sum, l) => sum + l.quantity * l.unitPrice, 0),
+            lines: { deleteMany: {}, create: lines.map((l) => ({ ...l, lineTotal: l.quantity * l.unitPrice })) },
+          }
+        : {}),
+    },
     select: orderSelect,
   });
   res.json(order);

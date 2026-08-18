@@ -1228,6 +1228,8 @@ export const exportableEntities = [
   "safetyInspections",
   "regulatoryNotices",
   "contractors",
+  "expenses",
+  "invoices",
 ] as const;
 export type ExportableEntity = (typeof exportableEntities)[number];
 
@@ -2034,6 +2036,8 @@ export interface Supplier {
   category?: string | null;
   bbbeeLevel?: string | null;
   status: SupplierStatus;
+  totalSpend?: number;
+  orderCount?: number;
   createdAt: string;
 }
 
@@ -2159,6 +2163,7 @@ export interface Expense {
   purchaseOrderId?: string | null;
   maintenanceScheduleId?: string | null;
   contractBidId?: string | null;
+  executiveRequestId?: string | null;
   createdBy?: { id: string; name: string } | null;
   createdAt: string;
 }
@@ -3591,6 +3596,34 @@ export interface CashFlowForecastResponse {
   forecast: { month: string; projectedNetCashFlow: number; projectedCumulative: number }[];
   ratios: { currentRatio: number | null; quickRatio: number | null; debtToEquity: number | null };
   balanceSnapshot: { cashAndEquivalents: number; accountsReceivable: number; inventory: number; accountsPayable: number };
+}
+
+// --- Approvals Inbox (CFO) ---
+
+export type ApprovalItemType = "EXPENSE" | "PURCHASE_ORDER";
+
+export interface ApprovalInboxItem {
+  id: string;
+  type: ApprovalItemType;
+  reference: string;
+  description: string;
+  amount: number;
+  currency: string;
+  site?: { id: string; name: string } | null;
+  requestedBy?: { id: string; name: string } | null;
+  category?: string | null;
+  supplier?: string | null;
+  createdAt: string;
+}
+
+export interface ApprovalsInboxResponse {
+  items: ApprovalInboxItem[];
+  totals: {
+    expenseCount: number;
+    expenseTotal: number;
+    purchaseOrderCount: number;
+    purchaseOrderTotal: number;
+  };
 }
 
 // --- Document Acknowledgement Tracker (Compliance) ---

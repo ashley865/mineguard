@@ -51,6 +51,7 @@ import NarrativeRiskScanner from "./pages/NarrativeRiskScanner";
 import SafetyAssistant from "./pages/SafetyAssistant";
 import SkillsMatrix from "./pages/SkillsMatrix";
 import CashFlowForecast from "./pages/CashFlowForecast";
+import ApprovalsInbox from "./pages/ApprovalsInbox";
 import DocumentAcknowledgements from "./pages/DocumentAcknowledgements";
 import VettingTracker from "./pages/VettingTracker";
 import MaintenanceScheduling from "./pages/MaintenanceScheduling";
@@ -134,6 +135,7 @@ export default function App() {
         <Route path="/safety-assistant" element={<SafetyAssistant />} />
         <Route path="/skills-matrix" element={<ModuleRoute path="/skills-matrix"><SkillsMatrix /></ModuleRoute>} />
         <Route path="/cash-flow-forecast" element={<CashFlowForecast />} />
+        <Route path="/approvals-inbox" element={<ApprovalsInbox />} />
         <Route path="/document-acknowledgements" element={<ModuleRoute path="/document-acknowledgements"><DocumentAcknowledgements /></ModuleRoute>} />
         <Route path="/vetting-records" element={<ModuleRoute path="/vetting-records"><VettingTracker /></ModuleRoute>} />
         <Route path="/maintenance" element={<ModuleRoute path="/maintenance"><MaintenanceScheduling /></ModuleRoute>} />

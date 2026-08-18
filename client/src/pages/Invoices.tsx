@@ -46,22 +46,26 @@ function agingBucket(dueDate: string): AgingBucket {
   return "90+";
 }
 
-function InvoiceForm({ sites, onSubmit, onCancel }: {
+function InvoiceForm({ sites, initial, onSubmit, onCancel }: {
   sites: Site[];
+  initial?: Invoice;
   onSubmit: (data: any) => Promise<void>;
   onCancel: () => void;
 }) {
   const { t } = useTranslation();
-  const [siteId, setSiteId] = useState(sites[0]?.id ?? "");
-  const [invoiceNumber, setInvoiceNumber] = useState("");
-  const [clientName, setClientName] = useState("");
-  const [clientAddress, setClientAddress] = useState("");
-  const [clientEmail, setClientEmail] = useState("");
-  const [clientTaxNumber, setClientTaxNumber] = useState("");
-  const [dueDate, setDueDate] = useState("");
-  const [vatRate, setVatRate] = useState("15");
-  const [notes, setNotes] = useState("");
-  const [lines, setLines] = useState([{ description: "", quantity: "1", unitPrice: "0" }]);
+  const [siteId, setSiteId] = useState(initial?.siteId ?? sites[0]?.id ?? "");
+  const [invoiceNumber, setInvoiceNumber] = useState(initial?.invoiceNumber ?? "");
+  const [clientName, setClientName] = useState(initial?.clientName ?? "");
+  const [clientAddress, setClientAddress] = useState(initial?.clientAddress ?? "");
+  const [clientEmail, setClientEmail] = useState(initial?.clientEmail ?? "");
+  const [clientTaxNumber, setClientTaxNumber] = useState(initial?.clientTaxNumber ?? "");
+  const [dueDate, setDueDate] = useState(initial?.dueDate?.slice(0, 10) ?? "");
+  const [vatRate, setVatRate] = useState(initial?.vatRate?.toString() ?? "15");
+  const [notes, setNotes] = useState(initial?.notes ?? "");
+  const [lines, setLines] = useState(
+    initial?.lines.map((l) => ({ description: l.description, quantity: l.quantity.toString(), unitPrice: l.unitPrice.toString() })) ??
+      [{ description: "", quantity: "1", unitPrice: "0" }]
+  );
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
 
@@ -188,11 +192,12 @@ function InvoiceForm({ sites, onSubmit, onCancel }: {
   );
 }
 
-function InvoiceView({ invoice, mine, onBack, onStatusChange }: {
+function InvoiceView({ invoice, mine, onBack, onStatusChange, onEdit }: {
   invoice: Invoice;
   mine: Mine | null;
   onBack: () => void;
   onStatusChange: (status: InvoiceStatus) => void;
+  onEdit: () => void;
 }) {
   const { t } = useTranslation();
   const subtotal = invoice.lines.reduce((sum, l) => sum + l.lineTotal, 0);
@@ -211,6 +216,7 @@ function InvoiceView({ invoice, mine, onBack, onStatusChange }: {
           >
             {invoiceStatuses.map((s) => <option key={s} value={s}>{t(`badges.status.${s}`)}</option>)}
           </select>
+          <button className={buttonSecondary} onClick={onEdit}>{t("common.edit")}</button>
           {invoice.documentId && (
             <a
               className={buttonSecondary}
@@ -305,8 +311,10 @@ export default function Invoices() {
   const [sites, setSites] = useState<Site[]>([]);
   const [mine, setMine] = useState<Mine | null>(null);
   const [loading, setLoading] = useState(true);
-  const [modal, setModal] = useState(false);
+  const [modal, setModal] = useState<null | "create" | Invoice>(null);
   const [viewing, setViewing] = useState<Invoice | null>(null);
+  const [statusFilter, setStatusFilter] = useState<InvoiceStatus | "ALL">("ALL");
+  const [siteFilter, setSiteFilter] = useState("");
 
   async function load() {
     setLoading(true);
@@ -327,7 +335,14 @@ export default function Invoices() {
 
   async function create(data: any) {
     await api.post("/invoices", data);
-    setModal(false);
+    setModal(null);
+    await load();
+  }
+
+  async function update(id: string, data: any) {
+    const res = await api.put<Invoice>(`/invoices/${id}`, data);
+    setModal(null);
+    if (viewing?.id === id) setViewing(res.data);
     await load();
   }
 
@@ -360,14 +375,26 @@ export default function Invoices() {
 
   if (loading) return <div className="text-mine-300">{t("common.loading")}</div>;
 
+  const filteredInvoices = invoices.filter(
+    (inv) => (statusFilter === "ALL" || inv.status === statusFilter) && (!siteFilter || inv.siteId === siteFilter)
+  );
+
   if (viewing) {
     return (
-      <InvoiceView
-        invoice={viewing}
-        mine={mine}
-        onBack={() => setViewing(null)}
-        onStatusChange={(status) => updateStatus(viewing.id, status)}
-      />
+      <>
+        <InvoiceView
+          invoice={viewing}
+          mine={mine}
+          onBack={() => setViewing(null)}
+          onStatusChange={(status) => updateStatus(viewing.id, status)}
+          onEdit={() => setModal(viewing)}
+        />
+        {modal && (
+          <Modal title={t("invoices.editInvoiceTitle")} onClose={() => setModal(null)}>
+            <InvoiceForm sites={sites} initial={modal === "create" ? undefined : modal} onSubmit={(data) => update(viewing.id, data)} onCancel={() => setModal(null)} />
+          </Modal>
+        )}
+      </>
     );
   }
 
@@ -379,7 +406,7 @@ export default function Invoices() {
           <p className="text-mine-300 text-sm">{t("invoices.subtitle")}</p>
         </div>
         {canEdit && sites.length > 0 && (
-          <button className={buttonPrimary} onClick={() => setModal(true)}>{t("invoices.newInvoice")}</button>
+          <button className={buttonPrimary} onClick={() => setModal("create")}>{t("invoices.newInvoice")}</button>
         )}
       </div>
 
@@ -466,10 +493,22 @@ export default function Invoices() {
             { key: "status", header: t("common.status"), render: (inv) => <StatusBadge status={inv.status} />, sortValue: (inv) => inv.status },
           ] as DataTableColumn<Invoice>[]
         }
-        rows={invoices}
+        rows={filteredInvoices}
         rowKey={(inv) => inv.id}
         emptyMessage={t("invoices.noneYet")}
         searchValue={(inv) => `${inv.invoiceNumber} ${inv.clientName}`}
+        toolbarExtra={
+          <>
+            <select className={`${inputClass} w-auto text-xs`} value={statusFilter} onChange={(e) => setStatusFilter(e.target.value as InvoiceStatus | "ALL")}>
+              <option value="ALL">{t("invoices.allStatuses")}</option>
+              {invoiceStatuses.map((s) => <option key={s} value={s}>{t(`badges.status.${s}`)}</option>)}
+            </select>
+            <select className={`${inputClass} w-auto text-xs`} value={siteFilter} onChange={(e) => setSiteFilter(e.target.value)}>
+              <option value="">{t("invoices.allSites")}</option>
+              {sites.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
+            </select>
+          </>
+        }
         exportFilename="invoices"
         exportColumns={[
           { header: t("invoices.invoiceNumber"), value: (inv) => inv.invoiceNumber },
@@ -489,8 +528,8 @@ export default function Invoices() {
       />
 
       {modal && (
-        <Modal title={t("invoices.newInvoiceTitle")} onClose={() => setModal(false)}>
-          <InvoiceForm sites={sites} onSubmit={create} onCancel={() => setModal(false)} />
+        <Modal title={modal === "create" ? t("invoices.newInvoiceTitle") : t("invoices.editInvoiceTitle")} onClose={() => setModal(null)}>
+          <InvoiceForm sites={sites} initial={modal === "create" ? undefined : modal} onSubmit={(data) => (modal === "create" ? create(data) : update(modal.id, data))} onCancel={() => setModal(null)} />
         </Modal>
       )}
     </div>

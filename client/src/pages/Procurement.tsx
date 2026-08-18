@@ -102,19 +102,23 @@ function SupplierForm({ initial, onSubmit, onCancel }: {
   );
 }
 
-function OrderForm({ sites, suppliers, onSubmit, onCancel }: {
+function OrderForm({ sites, suppliers, initial, onSubmit, onCancel }: {
   sites: Site[];
   suppliers: Supplier[];
+  initial?: PurchaseOrder;
   onSubmit: (data: any) => Promise<void>;
   onCancel: () => void;
 }) {
   const { t } = useTranslation();
-  const [siteId, setSiteId] = useState(sites[0]?.id ?? "");
-  const [supplierId, setSupplierId] = useState(suppliers[0]?.id ?? "");
-  const [orderNumber, setOrderNumber] = useState("");
-  const [description, setDescription] = useState("");
-  const [expectedDeliveryDate, setExpectedDeliveryDate] = useState("");
-  const [lines, setLines] = useState([{ itemDescription: "", quantity: "1", unitPrice: "0" }]);
+  const [siteId, setSiteId] = useState(initial?.siteId ?? sites[0]?.id ?? "");
+  const [supplierId, setSupplierId] = useState(initial?.supplierId ?? suppliers[0]?.id ?? "");
+  const [orderNumber, setOrderNumber] = useState(initial?.orderNumber ?? "");
+  const [description, setDescription] = useState(initial?.description ?? "");
+  const [expectedDeliveryDate, setExpectedDeliveryDate] = useState(initial?.expectedDeliveryDate?.slice(0, 10) ?? "");
+  const [lines, setLines] = useState(
+    initial?.lines.map((l) => ({ itemDescription: l.itemDescription, quantity: l.quantity.toString(), unitPrice: l.unitPrice.toString() })) ??
+      [{ itemDescription: "", quantity: "1", unitPrice: "0" }]
+  );
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
 
@@ -267,6 +271,8 @@ function SuppliersTab({ canEdit, canDelete }: { canEdit: boolean; canDelete: boo
             { key: "name", header: t("common.name"), render: (s) => <span className="font-medium">{s.name}</span>, sortValue: (s) => s.name },
             { key: "category", header: t("inventory.category"), render: (s) => s.category ?? "—", sortValue: (s) => s.category ?? "" },
             { key: "email", header: t("contractors.contactEmail"), render: (s) => s.contactEmail ?? "—", sortValue: (s) => s.contactEmail ?? "" },
+            { key: "orderCount", header: t("procurement.orderCount"), render: (s) => s.orderCount ?? 0, sortValue: (s) => s.orderCount ?? 0 },
+            { key: "totalSpend", header: t("procurement.totalSpend"), render: (s) => (s.totalSpend ?? 0).toLocaleString(), sortValue: (s) => s.totalSpend ?? 0 },
             { key: "status", header: t("common.status"), render: (s) => <StatusBadge status={s.status} />, sortValue: (s) => s.status },
           ] as DataTableColumn<Supplier>[]
         }
@@ -274,6 +280,14 @@ function SuppliersTab({ canEdit, canDelete }: { canEdit: boolean; canDelete: boo
         rowKey={(s) => s.id}
         emptyMessage={t("procurement.noneYetSuppliers")}
         searchValue={(s) => `${s.name} ${s.category ?? ""}`}
+        exportFilename="suppliers"
+        exportColumns={[
+          { header: t("common.name"), value: (s) => s.name },
+          { header: t("inventory.category"), value: (s) => s.category ?? "" },
+          { header: t("procurement.orderCount"), value: (s) => s.orderCount ?? 0 },
+          { header: t("procurement.totalSpend"), value: (s) => s.totalSpend ?? 0 },
+          { header: t("common.status"), value: (s) => s.status },
+        ]}
         actions={(s) => (
           <div className="flex justify-end gap-2">
             {canEdit && (
@@ -298,14 +312,17 @@ function SuppliersTab({ canEdit, canDelete }: { canEdit: boolean; canDelete: boo
   );
 }
 
-function OrderDetailModal({ order, onClose }: { order: PurchaseOrder; onClose: () => void }) {
+function OrderDetailModal({ order, canEdit, onEdit, onClose }: { order: PurchaseOrder; canEdit: boolean; onEdit: () => void; onClose: () => void }) {
   const { t } = useTranslation();
   return (
     <Modal title={order.orderNumber} onClose={onClose}>
       <div className="space-y-3 text-sm">
-        <div className="flex items-center gap-2">
-          <StatusBadge status={order.status} />
-          <span className="text-mine-400 text-xs">{order.supplier?.name} · {order.site?.name}</span>
+        <div className="flex items-center justify-between gap-2 flex-wrap">
+          <div className="flex items-center gap-2">
+            <StatusBadge status={order.status} />
+            <span className="text-mine-400 text-xs">{order.supplier?.name} · {order.site?.name}</span>
+          </div>
+          {canEdit && <button className="text-xs text-mine-300 hover:text-mine-50" onClick={onEdit}>{t("common.edit")}</button>}
         </div>
         <p className="text-mine-200">{order.description}</p>
         <div className="space-y-1">
@@ -319,6 +336,12 @@ function OrderDetailModal({ order, onClose }: { order: PurchaseOrder; onClose: (
         </div>
         <div className="text-right font-bold border-t border-mine-800 pt-2">
           {t("procurement.total")}: {order.currency} {order.totalAmount.toLocaleString()}
+        </div>
+        <div className="text-xs text-mine-400 border-t border-mine-800 pt-2 space-y-0.5">
+          {order.requestedBy && <div>{t("procurement.requestedBy", { name: order.requestedBy.name })}</div>}
+          {order.approvedBy && (
+            <div>{t("procurement.approvedBy", { name: order.approvedBy.name })}{order.approvedAt ? ` — ${new Date(order.approvedAt).toLocaleString()}` : ""}</div>
+          )}
         </div>
       </div>
     </Modal>
@@ -335,7 +358,7 @@ function OrdersTab({ sites, suppliers, canEdit, canApprove, canDelete }: {
   const { t } = useTranslation();
   const [orders, setOrders] = useState<PurchaseOrder[]>([]);
   const [loading, setLoading] = useState(true);
-  const [modal, setModal] = useState(false);
+  const [modal, setModal] = useState<null | "create" | PurchaseOrder>(null);
   const [detailOrder, setDetailOrder] = useState<PurchaseOrder | null>(null);
 
   async function load() {
@@ -351,7 +374,14 @@ function OrdersTab({ sites, suppliers, canEdit, canApprove, canDelete }: {
 
   async function create(data: any) {
     await api.post("/procurement/orders", data);
-    setModal(false);
+    setModal(null);
+    await load();
+  }
+
+  async function update(id: string, data: any) {
+    const res = await api.put<PurchaseOrder>(`/procurement/orders/${id}`, data);
+    setModal(null);
+    if (detailOrder?.id === id) setDetailOrder(res.data);
     await load();
   }
 
@@ -378,7 +408,7 @@ function OrdersTab({ sites, suppliers, canEdit, canApprove, canDelete }: {
 
       {canEdit && sites.length > 0 && suppliers.length > 0 && (
         <div className="flex justify-end">
-          <button className={buttonPrimary} onClick={() => setModal(true)}>{t("procurement.newOrder")}</button>
+          <button className={buttonPrimary} onClick={() => setModal("create")}>{t("procurement.newOrder")}</button>
         </div>
       )}
       <DataTable
@@ -406,6 +436,9 @@ function OrdersTab({ sites, suppliers, canEdit, canApprove, canDelete }: {
         actions={(o) => (
           <div className="flex justify-end gap-2">
             <AuditHistoryButton entityType="PurchaseOrder" entityId={o.id} />
+            {canEdit && (
+              <button className="text-xs text-mine-300 hover:text-mine-50" onClick={() => setModal(o)}>{t("common.edit")}</button>
+            )}
             {canApprove && o.status !== "APPROVED" && o.status !== "CANCELLED" && (
               <button className={`${buttonPrimary} text-xs px-3 py-1`} onClick={() => approve(o.id)}>{t("common.approve")}</button>
             )}
@@ -416,11 +449,19 @@ function OrdersTab({ sites, suppliers, canEdit, canApprove, canDelete }: {
         )}
       />
       {modal && (
-        <Modal title={t("procurement.newOrderTitle")} onClose={() => setModal(false)}>
-          <OrderForm sites={sites} suppliers={suppliers} onSubmit={create} onCancel={() => setModal(false)} />
+        <Modal title={modal === "create" ? t("procurement.newOrderTitle") : t("procurement.editOrderTitle")} onClose={() => setModal(null)}>
+          <OrderForm
+            sites={sites}
+            suppliers={suppliers}
+            initial={modal === "create" ? undefined : modal}
+            onSubmit={(data) => (modal === "create" ? create(data) : update(modal.id, data))}
+            onCancel={() => setModal(null)}
+          />
         </Modal>
       )}
-      {detailOrder && <OrderDetailModal order={detailOrder} onClose={() => setDetailOrder(null)} />}
+      {detailOrder && (
+        <OrderDetailModal order={detailOrder} canEdit={canEdit} onEdit={() => setModal(detailOrder)} onClose={() => setDetailOrder(null)} />
+      )}
     </div>
   );
 }

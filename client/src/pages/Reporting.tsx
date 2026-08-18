@@ -7,6 +7,7 @@ import { BalanceSheet, ExportableEntity, exportableEntities, JournalEntry, Repor
 import { SeverityBadge } from "../components/Badges";
 import { buttonPrimary, buttonSecondary, cardClass, inputClass } from "../components/ui";
 import LoadError from "../components/LoadError";
+import DataTable, { DataTableColumn } from "../components/DataTable";
 
 const dayOptions = [30, 90, 180, 365];
 type ReportingTab = "overview" | "balanceSheet" | "journal";
@@ -151,39 +152,47 @@ function JournalTab() {
       ) : !entries ? (
         <div className="text-mine-300 text-sm">{t("common.loading")}</div>
       ) : (
-        <div className={`${cardClass} overflow-x-auto`}>
-          <table className="w-full text-sm">
-            <thead className="bg-mine-800/50 text-mine-300 text-xs uppercase">
-              <tr>
-                <th className="text-left px-4 py-2">{t("reporting.journalDate")}</th>
-                <th className="text-left px-4 py-2">{t("reporting.journalDescription")}</th>
-                <th className="text-left px-4 py-2">{t("reporting.journalType")}</th>
-                <th className="text-right px-4 py-2">{t("reporting.journalAmount")}</th>
-                <th className="text-right px-4 py-2">{t("reporting.journalBalance")}</th>
-              </tr>
-            </thead>
-            <tbody>
-              {entries.map((e) => (
-                <tr key={e.id} className="border-t border-mine-800 hover:bg-mine-800/30">
-                  <td className="px-4 py-2 text-mine-300">{new Date(e.date).toLocaleDateString()}</td>
-                  <td className="px-4 py-2">{e.description}</td>
-                  <td className="px-4 py-2">
-                    <span className={`px-2 py-0.5 rounded text-xs font-semibold ${e.type === "INCOME" ? "bg-success-600 text-white" : "bg-danger-500 text-white"}`}>
-                      {t(`reporting.journalTypes.${e.type}`)}
-                    </span>
-                  </td>
-                  <td className={`px-4 py-2 text-right font-semibold ${e.type === "INCOME" ? "text-success-500" : "text-danger-400"}`}>
+        <DataTable
+          columns={
+            [
+              { key: "date", header: t("reporting.journalDate"), render: (e) => new Date(e.date).toLocaleDateString() },
+              { key: "description", header: t("reporting.journalDescription"), render: (e) => e.description },
+              {
+                key: "type",
+                header: t("reporting.journalType"),
+                render: (e) => (
+                  <span className={`px-2 py-0.5 rounded text-xs font-semibold ${e.type === "INCOME" ? "bg-success-600 text-white" : "bg-danger-500 text-white"}`}>
+                    {t(`reporting.journalTypes.${e.type}`)}
+                  </span>
+                ),
+              },
+              {
+                key: "amount",
+                header: t("reporting.journalAmount"),
+                className: "text-right",
+                render: (e) => (
+                  <span className={`font-semibold ${e.type === "INCOME" ? "text-success-500" : "text-danger-400"}`}>
                     {e.type === "INCOME" ? "+" : "-"}{e.currency} {e.amount.toLocaleString()}
-                  </td>
-                  <td className="px-4 py-2 text-right text-mine-300">{e.currency} {e.runningBalance.toLocaleString()}</td>
-                </tr>
-              ))}
-              {entries.length === 0 && (
-                <tr><td colSpan={5} className="px-4 py-6 text-center text-mine-400">{t("reporting.noJournalEntries")}</td></tr>
-              )}
-            </tbody>
-          </table>
-        </div>
+                  </span>
+                ),
+                sortValue: (e) => e.amount,
+              },
+              { key: "balance", header: t("reporting.journalBalance"), className: "text-right text-mine-300", render: (e) => `${e.currency} ${e.runningBalance.toLocaleString()}` },
+            ] as DataTableColumn<JournalEntry>[]
+          }
+          rows={entries}
+          rowKey={(e) => e.id}
+          emptyMessage={t("reporting.noJournalEntries")}
+          searchValue={(e) => e.description}
+          exportFilename="journal"
+          exportColumns={[
+            { header: t("reporting.journalDate"), value: (e) => new Date(e.date).toLocaleDateString() },
+            { header: t("reporting.journalDescription"), value: (e) => e.description },
+            { header: t("reporting.journalType"), value: (e) => t(`reporting.journalTypes.${e.type}`) },
+            { header: t("reporting.journalAmount"), value: (e) => e.amount },
+            { header: t("reporting.journalBalance"), value: (e) => e.runningBalance },
+          ]}
+        />
       )}
     </div>
   );
@@ -371,7 +380,7 @@ export default function Reporting() {
           <div className={`${cardClass} p-3`}>
             <h2 className="text-xs font-semibold mb-2">{t("reporting.exportTitle")}</h2>
             <div className="flex flex-wrap gap-2">
-              {exportableEntities.map((entity) => (
+              {exportableEntities.filter((entity) => canSeeFinancials || (entity !== "expenses" && entity !== "invoices")).map((entity) => (
                 <button
                   key={entity}
                   className={buttonSecondary}

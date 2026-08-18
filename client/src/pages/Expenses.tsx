@@ -43,23 +43,24 @@ const ALL_PAYEE_TYPES: PayeeType[] = ["COMPANY", "INDIVIDUAL", "BUYER", "CONTRAC
 type TabKey = "expenses" | "payees";
 const TAB_KEYS: TabKey[] = ["expenses", "payees"];
 
-function ExpenseForm({ sites, payees, onSubmit, onCancel }: {
+function ExpenseForm({ sites, payees, initial, onSubmit, onCancel }: {
   sites: Site[];
   payees: Payee[];
+  initial?: Expense;
   onSubmit: (form: FormData) => Promise<void>;
   onCancel: () => void;
 }) {
   const { t } = useTranslation();
-  const [siteId, setSiteId] = useState(sites[0]?.id ?? "");
-  const [payeeId, setPayeeId] = useState(payees[0]?.id ?? "");
-  const [expenseNumber, setExpenseNumber] = useState("");
-  const [category, setCategory] = useState<ExpenseCategory>("OPERATIONS");
-  const [description, setDescription] = useState("");
-  const [amount, setAmount] = useState("");
-  const [expenseDate, setExpenseDate] = useState(new Date().toISOString().slice(0, 10));
-  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("EFT");
-  const [referenceNumber, setReferenceNumber] = useState("");
-  const [notes, setNotes] = useState("");
+  const [siteId, setSiteId] = useState(initial?.siteId ?? sites[0]?.id ?? "");
+  const [payeeId, setPayeeId] = useState(initial?.payeeId ?? payees[0]?.id ?? "");
+  const [expenseNumber, setExpenseNumber] = useState(initial?.expenseNumber ?? "");
+  const [category, setCategory] = useState<ExpenseCategory>(initial?.category ?? "OPERATIONS");
+  const [description, setDescription] = useState(initial?.description ?? "");
+  const [amount, setAmount] = useState(initial?.amount?.toString() ?? "");
+  const [expenseDate, setExpenseDate] = useState(initial?.expenseDate?.slice(0, 10) ?? new Date().toISOString().slice(0, 10));
+  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>(initial?.paymentMethod ?? "EFT");
+  const [referenceNumber, setReferenceNumber] = useState(initial?.referenceNumber ?? "");
+  const [notes, setNotes] = useState(initial?.notes ?? "");
   const [receipt, setReceipt] = useState<File | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
@@ -305,7 +306,7 @@ export default function Expenses() {
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState(false);
   const [exportingPdf, setExportingPdf] = useState(false);
-  const [expenseModal, setExpenseModal] = useState(false);
+  const [expenseModal, setExpenseModal] = useState<null | "create" | Expense>(null);
   const [payeeModal, setPayeeModal] = useState<null | "create" | Payee>(null);
   const [costSummary, setCostSummary] = useState<CostSummary | null>(null);
   const [payeeTypeFilter, setPayeeTypeFilter] = useState<PayeeType | "ALL">("ALL");
@@ -337,7 +338,13 @@ export default function Expenses() {
 
   async function createExpense(form: FormData) {
     await api.post("/expenses", form, { headers: { "Content-Type": "multipart/form-data" } });
-    setExpenseModal(false);
+    setExpenseModal(null);
+    await load();
+  }
+
+  async function updateExpense(id: string, form: FormData) {
+    await api.put(`/expenses/${id}`, form, { headers: { "Content-Type": "multipart/form-data" } });
+    setExpenseModal(null);
     await load();
   }
 
@@ -408,7 +415,7 @@ export default function Expenses() {
               {exportingPdf ? t("common.saving") : t("expenses.exportPdf")}
             </button>
             {sites.length > 0 && (
-              <button className={buttonPrimary} onClick={() => setExpenseModal(true)}>{t("expenses.newExpense")}</button>
+              <button className={buttonPrimary} onClick={() => setExpenseModal("create")}>{t("expenses.newExpense")}</button>
             )}
           </div>
         )}
@@ -522,6 +529,7 @@ export default function Expenses() {
                       {ex.purchaseOrderId && <span className="ml-2 text-[10px] uppercase tracking-wide text-mine-400 border border-mine-700 rounded px-1 py-0.5">{t("expenses.purchaseOrderLinked")}</span>}
                       {ex.maintenanceScheduleId && <span className="ml-2 text-[10px] uppercase tracking-wide text-mine-400 border border-mine-700 rounded px-1 py-0.5">{t("expenses.maintenanceLinked")}</span>}
                       {ex.contractBidId && <span className="ml-2 text-[10px] uppercase tracking-wide text-mine-400 border border-mine-700 rounded px-1 py-0.5">{t("expenses.contractLinked")}</span>}
+                      {ex.executiveRequestId && <span className="ml-2 text-[10px] uppercase tracking-wide text-mine-400 border border-mine-700 rounded px-1 py-0.5">{t("expenses.requestLinked")}</span>}
                     </>
                   ),
                   sortValue: (ex) => ex.payee?.name ?? "",
@@ -558,6 +566,9 @@ export default function Expenses() {
                   </a>
                 )}
                 <AuditHistoryButton entityType="Expense" entityId={ex.id} />
+                {canEdit && ex.status === "PENDING" && (
+                  <button className="text-xs text-mine-300 hover:text-mine-50" onClick={() => setExpenseModal(ex)}>{t("common.edit")}</button>
+                )}
                 {canApprove && ex.status === "PENDING" && (
                   <>
                     <button className={`${buttonPrimary} text-xs px-3 py-1`} onClick={() => reviewExpense(ex.id, "PAID")}>
@@ -635,8 +646,14 @@ export default function Expenses() {
       )}
 
       {expenseModal && (
-        <Modal title={t("expenses.newExpenseTitle")} onClose={() => setExpenseModal(false)}>
-          <ExpenseForm sites={sites} payees={payees} onSubmit={createExpense} onCancel={() => setExpenseModal(false)} />
+        <Modal title={expenseModal === "create" ? t("expenses.newExpenseTitle") : t("expenses.editExpenseTitle")} onClose={() => setExpenseModal(null)}>
+          <ExpenseForm
+            sites={sites}
+            payees={payees}
+            initial={expenseModal === "create" ? undefined : expenseModal}
+            onSubmit={(form) => (expenseModal === "create" ? createExpense(form) : updateExpense(expenseModal.id, form))}
+            onCancel={() => setExpenseModal(null)}
+          />
         </Modal>
       )}
 

@@ -5,8 +5,12 @@ import { BarChart, Bar, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer } fro
 import { api } from "../api/client";
 import { useAuth } from "../context/AuthContext";
 import { CashFlowForecastResponse } from "../api/types";
-import { cardClass } from "../components/ui";
+import { buttonPrimary, buttonSecondary, cardClass } from "../components/ui";
 import LoadError from "../components/LoadError";
+import { exportToCsv } from "../lib/exportCsv";
+
+const HISTORY_OPTIONS = [3, 6, 12];
+const FORECAST_OPTIONS = [1, 3, 6];
 
 const CHART_TOOLTIP_STYLE = { background: "#fafafa", border: "1px solid #e5e5e5", fontSize: 11 };
 const CHART_TICK_STYLE = { fontSize: 10, fill: "#52525b" };
@@ -27,12 +31,14 @@ export default function CashFlowForecast() {
   const [data, setData] = useState<CashFlowForecastResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState(false);
+  const [historyMonths, setHistoryMonths] = useState(6);
+  const [forecastMonths, setForecastMonths] = useState(3);
 
   async function load() {
     setLoading(true);
     setLoadError(false);
     try {
-      const res = await api.get<CashFlowForecastResponse>("/cash-flow-forecast");
+      const res = await api.get<CashFlowForecastResponse>("/cash-flow-forecast", { params: { historyMonths, forecastMonths } });
       setData(res.data);
     } catch {
       setLoadError(true);
@@ -44,7 +50,25 @@ export default function CashFlowForecast() {
   useEffect(() => {
     if (canView) load();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [historyMonths, forecastMonths]);
+
+  function exportCsv() {
+    if (!data) return;
+    exportToCsv(
+      "cash-flow-forecast",
+      [
+        ...data.history.map((m) => ({ month: m.month, type: "history", income: m.income, outgoings: m.outgoings, netCashFlow: m.netCashFlow })),
+        ...data.forecast.map((f) => ({ month: f.month, type: "forecast", income: null, outgoings: null, netCashFlow: f.projectedNetCashFlow })),
+      ],
+      [
+        { header: "Month", value: (r) => r.month },
+        { header: "Type", value: (r) => r.type },
+        { header: "Income", value: (r) => r.income },
+        { header: "Outgoings", value: (r) => r.outgoings },
+        { header: "Net Cash Flow", value: (r) => r.netCashFlow },
+      ]
+    );
+  }
 
   if (!canView) return <Navigate to="/" replace />;
   if (loading) return <div className="text-mine-300">{t("common.loading")}</div>;
@@ -59,9 +83,31 @@ export default function CashFlowForecast() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-xl font-bold">{t("cashFlowForecast.nav")}</h1>
-        <p className="text-mine-300 text-sm">{t("cashFlowForecast.subtitle")}</p>
+      <div className="flex items-start justify-between flex-wrap gap-3">
+        <div>
+          <h1 className="text-xl font-bold">{t("cashFlowForecast.nav")}</h1>
+          <p className="text-mine-300 text-sm">{t("cashFlowForecast.subtitle")}</p>
+        </div>
+        <button className={buttonSecondary} onClick={exportCsv}>{t("common.exportCsv")}</button>
+      </div>
+
+      <div className="flex flex-wrap items-center gap-3 text-xs">
+        <div className="flex items-center gap-1">
+          <span className="text-mine-400">{t("cashFlowForecast.historyMonths")}</span>
+          {HISTORY_OPTIONS.map((m) => (
+            <button key={m} className={historyMonths === m ? buttonPrimary : buttonSecondary} onClick={() => setHistoryMonths(m)}>
+              {m}
+            </button>
+          ))}
+        </div>
+        <div className="flex items-center gap-1">
+          <span className="text-mine-400">{t("cashFlowForecast.forecastMonths")}</span>
+          {FORECAST_OPTIONS.map((m) => (
+            <button key={m} className={forecastMonths === m ? buttonPrimary : buttonSecondary} onClick={() => setForecastMonths(m)}>
+              {m}
+            </button>
+          ))}
+        </div>
       </div>
 
       <div className="grid grid-cols-2 md:grid-cols-3 gap-3">

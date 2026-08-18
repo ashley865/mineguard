@@ -2337,7 +2337,12 @@
     "createError": "No se pudo crear esta orden de compra",
     "noneYetOrders": "Aún no hay órdenes de compra.",
     "confirmDeleteOrder": "¿Eliminar esta orden de compra?",
-    "summaryPendingApproval": "Pendientes de Aprobación"
+    "summaryPendingApproval": "Pendientes de Aprobación",
+    "orderCount": "Pedidos",
+    "totalSpend": "Gasto total",
+    "requestedBy": "Solicitado por {{name}}",
+    "approvedBy": "Aprobado por {{name}}",
+    "editOrderTitle": "Editar orden de compra"
   },
   "invoices": {
     "nav": "Facturas",
@@ -2377,7 +2382,10 @@
       "31-60": "31–60 días",
       "61-90": "61–90 días",
       "90+": "90+ días"
-    }
+    },
+    "editInvoiceTitle": "Editar factura",
+    "allStatuses": "Todos los estados",
+    "allSites": "Todos los sitios"
   },
   "expenses": {
     "nav": "Gastos",
@@ -2453,7 +2461,9 @@
     "maintenanceLinked": "Mantenimiento",
     "contractLinked": "Adjudicación de Contrato",
     "allPayeeTypes": "Todos",
-    "payeeTypeAutoSyncedHint": "El tipo de este beneficiario se gestiona automáticamente y no se puede cambiar aquí."
+    "payeeTypeAutoSyncedHint": "El tipo de este beneficiario se gestiona automáticamente y no se puede cambiar aquí.",
+    "editExpenseTitle": "Editar gasto",
+    "requestLinked": "Solicitud ejecutiva"
   },
   "executiveRequests": {
     "nav": "Solicitudes",
@@ -3906,7 +3916,9 @@
     "actualAmount": "Gasto real",
     "variance": "Variación",
     "noneYet": "Aún no se han definido planes de presupuesto.",
-    "confirmDelete": "¿Eliminar este plan de presupuesto?"
+    "confirmDelete": "¿Eliminar este plan de presupuesto?",
+    "duplicate": "Duplicar",
+    "editTitle": "Editar plan de presupuesto"
   },
   "toolboxTalks": {
     "nav": "Charlas de Seguridad",
@@ -4004,7 +4016,9 @@
     "receivable": "Cuentas por Cobrar",
     "inventory": "Inventario",
     "payable": "Cuentas por Pagar",
-    "disclaimer": "Las cifras se derivan de facturas, gastos y nómina ya registrados en MineGuard. Esta es una ayuda de planificación, no un estado financiero auditado."
+    "disclaimer": "Las cifras se derivan de facturas, gastos y nómina ya registrados en MineGuard. Esta es una ayuda de planificación, no un estado financiero auditado.",
+    "historyMonths": "Historial:",
+    "forecastMonths": "Pronóstico:"
   },
   "documentAcknowledgements": {
     "nav": "Reconocimientos de Documentos",
@@ -4044,5 +4058,25 @@
     "markFailed": "Marcar Reprobado",
     "noneYet": "Aún no se han registrado verificaciones.",
     "confirmDelete": "¿Eliminar este registro de verificación?"
+  },
+  "approvalsInbox": {
+    "nav": "Bandeja de aprobaciones",
+    "subtitle": "Todas las aprobaciones pendientes de gastos y órdenes de compra en una sola cola",
+    "pendingExpenses": "Gastos pendientes",
+    "pendingExpenseTotal": "Total de gastos pendientes",
+    "submittedOrders": "Órdenes enviadas",
+    "submittedOrderTotal": "Total de órdenes enviadas",
+    "type": "Tipo",
+    "types": {
+      "EXPENSE": "Gasto",
+      "PURCHASE_ORDER": "Orden de compra"
+    },
+    "reference": "Referencia",
+    "description": "Descripción",
+    "requestedBy": "Solicitado por",
+    "amount": "Monto",
+    "submitted": "Enviado",
+    "noneYet": "No hay nada pendiente de aprobación en este momento.",
+    "confirmReject": "¿Rechazar este gasto?"
   }
 }

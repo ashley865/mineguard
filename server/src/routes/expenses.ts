@@ -93,6 +93,7 @@ const expenseSelect = {
   purchaseOrderId: true,
   maintenanceScheduleId: true,
   contractBidId: true,
+  executiveRequestId: true,
   createdBy: { select: { id: true, name: true } },
   createdAt: true,
 } as const;

@@ -44,6 +44,7 @@
     "unassigned": "Unassigned",
     "approve": "Approve",
     "reject": "Reject",
+    "view": "View",
     "reviewNotePlaceholder": "Optional note…",
     "reviewedBy": "Reviewed by {{name}}",
     "copy": "Copy",
@@ -2610,7 +2611,12 @@
     "createError": "Could not create this purchase order",
     "noneYetOrders": "No purchase orders yet.",
     "confirmDeleteOrder": "Delete this purchase order?",
-    "summaryPendingApproval": "Pending Approval"
+    "summaryPendingApproval": "Pending Approval",
+    "orderCount": "Orders",
+    "totalSpend": "Total Spend",
+    "requestedBy": "Requested by {{name}}",
+    "approvedBy": "Approved by {{name}}",
+    "editOrderTitle": "Edit Purchase Order"
   },
   "invoices": {
     "nav": "Invoices",
@@ -2650,7 +2656,10 @@
       "90+": "90+ days"
     },
     "createError": "Could not create this invoice",
-    "viewDocument": "View in Document Vault"
+    "viewDocument": "View in Document Vault",
+    "editInvoiceTitle": "Edit Invoice",
+    "allStatuses": "All Statuses",
+    "allSites": "All Sites"
   },
   "expenses": {
     "nav": "Expenses",
@@ -2726,7 +2735,9 @@
       "SUPPLIER": "Supplier"
     },
     "allPayeeTypes": "All",
-    "payeeTypeAutoSyncedHint": "This payee's type is managed automatically and can't be changed here."
+    "payeeTypeAutoSyncedHint": "This payee's type is managed automatically and can't be changed here.",
+    "editExpenseTitle": "Edit Expense",
+    "requestLinked": "Executive Request"
   },
   "statutoryAppointments": {
     "nav": "Statutory Appointments",
@@ -3905,7 +3916,9 @@
     "actualAmount": "Actual spend",
     "variance": "Variance",
     "noneYet": "No budget plans set yet.",
-    "confirmDelete": "Delete this budget plan?"
+    "confirmDelete": "Delete this budget plan?",
+    "duplicate": "Duplicate",
+    "editTitle": "Edit Budget Plan"
   },
   "toolboxTalks": {
     "nav": "Toolbox Talks",
@@ -4003,7 +4016,9 @@
     "receivable": "Accounts Receivable",
     "inventory": "Inventory",
     "payable": "Accounts Payable",
-    "disclaimer": "Figures are derived from paid/pending invoices, expenses, and payroll already logged in MineGuard. This is a planning aid, not an audited financial statement."
+    "disclaimer": "Figures are derived from paid/pending invoices, expenses, and payroll already logged in MineGuard. This is a planning aid, not an audited financial statement.",
+    "historyMonths": "History:",
+    "forecastMonths": "Forecast:"
   },
   "documentAcknowledgements": {
     "nav": "Document Acknowledgements",
@@ -4043,5 +4058,25 @@
     "markFailed": "Mark Failed",
     "noneYet": "No vetting records logged yet.",
     "confirmDelete": "Delete this vetting record?"
+  },
+  "approvalsInbox": {
+    "nav": "Approvals Inbox",
+    "subtitle": "All pending expense and purchase order approvals in one queue",
+    "pendingExpenses": "Pending Expenses",
+    "pendingExpenseTotal": "Pending Expense Total",
+    "submittedOrders": "Submitted Orders",
+    "submittedOrderTotal": "Submitted Order Total",
+    "type": "Type",
+    "types": {
+      "EXPENSE": "Expense",
+      "PURCHASE_ORDER": "Purchase Order"
+    },
+    "reference": "Reference",
+    "description": "Description",
+    "requestedBy": "Requested By",
+    "amount": "Amount",
+    "submitted": "Submitted",
+    "noneYet": "Nothing pending approval right now.",
+    "confirmReject": "Reject this expense?"
   }
 }

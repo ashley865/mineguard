@@ -2337,7 +2337,12 @@
     "createError": "Kon nie hierdie aankooporder skep nie",
     "noneYetOrders": "Nog geen aankooporders nie.",
     "confirmDeleteOrder": "Skrap hierdie aankooporder?",
-    "summaryPendingApproval": "Wag Vir Goedkeuring"
+    "summaryPendingApproval": "Wag Vir Goedkeuring",
+    "orderCount": "Bestellings",
+    "totalSpend": "Totale besteding",
+    "requestedBy": "Versoek deur {{name}}",
+    "approvedBy": "Goedgekeur deur {{name}}",
+    "editOrderTitle": "Wysig aankooporder"
   },
   "invoices": {
     "nav": "Fakture",
@@ -2377,7 +2382,10 @@
       "31-60": "31–60 dae",
       "61-90": "61–90 dae",
       "90+": "90+ dae"
-    }
+    },
+    "editInvoiceTitle": "Wysig faktuur",
+    "allStatuses": "Alle statusse",
+    "allSites": "Alle terreine"
   },
   "expenses": {
     "nav": "Uitgawes",
@@ -2453,7 +2461,9 @@
     "maintenanceLinked": "Onderhoud",
     "contractLinked": "Kontraktoekenning",
     "allPayeeTypes": "Almal",
-    "payeeTypeAutoSyncedHint": "Hierdie betaalde party se tipe word outomaties bestuur en kan nie hier verander word nie."
+    "payeeTypeAutoSyncedHint": "Hierdie betaalde party se tipe word outomaties bestuur en kan nie hier verander word nie.",
+    "editExpenseTitle": "Wysig uitgawe",
+    "requestLinked": "Uitvoerende versoek"
   },
   "executiveRequests": {
     "nav": "Versoeke",
@@ -3906,7 +3916,9 @@
     "actualAmount": "Werklike besteding",
     "variance": "Variansie",
     "noneYet": "Nog geen begrotingsplanne gestel nie.",
-    "confirmDelete": "Verwyder hierdie begrotingsplan?"
+    "confirmDelete": "Verwyder hierdie begrotingsplan?",
+    "duplicate": "Dupliseer",
+    "editTitle": "Wysig begrotingsplan"
   },
   "toolboxTalks": {
     "nav": "Veiligheidsgesprekke",
@@ -4004,7 +4016,9 @@
     "receivable": "Debiteure",
     "inventory": "Voorraad",
     "payable": "Krediteure",
-    "disclaimer": "Syfers is afgelei van reeds-aangetekende fakture, uitgawes en betaalstate in MineGuard. Dit is 'n beplanningshulpmiddel, nie 'n geouditeerde finansiële staat nie."
+    "disclaimer": "Syfers is afgelei van reeds-aangetekende fakture, uitgawes en betaalstate in MineGuard. Dit is 'n beplanningshulpmiddel, nie 'n geouditeerde finansiële staat nie.",
+    "historyMonths": "Geskiedenis:",
+    "forecastMonths": "Vooruitskatting:"
   },
   "documentAcknowledgements": {
     "nav": "Dokumenterkennings",
@@ -4044,5 +4058,25 @@
     "markFailed": "Merk Gedruip",
     "noneYet": "Nog geen siftingsrekords aangeteken nie.",
     "confirmDelete": "Verwyder hierdie siftingsrekord?"
+  },
+  "approvalsInbox": {
+    "nav": "Goedkeuringsinboks",
+    "subtitle": "Alle hangende uitgawe- en aankooporder-goedkeurings in een wagtou",
+    "pendingExpenses": "Hangende uitgawes",
+    "pendingExpenseTotal": "Totaal hangende uitgawes",
+    "submittedOrders": "Ingediende bestellings",
+    "submittedOrderTotal": "Totaal ingediende bestellings",
+    "type": "Tipe",
+    "types": {
+      "EXPENSE": "Uitgawe",
+      "PURCHASE_ORDER": "Aankooporder"
+    },
+    "reference": "Verwysing",
+    "description": "Beskrywing",
+    "requestedBy": "Versoek deur",
+    "amount": "Bedrag",
+    "submitted": "Ingedien",
+    "noneYet": "Niks wag tans op goedkeuring nie.",
+    "confirmReject": "Verwerp hierdie uitgawe?"
   }
 }

@@ -255,6 +255,12 @@ async function buildCfoContext(mineId: string) {
   const thirtyDaysAgo = new Date(Date.now() - 30 * 86400000);
   const in30Days = new Date(Date.now() + 30 * 86400000);
 
+  const now = new Date();
+  const threeMonthsAgo = new Date();
+  threeMonthsAgo.setMonth(threeMonthsAgo.getMonth() - 3);
+  threeMonthsAgo.setDate(1);
+  threeMonthsAgo.setHours(0, 0, 0, 0);
+
   const [
     mine,
     paidInvoices,
@@ -265,15 +271,16 @@ async function buildCfoContext(mineId: string) {
     pendingPurchaseOrders,
     recentPayslips,
     upcomingInvoicesDue,
+    activeBudgetPlans,
   ] = await Promise.all([
     prisma.mine.findUnique({ where: { id: mineId }, select: { name: true } }),
     prisma.invoice.findMany({
       where: { site: { mineId }, status: "PAID", issueDate: { gte: sixMonthsAgo } },
-      select: { vatRate: true, lines: { select: { lineTotal: true } } },
+      select: { vatRate: true, issueDate: true, lines: { select: { lineTotal: true } } },
     }),
     prisma.expense.findMany({
       where: { site: { mineId }, status: "PAID", expenseDate: { gte: sixMonthsAgo } },
-      select: { amount: true, category: true },
+      select: { amount: true, category: true, expenseDate: true },
     }),
     prisma.expense.aggregate({ where: { status: "PENDING", site: { mineId } }, _count: true, _sum: { amount: true } }),
     prisma.invoice.aggregate({
@@ -295,6 +302,10 @@ async function buildCfoContext(mineId: string) {
     }),
     prisma.invoice.count({
       where: { site: { mineId }, status: "SENT", dueDate: { lte: in30Days } },
+    }),
+    prisma.budgetPlan.findMany({
+      where: { mineId, periodStart: { lte: now }, periodEnd: { gte: now } },
+      select: { category: true, siteId: true, periodStart: true, periodEnd: true, budgetedAmount: true },
     }),
   ]);
 
@@ -329,6 +340,47 @@ async function buildCfoContext(mineId: string) {
     { grossPay: 0, netPay: 0, deductions: 0 }
   );
 
+  // Trailing 3-month net cash flow, approximated from paid invoices/expenses already
+  // fetched for the 6-month summary above — a lightweight echo of the dedicated Cash Flow
+  // Forecast module's own (more thorough) monthly projection, not a replacement for it.
+  let netCashFlowLast3Months = 0;
+  for (const inv of paidInvoices) {
+    if (inv.issueDate >= threeMonthsAgo) {
+      const subtotal = inv.lines.reduce((s, l) => s + l.lineTotal, 0);
+      netCashFlowLast3Months += subtotal * (1 + inv.vatRate / 100);
+    }
+  }
+  for (const e of paidExpensesLast6Months) {
+    if (e.expenseDate >= threeMonthsAgo) netCashFlowLast3Months -= e.amount;
+  }
+  const accountsPayable = (pendingExpenses._sum.amount ?? 0) + (pendingPurchaseOrders._sum.totalAmount ?? 0);
+
+  // Budget variance for plans covering the current date — over-budget categories only,
+  // since those are what a CFO needs flagged; under-budget is not actionable.
+  const budgetVariances = await Promise.all(
+    activeBudgetPlans.map(async (plan) => {
+      const actual = await prisma.expense.aggregate({
+        where: {
+          category: plan.category,
+          expenseDate: { gte: plan.periodStart, lte: plan.periodEnd },
+          site: { mineId, id: plan.siteId || undefined },
+        },
+        _sum: { amount: true },
+      });
+      return { category: plan.category, budgetedAmount: plan.budgetedAmount, actualAmount: actual._sum.amount ?? 0 };
+    })
+  );
+  const overBudgetCategories = budgetVariances
+    .filter((b) => b.actualAmount > b.budgetedAmount)
+    .sort((a, b) => (b.actualAmount - b.budgetedAmount) - (a.actualAmount - a.budgetedAmount))
+    .slice(0, 5)
+    .map((b) => ({
+      category: b.category,
+      budgetedAmount: Math.round(b.budgetedAmount),
+      actualAmount: Math.round(b.actualAmount),
+      overage: Math.round(b.actualAmount - b.budgetedAmount),
+    }));
+
   return {
     mine: { name: mine?.name ?? "the mine" },
     financialSummaryLast6Months: {
@@ -353,6 +405,15 @@ async function buildCfoContext(mineId: string) {
       netPay: Math.round(payrollLast30Days.netPay),
       deductions: Math.round(payrollLast30Days.deductions),
       workerCount: new Set(recentPayslips.map((p) => p.workerId)).size,
+    },
+    budgetVariance: {
+      activePlanCount: activeBudgetPlans.length,
+      overBudgetCategories,
+    },
+    cashFlowSnapshot: {
+      avgMonthlyNetCashFlowLast3Months: Math.round(netCashFlowLast3Months / 3),
+      accountsReceivable: Math.round(outstandingInvoiceTotal),
+      accountsPayable: Math.round(accountsPayable),
     },
   };
 }

@@ -120,6 +120,7 @@ export default function Layout() {
         { to: "/expenses", label: t("expenses.nav") },
         { to: "/budget-planning", label: t("budgetPlanning.nav") },
         ...(canSeeFinancials ? [{ to: "/cash-flow-forecast", label: t("cashFlowForecast.nav") }] : []),
+        ...(canSeeFinancials ? [{ to: "/approvals-inbox", label: t("approvalsInbox.nav") }] : []),
       ],
     },
     {

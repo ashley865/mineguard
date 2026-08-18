@@ -34,8 +34,12 @@ router.get("/", async (req, res) => {
   if (!mineId) return;
   if (!(await requireFinanceAccess(req, res))) return;
 
-  const historyMonths = 6;
-  const forecastMonths = 3;
+  const clampMonths = (raw: unknown, fallback: number) => {
+    const n = Number(raw);
+    return Number.isFinite(n) && n >= 1 && n <= 24 ? Math.round(n) : fallback;
+  };
+  const historyMonths = clampMonths(req.query.historyMonths, 6);
+  const forecastMonths = clampMonths(req.query.forecastMonths, 3);
   const since = new Date();
   since.setDate(1);
   since.setHours(0, 0, 0, 0);

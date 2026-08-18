@@ -4,9 +4,10 @@ import { api } from "../api/client";
 import { useAuth } from "../context/AuthContext";
 import { BudgetPlan, ExpenseCategory, Site } from "../api/types";
 import Modal from "../components/Modal";
-import { buttonDanger, buttonPrimary, buttonSecondary, cardClass, inputClass, labelClass, selectClass } from "../components/ui";
+import { buttonDanger, buttonPrimary, buttonSecondary, inputClass, labelClass, selectClass } from "../components/ui";
 import DateField from "../components/DateField";
 import LoadError from "../components/LoadError";
+import DataTable, { DataTableColumn } from "../components/DataTable";
 
 const categories: ExpenseCategory[] = [
   "OPERATIONS",
@@ -22,18 +23,28 @@ const categories: ExpenseCategory[] = [
   "OTHER",
 ];
 
-function PlanForm({ sites, onSubmit, onCancel }: {
+interface PlanSeed {
+  siteId?: string | null;
+  category?: ExpenseCategory;
+  periodStart?: string;
+  periodEnd?: string;
+  budgetedAmount?: number;
+  notes?: string | null;
+}
+
+function PlanForm({ sites, initial, onSubmit, onCancel }: {
   sites: Site[];
+  initial?: PlanSeed;
   onSubmit: (data: any) => Promise<void>;
   onCancel: () => void;
 }) {
   const { t } = useTranslation();
-  const [siteId, setSiteId] = useState("");
-  const [category, setCategory] = useState<ExpenseCategory>("OPERATIONS");
-  const [periodStart, setPeriodStart] = useState("");
-  const [periodEnd, setPeriodEnd] = useState("");
-  const [budgetedAmount, setBudgetedAmount] = useState("");
-  const [notes, setNotes] = useState("");
+  const [siteId, setSiteId] = useState(initial?.siteId ?? "");
+  const [category, setCategory] = useState<ExpenseCategory>(initial?.category ?? "OPERATIONS");
+  const [periodStart, setPeriodStart] = useState(initial?.periodStart?.slice(0, 10) ?? "");
+  const [periodEnd, setPeriodEnd] = useState(initial?.periodEnd?.slice(0, 10) ?? "");
+  const [budgetedAmount, setBudgetedAmount] = useState(initial?.budgetedAmount?.toString() ?? "");
+  const [notes, setNotes] = useState(initial?.notes ?? "");
   const [saving, setSaving] = useState(false);
 
   async function handleSubmit(e: FormEvent) {
@@ -100,7 +111,7 @@ export default function BudgetPlanning() {
   const [sites, setSites] = useState<Site[]>([]);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState(false);
-  const [modal, setModal] = useState(false);
+  const [modal, setModal] = useState<null | { mode: "create"; seed?: BudgetPlan } | { mode: "edit"; plan: BudgetPlan }>(null);
 
   async function load() {
     setLoading(true);
@@ -123,7 +134,13 @@ export default function BudgetPlanning() {
 
   async function create(data: any) {
     await api.post("/budget-plans", data);
-    setModal(false);
+    setModal(null);
+    await load();
+  }
+
+  async function update(id: string, data: any) {
+    await api.put(`/budget-plans/${id}`, data);
+    setModal(null);
     await load();
   }
 
@@ -144,54 +161,74 @@ export default function BudgetPlanning() {
           <p className="text-mine-300 text-sm">{t("budgetPlanning.subtitle")}</p>
         </div>
         {canEdit && (
-          <button className={buttonPrimary} onClick={() => setModal(true)}>{t("budgetPlanning.new")}</button>
+          <button className={buttonPrimary} onClick={() => setModal({ mode: "create" })}>{t("budgetPlanning.new")}</button>
         )}
       </div>
 
-      <div className={`${cardClass} overflow-x-auto`}>
-        <table className="w-full text-sm">
-          <thead className="bg-mine-800/50 text-mine-300 text-xs uppercase">
-            <tr>
-              <th className="text-left px-4 py-2">{t("common.site")}</th>
-              <th className="text-left px-4 py-2">{t("expenses.category")}</th>
-              <th className="text-left px-4 py-2">{t("budgetPlanning.period")}</th>
-              <th className="text-left px-4 py-2">{t("budgetPlanning.budgetedAmount")}</th>
-              <th className="text-left px-4 py-2">{t("budgetPlanning.actualAmount")}</th>
-              <th className="text-left px-4 py-2">{t("budgetPlanning.variance")}</th>
-              <th className="px-4 py-2"></th>
-            </tr>
-          </thead>
-          <tbody>
-            {plans.map((p) => {
-              const variance = p.budgetedAmount - p.actualAmount;
-              return (
-                <tr key={p.id} className="border-t border-mine-800 hover:bg-mine-800/30">
-                  <td className="px-4 py-2 font-medium">{p.site?.name ?? t("budgetPlanning.allSites")}</td>
-                  <td className="px-4 py-2 text-mine-300">{t(`expenses.categories.${p.category}`)}</td>
-                  <td className="px-4 py-2 text-mine-300">
-                    {new Date(p.periodStart).toLocaleDateString()} – {new Date(p.periodEnd).toLocaleDateString()}
-                  </td>
-                  <td className="px-4 py-2 text-mine-300">{p.budgetedAmount.toLocaleString()}</td>
-                  <td className="px-4 py-2 text-mine-300">{p.actualAmount.toLocaleString()}</td>
-                  <td className={`px-4 py-2 font-semibold ${variance < 0 ? "text-danger-500" : "text-success-500"}`}>
+      <DataTable
+        columns={
+          [
+            { key: "site", header: t("common.site"), render: (p) => p.site?.name ?? t("budgetPlanning.allSites"), sortValue: (p) => p.site?.name ?? "" },
+            { key: "category", header: t("expenses.category"), render: (p) => t(`expenses.categories.${p.category}`), sortValue: (p) => p.category },
+            {
+              key: "period",
+              header: t("budgetPlanning.period"),
+              render: (p) => `${new Date(p.periodStart).toLocaleDateString()} – ${new Date(p.periodEnd).toLocaleDateString()}`,
+              sortValue: (p) => p.periodStart,
+            },
+            { key: "budgeted", header: t("budgetPlanning.budgetedAmount"), render: (p) => p.budgetedAmount.toLocaleString(), sortValue: (p) => p.budgetedAmount },
+            { key: "actual", header: t("budgetPlanning.actualAmount"), render: (p) => p.actualAmount.toLocaleString(), sortValue: (p) => p.actualAmount },
+            {
+              key: "variance",
+              header: t("budgetPlanning.variance"),
+              render: (p) => {
+                const variance = p.budgetedAmount - p.actualAmount;
+                return (
+                  <span className={`font-semibold ${variance < 0 ? "text-danger-500" : "text-success-500"}`}>
                     {variance < 0 ? "−" : "+"}{Math.abs(variance).toLocaleString()}
-                  </td>
-                  <td className="px-4 py-2 text-right">
-                    {canEdit && <button className={buttonDanger} onClick={() => remove(p.id)}>{t("common.delete")}</button>}
-                  </td>
-                </tr>
-              );
-            })}
-            {plans.length === 0 && (
-              <tr><td colSpan={7} className="px-4 py-6 text-center text-mine-400">{t("budgetPlanning.noneYet")}</td></tr>
-            )}
-          </tbody>
-        </table>
-      </div>
+                  </span>
+                );
+              },
+              sortValue: (p) => p.budgetedAmount - p.actualAmount,
+            },
+          ] as DataTableColumn<BudgetPlan>[]
+        }
+        rows={plans}
+        rowKey={(p) => p.id}
+        emptyMessage={t("budgetPlanning.noneYet")}
+        searchValue={(p) => `${p.site?.name ?? ""} ${t(`expenses.categories.${p.category}`)}`}
+        exportFilename="budget-plans"
+        exportColumns={[
+          { header: t("common.site"), value: (p) => p.site?.name ?? t("budgetPlanning.allSites") },
+          { header: t("expenses.category"), value: (p) => t(`expenses.categories.${p.category}`) },
+          { header: t("budgetPlanning.budgetedAmount"), value: (p) => p.budgetedAmount },
+          { header: t("budgetPlanning.actualAmount"), value: (p) => p.actualAmount },
+        ]}
+        actions={(p) =>
+          canEdit ? (
+            <div className="flex justify-end gap-2">
+              <button className="text-xs text-mine-300 hover:text-mine-50" onClick={() => setModal({ mode: "edit", plan: p })}>{t("common.edit")}</button>
+              <button className="text-xs text-mine-300 hover:text-mine-50" onClick={() => setModal({ mode: "create", seed: p })}>{t("budgetPlanning.duplicate")}</button>
+              <button className={buttonDanger} onClick={() => remove(p.id)}>{t("common.delete")}</button>
+            </div>
+          ) : null
+        }
+      />
 
       {modal && (
-        <Modal title={t("budgetPlanning.newTitle")} onClose={() => setModal(false)}>
-          <PlanForm sites={sites} onSubmit={create} onCancel={() => setModal(false)} />
+        <Modal title={modal.mode === "edit" ? t("budgetPlanning.editTitle") : t("budgetPlanning.newTitle")} onClose={() => setModal(null)}>
+          <PlanForm
+            sites={sites}
+            initial={
+              modal.mode === "edit"
+                ? modal.plan
+                : modal.seed
+                ? { siteId: modal.seed.siteId, category: modal.seed.category, budgetedAmount: modal.seed.budgetedAmount, notes: modal.seed.notes }
+                : undefined
+            }
+            onSubmit={(data) => (modal.mode === "edit" ? update(modal.plan.id, data) : create(data))}
+            onCancel={() => setModal(null)}
+          />
         </Modal>
       )}
     </div>

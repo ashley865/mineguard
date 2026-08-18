@@ -2337,7 +2337,12 @@
     "createError": "Impossible de créer ce bon de commande",
     "noneYetOrders": "Aucun bon de commande pour le moment.",
     "confirmDeleteOrder": "Supprimer ce bon de commande ?",
-    "summaryPendingApproval": "En Attente d'Approbation"
+    "summaryPendingApproval": "En Attente d'Approbation",
+    "orderCount": "Commandes",
+    "totalSpend": "Dépense totale",
+    "requestedBy": "Demandé par {{name}}",
+    "approvedBy": "Approuvé par {{name}}",
+    "editOrderTitle": "Modifier le bon de commande"
   },
   "invoices": {
     "nav": "Factures",
@@ -2377,7 +2382,10 @@
       "31-60": "31–60 jours",
       "61-90": "61–90 jours",
       "90+": "90+ jours"
-    }
+    },
+    "editInvoiceTitle": "Modifier la facture",
+    "allStatuses": "Tous les statuts",
+    "allSites": "Tous les sites"
   },
   "expenses": {
     "nav": "Dépenses",
@@ -2453,7 +2461,9 @@
     "maintenanceLinked": "Maintenance",
     "contractLinked": "Attribution de Contrat",
     "allPayeeTypes": "Tous",
-    "payeeTypeAutoSyncedHint": "Le type de ce bénéficiaire est géré automatiquement et ne peut pas être modifié ici."
+    "payeeTypeAutoSyncedHint": "Le type de ce bénéficiaire est géré automatiquement et ne peut pas être modifié ici.",
+    "editExpenseTitle": "Modifier la dépense",
+    "requestLinked": "Demande exécutive"
   },
   "executiveRequests": {
     "nav": "Demandes",
@@ -3906,7 +3916,9 @@
     "actualAmount": "Dépense réelle",
     "variance": "Écart",
     "noneYet": "Aucun plan budgétaire défini pour l'instant.",
-    "confirmDelete": "Supprimer ce plan budgétaire ?"
+    "confirmDelete": "Supprimer ce plan budgétaire ?",
+    "duplicate": "Dupliquer",
+    "editTitle": "Modifier le plan budgétaire"
   },
   "toolboxTalks": {
     "nav": "Causeries Sécurité",
@@ -4004,7 +4016,9 @@
     "receivable": "Comptes Clients",
     "inventory": "Inventaire",
     "payable": "Comptes Fournisseurs",
-    "disclaimer": "Les chiffres proviennent des factures, dépenses et paie déjà enregistrées dans MineGuard. Il s'agit d'un outil de planification, pas d'un état financier audité."
+    "disclaimer": "Les chiffres proviennent des factures, dépenses et paie déjà enregistrées dans MineGuard. Il s'agit d'un outil de planification, pas d'un état financier audité.",
+    "historyMonths": "Historique :",
+    "forecastMonths": "Prévision :"
   },
   "documentAcknowledgements": {
     "nav": "Accusés de Réception de Documents",
@@ -4044,5 +4058,25 @@
     "markFailed": "Marquer Échoué",
     "noneYet": "Aucun enregistrement de vérification pour l'instant.",
     "confirmDelete": "Supprimer cet enregistrement de vérification ?"
+  },
+  "approvalsInbox": {
+    "nav": "Boîte d'approbations",
+    "subtitle": "Toutes les approbations de dépenses et de bons de commande en attente dans une seule file",
+    "pendingExpenses": "Dépenses en attente",
+    "pendingExpenseTotal": "Total des dépenses en attente",
+    "submittedOrders": "Commandes soumises",
+    "submittedOrderTotal": "Total des commandes soumises",
+    "type": "Type",
+    "types": {
+      "EXPENSE": "Dépense",
+      "PURCHASE_ORDER": "Bon de commande"
+    },
+    "reference": "Référence",
+    "description": "Description",
+    "requestedBy": "Demandé par",
+    "amount": "Montant",
+    "submitted": "Soumis",
+    "noneYet": "Rien en attente d'approbation pour le moment.",
+    "confirmReject": "Rejeter cette dépense ?"
   }
 }

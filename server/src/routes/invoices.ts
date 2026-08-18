@@ -154,7 +154,14 @@ router.put("/:id", requireRole("ADMIN", "SUPERVISOR", "EXECUTIVE"), async (req, 
   const { lines, clientEmail, ...invoiceData } = parsed.data;
   const invoice = await prisma.invoice.update({
     where: { id: existing.id },
-    data: { ...invoiceData, clientEmail: clientEmail || undefined },
+    data: {
+      ...invoiceData,
+      clientEmail: clientEmail || undefined,
+      // Line items are a nested relation, not a scalar field — replacing the whole set is
+      // simpler and safer than diffing individual rows, and invoices are edited rarely
+      // enough that this isn't a performance concern.
+      ...(lines ? { lines: { deleteMany: {}, create: lines.map((l) => ({ ...l, lineTotal: l.quantity * l.unitPrice })) } } : {}),
+    },
     select: invoiceSelect,
   });
   res.json(invoice);

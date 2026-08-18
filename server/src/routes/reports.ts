@@ -448,13 +448,56 @@ const exportConfigs: Record<
       return rows.map((r) => ({ ...r, site: r.site?.name }));
     },
   },
+  expenses: {
+    columns: [
+      { key: "expenseNumber", label: "Expense Number" },
+      { key: "category", label: "Category" },
+      { key: "description", label: "Description" },
+      { key: "amount", label: "Amount" },
+      { key: "currency", label: "Currency" },
+      { key: "status", label: "Status" },
+      { key: "payee", label: "Payee" },
+      { key: "site", label: "Site" },
+      { key: "expenseDate", label: "Expense Date" },
+    ],
+    query: async (mineId, siteId) => {
+      const rows = await prisma.expense.findMany({
+        where: siteId ? { siteId, site: { mineId } } : { site: { mineId } },
+        include: { site: { select: { name: true } }, payee: { select: { name: true } } },
+        orderBy: { expenseDate: "desc" },
+      });
+      return rows.map((r) => ({ ...r, site: r.site?.name, payee: r.payee?.name }));
+    },
+  },
+  invoices: {
+    columns: [
+      { key: "invoiceNumber", label: "Invoice Number" },
+      { key: "clientName", label: "Client Name" },
+      { key: "status", label: "Status" },
+      { key: "currency", label: "Currency" },
+      { key: "site", label: "Site" },
+      { key: "issueDate", label: "Issue Date" },
+      { key: "dueDate", label: "Due Date" },
+    ],
+    query: async (mineId, siteId) => {
+      const rows = await prisma.invoice.findMany({
+        where: siteId ? { siteId, site: { mineId } } : { site: { mineId } },
+        include: { site: { select: { name: true } } },
+        orderBy: { issueDate: "desc" },
+      });
+      return rows.map((r) => ({ ...r, site: r.site?.name }));
+    },
+  },
 };
+
+const FINANCE_ONLY_ENTITIES = new Set(["expenses", "invoices"]);
 
 router.get("/export/:entity", async (req, res) => {
   const mineId = requireMineId(req, res);
   if (!mineId) return;
   const config = exportConfigs[req.params.entity];
   if (!config) return res.status(404).json({ error: "Unknown export entity" });
+  if (FINANCE_ONLY_ENTITIES.has(req.params.entity) && !(await requireFinanceAccess(req, res))) return;
   const siteId = req.query.siteId as string | undefined;
   const rows = await config.query(mineId, siteId);
   const csv = toCsv(rows, config.columns);

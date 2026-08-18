@@ -14,8 +14,9 @@ import {
 } from "recharts";
 import { api } from "../../api/client";
 import { ProductionFinancialSummary, Site } from "../../api/types";
-import { cardClass, selectClass } from "../../components/ui";
+import { buttonSecondary, cardClass, selectClass } from "../../components/ui";
 import LoadError from "../../components/LoadError";
+import { exportToCsv } from "../../lib/exportCsv";
 
 const CHART_TOOLTIP_STYLE = { background: "#fafafa", border: "1px solid #e5e5e5", fontSize: 11 };
 const CHART_TICK_STYLE = { fontSize: 10, fill: "#52525b" };
@@ -62,6 +63,20 @@ export default function FinancialPerformanceTab({ sites }: { sites: Site[] }) {
   const currency = "ZAR";
   const money = (n: number) => `${currency} ${Math.round(n).toLocaleString()}`;
 
+  function exportCsv() {
+    if (!summary) return;
+    exportToCsv(
+      "financial-performance",
+      summary.months.map((m) => ({ ...m, netMargin: m.earnings - m.expenses })),
+      [
+        { header: "Month", value: (r) => r.month },
+        { header: "Earnings", value: (r) => r.earnings },
+        { header: "Expenses", value: (r) => r.expenses },
+        { header: "Net Margin", value: (r) => r.netMargin },
+      ]
+    );
+  }
+
   return (
     <div className="space-y-4">
       <div className="flex items-center gap-3 flex-wrap">
@@ -74,6 +89,9 @@ export default function FinancialPerformanceTab({ sites }: { sites: Site[] }) {
           <option value={6}>{t("production.lastNMonths", { count: 6 })}</option>
           <option value={12}>{t("production.lastNMonths", { count: 12 })}</option>
         </select>
+        {summary && (
+          <button className={`${buttonSecondary} ml-auto`} onClick={exportCsv}>{t("common.exportCsv")}</button>
+        )}
       </div>
 
       {loading && <div className="text-mine-300">{t("common.loading")}</div>}
