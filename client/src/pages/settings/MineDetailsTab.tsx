@@ -15,6 +15,7 @@ export default function MineDetailsTab() {
   const [registrationNumber, setRegistrationNumber] = useState("");
   const [miningRightNumber, setMiningRightNumber] = useState("");
   const [description, setDescription] = useState("");
+  const [weatherPostalCode, setWeatherPostalCode] = useState("");
   const [bankName, setBankName] = useState("");
   const [bankAccountHolder, setBankAccountHolder] = useState("");
   const [bankAccountNumber, setBankAccountNumber] = useState("");
@@ -35,6 +36,7 @@ export default function MineDetailsTab() {
     setRegistrationNumber(res.data.registrationNumber ?? "");
     setMiningRightNumber(res.data.miningRightNumber ?? "");
     setDescription(res.data.description ?? "");
+    setWeatherPostalCode(res.data.weatherPostalCode ?? "");
     setBankName(res.data.bankName ?? "");
     setBankAccountHolder(res.data.bankAccountHolder ?? "");
     setBankAccountNumber(res.data.bankAccountNumber ?? "");
@@ -57,12 +59,14 @@ export default function MineDetailsTab() {
         registrationNumber: registrationNumber || null,
         miningRightNumber: miningRightNumber || null,
         description: description || null,
+        weatherPostalCode: weatherPostalCode || undefined,
         bankName: bankName || null,
         bankAccountHolder: bankAccountHolder || null,
         bankAccountNumber: bankAccountNumber || null,
         bankBranchCode: bankBranchCode || null,
       });
       setMine(res.data);
+      setWeatherPostalCode(res.data.weatherPostalCode ?? "");
       setBankName(res.data.bankName ?? "");
       setBankAccountHolder(res.data.bankAccountHolder ?? "");
       setBankAccountNumber(res.data.bankAccountNumber ?? "");
@@ -146,6 +150,11 @@ export default function MineDetailsTab() {
         <div>
           <label className={labelClass}>{t("common.description")}</label>
           <textarea className={inputClass} rows={2} value={description} onChange={(e) => setDescription(e.target.value)} />
+        </div>
+        <div>
+          <label className={labelClass}>{t("settings.mine.weatherPostalCode")}</label>
+          <input className={`${inputClass} max-w-[10rem]`} value={weatherPostalCode} onChange={(e) => setWeatherPostalCode(e.target.value)} required />
+          <p className="text-[10px] text-mine-400 mt-1">{t("settings.mine.weatherPostalCodeHint")}</p>
         </div>
         <div className="border-t border-mine-800 pt-4">
           <div className="text-xs font-semibold text-mine-300 uppercase mb-2">{t("settings.mine.bankingDetails")}</div>

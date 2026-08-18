@@ -89,6 +89,74 @@ async function resolveSiteCoordinates(site: {
   return coords;
 }
 
+// A South African postal code isn't a reliable query for a name-based geocoder (Open-Meteo's
+// geocoding search matches place names, not postal codes), so well-known codes — covering the
+// major metros and mining hubs — are resolved from this curated table first. Anything not
+// listed here falls back to a best-effort name search before giving up.
+const SA_POSTAL_CODE_COORDS: Record<string, { lat: number; lon: number }> = {
+  "2000": { lat: -26.2041, lon: 28.0473 }, // Johannesburg CBD
+  "2001": { lat: -26.2044, lon: 28.0456 }, // Marshalltown
+  "2094": { lat: -26.1855, lon: 28.0074 }, // Melville / Auckland Park, Johannesburg
+  "2107": { lat: -26.0939, lon: 27.9994 }, // Randburg
+  "1401": { lat: -26.2125, lon: 28.254 }, // Boksburg
+  "1501": { lat: -26.2506, lon: 28.4406 }, // Springs
+  "1709": { lat: -26.1625, lon: 27.8727 }, // Roodepoort
+  "1685": { lat: -25.9992, lon: 28.1264 }, // Midrand
+  "0001": { lat: -25.7479, lon: 28.2293 }, // Pretoria Central
+  "0084": { lat: -25.7826, lon: 28.2773 }, // Pretoria (Menlyn)
+  "4001": { lat: -29.8587, lon: 31.0218 }, // Durban Central
+  "4301": { lat: -29.8149, lon: 30.8676 }, // Pinetown
+  "3201": { lat: -29.6006, lon: 30.3794 }, // Pietermaritzburg
+  "8000": { lat: -33.9249, lon: 18.4241 }, // Cape Town Central
+  "7530": { lat: -33.9, lon: 18.6292 }, // Bellville
+  "7100": { lat: -34.0836, lon: 18.8501 }, // Somerset West
+  "9301": { lat: -29.0852, lon: 26.1596 }, // Bloemfontein
+  "2570": { lat: -26.8523, lon: 26.6668 }, // Klerksdorp
+  "2571": { lat: -26.9808, lon: 26.6817 }, // Orkney
+  "2745": { lat: -25.6672, lon: 27.2424 }, // Rustenburg
+  "8301": { lat: -28.7282, lon: 24.7499 }, // Kimberley
+  "1035": { lat: -25.8712, lon: 29.2341 }, // Emalahleni (Witbank)
+  "2400": { lat: -27.9769, lon: 26.7311 }, // Welkom
+  "6000": { lat: -33.9608, lon: 25.6022 }, // Gqeberha (Port Elizabeth)
+  "2740": { lat: -23.9425, lon: 31.1367 }, // Phalaborwa
+  "8460": { lat: -28.325, lon: 23.0631 }, // Postmasburg
+  "8801": { lat: -27.6975, lon: 23.0419 }, // Kathu
+  "1200": { lat: -25.4753, lon: 30.9694 }, // Mbombela (Nelspruit)
+  "0699": { lat: -23.9045, lon: 29.4689 }, // Polokwane
+  "1350": { lat: -25.7748, lon: 29.4644 }, // Middelburg
+  "2499": { lat: -28.1258, lon: 26.855 }, // Virginia (Free State goldfields)
+  "8467": { lat: -27.4534, lon: 23.4322 }, // Kuruman
+};
+
+async function geocodePostalCode(postalCode: string): Promise<{ lat: number; lon: number } | null> {
+  const trimmed = postalCode.trim();
+  const known = SA_POSTAL_CODE_COORDS[trimmed];
+  if (known) return known;
+  return geocodeLocation(`${trimmed}, South Africa`);
+}
+
+// Same cache-once-and-persist pattern as resolveSiteCoordinates above, but for the mine's
+// single HQ postal code rather than a per-site address.
+async function resolveMineWeatherCoordinates(mine: {
+  id: string;
+  weatherPostalCode: string;
+  weatherLatitude: number | null;
+  weatherLongitude: number | null;
+}): Promise<{ lat: number; lon: number } | null> {
+  if (mine.weatherLatitude != null && mine.weatherLongitude != null) {
+    return { lat: mine.weatherLatitude, lon: mine.weatherLongitude };
+  }
+  const coords = await geocodePostalCode(mine.weatherPostalCode);
+  if (!coords) return null;
+  await prisma.mine
+    .update({
+      where: { id: mine.id },
+      data: { weatherLatitude: coords.lat, weatherLongitude: coords.lon, weatherGeocodedAt: new Date() },
+    })
+    .catch(() => {});
+  return coords;
+}
+
 const WEATHER_CODE_MAP: Record<number, { condition: string; icon: string }> = {
   0: { condition: "Clear sky", icon: "sun" },
   1: { condition: "Mainly clear", icon: "sun" },
@@ -158,13 +226,35 @@ async function fetchSiteWeather(siteId: string, coords: { lat: number; lon: numb
 router.get("/weather", async (req, res) => {
   const mineId = requireMineId(req, res);
   if (!mineId) return;
-  const sites = await prisma.site.findMany({
-    where: { mineId },
-    select: { id: true, name: true, location: true, latitude: true, longitude: true },
-    take: 8,
-    orderBy: { name: "asc" },
-  });
-  const results = await Promise.all(
+  const [mine, sites] = await Promise.all([
+    prisma.mine.findUnique({
+      where: { id: mineId },
+      select: { id: true, name: true, weatherPostalCode: true, weatherLatitude: true, weatherLongitude: true },
+    }),
+    prisma.site.findMany({
+      where: { mineId },
+      select: { id: true, name: true, location: true, latitude: true, longitude: true },
+      take: 8,
+      orderBy: { name: "asc" },
+    }),
+  ]);
+
+  const mineHqResult = mine
+    ? await (async () => {
+        const coords = await resolveMineWeatherCoordinates(mine);
+        const cacheKey = `mine-hq-${mine.id}`;
+        return {
+          siteId: cacheKey,
+          siteName: mine.name,
+          latitude: coords?.lat ?? null,
+          longitude: coords?.lon ?? null,
+          weather: coords ? await fetchSiteWeather(cacheKey, coords) : null,
+          isHeadquarters: true,
+        };
+      })()
+    : null;
+
+  const siteResults = await Promise.all(
     sites.map(async (site) => {
       const coords = await resolveSiteCoordinates(site);
       return {
@@ -173,35 +263,52 @@ router.get("/weather", async (req, res) => {
         latitude: coords?.lat ?? null,
         longitude: coords?.lon ?? null,
         weather: coords ? await fetchSiteWeather(site.id, coords) : null,
+        isHeadquarters: false,
       };
     })
   );
+
+  const results = [...(mineHqResult ? [mineHqResult] : []), ...siteResults];
   res.json(results.filter((r) => r.weather !== null));
 });
 
 // ---------------------------------------------------------------------------
-// Mineral / commodity spot prices — major metals relevant to South African
-// mining (platinum and gold especially). Not scoped to a mine, so no
-// requireMineId here — same data for every caller, hence the single shared
-// module-level cache rather than a per-mine one.
+// Mineral / commodity spot prices — the 11 commodities South Africa is most known
+// for mining (mirrors the MineralType enum used elsewhere in the app, minus the
+// non-metallic/lower-profile entries). Not scoped to a mine, so no requireMineId
+// here — same data for every caller, hence the single shared module-level cache
+// rather than a per-mine one.
+//
+// Several of these (chrome, manganese, diamond, zinc, nickel) have no free,
+// retail-accessible spot-price feed — diamonds in particular aren't a fungible,
+// exchange-traded commodity at all, and the others require a paid Fastmarkets/
+// Argus/Platts subscription. Those entries carry no `symbol` and are returned
+// with `available: false` rather than a guessed/fabricated number, so the client
+// can show all 11 while being honest about which have a live price.
 // ---------------------------------------------------------------------------
 
-const METAL_SYMBOLS: { symbol: string; key: string; label: string; unit: string }[] = [
-  { symbol: "GC=F", key: "GOLD", label: "Gold", unit: "oz" },
-  { symbol: "PL=F", key: "PLATINUM", label: "Platinum", unit: "oz" },
-  { symbol: "SI=F", key: "SILVER", label: "Silver", unit: "oz" },
-  { symbol: "PA=F", key: "PALLADIUM", label: "Palladium", unit: "oz" },
-  { symbol: "HG=F", key: "COPPER", label: "Copper", unit: "lb" },
+const COMMODITY_SYMBOLS: { symbol?: string; key: string; unit: string }[] = [
+  { symbol: "GC=F", key: "GOLD", unit: "oz" },
+  { symbol: "PL=F", key: "PLATINUM_GROUP_METALS", unit: "oz" },
+  { key: "DIAMOND", unit: "carat" },
+  { symbol: "MTF=F", key: "COAL", unit: "tonne" },
+  { symbol: "TIO=F", key: "IRON_ORE", unit: "tonne" },
+  { key: "CHROME", unit: "tonne" },
+  { key: "MANGANESE", unit: "tonne" },
+  { symbol: "HG=F", key: "COPPER", unit: "lb" },
+  { key: "ZINC", unit: "tonne" },
+  { key: "NICKEL", unit: "tonne" },
+  { symbol: "UX=F", key: "URANIUM", unit: "lb" },
 ];
 
 interface MetalPrice {
   key: string;
-  label: string;
   unit: string;
-  price: number;
+  available: boolean;
+  price: number | null;
   priceZar: number | null;
   previousClose: number | null;
-  changePercent: number;
+  changePercent: number | null;
   currency: string | null;
 }
 
@@ -230,11 +337,11 @@ async function generatePriceInsight(prices: MetalPrice[]): Promise<string | null
       {
         role: "system",
         content:
-          `You are the Mine Guard AI Assistant. Given a snapshot of major metal spot prices, write exactly ONE ` +
-          `short sentence (max 30 words) of plain-language, purely descriptive commentary on what's notable in the ` +
-          `snapshot — which metals moved most and in which direction. Never recommend buying, selling, holding, or ` +
-          `trading anything. Never predict future prices. Never use words like "should", "opportunity", "buy", or ` +
-          `"sell". Reply with ONLY the sentence, no markdown, no quotes.` +
+          `You are the Mine Guard AI Assistant. Given a snapshot of South African mining commodity spot prices, ` +
+          `write exactly ONE short sentence (max 30 words) of plain-language, purely descriptive commentary on ` +
+          `what's notable in the snapshot — which commodities moved most and in which direction. Never recommend ` +
+          `buying, selling, holding, or trading anything. Never predict future prices. Never use words like ` +
+          `"should", "opportunity", "buy", or "sell". Reply with ONLY the sentence, no markdown, no quotes.` +
           GUARDRAIL,
       },
       { role: "user", content: `Price snapshot (JSON): ${JSON.stringify(prices)}` },
@@ -271,9 +378,7 @@ async function fetchYahooQuote(symbol: string): Promise<{ price: number; previou
 // Dormant (silently skipped) whenever METALS_API_KEY isn't set, same pattern as AI_API_KEY.
 const METALS_API_SYMBOLS: Record<string, string> = {
   GOLD: "XAU",
-  PLATINUM: "XPT",
-  SILVER: "XAG",
-  PALLADIUM: "XPD",
+  PLATINUM_GROUP_METALS: "XPT",
   COPPER: "XCU",
 };
 
@@ -302,47 +407,57 @@ async function fetchMetalsApiPrices(): Promise<Record<string, number> | null> {
   }
 }
 
+const UNAVAILABLE_PRICE: Omit<MetalPrice, "key" | "unit"> = {
+  available: false,
+  price: null,
+  priceZar: null,
+  previousClose: null,
+  changePercent: null,
+  currency: null,
+};
+
+async function fetchCommodityQuote(c: { symbol?: string; key: string; unit: string }): Promise<MetalPrice> {
+  if (!c.symbol) return { key: c.key, unit: c.unit, ...UNAVAILABLE_PRICE };
+  const quote = await fetchYahooQuote(c.symbol);
+  if (!quote) return { key: c.key, unit: c.unit, ...UNAVAILABLE_PRICE };
+  return {
+    key: c.key,
+    unit: c.unit,
+    available: true,
+    price: quote.price,
+    priceZar: null, // filled in below once the FX rate is known
+    previousClose: quote.previousClose,
+    changePercent: 0, // recomputed below once the final (possibly metals-api-overridden) price is known
+    currency: quote.currency,
+  };
+}
+
 router.get("/mineral-prices", async (_req, res) => {
   if (priceCache && priceCache.expiresAt > Date.now()) {
     return res.json(priceCache.data);
   }
-  const [results, fxRateUsdZar, metalsApiPrices] = await Promise.all([
-    Promise.all(
-      METAL_SYMBOLS.map(async (m): Promise<Omit<MetalPrice, "priceZar"> | null> => {
-        const quote = await fetchYahooQuote(m.symbol);
-        if (!quote) return null;
-        return {
-          key: m.key,
-          label: m.label,
-          unit: m.unit,
-          price: quote.price,
-          previousClose: quote.previousClose,
-          changePercent: 0, // recomputed below once the final (possibly metals-api-overridden) price is known
-          currency: quote.currency,
-        };
-      })
-    ),
+  const [quotes, fxRateUsdZar, metalsApiPrices] = await Promise.all([
+    Promise.all(COMMODITY_SYMBOLS.map(fetchCommodityQuote)),
     fetchUsdToZarRate(),
     fetchMetalsApiPrices(),
   ]);
   // The Yahoo futures quotes are consistently USD in practice — only convert when the
   // source actually says so, rather than assuming, so a currency change upstream can't
   // silently produce a wrong ZAR figure. When metals-api.com is configured, its current
-  // price replaces Yahoo's for that metal (more authoritative), but Yahoo's previousClose
-  // is still what % change is measured against either way.
-  const prices: MetalPrice[] = results
-    .filter((r): r is Omit<MetalPrice, "priceZar"> => r !== null)
-    .map((p) => {
-      const price = metalsApiPrices?.[p.key] ?? p.price;
-      const changePercent = p.previousClose ? ((price - p.previousClose) / p.previousClose) * 100 : 0;
-      return {
-        ...p,
-        price: Math.round(price * 100) / 100,
-        changePercent: Math.round(changePercent * 100) / 100,
-        priceZar: fxRateUsdZar && p.currency === "USD" ? Math.round(price * fxRateUsdZar * 100) / 100 : null,
-      };
-    });
-  const insight = await generatePriceInsight(prices);
+  // price replaces Yahoo's for that commodity (more authoritative), but Yahoo's
+  // previousClose is still what % change is measured against either way.
+  const prices: MetalPrice[] = quotes.map((p) => {
+    if (!p.available || p.price == null) return p;
+    const price = metalsApiPrices?.[p.key] ?? p.price;
+    const changePercent = p.previousClose ? ((price - p.previousClose) / p.previousClose) * 100 : 0;
+    return {
+      ...p,
+      price: Math.round(price * 100) / 100,
+      changePercent: Math.round(changePercent * 100) / 100,
+      priceZar: fxRateUsdZar && p.currency === "USD" ? Math.round(price * fxRateUsdZar * 100) / 100 : null,
+    };
+  });
+  const insight = await generatePriceInsight(prices.filter((p) => p.available));
   const payload: MineralPricesPayload = {
     asOf: new Date().toISOString(),
     prices,

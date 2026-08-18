@@ -163,7 +163,21 @@
     "equipmentStatus": "État des Équipements",
     "financialPerformance": "Performance Financière",
     "tonnesSold": "Tonnes Vendues",
-    "biggestBuyer": "Plus Gros Acheteur"
+    "biggestBuyer": "Plus Gros Acheteur",
+    "needsAttention": "Nécessite votre attention",
+    "pendingExpenses": "Dépenses en attente",
+    "pendingOrders": "Commandes en attente",
+    "pendingRequests": "Demandes en attente",
+    "criticalItIncidents": "Incidents IT critiques",
+    "pendingInvites": "Invitations en attente",
+    "pendingFinanceTotal": "{{amount}} de dépenses et bons de commande en attente d'examen.",
+    "sectionOverview": "Vue d'ensemble",
+    "sectionInsights": "Informations",
+    "sectionOperations": "Opérations",
+    "quickApprovalsInbox": "Boîte d'approbations",
+    "quickExecutiveRequests": "Demandes de direction",
+    "quickReporting": "Rapports",
+    "quickMineSettings": "Paramètres de la mine"
   },
   "executive": {
     "title": "Tableau de bord exécutif",
@@ -1534,7 +1548,9 @@
       "logoTitle": "Logo de la mine",
       "uploadLogo": "Téléverser le logo",
       "bankingDetails": "Coordonnées Bancaires",
-      "bankingDetailsHint": "Utilisées sur les factures générées et comme référence de paiement pour les acheteurs/entrepreneurs. Visible uniquement par les administrateurs."
+      "bankingDetailsHint": "Utilisées sur les factures générées et comme référence de paiement pour les acheteurs/entrepreneurs. Visible uniquement par les administrateurs.",
+      "weatherPostalCode": "Code postal météo",
+      "weatherPostalCodeHint": "Code postal sud-africain utilisé pour afficher la météo du siège sur le tableau de bord."
     },
     "invites": {
       "newTitle": "Inviter un Exécutif",
@@ -3814,7 +3830,9 @@
     "industryNews": "Actualités du Secteur",
     "unknownSource": "Source inconnue",
     "noSummary": "Aucun résumé disponible pour cet article pour le moment.",
-    "readFullArticle": "Lire l'article complet"
+    "readFullArticle": "Lire l'article complet",
+    "hqBadge": "Siège",
+    "noLivePrice": "Aucune source de prix en direct disponible"
   },
   "financial": {
     "nav": "Performance Financière",

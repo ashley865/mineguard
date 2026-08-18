@@ -12,7 +12,8 @@ const NAVY_TOOLTIP_STYLE = { background: "#0f1f38", border: "1px solid rgba(255,
 const NAVY_TICK_STYLE = { fontSize: 10, fill: "rgba(255,255,255,0.55)", fontWeight: 600 };
 
 type Tier = "up" | "down" | "flat";
-function tierOf(changePercent: number): Tier {
+function tierOf(changePercent: number | null): Tier {
+  if (changePercent == null) return "flat";
   if (changePercent > 0.15) return "up";
   if (changePercent < -0.15) return "down";
   return "flat";
@@ -92,7 +93,12 @@ function WeatherCard({ reading }: { reading: SiteWeatherReading }) {
     >
       <WeatherIcon icon={weather.icon} className={`w-8 h-8 shrink-0 ${severe ? "text-danger-400" : "text-hazard-400"}`} />
       <div className="min-w-0">
-        <div className="text-[10px] text-white/50 uppercase tracking-wide truncate">{reading.siteName}</div>
+        <div className="text-[10px] text-white/50 uppercase tracking-wide truncate flex items-center gap-1">
+          {reading.isHeadquarters && (
+            <span className="px-1 py-0.5 rounded bg-hazard-500/80 text-white text-[8px] font-extrabold shrink-0">{t("liveData.hqBadge")}</span>
+          )}
+          <span className="truncate">{reading.siteName}</span>
+        </div>
         <div className="text-lg font-bold leading-tight text-white">{Math.round(weather.temperatureC)}°C</div>
         <div className="text-[10px] text-white/60 truncate">{weather.condition}</div>
         <div className={`text-[10px] mt-0.5 ${severe ? "text-danger-300 font-semibold" : "text-white/50"}`}>
@@ -106,6 +112,7 @@ function WeatherCard({ reading }: { reading: SiteWeatherReading }) {
 // ZAR is the primary figure (this is a South African mining app), USD secondary —
 // falls back to USD-only when no FX rate was available for this cache window.
 function priceLines(p: MetalPrice): { primary: string; secondary: string | null } {
+  if (p.price == null) return { primary: "", secondary: null };
   const usd = `${p.currency ?? "USD"} ${p.price.toLocaleString(undefined, { maximumFractionDigits: 2 })} / ${p.unit}`;
   if (p.priceZar == null) return { primary: usd, secondary: null };
   const zar = `ZAR ${p.priceZar.toLocaleString(undefined, { maximumFractionDigits: 2 })} / ${p.unit}`;
@@ -113,19 +120,22 @@ function priceLines(p: MetalPrice): { primary: string; secondary: string | null 
 }
 
 function PriceChangeTooltip({ active, payload }: any) {
+  const { t } = useTranslation();
   if (!active || !payload?.length) return null;
   const p: MetalPrice = payload[0].payload;
   const tier = tierOf(p.changePercent);
   const lines = priceLines(p);
   return (
     <div style={NAVY_TOOLTIP_STYLE} className="px-2.5 py-1.5">
-      <div className="font-bold">{p.label}</div>
+      <div className="font-bold">{t(`mineralTypes.${p.key}`)}</div>
       <div className="text-white/60">{lines.primary}</div>
       {lines.secondary && <div className="text-white/40 text-[10px]">{lines.secondary}</div>}
-      <div className={`font-semibold ${TIER_TEXT[tier]}`}>
-        {p.changePercent >= 0 ? "+" : ""}
-        {p.changePercent}%
-      </div>
+      {p.changePercent != null && (
+        <div className={`font-semibold ${TIER_TEXT[tier]}`}>
+          {p.changePercent >= 0 ? "+" : ""}
+          {p.changePercent}%
+        </div>
+      )}
     </div>
   );
 }
@@ -169,6 +179,9 @@ export default function LiveDataWidget({ showMineralPrices = false }: { showMine
 
   const hasWeather = weather.length > 0;
   const hasPrices = showMineralPrices && !!prices && prices.prices.length > 0;
+  const chartData = hasPrices
+    ? prices!.prices.filter((p) => p.available).map((p) => ({ ...p, label: t(`mineralTypes.${p.key}`) }))
+    : [];
   if (!hasWeather && !hasPrices && !fact) return null;
 
   return (
@@ -222,40 +235,53 @@ export default function LiveDataWidget({ showMineralPrices = false }: { showMine
               </div>
             </div>
 
-            <div className="h-44 -ml-2">
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={prices!.prices} margin={{ top: 14, right: 8, left: 0, bottom: 0 }}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.08)" vertical={false} />
-                  <XAxis dataKey="label" tick={NAVY_TICK_STYLE} axisLine={{ stroke: "rgba(255,255,255,0.15)" }} tickLine={false} />
-                  <YAxis tick={NAVY_TICK_STYLE} axisLine={false} tickLine={false} tickFormatter={(v) => `${v}%`} width={36} />
-                  <Tooltip content={<PriceChangeTooltip />} cursor={{ fill: "rgba(255,255,255,0.05)" }} />
-                  <Bar dataKey="changePercent" radius={[6, 6, 6, 6]} maxBarSize={34}>
-                    {prices!.prices.map((p) => (
-                      <Cell key={p.key} fill={TIER_HEX[tierOf(p.changePercent)]} />
-                    ))}
-                    <LabelList
-                      dataKey="changePercent"
-                      position="top"
-                      formatter={(v: number) => `${v >= 0 ? "+" : ""}${v}%`}
-                      style={{ fontSize: 9, fontWeight: 700, fill: "rgba(255,255,255,0.75)" }}
-                    />
-                  </Bar>
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
+            {chartData.length > 0 && (
+              <div className="h-44 -ml-2">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={chartData} margin={{ top: 14, right: 8, left: 0, bottom: 0 }}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.08)" vertical={false} />
+                    <XAxis dataKey="label" tick={NAVY_TICK_STYLE} axisLine={{ stroke: "rgba(255,255,255,0.15)" }} tickLine={false} />
+                    <YAxis tick={NAVY_TICK_STYLE} axisLine={false} tickLine={false} tickFormatter={(v) => `${v}%`} width={36} />
+                    <Tooltip content={<PriceChangeTooltip />} cursor={{ fill: "rgba(255,255,255,0.05)" }} />
+                    <Bar dataKey="changePercent" radius={[6, 6, 6, 6]} maxBarSize={34}>
+                      {chartData.map((p) => (
+                        <Cell key={p.key} fill={TIER_HEX[tierOf(p.changePercent)]} />
+                      ))}
+                      <LabelList
+                        dataKey="changePercent"
+                        position="top"
+                        formatter={(v: number) => `${v >= 0 ? "+" : ""}${v}%`}
+                        style={{ fontSize: 9, fontWeight: 700, fill: "rgba(255,255,255,0.75)" }}
+                      />
+                    </Bar>
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+            )}
 
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-1.5 mt-2">
               {prices!.prices.map((p) => {
+                const label = t(`mineralTypes.${p.key}`);
+                if (!p.available) {
+                  return (
+                    <div key={p.key} className="rounded-md border-l-2 border-white/10 bg-white/[0.02] px-2 py-1.5">
+                      <span className="text-[10px] text-white/40 uppercase tracking-wide truncate block">{label}</span>
+                      <div className="text-[10px] text-white/30 italic mt-0.5">{t("liveData.noLivePrice")}</div>
+                    </div>
+                  );
+                }
                 const tier = tierOf(p.changePercent);
                 const lines = priceLines(p);
                 return (
                   <div key={p.key} className={`rounded-md border-l-2 bg-white/[0.04] px-2 py-1.5 ${TIER_BORDER[tier]}`}>
                     <div className="flex items-center justify-between gap-1">
-                      <span className="text-[10px] text-white/50 uppercase tracking-wide truncate">{p.label}</span>
-                      <span className={`text-[10px] font-bold ${TIER_TEXT[tier]}`}>
-                        {p.changePercent >= 0 ? "+" : ""}
-                        {p.changePercent}%
-                      </span>
+                      <span className="text-[10px] text-white/50 uppercase tracking-wide truncate">{label}</span>
+                      {p.changePercent != null && (
+                        <span className={`text-[10px] font-bold ${TIER_TEXT[tier]}`}>
+                          {p.changePercent >= 0 ? "+" : ""}
+                          {p.changePercent}%
+                        </span>
+                      )}
                     </div>
                     <div className="text-xs font-bold text-white truncate">{lines.primary}</div>
                     {lines.secondary && <div className="text-[10px] text-white/40 truncate">{lines.secondary}</div>}

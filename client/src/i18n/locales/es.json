@@ -163,7 +163,21 @@
     "equipmentStatus": "Estado de Equipos",
     "financialPerformance": "Desempeño Financiero",
     "tonnesSold": "Toneladas Vendidas",
-    "biggestBuyer": "Mayor Comprador"
+    "biggestBuyer": "Mayor Comprador",
+    "needsAttention": "Requiere su atención",
+    "pendingExpenses": "Gastos pendientes",
+    "pendingOrders": "Pedidos pendientes",
+    "pendingRequests": "Solicitudes pendientes",
+    "criticalItIncidents": "Incidentes críticos de TI",
+    "pendingInvites": "Invitaciones pendientes",
+    "pendingFinanceTotal": "{{amount}} en gastos y órdenes de compra pendientes de revisión.",
+    "sectionOverview": "Resumen",
+    "sectionInsights": "Información",
+    "sectionOperations": "Operaciones",
+    "quickApprovalsInbox": "Bandeja de aprobaciones",
+    "quickExecutiveRequests": "Solicitudes ejecutivas",
+    "quickReporting": "Informes",
+    "quickMineSettings": "Configuración de la mina"
   },
   "executive": {
     "title": "Panel Ejecutivo",
@@ -1534,7 +1548,9 @@
       "logoTitle": "Logotipo de la mina",
       "uploadLogo": "Subir logotipo",
       "bankingDetails": "Datos Bancarios",
-      "bankingDetailsHint": "Se usan en las facturas generadas y como referencia de pago para compradores/contratistas. Solo visible para administradores."
+      "bankingDetailsHint": "Se usan en las facturas generadas y como referencia de pago para compradores/contratistas. Solo visible para administradores.",
+      "weatherPostalCode": "Código postal para el clima",
+      "weatherPostalCodeHint": "Código postal sudafricano usado para mostrar el clima de la sede en el panel."
     },
     "invites": {
       "newTitle": "Invitar a un Ejecutivo",
@@ -3814,7 +3830,9 @@
     "industryNews": "Noticias del Sector",
     "unknownSource": "Fuente desconocida",
     "noSummary": "Aún no hay resumen disponible para este artículo.",
-    "readFullArticle": "Leer artículo completo"
+    "readFullArticle": "Leer artículo completo",
+    "hqBadge": "Sede",
+    "noLivePrice": "No hay fuente de precio en vivo disponible"
   },
   "financial": {
     "nav": "Rendimiento Financiero",

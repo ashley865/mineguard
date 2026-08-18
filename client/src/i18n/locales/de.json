@@ -163,7 +163,21 @@
     "equipmentStatus": "Ausrüstungsstatus",
     "financialPerformance": "Finanzielle Leistung",
     "tonnesSold": "Verkaufte Tonnen",
-    "biggestBuyer": "Größter Käufer"
+    "biggestBuyer": "Größter Käufer",
+    "needsAttention": "Erfordert Ihre Aufmerksamkeit",
+    "pendingExpenses": "Ausstehende Ausgaben",
+    "pendingOrders": "Ausstehende Bestellungen",
+    "pendingRequests": "Ausstehende Anfragen",
+    "criticalItIncidents": "Kritische IT-Vorfälle",
+    "pendingInvites": "Ausstehende Einladungen",
+    "pendingFinanceTotal": "{{amount}} an ausstehenden Ausgaben und Bestellungen zur Prüfung.",
+    "sectionOverview": "Übersicht",
+    "sectionInsights": "Einblicke",
+    "sectionOperations": "Betrieb",
+    "quickApprovalsInbox": "Genehmigungspostfach",
+    "quickExecutiveRequests": "Geschäftsführungsanfragen",
+    "quickReporting": "Berichte",
+    "quickMineSettings": "Minen-Einstellungen"
   },
   "executive": {
     "title": "Führungskräfte-Dashboard",
@@ -1534,7 +1548,9 @@
       "logoTitle": "Minenlogo",
       "uploadLogo": "Logo hochladen",
       "bankingDetails": "Bankverbindung",
-      "bankingDetailsHint": "Wird auf erstellten Rechnungen und als Zahlungsreferenz für Käufer/Auftragnehmer verwendet. Nur für Admins sichtbar."
+      "bankingDetailsHint": "Wird auf erstellten Rechnungen und als Zahlungsreferenz für Käufer/Auftragnehmer verwendet. Nur für Admins sichtbar.",
+      "weatherPostalCode": "Postleitzahl für Wetter",
+      "weatherPostalCodeHint": "Südafrikanische Postleitzahl, die verwendet wird, um das Wetter am Hauptsitz im Dashboard anzuzeigen."
     },
     "invites": {
       "newTitle": "Eine Führungskraft einladen",
@@ -3814,7 +3830,9 @@
     "industryNews": "Branchennachrichten",
     "unknownSource": "Unbekannte Quelle",
     "noSummary": "Für diesen Artikel ist noch keine Zusammenfassung verfügbar.",
-    "readFullArticle": "Vollständigen Artikel lesen"
+    "readFullArticle": "Vollständigen Artikel lesen",
+    "hqBadge": "HQ",
+    "noLivePrice": "Keine Echtzeit-Preisquelle verfügbar"
   },
   "financial": {
     "nav": "Finanzielle Leistung",

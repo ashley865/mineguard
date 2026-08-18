@@ -163,7 +163,21 @@
     "equipmentStatus": "Toerustingstatus",
     "financialPerformance": "Finansiële Prestasie",
     "tonnesSold": "Ton Verkoop",
-    "biggestBuyer": "Grootste Koper"
+    "biggestBuyer": "Grootste Koper",
+    "needsAttention": "Benodig u aandag",
+    "pendingExpenses": "Hangende uitgawes",
+    "pendingOrders": "Hangende bestellings",
+    "pendingRequests": "Hangende versoeke",
+    "criticalItIncidents": "Kritieke IT-insidente",
+    "pendingInvites": "Hangende uitnodigings",
+    "pendingFinanceTotal": "{{amount}} in hangende uitgawes en aankooporders wat op hersiening wag.",
+    "sectionOverview": "Oorsig",
+    "sectionInsights": "Insigte",
+    "sectionOperations": "Bedrywighede",
+    "quickApprovalsInbox": "Goedkeuringsinboks",
+    "quickExecutiveRequests": "Uitvoerende versoeke",
+    "quickReporting": "Verslagdoening",
+    "quickMineSettings": "Myninstellings"
   },
   "executive": {
     "title": "Uitvoerende Dashboard",
@@ -1534,7 +1548,9 @@
       "logoTitle": "Myn-logo",
       "uploadLogo": "Laai logo op",
       "bankingDetails": "Bankbesonderhede",
-      "bankingDetailsHint": "Gebruik op gegenereerde fakture en as betalingsverwysing vir kopers/kontrakteurs. Slegs sigbaar vir admins."
+      "bankingDetailsHint": "Gebruik op gegenereerde fakture en as betalingsverwysing vir kopers/kontrakteurs. Slegs sigbaar vir admins.",
+      "weatherPostalCode": "Weerposkode",
+      "weatherPostalCodeHint": "Suid-Afrikaanse poskode wat gebruik word om hoofkantoor-weer op die dashboard te wys."
     },
     "invites": {
       "newTitle": "Nooi 'n Uitvoerende Beampte",
@@ -3814,7 +3830,9 @@
     "industryNews": "Bedryfsnuus",
     "unknownSource": "Onbekende bron",
     "noSummary": "Nog geen opsomming beskikbaar vir hierdie artikel nie.",
-    "readFullArticle": "Lees volledige artikel"
+    "readFullArticle": "Lees volledige artikel",
+    "hqBadge": "HK",
+    "noLivePrice": "Geen intydse prysbron beskikbaar nie"
   },
   "financial": {
     "nav": "Finansiële Prestasie",

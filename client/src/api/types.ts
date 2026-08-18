@@ -58,6 +58,7 @@ export interface Mine {
   miningRightNumber?: string | null;
   description?: string | null;
   hasLogo?: boolean;
+  weatherPostalCode: string;
   bankName?: string | null;
   bankAccountHolder?: string | null;
   bankAccountNumber?: string | null;
@@ -685,6 +686,14 @@ export interface DashboardSummary {
     totalTonnesSold: number;
     biggestBuyer: { name: string; quantity: number } | null;
   };
+}
+
+export interface OwnerAttentionSummary {
+  pendingExpenses: { count: number; total: number };
+  pendingPurchaseOrders: { count: number; total: number };
+  pendingExecutiveRequests: { count: number };
+  criticalItIncidents: { count: number };
+  pendingExecutiveInvites: { count: number };
 }
 
 export interface ExecutiveSummary {
@@ -3351,16 +3360,17 @@ export interface SiteWeatherReading {
   latitude: number | null;
   longitude: number | null;
   weather: SiteWeather;
+  isHeadquarters?: boolean;
 }
 
 export interface MetalPrice {
   key: string;
-  label: string;
   unit: string;
-  price: number;
+  available: boolean;
+  price: number | null;
   priceZar: number | null;
   previousClose: number | null;
-  changePercent: number;
+  changePercent: number | null;
   currency: string | null;
 }
 export interface MineralPricesResponse {

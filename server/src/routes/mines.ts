@@ -27,6 +27,7 @@ const mineDetailsSchema = z.object({
   bankAccountHolder: z.string().optional().nullable(),
   bankAccountNumber: z.string().optional().nullable(),
   bankBranchCode: z.string().optional().nullable(),
+  weatherPostalCode: z.string().min(1).optional(),
 });
 
 const registerMineSchema = z.object({
@@ -62,6 +63,7 @@ function mineResponse(mine: {
   miningRightNumber: string | null;
   description: string | null;
   logoData: Uint8Array | null;
+  weatherPostalCode: string;
   bankName: string | null;
   bankAccountHolder: string | null;
   bankAccountNumber: string | null;
@@ -75,6 +77,7 @@ function mineResponse(mine: {
     miningRightNumber: mine.miningRightNumber,
     description: mine.description,
     hasLogo: !!mine.logoData,
+    weatherPostalCode: mine.weatherPostalCode,
     ...(includeBanking
       ? {
           bankName: mine.bankName,
@@ -99,6 +102,9 @@ router.put("/mine", requireAuth, requireRole("ADMIN"), async (req, res) => {
   if (!parsed.success) return res.status(400).json({ error: parsed.error.flatten() });
   const user = await prisma.user.findUnique({ where: { id: req.auth!.userId } });
   if (!user?.mineId) return res.status(404).json({ error: "Not a member of a mine" });
+  const existing = await prisma.mine.findUnique({ where: { id: user.mineId }, select: { weatherPostalCode: true } });
+  const postalCodeChanged =
+    parsed.data.weatherPostalCode != null && parsed.data.weatherPostalCode !== existing?.weatherPostalCode;
   const mine = await prisma.mine.update({
     where: { id: user.mineId },
     data: {
@@ -111,6 +117,10 @@ router.put("/mine", requireAuth, requireRole("ADMIN"), async (req, res) => {
       bankAccountHolder: parsed.data.bankAccountHolder || null,
       bankAccountNumber: parsed.data.bankAccountNumber || null,
       bankBranchCode: parsed.data.bankBranchCode || null,
+      ...(parsed.data.weatherPostalCode != null ? { weatherPostalCode: parsed.data.weatherPostalCode } : {}),
+      // A changed postal code invalidates the cached geocoded coordinate — the next
+      // weather fetch re-resolves it rather than continuing to show the old location.
+      ...(postalCodeChanged ? { weatherLatitude: null, weatherLongitude: null, weatherGeocodedAt: null } : {}),
     },
   });
   res.json(mineResponse(mine, true));

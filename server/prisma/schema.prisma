@@ -1480,6 +1480,12 @@ model Mine {
   bankAccountHolder  String?
   bankAccountNumber  String?
   bankBranchCode     String?
+  // Drives the "mine HQ" weather card on the dashboard — resolved to a coordinate once
+  // and cached below, mirroring how Site.latitude/longitude cache a geocoded location.
+  weatherPostalCode  String    @default("2094")
+  weatherLatitude    Float?
+  weatherLongitude   Float?
+  weatherGeocodedAt  DateTime?
   createdAt          DateTime @default(now())
 
   users            User[]
