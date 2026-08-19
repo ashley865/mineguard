@@ -69,16 +69,23 @@ async function geocodeLocation(location: string): Promise<{ lat: number; lon: nu
 // reads the stored coordinate directly rather than re-geocoding, which is both more
 // efficient and more stable/"accurate": weather (and the site map) always plot the same
 // point rather than whatever the geocoder happens to return that particular call.
+//
+// Prefers the site's postal code (via the same curated/reliable lookup used for the mine's
+// HQ weather below) over a free-text place-name search: `location` is a human-written
+// description ("Head Office", "North Pit") that Open-Meteo's name search can match against
+// a same-named place anywhere on Earth, which is what used to make the site map zoom out
+// to fit a wildly wrong point instead of staying tight on the mine's actual sites.
 async function resolveSiteCoordinates(site: {
   id: string;
   location: string;
+  postalCode: string | null;
   latitude: number | null;
   longitude: number | null;
 }): Promise<{ lat: number; lon: number } | null> {
   if (site.latitude != null && site.longitude != null) {
     return { lat: site.latitude, lon: site.longitude };
   }
-  const coords = await geocodeLocation(site.location);
+  const coords = site.postalCode ? await geocodePostalCode(site.postalCode) : await geocodeLocation(site.location);
   if (!coords) return null;
   await prisma.site
     .update({
@@ -233,7 +240,7 @@ router.get("/weather", async (req, res) => {
     }),
     prisma.site.findMany({
       where: { mineId },
-      select: { id: true, name: true, location: true, latitude: true, longitude: true },
+      select: { id: true, name: true, location: true, postalCode: true, latitude: true, longitude: true },
       take: 8,
       orderBy: { name: "asc" },
     }),

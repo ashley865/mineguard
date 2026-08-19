@@ -151,6 +151,7 @@ export interface Site {
   id: string;
   name: string;
   location: string;
+  postalCode?: string | null;
   description?: string | null;
   status: SiteStatus;
   latitude?: number | null;

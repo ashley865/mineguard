@@ -10,12 +10,13 @@ import LoadError from "../components/LoadError";
 
 function SiteForm({ initial, onSubmit, onCancel }: {
   initial?: Partial<Site>;
-  onSubmit: (data: { name: string; location: string; description?: string; status: SiteStatus; latitude?: number | null; longitude?: number | null }) => Promise<void>;
+  onSubmit: (data: { name: string; location: string; postalCode: string; description?: string; status: SiteStatus; latitude?: number | null; longitude?: number | null }) => Promise<void>;
   onCancel: () => void;
 }) {
   const { t } = useTranslation();
   const [name, setName] = useState(initial?.name ?? "");
   const [location, setLocation] = useState(initial?.location ?? "");
+  const [postalCode, setPostalCode] = useState(initial?.postalCode ?? "");
   const [description, setDescription] = useState(initial?.description ?? "");
   const [status, setStatus] = useState<SiteStatus>(initial?.status ?? "OPERATIONAL");
   const [latitude, setLatitude] = useState(initial?.latitude != null ? String(initial.latitude) : "");
@@ -40,7 +41,7 @@ function SiteForm({ initial, onSubmit, onCancel }: {
     }
     setSaving(true);
     try {
-      await onSubmit({ name, location, description, status, latitude: lat, longitude: lon });
+      await onSubmit({ name, location, postalCode, description, status, latitude: lat, longitude: lon });
     } finally {
       setSaving(false);
     }
@@ -55,6 +56,17 @@ function SiteForm({ initial, onSubmit, onCancel }: {
       <div>
         <label className={labelClass}>{t("common.location")}</label>
         <input className={inputClass} value={location} onChange={(e) => setLocation(e.target.value)} required />
+      </div>
+      <div>
+        <label className={labelClass}>{t("sites.postalCode")}</label>
+        <input
+          className={`${inputClass} max-w-[10rem]`}
+          value={postalCode}
+          onChange={(e) => setPostalCode(e.target.value)}
+          placeholder={t("sites.postalCodePlaceholder") ?? ""}
+          required
+        />
+        <p className="text-[10px] text-mine-400 mt-1">{t("sites.postalCodeHint")}</p>
       </div>
       <div>
         <label className={labelClass}>{t("common.description")}</label>
@@ -240,7 +252,13 @@ export default function Sites() {
                     </span>
                   )}
                 </div>
-                <div className="text-sm text-mine-300">{site.location}</div>
+                <div className="text-sm text-mine-300">
+                  {site.location}
+                  {site.postalCode && <span className="text-mine-500"> · {site.postalCode}</span>}
+                </div>
+                {!site.postalCode && (
+                  <div className="text-xs text-hazard-500 mt-0.5">{t("sites.postalCodeMissing")}</div>
+                )}
                 {site.description && <div className="text-sm text-mine-400 mt-1">{site.description}</div>}
               </div>
               {canEdit && (

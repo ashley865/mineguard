@@ -362,12 +362,20 @@ model Site {
   id          String     @id @default(cuid())
   name        String
   location    String
+  // Nullable only for sites created before this field existed — every site created or
+  // edited through the app going forward is required to supply one (see sites.ts), because
+  // a postal code resolves to a precise, curated coordinate (see SA_POSTAL_CODE_COORDS in
+  // liveData.ts) whereas geocoding the free-text `location` name alone can match a
+  // same-named place anywhere in the world, which is what used to make the site map zoom
+  // out to fit a wildly wrong point instead of staying tight on the mine's real sites.
+  postalCode  String?
   description String?
   status      SiteStatus @default(OPERATIONAL)
-  // Resolved once from `location` text via the free Open-Meteo geocoder and cached here
-  // permanently (rather than re-resolved from an in-memory cache every server restart) —
-  // both so weather lookups always use a stable point rather than whatever the geocoder
-  // happens to return that day, and so the same coordinate can be plotted on the site map.
+  // Resolved once — from `postalCode` when present, else falling back to the less reliable
+  // `location` text search — via Open-Meteo, and cached here permanently (rather than
+  // re-resolved every server restart) so weather lookups and the site map always use a
+  // stable point rather than whatever the geocoder happens to return that day. Left
+  // null/omitted instead, these double as a manual override for the site's map position.
   latitude    Float?
   longitude   Float?
   geocodedAt  DateTime?

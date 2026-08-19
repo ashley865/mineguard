@@ -9,12 +9,17 @@ const router = Router();
 const siteSchema = z.object({
   name: z.string().min(1),
   location: z.string().min(1),
+  // Required on every create/edit going forward (see the Site model comment in
+  // schema.prisma) so the weather/map feature always has a precise, curated coordinate to
+  // resolve from instead of falling back to a free-text place-name search that can match
+  // a same-named location anywhere in the world.
+  postalCode: z.string().min(1),
   description: z.string().optional(),
   status: z.enum(["OPERATIONAL", "RESTRICTED", "SHUT_DOWN"]).optional(),
   // Optional manual override for the site's map position — mine sites are often remote
-  // enough that geocoding the address text alone can land on the nearest town rather than
-  // the actual site. Left null/omitted, the weather/map feature auto-geocodes from
-  // `location` instead (see server/src/routes/liveData.ts).
+  // enough that geocoding a postal code or address text alone can land on the nearest town
+  // rather than the actual site. Left null/omitted, the weather/map feature auto-geocodes
+  // from `postalCode` (falling back to `location`) instead (see routes/liveData.ts).
   latitude: z.number().min(-90).max(90).nullable().optional(),
   longitude: z.number().min(-180).max(180).nullable().optional(),
 });
@@ -74,12 +79,12 @@ router.get("/:id", async (req, res) => {
   res.json(site);
 });
 
-// Explicitly touching either coordinate field (setting a value, or clearing back to null
-// to revert to auto-geocoding) means the site's location is no longer "resolved from an
-// address the last time we checked" — clear geocodedAt either way so that distinction
-// stays meaningful rather than silently stale.
-function withGeocodedAtReset<T extends { latitude?: number | null; longitude?: number | null }>(data: T) {
-  if (data.latitude !== undefined || data.longitude !== undefined) {
+// Explicitly touching a coordinate field (setting a value, or clearing back to null to
+// revert to auto-geocoding) or the postal code means the site's location is no longer
+// "resolved from an address the last time we checked" — clear geocodedAt either way so
+// that distinction stays meaningful rather than silently stale.
+function withGeocodedAtReset<T extends { latitude?: number | null; longitude?: number | null; postalCode?: string }>(data: T) {
+  if (data.latitude !== undefined || data.longitude !== undefined || data.postalCode !== undefined) {
     return { ...data, geocodedAt: null };
   }
   return data;
