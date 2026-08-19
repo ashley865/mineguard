@@ -12,9 +12,12 @@ import {
 } from "../../api/types";
 import { StatusBadge } from "../../components/Badges";
 import Modal from "../../components/Modal";
-import { buttonDanger, buttonPrimary, buttonSecondary, cardClass, inputClass, labelClass, selectClass } from "../../components/ui";
+import { buttonDanger, buttonPrimary, buttonSecondary, inputClass, labelClass, selectClass } from "../../components/ui";
 import DateField from "../../components/DateField";
 import LoadError from "../../components/LoadError";
+import DataTable, { DataTableColumn } from "../../components/DataTable";
+import SummaryCards from "../../components/SummaryCards";
+import { AuditHistoryButton } from "../../components/AuditHistoryPanel";
 
 const cameraTypes: CameraType[] = ["FIXED", "PTZ", "DOME", "THERMAL", "BODY_WORN", "DRONE", "OTHER"];
 const statuses: CameraOperationalStatus[] = ["ONLINE", "OFFLINE", "MAINTENANCE", "DECOMMISSIONED"];
@@ -207,9 +210,58 @@ export default function CctvTab({ sites, zones }: { sites: Site[]; zones: Zone[]
   if (loading) return <div className="text-mine-300">{t("common.loading")}</div>;
   if (loadError) return <LoadError onRetry={load} />;
 
+  const onlineCount = items.filter((i) => i.status === "ONLINE").length;
+  const offlineCount = items.filter((i) => i.status === "OFFLINE").length;
+  const maintenanceCount = items.filter((i) => i.status === "MAINTENANCE").length;
+  const coveredZoneIds = new Set(items.filter((i) => i.zoneId).map((i) => i.zoneId));
+  const uncoveredZones = zones.filter((z) => !coveredZoneIds.has(z.id));
+
+  const columns: DataTableColumn<SecurityCamera>[] = [
+    {
+      key: "name",
+      header: t("security.cctv.colName"),
+      render: (item) => <>{item.name}<div className="text-[10px] text-mine-400">{item.site?.name}{item.zone ? ` · ${item.zone.name}` : ""}</div></>,
+      sortValue: (item) => item.name,
+    },
+    { key: "location", header: t("security.cctv.location"), render: (item) => item.location, sortValue: (item) => item.location },
+    { key: "cameraType", header: t("security.cctv.cameraType"), render: (item) => t(`security.cctv.cameraTypes.${item.cameraType}`), sortValue: (item) => item.cameraType },
+    { key: "status", header: t("common.status"), render: (item) => <StatusBadge status={item.status} />, sortValue: (item) => item.status },
+    {
+      key: "vms",
+      header: t("security.cctv.colVms"),
+      render: (item) =>
+        item.integrationMethod === "NOT_INTEGRATED" ? (
+          <span className="text-mine-400 text-xs">{t("security.cctv.integrationMethods.NOT_INTEGRATED")}</span>
+        ) : (
+          <div className="space-y-0.5">
+            <div>{item.vmsProvider || t("security.cctv.integrationMethods." + item.integrationMethod)}</div>
+            <div className="text-[10px] flex items-center gap-1">
+              <StatusBadge status={item.integrationStatus} />
+              {item.lastSyncAt && <span className="text-mine-400">{new Date(item.lastSyncAt).toLocaleString()}</span>}
+            </div>
+          </div>
+        ),
+    },
+  ];
+
   return (
     <div className="space-y-4">
       <p className="text-mine-300 text-sm">{t("security.cctv.subtitle")}</p>
+
+      <SummaryCards
+        cards={[
+          { label: t("security.cctv.summaryOnline"), value: onlineCount, tone: "success" },
+          { label: t("security.cctv.summaryOffline"), value: offlineCount, tone: offlineCount > 0 ? "danger" : "default" },
+          { label: t("security.cctv.summaryMaintenance"), value: maintenanceCount, tone: maintenanceCount > 0 ? "hazard" : "default" },
+          { label: t("security.cctv.summaryUncoveredZones"), value: uncoveredZones.length, tone: uncoveredZones.length > 0 ? "hazard" : "default" },
+        ]}
+      />
+
+      {uncoveredZones.length > 0 && (
+        <div className="text-xs text-hazard-500 bg-hazard-500/10 border border-hazard-500/30 rounded-md px-3 py-2">
+          {t("security.cctv.uncoveredZonesHint", { zones: uncoveredZones.map((z) => z.name).join(", ") })}
+        </div>
+      )}
 
       {canEdit && sites.length > 0 && (
         <div className="flex justify-end">
@@ -217,60 +269,34 @@ export default function CctvTab({ sites, zones }: { sites: Site[]; zones: Zone[]
         </div>
       )}
 
-      <div className={`${cardClass} overflow-x-auto`}>
-        <table className="w-full text-sm">
-          <thead className="bg-mine-800/50 text-mine-300 text-xs uppercase">
-            <tr>
-              <th className="text-left px-4 py-2">{t("security.cctv.colName")}</th>
-              <th className="text-left px-4 py-2">{t("security.cctv.location")}</th>
-              <th className="text-left px-4 py-2">{t("security.cctv.cameraType")}</th>
-              <th className="text-left px-4 py-2">{t("common.status")}</th>
-              <th className="text-left px-4 py-2">{t("security.cctv.colVms")}</th>
-              <th className="px-4 py-2"></th>
-            </tr>
-          </thead>
-          <tbody>
-            {items.map((item) => (
-              <tr key={item.id} className="border-t border-mine-800 hover:bg-mine-800/30 align-top">
-                <td className="px-4 py-2 font-medium">
-                  {item.name}
-                  <div className="text-[10px] text-mine-400">{item.site?.name}{item.zone ? ` · ${item.zone.name}` : ""}</div>
-                </td>
-                <td className="px-4 py-2 text-mine-300">{item.location}</td>
-                <td className="px-4 py-2 text-mine-300">{t(`security.cctv.cameraTypes.${item.cameraType}`)}</td>
-                <td className="px-4 py-2"><StatusBadge status={item.status} /></td>
-                <td className="px-4 py-2 text-mine-300">
-                  {item.integrationMethod === "NOT_INTEGRATED" ? (
-                    <span className="text-mine-400 text-xs">{t("security.cctv.integrationMethods.NOT_INTEGRATED")}</span>
-                  ) : (
-                    <div className="space-y-0.5">
-                      <div>{item.vmsProvider || t("security.cctv.integrationMethods." + item.integrationMethod)}</div>
-                      <div className="text-[10px] flex items-center gap-1">
-                        <StatusBadge status={item.integrationStatus} />
-                        {item.lastSyncAt && <span className="text-mine-400">{new Date(item.lastSyncAt).toLocaleString()}</span>}
-                      </div>
-                    </div>
-                  )}
-                </td>
-                <td className="px-4 py-2 text-right">
-                  {canEdit && (
-                    <div className="flex justify-end gap-2 flex-wrap">
-                      {item.integrationMethod !== "NOT_INTEGRATED" && (
-                        <button className="text-xs text-mine-300 hover:text-mine-50" onClick={() => sync(item.id)}>{t("security.cctv.syncNow")}</button>
-                      )}
-                      <button className="text-xs text-mine-300 hover:text-mine-50" onClick={() => setModal(item)}>{t("common.edit")}</button>
-                      <button className={buttonDanger} onClick={() => remove(item.id)}>{t("common.delete")}</button>
-                    </div>
-                  )}
-                </td>
-              </tr>
-            ))}
-            {items.length === 0 && (
-              <tr><td colSpan={6} className="px-4 py-6 text-center text-mine-400">{t("security.cctv.noneYet")}</td></tr>
+      <DataTable
+        columns={columns}
+        rows={items}
+        rowKey={(item) => item.id}
+        emptyMessage={t("security.cctv.noneYet")}
+        searchValue={(item) => `${item.name} ${item.location} ${item.site?.name ?? ""} ${item.zone?.name ?? ""}`}
+        exportFilename="security-cameras"
+        exportColumns={[
+          { header: t("security.cctv.colName"), value: (item) => item.name },
+          { header: t("security.cctv.location"), value: (item) => item.location },
+          { header: t("security.cctv.cameraType"), value: (item) => item.cameraType },
+          { header: t("common.status"), value: (item) => item.status },
+        ]}
+        actions={(item) => (
+          <div className="flex justify-end gap-2 flex-wrap">
+            <AuditHistoryButton entityType="SecurityCamera" entityId={item.id} />
+            {canEdit && (
+              <>
+                {item.integrationMethod !== "NOT_INTEGRATED" && (
+                  <button className="text-xs text-mine-300 hover:text-mine-50" onClick={() => sync(item.id)}>{t("security.cctv.syncNow")}</button>
+                )}
+                <button className="text-xs text-mine-300 hover:text-mine-50" onClick={() => setModal(item)}>{t("common.edit")}</button>
+                <button className={buttonDanger} onClick={() => remove(item.id)}>{t("common.delete")}</button>
+              </>
             )}
-          </tbody>
-        </table>
-      </div>
+          </div>
+        )}
+      />
 
       {modal && (
         <Modal title={modal === "create" ? t("security.cctv.newTitle") : t("security.cctv.editTitle")} onClose={() => setModal(null)} size="lg">

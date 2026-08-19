@@ -2651,7 +2651,12 @@
       "colVms": "VMS-integrasie",
       "syncNow": "Sinkroniseer nou",
       "noneYet": "Nog geen kameras aangeteken nie.",
-      "confirmDelete": "Verwyder hierdie kamera?"
+      "confirmDelete": "Verwyder hierdie kamera?",
+      "summaryOnline": "Aanlyn",
+      "summaryOffline": "Vanlyn",
+      "summaryMaintenance": "In onderhoud",
+      "summaryUncoveredZones": "Sones sonder kamera",
+      "uncoveredZonesHint": "Geen kamera is toegewys aan: {{zones}}."
     },
     "tabIncidents": "Voorvalbestuur",
     "incidents": {
@@ -2762,6 +2767,7 @@
       }
     },
     "tabGuards": "Wagte",
+    "tabPerformance": "Prestasie",
     "tabDutyLog": "Diensrekord",
     "guards": {
       "hint": "Elke wag kry sy eie veilige skakel — genereer dit een keer en deel dit direk met hulle. Geen aanmelding nodig nie; die skakel self identifiseer hulle.",
@@ -2774,6 +2780,23 @@
       "revoke": "Herroep",
       "confirmRevoke": "Herroep hierdie wag se diensskakel? Hulle sal 'n nuwe een nodig hê om vir diens aan te meld.",
       "noneYet": "Nog geen sekuriteitskategorie-werkers geregistreer nie."
+    },
+    "performance": {
+      "hint": "Bereken vanaf werklike patrolliesopdragte, kontrolepuntrekords, diensbywoning en waarnemings — geen aparte data-invoer nodig nie.",
+      "windowDays": "Laaste {{count}} dae",
+      "summaryAvgCompletion": "Gem. voltooiingskoers",
+      "summaryAvgCompliance": "Gem. kontrolepuntnakoming",
+      "summaryMissedShifts": "Gemiste skofte",
+      "summaryObservations": "Waarnemings aangeteken",
+      "completionRate": "Voltooiingskoers",
+      "checkpointCompliance": "Kontrolepuntnakoming",
+      "avgDuration": "Gem. patrollieduur",
+      "minutes": "{{count}} min",
+      "missedShifts": "Gemiste skofte",
+      "observations": "Waarnemings",
+      "dutyHours": "Diensure",
+      "lastActive": "Laaste aktief",
+      "noneYet": "Nog geen wagaktiwiteit in hierdie tydperk nie."
     },
     "dutyLog": {
       "hint": "Outomatiese rekord van elke keer wat 'n wag vir diens of van diens aangemeld het, met die presiese tyd en datum.",
@@ -4552,6 +4575,18 @@
       "lastLoginAt": "Laaste aanmelding",
       "never": "Nooit",
       "noDormantUsers": "Geen onaktiewe gebruikers nie — almal het onlangs aangemeld.",
+      "tabExternal": "Eksterne Toegang",
+      "externalHint": "Identiteit & Toegang dek almal met toegang tot hierdie myn se stelsels en terreine, nie net personeel nie — insluitend geregistreerde kopers wat op hierdie myn se lysings gebod het en besoekers aan sy terreine.",
+      "staffCount": "Personeel",
+      "tabBuyers": "Kopers",
+      "noBuyers": "Geen kopers het nog op hierdie myn se lysings gebod nie.",
+      "portalAccess": "Portaaltoegang",
+      "bidCount": "Bods",
+      "tabVisitors": "Besoekers",
+      "noVisitors": "Nog geen besoekers vir hierdie myn se terreine aangeteken nie.",
+      "company": "Maatskappy",
+      "host": "Gasheer",
+      "scheduledFor": "Geskeduleer vir",
       "tabActivity": "Onlangse Aanmeldaktiwiteit",
       "eventType": "Gebeurtenis",
       "ipAddress": "IP-adres",

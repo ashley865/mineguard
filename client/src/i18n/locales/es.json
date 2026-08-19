@@ -2651,7 +2651,12 @@
       "colVms": "Integración VMS",
       "syncNow": "Sincronizar ahora",
       "noneYet": "Aún no se han registrado cámaras.",
-      "confirmDelete": "¿Eliminar esta cámara?"
+      "confirmDelete": "¿Eliminar esta cámara?",
+      "summaryOnline": "En línea",
+      "summaryOffline": "Fuera de línea",
+      "summaryMaintenance": "En mantenimiento",
+      "summaryUncoveredZones": "Zonas sin cámara",
+      "uncoveredZonesHint": "No hay ninguna cámara asignada a: {{zones}}."
     },
     "tabIncidents": "Gestión de Incidentes",
     "incidents": {
@@ -2762,6 +2767,7 @@
       }
     },
     "tabGuards": "Guardias",
+    "tabPerformance": "Rendimiento",
     "tabDutyLog": "Registro de Servicio",
     "guards": {
       "hint": "Cada guardia obtiene su propio enlace seguro: genérelo una vez y compártalo directamente con ellos. No se requiere inicio de sesión; el enlace mismo los identifica.",
@@ -2774,6 +2780,23 @@
       "revoke": "Revocar",
       "confirmRevoke": "¿Revocar el enlace de servicio de este guardia? Necesitará uno nuevo para presentarse de servicio.",
       "noneYet": "Aún no hay trabajadores de categoría seguridad registrados."
+    },
+    "performance": {
+      "hint": "Calculado a partir de asignaciones de patrulla, registros de puntos de control, asistencia y observaciones reales — sin captura de datos adicional.",
+      "windowDays": "Últimos {{count}} días",
+      "summaryAvgCompletion": "Tasa de finalización promedio",
+      "summaryAvgCompliance": "Cumplimiento promedio de puntos de control",
+      "summaryMissedShifts": "Turnos perdidos",
+      "summaryObservations": "Observaciones registradas",
+      "completionRate": "Tasa de finalización",
+      "checkpointCompliance": "Cumplimiento de puntos de control",
+      "avgDuration": "Duración promedio de patrulla",
+      "minutes": "{{count}} min",
+      "missedShifts": "Turnos perdidos",
+      "observations": "Observaciones",
+      "dutyHours": "Horas de servicio",
+      "lastActive": "Última actividad",
+      "noneYet": "Sin actividad de guardias en este período aún."
     },
     "dutyLog": {
       "hint": "Registro automático de cada vez que un guardia se presentó o salió de servicio, con la fecha y hora exactas.",
@@ -4552,6 +4575,18 @@
       "lastLoginAt": "Último inicio de sesión",
       "never": "Nunca",
       "noDormantUsers": "Sin usuarios inactivos — todos han iniciado sesión recientemente.",
+      "tabExternal": "Acceso Externo",
+      "externalHint": "Identidad y Acceso cubre a todos los que tienen acceso a los sistemas y sitios de esta mina, no solo al personal — incluyendo compradores registrados que han pujado en los listados de esta mina y visitantes de sus sitios.",
+      "staffCount": "Personal",
+      "tabBuyers": "Compradores",
+      "noBuyers": "Aún ningún comprador ha pujado en los listados de esta mina.",
+      "portalAccess": "Acceso al portal",
+      "bidCount": "Pujas",
+      "tabVisitors": "Visitantes",
+      "noVisitors": "Aún no se han registrado visitantes para los sitios de esta mina.",
+      "company": "Empresa",
+      "host": "Anfitrión",
+      "scheduledFor": "Programado para",
       "tabActivity": "Actividad Reciente de Inicio de Sesión",
       "eventType": "Evento",
       "ipAddress": "Dirección IP",

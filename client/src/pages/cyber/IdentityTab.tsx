@@ -121,6 +121,12 @@ export default function IdentityTab({ theme, canEdit }: { theme: CyberTheme; can
         <StatBlock theme={theme} label={t("cyber.identity.mfaGap")} value={data.mfaGapCount} tone={data.mfaGapCount > 0 ? "text-red-500" : undefined} />
       </div>
 
+      <div className="grid grid-cols-3 gap-2">
+        <StatBlock theme={theme} label={t("cyber.identity.staffCount")} value={data.totalUsers} />
+        <StatBlock theme={theme} label={t("cyber.identity.tabBuyers")} value={data.totalBuyers} />
+        <StatBlock theme={theme} label={t("cyber.identity.tabVisitors")} value={data.totalVisitors} />
+      </div>
+
       <div className="space-y-2">
         <h3 className={`text-sm font-semibold ${theme.text}`}>{t("cyber.identity.tabDevices")}</h3>
         <p className={`text-xs ${theme.mutedText}`}>{t("cyber.identity.devicesHint", { days: 90 })}</p>
@@ -245,6 +251,53 @@ export default function IdentityTab({ theme, canEdit }: { theme: CyberTheme; can
           rows={data.dormantUsers}
           rowKey={(u) => u.id}
           emptyMessage={t("cyber.identity.noDormantUsers")}
+        />
+      </div>
+
+      <div className="space-y-1">
+        <h3 className={`text-sm font-semibold ${theme.text}`}>{t("cyber.identity.tabExternal")}</h3>
+        <p className={`text-xs ${theme.mutedText}`}>{t("cyber.identity.externalHint")}</p>
+      </div>
+
+      <div className="space-y-2">
+        <h4 className={`text-xs font-semibold uppercase tracking-wide ${theme.subtext}`}>{t("cyber.identity.tabBuyers")}</h4>
+        <CyberTable
+          theme={theme}
+          columns={
+            [
+              { key: "name", header: t("cyber.identity.name"), render: (b) => <span className={theme.text}>{b.legalName}</span>, sortValue: (b) => b.legalName },
+              { key: "email", header: t("cyber.identity.email"), render: (b) => b.contactEmail },
+              { key: "status", header: t("common.status"), render: (b) => <StatusPill status={b.status} /> },
+              { key: "portal", header: t("cyber.identity.portalAccess"), render: (b) => <StatusPill status={b.hasPortalAccess ? "PROTECTED" : "MISSING"} /> },
+              { key: "bids", header: t("cyber.identity.bidCount"), render: (b) => b.bidCount, sortValue: (b) => b.bidCount },
+              { key: "lastLogin", header: t("cyber.identity.lastLoginAt"), render: (b) => (b.lastLoginAt ? new Date(b.lastLoginAt).toLocaleString() : t("cyber.identity.never")) },
+            ] as CyberTableColumn<(typeof data.buyers)[number]>[]
+          }
+          rows={data.buyers}
+          rowKey={(b) => b.id}
+          emptyMessage={t("cyber.identity.noBuyers")}
+          searchValue={(b) => `${b.legalName} ${b.contactEmail}`}
+        />
+      </div>
+
+      <div className="space-y-2">
+        <h4 className={`text-xs font-semibold uppercase tracking-wide ${theme.subtext}`}>{t("cyber.identity.tabVisitors")}</h4>
+        <CyberTable
+          theme={theme}
+          columns={
+            [
+              { key: "name", header: t("cyber.identity.name"), render: (v) => <span className={theme.text}>{v.fullName}</span>, sortValue: (v) => v.fullName },
+              { key: "company", header: t("cyber.identity.company"), render: (v) => v.company ?? "—" },
+              { key: "host", header: t("cyber.identity.host"), render: (v) => v.hostName },
+              { key: "site", header: t("common.site"), render: (v) => v.site?.name ?? "—" },
+              { key: "status", header: t("common.status"), render: (v) => <StatusPill status={v.status} /> },
+              { key: "scheduled", header: t("cyber.identity.scheduledFor"), render: (v) => new Date(v.scheduledFor).toLocaleString(), sortValue: (v) => v.scheduledFor },
+            ] as CyberTableColumn<(typeof data.visitors)[number]>[]
+          }
+          rows={data.visitors}
+          rowKey={(v) => v.id}
+          emptyMessage={t("cyber.identity.noVisitors")}
+          searchValue={(v) => `${v.fullName} ${v.company ?? ""} ${v.hostName}`}
         />
       </div>
 

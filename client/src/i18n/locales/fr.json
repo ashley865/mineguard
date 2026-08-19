@@ -2651,7 +2651,12 @@
       "colVms": "Intégration VMS",
       "syncNow": "Synchroniser maintenant",
       "noneYet": "Aucune caméra enregistrée pour le moment.",
-      "confirmDelete": "Supprimer cette caméra ?"
+      "confirmDelete": "Supprimer cette caméra ?",
+      "summaryOnline": "En ligne",
+      "summaryOffline": "Hors ligne",
+      "summaryMaintenance": "En maintenance",
+      "summaryUncoveredZones": "Zones sans caméra",
+      "uncoveredZonesHint": "Aucune caméra n'est affectée à : {{zones}}."
     },
     "tabIncidents": "Gestion des Incidents",
     "incidents": {
@@ -2762,6 +2767,7 @@
       }
     },
     "tabGuards": "Gardes",
+    "tabPerformance": "Performance",
     "tabDutyLog": "Journal de Service",
     "guards": {
       "hint": "Chaque garde obtient son propre lien sécurisé : générez-le une fois et partagez-le directement avec lui. Aucune connexion requise ; le lien lui-même l'identifie.",
@@ -2774,6 +2780,23 @@
       "revoke": "Révoquer",
       "confirmRevoke": "Révoquer le lien de service de ce garde ? Il en faudra un nouveau pour se présenter en service.",
       "noneYet": "Aucun travailleur de catégorie sécurité enregistré pour le moment."
+    },
+    "performance": {
+      "hint": "Calculé à partir des affectations de patrouille, des relevés de points de contrôle, de la présence en service et des observations réelles — aucune saisie supplémentaire requise.",
+      "windowDays": "{{count}} derniers jours",
+      "summaryAvgCompletion": "Taux d'achèvement moyen",
+      "summaryAvgCompliance": "Conformité moyenne des points de contrôle",
+      "summaryMissedShifts": "Quarts manqués",
+      "summaryObservations": "Observations enregistrées",
+      "completionRate": "Taux d'achèvement",
+      "checkpointCompliance": "Conformité des points de contrôle",
+      "avgDuration": "Durée moyenne de patrouille",
+      "minutes": "{{count}} min",
+      "missedShifts": "Quarts manqués",
+      "observations": "Observations",
+      "dutyHours": "Heures de service",
+      "lastActive": "Dernière activité",
+      "noneYet": "Aucune activité de garde dans cette période pour l'instant."
     },
     "dutyLog": {
       "hint": "Enregistrement automatique de chaque prise ou fin de service d'un garde, avec l'heure et la date exactes.",
@@ -4552,6 +4575,18 @@
       "lastLoginAt": "Dernière connexion",
       "never": "Jamais",
       "noDormantUsers": "Aucun utilisateur inactif — tout le monde s'est connecté récemment.",
+      "tabExternal": "Accès Externe",
+      "externalHint": "Identité & Accès couvre tous ceux qui ont accès aux systèmes et sites de cette mine, pas seulement le personnel — y compris les acheteurs enregistrés ayant enchéri sur les annonces de cette mine et les visiteurs de ses sites.",
+      "staffCount": "Personnel",
+      "tabBuyers": "Acheteurs",
+      "noBuyers": "Aucun acheteur n'a encore enchéri sur les annonces de cette mine.",
+      "portalAccess": "Accès au portail",
+      "bidCount": "Offres",
+      "tabVisitors": "Visiteurs",
+      "noVisitors": "Aucun visiteur enregistré pour les sites de cette mine pour le moment.",
+      "company": "Entreprise",
+      "host": "Hôte",
+      "scheduledFor": "Prévu pour",
       "tabActivity": "Activité de Connexion Récente",
       "eventType": "Événement",
       "ipAddress": "Adresse IP",

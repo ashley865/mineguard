@@ -84,6 +84,10 @@ router.post("/login", authLimiter, async (req, res) => {
     return res.status(403).json({ error: "This buyer account has been suspended" });
   }
 
+  // Feeds the Cyber Command Center's Identity & Access view (buyers are shown there
+  // alongside staff and visitors), the same way User.lastLoginAt does for staff.
+  await prisma.buyer.update({ where: { id: buyer.id }, data: { lastLoginAt: new Date() } }).catch(() => {});
+
   const token = signBuyerAuthToken(buyer.id);
   const full = await prisma.buyer.findUnique({ where: { id: buyer.id }, select: buyerSelfSelect });
   res.json({ token, buyer: full });

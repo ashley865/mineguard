@@ -568,6 +568,29 @@ export interface GuardSummary {
   onDutySince?: string | null;
 }
 
+export interface GuardPerformance {
+  workerId: string;
+  name: string;
+  employeeId: string;
+  siteId: string;
+  site?: { id: string; name: string };
+  totalAssignments: number;
+  completedAssignments: number;
+  missedAssignments: number;
+  inProgressAssignments: number;
+  completionRate: number | null;
+  checkpointComplianceRate: number | null;
+  avgPatrolDurationMinutes: number | null;
+  observationsLogged: number;
+  dutyHours: number;
+  lastActiveAt?: string | null;
+}
+
+export interface GuardPerformanceResponse {
+  days: number;
+  results: GuardPerformance[];
+}
+
 export interface DutyLogEntry {
   id: string;
   checkInAt: string;
@@ -3762,6 +3785,29 @@ export interface CyberDormantUser {
   lastLoginAt?: string | null;
 }
 
+export interface CyberIdentityBuyer {
+  id: string;
+  legalName: string;
+  contactEmail: string;
+  status: BuyerStatus;
+  hasPortalAccess: boolean;
+  lastLoginAt?: string | null;
+  bidCount: number;
+  createdAt: string;
+}
+
+export interface CyberIdentityVisitor {
+  id: string;
+  fullName: string;
+  company?: string | null;
+  hostName: string;
+  site?: { id: string; name: string };
+  status: VisitorStatus;
+  scheduledFor: string;
+  checkInAt?: string | null;
+  checkOutAt?: string | null;
+}
+
 export interface CyberIdentityOverview {
   totalUsers: number;
   privilegedAccounts: CyberPrivilegedAccount[];
@@ -3769,6 +3815,10 @@ export interface CyberIdentityOverview {
   mfaGapCount: number;
   recentEvents: CyberLoginEvent[];
   accessViolations: CyberLoginEvent[];
+  totalBuyers: number;
+  buyers: CyberIdentityBuyer[];
+  totalVisitors: number;
+  visitors: CyberIdentityVisitor[];
 }
 
 export interface CyberScoreBreakdownItem {

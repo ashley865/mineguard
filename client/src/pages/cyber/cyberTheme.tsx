@@ -113,6 +113,15 @@ const STATUS_COLORS: Record<string, string> = {
   WARNING: "bg-amber-500",
   COMPROMISED: "bg-red-600",
   BLOCKED: "bg-red-600",
+  // Buyer / visitor identity statuses (Identity & Access tab)
+  APPROVED: "bg-green-600",
+  PENDING_REVIEW: "bg-amber-500",
+  PENDING_APPROVAL: "bg-amber-500",
+  SUSPENDED: "bg-red-600",
+  REJECTED: "bg-red-600",
+  DENIED: "bg-red-600",
+  CHECKED_IN: "bg-green-600",
+  CHECKED_OUT: "bg-slate-400",
 };
 
 export function StatusPill({ status }: { status: string }) {

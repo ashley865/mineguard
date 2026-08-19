@@ -1932,6 +1932,7 @@ model Buyer {
   // POST /buyers/:id/set-password. Self-registered buyers (POST /buyers/register)
   // always set this at signup.
   passwordHash            String?
+  lastLoginAt             DateTime?
   bankName                String?
   bankAccountHolder       String?
   bankAccountNumber       String?

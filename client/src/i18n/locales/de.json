@@ -2651,7 +2651,12 @@
       "colVms": "VMS-Integration",
       "syncNow": "Jetzt synchronisieren",
       "noneYet": "Noch keine Kameras erfasst.",
-      "confirmDelete": "Diese Kamera löschen?"
+      "confirmDelete": "Diese Kamera löschen?",
+      "summaryOnline": "Online",
+      "summaryOffline": "Offline",
+      "summaryMaintenance": "In Wartung",
+      "summaryUncoveredZones": "Zonen ohne Kamera",
+      "uncoveredZonesHint": "Keiner Kamera zugeordnet: {{zones}}."
     },
     "tabIncidents": "Vorfallmanagement",
     "incidents": {
@@ -2762,6 +2767,7 @@
       }
     },
     "tabGuards": "Wachen",
+    "tabPerformance": "Leistung",
     "tabDutyLog": "Dienstprotokoll",
     "guards": {
       "hint": "Jede Wache erhält ihren eigenen sicheren Link — generieren Sie ihn einmal und teilen Sie ihn direkt mit. Keine Anmeldung erforderlich; der Link selbst identifiziert sie.",
@@ -2774,6 +2780,23 @@
       "revoke": "Widerrufen",
       "confirmRevoke": "Den Dienstlink dieser Wache widerrufen? Sie benötigt einen neuen, um sich zum Dienst zu melden.",
       "noneYet": "Noch keine Mitarbeiter der Kategorie Sicherheit registriert."
+    },
+    "performance": {
+      "hint": "Berechnet aus tatsächlichen Streifeneinsätzen, Kontrollpunkt-Protokollen, Dienstanwesenheit und Beobachtungen — keine zusätzliche Dateneingabe erforderlich.",
+      "windowDays": "Letzte {{count}} Tage",
+      "summaryAvgCompletion": "Ø Abschlussquote",
+      "summaryAvgCompliance": "Ø Kontrollpunkt-Einhaltung",
+      "summaryMissedShifts": "Verpasste Schichten",
+      "summaryObservations": "Erfasste Beobachtungen",
+      "completionRate": "Abschlussquote",
+      "checkpointCompliance": "Kontrollpunkt-Einhaltung",
+      "avgDuration": "Ø Streifendauer",
+      "minutes": "{{count}} Min.",
+      "missedShifts": "Verpasste Schichten",
+      "observations": "Beobachtungen",
+      "dutyHours": "Diensstunden",
+      "lastActive": "Zuletzt aktiv",
+      "noneYet": "Noch keine Wachaktivität in diesem Zeitraum."
     },
     "dutyLog": {
       "hint": "Automatische Aufzeichnung jedes Dienstantritts oder Dienstendes einer Wache, mit genauer Uhrzeit und Datum.",
@@ -4552,6 +4575,18 @@
       "lastLoginAt": "Letzte Anmeldung",
       "never": "Nie",
       "noDormantUsers": "Keine inaktiven Benutzer — alle haben sich kürzlich angemeldet.",
+      "tabExternal": "Externer Zugriff",
+      "externalHint": "Identität & Zugriff umfasst alle mit Zugang zu den Systemen und Standorten dieser Mine, nicht nur Mitarbeiter — einschließlich registrierter Käufer, die auf Angebote dieser Mine geboten haben, und Besucher ihrer Standorte.",
+      "staffCount": "Mitarbeiter",
+      "tabBuyers": "Käufer",
+      "noBuyers": "Noch kein Käufer hat auf Angebote dieser Mine geboten.",
+      "portalAccess": "Portalzugang",
+      "bidCount": "Gebote",
+      "tabVisitors": "Besucher",
+      "noVisitors": "Noch keine Besucher für die Standorte dieser Mine erfasst.",
+      "company": "Unternehmen",
+      "host": "Gastgeber",
+      "scheduledFor": "Geplant für",
       "tabActivity": "Neueste Anmeldeaktivität",
       "eventType": "Ereignis",
       "ipAddress": "IP-Adresse",

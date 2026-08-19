@@ -2,13 +2,24 @@ import { FormEvent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { api, API_URL } from "../../api/client";
 import { useAuth } from "../../context/AuthContext";
-import { DutyLogEntry, GuardSummary, PatrolAssignment, PatrolObservation, PatrolRoute, Site, Worker } from "../../api/types";
+import { DutyLogEntry, GuardPerformance, GuardSummary, PatrolAssignment, PatrolObservation, PatrolRoute, Site, Worker } from "../../api/types";
 import { StatusBadge } from "../../components/Badges";
 import Modal from "../../components/Modal";
 import { buttonDanger, buttonPrimary, buttonSecondary, cardClass, inputClass, labelClass, selectClass } from "../../components/ui";
 import DateField from "../../components/DateField";
+import DataTable, { DataTableColumn } from "../../components/DataTable";
+import SummaryCards from "../../components/SummaryCards";
 
-type SubTab = "routes" | "assignments" | "guards" | "dutyLog" | "observations";
+type SubTab = "routes" | "assignments" | "guards" | "performance" | "dutyLog" | "observations";
+const PERFORMANCE_WINDOWS = [7, 30, 90] as const;
+
+// Averages only over guards with at least one due/measurable shift in the window — a guard
+// with no data yet (completionRate: null) shouldn't drag the mine-wide average toward 0.
+function avgOf(values: (number | null)[]): number {
+  const present = values.filter((v): v is number => v != null);
+  if (present.length === 0) return 0;
+  return Math.round((present.reduce((sum, v) => sum + v, 0) / present.length) * 10) / 10;
+}
 
 const SUGGESTED_CHECKPOINTS = [
   "Gate 1",
@@ -354,6 +365,9 @@ export default function PatrolManagementTab({ sites }: { sites: Site[] }) {
   const [guardSummaries, setGuardSummaries] = useState<GuardSummary[]>([]);
   const [dutyLog, setDutyLog] = useState<DutyLogEntry[]>([]);
   const [observations, setObservations] = useState<PatrolObservation[]>([]);
+  const [performance, setPerformance] = useState<GuardPerformance[]>([]);
+  const [performanceDays, setPerformanceDays] = useState<number>(30);
+  const [performanceLoading, setPerformanceLoading] = useState(false);
   const [loading, setLoading] = useState(true);
   const [routeModal, setRouteModal] = useState<null | "create" | PatrolRoute>(null);
   const [assignmentModal, setAssignmentModal] = useState(false);
@@ -386,6 +400,23 @@ export default function PatrolManagementTab({ sites }: { sites: Site[] }) {
   useEffect(() => {
     load();
   }, []);
+
+  async function loadPerformance() {
+    setPerformanceLoading(true);
+    try {
+      const res = await api.get<{ days: number; results: GuardPerformance[] }>("/patrol/guards/performance", {
+        params: { days: performanceDays },
+      });
+      setPerformance(res.data.results);
+    } finally {
+      setPerformanceLoading(false);
+    }
+  }
+
+  useEffect(() => {
+    if (subTab === "performance") loadPerformance();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [subTab, performanceDays]);
 
   async function createRoute(data: any) {
     await api.post("/patrol/routes", data);
@@ -447,6 +478,57 @@ export default function PatrolManagementTab({ sites }: { sites: Site[] }) {
     return res.data;
   }
 
+  const performanceColumns: DataTableColumn<GuardPerformance>[] = [
+    {
+      key: "guard",
+      header: t("patrol.guards.colGuard"),
+      render: (p) => <>{p.name}<div className="text-[10px] text-mine-400">{p.site?.name}</div></>,
+      sortValue: (p) => p.name,
+    },
+    {
+      key: "completionRate",
+      header: t("patrol.performance.completionRate"),
+      render: (p) => (p.completionRate == null ? "—" : <span className={p.completionRate < 80 ? "text-danger-500 font-semibold" : "text-success-500"}>{p.completionRate}%</span>),
+      sortValue: (p) => p.completionRate ?? -1,
+    },
+    {
+      key: "checkpointCompliance",
+      header: t("patrol.performance.checkpointCompliance"),
+      render: (p) => (p.checkpointComplianceRate == null ? "—" : `${p.checkpointComplianceRate}%`),
+      sortValue: (p) => p.checkpointComplianceRate ?? -1,
+    },
+    {
+      key: "avgDuration",
+      header: t("patrol.performance.avgDuration"),
+      render: (p) => (p.avgPatrolDurationMinutes == null ? "—" : t("patrol.performance.minutes", { count: p.avgPatrolDurationMinutes })),
+      sortValue: (p) => p.avgPatrolDurationMinutes ?? -1,
+    },
+    {
+      key: "missed",
+      header: t("patrol.performance.missedShifts"),
+      render: (p) => (p.missedAssignments > 0 ? <span className="text-danger-500 font-semibold">{p.missedAssignments}</span> : "0"),
+      sortValue: (p) => p.missedAssignments,
+    },
+    {
+      key: "observations",
+      header: t("patrol.performance.observations"),
+      render: (p) => p.observationsLogged,
+      sortValue: (p) => p.observationsLogged,
+    },
+    {
+      key: "dutyHours",
+      header: t("patrol.performance.dutyHours"),
+      render: (p) => p.dutyHours,
+      sortValue: (p) => p.dutyHours,
+    },
+    {
+      key: "lastActive",
+      header: t("patrol.performance.lastActive"),
+      render: (p) => (p.lastActiveAt ? new Date(p.lastActiveAt).toLocaleString() : "—"),
+      sortValue: (p) => p.lastActiveAt ?? "",
+    },
+  ];
+
   if (loading) return <div className="text-mine-300">{t("common.loading")}</div>;
 
   return (
@@ -474,6 +556,9 @@ export default function PatrolManagementTab({ sites }: { sites: Site[] }) {
         </button>
         <button className={subTab === "guards" ? buttonPrimary : buttonSecondary} onClick={() => setSubTab("guards")}>
           {t("patrol.tabGuards")}
+        </button>
+        <button className={subTab === "performance" ? buttonPrimary : buttonSecondary} onClick={() => setSubTab("performance")}>
+          {t("patrol.tabPerformance")}
         </button>
         <button className={subTab === "dutyLog" ? buttonPrimary : buttonSecondary} onClick={() => setSubTab("dutyLog")}>
           {t("patrol.tabDutyLog")}
@@ -629,6 +714,74 @@ export default function PatrolManagementTab({ sites }: { sites: Site[] }) {
               </tbody>
             </table>
           </div>
+        </div>
+      )}
+
+      {subTab === "performance" && (
+        <div className="space-y-3">
+          <div className="flex items-center justify-between flex-wrap gap-2">
+            <p className="text-xs text-mine-400">{t("patrol.performance.hint")}</p>
+            <div className="flex gap-1.5">
+              {PERFORMANCE_WINDOWS.map((d) => (
+                <button
+                  key={d}
+                  className={`text-xs px-3 py-1.5 rounded-lg border transition-colors ${
+                    performanceDays === d ? "bg-hazard-500 text-white border-hazard-500" : "border-mine-700 text-mine-300 hover:bg-mine-800"
+                  }`}
+                  onClick={() => setPerformanceDays(d)}
+                >
+                  {t("patrol.performance.windowDays", { count: d })}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {performanceLoading ? (
+            <div className="text-mine-300 text-sm">{t("common.loading")}</div>
+          ) : (
+            <>
+              {performance.length > 0 && (
+                <SummaryCards
+                  cards={[
+                    {
+                      label: t("patrol.performance.summaryAvgCompletion"),
+                      value: `${avgOf(performance.map((p) => p.completionRate))}%`,
+                    },
+                    {
+                      label: t("patrol.performance.summaryAvgCompliance"),
+                      value: `${avgOf(performance.map((p) => p.checkpointComplianceRate))}%`,
+                    },
+                    {
+                      label: t("patrol.performance.summaryMissedShifts"),
+                      value: performance.reduce((sum, p) => sum + p.missedAssignments, 0),
+                      tone: performance.some((p) => p.missedAssignments > 0) ? "danger" : "default",
+                    },
+                    {
+                      label: t("patrol.performance.summaryObservations"),
+                      value: performance.reduce((sum, p) => sum + p.observationsLogged, 0),
+                    },
+                  ]}
+                />
+              )}
+              <DataTable
+                columns={performanceColumns}
+                rows={performance}
+                rowKey={(p) => p.workerId}
+                emptyMessage={t("patrol.performance.noneYet")}
+                searchValue={(p) => `${p.name} ${p.site?.name ?? ""}`}
+                exportFilename="guard-performance"
+                exportColumns={[
+                  { header: t("patrol.guards.colGuard"), value: (p) => p.name },
+                  { header: t("common.site"), value: (p) => p.site?.name ?? "" },
+                  { header: t("patrol.performance.completionRate"), value: (p) => p.completionRate ?? "" },
+                  { header: t("patrol.performance.checkpointCompliance"), value: (p) => p.checkpointComplianceRate ?? "" },
+                  { header: t("patrol.performance.avgDuration"), value: (p) => p.avgPatrolDurationMinutes ?? "" },
+                  { header: t("patrol.performance.observations"), value: (p) => p.observationsLogged },
+                  { header: t("patrol.performance.dutyHours"), value: (p) => p.dutyHours },
+                ]}
+              />
+            </>
+          )}
         </div>
       )}
 

@@ -378,6 +378,144 @@ router.get("/guards", async (req, res) => {
   );
 });
 
+// Per-guard performance summary over a rolling window, computed entirely from records
+// that already exist (assignments, checkpoint logs, duty attendance, observations) — no
+// separate tracking needed. A due-but-still-SCHEDULED assignment (shift date already
+// passed, never started) counts as a no-show alongside anything explicitly marked MISSED,
+// since nothing else in this app currently flips that status automatically.
+router.get("/guards/performance", async (req, res) => {
+  const mineId = requireMineId(req, res);
+  if (!mineId) return;
+  const siteId = req.query.siteId as string | undefined;
+  const days = Math.min(Math.max(Number(req.query.days) || 30, 1), 365);
+  const cutoff = new Date();
+  cutoff.setDate(cutoff.getDate() - days);
+  cutoff.setHours(0, 0, 0, 0);
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  const guards = await prisma.worker.findMany({
+    where: { site: { mineId }, siteId: siteId || undefined, category: "SECURITY" },
+    select: { id: true, name: true, employeeId: true, siteId: true, site: { select: { id: true, name: true } } },
+    orderBy: { name: "asc" },
+  });
+  const guardIds = guards.map((g) => g.id);
+
+  const [assignments, attendance, observations] = await Promise.all([
+    prisma.patrolAssignment.findMany({
+      where: { workerId: { in: guardIds }, shiftDate: { gte: cutoff } },
+      select: {
+        workerId: true,
+        status: true,
+        shiftDate: true,
+        startedAt: true,
+        completedAt: true,
+        route: { select: { checkpoints: { select: { id: true } } } },
+        logs: { select: { checkpointId: true } },
+      },
+    }),
+    prisma.workerAttendance.findMany({
+      where: { workerId: { in: guardIds }, checkInAt: { gte: cutoff } },
+      select: { workerId: true, checkInAt: true, checkOutAt: true },
+    }),
+    // Same "an observation is any log entry with a category" filter used by GET /observations.
+    prisma.patrolLogEntry.findMany({
+      where: { workerId: { in: guardIds }, category: { not: null }, loggedAt: { gte: cutoff } },
+      select: { workerId: true },
+    }),
+  ]);
+
+  interface Accumulator {
+    totalAssignments: number;
+    completedAssignments: number;
+    missedAssignments: number;
+    inProgressAssignments: number;
+    checkpointsLogged: number;
+    checkpointsTotal: number;
+    durationSumMinutes: number;
+    durationCount: number;
+    observationsLogged: number;
+    dutyHoursSum: number;
+    lastActiveAt: Date | null;
+  }
+  const byGuard = new Map<string, Accumulator>(
+    guards.map((g) => [
+      g.id,
+      {
+        totalAssignments: 0,
+        completedAssignments: 0,
+        missedAssignments: 0,
+        inProgressAssignments: 0,
+        checkpointsLogged: 0,
+        checkpointsTotal: 0,
+        durationSumMinutes: 0,
+        durationCount: 0,
+        observationsLogged: 0,
+        dutyHoursSum: 0,
+        lastActiveAt: null,
+      },
+    ])
+  );
+
+  for (const a of assignments) {
+    const acc = byGuard.get(a.workerId);
+    if (!acc) continue;
+    acc.totalAssignments += 1;
+    const loggedCheckpointIds = new Set(a.logs.filter((l) => l.checkpointId).map((l) => l.checkpointId));
+    acc.checkpointsLogged += loggedCheckpointIds.size;
+    acc.checkpointsTotal += a.route.checkpoints.length;
+    if (a.status === "COMPLETED") {
+      acc.completedAssignments += 1;
+      if (a.startedAt && a.completedAt) {
+        acc.durationSumMinutes += (a.completedAt.getTime() - a.startedAt.getTime()) / 60000;
+        acc.durationCount += 1;
+      }
+    } else if (a.status === "MISSED" || (a.status === "SCHEDULED" && a.shiftDate < today)) {
+      acc.missedAssignments += 1;
+    } else if (a.status === "IN_PROGRESS") {
+      acc.inProgressAssignments += 1;
+    }
+  }
+
+  for (const att of attendance) {
+    const acc = byGuard.get(att.workerId);
+    if (!acc) continue;
+    const end = att.checkOutAt ?? new Date();
+    acc.dutyHoursSum += (end.getTime() - att.checkInAt.getTime()) / 3600000;
+    if (!acc.lastActiveAt || att.checkInAt > acc.lastActiveAt) acc.lastActiveAt = att.checkInAt;
+  }
+
+  for (const o of observations) {
+    if (!o.workerId) continue;
+    const acc = byGuard.get(o.workerId);
+    if (acc) acc.observationsLogged += 1;
+  }
+
+  const results = guards.map((g) => {
+    const acc = byGuard.get(g.id)!;
+    const dueCount = acc.completedAssignments + acc.missedAssignments + acc.inProgressAssignments;
+    return {
+      workerId: g.id,
+      name: g.name,
+      employeeId: g.employeeId,
+      siteId: g.siteId,
+      site: g.site,
+      totalAssignments: acc.totalAssignments,
+      completedAssignments: acc.completedAssignments,
+      missedAssignments: acc.missedAssignments,
+      inProgressAssignments: acc.inProgressAssignments,
+      completionRate: dueCount > 0 ? Math.round((acc.completedAssignments / dueCount) * 1000) / 10 : null,
+      checkpointComplianceRate: acc.checkpointsTotal > 0 ? Math.round((acc.checkpointsLogged / acc.checkpointsTotal) * 1000) / 10 : null,
+      avgPatrolDurationMinutes: acc.durationCount > 0 ? Math.round(acc.durationSumMinutes / acc.durationCount) : null,
+      observationsLogged: acc.observationsLogged,
+      dutyHours: Math.round(acc.dutyHoursSum * 10) / 10,
+      lastActiveAt: acc.lastActiveAt,
+    };
+  });
+
+  res.json({ days, results });
+});
+
 // The token is only ever returned here, once, at generation time — like an API key —
 // not exposed through the general guards list above.
 router.post("/guards/:workerId/duty-link", requireRole("ADMIN", "SUPERVISOR", "EXECUTIVE"), async (req, res) => {

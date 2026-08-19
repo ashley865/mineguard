@@ -32,7 +32,7 @@ router.get("/overview", async (req, res) => {
   if (!(await requireCyberAccess(req, res))) return;
   const dormantSince = new Date(Date.now() - DORMANT_THRESHOLD_DAYS * 86400000);
 
-  const [users, recentEvents] = await Promise.all([
+  const [users, recentEvents, buyers, visitors] = await Promise.all([
     prisma.user.findMany({
       where: { mineId },
       select: { id: true, name: true, email: true, role: true, title: true, isActive: true, mfaEnabled: true, lastLoginAt: true, createdAt: true },
@@ -52,6 +52,40 @@ router.get("/overview", async (req, res) => {
       orderBy: { occurredAt: "desc" },
       take: 100,
     }),
+    // Buyers aren't scoped to a single mine (the marketplace is shared), so "belongs to
+    // this mine's identity picture" means having actually bid on one of this mine's
+    // listings — not every registered buyer in the whole system.
+    prisma.buyer.findMany({
+      where: { bids: { some: { listing: { site: { mineId } } } } },
+      select: {
+        id: true,
+        legalName: true,
+        contactEmail: true,
+        status: true,
+        passwordHash: true,
+        lastLoginAt: true,
+        createdAt: true,
+        _count: { select: { bids: { where: { listing: { site: { mineId } } } } } },
+      },
+      orderBy: { legalName: "asc" },
+      take: 200,
+    }),
+    prisma.visitor.findMany({
+      where: { site: { mineId } },
+      select: {
+        id: true,
+        fullName: true,
+        company: true,
+        hostName: true,
+        site: { select: { id: true, name: true } },
+        status: true,
+        scheduledFor: true,
+        checkInAt: true,
+        checkOutAt: true,
+      },
+      orderBy: { scheduledFor: "desc" },
+      take: 200,
+    }),
   ]);
 
   const privilegedAccounts = users.filter((u) => u.role === "ADMIN" || u.role === "EXECUTIVE");
@@ -67,6 +101,19 @@ router.get("/overview", async (req, res) => {
     mfaGapCount: mfaGapAccounts.length,
     recentEvents,
     accessViolations: recentEvents.filter((e) => e.flagged),
+    totalBuyers: buyers.length,
+    buyers: buyers.map((b) => ({
+      id: b.id,
+      legalName: b.legalName,
+      contactEmail: b.contactEmail,
+      status: b.status,
+      hasPortalAccess: !!b.passwordHash,
+      lastLoginAt: b.lastLoginAt,
+      bidCount: b._count.bids,
+      createdAt: b.createdAt,
+    })),
+    totalVisitors: visitors.length,
+    visitors,
   });
 });
 
