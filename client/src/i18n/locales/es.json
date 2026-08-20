@@ -4567,6 +4567,10 @@
         "down": "Empeorando",
         "flat": "Estable"
       },
+      "postureCritical": "{{count}} problema crítico requiere atención en {{incidents}} incidentes abiertos",
+      "postureCritical_other": "{{count}} problemas críticos requieren atención en {{incidents}} incidentes abiertos",
+      "postureOk": "{{count}} incidente abierto por revisar",
+      "postureOk_other": "{{count}} incidentes abiertos por revisar",
       "openAlerts": "Alertas Abiertas",
       "openIncidents": "Incidentes Abiertos",
       "criticalCount": "Elementos Críticos",

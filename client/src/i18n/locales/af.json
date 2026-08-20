@@ -4567,6 +4567,10 @@
         "down": "Verswak",
         "flat": "Stabiel"
       },
+      "postureCritical": "{{count}} kritieke kwessie benodig aandag oor {{incidents}} oop insidente",
+      "postureCritical_other": "{{count}} kritieke kwessies benodig aandag oor {{incidents}} oop insidente",
+      "postureOk": "{{count}} oop insident om te hersien",
+      "postureOk_other": "{{count}} oop insidente om te hersien",
       "openAlerts": "Oop Waarskuwings",
       "openIncidents": "Oop Insidente",
       "criticalCount": "Kritieke Items",

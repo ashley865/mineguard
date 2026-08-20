@@ -84,17 +84,19 @@ export default function CyberCommandCenter() {
           </button>
         </div>
 
-        <div className="flex gap-1.5 flex-wrap">
+        <div
+          className={`inline-flex flex-wrap gap-0.5 p-1 rounded-full ${dark ? "bg-white/5" : "bg-slate-200/60"}`}
+        >
           {tabs.map((tb) => (
             <button
               key={tb.key}
               onClick={() => setTab(tb.key)}
-              className={`text-xs font-semibold px-3 py-1.5 rounded-md transition-colors ${
+              className={`text-xs font-semibold px-4 py-1.5 rounded-full transition-colors ${
                 tab === tb.key
                   ? "bg-hazard-500 text-white"
                   : dark
-                  ? "bg-white/5 text-white/60 hover:bg-white/10"
-                  : "bg-white text-slate-600 border border-slate-200 hover:bg-slate-50"
+                  ? "text-white/55 hover:text-white/80"
+                  : "text-slate-500 hover:text-slate-800"
               }`}
             >
               {tb.label}

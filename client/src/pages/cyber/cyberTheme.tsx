@@ -26,7 +26,7 @@ export function getCyberTheme(dark: boolean): CyberTheme {
     ? {
         dark: true,
         page: "bg-[#0a0e1a] text-white",
-        panel: "bg-[#0f1523] border border-white/10 rounded-xl",
+        panel: "bg-[#0f1523] border border-white/10 rounded-[20px]",
         panelHeader: "border-b border-white/10",
         text: "text-white",
         subtext: "text-white/60",
@@ -42,7 +42,7 @@ export function getCyberTheme(dark: boolean): CyberTheme {
     : {
         dark: false,
         page: "bg-slate-100 text-slate-900",
-        panel: "bg-white border border-slate-200 rounded-xl shadow-sm",
+        panel: "bg-white border border-slate-200 rounded-[20px] shadow-sm",
         panelHeader: "border-b border-slate-200",
         text: "text-slate-900",
         subtext: "text-slate-500",

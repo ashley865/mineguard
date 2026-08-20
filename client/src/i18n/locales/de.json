@@ -4567,6 +4567,10 @@
         "down": "Verschlechtert sich",
         "flat": "Stabil"
       },
+      "postureCritical": "{{count}} kritisches Problem erfordert Aufmerksamkeit bei {{incidents}} offenen Vorfällen",
+      "postureCritical_other": "{{count}} kritische Probleme erfordern Aufmerksamkeit bei {{incidents}} offenen Vorfällen",
+      "postureOk": "{{count}} offener Vorfall zu prüfen",
+      "postureOk_other": "{{count}} offene Vorfälle zu prüfen",
       "openAlerts": "Offene Warnungen",
       "openIncidents": "Offene Vorfälle",
       "criticalCount": "Kritische Elemente",

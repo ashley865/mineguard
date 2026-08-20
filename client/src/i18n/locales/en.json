@@ -4567,6 +4567,10 @@
         "down": "Declining",
         "flat": "Stable"
       },
+      "postureCritical": "{{count}} critical issue needs attention across {{incidents}} open incidents",
+      "postureCritical_other": "{{count}} critical issues need attention across {{incidents}} open incidents",
+      "postureOk": "{{count}} open incident to review",
+      "postureOk_other": "{{count}} open incidents to review",
       "openAlerts": "Open Alerts",
       "openIncidents": "Open Incidents",
       "criticalCount": "Critical Items",
