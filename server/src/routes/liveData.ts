@@ -380,36 +380,74 @@ async function fetchYahooQuote(symbol: string): Promise<{ price: number; previou
 }
 
 // Optional, more authoritative current-price source layered on top of the free Yahoo feed
-// above rather than replacing it — metals-api.com's /latest endpoint only gives a current
-// snapshot (no previousClose without a second, quota-costing call), so Yahoo's
+// above rather than replacing it — a paid metals API's /latest endpoint only gives a
+// current snapshot (no previousClose without a second, quota-costing call), so Yahoo's
 // previousClose is still used for the % change calculation even when this is configured.
 // Dormant (silently skipped) whenever METALS_API_KEY isn't set, same pattern as AI_API_KEY.
+//
+// Provider-pluggable: METALS_API_PROVIDER (a System Configuration setting, see
+// lib/systemSettings.ts) picks which of the adapters below actually gets called. Switching
+// providers later is just changing that setting and pasting the new provider's key — adding
+// a *new* provider means adding one more adapter function here and a case in
+// fetchMetalsApiPrices, nothing else needs to change.
 const METALS_API_SYMBOLS: Record<string, string> = {
   GOLD: "XAU",
   PLATINUM_GROUP_METALS: "XPT",
   COPPER: "XCU",
 };
 
+async function fetchFromMetalsApiDotCom(apiKey: string): Promise<Record<string, number> | null> {
+  const symbols = Object.values(METALS_API_SYMBOLS).join(",");
+  const url = `https://metals-api.com/api/latest?access_key=${apiKey}&base=USD&symbols=${symbols}`;
+  const res = await fetch(url);
+  if (!res.ok) return null;
+  const data: any = await res.json();
+  if (!data?.success || !data?.rates) return null;
+  // metals-api quotes metals like forex currencies against the base — rates.XAU is "how
+  // many ounces of gold equal 1 USD", so the USD price per ounce is the inverse.
+  const prices: Record<string, number> = {};
+  for (const [key, symbol] of Object.entries(METALS_API_SYMBOLS)) {
+    const rate = data.rates[symbol];
+    if (typeof rate === "number" && rate > 0) {
+      prices[key] = 1 / rate;
+    }
+  }
+  return Object.keys(prices).length > 0 ? prices : null;
+}
+
+const TWELVE_DATA_SYMBOLS: Record<string, string> = {
+  GOLD: "XAU/USD",
+  PLATINUM_GROUP_METALS: "XPT/USD",
+  COPPER: "XCU/USD",
+};
+
+async function fetchFromTwelveData(apiKey: string): Promise<Record<string, number> | null> {
+  const symbols = Object.values(TWELVE_DATA_SYMBOLS).join(",");
+  const url = `https://api.twelvedata.com/price?symbol=${encodeURIComponent(symbols)}&apikey=${apiKey}`;
+  const res = await fetch(url);
+  if (!res.ok) return null;
+  const data: any = await res.json();
+  if (data?.status === "error" || data?.code) return null;
+  // Twelve Data returns a flat {price} object for a single symbol, or one keyed by symbol
+  // when several are requested at once (which is always the case here) — already a direct
+  // USD price per unit, unlike metals-api.com's inverted forex-style rate.
+  const prices: Record<string, number> = {};
+  for (const [key, symbol] of Object.entries(TWELVE_DATA_SYMBOLS)) {
+    const price = Number(data?.[symbol]?.price);
+    if (Number.isFinite(price) && price > 0) {
+      prices[key] = price;
+    }
+  }
+  return Object.keys(prices).length > 0 ? prices : null;
+}
+
 async function fetchMetalsApiPrices(): Promise<Record<string, number> | null> {
   const apiKey = await resolveSetting("METALS_API_KEY");
   if (!apiKey) return null;
+  const provider = (await resolveSetting("METALS_API_PROVIDER")) || "twelvedata";
   try {
-    const symbols = Object.values(METALS_API_SYMBOLS).join(",");
-    const url = `https://metals-api.com/api/latest?access_key=${apiKey}&base=USD&symbols=${symbols}`;
-    const res = await fetch(url);
-    if (!res.ok) return null;
-    const data: any = await res.json();
-    if (!data?.success || !data?.rates) return null;
-    // metals-api quotes metals like forex currencies against the base — rates.XAU is "how
-    // many ounces of gold equal 1 USD", so the USD price per ounce is the inverse.
-    const prices: Record<string, number> = {};
-    for (const [key, symbol] of Object.entries(METALS_API_SYMBOLS)) {
-      const rate = data.rates[symbol];
-      if (typeof rate === "number" && rate > 0) {
-        prices[key] = 1 / rate;
-      }
-    }
-    return Object.keys(prices).length > 0 ? prices : null;
+    if (provider === "metals-api") return await fetchFromMetalsApiDotCom(apiKey);
+    return await fetchFromTwelveData(apiKey);
   } catch {
     return null;
   }

@@ -48,9 +48,18 @@ export const SYSTEM_SETTING_KEYS: SystemSettingDef[] = [
     defaultValue: "gpt-4o-mini",
   },
   {
+    key: "METALS_API_PROVIDER",
+    label: "Metals API provider",
+    description: 'Which provider the Metals API key below belongs to. Valid values: "twelvedata" or "metals-api". Switching providers is just changing this and pasting the new provider\'s key — no other changes needed.',
+    type: "text",
+    secret: false,
+    testable: false,
+    defaultValue: "twelvedata",
+  },
+  {
     key: "METALS_API_KEY",
     label: "Metals API key",
-    description: "metals-api.com access key used to refine live commodity prices beyond the free Yahoo feed.",
+    description: "Access key for whichever provider is selected above, used to refine live commodity prices beyond the free Yahoo feed.",
     type: "password",
     secret: true,
     testable: true,
@@ -161,6 +170,14 @@ export function isKnownSystemSetting(key: string): boolean {
 
 const URL_KEYS = new Set(["AI_API_BASE_URL", "SECURITY_ALERT_WEBHOOK_URL"]);
 
+// Plain "text" settings that are really a closed set of choices, not free-form input —
+// enforced here instead of adding a whole new SystemSettingType, since there are only a
+// couple of these and a typo (e.g. "twelve-data" instead of "twelvedata") would otherwise
+// silently fall through to the resolveSetting() default rather than erroring at save time.
+const ENUM_VALUES: Record<string, string[]> = {
+  METALS_API_PROVIDER: ["twelvedata", "metals-api"],
+};
+
 /** Returns an error message if invalid, or null if the value is acceptable for this key's type. */
 export function validateSettingValue(key: string, value: string): string | null {
   const def = SETTING_DEF_BY_KEY.get(key);
@@ -174,6 +191,10 @@ export function validateSettingValue(key: string, value: string): string | null 
     if (key === "BRUTE_FORCE_THRESHOLD" && n > 1000) return "Must be 1000 or less";
     if (key === "BRUTE_FORCE_WINDOW_HOURS" && n > 8760) return "Must be 8760 (one year) or less";
     return null;
+  }
+  if (ENUM_VALUES[key]) {
+    const allowed = ENUM_VALUES[key];
+    return allowed.includes(value) ? null : `Must be one of: ${allowed.join(", ")}`;
   }
   if (URL_KEYS.has(key)) {
     // Cheap, synchronous format check only — the real SSRF/DNS check (lib/ssrfGuard.ts)

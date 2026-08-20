@@ -81,18 +81,27 @@ router.post("/:key/test", async (req, res) => {
   if (key === "METALS_API_KEY") {
     const apiKey = await resolveSetting("METALS_API_KEY");
     if (!apiKey) return res.json({ success: false, message: "No metals API key is configured" });
+    const provider = (await resolveSetting("METALS_API_PROVIDER")) || "twelvedata";
     try {
       const controller = new AbortController();
       const timeout = setTimeout(() => controller.abort(), 8000);
+      const url =
+        provider === "metals-api"
+          ? `https://metals-api.com/api/latest?access_key=${apiKey}&base=USD&symbols=XAU`
+          : `https://api.twelvedata.com/price?symbol=XAU/USD&apikey=${apiKey}`;
       let response;
       try {
-        response = await fetch(`https://metals-api.com/api/latest?access_key=${apiKey}&base=USD&symbols=XAU`, { signal: controller.signal });
+        response = await fetch(url, { signal: controller.signal });
       } finally {
         clearTimeout(timeout);
       }
       const data: any = await response.json().catch(() => null);
-      if (response.ok && data?.success) return res.json({ success: true, message: "Metals API responded successfully" });
-      return res.json({ success: false, message: data?.error?.info || `Metals API responded with ${response.status}` });
+      if (provider === "metals-api") {
+        if (response.ok && data?.success) return res.json({ success: true, message: "Metals API responded successfully" });
+        return res.json({ success: false, message: data?.error?.info || `Metals API responded with ${response.status}` });
+      }
+      if (response.ok && data?.price && !data?.code) return res.json({ success: true, message: "Twelve Data responded successfully" });
+      return res.json({ success: false, message: data?.message || `Twelve Data responded with ${response.status}` });
     } catch (err) {
       return res.json({ success: false, message: err instanceof Error && err.name === "AbortError" ? "Request timed out" : "Could not reach the metals API" });
     }
