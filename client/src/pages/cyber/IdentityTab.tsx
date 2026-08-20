@@ -1,7 +1,7 @@
 import { FormEvent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { api } from "../../api/client";
-import { CyberAccessThreats, CyberBlockedIp, CyberDevice, CyberIdentityOverview } from "../../api/types";
+import { CyberAccessThreats, CyberBlockedIp, CyberDevice, CyberIdentityOverview, CyberPhysicalAccessAlert } from "../../api/types";
 import { CyberTheme, StatusPill, cyberButtonDanger, cyberButtonPrimary, cyberButtonSecondary } from "./cyberTheme";
 import CyberTable, { CyberTableColumn } from "./CyberTable";
 import CyberModal from "./CyberModal";
@@ -110,15 +110,30 @@ export default function IdentityTab({ theme, canEdit }: { theme: CyberTheme; can
 
   if (loading || !data || !threats) return <div className={theme.subtext}>{t("common.loading")}</div>;
 
-  const threatCount = threats.bruteForceIps.length + threats.multiAccountIps.length;
+  const threatCount = threats.bruteForceIps.length + threats.multiAccountIps.length + data.physicalAccessAlerts.length;
+
+  const physicalAlertColumns: CyberTableColumn<CyberPhysicalAccessAlert>[] = [
+    { key: "person", header: t("cyber.identity.name"), render: (a) => <>{a.personName}{a.company ? <div className={`text-[10px] ${theme.mutedText}`}>{a.company}</div> : null}</>, sortValue: (a) => a.personName },
+    { key: "reason", header: t("cyber.identity.blockReason"), render: (a) => a.matchedReason ?? "—" },
+    { key: "site", header: t("common.site"), render: (a) => a.site?.name ?? "—" },
+    { key: "gate", header: t("accessControl.gateName"), render: (a) => a.gateName ?? "—" },
+    { key: "direction", header: t("accessControl.direction"), render: (a) => t(`accessControl.directions.${a.direction}`) },
+    { key: "loggedAt", header: t("cyber.identity.occurredAt"), render: (a) => new Date(a.loggedAt).toLocaleString(), sortValue: (a) => a.loggedAt },
+  ];
 
   return (
     <div className="space-y-6">
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+      <div className="grid grid-cols-2 md:grid-cols-5 gap-2">
         <StatBlock theme={theme} label={t("cyber.identity.devicesUsingSoftware")} value={devices.length} />
         <StatBlock theme={theme} label={t("cyber.identity.blockedIps")} value={blocklist.length} />
         <StatBlock theme={theme} label={t("cyber.identity.accessThreats")} value={threatCount} tone={threatCount > 0 ? "text-red-500" : undefined} />
         <StatBlock theme={theme} label={t("cyber.identity.mfaGap")} value={data.mfaGapCount} tone={data.mfaGapCount > 0 ? "text-red-500" : undefined} />
+        <StatBlock
+          theme={theme}
+          label={t("cyber.identity.physicalAlerts")}
+          value={data.physicalAccessAlerts.length}
+          tone={data.physicalAccessAlerts.length > 0 ? "text-red-500" : undefined}
+        />
       </div>
 
       <div className="grid grid-cols-3 gap-2">
@@ -182,6 +197,18 @@ export default function IdentityTab({ theme, canEdit }: { theme: CyberTheme; can
               </div>
             )}
           </div>
+        </div>
+        <div className="space-y-1">
+          <div className={`text-xs font-semibold ${theme.text}`}>{t("cyber.identity.physicalAlertsTitle")}</div>
+          <p className={`text-[11px] ${theme.mutedText}`}>{t("cyber.identity.physicalAlertsHint")}</p>
+          <CyberTable
+            theme={theme}
+            columns={physicalAlertColumns}
+            rows={data.physicalAccessAlerts}
+            rowKey={(a) => a.id}
+            emptyMessage={t("cyber.identity.noPhysicalAlerts")}
+            searchValue={(a) => `${a.personName} ${a.company ?? ""} ${a.site?.name ?? ""}`}
+          />
         </div>
       </div>
 

@@ -3808,6 +3808,18 @@ export interface CyberIdentityVisitor {
   checkOutAt?: string | null;
 }
 
+export interface CyberPhysicalAccessAlert {
+  id: string;
+  personName: string;
+  company?: string | null;
+  vehicleReg?: string | null;
+  direction: "IN" | "OUT";
+  gateName?: string | null;
+  loggedAt: string;
+  site?: { id: string; name: string };
+  matchedReason: string | null;
+}
+
 export interface CyberIdentityOverview {
   totalUsers: number;
   privilegedAccounts: CyberPrivilegedAccount[];
@@ -3819,6 +3831,7 @@ export interface CyberIdentityOverview {
   buyers: CyberIdentityBuyer[];
   totalVisitors: number;
   visitors: CyberIdentityVisitor[];
+  physicalAccessAlerts: CyberPhysicalAccessAlert[];
 }
 
 export interface CyberScoreBreakdownItem {

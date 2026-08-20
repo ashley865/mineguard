@@ -32,7 +32,7 @@ router.get("/overview", async (req, res) => {
   if (!(await requireCyberAccess(req, res))) return;
   const dormantSince = new Date(Date.now() - DORMANT_THRESHOLD_DAYS * 86400000);
 
-  const [users, recentEvents, buyers, visitors] = await Promise.all([
+  const [users, recentEvents, buyers, visitors, activeBlacklist, gateLogs] = await Promise.all([
     prisma.user.findMany({
       where: { mineId },
       select: { id: true, name: true, email: true, role: true, title: true, isActive: true, mfaEnabled: true, lastLoginAt: true, createdAt: true },
@@ -86,7 +86,51 @@ router.get("/overview", async (req, res) => {
       orderBy: { scheduledFor: "desc" },
       take: 200,
     }),
+    // Same "who's currently barred" set Access Control's own gate-log-entry endpoint checks
+    // against at creation time (see accessControl.ts) — recomputed here against the
+    // *current* blacklist, so a person added to the list after they were logged still
+    // surfaces retroactively, which is exactly the kind of thing a security review needs.
+    prisma.securityBlacklistEntry.findMany({
+      where: { isActive: true, OR: [{ site: { mineId } }, { siteId: null }] },
+      select: { name: true, vehicleReg: true, reason: true },
+    }),
+    prisma.gateLog.findMany({
+      where: { site: { mineId } },
+      select: {
+        id: true,
+        personName: true,
+        company: true,
+        vehicleReg: true,
+        direction: true,
+        gateName: true,
+        loggedAt: true,
+        site: { select: { id: true, name: true } },
+      },
+      orderBy: { loggedAt: "desc" },
+      take: 300,
+    }),
   ]);
+
+  // Digital access threats (below) are IP-based; this is the physical-access equivalent —
+  // someone the mine has explicitly barred was nonetheless logged moving through a gate.
+  const blacklistedNames = new Set(activeBlacklist.map((b) => b.name.toLowerCase()));
+  const blacklistedVehicles = new Set(
+    activeBlacklist.filter((b): b is typeof b & { vehicleReg: string } => !!b.vehicleReg).map((b) => b.vehicleReg.toLowerCase())
+  );
+  const physicalAccessAlerts = gateLogs
+    .filter(
+      (g) =>
+        blacklistedNames.has(g.personName.toLowerCase()) ||
+        (g.vehicleReg && blacklistedVehicles.has(g.vehicleReg.toLowerCase()))
+    )
+    .map((g) => {
+      const matched = activeBlacklist.find(
+        (b) =>
+          b.name.toLowerCase() === g.personName.toLowerCase() ||
+          (g.vehicleReg && b.vehicleReg?.toLowerCase() === g.vehicleReg.toLowerCase())
+      );
+      return { ...g, matchedReason: matched?.reason ?? null };
+    });
 
   const privilegedAccounts = users.filter((u) => u.role === "ADMIN" || u.role === "EXECUTIVE");
   const dormantUsers = users.filter(
@@ -114,6 +158,7 @@ router.get("/overview", async (req, res) => {
     })),
     totalVisitors: visitors.length,
     visitors,
+    physicalAccessAlerts,
   });
 });
 

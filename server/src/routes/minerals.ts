@@ -8,6 +8,7 @@ import { requireBuyerAuth } from "../middleware/buyerAuth";
 import { imageFileFilter } from "../lib/uploadFilters";
 import { requireMineId } from "../lib/mineScope";
 import { mineralTypeEnum } from "../lib/minerals";
+import { isIpBlocked } from "../lib/ipBlocklist";
 
 const router = Router();
 
@@ -131,9 +132,19 @@ router.post("/:id/bids", requireBuyerAuth, async (req, res) => {
   const parsed = bidSchema.safeParse(req.body);
   if (!parsed.success) return res.status(400).json({ error: parsed.error.flatten() });
 
-  const listing = await prisma.mineralListing.findUnique({ where: { id: req.params.id } });
+  const listing = await prisma.mineralListing.findUnique({
+    where: { id: req.params.id },
+    include: { site: { select: { mineId: true } } },
+  });
   if (!listing) return res.status(404).json({ error: "Listing not found" });
   if (listing.status !== "AVAILABLE") return res.status(409).json({ error: "This listing is no longer available" });
+
+  // Buyers aren't staff and never hit requireAuth, so this is the one place a mine's own
+  // IP blocklist (Cyber Command Center > Identity & Access) can actually apply to them —
+  // enforced against the listing's own mine, since a buyer isn't tied to any single mine.
+  if (await isIpBlocked(listing.site.mineId, req.ip)) {
+    return res.status(403).json({ error: "Access blocked from this network" });
+  }
 
   if (req.buyerAuth!.status !== "APPROVED") {
     return res.status(403).json({ error: "Your buyer registration must be approved before you can bid" });
