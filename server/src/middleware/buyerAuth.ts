@@ -2,6 +2,7 @@ import { NextFunction, Request, Response } from "express";
 import { BuyerStatus } from "@prisma/client";
 import { prisma } from "../prisma";
 import { verifyBuyerAuthToken } from "../lib/jwt";
+import { isGlobalIpBlocked } from "../lib/ipBlocklist";
 
 export interface BuyerAuthPayload {
   buyerId: string;
@@ -43,6 +44,12 @@ export async function requireBuyerAuth(req: Request, res: Response, next: NextFu
   // behavior as a deactivated staff account in requireAuth.
   if (buyer.status === "SUSPENDED") {
     return res.status(403).json({ error: "This buyer account has been suspended" });
+  }
+  // Rejects every request from a globally blocked IP immediately, even one carrying an
+  // already-issued, still-valid token — mirrors requireAuth/requireContractorAuth
+  // re-checking their own mine's blocklist on every request, not just at login.
+  if (await isGlobalIpBlocked(req.ip)) {
+    return res.status(403).json({ error: "Access blocked from this network" });
   }
   req.buyerAuth = { buyerId: buyer.id, status: buyer.status };
   next();

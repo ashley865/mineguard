@@ -4674,7 +4674,8 @@
       "distinctAccounts": "{{count}} cuentas",
       "tabBlocklist": "Control de Acceso IP",
       "blockNew": "+ Bloquear una IP",
-      "blocklistHint": "Las IP y rangos bloqueados se rechazan en cada solicitud, de inmediato, incluso desde un dispositivo ya conectado. Este es el único control aplicado del módulo; todo lo demás aquí es monitoreo.",
+      "blocklistHint": "Las IP y rangos bloqueados se rechazan en cada solicitud, de inmediato, incluso desde un dispositivo ya conectado. Una IP que supera 5 inicios de sesión fallidos en 24 horas se agrega aquí automáticamente; también puedes agregar o quitar entradas manualmente.",
+      "autoBlocked": "Bloqueado automáticamente",
       "ipOrCidr": "Dirección IP o rango CIDR",
       "ipOrCidrHint": "p. ej. 41.2.3.4 para una sola dirección, o 41.0.0.0/8 para un rango. Los rangos IPv4 se comparan por completo; otros valores solo coinciden exactamente.",
       "blockReason": "Motivo",
@@ -4685,7 +4686,9 @@
       "unblock": "Desbloquear",
       "noneBlocked": "No hay IPs ni rangos bloqueados.",
       "blockNewTitle": "Bloquear una IP o Rango",
-      "confirmUnblock": "¿Eliminar esta IP de la lista de bloqueo?"
+      "confirmUnblock": "¿Eliminar esta IP de la lista de bloqueo?",
+      "tabMarketplaceSecurity": "Seguridad de Compradores en Todo el Mercado",
+      "marketplaceSecurityHint": "Las cuentas de comprador no están ligadas a una sola mina, por lo que sus amenazas de inicio de sesión y su lista de bloqueo se comparten entre todas las minas que usan MineGuard — una IP se agrega aquí automáticamente tras 5 inicios de sesión fallidos de comprador en 24 horas; puedes eliminar un falso positivo pero no agregar uno manualmente, ya que eso bloquearía a un comprador de todos los mercados, no solo de este."
     },
     "ai": {
       "disclaimer": "El Analista de Seguridad IA es solo asesor — correlaciona y explica datos ya presentes en MineGuard, y nunca actúa por sí mismo. Cada sugerencia requiere revisión humana antes de crear o cambiar algo.",

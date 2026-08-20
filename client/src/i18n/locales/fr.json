@@ -4674,7 +4674,8 @@
       "distinctAccounts": "{{count}} comptes",
       "tabBlocklist": "Contrôle d'Accès IP",
       "blockNew": "+ Bloquer une IP",
-      "blocklistHint": "Les IP et plages bloquées sont rejetées à chaque requête, immédiatement — même depuis un appareil déjà connecté. C'est le seul contrôle appliqué du module ; tout le reste ici est de la surveillance.",
+      "blocklistHint": "Les IP et plages bloquées sont rejetées à chaque requête, immédiatement — même depuis un appareil déjà connecté. Une IP dépassant 5 échecs de connexion en 24 heures est ajoutée ici automatiquement ; vous pouvez aussi ajouter ou retirer des entrées manuellement.",
+      "autoBlocked": "Bloqué automatiquement",
       "ipOrCidr": "Adresse IP ou plage CIDR",
       "ipOrCidrHint": "ex. 41.2.3.4 pour une seule adresse, ou 41.0.0.0/8 pour une plage. Les plages IPv4 sont entièrement prises en charge ; les autres valeurs ne correspondent qu'exactement.",
       "blockReason": "Raison",
@@ -4685,7 +4686,9 @@
       "unblock": "Débloquer",
       "noneBlocked": "Aucune IP ni plage n'est bloquée.",
       "blockNewTitle": "Bloquer une IP ou une Plage",
-      "confirmUnblock": "Retirer cette IP de la liste de blocage ?"
+      "confirmUnblock": "Retirer cette IP de la liste de blocage ?",
+      "tabMarketplaceSecurity": "Sécurité des Acheteurs à l'Échelle du Marché",
+      "marketplaceSecurityHint": "Les comptes acheteurs ne sont pas liés à une seule mine, donc leurs menaces de connexion et leur liste de blocage sont partagées entre toutes les mines utilisant MineGuard — une IP y est ajoutée automatiquement après 5 échecs de connexion acheteur en 24 heures ; vous pouvez retirer un faux positif mais pas en ajouter un manuellement, car cela bloquerait un acheteur de tous les marchés, pas seulement celui-ci."
     },
     "ai": {
       "disclaimer": "L'Analyste de Sécurité IA est purement consultatif — il corrèle et explique les données déjà présentes dans MineGuard, et n'agit jamais lui-même. Chaque suggestion nécessite une révision humaine avant toute création ou modification.",

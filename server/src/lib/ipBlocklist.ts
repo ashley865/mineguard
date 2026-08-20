@@ -19,6 +19,9 @@ interface CacheEntry {
 }
 
 const cache = new Map<string, CacheEntry>();
+// Buyer/marketplace login isn't scoped to any single mine, so its blocklist is a single
+// shared list rather than one cache entry per mine — see GlobalBlockedIp in schema.prisma.
+let globalCache: CacheEntry | null = null;
 
 function parseIpv4(ip: string): number | null {
   const parts = ip.split(".");
@@ -43,6 +46,21 @@ function parseEntry(raw: string): ParsedEntry {
   return { raw: trimmed, net: { base, mask } };
 }
 
+function matchesEntries(ip: string, entries: ParsedEntry[]): boolean {
+  if (entries.length === 0) return false;
+  const normalized = ip.replace(/^::ffff:/, "");
+  const target = parseIpv4(normalized);
+  for (const entry of entries) {
+    if (entry.raw === normalized) return true;
+    if (target != null && entry.net) {
+      const shift = 32 - entry.net.mask;
+      const maskBits = shift >= 32 ? 0 : (~0 << shift) >>> 0;
+      if ((target & maskBits) === (entry.net.base & maskBits)) return true;
+    }
+  }
+  return false;
+}
+
 async function loadEntries(mineId: string): Promise<ParsedEntry[]> {
   const rows = await prisma.cyberBlockedIp.findMany({ where: { mineId }, select: { ipOrCidr: true } });
   return rows.map((r) => parseEntry(r.ipOrCidr));
@@ -63,22 +81,36 @@ async function getEntries(mineId: string): Promise<ParsedEntry[]> {
 
 export async function isIpBlocked(mineId: string, ip: string | undefined | null): Promise<boolean> {
   if (!ip) return false;
-  // Strip the IPv4-mapped-IPv6 prefix Node sometimes reports (e.g. "::ffff:41.2.3.4").
-  const normalized = ip.replace(/^::ffff:/, "");
   const entries = await getEntries(mineId);
-  if (entries.length === 0) return false;
-  const target = parseIpv4(normalized);
-  for (const entry of entries) {
-    if (entry.raw === normalized) return true;
-    if (target != null && entry.net) {
-      const shift = 32 - entry.net.mask;
-      const maskBits = shift >= 32 ? 0 : (~0 << shift) >>> 0;
-      if ((target & maskBits) === (entry.net.base & maskBits)) return true;
-    }
-  }
-  return false;
+  return matchesEntries(ip, entries);
 }
 
 export function invalidateIpBlocklistCache(mineId: string): void {
   cache.delete(mineId);
+}
+
+async function loadGlobalEntries(): Promise<ParsedEntry[]> {
+  const rows = await prisma.globalBlockedIp.findMany({ select: { ipOrCidr: true } });
+  return rows.map((r) => parseEntry(r.ipOrCidr));
+}
+
+async function getGlobalEntries(): Promise<ParsedEntry[]> {
+  if (globalCache && globalCache.expiresAt > Date.now()) return globalCache.entries;
+  try {
+    const entries = await loadGlobalEntries();
+    globalCache = { entries, expiresAt: Date.now() + CACHE_TTL_MS };
+    return entries;
+  } catch {
+    return globalCache?.entries ?? [];
+  }
+}
+
+export async function isGlobalIpBlocked(ip: string | undefined | null): Promise<boolean> {
+  if (!ip) return false;
+  const entries = await getGlobalEntries();
+  return matchesEntries(ip, entries);
+}
+
+export function invalidateGlobalIpBlocklistCache(): void {
+  globalCache = null;
 }

@@ -6,6 +6,7 @@ import { requireContractorAuth } from "../middleware/contractorAuth";
 import { signContractorAuthToken } from "../lib/jwt";
 import { authLimiter, passwordChangeLimiter } from "../middleware/rateLimit";
 import { isIpBlocked } from "../lib/ipBlocklist";
+import { autoBlockMineIpIfBruteForced } from "../lib/autoBlock";
 
 const router = Router();
 
@@ -88,6 +89,7 @@ router.post("/login", authLimiter, async (req, res) => {
     await prisma.cyberLoginEvent
       .create({ data: { mineId, contractorId: contractor.id, eventType: "LOGIN_FAILED", ipAddress, userAgent, flagged: true } })
       .catch(() => {});
+    await autoBlockMineIpIfBruteForced(mineId, ipAddress);
     return res.status(401).json({ error: "Invalid email or password" });
   }
   if (contractor.status === "SUSPENDED" || contractor.status === "TERMINATED") {

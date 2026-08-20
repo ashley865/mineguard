@@ -4674,7 +4674,8 @@
       "distinctAccounts": "{{count}} Konten",
       "tabBlocklist": "IP-Zugriffskontrolle",
       "blockNew": "+ IP blockieren",
-      "blocklistHint": "Blockierte IPs und Bereiche werden bei jeder Anfrage sofort abgelehnt — auch von einem bereits angemeldeten Gerät. Dies ist die einzige durchgesetzte Kontrolle des Moduls; alles andere hier ist Überwachung.",
+      "blocklistHint": "Blockierte IPs und Bereiche werden bei jeder Anfrage sofort abgelehnt — auch von einem bereits angemeldeten Gerät. Eine IP mit mehr als 5 fehlgeschlagenen Anmeldungen innerhalb von 24 Stunden wird automatisch hier hinzugefügt; Sie können auch selbst Einträge hinzufügen oder entfernen.",
+      "autoBlocked": "Automatisch blockiert",
       "ipOrCidr": "IP-Adresse oder CIDR-Bereich",
       "ipOrCidrHint": "z. B. 41.2.3.4 für eine einzelne Adresse oder 41.0.0.0/8 für einen Bereich. IPv4-Bereiche werden vollständig abgeglichen; andere Werte stimmen nur exakt überein.",
       "blockReason": "Grund",
@@ -4685,7 +4686,9 @@
       "unblock": "Entsperren",
       "noneBlocked": "Keine IPs oder Bereiche sind blockiert.",
       "blockNewTitle": "Eine IP oder einen Bereich blockieren",
-      "confirmUnblock": "Diese IP von der Sperrliste entfernen?"
+      "confirmUnblock": "Diese IP von der Sperrliste entfernen?",
+      "tabMarketplaceSecurity": "Marktplatzweite Käufersicherheit",
+      "marketplaceSecurityHint": "Käuferkonten sind an keine einzelne Mine gebunden, daher werden ihre Anmeldebedrohungen und ihre Sperrliste über alle Minen hinweg geteilt, die MineGuard verwenden — eine IP wird hier automatisch nach 5 fehlgeschlagenen Käuferanmeldungen innerhalb von 24 Stunden hinzugefügt; Sie können einen Fehlalarm entfernen, aber keinen manuell hinzufügen, da dies einen Käufer vom Marktplatz jeder Mine sperren würde, nicht nur von dieser."
     },
     "ai": {
       "disclaimer": "Der KI-Sicherheitsanalyst ist rein beratend — er korreliert und erklärt bereits in MineGuard vorhandene Daten und handelt niemals selbst. Jeder Vorschlag erfordert eine menschliche Überprüfung, bevor etwas erstellt oder geändert wird.",

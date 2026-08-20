@@ -9,6 +9,7 @@ import { signAuthToken } from "../lib/jwt";
 import { authLimiter, passwordChangeLimiter } from "../middleware/rateLimit";
 import { verifyAdminPassword } from "../lib/verifyPassword";
 import { isIpBlocked } from "../lib/ipBlocklist";
+import { autoBlockMineIpIfBruteForced } from "../lib/autoBlock";
 import { buildOtpAuthUrl, generateMfaSecret, verifyMfaToken } from "../lib/totp";
 
 const router = Router();
@@ -108,6 +109,7 @@ router.post("/login", authLimiter, async (req, res) => {
       await prisma.cyberLoginEvent
         .create({ data: { mineId: user.mineId, userId: user.id, eventType: "LOGIN_FAILED", ipAddress, userAgent, flagged: true } })
         .catch(() => {});
+      await autoBlockMineIpIfBruteForced(user.mineId, ipAddress);
     }
     return res.status(401).json({ error: "Invalid email or password" });
   }
@@ -128,6 +130,7 @@ router.post("/login", authLimiter, async (req, res) => {
         await prisma.cyberLoginEvent
           .create({ data: { mineId: user.mineId, userId: user.id, eventType: "LOGIN_FAILED", ipAddress, userAgent, flagged: true } })
           .catch(() => {});
+        await autoBlockMineIpIfBruteForced(user.mineId, ipAddress);
       }
       return res.status(401).json({ error: "Invalid MFA code", mfaRequired: true });
     }

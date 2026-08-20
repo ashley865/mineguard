@@ -4,15 +4,14 @@ import { prisma } from "../prisma";
 import { requireAuth, requireRole } from "../middleware/auth";
 import { requireMineId } from "../lib/mineScope";
 import { requireCyberAccess } from "../lib/cyberAccess";
-import { invalidateIpBlocklistCache } from "../lib/ipBlocklist";
+import { invalidateIpBlocklistCache, invalidateGlobalIpBlocklistCache } from "../lib/ipBlocklist";
+import { BRUTE_FORCE_THRESHOLD, BRUTE_FORCE_WINDOW_HOURS } from "../lib/autoBlock";
 
 const router = Router();
 
 router.use(requireAuth, requireRole("ADMIN", "EXECUTIVE"));
 
 const DEVICE_WINDOW_DAYS = 90;
-const BRUTE_FORCE_WINDOW_HOURS = 24;
-const BRUTE_FORCE_THRESHOLD = 5;
 const MULTI_ACCOUNT_WINDOW_DAYS = 7;
 
 // Deliberately rough — a real UA parser is a whole dependency of its own, and this is
@@ -141,6 +140,7 @@ const blockedIpSelect = {
   ipOrCidr: true,
   reason: true,
   blockedBy: { select: { id: true, name: true } },
+  autoBlocked: true,
   createdAt: true,
 } as const;
 
@@ -185,6 +185,56 @@ router.delete("/blocklist/:id", async (req, res) => {
   if (!existing) return res.status(404).json({ error: "Blocked entry not found" });
   await prisma.cyberBlockedIp.delete({ where: { id: existing.id } });
   invalidateIpBlocklistCache(mineId);
+  res.status(204).send();
+});
+
+// Marketplace-wide (not mine-scoped) buyer login threats and the shared blocklist that
+// protects against them — see BuyerLoginEvent / GlobalBlockedIp in schema.prisma. Every
+// mine sees the same data here, the same "shared reference data" pattern already used for
+// mineral prices and industry news in liveData.ts, since a brute-forced buyer account is
+// every mine's problem, not just the one whose dashboard happens to be open.
+router.get("/buyer-threats", async (req, res) => {
+  const mineId = requireMineId(req, res);
+  if (!mineId) return;
+  if (!(await requireCyberAccess(req, res))) return;
+
+  const bruteForceSince = new Date(Date.now() - BRUTE_FORCE_WINDOW_HOURS * 3600000);
+  const [failedEvents, globalBlocklist] = await Promise.all([
+    prisma.buyerLoginEvent.findMany({
+      where: { eventType: "LOGIN_FAILED", occurredAt: { gte: bruteForceSince }, ipAddress: { not: null } },
+      select: { ipAddress: true, buyer: { select: { legalName: true } }, occurredAt: true },
+    }),
+    prisma.globalBlockedIp.findMany({ orderBy: { createdAt: "desc" } }),
+  ]);
+
+  const byIpFailed = new Map<string, { count: number; buyerNames: Set<string>; lastAttempt: Date }>();
+  for (const e of failedEvents) {
+    const ip = e.ipAddress!;
+    const bucket = byIpFailed.get(ip) ?? { count: 0, buyerNames: new Set<string>(), lastAttempt: e.occurredAt };
+    bucket.count += 1;
+    if (e.buyer?.legalName) bucket.buyerNames.add(e.buyer.legalName);
+    if (e.occurredAt > bucket.lastAttempt) bucket.lastAttempt = e.occurredAt;
+    byIpFailed.set(ip, bucket);
+  }
+  const bruteForceIps = [...byIpFailed.entries()]
+    .filter(([, v]) => v.count >= BRUTE_FORCE_THRESHOLD)
+    .map(([ip, v]) => ({ ipAddress: ip, failedAttempts: v.count, targetedAccounts: [...v.buyerNames], lastAttemptAt: v.lastAttempt }))
+    .sort((a, b) => b.failedAttempts - a.failedAttempts);
+
+  res.json({ bruteForceIps, globalBlocklist });
+});
+
+// A false-positive global block (e.g. a shared office/NAT IP) needs to be removable, but
+// creating one is system-only (see autoBlockGlobalIpIfBruteForced) — no single mine's
+// admin can unilaterally decide to block a buyer from every other mine's marketplace.
+router.delete("/buyer-threats/blocklist/:id", async (req, res) => {
+  const mineId = requireMineId(req, res);
+  if (!mineId) return;
+  if (!(await requireCyberAccess(req, res))) return;
+  const existing = await prisma.globalBlockedIp.findUnique({ where: { id: req.params.id } });
+  if (!existing) return res.status(404).json({ error: "Blocked entry not found" });
+  await prisma.globalBlockedIp.delete({ where: { id: existing.id } });
+  invalidateGlobalIpBlocklistCache();
   res.status(204).send();
 });
 

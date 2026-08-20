@@ -3927,7 +3927,21 @@ export interface CyberBlockedIp {
   ipOrCidr: string;
   reason?: string | null;
   blockedBy?: { id: string; name: string } | null;
+  autoBlocked: boolean;
   createdAt: string;
+}
+
+export interface CyberGlobalBlockedIp {
+  id: string;
+  ipOrCidr: string;
+  reason?: string | null;
+  autoBlocked: boolean;
+  createdAt: string;
+}
+
+export interface CyberBuyerThreats {
+  bruteForceIps: CyberBruteForceIp[];
+  globalBlocklist: CyberGlobalBlockedIp[];
 }
 
 export interface BudgetPlan {

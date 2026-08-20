@@ -1,7 +1,7 @@
 import { FormEvent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { api } from "../../api/client";
-import { CyberAccessThreats, CyberBlockedIp, CyberDevice, CyberIdentityOverview, CyberPhysicalAccessAlert } from "../../api/types";
+import { CyberAccessThreats, CyberBlockedIp, CyberBuyerThreats, CyberDevice, CyberGlobalBlockedIp, CyberIdentityOverview, CyberPhysicalAccessAlert } from "../../api/types";
 import { CyberTheme, StatusPill, cyberButtonDanger, cyberButtonPrimary, cyberButtonSecondary } from "./cyberTheme";
 import CyberTable, { CyberTableColumn } from "./CyberTable";
 import CyberModal from "./CyberModal";
@@ -62,6 +62,7 @@ export default function IdentityTab({ theme, canEdit }: { theme: CyberTheme; can
   const [devices, setDevices] = useState<CyberDevice[]>([]);
   const [threats, setThreats] = useState<CyberAccessThreats | null>(null);
   const [blocklist, setBlocklist] = useState<CyberBlockedIp[]>([]);
+  const [buyerThreats, setBuyerThreats] = useState<CyberBuyerThreats | null>(null);
   const [loading, setLoading] = useState(true);
   const [busyId, setBusyId] = useState<string | null>(null);
   const [blockModal, setBlockModal] = useState(false);
@@ -69,16 +70,18 @@ export default function IdentityTab({ theme, canEdit }: { theme: CyberTheme; can
   async function load() {
     setLoading(true);
     try {
-      const [overview, deviceList, threatData, blocked] = await Promise.all([
+      const [overview, deviceList, threatData, blocked, buyerThreatData] = await Promise.all([
         api.get<CyberIdentityOverview>("/cyber-identity/overview"),
         api.get<CyberDevice[]>("/cyber-access-control/devices"),
         api.get<CyberAccessThreats>("/cyber-access-control/threats"),
         api.get<CyberBlockedIp[]>("/cyber-access-control/blocklist"),
+        api.get<CyberBuyerThreats>("/cyber-access-control/buyer-threats"),
       ]);
       setData(overview.data);
       setDevices(deviceList.data);
       setThreats(threatData.data);
       setBlocklist(blocked.data);
+      setBuyerThreats(buyerThreatData.data);
     } finally {
       setLoading(false);
     }
@@ -109,9 +112,16 @@ export default function IdentityTab({ theme, canEdit }: { theme: CyberTheme; can
     await load();
   }
 
-  if (loading || !data || !threats) return <div className={theme.subtext}>{t("common.loading")}</div>;
+  async function unblockGlobalIp(id: string) {
+    if (!confirm(t("cyber.identity.confirmUnblock"))) return;
+    await api.delete(`/cyber-access-control/buyer-threats/blocklist/${id}`);
+    await load();
+  }
 
-  const threatCount = threats.bruteForceIps.length + threats.multiAccountIps.length + data.physicalAccessAlerts.length;
+  if (loading || !data || !threats || !buyerThreats) return <div className={theme.subtext}>{t("common.loading")}</div>;
+
+  const threatCount =
+    threats.bruteForceIps.length + threats.multiAccountIps.length + data.physicalAccessAlerts.length + buyerThreats.bruteForceIps.length;
 
   const physicalAlertColumns: CyberTableColumn<CyberPhysicalAccessAlert>[] = [
     { key: "person", header: t("cyber.identity.name"), render: (a) => <>{a.personName}{a.company ? <div className={`text-[10px] ${theme.mutedText}`}>{a.company}</div> : null}</>, sortValue: (a) => a.personName },
@@ -226,7 +236,16 @@ export default function IdentityTab({ theme, canEdit }: { theme: CyberTheme; can
             [
               { key: "ip", header: t("cyber.identity.ipOrCidr"), render: (b) => <span className={theme.text}>{b.ipOrCidr}</span>, sortValue: (b) => b.ipOrCidr },
               { key: "reason", header: t("cyber.identity.blockReason"), render: (b) => b.reason ?? "—" },
-              { key: "blockedBy", header: t("cyber.identity.blockedBy"), render: (b) => b.blockedBy?.name ?? "—" },
+              {
+                key: "blockedBy",
+                header: t("cyber.identity.blockedBy"),
+                render: (b) =>
+                  b.autoBlocked ? (
+                    <span className="text-amber-500 font-semibold">{t("cyber.identity.autoBlocked")}</span>
+                  ) : (
+                    b.blockedBy?.name ?? "—"
+                  ),
+              },
               { key: "createdAt", header: t("cyber.createdAt"), render: (b) => new Date(b.createdAt).toLocaleDateString(), sortValue: (b) => b.createdAt },
             ] as CyberTableColumn<CyberBlockedIp>[]
           }
@@ -234,6 +253,48 @@ export default function IdentityTab({ theme, canEdit }: { theme: CyberTheme; can
           rowKey={(b) => b.id}
           emptyMessage={t("cyber.identity.noneBlocked")}
           actions={canEdit ? (b) => <button className={cyberButtonDanger} onClick={() => unblockIp(b.id)}>{t("cyber.identity.unblock")}</button> : undefined}
+        />
+      </div>
+
+      <div className="space-y-1">
+        <h3 className={`text-sm font-semibold ${theme.text}`}>{t("cyber.identity.tabMarketplaceSecurity")}</h3>
+        <p className={`text-xs ${theme.mutedText}`}>{t("cyber.identity.marketplaceSecurityHint")}</p>
+      </div>
+
+      <div className="space-y-2">
+        <div className={`${theme.panel} p-3`}>
+          <div className={`text-xs font-semibold mb-2 ${theme.text}`}>{t("cyber.identity.bruteForceTitle")}</div>
+          {buyerThreats.bruteForceIps.length === 0 ? (
+            <div className={`text-xs ${theme.mutedText}`}>{t("cyber.identity.noBruteForce")}</div>
+          ) : (
+            <div className="space-y-1.5">
+              {buyerThreats.bruteForceIps.map((b) => (
+                <div key={b.ipAddress} className={`flex items-center justify-between text-xs border-t ${theme.rowBorder} pt-1.5 first:border-t-0 first:pt-0`}>
+                  <span className={theme.text}>{b.ipAddress}</span>
+                  <span className="text-red-500 font-semibold">{t("cyber.identity.failedAttempts", { count: b.failedAttempts })}</span>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+        <CyberTable
+          theme={theme}
+          columns={
+            [
+              { key: "ip", header: t("cyber.identity.ipOrCidr"), render: (b) => <span className={theme.text}>{b.ipOrCidr}</span>, sortValue: (b) => b.ipOrCidr },
+              { key: "reason", header: t("cyber.identity.blockReason"), render: (b) => b.reason ?? "—" },
+              {
+                key: "auto",
+                header: t("cyber.identity.blockedBy"),
+                render: (b) => (b.autoBlocked ? <span className="text-amber-500 font-semibold">{t("cyber.identity.autoBlocked")}</span> : "—"),
+              },
+              { key: "createdAt", header: t("cyber.createdAt"), render: (b) => new Date(b.createdAt).toLocaleDateString(), sortValue: (b) => b.createdAt },
+            ] as CyberTableColumn<CyberGlobalBlockedIp>[]
+          }
+          rows={buyerThreats.globalBlocklist}
+          rowKey={(b) => b.id}
+          emptyMessage={t("cyber.identity.noneBlocked")}
+          actions={canEdit ? (b) => <button className={cyberButtonDanger} onClick={() => unblockGlobalIp(b.id)}>{t("cyber.identity.unblock")}</button> : undefined}
         />
       </div>
 

@@ -5,6 +5,8 @@ import { prisma } from "../prisma";
 import { requireBuyerAuth } from "../middleware/buyerAuth";
 import { signBuyerAuthToken } from "../lib/jwt";
 import { authLimiter, passwordChangeLimiter } from "../middleware/rateLimit";
+import { isGlobalIpBlocked } from "../lib/ipBlocklist";
+import { autoBlockGlobalIpIfBruteForced } from "../lib/autoBlock";
 
 const router = Router();
 
@@ -71,19 +73,41 @@ router.post("/login", authLimiter, async (req, res) => {
   const parsed = loginSchema.safeParse(req.body);
   if (!parsed.success) return res.status(400).json({ error: parsed.error.flatten() });
   const { email, password } = parsed.data;
+  const ipAddress = req.ip;
+  const userAgent = req.headers["user-agent"];
 
   const buyer = await prisma.buyer.findUnique({ where: { contactEmail: email } });
   if (!buyer || !buyer.passwordHash) {
     return res.status(401).json({ error: "Invalid email or password" });
   }
+
+  // Buyer login has no single mine to scope a block to (see requireBuyerAuth), so this
+  // checks the shared, marketplace-wide list instead — logged against the real account
+  // since the email did resolve to one.
+  if (await isGlobalIpBlocked(ipAddress)) {
+    await prisma.buyerLoginEvent
+      .create({ data: { buyerId: buyer.id, eventType: "BLOCKED", ipAddress, userAgent, flagged: true } })
+      .catch(() => {});
+    return res.status(403).json({ error: "Access blocked from this network" });
+  }
+
   const valid = await bcrypt.compare(password, buyer.passwordHash);
   if (!valid) {
+    // Feeds the marketplace-wide "buyer threats" view every mine's Cyber Command Center
+    // can see, the same way a failed staff login feeds that mine's own threat detection.
+    await prisma.buyerLoginEvent
+      .create({ data: { buyerId: buyer.id, eventType: "LOGIN_FAILED", ipAddress, userAgent, flagged: true } })
+      .catch(() => {});
+    await autoBlockGlobalIpIfBruteForced(ipAddress);
     return res.status(401).json({ error: "Invalid email or password" });
   }
   if (buyer.status === "SUSPENDED") {
     return res.status(403).json({ error: "This buyer account has been suspended" });
   }
 
+  await prisma.buyerLoginEvent
+    .create({ data: { buyerId: buyer.id, eventType: "LOGIN_SUCCESS", ipAddress, userAgent } })
+    .catch(() => {});
   // Feeds the Cyber Command Center's Identity & Access view (buyers are shown there
   // alongside staff and visitors), the same way User.lastLoginAt does for staff.
   await prisma.buyer.update({ where: { id: buyer.id }, data: { lastLoginAt: new Date() } }).catch(() => {});

@@ -1956,10 +1956,41 @@ model Buyer {
   reviewedById            String?
   reviewedBy              User?       @relation(fields: [reviewedById], references: [id], onDelete: SetNull)
 
-  documents BuyerDocument[]
-  bids      MineralBid[]
+  documents        BuyerDocument[]
+  bids             MineralBid[]
+  buyerLoginEvents BuyerLoginEvent[]
 
   createdAt DateTime @default(now())
+}
+
+// A Buyer isn't scoped to any single mine (the marketplace is shared across every mine
+// using this app), so its login activity can't live in the mine-scoped CyberLoginEvent
+// table the way staff and Contractor logins do — this is the buyer/marketplace-wide
+// equivalent, and its threats are shown read-only to every mine's Cyber Command Center
+// (see GET /cyber-access-control/buyer-threats) since a compromised buyer account is a
+// shared concern, not one mine's alone.
+model BuyerLoginEvent {
+  id         String              @id @default(cuid())
+  buyerId    String
+  buyer      Buyer               @relation(fields: [buyerId], references: [id], onDelete: Cascade)
+  eventType  CyberLoginEventType
+  ipAddress  String?
+  userAgent  String?
+  flagged    Boolean             @default(false)
+  occurredAt DateTime            @default(now())
+}
+
+// The marketplace-wide equivalent of CyberBlockedIp — since buyer login has no mine
+// context to scope a block to, entries here are system-managed only (see
+// autoBlockGlobalIpIfBruteForced in lib/autoBlock.ts): no mine's admin can add one
+// unilaterally (that would block a buyer from every mine's marketplace, not just theirs),
+// but any mine's IT Manager/Owner can review and remove a false positive.
+model GlobalBlockedIp {
+  id          String   @id @default(cuid())
+  ipOrCidr    String   @unique
+  reason      String?
+  autoBlocked Boolean  @default(false)
+  createdAt   DateTime @default(now())
 }
 
 enum BuyerDocumentType {
@@ -5565,6 +5596,10 @@ model CyberBlockedIp {
   reason      String?
   blockedById String?
   blockedBy   User?    @relation("CyberBlockedIpBlockedBy", fields: [blockedById], references: [id], onDelete: SetNull)
+  // Set by autoBlockMineIpIfBruteForced (lib/autoBlock.ts) when this entry was created
+  // automatically after repeated failed logins, rather than added by hand — surfaced in
+  // the UI so an admin can tell a real detection apart from their own manual block.
+  autoBlocked Boolean  @default(false)
 
   createdAt DateTime @default(now())
 

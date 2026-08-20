@@ -4674,7 +4674,8 @@
       "distinctAccounts": "{{count}} rekeninge",
       "tabBlocklist": "IP-toegangsbeheer",
       "blockNew": "+ Blokkeer 'n IP",
-      "blocklistHint": "Geblokkeerde IP's en reekse word onmiddellik by elke versoek geweier — selfs vanaf 'n reeds aangemelde toestel. Dit is die module se enigste afgedwonge beheer; alles anders hier is monitering.",
+      "blocklistHint": "Geblokkeerde IP's en reekse word onmiddellik by elke versoek geweier — selfs vanaf 'n reeds aangemelde toestel. 'n IP wat 5 mislukte aanmeldings binne 24 uur oorskry, word outomaties hier bygevoeg; jy kan ook self inskrywings byvoeg of verwyder.",
+      "autoBlocked": "Outomaties geblokkeer",
       "ipOrCidr": "IP-adres of CIDR-reeks",
       "ipOrCidrHint": "bv. 41.2.3.4 vir 'n enkele adres, of 41.0.0.0/8 vir 'n reeks. IPv4-reekse word ten volle vergelyk; ander waardes pas net presies.",
       "blockReason": "Rede",
@@ -4685,7 +4686,9 @@
       "unblock": "Ontblokkeer",
       "noneBlocked": "Geen IP's of reekse is geblokkeer nie.",
       "blockNewTitle": "Blokkeer 'n IP of Reeks",
-      "confirmUnblock": "Verwyder hierdie IP van die blokkeerlys?"
+      "confirmUnblock": "Verwyder hierdie IP van die blokkeerlys?",
+      "tabMarketplaceSecurity": "Markwye Koperveiligheid",
+      "marketplaceSecurityHint": "Koperrekeninge is nie aan een myn gebonde nie, so hul aanmeldingsbedreigings en blokkeerlys word gedeel tussen alle myne wat MineGuard gebruik — 'n IP word hier outomaties bygevoeg na 5 mislukte koperaanmeldings binne 24 uur; jy kan 'n vals positief verwyder maar nie een met die hand byvoeg nie, aangesien dit 'n koper van elke myn se mark sou blokkeer, nie net hierdie een nie."
     },
     "ai": {
       "disclaimer": "Die KI-Sekuriteitsontleder is slegs raadgewend — dit korreleer en verduidelik data wat reeds in MineGuard is, en tree nooit self op nie. Elke voorstel vereis menslike hersiening voordat enigiets geskep of verander word.",
