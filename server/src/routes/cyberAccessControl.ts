@@ -5,7 +5,7 @@ import { requireAuth, requireRole } from "../middleware/auth";
 import { requireMineId } from "../lib/mineScope";
 import { requireCyberAccess } from "../lib/cyberAccess";
 import { invalidateIpBlocklistCache, invalidateGlobalIpBlocklistCache } from "../lib/ipBlocklist";
-import { BRUTE_FORCE_THRESHOLD, BRUTE_FORCE_WINDOW_HOURS } from "../lib/autoBlock";
+import { getBruteForceThreshold, getBruteForceWindowHours } from "../lib/autoBlock";
 
 const router = Router();
 
@@ -77,7 +77,8 @@ router.get("/threats", async (req, res) => {
   if (!mineId) return;
   if (!(await requireCyberAccess(req, res))) return;
 
-  const bruteForceSince = new Date(Date.now() - BRUTE_FORCE_WINDOW_HOURS * 3600000);
+  const [bruteForceThreshold, bruteForceWindowHours] = await Promise.all([getBruteForceThreshold(), getBruteForceWindowHours()]);
+  const bruteForceSince = new Date(Date.now() - bruteForceWindowHours * 3600000);
   const multiAccountSince = new Date(Date.now() - MULTI_ACCOUNT_WINDOW_DAYS * 86400000);
 
   const [failedEvents, successEvents, blockedEvents] = await Promise.all([
@@ -106,7 +107,7 @@ router.get("/threats", async (req, res) => {
     byIpFailed.set(ip, bucket);
   }
   const bruteForceIps = [...byIpFailed.entries()]
-    .filter(([, v]) => v.count >= BRUTE_FORCE_THRESHOLD)
+    .filter(([, v]) => v.count >= bruteForceThreshold)
     .map(([ip, v]) => ({ ipAddress: ip, failedAttempts: v.count, targetedAccounts: [...v.usernames], lastAttemptAt: v.lastAttempt }))
     .sort((a, b) => b.failedAttempts - a.failedAttempts);
 
@@ -198,7 +199,8 @@ router.get("/buyer-threats", async (req, res) => {
   if (!mineId) return;
   if (!(await requireCyberAccess(req, res))) return;
 
-  const bruteForceSince = new Date(Date.now() - BRUTE_FORCE_WINDOW_HOURS * 3600000);
+  const [bruteForceThreshold, bruteForceWindowHours] = await Promise.all([getBruteForceThreshold(), getBruteForceWindowHours()]);
+  const bruteForceSince = new Date(Date.now() - bruteForceWindowHours * 3600000);
   const [failedEvents, globalBlocklist] = await Promise.all([
     prisma.buyerLoginEvent.findMany({
       where: { eventType: "LOGIN_FAILED", occurredAt: { gte: bruteForceSince }, ipAddress: { not: null } },
@@ -217,7 +219,7 @@ router.get("/buyer-threats", async (req, res) => {
     byIpFailed.set(ip, bucket);
   }
   const bruteForceIps = [...byIpFailed.entries()]
-    .filter(([, v]) => v.count >= BRUTE_FORCE_THRESHOLD)
+    .filter(([, v]) => v.count >= bruteForceThreshold)
     .map(([ip, v]) => ({ ipAddress: ip, failedAttempts: v.count, targetedAccounts: [...v.buyerNames], lastAttemptAt: v.lastAttempt }))
     .sort((a, b) => b.failedAttempts - a.failedAttempts);
 

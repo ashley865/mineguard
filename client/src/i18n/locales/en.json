@@ -4710,18 +4710,26 @@
     },
     "settings": {
       "title": "Integration & System Configuration",
-      "hint": "Manage the API keys and integration settings that power this deployment, without needing a server redeploy. A value saved here overrides the server's environment variable for every mine.",
+      "hint": "Manage the API keys, security policy, and integration settings that power this deployment, without needing a server redeploy. A value saved here overrides the server's environment variable (or built-in default) for every mine.",
       "currentValue": "Current value",
       "newValue": "New value",
       "notSet": "Not configured",
       "edit": "Edit",
-      "resetToEnvironment": "Reset to environment default",
-      "confirmReset": "Remove the saved override and fall back to the server's environment variable?",
+      "on": "On",
+      "off": "Off",
+      "clearOverride": "Clear saved value",
+      "confirmReset": "Remove the saved value and fall back to the default?",
       "saveError": "Failed to save this setting — try again shortly.",
       "updatedBy": "updated by {{name}} on {{date}}",
+      "testConnection": "Test connection",
+      "testing": "Testing…",
+      "testSuccess": "Success",
+      "testFailed": "Failed",
+      "testError": "Test failed — try again shortly.",
       "source": {
         "database": "Configured here",
         "environment": "From server environment",
+        "default": "Using default",
         "unset": "Not set"
       }
     }

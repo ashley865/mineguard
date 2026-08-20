@@ -7,6 +7,7 @@ import { signContractorAuthToken } from "../lib/jwt";
 import { authLimiter, passwordChangeLimiter } from "../middleware/rateLimit";
 import { isIpBlocked } from "../lib/ipBlocklist";
 import { autoBlockMineIpIfBruteForced } from "../lib/autoBlock";
+import { resolveBooleanSetting } from "../lib/systemSettings";
 
 const router = Router();
 
@@ -82,6 +83,12 @@ router.post("/login", authLimiter, async (req, res) => {
       .create({ data: { mineId, contractorId: contractor.id, eventType: "BLOCKED", ipAddress, userAgent, flagged: true } })
       .catch(() => {});
     return res.status(403).json({ error: "Access blocked from this network" });
+  }
+
+  // Contractors have no privileged bypass (unlike staff) — maintenance mode blocks every
+  // contractor login, since only an Owner/IT Manager can turn it back off.
+  if (await resolveBooleanSetting("MAINTENANCE_MODE", false)) {
+    return res.status(503).json({ error: "MineGuard is temporarily down for maintenance. Please try again shortly.", maintenance: true });
   }
 
   const valid = await bcrypt.compare(password, contractor.passwordHash);

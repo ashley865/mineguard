@@ -11,6 +11,8 @@ import { verifyAdminPassword } from "../lib/verifyPassword";
 import { isIpBlocked } from "../lib/ipBlocklist";
 import { autoBlockMineIpIfBruteForced } from "../lib/autoBlock";
 import { buildOtpAuthUrl, generateMfaSecret, verifyMfaToken } from "../lib/totp";
+import { resolveBooleanSetting } from "../lib/systemSettings";
+import { isCyberPrivilegedUser } from "../lib/cyberAccess";
 
 const router = Router();
 
@@ -98,6 +100,12 @@ router.post("/login", authLimiter, async (req, res) => {
       .create({ data: { mineId: user.mineId, userId: user.id, eventType: "BLOCKED", ipAddress, userAgent, flagged: true } })
       .catch(() => {});
     return res.status(403).json({ error: "Access blocked from this network" });
+  }
+  // Owners and IT Managers can always log in during maintenance — they're the only
+  // roles that can turn it back off from Cyber Command Center, so blocking them too
+  // would be a self-lockout.
+  if (!isCyberPrivilegedUser(user.role, user.title) && (await resolveBooleanSetting("MAINTENANCE_MODE", false))) {
+    return res.status(503).json({ error: "MineGuard is temporarily down for maintenance. Please try again shortly.", maintenance: true });
   }
   const valid = await bcrypt.compare(password, user.passwordHash);
   if (!valid) {

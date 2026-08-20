@@ -4710,18 +4710,26 @@
     },
     "settings": {
       "title": "Configuration des Intégrations et du Système",
-      "hint": "Gérez les clés API et les paramètres d'intégration qui font fonctionner ce déploiement, sans avoir besoin de redéployer le serveur. Une valeur enregistrée ici remplace la variable d'environnement du serveur pour toutes les mines.",
+      "hint": "Gérez les clés API, la politique de sécurité et les paramètres d'intégration qui font fonctionner ce déploiement, sans avoir besoin de redéployer le serveur. Une valeur enregistrée ici remplace la variable d'environnement du serveur (ou la valeur par défaut) pour toutes les mines.",
       "currentValue": "Valeur actuelle",
       "newValue": "Nouvelle valeur",
       "notSet": "Non configuré",
       "edit": "Modifier",
-      "resetToEnvironment": "Rétablir la valeur par défaut de l'environnement",
-      "confirmReset": "Supprimer la valeur enregistrée et revenir à la variable d'environnement du serveur ?",
+      "on": "Activé",
+      "off": "Désactivé",
+      "clearOverride": "Supprimer la valeur enregistrée",
+      "confirmReset": "Supprimer la valeur enregistrée et revenir à la valeur par défaut ?",
       "saveError": "Échec de l'enregistrement de ce paramètre — réessayez sous peu.",
       "updatedBy": "mis à jour par {{name}} le {{date}}",
+      "testConnection": "Tester la connexion",
+      "testing": "Test en cours…",
+      "testSuccess": "Succès",
+      "testFailed": "Échec",
+      "testError": "Le test a échoué — réessayez sous peu.",
       "source": {
         "database": "Configuré ici",
         "environment": "Depuis l'environnement du serveur",
+        "default": "Valeur par défaut utilisée",
         "unset": "Non défini"
       }
     }

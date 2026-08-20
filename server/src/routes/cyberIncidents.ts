@@ -4,6 +4,7 @@ import { prisma } from "../prisma";
 import { requireAuth, requireRole } from "../middleware/auth";
 import { requireMineId } from "../lib/mineScope";
 import { requireCyberAccess } from "../lib/cyberAccess";
+import { notifySecurityWebhook } from "../lib/securityWebhook";
 
 const router = Router();
 
@@ -62,6 +63,9 @@ router.post("/", async (req, res) => {
     data: { ...parsed.data, mineId, createdById: req.auth!.userId },
     select: incidentSelect,
   });
+  if (incident.severity === "CRITICAL") {
+    void notifySecurityWebhook({ severity: "CRITICAL", title: `New critical incident: ${incident.title}`, detail: incident.description });
+  }
   res.status(201).json(incident);
 });
 

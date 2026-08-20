@@ -7,6 +7,7 @@ import { signBuyerAuthToken } from "../lib/jwt";
 import { authLimiter, passwordChangeLimiter } from "../middleware/rateLimit";
 import { isGlobalIpBlocked } from "../lib/ipBlocklist";
 import { autoBlockGlobalIpIfBruteForced } from "../lib/autoBlock";
+import { resolveBooleanSetting } from "../lib/systemSettings";
 
 const router = Router();
 
@@ -89,6 +90,12 @@ router.post("/login", authLimiter, async (req, res) => {
       .create({ data: { buyerId: buyer.id, eventType: "BLOCKED", ipAddress, userAgent, flagged: true } })
       .catch(() => {});
     return res.status(403).json({ error: "Access blocked from this network" });
+  }
+
+  // Buyers have no privileged bypass (unlike staff) — maintenance mode blocks every
+  // buyer login, since only an Owner/IT Manager can turn it back off.
+  if (await resolveBooleanSetting("MAINTENANCE_MODE", false)) {
+    return res.status(503).json({ error: "MineGuard is temporarily down for maintenance. Please try again shortly.", maintenance: true });
   }
 
   const valid = await bcrypt.compare(password, buyer.passwordHash);

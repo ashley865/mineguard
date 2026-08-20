@@ -3948,8 +3948,11 @@ export interface CyberSystemSetting {
   key: string;
   label: string;
   description: string;
+  type: "text" | "password" | "boolean" | "number";
   secret: boolean;
-  source: "database" | "environment" | "unset";
+  testable: boolean;
+  defaultValue?: string;
+  source: "database" | "environment" | "default" | "unset";
   maskedValue: string | null;
   updatedAt: string | null;
   updatedByName: string | null;

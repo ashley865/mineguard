@@ -4710,18 +4710,26 @@
     },
     "settings": {
       "title": "Integrasie- en Stelselkonfigurasie",
-      "hint": "Bestuur die API-sleutels en integrasie-instellings wat hierdie ontplooiing aandryf, sonder om die bediener te moet herontplooi. 'n Waarde wat hier gestoor word, oorskryf die bediener se omgewingveranderlike vir elke myn.",
+      "hint": "Bestuur die API-sleutels, sekuriteitsbeleid en integrasie-instellings wat hierdie ontplooiing aandryf, sonder om die bediener te moet herontplooi. 'n Waarde wat hier gestoor word, oorskryf die bediener se omgewingveranderlike (of verstekwaarde) vir elke myn.",
       "currentValue": "Huidige waarde",
       "newValue": "Nuwe waarde",
       "notSet": "Nie gekonfigureer nie",
       "edit": "Wysig",
-      "resetToEnvironment": "Herstel na omgewing-verstek",
-      "confirmReset": "Verwyder die gestoorde oorskrywing en val terug na die bediener se omgewingveranderlike?",
+      "on": "Aan",
+      "off": "Af",
+      "clearOverride": "Verwyder gestoorde waarde",
+      "confirmReset": "Verwyder die gestoorde waarde en val terug na die verstek?",
       "saveError": "Kon nie hierdie instelling stoor nie — probeer binnekort weer.",
       "updatedBy": "opgedateer deur {{name}} op {{date}}",
+      "testConnection": "Toets verbinding",
+      "testing": "Toets tans…",
+      "testSuccess": "Suksesvol",
+      "testFailed": "Misluk",
+      "testError": "Toets het misluk — probeer binnekort weer.",
       "source": {
         "database": "Hier gekonfigureer",
         "environment": "Vanaf bediener-omgewing",
+        "default": "Gebruik verstekwaarde",
         "unset": "Nie gestel nie"
       }
     }
