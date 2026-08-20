@@ -3,9 +3,9 @@ import { useTranslation } from "react-i18next";
 import { RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar, ResponsiveContainer, Tooltip } from "recharts";
 import { api } from "../api/client";
 import { BudgetSummary, ExecutiveSummary } from "../api/types";
-import { cardClass } from "./ui";
 
 const CHART_TOOLTIP_STYLE = { background: "#fafafa", border: "1px solid #e5e5e5", fontSize: 11 };
+const cardOuter = "bg-mine-900 border border-mine-800 rounded-[20px] shadow-sm shadow-black/5 p-6";
 
 // Budget health is scored around 100% utilization being "on plan" — mild penalty for
 // drifting either side of it, a steeper one for actually going over, and a full mark
@@ -47,15 +47,15 @@ export default function ExecutiveScorecard({ summary }: { summary: ExecutiveSumm
   const overallTone = overall >= 80 ? "text-success-500" : overall >= 50 ? "text-hazard-500" : "text-danger-500";
 
   return (
-    <div className={`${cardClass} p-3`}>
+    <div className={cardOuter}>
       <div className="flex items-center justify-between mb-1">
-        <h2 className="text-xs font-semibold">{t("executive.scorecard.title")}</h2>
+        <h2 className="text-sm font-semibold">{t("executive.scorecard.title")}</h2>
         <div className="text-right">
-          <div className="text-[9px] text-mine-400 uppercase tracking-wide">{t("executive.scorecard.overall")}</div>
-          <div className={`text-lg font-bold leading-none ${overallTone}`}>{overall}</div>
+          <div className="text-[10px] text-mine-400 uppercase tracking-wide">{t("executive.scorecard.overall")}</div>
+          <div className={`text-2xl font-bold leading-none ${overallTone}`}>{overall}</div>
         </div>
       </div>
-      <p className="text-[10px] text-mine-400 mb-1">{t("executive.scorecard.hint")}</p>
+      <p className="text-xs text-mine-400 mb-4">{t("executive.scorecard.hint")}</p>
       <div className="h-64">
         <ResponsiveContainer width="100%" height="100%">
           <RadarChart data={data} outerRadius="72%">

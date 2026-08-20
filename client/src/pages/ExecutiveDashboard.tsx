@@ -129,11 +129,15 @@ export default function ExecutiveDashboard() {
   const canSeeFinancials = user?.title === "CFO" || user?.title === "GENERAL_MANAGER";
   const canSeeHrWorkforce = user?.title === "HR_MANAGER";
   const canSeeVisitorHistory = user?.title === "SECURITY_MANAGER";
-  // GM has full module access to Production/Inventory/Maintenance already (see
-  // executiveAccess.ts's fullAccess list) but this dashboard never showed it — the GM was
-  // one of the only "full access" titles with nothing of its own beyond financials.
-  const canSeeProductionAnalytics = user?.title === "OPERATIONS_MANAGER" || user?.title === "GENERAL_MANAGER";
+  // GM and COO both have full module access to Production/Inventory/Maintenance already
+  // (see executiveAccess.ts's fullAccess list) but this dashboard didn't reflect it —
+  // they were the only "full access" titles with nothing operational of their own here.
+  const canSeeProductionAnalytics = user?.title === "OPERATIONS_MANAGER" || user?.title === "GENERAL_MANAGER" || user?.title === "COO";
   const isGeneralManager = user?.title === "GENERAL_MANAGER";
+  const isCOO = user?.title === "COO";
+  // Budget health is operationally relevant to the COO too, not just the P&L-focused
+  // CFO/GM — full P&L (FinancialSummaryWidget) stays CFO/GM only.
+  const canSeeBudget = canSeeFinancials || isCOO;
   // Every executive title has an AI module now except the generic "OTHER" catch-all.
   const canSeeAiAssistant = !!user?.title && user.title !== "OTHER";
   const [summary, setSummary] = useState<ExecutiveSummary | null>(null);
@@ -228,7 +232,7 @@ export default function ExecutiveDashboard() {
         <StatCard label={t("executive.equipmentUptime")} value={`${equipment.uptimePct}%`} tone={equipment.uptimePct >= 80 ? "positive" : equipment.uptimePct >= 50 ? "caution" : "negative"} />
       </div>
 
-      {isGeneralManager && <ExecutiveScorecard summary={summary} />}
+      {(isGeneralManager || isCOO) && <ExecutiveScorecard summary={summary} />}
 
       {executiveOps.hasSiteAccess ? (
         <>
@@ -295,7 +299,7 @@ export default function ExecutiveDashboard() {
         </>
       )}
       {canSeeFinancials && <FinancialSummaryWidget />}
-      {canSeeFinancials && <BudgetSummaryWidget />}
+      {canSeeBudget && <BudgetSummaryWidget />}
       {canSeeHrWorkforce && <HrWorkforceWidget />}
       {canSeeVisitorHistory && <SecurityVisitorHistoryWidget />}
       {canSeeProductionAnalytics && <ProductionAnalyticsWidget />}

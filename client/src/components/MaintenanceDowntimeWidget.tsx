@@ -3,7 +3,7 @@ import { useTranslation } from "react-i18next";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
 import { api } from "../api/client";
 import { MaintenanceSummary } from "../api/types";
-import { cardClass } from "./ui";
+import { ListIcon, ClockIcon, RefreshIcon, AlertTriangleIcon } from "./icons/DashboardIcons";
 
 const CHART_TOOLTIP_STYLE = { background: "#fafafa", border: "1px solid #e5e5e5", fontSize: 11 };
 const CHART_TICK_STYLE = { fontSize: 9, fill: "#52525b" };
@@ -21,13 +21,19 @@ const STATUS_COLORS: Record<string, string> = {
   OVERDUE: "#e13b2e",
   CANCELLED: "#6b6b6b",
 };
+const cardOuter = "bg-mine-900 border border-mine-800 rounded-[20px] shadow-sm shadow-black/5 p-6";
+const TONE_CLASS: Record<"danger" | "caution" | "neutral", string> = {
+  danger: "bg-danger-500/10 text-danger-500",
+  caution: "bg-hazard-500/10 text-hazard-500",
+  neutral: "bg-mine-400/10 text-mine-400",
+};
 
-function StatCard({ label, value, tone }: { label: string; value: string; tone?: "danger" | "caution" }) {
-  const toneClass = tone === "danger" ? "text-danger-500" : tone === "caution" ? "text-hazard-500" : "text-mine-50";
+function IconStatCard({ icon, label, value, tone = "neutral" }: { icon: React.ReactNode; label: string; value: string; tone?: "danger" | "caution" | "neutral" }) {
   return (
-    <div className={`${cardClass} px-3 py-2.5`}>
-      <div className="text-[10px] text-mine-300 uppercase tracking-wide">{label}</div>
-      <div className={`text-lg font-bold mt-0.5 ${toneClass}`}>{value}</div>
+    <div className={`${cardOuter} p-[22px]`}>
+      <div className={`w-[34px] h-[34px] rounded-[10px] flex items-center justify-center mb-3.5 ${TONE_CLASS[tone]}`}>{icon}</div>
+      <div className="text-[26px] font-bold leading-none">{value}</div>
+      <div className="text-xs text-mine-400 mt-2">{label}</div>
     </div>
   );
 }
@@ -47,7 +53,7 @@ export default function MaintenanceDowntimeWidget() {
 
   if (loading) {
     return (
-      <div className={`${cardClass} p-3`}>
+      <div className={cardOuter}>
         <div className="text-mine-300 text-xs">{t("common.loading")}</div>
       </div>
     );
@@ -60,23 +66,24 @@ export default function MaintenanceDowntimeWidget() {
   const statusChartData = data.byStatus.filter((d) => d.count > 0).map((d) => ({ status: d.status, count: d.count }));
 
   return (
-    <div className={`${cardClass} p-3 space-y-4`}>
-      <h2 className="text-xs font-semibold">{t("maintenance.downtimeOverviewTitle")}</h2>
+    <div className={`${cardOuter} space-y-6`}>
+      <h2 className="text-sm font-semibold">{t("maintenance.downtimeOverviewTitle")}</h2>
 
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
-        <StatCard label={t("maintenance.backlog")} value={data.backlog.toString()} tone={data.backlog > 0 ? "caution" : undefined} />
-        <StatCard
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <IconStatCard icon={<ListIcon />} label={t("maintenance.backlog")} value={data.backlog.toString()} tone={data.backlog > 0 ? "caution" : "neutral"} />
+        <IconStatCard
+          icon={<ClockIcon />}
           label={t("maintenance.totalDowntime")}
           value={t("maintenance.hoursValue", { count: Math.round((data.totalDowntimeMinutes / 60) * 10) / 10 })}
-          tone={data.totalDowntimeMinutes > 0 ? "caution" : undefined}
+          tone={data.totalDowntimeMinutes > 0 ? "caution" : "neutral"}
         />
-        <StatCard label={t("maintenance.mtbf")} value={data.mtbfDays != null ? t("maintenance.daysValue", { count: data.mtbfDays }) : "—"} />
-        <StatCard label={t("maintenance.failureCount")} value={data.failureCount.toString()} tone={data.failureCount > 0 ? "caution" : undefined} />
+        <IconStatCard icon={<RefreshIcon />} label={t("maintenance.mtbf")} value={data.mtbfDays != null ? t("maintenance.daysValue", { count: data.mtbfDays }) : "—"} />
+        <IconStatCard icon={<AlertTriangleIcon />} label={t("maintenance.failureCount")} value={data.failureCount.toString()} tone={data.failureCount > 0 ? "caution" : "neutral"} />
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
-        <div className={`${cardClass} p-3`}>
-          <h3 className="text-xs font-semibold mb-2">{t("maintenance.byType")}</h3>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <div className={cardOuter}>
+          <h3 className="text-sm font-semibold mb-4">{t("maintenance.byType")}</h3>
           {typeChartData.length === 0 ? (
             <div className="text-mine-400 text-xs h-48 flex items-center justify-center">{t("maintenance.noneYet")}</div>
           ) : (
@@ -97,8 +104,8 @@ export default function MaintenanceDowntimeWidget() {
           )}
         </div>
 
-        <div className={`${cardClass} p-3`}>
-          <h3 className="text-xs font-semibold mb-2">{t("maintenance.byStatus")}</h3>
+        <div className={cardOuter}>
+          <h3 className="text-sm font-semibold mb-4">{t("maintenance.byStatus")}</h3>
           {statusChartData.length === 0 ? (
             <div className="text-mine-400 text-xs h-48 flex items-center justify-center">{t("maintenance.noneYet")}</div>
           ) : (
@@ -131,9 +138,9 @@ export default function MaintenanceDowntimeWidget() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
-        <div className={`${cardClass} p-3`}>
-          <h3 className="text-xs font-semibold mb-2">{t("maintenance.byTechnician")}</h3>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <div className={cardOuter}>
+          <h3 className="text-sm font-semibold mb-4">{t("maintenance.byTechnician")}</h3>
           {data.byTechnician.length === 0 ? (
             <div className="text-mine-400 text-xs h-32 flex items-center justify-center">{t("maintenance.noneYet")}</div>
           ) : (
@@ -153,8 +160,8 @@ export default function MaintenanceDowntimeWidget() {
           )}
         </div>
 
-        <div className={`${cardClass} p-3`}>
-          <h3 className="text-xs font-semibold mb-2">{t("maintenance.topPartsUsed")}</h3>
+        <div className={cardOuter}>
+          <h3 className="text-sm font-semibold mb-4">{t("maintenance.topPartsUsed")}</h3>
           {data.topPartsUsed.length === 0 ? (
             <div className="text-mine-400 text-xs h-32 flex items-center justify-center">{t("maintenance.noneYet")}</div>
           ) : (
@@ -170,8 +177,8 @@ export default function MaintenanceDowntimeWidget() {
         </div>
       </div>
 
-      <div className={`${cardClass} p-3`}>
-        <h3 className="text-xs font-semibold mb-2">{t("maintenance.recentDowntimeEvents")}</h3>
+      <div className={cardOuter}>
+        <h3 className="text-sm font-semibold mb-4">{t("maintenance.recentDowntimeEvents")}</h3>
         {data.recentDowntimeEvents.length === 0 ? (
           <div className="text-mine-400 text-xs h-16 flex items-center justify-center">{t("maintenance.noDowntimeEvents")}</div>
         ) : (

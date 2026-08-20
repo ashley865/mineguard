@@ -17,19 +17,22 @@ import {
 } from "recharts";
 import { api } from "../api/client";
 import { ProductionAnalytics } from "../api/types";
-import { cardClass, selectClass } from "./ui";
+import { selectClass } from "./ui";
+import { PackageIcon, LayersIcon, GemIcon, RefreshIcon } from "./icons/DashboardIcons";
 import LoadError from "./LoadError";
 
 const CHART_TOOLTIP_STYLE = { background: "#fafafa", border: "1px solid #e5e5e5", fontSize: 11 };
 const CHART_TICK_STYLE = { fontSize: 9, fill: "#52525b" };
 const SHIFT_COLORS: Record<string, string> = { DAY: "#c48a1f", AFTERNOON: "#8a9ab5", NIGHT: "#3f5a7d" };
 const SECTION_COLORS = ["#c48a1f", "#8a9ab5", "#16a34a", "#e13b2e", "#5b7092", "#d9a441", "#3f5a7d", "#7a8a5a"];
+const cardOuter = "bg-mine-900 border border-mine-800 rounded-[20px] shadow-sm shadow-black/5 p-6";
 
-function StatCard({ label, value }: { label: string; value: string }) {
+function IconStatCard({ icon, tone, label, value }: { icon: React.ReactNode; tone: string; label: string; value: string }) {
   return (
-    <div className={`${cardClass} px-3 py-2.5`}>
-      <div className="text-[10px] text-mine-300 uppercase tracking-wide">{label}</div>
-      <div className="text-lg font-bold mt-0.5">{value}</div>
+    <div className={`${cardOuter} p-[22px]`}>
+      <div className={`w-[34px] h-[34px] rounded-[10px] flex items-center justify-center mb-3.5 ${tone}`}>{icon}</div>
+      <div className="text-[26px] font-bold leading-none">{value}</div>
+      <div className="text-xs text-mine-400 mt-2">{label}</div>
     </div>
   );
 }
@@ -75,9 +78,9 @@ export default function ProductionAnalyticsWidget({ siteId }: { siteId?: string 
   const tickFormatter = periodTickFormatter(period);
 
   return (
-    <div className={`${cardClass} p-3 space-y-4`}>
+    <div className={`${cardOuter} space-y-6`}>
       <div className="flex items-center justify-between flex-wrap gap-3">
-        <h2 className="text-xs font-semibold">{t("production.analyticsTitle")}</h2>
+        <h2 className="text-sm font-semibold">{t("production.analyticsTitle")}</h2>
         <select className={`${selectClass} text-xs max-w-[10rem] py-1.5`} value={period} onChange={(e) => setPeriod(e.target.value as typeof period)}>
           <option value="daily">{t("production.periodDaily")}</option>
           <option value="weekly">{t("production.periodWeekly")}</option>
@@ -90,16 +93,16 @@ export default function ProductionAnalyticsWidget({ siteId }: { siteId?: string 
 
       {!loading && !loadError && data && (
         <>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
-            <StatCard label={t("production.tonnesMined")} value={data.totals.tonnesMined.toLocaleString()} />
-            <StatCard label={t("production.tonnesProcessed")} value={data.totals.tonnesProcessed.toLocaleString()} />
-            <StatCard label={t("production.avgOreGrade")} value={data.totals.avgOreGrade != null ? `${data.totals.avgOreGrade}%` : "—"} />
-            <StatCard label={t("production.avgRecovery")} value={data.totals.avgRecoveryRate != null ? `${data.totals.avgRecoveryRate}%` : "—"} />
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <IconStatCard icon={<PackageIcon />} tone="bg-hazard-500/10 text-hazard-500" label={t("production.tonnesMined")} value={data.totals.tonnesMined.toLocaleString()} />
+            <IconStatCard icon={<LayersIcon />} tone="bg-mine-400/10 text-mine-400" label={t("production.tonnesProcessed")} value={data.totals.tonnesProcessed.toLocaleString()} />
+            <IconStatCard icon={<GemIcon />} tone="bg-success-500/10 text-success-500" label={t("production.avgOreGrade")} value={data.totals.avgOreGrade != null ? `${data.totals.avgOreGrade}%` : "—"} />
+            <IconStatCard icon={<RefreshIcon />} tone="bg-success-500/10 text-success-500" label={t("production.avgRecovery")} value={data.totals.avgRecoveryRate != null ? `${data.totals.avgRecoveryRate}%` : "—"} />
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
-            <div className={`${cardClass} p-3`}>
-              <h3 className="text-xs font-semibold mb-2">{t("production.actualVsPlanned")}</h3>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            <div className={cardOuter}>
+              <h3 className="text-sm font-semibold mb-4">{t("production.actualVsPlanned")}</h3>
               <div className="h-56">
                 <ResponsiveContainer width="100%" height="100%">
                   <ComposedChart data={data.trend}>
@@ -114,8 +117,8 @@ export default function ProductionAnalyticsWidget({ siteId }: { siteId?: string 
               </div>
             </div>
 
-            <div className={`${cardClass} p-3`}>
-              <h3 className="text-xs font-semibold mb-2">{t("production.minedVsProcessed")}</h3>
+            <div className={cardOuter}>
+              <h3 className="text-sm font-semibold mb-4">{t("production.minedVsProcessed")}</h3>
               <div className="h-56">
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart data={data.trend}>
@@ -130,8 +133,8 @@ export default function ProductionAnalyticsWidget({ siteId }: { siteId?: string 
               </div>
             </div>
 
-            <div className={`${cardClass} p-3`}>
-              <h3 className="text-xs font-semibold mb-2">{t("production.oreVsWaste")}</h3>
+            <div className={cardOuter}>
+              <h3 className="text-sm font-semibold mb-4">{t("production.oreVsWaste")}</h3>
               <div className="h-56">
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart data={data.trend}>
@@ -146,8 +149,8 @@ export default function ProductionAnalyticsWidget({ siteId }: { siteId?: string 
               </div>
             </div>
 
-            <div className={`${cardClass} p-3`}>
-              <h3 className="text-xs font-semibold mb-2">{t("production.gradeAndRecovery")}</h3>
+            <div className={cardOuter}>
+              <h3 className="text-sm font-semibold mb-4">{t("production.gradeAndRecovery")}</h3>
               <div className="h-56">
                 <ResponsiveContainer width="100%" height="100%">
                   <LineChart data={data.trend}>
@@ -163,9 +166,9 @@ export default function ProductionAnalyticsWidget({ siteId }: { siteId?: string 
             </div>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
-            <div className={`${cardClass} p-3`}>
-              <h3 className="text-xs font-semibold mb-2">{t("production.byShift")}</h3>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            <div className={cardOuter}>
+              <h3 className="text-sm font-semibold mb-4">{t("production.byShift")}</h3>
               {data.byShift.every((s) => s.tonnesMined === 0) ? (
                 <div className="text-mine-400 text-xs h-40 flex items-center justify-center">{t("production.noneYet")}</div>
               ) : (
@@ -197,8 +200,8 @@ export default function ProductionAnalyticsWidget({ siteId }: { siteId?: string 
               )}
             </div>
 
-            <div className={`${cardClass} p-3`}>
-              <h3 className="text-xs font-semibold mb-2">{t("production.bySection")}</h3>
+            <div className={cardOuter}>
+              <h3 className="text-sm font-semibold mb-4">{t("production.bySection")}</h3>
               {data.bySection.length === 0 ? (
                 <div className="text-mine-400 text-xs h-40 flex items-center justify-center">{t("production.noneYet")}</div>
               ) : (

@@ -3,7 +3,7 @@ import { useTranslation } from "react-i18next";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
 import { api } from "../api/client";
 import { InventoryProcurementSummary } from "../api/types";
-import { cardClass } from "./ui";
+import { AlertTriangleIcon, ZapIcon, ReceiptIcon, ClockIcon } from "./icons/DashboardIcons";
 
 const CHART_TOOLTIP_STYLE = { background: "#fafafa", border: "1px solid #e5e5e5", fontSize: 11 };
 const CHART_TICK_STYLE = { fontSize: 9, fill: "#52525b" };
@@ -17,13 +17,19 @@ const PO_STATUS_COLORS: Record<string, string> = {
 };
 const SUPPLIER_STATUS_COLORS: Record<string, string> = { ACTIVE: "#16a34a", INACTIVE: "#6b6b6b", BLACKLISTED: "#e13b2e" };
 const EXPLOSIVES_STATUS_COLORS: Record<string, string> = { ACTIVE: "#16a34a", SUSPENDED: "#d9a441", EXPIRED: "#e13b2e" };
+const cardOuter = "bg-mine-900 border border-mine-800 rounded-[20px] shadow-sm shadow-black/5 p-6";
+const TONE_CLASS: Record<"danger" | "caution" | "neutral", string> = {
+  danger: "bg-danger-500/10 text-danger-500",
+  caution: "bg-hazard-500/10 text-hazard-500",
+  neutral: "bg-mine-400/10 text-mine-400",
+};
 
-function StatCard({ label, value, tone }: { label: string; value: string; tone?: "danger" | "caution" }) {
-  const toneClass = tone === "danger" ? "text-danger-500" : tone === "caution" ? "text-hazard-500" : "text-mine-50";
+function IconStatCard({ icon, label, value, tone = "neutral" }: { icon: React.ReactNode; label: string; value: string; tone?: "danger" | "caution" | "neutral" }) {
   return (
-    <div className={`${cardClass} px-3 py-2.5`}>
-      <div className="text-[10px] text-mine-300 uppercase tracking-wide">{label}</div>
-      <div className={`text-lg font-bold mt-0.5 ${toneClass}`}>{value}</div>
+    <div className={`${cardOuter} p-[22px]`}>
+      <div className={`w-[34px] h-[34px] rounded-[10px] flex items-center justify-center mb-3.5 ${TONE_CLASS[tone]}`}>{icon}</div>
+      <div className="text-[26px] font-bold leading-none">{value}</div>
+      <div className="text-xs text-mine-400 mt-2">{label}</div>
     </div>
   );
 }
@@ -43,7 +49,7 @@ export default function InventoryProcurementWidget() {
 
   if (loading) {
     return (
-      <div className={`${cardClass} p-3`}>
+      <div className={cardOuter}>
         <div className="text-mine-300 text-xs">{t("common.loading")}</div>
       </div>
     );
@@ -70,22 +76,23 @@ export default function InventoryProcurementWidget() {
     .map(([status, count]) => ({ status, count }));
 
   return (
-    <div className={`${cardClass} p-3 space-y-4`}>
-      <h2 className="text-xs font-semibold">{t("inventory.procurementOverviewTitle")}</h2>
+    <div className={`${cardOuter} space-y-6`}>
+      <h2 className="text-sm font-semibold">{t("inventory.procurementOverviewTitle")}</h2>
 
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
-        <StatCard label={t("inventory.lowStockItems")} value={data.lowStockItems.length.toString()} tone={data.lowStockItems.length > 0 ? "caution" : undefined} />
-        <StatCard label={t("inventory.explosivesStock")} value={`${data.explosives.totalCurrentStock.toLocaleString()} / ${data.explosives.totalCapacity.toLocaleString()}`} />
-        <StatCard label={t("inventory.openPoValue")} value={`ZAR ${Math.round(data.purchaseOrders.openValue).toLocaleString()}`} />
-        <StatCard
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <IconStatCard icon={<AlertTriangleIcon />} label={t("inventory.lowStockItems")} value={data.lowStockItems.length.toString()} tone={data.lowStockItems.length > 0 ? "caution" : "neutral"} />
+        <IconStatCard icon={<ZapIcon />} label={t("inventory.explosivesStock")} value={`${data.explosives.totalCurrentStock.toLocaleString()} / ${data.explosives.totalCapacity.toLocaleString()}`} />
+        <IconStatCard icon={<ReceiptIcon />} label={t("inventory.openPoValue")} value={`ZAR ${Math.round(data.purchaseOrders.openValue).toLocaleString()}`} />
+        <IconStatCard
+          icon={<ClockIcon />}
           label={t("inventory.pendingApproval")}
           value={data.purchaseOrders.pendingApproval.toString()}
-          tone={data.purchaseOrders.pendingApproval > 0 ? "caution" : undefined}
+          tone={data.purchaseOrders.pendingApproval > 0 ? "caution" : "neutral"}
         />
       </div>
 
-      <div className={`${cardClass} p-3`}>
-        <h3 className="text-xs font-semibold mb-2">{t("inventory.byCategory")}</h3>
+      <div className={cardOuter}>
+        <h3 className="text-sm font-semibold mb-4">{t("inventory.byCategory")}</h3>
         <div className="h-56">
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={categoryChartData}>
@@ -100,9 +107,9 @@ export default function InventoryProcurementWidget() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
-        <div className={`${cardClass} p-3`}>
-          <h3 className="text-xs font-semibold mb-2">{t("inventory.explosivesByStatus")}</h3>
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+        <div className={cardOuter}>
+          <h3 className="text-sm font-semibold mb-4">{t("inventory.explosivesByStatus")}</h3>
           {explosivesChartData.length === 0 ? (
             <div className="text-mine-400 text-xs h-32 flex items-center justify-center">{t("inventory.noneYet")}</div>
           ) : (
@@ -139,8 +146,8 @@ export default function InventoryProcurementWidget() {
           )}
         </div>
 
-        <div className={`${cardClass} p-3`}>
-          <h3 className="text-xs font-semibold mb-2">{t("inventory.poByStatus")}</h3>
+        <div className={cardOuter}>
+          <h3 className="text-sm font-semibold mb-4">{t("inventory.poByStatus")}</h3>
           {poChartData.length === 0 ? (
             <div className="text-mine-400 text-xs h-32 flex items-center justify-center">{t("inventory.noneYet")}</div>
           ) : (
@@ -172,8 +179,8 @@ export default function InventoryProcurementWidget() {
           )}
         </div>
 
-        <div className={`${cardClass} p-3`}>
-          <h3 className="text-xs font-semibold mb-2">{t("inventory.suppliersByStatus")}</h3>
+        <div className={cardOuter}>
+          <h3 className="text-sm font-semibold mb-4">{t("inventory.suppliersByStatus")}</h3>
           {supplierChartData.length === 0 ? (
             <div className="text-mine-400 text-xs h-32 flex items-center justify-center">{t("inventory.noneYet")}</div>
           ) : (
@@ -210,8 +217,8 @@ export default function InventoryProcurementWidget() {
         </div>
       </div>
 
-      <div className={`${cardClass} p-3`}>
-        <h3 className="text-xs font-semibold mb-2">{t("inventory.lowStockItems")}</h3>
+      <div className={cardOuter}>
+        <h3 className="text-sm font-semibold mb-4">{t("inventory.lowStockItems")}</h3>
         {data.lowStockItems.length === 0 ? (
           <div className="text-mine-400 text-xs h-16 flex items-center justify-center">{t("inventory.noLowStock")}</div>
         ) : (

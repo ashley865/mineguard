@@ -4,17 +4,24 @@ import { Link } from "react-router-dom";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer } from "recharts";
 import { api } from "../api/client";
 import { BudgetSummary } from "../api/types";
-import { cardClass } from "./ui";
+import { WalletIcon, ReceiptIcon, GaugeIcon, AlertTriangleIcon } from "./icons/DashboardIcons";
 
 const CHART_TOOLTIP_STYLE = { background: "#fafafa", border: "1px solid #e5e5e5", fontSize: 11 };
 const CHART_TICK_STYLE = { fontSize: 9, fill: "#52525b" };
+const cardOuter = "bg-mine-900 border border-mine-800 rounded-[20px] shadow-sm shadow-black/5 p-6";
+const TONE_CLASS: Record<"positive" | "negative" | "caution" | "neutral", string> = {
+  positive: "bg-success-500/10 text-success-500",
+  negative: "bg-danger-500/10 text-danger-500",
+  caution: "bg-hazard-500/10 text-hazard-500",
+  neutral: "bg-mine-400/10 text-mine-400",
+};
 
-function StatMini({ label, value, tone }: { label: string; value: string; tone?: "positive" | "negative" | "caution" }) {
-  const toneClass = tone === "negative" ? "text-danger-500" : tone === "caution" ? "text-hazard-500" : tone === "positive" ? "text-success-500" : "";
+function IconStatCard({ icon, label, value, tone = "neutral" }: { icon: React.ReactNode; label: string; value: string; tone?: "positive" | "negative" | "caution" | "neutral" }) {
   return (
-    <div className={`${cardClass} px-3 py-2.5`}>
-      <div className="text-[10px] text-mine-300 uppercase tracking-wide">{label}</div>
-      <div className={`text-lg font-bold mt-0.5 ${toneClass}`}>{value}</div>
+    <div className={`${cardOuter} p-[22px]`}>
+      <div className={`w-[34px] h-[34px] rounded-[10px] flex items-center justify-center mb-3.5 ${TONE_CLASS[tone]}`}>{icon}</div>
+      <div className="text-[26px] font-bold leading-none">{value}</div>
+      <div className="text-xs text-mine-400 mt-2">{label}</div>
     </div>
   );
 }
@@ -41,22 +48,24 @@ export default function BudgetSummaryWidget() {
   const chartData = data.byCategory.slice(0, 6).map((c) => ({ ...c, label: t(`expenses.categories.${c.category}`) }));
 
   return (
-    <div className={`${cardClass} p-3 space-y-3`}>
-      <div className="flex items-center justify-between">
-        <h2 className="text-xs font-semibold">{t("executive.budgetHealth.title")}</h2>
-        <Link to="/budget-planning" className="text-[10px] text-hazard-600 hover:text-hazard-500 font-semibold">
+    <div className={cardOuter}>
+      <div className="flex items-center justify-between mb-5">
+        <h2 className="text-sm font-semibold">{t("executive.budgetHealth.title")}</h2>
+        <Link to="/budget-planning" className="text-xs text-hazard-600 hover:text-hazard-500 font-semibold">
           {t("executive.budgetHealth.viewAll")}
         </Link>
       </div>
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
-        <StatMini label={t("budgetPlanning.totalBudgeted")} value={money(data.totalBudgeted)} />
-        <StatMini label={t("budgetPlanning.totalActual")} value={money(data.totalActual)} />
-        <StatMini
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+        <IconStatCard icon={<WalletIcon />} label={t("budgetPlanning.totalBudgeted")} value={money(data.totalBudgeted)} />
+        <IconStatCard icon={<ReceiptIcon />} label={t("budgetPlanning.totalActual")} value={money(data.totalActual)} />
+        <IconStatCard
+          icon={<GaugeIcon />}
           label={t("budgetPlanning.utilization")}
           value={`${data.utilizationPct}%`}
           tone={data.utilizationPct > 100 ? "negative" : data.utilizationPct > 85 ? "caution" : "positive"}
         />
-        <StatMini
+        <IconStatCard
+          icon={<AlertTriangleIcon />}
           label={t("budgetPlanning.overBudgetCount")}
           value={String(data.overBudgetCount)}
           tone={data.overBudgetCount > 0 ? "negative" : "positive"}
