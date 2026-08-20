@@ -86,10 +86,11 @@ export default function IdentityTab({ theme, canEdit }: { theme: CyberTheme; can
 
   useEffect(() => { load(); }, []);
 
-  async function toggleMfa(id: string, mfaEnabled: boolean) {
+  async function resetMfa(id: string) {
+    if (!confirm(t("cyber.identity.confirmMfaReset"))) return;
     setBusyId(id);
     try {
-      await api.put(`/cyber-identity/users/${id}/mfa`, { mfaEnabled });
+      await api.post(`/cyber-identity/users/${id}/mfa-reset`);
       await load();
     } finally {
       setBusyId(null);
@@ -254,11 +255,14 @@ export default function IdentityTab({ theme, canEdit }: { theme: CyberTheme; can
           emptyMessage={t("cyber.identity.noPrivilegedAccounts")}
           actions={
             canEdit
-              ? (u) => (
-                  <button className={cyberButtonSecondary(theme)} disabled={busyId === u.id} onClick={() => toggleMfa(u.id, !u.mfaEnabled)}>
-                    {u.mfaEnabled ? t("cyber.identity.markMfaDisabled") : t("cyber.identity.markMfaEnabled")}
-                  </button>
-                )
+              ? (u) =>
+                  u.mfaEnabled ? (
+                    <button className={cyberButtonSecondary(theme)} disabled={busyId === u.id} onClick={() => resetMfa(u.id)}>
+                      {t("cyber.identity.resetMfa")}
+                    </button>
+                  ) : (
+                    <span className={`text-[10px] ${theme.mutedText}`}>{t("cyber.identity.mfaNotEnrolled")}</span>
+                  )
               : undefined
           }
         />

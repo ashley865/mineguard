@@ -17,7 +17,7 @@ interface AuthContextValue {
   user: User | null;
   token: string | null;
   loading: boolean;
-  login: (email: string, password: string) => Promise<void>;
+  login: (email: string, password: string, mfaCode?: string) => Promise<void>;
   register: (email: string, password: string, name: string, mineId: string, passkey: string) => Promise<void>;
   registerMine: (payload: RegisterMinePayload) => Promise<{ mine: Mine; passkey: string }>;
   acceptExecutiveInvite: (inviteId: string, key: string, password: string) => Promise<void>;
@@ -78,8 +78,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUser(newUser);
   }
 
-  async function login(email: string, password: string) {
-    const res = await api.post("/auth/login", { email, password });
+  async function login(email: string, password: string, mfaCode?: string) {
+    const res = await api.post("/auth/login", { email, password, mfaCode: mfaCode || undefined });
     persist(res.data.token, res.data.user);
   }
 

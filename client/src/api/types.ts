@@ -21,6 +21,7 @@ export interface User {
   title?: ExecutiveTitle | null;
   mineId?: string | null;
   hasPhoto?: boolean;
+  mfaEnabled?: boolean;
 }
 
 export interface TeamMember {

@@ -9,6 +9,7 @@ import { signAuthToken } from "../lib/jwt";
 import { authLimiter, passwordChangeLimiter } from "../middleware/rateLimit";
 import { verifyAdminPassword } from "../lib/verifyPassword";
 import { isIpBlocked } from "../lib/ipBlocklist";
+import { buildOtpAuthUrl, generateMfaSecret, verifyMfaToken } from "../lib/totp";
 
 const router = Router();
 
@@ -29,6 +30,7 @@ const registerSchema = z.object({
 const loginSchema = z.object({
   email: z.string().email(),
   password: z.string().min(1),
+  mfaCode: z.string().optional(),
 });
 
 const updateProfileSchema = z.object({
@@ -73,7 +75,7 @@ router.post("/register", authLimiter, async (req, res) => {
   const token = signAuthToken(user.id);
   res.status(201).json({
     token,
-    user: { id: user.id, email: user.email, name: user.name, role: user.role, title: user.title, mineId: user.mineId },
+    user: { id: user.id, email: user.email, name: user.name, role: user.role, title: user.title, mineId: user.mineId, mfaEnabled: user.mfaEnabled },
   });
 });
 
@@ -82,7 +84,7 @@ router.post("/login", authLimiter, async (req, res) => {
   if (!parsed.success) {
     return res.status(400).json({ error: parsed.error.flatten() });
   }
-  const { email, password } = parsed.data;
+  const { email, password, mfaCode } = parsed.data;
   const ipAddress = req.ip;
   const userAgent = req.headers["user-agent"];
 
@@ -113,6 +115,24 @@ router.post("/login", authLimiter, async (req, res) => {
     return res.status(403).json({ error: "This account has been deactivated. Contact your mine owner for access." });
   }
 
+  // A correct password alone is not enough once MFA is on: the client resubmits this
+  // same request with an added mfaCode once it sees mfaRequired, rather than a separate
+  // pre-auth token/session — the password has already been verified above either way, so
+  // there's nothing sensitive being repeated, just a second field.
+  if (user.mfaEnabled) {
+    if (!mfaCode) {
+      return res.status(401).json({ error: "MFA code required", mfaRequired: true });
+    }
+    if (!user.mfaSecret || !verifyMfaToken(user.mfaSecret, mfaCode)) {
+      if (user.mineId) {
+        await prisma.cyberLoginEvent
+          .create({ data: { mineId: user.mineId, userId: user.id, eventType: "LOGIN_FAILED", ipAddress, userAgent, flagged: true } })
+          .catch(() => {});
+      }
+      return res.status(401).json({ error: "Invalid MFA code", mfaRequired: true });
+    }
+  }
+
   if (user.mineId) {
     await prisma.cyberLoginEvent
       .create({ data: { mineId: user.mineId, userId: user.id, eventType: "LOGIN_SUCCESS", ipAddress, userAgent } })
@@ -132,7 +152,7 @@ router.post("/login", authLimiter, async (req, res) => {
   const token = signAuthToken(user.id);
   res.json({
     token,
-    user: { id: user.id, email: user.email, name: user.name, role: user.role, title: user.title, mineId: user.mineId },
+    user: { id: user.id, email: user.email, name: user.name, role: user.role, title: user.title, mineId: user.mineId, mfaEnabled: user.mfaEnabled },
   });
 });
 
@@ -149,6 +169,7 @@ router.get("/me", requireAuth, async (req, res) => {
     title: user.title,
     mineId: user.mineId,
     hasPhoto: !!user.photoData,
+    mfaEnabled: user.mfaEnabled,
   });
 });
 
@@ -167,6 +188,7 @@ router.put("/me", requireAuth, async (req, res) => {
     title: user.title,
     mineId: user.mineId,
     hasPhoto: !!user.photoData,
+    mfaEnabled: user.mfaEnabled,
   });
 });
 
@@ -179,6 +201,46 @@ router.post("/change-password", requireAuth, passwordChangeLimiter, async (req, 
   if (!valid) return res.status(401).json({ error: "Current password is incorrect" });
   const passwordHash = await bcrypt.hash(parsed.data.newPassword, 10);
   await prisma.user.update({ where: { id: user.id }, data: { passwordHash } });
+  res.status(204).send();
+});
+
+const mfaVerifySchema = z.object({ token: z.string().min(1) });
+const mfaDisableSchema = z.object({ password: z.string().min(1) });
+
+// Generates a fresh secret and stores it, but does NOT enable MFA yet — mfaEnabled only
+// flips to true once the user proves they actually captured it (POST /mfa/verify), so a
+// half-finished setup (secret saved, QR never scanned) can't silently lock nothing in but
+// also can't be mistaken for MFA actually being active.
+router.post("/mfa/setup", requireAuth, async (req, res) => {
+  const user = await prisma.user.findUnique({ where: { id: req.auth!.userId } });
+  if (!user) return res.status(404).json({ error: "User not found" });
+  const secret = generateMfaSecret();
+  await prisma.user.update({ where: { id: user.id }, data: { mfaSecret: secret, mfaEnabled: false } });
+  res.json({ secret, otpauthUrl: buildOtpAuthUrl(secret, user.email) });
+});
+
+router.post("/mfa/verify", requireAuth, async (req, res) => {
+  const parsed = mfaVerifySchema.safeParse(req.body);
+  if (!parsed.success) return res.status(400).json({ error: parsed.error.flatten() });
+  const user = await prisma.user.findUnique({ where: { id: req.auth!.userId } });
+  if (!user?.mfaSecret) return res.status(400).json({ error: "Start MFA setup first" });
+  if (!verifyMfaToken(user.mfaSecret, parsed.data.token)) {
+    return res.status(401).json({ error: "Invalid code. Check your authenticator app and try again." });
+  }
+  await prisma.user.update({ where: { id: user.id }, data: { mfaEnabled: true } });
+  res.status(204).send();
+});
+
+// Requires re-confirming the password, matching the pattern used for other
+// security-sensitive self-service actions (change-password).
+router.post("/mfa/disable", requireAuth, passwordChangeLimiter, async (req, res) => {
+  const parsed = mfaDisableSchema.safeParse(req.body);
+  if (!parsed.success) return res.status(400).json({ error: parsed.error.flatten() });
+  const user = await prisma.user.findUnique({ where: { id: req.auth!.userId } });
+  if (!user) return res.status(404).json({ error: "User not found" });
+  const valid = await bcrypt.compare(parsed.data.password, user.passwordHash);
+  if (!valid) return res.status(401).json({ error: "Incorrect password" });
+  await prisma.user.update({ where: { id: user.id }, data: { mfaEnabled: false, mfaSecret: null } });
   res.status(204).send();
 });
 

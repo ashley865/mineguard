@@ -1,5 +1,4 @@
 import { Router } from "express";
-import { z } from "zod";
 import { prisma } from "../prisma";
 import { requireAuth, requireRole } from "../middleware/auth";
 import { requireMineId } from "../lib/mineScope";
@@ -162,19 +161,19 @@ router.get("/overview", async (req, res) => {
   });
 });
 
-const mfaSchema = z.object({ mfaEnabled: z.boolean() });
-
-router.put("/users/:id/mfa", async (req, res) => {
+// MFA is real (TOTP, enforced at login — see routes/auth.ts) and tied to a secret only the
+// user's own authenticator app holds, so there is no "enable on someone's behalf" action
+// here. This only ever resets — for a lost/replaced device or a suspected compromise — so
+// the user can re-enroll from scratch via their own POST /auth/mfa/setup.
+router.post("/users/:id/mfa-reset", async (req, res) => {
   const mineId = requireMineId(req, res);
   if (!mineId) return;
   if (!(await requireCyberAccess(req, res))) return;
-  const parsed = mfaSchema.safeParse(req.body);
-  if (!parsed.success) return res.status(400).json({ error: parsed.error.flatten() });
   const existing = await prisma.user.findFirst({ where: { id: req.params.id, mineId } });
   if (!existing) return res.status(404).json({ error: "User not found" });
   const user = await prisma.user.update({
     where: { id: existing.id },
-    data: { mfaEnabled: parsed.data.mfaEnabled },
+    data: { mfaEnabled: false, mfaSecret: null },
     select: { id: true, name: true, mfaEnabled: true },
   });
   res.json(user);

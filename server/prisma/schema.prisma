@@ -206,10 +206,12 @@ model User {
   // Set to false when an owner removes an executive: blocks login entirely rather than
   // just demoting the role, so a removed executive can't fall back to viewer access.
   isActive     Boolean         @default(true)
-  // Self-reported/admin-attested for visibility in Identity & Access Security — MineGuard
-  // does not itself implement an MFA challenge at login, so this tracks whether MFA is
-  // enforced via the mine's identity provider rather than claiming to enforce it here.
+  // Real TOTP (RFC 6238) multi-factor authentication, enforced at login (see POST
+  // /auth/login) once set — not self-reported. mfaSecret is written by POST /auth/mfa/setup
+  // and only takes effect (mfaEnabled: true) once the user proves possession of it via
+  // POST /auth/mfa/verify, so a secret alone is never enough to flip this on.
   mfaEnabled   Boolean         @default(false)
+  mfaSecret    String?
   lastLoginAt  DateTime?
   createdAt    DateTime        @default(now())
 

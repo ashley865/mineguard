@@ -10,6 +10,8 @@ export default function Login() {
   const { user, login } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [mfaCode, setMfaCode] = useState("");
+  const [mfaRequired, setMfaRequired] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
@@ -20,9 +22,14 @@ export default function Login() {
     setError(null);
     setLoading(true);
     try {
-      await login(email, password);
+      await login(email, password, mfaCode || undefined);
     } catch (err: any) {
-      setError(err.response?.data?.error ?? t("login.error"));
+      if (err.response?.data?.mfaRequired) {
+        setMfaRequired(true);
+        setError(mfaCode ? (err.response?.data?.error ?? t("login.mfaInvalid")) : null);
+      } else {
+        setError(err.response?.data?.error ?? t("login.error"));
+      }
     } finally {
       setLoading(false);
     }
@@ -47,6 +54,7 @@ export default function Login() {
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
+              disabled={mfaRequired}
               required
             />
           </div>
@@ -57,9 +65,27 @@ export default function Login() {
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
+              disabled={mfaRequired}
               required
             />
           </div>
+          {mfaRequired && (
+            <div>
+              <label className={labelClass}>{t("login.mfaCode")}</label>
+              <input
+                className={inputClass}
+                inputMode="numeric"
+                pattern="[0-9]*"
+                maxLength={6}
+                value={mfaCode}
+                onChange={(e) => setMfaCode(e.target.value)}
+                placeholder="000000"
+                autoFocus
+                required
+              />
+              <p className="text-[11px] text-mine-400 mt-1">{t("login.mfaCodeHint")}</p>
+            </div>
+          )}
           {error && <div className="text-danger-400 text-sm">{error}</div>}
           <button type="submit" disabled={loading} className={`${buttonPrimary} w-full`}>
             {loading ? t("login.signingIn") : t("login.signIn")}
