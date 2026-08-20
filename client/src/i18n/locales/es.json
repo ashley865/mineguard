@@ -4429,6 +4429,7 @@
     "tabIdentity": "Identidad y Acceso",
     "tabCompliance": "Cumplimiento y Auditoría",
     "tabAi": "Analista IA",
+    "tabSettings": "Configuración del Sistema",
     "severityLabel": "Severidad",
     "assignedTo": "Asignado a",
     "unassigned": "Sin asignar",
@@ -4706,6 +4707,23 @@
       "explainAction": "Explicar",
       "explainError": "La explicación de IA falló — intente de nuevo en breve.",
       "summary": "Resumen de IA"
+    },
+    "settings": {
+      "title": "Configuración de Integraciones y del Sistema",
+      "hint": "Gestione las claves API y los ajustes de integración que impulsan este despliegue, sin necesidad de volver a implementar el servidor. Un valor guardado aquí sustituye la variable de entorno del servidor para todas las minas.",
+      "currentValue": "Valor actual",
+      "newValue": "Nuevo valor",
+      "notSet": "No configurado",
+      "edit": "Editar",
+      "resetToEnvironment": "Restablecer al valor predeterminado del entorno",
+      "confirmReset": "¿Eliminar el valor guardado y volver a la variable de entorno del servidor?",
+      "saveError": "No se pudo guardar este ajuste — intente de nuevo en breve.",
+      "updatedBy": "actualizado por {{name}} el {{date}}",
+      "source": {
+        "database": "Configurado aquí",
+        "environment": "Desde el entorno del servidor",
+        "unset": "No establecido"
+      }
     }
   }
 }

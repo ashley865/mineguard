@@ -4429,6 +4429,7 @@
     "tabIdentity": "Identität & Zugriff",
     "tabCompliance": "Compliance & Audit",
     "tabAi": "KI-Analyst",
+    "tabSettings": "Systemkonfiguration",
     "severityLabel": "Schweregrad",
     "assignedTo": "Zugewiesen an",
     "unassigned": "Nicht zugewiesen",
@@ -4706,6 +4707,23 @@
       "explainAction": "Erklären",
       "explainError": "KI-Erklärung fehlgeschlagen — versuchen Sie es in Kürze erneut.",
       "summary": "KI-Zusammenfassung"
+    },
+    "settings": {
+      "title": "Integrations- und Systemkonfiguration",
+      "hint": "Verwalten Sie die API-Schlüssel und Integrationseinstellungen dieser Bereitstellung, ohne den Server neu bereitstellen zu müssen. Ein hier gespeicherter Wert überschreibt die Umgebungsvariable des Servers für jede Mine.",
+      "currentValue": "Aktueller Wert",
+      "newValue": "Neuer Wert",
+      "notSet": "Nicht konfiguriert",
+      "edit": "Bearbeiten",
+      "resetToEnvironment": "Auf Umgebungsstandard zurücksetzen",
+      "confirmReset": "Den gespeicherten Wert entfernen und auf die Umgebungsvariable des Servers zurückfallen?",
+      "saveError": "Diese Einstellung konnte nicht gespeichert werden — versuchen Sie es in Kürze erneut.",
+      "updatedBy": "aktualisiert von {{name}} am {{date}}",
+      "source": {
+        "database": "Hier konfiguriert",
+        "environment": "Aus der Serverumgebung",
+        "unset": "Nicht festgelegt"
+      }
     }
   }
 }

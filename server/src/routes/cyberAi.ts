@@ -23,7 +23,7 @@ router.post("/correlate", async (req, res) => {
   const mineId = requireMineId(req, res);
   if (!mineId) return;
   if (!(await requireCyberAccess(req, res))) return;
-  if (!isAiConfigured()) return res.status(503).json({ error: "AI is not configured for this deployment" });
+  if (!(await isAiConfigured())) return res.status(503).json({ error: "AI is not configured for this deployment" });
   const parsed = correlateSchema.safeParse(req.body);
   if (!parsed.success) return res.status(400).json({ error: parsed.error.flatten() });
 
@@ -74,7 +74,7 @@ router.post("/explain", async (req, res) => {
   const mineId = requireMineId(req, res);
   if (!mineId) return;
   if (!(await requireCyberAccess(req, res))) return;
-  if (!isAiConfigured()) return res.status(503).json({ error: "AI is not configured for this deployment" });
+  if (!(await isAiConfigured())) return res.status(503).json({ error: "AI is not configured for this deployment" });
   const parsed = explainSchema.safeParse(req.body);
   if (!parsed.success) return res.status(400).json({ error: parsed.error.flatten() });
 

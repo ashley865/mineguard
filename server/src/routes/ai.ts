@@ -1200,7 +1200,7 @@ router.get("/summary", aiLimiter, async (req, res) => {
   const resolved = await resolveAiModule(req, res);
   if (!resolved) return;
 
-  if (!isAiConfigured()) {
+  if (!(await isAiConfigured())) {
     return res.json({ configured: false, summary: null, generatedAt: null });
   }
 
@@ -1320,7 +1320,7 @@ router.post("/chat", aiLimiter, async (req, res) => {
     return res.status(400).json({ error: "The last message must be from the user" });
   }
 
-  if (!isAiConfigured()) {
+  if (!(await isAiConfigured())) {
     return res.json({ configured: false, reply: null });
   }
 
@@ -1628,7 +1628,7 @@ router.post("/report", aiLimiter, async (req, res) => {
     return res.status(400).json({ error: "Invalid report request — period must be WEEK or MONTH" });
   }
 
-  if (!isAiConfigured()) {
+  if (!(await isAiConfigured())) {
     return res.json({ configured: false, report: null });
   }
 
@@ -1749,7 +1749,7 @@ router.post("/department-report", aiLimiter, async (req, res) => {
     return res.status(403).json({ error: "Department reports aren't available for your role" });
   }
 
-  if (!isAiConfigured()) {
+  if (!(await isAiConfigured())) {
     return res.json({ configured: false, report: null });
   }
 

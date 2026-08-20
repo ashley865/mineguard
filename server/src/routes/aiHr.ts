@@ -194,7 +194,7 @@ router.post("/report", aiLimiter, async (req, res) => {
     return res.status(400).json({ error: "Invalid report request — period must be WEEK or MONTH" });
   }
 
-  if (!isAiConfigured()) {
+  if (!(await isAiConfigured())) {
     return res.json({ configured: false, report: null });
   }
 
@@ -310,7 +310,7 @@ router.post("/case-risk", aiLimiter, async (req, res) => {
     return res.status(404).json({ error: "Case not found" });
   }
 
-  if (!isAiConfigured()) {
+  if (!(await isAiConfigured())) {
     return res.json({ configured: false, result: null, disclaimer: CASE_RISK_DISCLAIMER });
   }
 

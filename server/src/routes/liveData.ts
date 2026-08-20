@@ -5,6 +5,7 @@ import { requireAuth } from "../middleware/auth";
 import { requireMineId } from "../lib/mineScope";
 import { aiChatComplete, AiMessage, isAiConfigured } from "../lib/ai";
 import { GUARDRAIL } from "./ai";
+import { resolveSetting } from "../lib/systemSettings";
 
 const router = Router();
 router.use(requireAuth);
@@ -338,7 +339,7 @@ const PRICE_INSIGHT_DISCLAIMER =
 // could read as investment advice, and the disclaimer above is a fixed string the model
 // never authors, so it can't be dropped or softened by the response.
 async function generatePriceInsight(prices: MetalPrice[]): Promise<string | null> {
-  if (!isAiConfigured() || prices.length === 0) return null;
+  if (!(await isAiConfigured()) || prices.length === 0) return null;
   try {
     const messages: AiMessage[] = [
       {
@@ -390,7 +391,7 @@ const METALS_API_SYMBOLS: Record<string, string> = {
 };
 
 async function fetchMetalsApiPrices(): Promise<Record<string, number> | null> {
-  const apiKey = process.env.METALS_API_KEY;
+  const apiKey = await resolveSetting("METALS_API_KEY");
   if (!apiKey) return null;
   try {
     const symbols = Object.values(METALS_API_SYMBOLS).join(",");
@@ -545,7 +546,7 @@ async function fetchIndustryNewsRaw(): Promise<IndustryNewsItem[]> {
 // One AI call per cache window covering every headline at once (not one call per item, and
 // never a click-triggered call) — cheap regardless of how many users open the news panel.
 async function generateNewsSummaries(items: IndustryNewsItem[]): Promise<IndustryNewsItem[]> {
-  if (!isAiConfigured() || items.length === 0) return items;
+  if (!(await isAiConfigured()) || items.length === 0) return items;
   try {
     const messages: AiMessage[] = [
       {

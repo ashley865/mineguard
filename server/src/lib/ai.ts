@@ -1,3 +1,5 @@
+import { resolveSetting } from "./systemSettings";
+
 export class AiNotConfiguredError extends Error {
   constructor() {
     super("AI assistant is not configured");
@@ -10,22 +12,24 @@ export interface AiMessage {
   content: string;
 }
 
-export function isAiConfigured(): boolean {
-  return !!process.env.AI_API_KEY;
+export async function isAiConfigured(): Promise<boolean> {
+  return !!(await resolveSetting("AI_API_KEY"));
 }
 
 /**
  * Talks to any OpenAI-compatible chat completions endpoint (OpenAI, Groq,
- * OpenRouter, a local proxy, etc.) behind a single env-var-driven client, so
- * picking a provider later is a config change, never a code change.
- * AI_API_KEY is intentionally left unset until a provider is chosen.
+ * OpenRouter, a local proxy, etc.) behind a single client, so picking a
+ * provider later is a config change, never a code change. AI_API_KEY is
+ * intentionally left unset until a provider is chosen — configurable via
+ * the AI_API_KEY env var or, preferably, Cyber Command Center's System
+ * Configuration panel (see lib/systemSettings.ts).
  */
 export async function aiChatComplete(messages: AiMessage[]): Promise<string> {
-  const apiKey = process.env.AI_API_KEY;
+  const apiKey = await resolveSetting("AI_API_KEY");
   if (!apiKey) throw new AiNotConfiguredError();
 
-  const baseUrl = (process.env.AI_API_BASE_URL || "https://api.openai.com/v1").replace(/\/+$/, "");
-  const model = process.env.AI_MODEL || "gpt-4o-mini";
+  const baseUrl = ((await resolveSetting("AI_API_BASE_URL")) || "https://api.openai.com/v1").replace(/\/+$/, "");
+  const model = (await resolveSetting("AI_MODEL")) || "gpt-4o-mini";
 
   const res = await fetch(`${baseUrl}/chat/completions`, {
     method: "POST",

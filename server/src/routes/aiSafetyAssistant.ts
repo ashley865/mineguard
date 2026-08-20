@@ -53,7 +53,7 @@ router.post("/", aiLimiter, async (req, res) => {
     return res.status(400).json({ error: "The last message must be from the user" });
   }
 
-  if (!isAiConfigured()) {
+  if (!(await isAiConfigured())) {
     return res.json({ configured: false, reply: null });
   }
 

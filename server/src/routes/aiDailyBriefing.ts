@@ -115,7 +115,7 @@ router.get("/", aiLimiter, async (req, res) => {
     if (existing) return res.json({ configured: true, cached: true, ...existing });
   }
 
-  if (!isAiConfigured()) {
+  if (!(await isAiConfigured())) {
     return res.json({ configured: false, cached: false, headline: null, topPriority: null, sections: [] });
   }
 

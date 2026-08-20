@@ -3944,6 +3944,17 @@ export interface CyberBuyerThreats {
   globalBlocklist: CyberGlobalBlockedIp[];
 }
 
+export interface CyberSystemSetting {
+  key: string;
+  label: string;
+  description: string;
+  secret: boolean;
+  source: "database" | "environment" | "unset";
+  maskedValue: string | null;
+  updatedAt: string | null;
+  updatedByName: string | null;
+}
+
 export interface BudgetPlan {
   id: string;
   siteId?: string | null;

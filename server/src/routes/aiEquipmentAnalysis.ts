@@ -44,7 +44,7 @@ router.post("/:equipmentId", aiLimiter, async (req, res) => {
   });
   if (!equipment) return res.status(404).json({ error: "Equipment not found" });
 
-  if (!isAiConfigured()) {
+  if (!(await isAiConfigured())) {
     return res.json({ configured: false, result: null, disclaimer: DISCLAIMER });
   }
 

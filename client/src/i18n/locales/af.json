@@ -4429,6 +4429,7 @@
     "tabIdentity": "Identiteit & Toegang",
     "tabCompliance": "Nakoming & Oudit",
     "tabAi": "KI-Ontleder",
+    "tabSettings": "Stelselkonfigurasie",
     "severityLabel": "Erns",
     "assignedTo": "Toegewys aan",
     "unassigned": "Nie toegewys nie",
@@ -4706,6 +4707,23 @@
       "explainAction": "Verduidelik",
       "explainError": "KI-verduideliking het misluk — probeer binnekort weer.",
       "summary": "KI-opsomming"
+    },
+    "settings": {
+      "title": "Integrasie- en Stelselkonfigurasie",
+      "hint": "Bestuur die API-sleutels en integrasie-instellings wat hierdie ontplooiing aandryf, sonder om die bediener te moet herontplooi. 'n Waarde wat hier gestoor word, oorskryf die bediener se omgewingveranderlike vir elke myn.",
+      "currentValue": "Huidige waarde",
+      "newValue": "Nuwe waarde",
+      "notSet": "Nie gekonfigureer nie",
+      "edit": "Wysig",
+      "resetToEnvironment": "Herstel na omgewing-verstek",
+      "confirmReset": "Verwyder die gestoorde oorskrywing en val terug na die bediener se omgewingveranderlike?",
+      "saveError": "Kon nie hierdie instelling stoor nie — probeer binnekort weer.",
+      "updatedBy": "opgedateer deur {{name}} op {{date}}",
+      "source": {
+        "database": "Hier gekonfigureer",
+        "environment": "Vanaf bediener-omgewing",
+        "unset": "Nie gestel nie"
+      }
     }
   }
 }

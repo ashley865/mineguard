@@ -62,7 +62,7 @@ router.get("/", aiLimiter, async (req, res) => {
   if (!mineId) return;
   if (!(await requireScanAccess(req, res))) return;
 
-  if (!isAiConfigured()) {
+  if (!(await isAiConfigured())) {
     return res.json({ configured: false, flagged: [], scannedCount: 0, disclaimer: DISCLAIMER });
   }
 

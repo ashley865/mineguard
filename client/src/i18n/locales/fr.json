@@ -4429,6 +4429,7 @@
     "tabIdentity": "Identité et Accès",
     "tabCompliance": "Conformité et Audit",
     "tabAi": "Analyste IA",
+    "tabSettings": "Configuration du Système",
     "severityLabel": "Gravité",
     "assignedTo": "Assigné à",
     "unassigned": "Non assigné",
@@ -4706,6 +4707,23 @@
       "explainAction": "Expliquer",
       "explainError": "L'explication IA a échoué — réessayez sous peu.",
       "summary": "Résumé IA"
+    },
+    "settings": {
+      "title": "Configuration des Intégrations et du Système",
+      "hint": "Gérez les clés API et les paramètres d'intégration qui font fonctionner ce déploiement, sans avoir besoin de redéployer le serveur. Une valeur enregistrée ici remplace la variable d'environnement du serveur pour toutes les mines.",
+      "currentValue": "Valeur actuelle",
+      "newValue": "Nouvelle valeur",
+      "notSet": "Non configuré",
+      "edit": "Modifier",
+      "resetToEnvironment": "Rétablir la valeur par défaut de l'environnement",
+      "confirmReset": "Supprimer la valeur enregistrée et revenir à la variable d'environnement du serveur ?",
+      "saveError": "Échec de l'enregistrement de ce paramètre — réessayez sous peu.",
+      "updatedBy": "mis à jour par {{name}} le {{date}}",
+      "source": {
+        "database": "Configuré ici",
+        "environment": "Depuis l'environnement du serveur",
+        "unset": "Non défini"
+      }
     }
   }
 }

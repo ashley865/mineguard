@@ -46,7 +46,7 @@ router.post("/:incidentId", aiLimiter, async (req, res) => {
   });
   if (!incident) return res.status(404).json({ error: "Incident not found" });
 
-  if (!isAiConfigured()) {
+  if (!(await isAiConfigured())) {
     return res.json({ configured: false, result: null, disclaimer: DISCLAIMER });
   }
 

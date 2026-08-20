@@ -11,8 +11,9 @@ import IncidentsTab from "./cyber/IncidentsTab";
 import ComplianceTab from "./cyber/ComplianceTab";
 import IdentityTab from "./cyber/IdentityTab";
 import AiAnalystTab from "./cyber/AiAnalystTab";
+import SettingsTab from "./cyber/SettingsTab";
 
-type CyberTab = "dashboard" | "endpoints" | "identity" | "network" | "vulnerabilities" | "incidents" | "compliance" | "ai";
+type CyberTab = "dashboard" | "endpoints" | "identity" | "network" | "vulnerabilities" | "incidents" | "compliance" | "ai" | "settings";
 
 const THEME_STORAGE_KEY = "mineguard.cyberCommandCenter.dark";
 
@@ -53,6 +54,7 @@ export default function CyberCommandCenter() {
     { key: "identity", label: t("cyber.tabIdentity") },
     { key: "compliance", label: t("cyber.tabCompliance") },
     { key: "ai", label: t("cyber.tabAi") },
+    { key: "settings", label: t("cyber.tabSettings") },
   ];
 
   if (!canAccess) return <Navigate to="/" replace />;
@@ -108,6 +110,7 @@ export default function CyberCommandCenter() {
         {tab === "compliance" && <ComplianceTab theme={theme} canEdit={canEdit} canDelete={canDelete} />}
         {tab === "identity" && <IdentityTab theme={theme} canEdit={canEdit} />}
         {tab === "ai" && <AiAnalystTab theme={theme} canEdit={canEdit} />}
+        {tab === "settings" && <SettingsTab theme={theme} canEdit={canEdit} />}
       </div>
     </div>
   );

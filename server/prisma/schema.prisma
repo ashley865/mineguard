@@ -5605,3 +5605,18 @@ model CyberBlockedIp {
 
   @@unique([mineId, ipOrCidr])
 }
+
+// Admin-editable overrides for values that would otherwise only be configurable by
+// redeploying with a different server environment variable (integration API keys, provider
+// URLs). Global/system-wide, not mine-scoped — these drive shared infrastructure (the AI
+// assistant, the metals price feed) used by every mine on this deployment, same as
+// GlobalBlockedIp. key is one of SYSTEM_SETTING_KEYS in lib/systemSettings.ts; resolveSetting()
+// prefers this table's value and falls back to process.env[key] when no row exists, so
+// unconfigured settings keep working exactly as before this table existed.
+model SystemSetting {
+  id            String   @id @default(cuid())
+  key           String   @unique
+  value         String
+  updatedAt     DateTime @updatedAt
+  updatedByName String?
+}

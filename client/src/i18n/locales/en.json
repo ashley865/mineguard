@@ -4429,6 +4429,7 @@
     "tabIdentity": "Identity & Access",
     "tabCompliance": "Compliance & Audit",
     "tabAi": "AI Analyst",
+    "tabSettings": "System Configuration",
     "severityLabel": "Severity",
     "assignedTo": "Assigned to",
     "unassigned": "Unassigned",
@@ -4706,6 +4707,23 @@
       "explainAction": "Explain",
       "explainError": "AI explanation failed — try again shortly.",
       "summary": "AI summary"
+    },
+    "settings": {
+      "title": "Integration & System Configuration",
+      "hint": "Manage the API keys and integration settings that power this deployment, without needing a server redeploy. A value saved here overrides the server's environment variable for every mine.",
+      "currentValue": "Current value",
+      "newValue": "New value",
+      "notSet": "Not configured",
+      "edit": "Edit",
+      "resetToEnvironment": "Reset to environment default",
+      "confirmReset": "Remove the saved override and fall back to the server's environment variable?",
+      "saveError": "Failed to save this setting — try again shortly.",
+      "updatedBy": "updated by {{name}} on {{date}}",
+      "source": {
+        "database": "Configured here",
+        "environment": "From server environment",
+        "unset": "Not set"
+      }
     }
   }
 }
