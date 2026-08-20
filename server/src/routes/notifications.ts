@@ -14,15 +14,15 @@ const ORDER_STUCK_DAYS = 14;
 // Executive titles whose department owns worker certification/training compliance.
 // Compliance shares this because certificate/training lapses are themselves a
 // compliance risk, not just an HR administration matter.
-const CERTIFICATION_AUDIENCE: ExecutiveTitle[] = ["HR_MANAGER", "COMPLIANCE_OFFICER"];
+export const CERTIFICATION_AUDIENCE: ExecutiveTitle[] = ["HR_MANAGER", "COMPLIANCE_OFFICER"];
 // Executive titles whose department owns contractor/vendor contract terms.
-const CONTRACT_AUDIENCE: ExecutiveTitle[] = ["GENERAL_MANAGER", "COO", "OPERATIONS_MANAGER", "COMPLIANCE_OFFICER"];
+export const CONTRACT_AUDIENCE: ExecutiveTitle[] = ["GENERAL_MANAGER", "COO", "OPERATIONS_MANAGER", "COMPLIANCE_OFFICER"];
 // Executive titles who need visibility into outstanding client invoice deadlines.
-const INVOICE_AUDIENCE: ExecutiveTitle[] = ["CFO", "GENERAL_MANAGER"];
+export const INVOICE_AUDIENCE: ExecutiveTitle[] = ["CFO", "GENERAL_MANAGER"];
 // Executive titles who own procurement / purchase order approvals.
-const ORDER_AUDIENCE: ExecutiveTitle[] = ["GENERAL_MANAGER", "COO", "OPERATIONS_MANAGER", "CFO"];
+export const ORDER_AUDIENCE: ExecutiveTitle[] = ["GENERAL_MANAGER", "COO", "OPERATIONS_MANAGER", "CFO"];
 // Executive titles who own sign-off on logged expenses before they're paid.
-const EXPENSE_APPROVAL_AUDIENCE: ExecutiveTitle[] = ["CFO", "GENERAL_MANAGER", "COO"];
+export const EXPENSE_APPROVAL_AUDIENCE: ExecutiveTitle[] = ["CFO", "GENERAL_MANAGER", "COO"];
 const EXPENSE_PENDING_NOTICE_DAYS = 3;
 
 function daysFromNow(date: Date): number {

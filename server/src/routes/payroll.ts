@@ -5,6 +5,7 @@ import { prisma } from "../prisma";
 import { requireAuth, requireRole } from "../middleware/auth";
 import { documentFileFilter } from "../lib/uploadFilters";
 import { requireMineId } from "../lib/mineScope";
+import { notifyExecutives } from "../lib/notify";
 
 const router = Router();
 
@@ -106,6 +107,16 @@ router.post("/leave", requireRole("ADMIN", "SUPERVISOR", "EXECUTIVE"), async (re
   const worker = await prisma.worker.findFirst({ where: { id: parsed.data.workerId, site: { mineId } } });
   if (!worker) return res.status(404).json({ error: "Worker not found" });
   const request = await prisma.leaveRequest.create({ data: parsed.data, select: leaveSelect });
+
+  await notifyExecutives(req.app.get("io"), {
+    mineId,
+    titles: ["HR_MANAGER"],
+    type: "LEAVE_REQUEST",
+    title: `Leave request — ${worker.name}`,
+    body: `${request.leaveType} · ${request.daysRequested} day(s)`,
+    link: "/payroll",
+  });
+
   res.status(201).json(request);
 });
 

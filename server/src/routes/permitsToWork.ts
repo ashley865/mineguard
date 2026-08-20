@@ -2,8 +2,9 @@ import { Router } from "express";
 import { z } from "zod";
 import { prisma } from "../prisma";
 import { requireAuth, requireRole } from "../middleware/auth";
-import { getAssignedSiteIds } from "../services/executiveSites";
+import { getAssignedSiteIds, getUsersAssignedToSite } from "../services/executiveSites";
 import { requireMineId } from "../lib/mineScope";
+import { notifyExecutives } from "../lib/notify";
 
 const router = Router();
 
@@ -121,6 +122,22 @@ router.post("/:id/supervisor-decision", async (req, res) => {
     },
     select: ptwSelect,
   });
+
+  if (item.status === "PENDING_EXECUTIVE") {
+    // Site-scoped, not title-scoped — PTW executive sign-off is gated by ExecutiveSiteAssignment
+    // (see assertSiteAccess above), not an ExecutiveTitle, so the notification audience has to
+    // be resolved the same way rather than through notifyExecutives' titles filter.
+    const assignedUserIds = await getUsersAssignedToSite(item.siteId);
+    await notifyExecutives(req.app.get("io"), {
+      mineId,
+      userIds: assignedUserIds,
+      type: "PERMIT_TO_WORK",
+      title: `Permit to work needs your approval — ${item.contractor.companyName}`,
+      body: `${item.workDescription} at ${item.site.name}`,
+      link: "/permits-to-work",
+    });
+  }
+
   res.json(item);
 });
 

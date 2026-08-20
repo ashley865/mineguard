@@ -348,6 +348,7 @@ model User {
   cyberAuditFindingsCreated    CyberAuditFinding[]       @relation("CyberAuditFindingCreatedBy")
   cyberLoginEvents             CyberLoginEvent[]         @relation("CyberLoginEventUser")
   cyberBlockedIpsBlocked       CyberBlockedIp[]          @relation("CyberBlockedIpBlockedBy")
+  notifications                Notification[]            @relation("NotificationRecipient")
 }
 
 model UserAttendance {
@@ -1575,6 +1576,7 @@ model Mine {
   cyberLoginEvents         CyberLoginEvent[]
   cyberScoreSnapshots      CyberScoreSnapshot[]
   cyberBlockedIps          CyberBlockedIp[]
+  notifications            Notification[]
 }
 
 enum ExecutiveRequestStatus {
@@ -5643,4 +5645,40 @@ model CustomApiKey {
   createdByName String?
   createdAt     DateTime               @default(now())
   updatedAt     DateTime               @updatedAt
+}
+
+enum NotificationType {
+  EXECUTIVE_REQUEST
+  VISITOR_PENDING
+  PERMIT_TO_WORK
+  EXPENSE_APPROVAL
+  PURCHASE_ORDER_APPROVAL
+  IT_ACCESS_REQUEST
+  LEAVE_REQUEST
+  IOD_CLAIM
+}
+
+// A real, persisted per-recipient inbox row — created by lib/notify.ts's notifyExecutives()
+// at the moment a request needs a specific executive's attention, one row fanned out per
+// matching recipient (rather than a single row with an "audience" query resolved at read
+// time), so the notification survives even if that executive is offline when it happens and
+// their audience membership later changes. Distinct from the older synthetic feed in
+// routes/notifications.ts (expiring certs/contracts/invoices, computed live from other
+// tables, never persisted) — this table is specifically for "someone submitted something
+// that needs your decision."
+model Notification {
+  id          String           @id @default(cuid())
+  mineId      String
+  mine        Mine             @relation(fields: [mineId], references: [id], onDelete: Cascade)
+  recipientId String
+  recipient   User             @relation("NotificationRecipient", fields: [recipientId], references: [id], onDelete: Cascade)
+  type        NotificationType
+  title       String
+  body        String?
+  // Client-side route to navigate to when the notification is clicked, e.g. "/permits-to-work".
+  link        String?
+  readAt      DateTime?
+  createdAt   DateTime         @default(now())
+
+  @@index([recipientId, readAt])
 }

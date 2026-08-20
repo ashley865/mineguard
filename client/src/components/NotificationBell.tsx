@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { api } from "../api/client";
 import { useAuth } from "../context/AuthContext";
 import { useSocket } from "../context/SocketContext";
-import { ReviewNotification } from "../api/types";
+import { RequestNotification, ReviewNotification } from "../api/types";
 import { SeverityBadge, StatusBadge } from "./Badges";
 import { cardClass } from "./ui";
 
@@ -17,6 +17,7 @@ export default function NotificationBell() {
   const socket = useSocket();
   const canAct = user?.role === "ADMIN" || user?.role === "SUPERVISOR" || user?.role === "EXECUTIVE";
   const [items, setItems] = useState<ReviewNotification[]>([]);
+  const [requests, setRequests] = useState<RequestNotification[]>([]);
   const [open, setOpen] = useState(false);
   const [actingId, setActingId] = useState<string | null>(null);
   const [lastSeen, setLastSeen] = useState<number>(() => Number(localStorage.getItem(SEEN_KEY) ?? 0));
@@ -25,6 +26,25 @@ export default function NotificationBell() {
   async function load() {
     const res = await api.get<ReviewNotification[]>("/notifications");
     setItems(res.data);
+  }
+
+  async function loadRequests() {
+    const res = await api.get<RequestNotification[]>("/request-notifications");
+    setRequests(res.data);
+  }
+
+  async function openRequest(n: RequestNotification) {
+    setOpen(false);
+    if (!n.readAt) {
+      setRequests((prev) => prev.map((r) => (r.id === n.id ? { ...r, readAt: new Date().toISOString() } : r)));
+      api.post(`/request-notifications/${n.id}/read`).catch(() => {});
+    }
+    if (n.link) navigate(n.link);
+  }
+
+  async function markAllRequestsRead() {
+    setRequests((prev) => prev.map((r) => (r.readAt ? r : { ...r, readAt: new Date().toISOString() })));
+    await api.post("/request-notifications/read-all").catch(() => {});
   }
 
   function goTo(path: string) {
@@ -56,16 +76,20 @@ export default function NotificationBell() {
 
   useEffect(() => {
     load();
+    loadRequests();
   }, []);
 
   useEffect(() => {
     if (!socket) return;
     const refresh = () => load();
+    const refreshRequests = () => loadRequests();
     socket.on("alert:updated", refresh);
     socket.on("incident:updated", refresh);
+    socket.on("notification:new", refreshRequests);
     return () => {
       socket.off("alert:updated", refresh);
       socket.off("incident:updated", refresh);
+      socket.off("notification:new", refreshRequests);
     };
   }, [socket]);
 
@@ -89,7 +113,8 @@ export default function NotificationBell() {
     }
   }
 
-  const unreadCount = items.filter((n) => new Date(n.reviewedAt).getTime() > lastSeen).length;
+  const unreadCount = items.filter((n) => new Date(n.reviewedAt).getTime() > lastSeen).length + requests.filter((r) => !r.readAt).length;
+  const unreadRequestCount = requests.filter((r) => !r.readAt).length;
 
   return (
     <div className="relative" ref={panelRef}>
@@ -111,6 +136,30 @@ export default function NotificationBell() {
 
       {open && (
         <div className={`${cardClass} absolute right-0 mt-2 w-96 max-h-[28rem] overflow-y-auto z-20`}>
+          {requests.length > 0 && (
+            <>
+              <div className="px-4 py-3 border-b border-mine-800 text-sm font-semibold flex items-center justify-between">
+                <span>{t("notifications.requestsTitle")}</span>
+                {unreadRequestCount > 0 && (
+                  <button className="text-xs font-medium text-hazard-400 hover:text-hazard-300" onClick={markAllRequestsRead}>
+                    {t("notifications.markAllRead")}
+                  </button>
+                )}
+              </div>
+              <div className="divide-y divide-mine-800">
+                {requests.map((n) => (
+                  <button key={n.id} className="w-full text-left px-4 py-3 hover:bg-mine-800/60 transition-colors" onClick={() => openRequest(n)}>
+                    <div className="flex items-center gap-2">
+                      {!n.readAt && <span className="w-1.5 h-1.5 rounded-full bg-hazard-500 shrink-0" />}
+                      <span className="text-sm">{n.title}</span>
+                    </div>
+                    {n.body && <div className="text-xs text-mine-400 mt-1">{n.body}</div>}
+                    <div className="text-[10px] text-mine-500 mt-1">{new Date(n.createdAt).toLocaleString()}</div>
+                  </button>
+                ))}
+              </div>
+            </>
+          )}
           <div className="px-4 py-3 border-b border-mine-800 text-sm font-semibold">{t("notifications.title")}</div>
           <div className="divide-y divide-mine-800">
             {items.length === 0 && (

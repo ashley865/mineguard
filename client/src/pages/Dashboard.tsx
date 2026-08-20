@@ -11,6 +11,7 @@ import FinancialSummaryWidget from "../components/FinancialSummaryWidget";
 import AiAssistantWidget from "../components/AiAssistantWidget";
 import LiveDataWidget from "../components/LiveDataWidget";
 import IndustryNewsWidget from "../components/IndustryNewsWidget";
+import CyberSecurityWidget from "../components/CyberSecurityWidget";
 
 function StatCard({
   label,
@@ -78,7 +79,10 @@ function OwnerAttentionPanel() {
     data.pendingPurchaseOrders.count +
     data.pendingExecutiveRequests.count +
     data.criticalItIncidents.count +
-    data.pendingExecutiveInvites.count;
+    data.pendingExecutiveInvites.count +
+    data.pendingPermitsToWork.count +
+    data.pendingItAccessRequests.count +
+    data.pendingLeaveRequests.count;
 
   return (
     <div>
@@ -88,12 +92,15 @@ function OwnerAttentionPanel() {
           <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-hazard-500 text-white">{totalUrgent}</span>
         )}
       </div>
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-2">
+      <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-2">
         <AttentionCard label={t("dashboard.pendingExpenses")} value={data.pendingExpenses.count} to="/expenses" />
         <AttentionCard label={t("dashboard.pendingOrders")} value={data.pendingPurchaseOrders.count} to="/procurement" />
         <AttentionCard label={t("dashboard.pendingRequests")} value={data.pendingExecutiveRequests.count} to="/executive-requests" />
         <AttentionCard label={t("dashboard.criticalItIncidents")} value={data.criticalItIncidents.count} to="/it-operations" />
         <AttentionCard label={t("dashboard.pendingInvites")} value={data.pendingExecutiveInvites.count} to="/settings" />
+        <AttentionCard label={t("dashboard.pendingPermits")} value={data.pendingPermitsToWork.count} to="/permits-to-work" />
+        <AttentionCard label={t("dashboard.pendingItAccess")} value={data.pendingItAccessRequests.count} to="/it-operations" />
+        <AttentionCard label={t("dashboard.pendingLeave")} value={data.pendingLeaveRequests.count} to="/payroll" />
       </div>
       {(data.pendingExpenses.count > 0 || data.pendingPurchaseOrders.count > 0) && (
         <p className="text-[10px] text-mine-400 mt-1.5">
@@ -197,6 +204,7 @@ export default function Dashboard() {
       <div className="space-y-3">
         <SectionHeader label={t("dashboard.sectionInsights")} />
         {isOwner && <AiAssistantWidget showReportGenerator />}
+        {isOwner && <CyberSecurityWidget />}
         <LiveDataWidget showMineralPrices={isOwner} />
         <IndustryNewsWidget />
         {isOwner && <FinancialSummaryWidget />}

@@ -3,6 +3,7 @@ import { z } from "zod";
 import { prisma } from "../prisma";
 import { requireAuth, requireRole } from "../middleware/auth";
 import { requireMineId } from "../lib/mineScope";
+import { notifyExecutives } from "../lib/notify";
 
 const router = Router();
 
@@ -56,6 +57,18 @@ router.post("/", requireRole("ADMIN", "SUPERVISOR", "EXECUTIVE"), async (req, re
     data: { ...parsed.data, mineId, createdById: req.auth!.userId },
     select: accessRequestSelect,
   });
+
+  if (request.status === "REQUESTED") {
+    await notifyExecutives(req.app.get("io"), {
+      mineId,
+      titles: ["IT_MANAGER"],
+      type: "IT_ACCESS_REQUEST",
+      title: `IT access request — ${request.subjectName}`,
+      body: `${request.requestType ?? "GRANT"} access to ${request.systemName}`,
+      link: "/it-operations",
+    });
+  }
+
   res.status(201).json(request);
 });
 

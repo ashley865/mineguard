@@ -6,6 +6,7 @@ import { prisma } from "../prisma";
 import { requireAuth, requireRole } from "../middleware/auth";
 import { requireMineId } from "../lib/mineScope";
 import { documentFileFilter } from "../lib/uploadFilters";
+import { notifyExecutives } from "../lib/notify";
 
 const router = Router();
 
@@ -139,6 +140,17 @@ router.post("/", upload.single("attachment"), async (req, res) => {
   // intended recipient (their own title, or admin) before showing anything.
   const io = req.app.get("io");
   io?.to(`mine:${mineId}`).emit("request:new", withHasAttachment(request));
+
+  // Also persisted, unlike the socket-only toast above, so it's still there in the bell
+  // if the recipient was offline when it arrived.
+  await notifyExecutives(io, {
+    mineId,
+    titles: [parsed.data.toTitle],
+    type: "EXECUTIVE_REQUEST",
+    title: `New request: ${parsed.data.subject}`,
+    body: parsed.data.message,
+    link: "/executive-requests",
+  });
 
   res.status(201).json(withHasAttachment(request));
 });

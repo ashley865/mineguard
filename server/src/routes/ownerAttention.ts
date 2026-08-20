@@ -20,12 +20,18 @@ router.get("/", async (req, res) => {
     pendingExecutiveRequests,
     criticalItIncidents,
     pendingExecutiveInvites,
+    pendingPermitsToWork,
+    pendingItAccessRequests,
+    pendingLeaveRequests,
   ] = await Promise.all([
     prisma.expense.aggregate({ where: { status: "PENDING", site: { mineId } }, _count: true, _sum: { amount: true } }),
     prisma.purchaseOrder.aggregate({ where: { status: "SUBMITTED", site: { mineId } }, _count: true, _sum: { totalAmount: true } }),
     prisma.executiveRequest.count({ where: { mineId, status: "PENDING" } }),
     prisma.iTSecurityIncident.count({ where: { mineId, severity: "CRITICAL", status: { not: "RESOLVED" } } }),
     prisma.executiveInvite.count({ where: { mineId, status: "PENDING" } }),
+    prisma.permitToWork.count({ where: { status: "PENDING_EXECUTIVE", site: { mineId } } }),
+    prisma.iTAccessRequest.count({ where: { mineId, status: "REQUESTED" } }),
+    prisma.leaveRequest.count({ where: { status: "PENDING", worker: { site: { mineId } } } }),
   ]);
 
   res.json({
@@ -34,6 +40,9 @@ router.get("/", async (req, res) => {
     pendingExecutiveRequests: { count: pendingExecutiveRequests },
     criticalItIncidents: { count: criticalItIncidents },
     pendingExecutiveInvites: { count: pendingExecutiveInvites },
+    pendingPermitsToWork: { count: pendingPermitsToWork },
+    pendingItAccessRequests: { count: pendingItAccessRequests },
+    pendingLeaveRequests: { count: pendingLeaveRequests },
   });
 });
 

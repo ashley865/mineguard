@@ -3,6 +3,8 @@ import { z } from "zod";
 import { prisma } from "../prisma";
 import { requireAuth, requireRole } from "../middleware/auth";
 import { requireMineId } from "../lib/mineScope";
+import { notifyExecutives } from "../lib/notify";
+import { ORDER_AUDIENCE } from "./notifications";
 
 const router = Router();
 
@@ -167,6 +169,18 @@ router.post("/orders", requireRole("ADMIN", "SUPERVISOR", "EXECUTIVE"), async (r
     },
     select: orderSelect,
   });
+
+  if (order.status === "SUBMITTED") {
+    await notifyExecutives(req.app.get("io"), {
+      mineId,
+      titles: ORDER_AUDIENCE,
+      type: "PURCHASE_ORDER_APPROVAL",
+      title: `Purchase order needs approval — ${order.orderNumber}`,
+      body: `${order.description} · R${order.totalAmount.toLocaleString()}`,
+      link: "/approvals-inbox",
+    });
+  }
+
   res.status(201).json(order);
 });
 
@@ -193,6 +207,18 @@ router.put("/orders/:id", requireRole("ADMIN", "SUPERVISOR", "EXECUTIVE"), async
     },
     select: orderSelect,
   });
+
+  if (existing.status !== "SUBMITTED" && order.status === "SUBMITTED") {
+    await notifyExecutives(req.app.get("io"), {
+      mineId,
+      titles: ORDER_AUDIENCE,
+      type: "PURCHASE_ORDER_APPROVAL",
+      title: `Purchase order needs approval — ${order.orderNumber}`,
+      body: `${order.description} · R${order.totalAmount.toLocaleString()}`,
+      link: "/approvals-inbox",
+    });
+  }
+
   res.json(order);
 });
 

@@ -3,6 +3,7 @@ import { z } from "zod";
 import { prisma } from "../prisma";
 import { requireAuth, requireRole } from "../middleware/auth";
 import { requireMineId } from "../lib/mineScope";
+import { notifyExecutives } from "../lib/notify";
 
 const router = Router();
 
@@ -72,6 +73,16 @@ router.post("/", requireRole("ADMIN", "SUPERVISOR", "EXECUTIVE"), async (req, re
     data: { ...parsed.data, reportedById: req.auth!.userId },
     select: claimSelect,
   });
+
+  await notifyExecutives(req.app.get("io"), {
+    mineId,
+    titles: ["HR_MANAGER", "COMPLIANCE_OFFICER"],
+    type: "IOD_CLAIM",
+    title: `Injury-on-duty claim reported — ${claim.worker.name}`,
+    body: claim.natureOfInjury,
+    link: "/compliance",
+  });
+
   res.status(201).json(claim);
 });
 

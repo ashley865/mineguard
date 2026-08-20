@@ -9,6 +9,7 @@ import { verifyAdminPassword } from "../lib/verifyPassword";
 import { isValidIdOrPassport } from "../lib/saId";
 import { documentFileFilter } from "../lib/uploadFilters";
 import { requireMineId } from "../lib/mineScope";
+import { notifyExecutives } from "../lib/notify";
 
 const router = Router();
 
@@ -158,7 +159,17 @@ router.post("/checkin/:siteId", upload.array("documents", 5), async (req, res) =
 
   const io = req.app.get("io");
   const mineId = (await prisma.site.findUnique({ where: { id: site.id }, select: { mineId: true } }))?.mineId;
-  if (io && mineId) io.to(`mine:${mineId}`).emit("visitor:pending", visitor);
+  if (io && mineId) {
+    io.to(`mine:${mineId}`).emit("visitor:pending", visitor);
+    await notifyExecutives(io, {
+      mineId,
+      allExecutives: true,
+      type: "VISITOR_PENDING",
+      title: `Visitor approval needed: ${visitor.fullName}`,
+      body: `${visitor.purposeOfVisit} — hosted by ${visitor.hostName}`,
+      link: "/visitors",
+    });
+  }
 
   res.status(201).json(visitor);
 });

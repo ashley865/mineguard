@@ -19,6 +19,7 @@ import LoadError from "../components/LoadError";
 import DataTable, { DataTableColumn } from "../components/DataTable";
 import SummaryCards from "../components/SummaryCards";
 import { AuditHistoryButton } from "../components/AuditHistoryPanel";
+import CyberSecurityWidget from "../components/CyberSecurityWidget";
 
 const assetTypes: ITAssetType[] = ["COMPUTER", "SERVER", "NETWORK_DEVICE", "MOBILE_DEVICE", "SOFTWARE_LICENSE", "PERIPHERAL", "OTHER"];
 const assetStatuses: ITAssetStatus[] = ["ACTIVE", "IN_REPAIR", "RETIRED", "LOST"];
@@ -110,6 +111,7 @@ function OverviewTab({ onNavigate }: { onNavigate: (tab: ITOperationsTab) => voi
   return (
     <div className="space-y-4">
       <p className="text-mine-300 text-sm">{t("itOperations.overview.subtitle")}</p>
+      <CyberSecurityWidget />
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
         <OverviewCard label={t("itOperations.overview.urgentTickets")} value={urgentTickets.length} tone={urgentTickets.length > 0 ? "danger" : "default"} onClick={() => onNavigate("tickets")} />
         <OverviewCard label={t("itOperations.overview.criticalIncidents")} value={criticalIncidents.length} tone={criticalIncidents.length > 0 ? "danger" : "default"} onClick={() => onNavigate("incidents")} />
@@ -1604,6 +1606,21 @@ export default function ITOperations() {
   const canApprove = user?.role === "ADMIN" || user?.role === "EXECUTIVE";
   const canDelete = user?.role === "ADMIN" || user?.role === "EXECUTIVE";
   const [tab, setTab] = useState<ITOperationsTab>("overview");
+  const [pendingAccessCount, setPendingAccessCount] = useState(0);
+  const [highRiskChangesCount, setHighRiskChangesCount] = useState(0);
+
+  useEffect(() => {
+    api.get<ITAccessRequest[]>("/it-access-requests").then((res) => {
+      setPendingAccessCount(res.data.filter((r) => r.status === "REQUESTED").length);
+    }).catch(() => {});
+    api.get<ITChangeRequest[]>("/it-change-requests").then((res) => {
+      setHighRiskChangesCount(
+        res.data.filter((c) => c.riskLevel === "HIGH" && !["COMPLETED", "CANCELLED", "ROLLED_BACK"].includes(c.status)).length
+      );
+    }).catch(() => {});
+  }, [tab]);
+
+  const tabBadges: Partial<Record<ITOperationsTab, number>> = { access: pendingAccessCount, changes: highRiskChangesCount };
 
   const tabs: { key: ITOperationsTab; label: string }[] = [
     { key: "overview", label: t("itOperations.tabOverview") },
@@ -1625,11 +1642,19 @@ export default function ITOperations() {
       </div>
 
       <div className="flex gap-2 flex-wrap">
-        {tabs.map((tb) => (
-          <button key={tb.key} className={tab === tb.key ? buttonPrimary : buttonSecondary} onClick={() => setTab(tb.key)}>
-            {tb.label}
-          </button>
-        ))}
+        {tabs.map((tb) => {
+          const badge = tabBadges[tb.key];
+          return (
+            <button key={tb.key} className={`relative ${tab === tb.key ? buttonPrimary : buttonSecondary}`} onClick={() => setTab(tb.key)}>
+              {tb.label}
+              {!!badge && (
+                <span className="absolute -top-1.5 -right-1.5 min-w-[16px] h-4 px-1 rounded-full bg-danger-500 text-white text-[10px] leading-4 text-center font-semibold">
+                  {badge > 9 ? "9+" : badge}
+                </span>
+              )}
+            </button>
+          );
+        })}
       </div>
 
       {tab === "overview" && <OverviewTab onNavigate={setTab} />}

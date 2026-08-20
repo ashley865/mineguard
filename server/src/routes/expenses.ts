@@ -7,6 +7,7 @@ import { requireAuth, requireRole } from "../middleware/auth";
 import { documentFileFilter } from "../lib/uploadFilters";
 import { requireMineId } from "../lib/mineScope";
 import { renderExpensesReportHtml } from "../lib/expensesReportHtml";
+import { notifyExecutives } from "../lib/notify";
 
 const router = Router();
 
@@ -285,6 +286,16 @@ router.post("/", requireRole("ADMIN", "SUPERVISOR", "EXECUTIVE"), upload.single(
     data: { ...parsed.data, documentId, createdById: req.auth!.userId },
     select: expenseSelect,
   });
+
+  await notifyExecutives(req.app.get("io"), {
+    mineId,
+    titles: EXPENSE_APPROVAL_AUDIENCE,
+    type: "EXPENSE_APPROVAL",
+    title: `Expense needs approval — ${expense.description}`,
+    body: `R${expense.amount.toLocaleString()} · ${expense.category}`,
+    link: "/approvals-inbox",
+  });
+
   res.status(201).json(expense);
 });
 

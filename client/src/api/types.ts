@@ -93,6 +93,26 @@ export interface ReviewNotification {
   site?: { id: string; name: string } | null;
 }
 
+export type NotificationType =
+  | "EXECUTIVE_REQUEST"
+  | "VISITOR_PENDING"
+  | "PERMIT_TO_WORK"
+  | "EXPENSE_APPROVAL"
+  | "PURCHASE_ORDER_APPROVAL"
+  | "IT_ACCESS_REQUEST"
+  | "LEAVE_REQUEST"
+  | "IOD_CLAIM";
+
+export interface RequestNotification {
+  id: string;
+  type: NotificationType;
+  title: string;
+  body?: string | null;
+  link?: string | null;
+  readAt?: string | null;
+  createdAt: string;
+}
+
 export interface UserAttendanceRecord {
   id: string;
   checkInAt: string;
@@ -728,6 +748,9 @@ export interface OwnerAttentionSummary {
   pendingExecutiveRequests: { count: number };
   criticalItIncidents: { count: number };
   pendingExecutiveInvites: { count: number };
+  pendingPermitsToWork: { count: number };
+  pendingItAccessRequests: { count: number };
+  pendingLeaveRequests: { count: number };
 }
 
 export interface ExecutiveSummary {
