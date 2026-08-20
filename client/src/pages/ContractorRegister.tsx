@@ -5,6 +5,7 @@ import { api } from "../api/client";
 import { useContractorAuth } from "../context/ContractorAuthContext";
 import { buttonPrimary, cardClass, inputClass, labelClass } from "../components/ui";
 import DateField from "../components/DateField";
+import { LogoMark, Wordmark } from "../components/Logo";
 
 export default function ContractorRegister() {
   const { t } = useTranslation();
@@ -85,7 +86,7 @@ export default function ContractorRegister() {
     <div className="min-h-screen bg-mine-950 flex items-center justify-center p-4">
       <div className={`${cardClass} p-6 w-full max-w-lg space-y-5`}>
         <div>
-          <div className="text-lg font-bold tracking-tight">⛏ Mine Guard</div>
+          <div className="text-lg font-bold tracking-tight flex items-center gap-2"><LogoMark size={20} /><Wordmark /></div>
           <h1 className="text-base font-semibold mt-2">{t("contractorRegister.title")}</h1>
           {site && <p className="text-mine-300 text-sm">{t("contractorRegister.subtitle", { site: site.name })}</p>}
         </div>

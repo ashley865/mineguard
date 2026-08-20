@@ -16,6 +16,7 @@ import ClockInOutWidget from "./ClockInOutWidget";
 import CallUI from "./CallUI";
 import ToastContainer from "./ToastContainer";
 import RequestNotificationListener from "./RequestNotificationListener";
+import { LogoMark } from "./Logo";
 
 export default function Layout() {
   const { t } = useTranslation();
@@ -194,7 +195,7 @@ export default function Layout() {
                 className="w-7 h-7 rounded object-contain bg-white p-0.5 shrink-0"
               />
             ) : (
-              <span className="text-lg">⛏</span>
+              <LogoMark size={22} dark />
             )}
             <div className="text-lg font-bold tracking-tight text-white truncate">{mine?.name || "Mine Guard"}</div>
           </div>

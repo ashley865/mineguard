@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next";
 import { useAuth } from "../context/AuthContext";
 import { buttonPrimary, buttonSecondary, inputClass, labelClass } from "../components/ui";
 import LanguageSwitcher from "../components/LanguageSwitcher";
+import { LogoMark, Wordmark } from "../components/Logo";
 
 export default function Login() {
   const { t } = useTranslation();
@@ -42,8 +43,8 @@ export default function Login() {
           <LanguageSwitcher />
         </div>
         <div className="text-center mb-8">
-          <div className="text-4xl">⛏</div>
-          <div className="text-2xl font-bold tracking-tight mt-1">Mine Guard</div>
+          <div className="flex justify-center"><LogoMark size={44} /></div>
+          <div className="text-2xl font-bold tracking-tight mt-2"><Wordmark /></div>
           <div className="text-mine-300 text-sm mt-1">{t("login.tagline")}</div>
         </div>
         <form onSubmit={handleSubmit} className="bg-mine-900 border border-mine-800 rounded-xl shadow-xl shadow-black/10 p-6 space-y-4">

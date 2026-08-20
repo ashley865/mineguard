@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next";
 import { api } from "../api/client";
 import { cardClass, labelClass, selectClass } from "../components/ui";
 import GuardDutyPanel from "../components/patrol/GuardDutyPanel";
+import { LogoMark, Wordmark } from "../components/Logo";
 
 interface Guard {
   id: string;
@@ -59,7 +60,7 @@ export default function PatrolDuty() {
     <div className="min-h-screen bg-mine-950 p-4 flex justify-center">
       <div className="w-full max-w-lg space-y-4">
         <div>
-          <div className="text-lg font-bold tracking-tight text-white">⛏ Mine Guard</div>
+          <div className="text-lg font-bold tracking-tight flex items-center gap-2"><LogoMark size={20} /><Wordmark /></div>
           <h1 className="text-base font-semibold mt-2 text-mine-50">{t("patrol.duty.title")}</h1>
           {site && <p className="text-mine-300 text-sm">{site.name}</p>}
         </div>

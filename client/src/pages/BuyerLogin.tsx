@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next";
 import { useBuyerAuth } from "../context/BuyerAuthContext";
 import { buttonPrimary, cardClass, inputClass, labelClass } from "../components/ui";
 import LanguageSwitcher from "../components/LanguageSwitcher";
+import { LogoMark, Wordmark } from "../components/Logo";
 
 export default function BuyerLogin() {
   const { t } = useTranslation();
@@ -35,7 +36,7 @@ export default function BuyerLogin() {
           <LanguageSwitcher />
         </div>
         <div>
-          <div className="text-lg font-bold tracking-tight">⛏ Mine Guard</div>
+          <div className="text-lg font-bold tracking-tight flex items-center gap-2"><LogoMark size={20} /><Wordmark /></div>
           <h1 className="text-base font-semibold mt-2">{t("buyerLogin.title")}</h1>
           <p className="text-mine-300 text-sm">{t("buyerLogin.subtitle")}</p>
         </div>

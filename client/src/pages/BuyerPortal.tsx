@@ -8,6 +8,7 @@ import { BuyerDocument, MineralBid, MineralListing } from "../api/types";
 import { StatusBadge } from "../components/Badges";
 import { buttonDanger, buttonPrimary, buttonSecondary, cardClass, inputClass, labelClass } from "../components/ui";
 import LanguageSwitcher from "../components/LanguageSwitcher";
+import { LogoMark, Wordmark } from "../components/Logo";
 
 function FavoritesCard() {
   const { t } = useTranslation();
@@ -151,7 +152,7 @@ export default function BuyerPortal() {
       <div className="border-b border-mine-800 bg-mine-900 px-6 py-5">
         <div className="max-w-4xl mx-auto flex items-center justify-between flex-wrap gap-3">
           <div>
-            <div className="text-lg font-bold tracking-tight">⛏ Mine Guard {t("buyerPortal.title")}</div>
+            <div className="text-lg font-bold tracking-tight flex items-center gap-2"><LogoMark size={20} /><Wordmark /> {t("buyerPortal.title")}</div>
             <p className="text-mine-300 text-sm">{buyer.legalName}</p>
           </div>
           <div className="flex items-center gap-3">

@@ -5,6 +5,7 @@ import { api } from "../api/client";
 import { SafetyObservationType } from "../api/types";
 import { buttonPrimary, cardClass, inputClass, labelClass, selectClass } from "../components/ui";
 import LanguageSwitcher from "../components/LanguageSwitcher";
+import { LogoMark, Wordmark } from "../components/Logo";
 
 const types: SafetyObservationType[] = ["NEAR_MISS", "UNSAFE_ACT", "UNSAFE_CONDITION", "POSITIVE_OBSERVATION"];
 
@@ -76,7 +77,7 @@ export default function SafetyObservationReport() {
           <LanguageSwitcher />
         </div>
         <div>
-          <div className="text-lg font-bold tracking-tight">⛏ Mine Guard</div>
+          <div className="text-lg font-bold tracking-tight flex items-center gap-2"><LogoMark size={20} /><Wordmark /></div>
           <h1 className="text-base font-semibold mt-2">{t("safetyObservations.reportTitle")}</h1>
           {site && <p className="text-mine-300 text-sm">{t("safetyObservations.reportSubtitle", { site: site.name })}</p>}
         </div>

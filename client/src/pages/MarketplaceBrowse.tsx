@@ -10,6 +10,7 @@ import Modal from "../components/Modal";
 import { buttonPrimary, buttonSecondary, cardClass, inputClass, labelClass, selectClass } from "../components/ui";
 import { mineralTypes } from "../lib/minerals";
 import { DISPLAY_CURRENCIES, DisplayCurrency, formatCurrency, useFxRates } from "../lib/currency";
+import { LogoMark, Wordmark } from "../components/Logo";
 
 function coverImage(listing: MineralListing) {
   return listing.images.find((img) => img.isPrimary) ?? listing.images[0] ?? null;
@@ -330,7 +331,7 @@ export default function MarketplaceBrowse() {
         <div className="max-w-6xl mx-auto space-y-5">
           <div className="flex items-center justify-between flex-wrap gap-3">
             <div>
-              <div className="text-xl font-bold tracking-tight">⛏ Mine Guard {t("marketplace.nav")}</div>
+              <div className="text-xl font-bold tracking-tight flex items-center gap-2"><LogoMark size={24} /><Wordmark /> {t("marketplace.nav")}</div>
               <p className="text-mine-300 text-sm mt-1">{t("marketplace.publicSubtitle")}</p>
             </div>
             <div className="flex items-center gap-2">

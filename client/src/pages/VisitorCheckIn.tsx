@@ -6,6 +6,7 @@ import { api } from "../api/client";
 import { buttonPrimary, cardClass, inputClass, labelClass } from "../components/ui";
 import { isValidIdOrPassport } from "../lib/saId";
 import FileDropzone from "../components/FileDropzone";
+import { LogoMark, Wordmark } from "../components/Logo";
 
 const MIN_LEAD_MINUTES = 60;
 
@@ -131,7 +132,7 @@ export default function VisitorCheckIn() {
     <div className="min-h-screen bg-mine-950 flex items-center justify-center p-4">
       <div className={`${cardClass} p-6 w-full max-w-lg space-y-5`}>
         <div>
-          <div className="text-lg font-bold tracking-tight">⛏ Mine Guard</div>
+          <div className="text-lg font-bold tracking-tight flex items-center gap-2"><LogoMark size={20} /><Wordmark /></div>
           <h1 className="text-base font-semibold mt-2">{t("visitorCheckin.title")}</h1>
           {site && <p className="text-mine-300 text-sm">{t("visitorCheckin.subtitle", { site: site.name })}</p>}
         </div>

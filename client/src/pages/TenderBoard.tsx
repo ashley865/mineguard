@@ -6,6 +6,7 @@ import { StatusBadge } from "../components/Badges";
 import Modal from "../components/Modal";
 import { contractCategories } from "./marketplace/ContractOpportunitiesTab";
 import { buttonPrimary, buttonSecondary, cardClass, inputClass, labelClass } from "../components/ui";
+import { LogoMark, Wordmark } from "../components/Logo";
 
 function ContractBidForm({ opportunity, onDone }: { opportunity: ContractOpportunity; onDone: () => void }) {
   const { t } = useTranslation();
@@ -112,7 +113,7 @@ export default function TenderBoard() {
     <div className="min-h-screen bg-mine-950">
       <div className="border-b border-mine-800 bg-mine-900 px-6 py-5">
         <div className="max-w-5xl mx-auto">
-          <div className="text-lg font-bold tracking-tight">⛏ Mine Guard {t("tenders.nav")}</div>
+          <div className="text-lg font-bold tracking-tight flex items-center gap-2"><LogoMark size={20} /><Wordmark /> {t("tenders.nav")}</div>
           <p className="text-mine-300 text-sm">{t("tenders.publicSubtitle")}</p>
         </div>
       </div>

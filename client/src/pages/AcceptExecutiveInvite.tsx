@@ -5,6 +5,7 @@ import { useAuth } from "../context/AuthContext";
 import { api } from "../api/client";
 import { buttonPrimary, buttonSecondary, inputClass, labelClass } from "../components/ui";
 import LanguageSwitcher from "../components/LanguageSwitcher";
+import { LogoMark, Wordmark } from "../components/Logo";
 
 interface InviteInfo {
   name: string;
@@ -63,7 +64,7 @@ export default function AcceptExecutiveInvite() {
     return (
       <div className="min-h-screen flex items-center justify-center bg-mine-950 px-4">
         <div className="bg-mine-900 border border-mine-800 rounded-xl shadow-xl shadow-black/10 p-6 max-w-sm w-full text-center space-y-4">
-          <div className="text-4xl">⛏</div>
+          <div className="flex justify-center"><LogoMark size={44} /></div>
           <p className="text-sm text-mine-300">{t("acceptInvite.alreadySignedIn", { name: user.name })}</p>
           <button
             className={`${buttonPrimary} w-full`}
@@ -86,8 +87,8 @@ export default function AcceptExecutiveInvite() {
           <LanguageSwitcher />
         </div>
         <div className="text-center mb-8">
-          <div className="text-4xl">⛏</div>
-          <div className="text-2xl font-bold tracking-tight mt-1">Mine Guard</div>
+          <div className="flex justify-center"><LogoMark size={44} /></div>
+          <div className="text-2xl font-bold tracking-tight mt-2"><Wordmark /></div>
           <div className="text-mine-300 text-sm mt-1">{t("acceptInvite.title")}</div>
         </div>
         <form onSubmit={handleSubmit} className="bg-mine-900 border border-mine-800 rounded-xl shadow-xl shadow-black/10 p-6 space-y-4">
