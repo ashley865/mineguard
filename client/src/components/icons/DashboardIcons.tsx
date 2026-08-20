@@ -135,3 +135,74 @@ export function ClockIcon() {
     </Icon>
   );
 }
+
+export function ShieldCheckIcon() {
+  return (
+    <Icon>
+      <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z" />
+      <path d="m9 12 2 2 4-4" />
+    </Icon>
+  );
+}
+
+export function ShieldOffIcon() {
+  return (
+    <Icon>
+      <path d="M19.7 14a6.9 6.9 0 0 0 .3-2V5l-8-3-3.2 1.2M4.7 4.7 4 5v7c0 6 8 10 8 10a20.3 20.3 0 0 0 5.6-4.2M2 2l20 20" />
+    </Icon>
+  );
+}
+
+export function GraduationCapIcon() {
+  return (
+    <Icon>
+      <path d="M22 10 12 5 2 10l10 5 10-5Z" />
+      <path d="M6 12v5c0 1.5 2.7 3 6 3s6-1.5 6-3v-5" />
+    </Icon>
+  );
+}
+
+export function HeartPulseIcon() {
+  return (
+    <Icon>
+      <path d="M19 14c1.5-1.5 3-3.4 3-5.5A4.5 4.5 0 0 0 17.5 4c-1.7 0-3 .8-3.5 2-.5-1.2-1.8-2-3.5-2A4.5 4.5 0 0 0 6 8.5C6 12 9 15 12 18c.6-.6 1.3-1.2 2-1.9" />
+      <path d="M2 12h4l2-4 3 8 2-4h9" />
+    </Icon>
+  );
+}
+
+export function PalmtreeIcon() {
+  return (
+    <Icon>
+      <path d="M12 22v-9" />
+      <path d="M12 13c-3-1-6-3-6-6 3 0 5 1 6 3 1-2 3-3 6-3 0 3-3 5-6 6Z" />
+      <path d="M12 10c-1-2-3-4-6-4 1 3 3 4 6 4Zm0 0c1-2 3-4 6-4-1 3-3 4-6 4Z" />
+    </Icon>
+  );
+}
+
+export function PhoneIcon() {
+  return (
+    <Icon>
+      <path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6 19.8 19.8 0 0 1-3.1-8.7A2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1 1 .4 2 .7 2.9a2 2 0 0 1-.4 2.1L8.1 10a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.9.6 2.9.7a2 2 0 0 1 1.6 2Z" />
+    </Icon>
+  );
+}
+
+export function IdCardIcon() {
+  return (
+    <Icon>
+      <rect x="2" y="4" width="20" height="16" rx="2" />
+      <circle cx="8" cy="11" r="2" />
+      <path d="M6 16c.5-1.5 1.8-2 2-2s1.5.5 2 2M14 9h6M14 13h6M14 17h4" />
+    </Icon>
+  );
+}
+
+export function ChevronRightIcon() {
+  return (
+    <Icon>
+      <path d="m9 6 6 6-6 6" />
+    </Icon>
+  );
+}

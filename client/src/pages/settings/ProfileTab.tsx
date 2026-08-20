@@ -4,7 +4,10 @@ import QRCode from "qrcode";
 import { api, API_URL } from "../../api/client";
 import { useAuth } from "../../context/AuthContext";
 import Avatar from "../../components/Avatar";
-import { buttonDanger, buttonPrimary, buttonSecondary, cardClass, inputClass, labelClass } from "../../components/ui";
+import { buttonDanger, buttonPrimary, buttonSecondary, inputClass, labelClass } from "../../components/ui";
+import { ShieldCheckIcon, ShieldOffIcon } from "../../components/icons/DashboardIcons";
+
+const cardOuter = "bg-mine-900 border border-mine-800 rounded-[20px] shadow-sm shadow-black/5 p-6";
 
 function MfaCard() {
   const { t } = useTranslation();
@@ -64,10 +67,15 @@ function MfaCard() {
   }
 
   return (
-    <div className={`${cardClass} p-5 space-y-4`}>
-      <div>
-        <h2 className="text-sm font-semibold">{t("settings.profile.mfaTitle")}</h2>
-        <p className="text-xs text-mine-400 mt-0.5">{t("settings.profile.mfaHint")}</p>
+    <div className={`${cardOuter} space-y-4`}>
+      <div className="flex items-start gap-3">
+        <div className={`w-10 h-10 rounded-[12px] flex items-center justify-center shrink-0 ${user?.mfaEnabled ? "bg-success-500/10 text-success-500" : "bg-hazard-500/10 text-hazard-500"}`}>
+          {user?.mfaEnabled ? <ShieldCheckIcon /> : <ShieldOffIcon />}
+        </div>
+        <div>
+          <h2 className="text-sm font-semibold">{t("settings.profile.mfaTitle")}</h2>
+          <p className="text-xs text-mine-400 mt-0.5">{t("settings.profile.mfaHint")}</p>
+        </div>
       </div>
 
       {user?.mfaEnabled ? (
@@ -211,15 +219,24 @@ export default function ProfileTab() {
 
   return (
     <div className="space-y-6 max-w-lg">
-      <form onSubmit={saveProfile} className={`${cardClass} p-5 space-y-4`}>
-        <h2 className="text-sm font-semibold">{t("settings.profile.title")}</h2>
-        <div className="flex items-center gap-4">
-          <Avatar
-            size={64}
-            name={user?.name ?? "?"}
-            src={user?.hasPhoto || photoVersion > 0 ? `${API_URL}/api/auth/users/${user?.id}/photo?v=${photoVersion}` : null}
-          />
-          <div>
+      {/* Banner + floating avatar */}
+      <div>
+        <div className="h-16 rounded-t-[20px] bg-mine-800/60" />
+        <div className="flex items-end gap-4 px-1 -mt-9">
+          <div className="rounded-full ring-4 ring-mine-950 shrink-0">
+            <Avatar
+              size={84}
+              name={user?.name ?? "?"}
+              src={user?.hasPhoto || photoVersion > 0 ? `${API_URL}/api/auth/users/${user?.id}/photo?v=${photoVersion}` : null}
+            />
+          </div>
+          <div className="pb-1 min-w-0">
+            <div className="text-base font-semibold truncate">{user?.name}</div>
+            <div className="text-xs text-mine-400">
+              {user?.title ? t(`settings.invites.titles.${user.title}`) : user?.role ? t(`roles.${user.role}`) : ""}
+            </div>
+          </div>
+          <div className="pb-1 ml-auto shrink-0">
             <button
               type="button"
               className={buttonSecondary}
@@ -231,6 +248,10 @@ export default function ProfileTab() {
             <input ref={photoInputRef} type="file" accept="image/*" className="hidden" onChange={handlePhoto} />
           </div>
         </div>
+      </div>
+
+      <form onSubmit={saveProfile} className={`${cardOuter} space-y-4`}>
+        <h2 className="text-sm font-semibold">{t("settings.profile.title")}</h2>
         <div>
           <label className={labelClass}>{t("settings.profile.name")}</label>
           <input className={inputClass} value={name} onChange={(e) => setName(e.target.value)} required />
@@ -257,7 +278,7 @@ export default function ProfileTab() {
         </div>
       </form>
 
-      <form onSubmit={savePassword} className={`${cardClass} p-5 space-y-4`}>
+      <form onSubmit={savePassword} className={`${cardOuter} space-y-4`}>
         <h2 className="text-sm font-semibold">{t("settings.profile.passwordTitle")}</h2>
         <div>
           <label className={labelClass}>{t("settings.profile.currentPassword")}</label>
