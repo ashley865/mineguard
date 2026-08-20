@@ -4285,7 +4285,22 @@
     "noneYet": "No budget plans set yet.",
     "confirmDelete": "Delete this budget plan?",
     "duplicate": "Duplicate",
-    "editTitle": "Edit Budget Plan"
+    "editTitle": "Edit Budget Plan",
+    "totalBudgeted": "Total Budgeted",
+    "totalActual": "Total Actual",
+    "totalVariance": "Total Variance",
+    "utilization": "Budget Utilization",
+    "overBudgetCount": "Over Budget",
+    "pendingApprovalCount": "Pending Approval",
+    "chartByCategory": "Budgeted vs Actual by Category",
+    "chartBySite": "Budgeted vs Actual by Site",
+    "aiInsightsTitle": "AI Budget Insights",
+    "refreshInsights": "Refresh",
+    "riskFlags": "Risk Flags",
+    "recommendations": "Recommendations",
+    "reviewNote": "Note (optional)",
+    "approveTitle": "Approve Budget Plan",
+    "rejectTitle": "Reject Budget Plan"
   },
   "toolboxTalks": {
     "nav": "Toolbox Talks",

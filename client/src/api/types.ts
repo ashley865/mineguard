@@ -101,7 +101,8 @@ export type NotificationType =
   | "PURCHASE_ORDER_APPROVAL"
   | "IT_ACCESS_REQUEST"
   | "LEAVE_REQUEST"
-  | "IOD_CLAIM";
+  | "IOD_CLAIM"
+  | "BUDGET_APPROVAL";
 
 export interface RequestNotification {
   id: string;
@@ -4013,6 +4014,8 @@ export interface CyberCustomApiKey {
   updatedAt: string;
 }
 
+export type BudgetPlanStatus = "PENDING_APPROVAL" | "APPROVED" | "REJECTED";
+
 export interface BudgetPlan {
   id: string;
   siteId?: string | null;
@@ -4023,8 +4026,34 @@ export interface BudgetPlan {
   budgetedAmount: number;
   actualAmount: number;
   notes?: string | null;
+  status: BudgetPlanStatus;
+  submittedBy?: { id: string; name: string } | null;
+  approvedBy?: { id: string; name: string } | null;
+  approvedAt?: string | null;
+  reviewNote?: string | null;
   createdBy?: { id: string; name: string } | null;
   createdAt: string;
+}
+
+export interface BudgetSummary {
+  totalBudgeted: number;
+  totalActual: number;
+  totalVariance: number;
+  utilizationPct: number;
+  overBudgetCount: number;
+  planCount: number;
+  statusCounts: Record<BudgetPlanStatus, number>;
+  byCategory: { category: ExpenseCategory; budgeted: number; actual: number }[];
+  bySite: { site: string; budgeted: number; actual: number }[];
+}
+
+export interface AiBudgetInsight {
+  configured: boolean;
+  cached: boolean;
+  summary: string | null;
+  riskFlags: { category: string; detail: string }[];
+  recommendations: string[];
+  generatedAt?: string;
 }
 
 export interface ToolboxTalk {

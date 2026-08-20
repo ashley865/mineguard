@@ -320,6 +320,8 @@ model User {
   itAssetsCreated              ITAsset[]              @relation("ITAssetCreatedBy")
   itTicketsCreated              ITTicket[]             @relation("ITTicketCreatedBy")
   budgetPlansCreated           BudgetPlan[]           @relation("BudgetPlanCreatedBy")
+  budgetPlansSubmitted         BudgetPlan[]           @relation("BudgetPlanSubmittedBy")
+  budgetPlansApproved          BudgetPlan[]           @relation("BudgetPlanApprovedBy")
   toolboxTalksCreated          ToolboxTalk[]          @relation("ToolboxTalkCreatedBy")
   regulatorySubmissionsCreated RegulatorySubmission[] @relation("RegulatorySubmissionCreatedBy")
 
@@ -1556,6 +1558,7 @@ model Mine {
   itAssets               ITAsset[]
   itTickets               ITTicket[]
   budgetPlans             BudgetPlan[]
+  aiBudgetInsight         AiBudgetInsight?
   regulatorySubmissions   RegulatorySubmission[]
   aiDailyBriefings        AiDailyBriefing[]
   skills                  Skill[]
@@ -5099,6 +5102,12 @@ model ITAccessRequest {
 // from Expense records rather than duplicated here, so it never drifts.
 // ---------------------------------------------------------------------------
 
+enum BudgetPlanStatus {
+  PENDING_APPROVAL
+  APPROVED
+  REJECTED
+}
+
 model BudgetPlan {
   id             String          @id @default(cuid())
   mineId         String
@@ -5113,7 +5122,32 @@ model BudgetPlan {
   createdById    String?
   createdBy      User?           @relation("BudgetPlanCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
 
+  // The Owner's own budgets are auto-APPROVED (they're the final authority anyway — routing
+  // them through their own approval would just be ceremony); an EXECUTIVE-created budget
+  // starts PENDING_APPROVAL and needs Owner sign-off, mirroring Expense's status pattern.
+  status        BudgetPlanStatus @default(APPROVED)
+  submittedById String?
+  submittedBy   User?            @relation("BudgetPlanSubmittedBy", fields: [submittedById], references: [id], onDelete: SetNull)
+  approvedById  String?
+  approvedBy    User?            @relation("BudgetPlanApprovedBy", fields: [approvedById], references: [id], onDelete: SetNull)
+  approvedAt    DateTime?
+  reviewNote    String?
+
   createdAt DateTime @default(now())
+}
+
+// Cached AI-generated read of the mine's current budget position (overspend risks, trends,
+// recommendations) — one row per mine, overwritten on refresh, same "regenerate on demand
+// rather than on every page load" reasoning as AiDailyBriefing, except keyed by mine alone
+// since a budget snapshot doesn't have a natural daily boundary the way a briefing does.
+model AiBudgetInsight {
+  id              String   @id @default(cuid())
+  mineId          String   @unique
+  mine            Mine     @relation(fields: [mineId], references: [id], onDelete: Cascade)
+  summary         String
+  riskFlags       Json
+  recommendations Json
+  generatedAt     DateTime @default(now())
 }
 
 // ---------------------------------------------------------------------------
@@ -5677,6 +5711,7 @@ enum NotificationType {
   IT_ACCESS_REQUEST
   LEAVE_REQUEST
   IOD_CLAIM
+  BUDGET_APPROVAL
 }
 
 // A real, persisted per-recipient inbox row — created by lib/notify.ts's notifyExecutives()

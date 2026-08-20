@@ -4285,7 +4285,22 @@
     "noneYet": "Aún no se han definido planes de presupuesto.",
     "confirmDelete": "¿Eliminar este plan de presupuesto?",
     "duplicate": "Duplicar",
-    "editTitle": "Editar plan de presupuesto"
+    "editTitle": "Editar plan de presupuesto",
+    "totalBudgeted": "Total Presupuestado",
+    "totalActual": "Total Real",
+    "totalVariance": "Variación Total",
+    "utilization": "Utilización del Presupuesto",
+    "overBudgetCount": "Sobre Presupuesto",
+    "pendingApprovalCount": "Pendiente de Aprobación",
+    "chartByCategory": "Presupuestado vs Real por Categoría",
+    "chartBySite": "Presupuestado vs Real por Sitio",
+    "aiInsightsTitle": "Perspectivas de IA sobre el Presupuesto",
+    "refreshInsights": "Actualizar",
+    "riskFlags": "Alertas de Riesgo",
+    "recommendations": "Recomendaciones",
+    "reviewNote": "Nota (opcional)",
+    "approveTitle": "Aprobar Plan de Presupuesto",
+    "rejectTitle": "Rechazar Plan de Presupuesto"
   },
   "toolboxTalks": {
     "nav": "Charlas de Seguridad",

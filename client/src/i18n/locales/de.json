@@ -4285,7 +4285,22 @@
     "noneYet": "Noch keine Budgetpläne festgelegt.",
     "confirmDelete": "Diesen Budgetplan löschen?",
     "duplicate": "Duplizieren",
-    "editTitle": "Budgetplan bearbeiten"
+    "editTitle": "Budgetplan bearbeiten",
+    "totalBudgeted": "Gesamtbudget",
+    "totalActual": "Gesamte Ist-Ausgaben",
+    "totalVariance": "Gesamtabweichung",
+    "utilization": "Budgetauslastung",
+    "overBudgetCount": "Budgetüberschreitung",
+    "pendingApprovalCount": "Genehmigung Ausstehend",
+    "chartByCategory": "Budget vs. Ist nach Kategorie",
+    "chartBySite": "Budget vs. Ist nach Standort",
+    "aiInsightsTitle": "KI-Budgeteinblicke",
+    "refreshInsights": "Aktualisieren",
+    "riskFlags": "Risikohinweise",
+    "recommendations": "Empfehlungen",
+    "reviewNote": "Notiz (optional)",
+    "approveTitle": "Budgetplan Genehmigen",
+    "rejectTitle": "Budgetplan Ablehnen"
   },
   "toolboxTalks": {
     "nav": "Sicherheitsunterweisungen",

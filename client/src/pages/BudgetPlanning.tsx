@@ -1,10 +1,12 @@
 import { FormEvent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { BarChart, Bar, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer } from "recharts";
 import { api } from "../api/client";
 import { useAuth } from "../context/AuthContext";
-import { BudgetPlan, ExpenseCategory, Site } from "../api/types";
+import { AiBudgetInsight, BudgetPlan, BudgetSummary, ExpenseCategory, Site } from "../api/types";
+import { StatusBadge } from "../components/Badges";
 import Modal from "../components/Modal";
-import { buttonDanger, buttonPrimary, buttonSecondary, inputClass, labelClass, selectClass } from "../components/ui";
+import { buttonDanger, buttonPrimary, buttonSecondary, cardClass, inputClass, labelClass, selectClass } from "../components/ui";
 import DateField from "../components/DateField";
 import LoadError from "../components/LoadError";
 import DataTable, { DataTableColumn } from "../components/DataTable";
@@ -22,6 +24,9 @@ const categories: ExpenseCategory[] = [
   "TAXES_LEVIES",
   "OTHER",
 ];
+
+const CHART_TOOLTIP_STYLE = { background: "#fafafa", border: "1px solid #e5e5e5", fontSize: 11 };
+const CHART_TICK_STYLE = { fontSize: 10, fill: "#52525b" };
 
 interface PlanSeed {
   siteId?: string | null;
@@ -103,25 +108,135 @@ function PlanForm({ sites, initial, onSubmit, onCancel }: {
   );
 }
 
+function ReviewForm({ decision, onSubmit, onCancel }: { decision: "approve" | "reject"; onSubmit: (reviewNote?: string) => Promise<void>; onCancel: () => void }) {
+  const { t } = useTranslation();
+  const [reviewNote, setReviewNote] = useState("");
+  const [saving, setSaving] = useState(false);
+
+  async function handleSubmit(e: FormEvent) {
+    e.preventDefault();
+    setSaving(true);
+    try {
+      await onSubmit(reviewNote || undefined);
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  return (
+    <form onSubmit={handleSubmit} className="space-y-4">
+      <div>
+        <label className={labelClass}>{t("budgetPlanning.reviewNote")}</label>
+        <textarea className={inputClass} rows={2} value={reviewNote} onChange={(e) => setReviewNote(e.target.value)} />
+      </div>
+      <div className="flex justify-end gap-2 pt-2">
+        <button type="button" className={buttonSecondary} onClick={onCancel}>{t("common.cancel")}</button>
+        <button type="submit" className={decision === "approve" ? buttonPrimary : buttonDanger} disabled={saving}>
+          {saving ? t("common.saving") : decision === "approve" ? t("common.approve") : t("common.reject")}
+        </button>
+      </div>
+    </form>
+  );
+}
+
+function KpiCard({ label, value, tone }: { label: string; value: string; tone?: "danger" | "hazard" | "success" }) {
+  const toneClass = tone === "danger" ? "text-danger-500" : tone === "hazard" ? "text-hazard-500" : tone === "success" ? "text-success-500" : "";
+  return (
+    <div className={`${cardClass} px-4 py-3`}>
+      <div className="text-[10px] text-mine-400 uppercase tracking-wide">{label}</div>
+      <div className={`text-lg font-bold mt-0.5 ${toneClass}`}>{value}</div>
+    </div>
+  );
+}
+
+function AiInsightsPanel() {
+  const { t } = useTranslation();
+  const [data, setData] = useState<AiBudgetInsight | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+
+  async function load(refresh?: boolean) {
+    if (refresh) setRefreshing(true);
+    else setLoading(true);
+    try {
+      const res = await api.get<AiBudgetInsight>("/ai/budget-insights", { params: refresh ? { refresh: "true" } : undefined });
+      setData(res.data);
+    } finally {
+      setLoading(false);
+      setRefreshing(false);
+    }
+  }
+
+  useEffect(() => { load(); }, []);
+
+  if (loading) return <div className={`${cardClass} p-4 text-sm text-mine-300`}>{t("common.loading")}</div>;
+  if (!data) return null;
+
+  return (
+    <div className={`${cardClass} p-4 space-y-3`}>
+      <div className="flex items-center justify-between">
+        <h3 className="text-sm font-semibold">{t("budgetPlanning.aiInsightsTitle")}</h3>
+        {data.configured && (
+          <button className={buttonSecondary} disabled={refreshing} onClick={() => load(true)}>
+            {refreshing ? t("common.saving") : t("budgetPlanning.refreshInsights")}
+          </button>
+        )}
+      </div>
+      {!data.configured ? (
+        <p className="text-xs text-mine-400">{t("ai.notConfigured")}</p>
+      ) : (
+        <>
+          <p className="text-sm text-mine-200">{data.summary}</p>
+          {data.riskFlags.length > 0 && (
+            <div>
+              <div className="text-[10px] uppercase tracking-wide text-mine-400 mb-1">{t("budgetPlanning.riskFlags")}</div>
+              <div className="space-y-1.5">
+                {data.riskFlags.map((r, i) => (
+                  <div key={i} className="text-xs border-l-2 border-danger-500 pl-2">
+                    <span className="font-semibold">{r.category}</span> — <span className="text-mine-300">{r.detail}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+          {data.recommendations.length > 0 && (
+            <div>
+              <div className="text-[10px] uppercase tracking-wide text-mine-400 mb-1">{t("budgetPlanning.recommendations")}</div>
+              <ul className="text-xs text-mine-300 list-disc pl-4 space-y-0.5">
+                {data.recommendations.map((r, i) => <li key={i}>{r}</li>)}
+              </ul>
+            </div>
+          )}
+        </>
+      )}
+    </div>
+  );
+}
+
 export default function BudgetPlanning() {
   const { t } = useTranslation();
   const { user } = useAuth();
   const canEdit = user?.role === "ADMIN" || user?.role === "EXECUTIVE";
+  const canApprove = user?.role === "ADMIN";
   const [plans, setPlans] = useState<BudgetPlan[]>([]);
+  const [summary, setSummary] = useState<BudgetSummary | null>(null);
   const [sites, setSites] = useState<Site[]>([]);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState(false);
   const [modal, setModal] = useState<null | { mode: "create"; seed?: BudgetPlan } | { mode: "edit"; plan: BudgetPlan }>(null);
+  const [reviewModal, setReviewModal] = useState<null | { plan: BudgetPlan; decision: "approve" | "reject" }>(null);
 
   async function load() {
     setLoading(true);
     setLoadError(false);
     try {
-      const [p, s] = await Promise.all([
+      const [p, sum, s] = await Promise.all([
         api.get<BudgetPlan[]>("/budget-plans"),
+        api.get<BudgetSummary>("/budget-plans/summary"),
         api.get<Site[]>("/sites"),
       ]);
       setPlans(p.data);
+      setSummary(sum.data);
       setSites(s.data);
     } catch {
       setLoadError(true);
@@ -150,8 +265,19 @@ export default function BudgetPlanning() {
     await load();
   }
 
+  async function review(reviewNote?: string) {
+    if (!reviewModal) return;
+    await api.post(`/budget-plans/${reviewModal.plan.id}/${reviewModal.decision}`, { reviewNote });
+    setReviewModal(null);
+    await load();
+  }
+
   if (loading) return <div className="text-mine-300">{t("common.loading")}</div>;
   if (loadError) return <LoadError onRetry={load} />;
+
+  const money = (n: number) => `R ${Math.round(n).toLocaleString()}`;
+  const categoryChartData = (summary?.byCategory ?? []).map((c) => ({ ...c, categoryLabel: t(`expenses.categories.${c.category}`) }));
+  const siteChartData = summary?.bySite ?? [];
 
   return (
     <div className="space-y-6">
@@ -164,6 +290,58 @@ export default function BudgetPlanning() {
           <button className={buttonPrimary} onClick={() => setModal({ mode: "create" })}>{t("budgetPlanning.new")}</button>
         )}
       </div>
+
+      {summary && (
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
+          <KpiCard label={t("budgetPlanning.totalBudgeted")} value={money(summary.totalBudgeted)} />
+          <KpiCard label={t("budgetPlanning.totalActual")} value={money(summary.totalActual)} />
+          <KpiCard
+            label={t("budgetPlanning.totalVariance")}
+            value={`${summary.totalVariance < 0 ? "−" : "+"}${money(Math.abs(summary.totalVariance))}`}
+            tone={summary.totalVariance < 0 ? "danger" : "success"}
+          />
+          <KpiCard label={t("budgetPlanning.utilization")} value={`${summary.utilizationPct}%`} tone={summary.utilizationPct > 100 ? "danger" : summary.utilizationPct > 85 ? "hazard" : "success"} />
+          <KpiCard label={t("budgetPlanning.overBudgetCount")} value={String(summary.overBudgetCount)} tone={summary.overBudgetCount > 0 ? "danger" : "success"} />
+          <KpiCard label={t("budgetPlanning.pendingApprovalCount")} value={String(summary.statusCounts.PENDING_APPROVAL)} tone={summary.statusCounts.PENDING_APPROVAL > 0 ? "hazard" : undefined} />
+        </div>
+      )}
+
+      {summary && summary.byCategory.length > 0 && (
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          <div className={`${cardClass} p-4`}>
+            <h3 className="text-sm font-semibold mb-3">{t("budgetPlanning.chartByCategory")}</h3>
+            <div className="h-64">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={categoryChartData}>
+                  <XAxis dataKey="categoryLabel" tick={CHART_TICK_STYLE} interval={0} angle={-25} textAnchor="end" height={60} />
+                  <YAxis tick={CHART_TICK_STYLE} />
+                  <Tooltip contentStyle={CHART_TOOLTIP_STYLE} formatter={(v: number) => money(v)} />
+                  <Legend wrapperStyle={{ fontSize: 11 }} />
+                  <Bar dataKey="budgeted" name={t("budgetPlanning.budgetedAmount")} fill="#3b82f6" radius={[3, 3, 0, 0]} />
+                  <Bar dataKey="actual" name={t("budgetPlanning.actualAmount")} fill="#c48a1f" radius={[3, 3, 0, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
+          <div className={`${cardClass} p-4`}>
+            <h3 className="text-sm font-semibold mb-3">{t("budgetPlanning.chartBySite")}</h3>
+            <div className="h-64">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={siteChartData}>
+                  <XAxis dataKey="site" tick={CHART_TICK_STYLE} interval={0} angle={-25} textAnchor="end" height={60} />
+                  <YAxis tick={CHART_TICK_STYLE} />
+                  <Tooltip contentStyle={CHART_TOOLTIP_STYLE} formatter={(v: number) => money(v)} />
+                  <Legend wrapperStyle={{ fontSize: 11 }} />
+                  <Bar dataKey="budgeted" name={t("budgetPlanning.budgetedAmount")} fill="#3b82f6" radius={[3, 3, 0, 0]} />
+                  <Bar dataKey="actual" name={t("budgetPlanning.actualAmount")} fill="#c48a1f" radius={[3, 3, 0, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
+        </div>
+      )}
+
+      <AiInsightsPanel />
 
       <DataTable
         columns={
@@ -191,6 +369,7 @@ export default function BudgetPlanning() {
               },
               sortValue: (p) => p.budgetedAmount - p.actualAmount,
             },
+            { key: "status", header: t("common.status"), render: (p) => <StatusBadge status={p.status} />, sortValue: (p) => p.status },
           ] as DataTableColumn<BudgetPlan>[]
         }
         rows={plans}
@@ -203,16 +382,29 @@ export default function BudgetPlanning() {
           { header: t("expenses.category"), value: (p) => t(`expenses.categories.${p.category}`) },
           { header: t("budgetPlanning.budgetedAmount"), value: (p) => p.budgetedAmount },
           { header: t("budgetPlanning.actualAmount"), value: (p) => p.actualAmount },
+          { header: t("common.status"), value: (p) => p.status },
         ]}
-        actions={(p) =>
-          canEdit ? (
-            <div className="flex justify-end gap-2">
-              <button className="text-xs text-mine-300 hover:text-mine-50" onClick={() => setModal({ mode: "edit", plan: p })}>{t("common.edit")}</button>
-              <button className="text-xs text-mine-300 hover:text-mine-50" onClick={() => setModal({ mode: "create", seed: p })}>{t("budgetPlanning.duplicate")}</button>
-              <button className={buttonDanger} onClick={() => remove(p.id)}>{t("common.delete")}</button>
-            </div>
-          ) : null
-        }
+        actions={(p) => (
+          <div className="flex justify-end gap-2">
+            {canApprove && p.status === "PENDING_APPROVAL" && (
+              <>
+                <button className="text-xs text-success-500 hover:text-success-400" onClick={() => setReviewModal({ plan: p, decision: "approve" })}>
+                  {t("common.approve")}
+                </button>
+                <button className="text-xs text-danger-500 hover:text-danger-400" onClick={() => setReviewModal({ plan: p, decision: "reject" })}>
+                  {t("common.reject")}
+                </button>
+              </>
+            )}
+            {canEdit && (
+              <>
+                <button className="text-xs text-mine-300 hover:text-mine-50" onClick={() => setModal({ mode: "edit", plan: p })}>{t("common.edit")}</button>
+                <button className="text-xs text-mine-300 hover:text-mine-50" onClick={() => setModal({ mode: "create", seed: p })}>{t("budgetPlanning.duplicate")}</button>
+                <button className={buttonDanger} onClick={() => remove(p.id)}>{t("common.delete")}</button>
+              </>
+            )}
+          </div>
+        )}
       />
 
       {modal && (
@@ -229,6 +421,15 @@ export default function BudgetPlanning() {
             onSubmit={(data) => (modal.mode === "edit" ? update(modal.plan.id, data) : create(data))}
             onCancel={() => setModal(null)}
           />
+        </Modal>
+      )}
+
+      {reviewModal && (
+        <Modal
+          title={reviewModal.decision === "approve" ? t("budgetPlanning.approveTitle") : t("budgetPlanning.rejectTitle")}
+          onClose={() => setReviewModal(null)}
+        >
+          <ReviewForm decision={reviewModal.decision} onSubmit={review} onCancel={() => setReviewModal(null)} />
         </Modal>
       )}
     </div>

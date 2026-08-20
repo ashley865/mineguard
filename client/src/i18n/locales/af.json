@@ -4285,7 +4285,22 @@
     "noneYet": "Nog geen begrotingsplanne gestel nie.",
     "confirmDelete": "Verwyder hierdie begrotingsplan?",
     "duplicate": "Dupliseer",
-    "editTitle": "Wysig begrotingsplan"
+    "editTitle": "Wysig begrotingsplan",
+    "totalBudgeted": "Totaal Begroot",
+    "totalActual": "Totale Werklike",
+    "totalVariance": "Totale Variansie",
+    "utilization": "Begrotingsgebruik",
+    "overBudgetCount": "Oor Begroting",
+    "pendingApprovalCount": "Wag vir Goedkeuring",
+    "chartByCategory": "Begroot vs Werklik per Kategorie",
+    "chartBySite": "Begroot vs Werklik per Terrein",
+    "aiInsightsTitle": "KI-Begrotingsinsigte",
+    "refreshInsights": "Verfris",
+    "riskFlags": "Risikovlae",
+    "recommendations": "Aanbevelings",
+    "reviewNote": "Nota (opsioneel)",
+    "approveTitle": "Keur Begrotingsplan Goed",
+    "rejectTitle": "Verwerp Begrotingsplan"
   },
   "toolboxTalks": {
     "nav": "Veiligheidsgesprekke",

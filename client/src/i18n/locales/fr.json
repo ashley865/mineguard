@@ -4285,7 +4285,22 @@
     "noneYet": "Aucun plan budgétaire défini pour l'instant.",
     "confirmDelete": "Supprimer ce plan budgétaire ?",
     "duplicate": "Dupliquer",
-    "editTitle": "Modifier le plan budgétaire"
+    "editTitle": "Modifier le plan budgétaire",
+    "totalBudgeted": "Total Budgété",
+    "totalActual": "Total Réel",
+    "totalVariance": "Écart Total",
+    "utilization": "Utilisation du Budget",
+    "overBudgetCount": "Dépassement de Budget",
+    "pendingApprovalCount": "En Attente d'Approbation",
+    "chartByCategory": "Budgété vs Réel par Catégorie",
+    "chartBySite": "Budgété vs Réel par Site",
+    "aiInsightsTitle": "Analyses IA du Budget",
+    "refreshInsights": "Actualiser",
+    "riskFlags": "Alertes de Risque",
+    "recommendations": "Recommandations",
+    "reviewNote": "Note (facultatif)",
+    "approveTitle": "Approuver le Plan Budgétaire",
+    "rejectTitle": "Rejeter le Plan Budgétaire"
   },
   "toolboxTalks": {
     "nav": "Causeries Sécurité",
