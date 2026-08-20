@@ -245,7 +245,21 @@
     "noWorkerWarnings": "Sin advertencias de certificación o capacitación de trabajadores.",
     "contactWorker": "Contactar",
     "visitorHistoryTitle": "Historial de Visitantes",
-    "noVisitorHistory": "Aún no se han registrado visitantes."
+    "noVisitorHistory": "Aún no se han registrado visitantes.",
+    "scorecard": {
+      "title": "Cuadro de Mando Ejecutivo",
+      "overall": "General",
+      "hint": "Cinco KPI de toda la mina, normalizados a una escala de 0 a 100 para compararlos de un vistazo.",
+      "compliance": "Cumplimiento",
+      "safety": "Seguridad",
+      "uptime": "Disponibilidad de Equipos",
+      "workforce": "Cobertura de Personal",
+      "budget": "Salud Presupuestaria"
+    },
+    "budgetHealth": {
+      "title": "Salud Presupuestaria",
+      "viewAll": "Ver Planificación de Presupuesto →"
+    }
   },
   "sites": {
     "title": "Sitios y Zonas",

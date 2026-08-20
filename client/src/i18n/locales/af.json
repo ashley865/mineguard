@@ -245,7 +245,21 @@
     "noWorkerWarnings": "Geen werker-sertifisering- of opleidingswaarskuwings nie.",
     "contactWorker": "Kontak",
     "visitorHistoryTitle": "Besoekersgeskiedenis",
-    "noVisitorHistory": "Nog geen besoekers aangeteken nie."
+    "noVisitorHistory": "Nog geen besoekers aangeteken nie.",
+    "scorecard": {
+      "title": "Uitvoerende Telkaart",
+      "overall": "Algeheel",
+      "hint": "Vyf KPI's van dwarsdeur die myn, genormaliseer na een 0-100-skaal sodat hulle met 'n oogopslag vergelyk kan word.",
+      "compliance": "Nakoming",
+      "safety": "Veiligheid",
+      "uptime": "Toerustingbeskikbaarheid",
+      "workforce": "Werksmagdekking",
+      "budget": "Begrotingsgesondheid"
+    },
+    "budgetHealth": {
+      "title": "Begrotingsgesondheid",
+      "viewAll": "Bekyk Begrotingsbeplanning →"
+    }
   },
   "sites": {
     "title": "Terreine & Sones",

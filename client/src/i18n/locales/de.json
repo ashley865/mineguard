@@ -245,7 +245,21 @@
     "noWorkerWarnings": "Keine Zertifizierungs- oder Schulungswarnungen für Mitarbeiter.",
     "contactWorker": "Kontaktieren",
     "visitorHistoryTitle": "Besucherverlauf",
-    "noVisitorHistory": "Noch keine Besucher erfasst."
+    "noVisitorHistory": "Noch keine Besucher erfasst.",
+    "scorecard": {
+      "title": "Führungs-Scorecard",
+      "overall": "Gesamt",
+      "hint": "Fünf Kennzahlen aus der gesamten Mine, auf eine gemeinsame 0-100-Skala normiert, damit sie auf einen Blick vergleichbar sind.",
+      "compliance": "Compliance",
+      "safety": "Sicherheit",
+      "uptime": "Anlagenverfügbarkeit",
+      "workforce": "Personalabdeckung",
+      "budget": "Budgetgesundheit"
+    },
+    "budgetHealth": {
+      "title": "Budgetgesundheit",
+      "viewAll": "Budgetplanung ansehen →"
+    }
   },
   "sites": {
     "title": "Standorte & Zonen",

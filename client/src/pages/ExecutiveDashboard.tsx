@@ -16,6 +16,8 @@ import MaintenanceDowntimeWidget from "../components/MaintenanceDowntimeWidget";
 import AiAssistantWidget from "../components/AiAssistantWidget";
 import LiveDataWidget, { MINERAL_PRICE_RELEVANT_TITLES } from "../components/LiveDataWidget";
 import IndustryNewsWidget from "../components/IndustryNewsWidget";
+import ExecutiveScorecard from "../components/ExecutiveScorecard";
+import BudgetSummaryWidget from "../components/BudgetSummaryWidget";
 
 type Tone = "positive" | "negative" | "caution";
 
@@ -127,7 +129,11 @@ export default function ExecutiveDashboard() {
   const canSeeFinancials = user?.title === "CFO" || user?.title === "GENERAL_MANAGER";
   const canSeeHrWorkforce = user?.title === "HR_MANAGER";
   const canSeeVisitorHistory = user?.title === "SECURITY_MANAGER";
-  const canSeeProductionAnalytics = user?.title === "OPERATIONS_MANAGER";
+  // GM has full module access to Production/Inventory/Maintenance already (see
+  // executiveAccess.ts's fullAccess list) but this dashboard never showed it — the GM was
+  // one of the only "full access" titles with nothing of its own beyond financials.
+  const canSeeProductionAnalytics = user?.title === "OPERATIONS_MANAGER" || user?.title === "GENERAL_MANAGER";
+  const isGeneralManager = user?.title === "GENERAL_MANAGER";
   // Every executive title has an AI module now except the generic "OTHER" catch-all.
   const canSeeAiAssistant = !!user?.title && user.title !== "OTHER";
   const [summary, setSummary] = useState<ExecutiveSummary | null>(null);
@@ -222,6 +228,8 @@ export default function ExecutiveDashboard() {
         <StatCard label={t("executive.equipmentUptime")} value={`${equipment.uptimePct}%`} tone={equipment.uptimePct >= 80 ? "positive" : equipment.uptimePct >= 50 ? "caution" : "negative"} />
       </div>
 
+      {isGeneralManager && <ExecutiveScorecard summary={summary} />}
+
       {executiveOps.hasSiteAccess ? (
         <>
           <div className={`${cardClass} p-3 flex items-center justify-between flex-wrap gap-3`}>
@@ -287,6 +295,7 @@ export default function ExecutiveDashboard() {
         </>
       )}
       {canSeeFinancials && <FinancialSummaryWidget />}
+      {canSeeFinancials && <BudgetSummaryWidget />}
       {canSeeHrWorkforce && <HrWorkforceWidget />}
       {canSeeVisitorHistory && <SecurityVisitorHistoryWidget />}
       {canSeeProductionAnalytics && <ProductionAnalyticsWidget />}

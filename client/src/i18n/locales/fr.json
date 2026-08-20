@@ -245,7 +245,21 @@
     "noWorkerWarnings": "Aucune alerte de certification ou de formation des travailleurs.",
     "contactWorker": "Contacter",
     "visitorHistoryTitle": "Historique des Visiteurs",
-    "noVisitorHistory": "Aucun visiteur enregistré pour le moment."
+    "noVisitorHistory": "Aucun visiteur enregistré pour le moment.",
+    "scorecard": {
+      "title": "Tableau de Bord Exécutif",
+      "overall": "Global",
+      "hint": "Cinq indicateurs clés de toute la mine, normalisés sur une échelle de 0 à 100 pour être comparables en un coup d'œil.",
+      "compliance": "Conformité",
+      "safety": "Sécurité",
+      "uptime": "Disponibilité des Équipements",
+      "workforce": "Couverture du Personnel",
+      "budget": "Santé Budgétaire"
+    },
+    "budgetHealth": {
+      "title": "Santé Budgétaire",
+      "viewAll": "Voir la Planification Budgétaire →"
+    }
   },
   "sites": {
     "title": "Sites et zones",

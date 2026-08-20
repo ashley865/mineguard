@@ -263,7 +263,21 @@
     "noWorkerWarnings": "No worker certification or training warnings.",
     "contactWorker": "Contact",
     "visitorHistoryTitle": "Visitor History",
-    "noVisitorHistory": "No visitors logged yet."
+    "noVisitorHistory": "No visitors logged yet.",
+    "scorecard": {
+      "title": "Executive Scorecard",
+      "overall": "Overall",
+      "hint": "Five KPIs from across the mine, normalized to one 0-100 scale so they're comparable at a glance.",
+      "compliance": "Compliance",
+      "safety": "Safety",
+      "uptime": "Equipment Uptime",
+      "workforce": "Workforce Coverage",
+      "budget": "Budget Health"
+    },
+    "budgetHealth": {
+      "title": "Budget Health",
+      "viewAll": "View Budget Planning →"
+    }
   },
   "sites": {
     "title": "Sites & Zones",
