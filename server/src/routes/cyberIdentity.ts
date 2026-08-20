@@ -3,6 +3,7 @@ import { prisma } from "../prisma";
 import { requireAuth, requireRole } from "../middleware/auth";
 import { requireMineId } from "../lib/mineScope";
 import { requireCyberAccess } from "../lib/cyberAccess";
+import { issueBackupCode } from "../lib/mfaBackupCodes";
 
 const router = Router();
 
@@ -206,6 +207,45 @@ router.post("/users/:id/mfa-reset", async (req, res) => {
     select: { id: true, name: true, mfaEnabled: true },
   });
   res.json(user);
+});
+
+const backupCodeSelect = {
+  id: true,
+  generatedByName: true,
+  revokedAt: true,
+  usedAt: true,
+  usedIpAddress: true,
+  createdAt: true,
+} as const;
+
+// Generates the fallback the mine's ownership actually controls — see lib/mfaBackupCodes.ts
+// for why this exists separately from the TOTP code itself. Only for a user who already has
+// MFA enabled, since a backup code is meaningless without a primary factor to fall back from.
+router.post("/users/:id/backup-code", async (req, res) => {
+  const mineId = requireMineId(req, res);
+  if (!mineId) return;
+  if (!(await requireCyberAccess(req, res))) return;
+  const existing = await prisma.user.findFirst({ where: { id: req.params.id, mineId } });
+  if (!existing) return res.status(404).json({ error: "User not found" });
+  if (!existing.mfaEnabled) return res.status(409).json({ error: "This user does not have MFA enabled" });
+
+  const me = await prisma.user.findUnique({ where: { id: req.auth!.userId }, select: { name: true } });
+  const code = await issueBackupCode(existing.id, req.auth!.userId, me?.name ?? null);
+  res.status(201).json({ code });
+});
+
+router.get("/users/:id/backup-codes", async (req, res) => {
+  const mineId = requireMineId(req, res);
+  if (!mineId) return;
+  if (!(await requireCyberAccess(req, res))) return;
+  const existing = await prisma.user.findFirst({ where: { id: req.params.id, mineId } });
+  if (!existing) return res.status(404).json({ error: "User not found" });
+  const codes = await prisma.mfaBackupCode.findMany({
+    where: { userId: existing.id },
+    select: backupCodeSelect,
+    orderBy: { createdAt: "desc" },
+  });
+  res.json(codes);
 });
 
 export default router;

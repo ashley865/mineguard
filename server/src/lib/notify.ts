@@ -1,6 +1,7 @@
 import { ExecutiveTitle, NotificationType } from "@prisma/client";
 import { Server as SocketServer } from "socket.io";
 import { prisma } from "../prisma";
+import { sendEmail } from "./email";
 
 export interface NotifyExecutivesInput {
   mineId: string;
@@ -39,7 +40,7 @@ export async function notifyExecutives(io: SocketServer | undefined, input: Noti
 
   const recipients = await prisma.user.findMany({
     where: { mineId, isActive: true, OR: orConditions },
-    select: { id: true },
+    select: { id: true, email: true },
   });
   if (recipients.length === 0) return;
 
@@ -48,4 +49,17 @@ export async function notifyExecutives(io: SocketServer | undefined, input: Noti
   });
 
   io?.to(`mine:${mineId}`).emit("notification:new", { type });
+
+  // Best-effort — SMTP is opt-in and most deployments won't have it configured, so
+  // sendEmail() silently no-ops rather than every notify call needing its own guard.
+  const clientOrigin = process.env.CLIENT_ORIGIN || "http://localhost:5173";
+  const url = link ? `${clientOrigin}${link}` : clientOrigin;
+  for (const r of recipients) {
+    void sendEmail({
+      to: r.email,
+      subject: title,
+      text: `${body ?? ""}\n\n${url}`,
+      html: `<p>${body ?? ""}</p><p><a href="${url}">Open in MineGuard</a></p>`,
+    });
+  }
 }

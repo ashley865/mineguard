@@ -1,7 +1,7 @@
 import { FormEvent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { api } from "../../api/client";
-import { CyberAccessThreats, CyberBlockedIp, CyberBuyerThreats, CyberDevice, CyberGlobalBlockedIp, CyberIdentityOverview, CyberPhysicalAccessAlert } from "../../api/types";
+import { CyberAccessThreats, CyberBackupCode, CyberBlockedIp, CyberBuyerThreats, CyberDevice, CyberGlobalBlockedIp, CyberIdentityOverview, CyberPhysicalAccessAlert } from "../../api/types";
 import { CyberTheme, StatusPill, cyberButtonDanger, cyberButtonPrimary, cyberButtonSecondary } from "./cyberTheme";
 import CyberTable, { CyberTableColumn } from "./CyberTable";
 import CyberModal from "./CyberModal";
@@ -56,6 +56,92 @@ function BlockIpForm({ theme, onSubmit, onCancel }: { theme: CyberTheme; onSubmi
   );
 }
 
+function BackupCodeModal({ theme, user, onClose }: { theme: CyberTheme; user: { id: string; name: string }; onClose: () => void }) {
+  const { t } = useTranslation();
+  const [codes, setCodes] = useState<CyberBackupCode[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [newCode, setNewCode] = useState<string | null>(null);
+  const [generating, setGenerating] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  async function load() {
+    setLoading(true);
+    try {
+      const res = await api.get<CyberBackupCode[]>(`/cyber-identity/users/${user.id}/backup-codes`);
+      setCodes(res.data);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  useEffect(() => { load(); }, []);
+
+  async function generate() {
+    setGenerating(true);
+    setError(null);
+    try {
+      const res = await api.post<{ code: string }>(`/cyber-identity/users/${user.id}/backup-code`);
+      setNewCode(res.data.code);
+      await load();
+    } catch (err: any) {
+      setError(err.response?.data?.error ?? t("cyber.identity.backupCodeError"));
+    } finally {
+      setGenerating(false);
+    }
+  }
+
+  function codeStatus(c: CyberBackupCode): "PROTECTED" | "BLOCKED" | "MISSING" {
+    if (c.usedAt) return "BLOCKED";
+    if (c.revokedAt) return "MISSING";
+    return "PROTECTED";
+  }
+
+  return (
+    <CyberModal theme={theme} title={t("cyber.identity.backupCodeTitle", { name: user.name })} onClose={onClose}>
+      <div className="space-y-4">
+        <p className={`text-xs ${theme.mutedText}`}>{t("cyber.identity.backupCodeHint")}</p>
+
+        {newCode ? (
+          <div className={`${theme.panel} p-4 text-center`}>
+            <div className={`text-[10px] uppercase tracking-wide ${theme.mutedText}`}>{t("cyber.identity.backupCodeNew")}</div>
+            <div className={`text-3xl font-bold tracking-[0.3em] mt-1 ${theme.text}`}>{newCode}</div>
+            <p className="text-[10px] text-amber-500 font-semibold mt-2">{t("cyber.identity.backupCodeShownOnce")}</p>
+          </div>
+        ) : (
+          <button className={cyberButtonPrimary} disabled={generating} onClick={generate}>
+            {generating ? t("common.saving") : t("cyber.identity.backupCodeGenerate")}
+          </button>
+        )}
+        {error && <div className="text-xs text-red-500">{error}</div>}
+
+        <div className="space-y-1.5">
+          <div className={`text-xs font-semibold ${theme.text}`}>{t("cyber.identity.backupCodeHistory")}</div>
+          {loading ? (
+            <div className={`text-xs ${theme.mutedText}`}>{t("common.loading")}</div>
+          ) : codes.length === 0 ? (
+            <div className={`text-xs ${theme.mutedText}`}>{t("cyber.identity.backupCodeNone")}</div>
+          ) : (
+            <div className="space-y-1.5">
+              {codes.map((c) => (
+                <div key={c.id} className={`flex items-center justify-between text-xs border-t ${theme.rowBorder} pt-1.5 first:border-t-0 first:pt-0`}>
+                  <div>
+                    <div className={theme.text}>{new Date(c.createdAt).toLocaleString()}</div>
+                    <div className={theme.mutedText}>
+                      {t("cyber.identity.backupCodeGeneratedBy", { name: c.generatedByName ?? "—" })}
+                      {c.usedAt && ` · ${t("cyber.identity.backupCodeUsedAt", { date: new Date(c.usedAt).toLocaleString(), ip: c.usedIpAddress ?? "—" })}`}
+                    </div>
+                  </div>
+                  <StatusPill status={codeStatus(c)} />
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+    </CyberModal>
+  );
+}
+
 export default function IdentityTab({ theme, canEdit }: { theme: CyberTheme; canEdit: boolean }) {
   const { t } = useTranslation();
   const [data, setData] = useState<CyberIdentityOverview | null>(null);
@@ -66,6 +152,7 @@ export default function IdentityTab({ theme, canEdit }: { theme: CyberTheme; can
   const [loading, setLoading] = useState(true);
   const [busyId, setBusyId] = useState<string | null>(null);
   const [blockModal, setBlockModal] = useState(false);
+  const [backupCodeUser, setBackupCodeUser] = useState<{ id: string; name: string } | null>(null);
 
   async function load() {
     setLoading(true);
@@ -319,9 +406,14 @@ export default function IdentityTab({ theme, canEdit }: { theme: CyberTheme; can
             canEdit
               ? (u) =>
                   u.mfaEnabled ? (
-                    <button className={cyberButtonSecondary(theme)} disabled={busyId === u.id} onClick={() => resetMfa(u.id)}>
-                      {t("cyber.identity.resetMfa")}
-                    </button>
+                    <div className="flex gap-2">
+                      <button className={cyberButtonSecondary(theme)} disabled={busyId === u.id} onClick={() => resetMfa(u.id)}>
+                        {t("cyber.identity.resetMfa")}
+                      </button>
+                      <button className={cyberButtonSecondary(theme)} onClick={() => setBackupCodeUser({ id: u.id, name: u.name })}>
+                        {t("cyber.identity.backupCode")}
+                      </button>
+                    </div>
                   ) : (
                     <span className={`text-[10px] ${theme.mutedText}`}>{t("cyber.identity.mfaNotEnrolled")}</span>
                   )
@@ -329,6 +421,8 @@ export default function IdentityTab({ theme, canEdit }: { theme: CyberTheme; can
           }
         />
       </div>
+
+      {backupCodeUser && <BackupCodeModal theme={theme} user={backupCodeUser} onClose={() => setBackupCodeUser(null)} />}
 
       <div className="space-y-2">
         <h3 className={`text-sm font-semibold ${theme.text}`}>{t("cyber.identity.tabDormant")}</h3>

@@ -349,6 +349,8 @@ model User {
   cyberLoginEvents             CyberLoginEvent[]         @relation("CyberLoginEventUser")
   cyberBlockedIpsBlocked       CyberBlockedIp[]          @relation("CyberBlockedIpBlockedBy")
   notifications                Notification[]            @relation("NotificationRecipient")
+  mfaBackupCodes                MfaBackupCode[]           @relation("MfaBackupCodeUser")
+  mfaBackupCodesGenerated       MfaBackupCode[]           @relation("MfaBackupCodeGeneratedBy")
 }
 
 model UserAttendance {
@@ -5681,4 +5683,28 @@ model Notification {
   createdAt   DateTime         @default(now())
 
   @@index([recipientId, readAt])
+}
+
+// A single-use fallback for a user locked out of their TOTP authenticator app — generated
+// by an Owner/IT Manager (see routes/cyberIdentity.ts), never by the user themselves, and
+// shown in plaintext exactly once at creation (codeHash only from then on, same as a
+// password). Generating a new code revokes any previous unused one for that user, so at
+// most one is ever valid at a time — "the 6-digit code IT Manager sets" is really this,
+// not the TOTP code itself, which is algorithmically generated and can't be hand-picked
+// without defeating the point of MFA.
+model MfaBackupCode {
+  id              String    @id @default(cuid())
+  userId          String
+  user            User      @relation("MfaBackupCodeUser", fields: [userId], references: [id], onDelete: Cascade)
+  codeHash        String
+  generatedById   String?
+  generatedBy     User?     @relation("MfaBackupCodeGeneratedBy", fields: [generatedById], references: [id], onDelete: SetNull)
+  generatedByName String?
+  revokedAt       DateTime?
+  usedAt          DateTime?
+  usedIpAddress   String?
+  usedUserAgent   String?
+  createdAt       DateTime  @default(now())
+
+  @@index([userId])
 }

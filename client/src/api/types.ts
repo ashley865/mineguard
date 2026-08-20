@@ -3858,6 +3858,15 @@ export interface CyberPhysicalAccessAlert {
   matchedReason: string | null;
 }
 
+export interface CyberBackupCode {
+  id: string;
+  generatedByName: string | null;
+  revokedAt: string | null;
+  usedAt: string | null;
+  usedIpAddress: string | null;
+  createdAt: string;
+}
+
 export interface CyberIdentityOverview {
   totalUsers: number;
   privilegedAccounts: CyberPrivilegedAccount[];

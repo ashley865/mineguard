@@ -6,6 +6,7 @@ import { prisma } from "../prisma";
 import { requireAuth, requireRole } from "../middleware/auth";
 import { signAuthToken } from "../lib/jwt";
 import { authLimiter } from "../middleware/rateLimit";
+import { sendEmail } from "../lib/email";
 
 const router = Router();
 
@@ -131,6 +132,16 @@ router.post("/", async (req, res) => {
     },
     select: inviteSelect,
   });
+
+  const clientOrigin = process.env.CLIENT_ORIGIN || "http://localhost:5173";
+  const acceptUrl = `${clientOrigin}/join-executive/${invite.id}?key=${key}`;
+  void sendEmail({
+    to: parsed.data.email,
+    subject: "You've been invited to join MineGuard",
+    text: `${admin.name} has invited you to join MineGuard as ${parsed.data.title.replace(/_/g, " ")}.\n\nAccept your invite: ${acceptUrl}`,
+    html: `<p>${admin.name} has invited you to join MineGuard as <strong>${parsed.data.title.replace(/_/g, " ")}</strong>.</p><p><a href="${acceptUrl}">Accept your invite</a></p>`,
+  });
+
   res.status(201).json({ invite, key });
 });
 

@@ -13,6 +13,8 @@ import { autoBlockMineIpIfBruteForced } from "../lib/autoBlock";
 import { buildOtpAuthUrl, generateMfaSecret, verifyMfaToken } from "../lib/totp";
 import { resolveBooleanSetting } from "../lib/systemSettings";
 import { isCyberPrivilegedUser } from "../lib/cyberAccess";
+import { verifyAndConsumeBackupCode } from "../lib/mfaBackupCodes";
+import { notifySecurityWebhook } from "../lib/securityWebhook";
 
 const router = Router();
 
@@ -129,11 +131,17 @@ router.post("/login", authLimiter, async (req, res) => {
   // same request with an added mfaCode once it sees mfaRequired, rather than a separate
   // pre-auth token/session — the password has already been verified above either way, so
   // there's nothing sensitive being repeated, just a second field.
+  let usedBackupCode = false;
   if (user.mfaEnabled) {
     if (!mfaCode) {
       return res.status(401).json({ error: "MFA code required", mfaRequired: true });
     }
-    if (!user.mfaSecret || !verifyMfaToken(user.mfaSecret, mfaCode)) {
+    const totpValid = !!user.mfaSecret && verifyMfaToken(user.mfaSecret, mfaCode);
+    // A backup code is only ever checked once the real TOTP code has already failed —
+    // it's a fallback for a lost authenticator, not an alternate everyday path, and every
+    // use consumes it (lib/mfaBackupCodes.ts) so it can never be replayed.
+    if (!totpValid) usedBackupCode = await verifyAndConsumeBackupCode(user.id, mfaCode, ipAddress, userAgent);
+    if (!totpValid && !usedBackupCode) {
       if (user.mineId) {
         await prisma.cyberLoginEvent
           .create({ data: { mineId: user.mineId, userId: user.id, eventType: "LOGIN_FAILED", ipAddress, userAgent, flagged: true } })
@@ -146,8 +154,15 @@ router.post("/login", authLimiter, async (req, res) => {
 
   if (user.mineId) {
     await prisma.cyberLoginEvent
-      .create({ data: { mineId: user.mineId, userId: user.id, eventType: "LOGIN_SUCCESS", ipAddress, userAgent } })
+      .create({ data: { mineId: user.mineId, userId: user.id, eventType: "LOGIN_SUCCESS", ipAddress, userAgent, flagged: usedBackupCode } })
       .catch(() => {});
+  }
+  if (usedBackupCode) {
+    void notifySecurityWebhook({
+      severity: "HIGH",
+      title: "MFA backup code used to log in",
+      detail: `${user.name} (${user.email}) logged in using a backup code instead of their authenticator app, from ${ipAddress ?? "an unknown IP"}.`,
+    });
   }
   await prisma.user.update({ where: { id: user.id }, data: { lastLoginAt: new Date() } }).catch(() => {});
 

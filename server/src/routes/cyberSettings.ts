@@ -13,6 +13,7 @@ import {
 } from "../lib/systemSettings";
 import { aiChatComplete, AiNotConfiguredError } from "../lib/ai";
 import { sendTestWebhook } from "../lib/securityWebhook";
+import { sendTestEmail } from "../lib/email";
 import {
   createCustomApiKey,
   deleteCustomApiKey,
@@ -101,6 +102,12 @@ router.post("/:key/test", async (req, res) => {
     const url = await resolveSetting("SECURITY_ALERT_WEBHOOK_URL");
     if (!url) return res.json({ success: false, message: "No webhook URL is configured" });
     return res.json(await sendTestWebhook(url));
+  }
+
+  if (key === "SMTP_HOST") {
+    const me = await prisma.user.findUnique({ where: { id: req.auth!.userId }, select: { email: true } });
+    if (!me?.email) return res.json({ success: false, message: "Could not determine your account email" });
+    return res.json(await sendTestEmail(me.email));
   }
 
   return res.status(400).json({ error: "This setting cannot be tested" });
