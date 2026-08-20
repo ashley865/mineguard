@@ -1963,6 +1963,7 @@ model Buyer {
   documents        BuyerDocument[]
   bids             MineralBid[]
   buyerLoginEvents BuyerLoginEvent[]
+  favorites        BuyerFavorite[]
 
   createdAt DateTime @default(now())
 }
@@ -2062,8 +2063,9 @@ model MineralListing {
   listedById    String?
   listedBy      User?                @relation(fields: [listedById], references: [id], onDelete: SetNull)
 
-  bids   MineralBid[]
-  images MineralListingImage[]
+  bids      MineralBid[]
+  images    MineralListingImage[]
+  favorites BuyerFavorite[]
 
   createdAt DateTime @default(now())
 }
@@ -2076,8 +2078,25 @@ model MineralListingImage {
   fileMimeType String
   fileSize     Int
   fileData     Bytes
+  // The cover photo shown on listing cards — at most one true per listing, enforced in
+  // routes/minerals.ts (unsets any sibling before setting a new primary) rather than in the
+  // schema, since Postgres has no native "unique where true" without a partial index.
+  isPrimary    Boolean         @default(false)
 
   createdAt DateTime @default(now())
+}
+
+// A buyer's saved/watchlisted listing — buyers aren't mine-scoped (the marketplace spans
+// every mine), so this is a plain buyer-to-listing pairing, not nested under any mine.
+model BuyerFavorite {
+  id        String         @id @default(cuid())
+  buyerId   String
+  buyer     Buyer          @relation(fields: [buyerId], references: [id], onDelete: Cascade)
+  listingId String
+  listing   MineralListing @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  createdAt DateTime       @default(now())
+
+  @@unique([buyerId, listingId])
 }
 
 enum MineralBidStatus {

@@ -1543,6 +1543,7 @@ export interface MineralListingImage {
   fileName: string;
   fileMimeType: string;
   fileSize: number;
+  isPrimary: boolean;
 }
 
 export interface MineralListing {
@@ -1561,7 +1562,13 @@ export interface MineralListing {
   status: MineralListingStatus;
   listedBy?: { id: string; name: string } | null;
   images: MineralListingImage[];
+  bidCount: number;
   createdAt: string;
+}
+
+export interface FxRates {
+  base: "USD";
+  rates: Record<string, number> | null;
 }
 
 export type MineralBidStatus = "PENDING" | "ACCEPTED" | "REJECTED" | "WITHDRAWN";

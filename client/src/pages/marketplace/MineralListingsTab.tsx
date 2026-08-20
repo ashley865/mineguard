@@ -58,6 +58,16 @@ function ImageManager({ listing, onChanged }: { listing: MineralListing; onChang
     }
   }
 
+  async function setPrimary(imageId: string) {
+    setBusy(true);
+    try {
+      await api.post(`/minerals/${listing.id}/images/${imageId}/primary`);
+      onChanged({ ...listing, images: listing.images.map((img) => ({ ...img, isPrimary: img.id === imageId })) });
+    } finally {
+      setBusy(false);
+    }
+  }
+
   return (
     <div className="space-y-2 border border-mine-800 rounded-md p-3 bg-mine-900/40">
       <div className="text-xs font-semibold text-mine-300 uppercase">{t("marketplace.images")}</div>
@@ -68,8 +78,22 @@ function ImageManager({ listing, onChanged }: { listing: MineralListing; onChang
               <img
                 src={`${API_URL}/api/minerals/${listing.id}/images/${img.id}`}
                 alt={img.fileName}
-                className="h-16 w-16 object-cover rounded-md border border-mine-800"
+                className={`h-16 w-16 object-cover rounded-md border ${img.isPrimary ? "border-hazard-500 ring-1 ring-hazard-500" : "border-mine-800"}`}
               />
+              {img.isPrimary ? (
+                <span className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 text-[9px] font-semibold px-1 py-0.5 rounded bg-hazard-500 text-white whitespace-nowrap">
+                  {t("marketplace.primaryImage")}
+                </span>
+              ) : (
+                <button
+                  type="button"
+                  className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 text-[9px] font-semibold px-1 py-0.5 rounded bg-mine-700 text-mine-200 hover:bg-mine-600 whitespace-nowrap"
+                  onClick={() => setPrimary(img.id)}
+                  disabled={busy}
+                >
+                  {t("marketplace.setPrimary")}
+                </button>
+              )}
               <button
                 type="button"
                 className="absolute -top-1.5 -right-1.5 bg-danger-500 text-white rounded-full w-5 h-5 text-xs leading-none"
@@ -310,6 +334,8 @@ export default function MineralListingsTab({ sites }: { sites: Site[] }) {
   const [loading, setLoading] = useState(true);
   const [modal, setModal] = useState<null | "create" | MineralListing>(null);
   const [bidsListing, setBidsListing] = useState<MineralListing | null>(null);
+  const [search, setSearch] = useState("");
+  const [statusFilter, setStatusFilter] = useState<MineralListingStatus | "">("");
 
   async function load() {
     setLoading(true);
@@ -321,6 +347,16 @@ export default function MineralListingsTab({ sites }: { sites: Site[] }) {
   useEffect(() => {
     load();
   }, []);
+
+  const filteredItems = items.filter((item) => {
+    if (statusFilter && item.status !== statusFilter) return false;
+    if (search) {
+      const q = search.toLowerCase();
+      const haystack = `${item.mineralType} ${item.grade ?? ""} ${item.site?.name ?? ""} ${item.description ?? ""}`.toLowerCase();
+      if (!haystack.includes(q)) return false;
+    }
+    return true;
+  });
 
   async function create(data: any) {
     await api.post("/minerals", data);
@@ -344,11 +380,23 @@ export default function MineralListingsTab({ sites }: { sites: Site[] }) {
 
   return (
     <div className="space-y-4">
-      {canEdit && sites.length > 0 && (
-        <div className="flex justify-end">
-          <button className={buttonPrimary} onClick={() => setModal("create")}>{t("marketplace.newListing")}</button>
+      <div className="flex items-center justify-between gap-2 flex-wrap">
+        <div className="flex items-center gap-2 flex-wrap">
+          <input
+            className={`${inputClass} w-52`}
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder={t("marketplace.searchPlaceholder") ?? ""}
+          />
+          <select className={selectClass} value={statusFilter} onChange={(e) => setStatusFilter(e.target.value as MineralListingStatus | "")}>
+            <option value="">{t("marketplace.allStatuses")}</option>
+            {listingStatuses.map((s) => <option key={s} value={s}>{t(`badges.status.${s}`)}</option>)}
+          </select>
         </div>
-      )}
+        {canEdit && sites.length > 0 && (
+          <button className={buttonPrimary} onClick={() => setModal("create")}>{t("marketplace.newListing")}</button>
+        )}
+      </div>
 
       <div className={`${cardClass} overflow-x-auto`}>
         <table className="w-full text-sm">
@@ -362,15 +410,20 @@ export default function MineralListingsTab({ sites }: { sites: Site[] }) {
             </tr>
           </thead>
           <tbody>
-            {items.map((item) => (
+            {filteredItems.map((item) => (
               <tr key={item.id} className="border-t border-mine-800 hover:bg-mine-800/30">
                 <td className="px-4 py-2 font-medium">{t(`mineralTypes.${item.mineralType}`)}{item.grade ? ` (${item.grade})` : ""}</td>
                 <td className="px-4 py-2 text-mine-300">{item.site?.name}</td>
                 <td className="px-4 py-2 text-mine-300">{item.quantity} {item.unit}</td>
                 <td className="px-4 py-2"><StatusBadge status={item.status} /></td>
                 <td className="px-4 py-2 text-right">
-                  <div className="flex justify-end gap-2">
-                    <button className="text-xs text-mine-300 hover:text-mine-50" onClick={() => setBidsListing(item)}>{t("marketplace.viewBids")}</button>
+                  <div className="flex justify-end items-center gap-2">
+                    <button className="text-xs text-mine-300 hover:text-mine-50 flex items-center gap-1" onClick={() => setBidsListing(item)}>
+                      {t("marketplace.viewBids")}
+                      {item.bidCount > 0 && (
+                        <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-full bg-hazard-500/15 text-hazard-400">{item.bidCount}</span>
+                      )}
+                    </button>
                     {canEdit && (
                       <button className="text-xs text-mine-300 hover:text-mine-50" onClick={() => setModal(item)}>{t("common.edit")}</button>
                     )}
@@ -381,8 +434,8 @@ export default function MineralListingsTab({ sites }: { sites: Site[] }) {
                 </td>
               </tr>
             ))}
-            {items.length === 0 && (
-              <tr><td colSpan={5} className="px-4 py-6 text-center text-mine-400">{t("marketplace.noneYetListings")}</td></tr>
+            {filteredItems.length === 0 && (
+              <tr><td colSpan={5} className="px-4 py-6 text-center text-mine-400">{t(items.length === 0 ? "marketplace.noneYetListings" : "marketplace.noMatchingListings")}</td></tr>
             )}
           </tbody>
         </table>

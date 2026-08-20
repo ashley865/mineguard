@@ -3,10 +3,67 @@ import { Link, Navigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useBuyerAuth } from "../context/BuyerAuthContext";
 import { buyerApi } from "../api/buyerClient";
-import { BuyerDocument, MineralBid } from "../api/types";
+import { API_URL } from "../api/client";
+import { BuyerDocument, MineralBid, MineralListing } from "../api/types";
 import { StatusBadge } from "../components/Badges";
-import { buttonPrimary, buttonSecondary, cardClass, inputClass, labelClass } from "../components/ui";
+import { buttonDanger, buttonPrimary, buttonSecondary, cardClass, inputClass, labelClass } from "../components/ui";
 import LanguageSwitcher from "../components/LanguageSwitcher";
+
+function FavoritesCard() {
+  const { t } = useTranslation();
+  const [favorites, setFavorites] = useState<MineralListing[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  async function load() {
+    setLoading(true);
+    try {
+      const [idsRes, listingsRes] = await Promise.all([
+        buyerApi.get<string[]>("/minerals/favorites"),
+        buyerApi.get<MineralListing[]>("/minerals", { params: { status: "AVAILABLE" } }),
+      ]);
+      const ids = new Set(idsRes.data);
+      setFavorites(listingsRes.data.filter((l) => ids.has(l.id)));
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  useEffect(() => { load(); }, []);
+
+  async function unfavorite(id: string) {
+    setFavorites((prev) => prev.filter((l) => l.id !== id));
+    await buyerApi.delete(`/minerals/${id}/favorite`).catch(() => load());
+  }
+
+  return (
+    <div className={`${cardClass} p-4 space-y-3`}>
+      <h2 className="text-sm font-semibold">{t("buyerPortal.favoritesTitle")}</h2>
+      {loading && <div className="text-mine-300 text-xs">{t("common.loading")}</div>}
+      {!loading && favorites.length === 0 && <div className="text-xs text-mine-400">{t("buyerPortal.noFavorites")}</div>}
+      {!loading && favorites.length > 0 && (
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+          {favorites.map((l) => {
+            const cover = l.images.find((img) => img.isPrimary) ?? l.images[0];
+            return (
+              <div key={l.id} className="flex items-center gap-3 border border-mine-800 rounded-md p-2">
+                <div className="w-12 h-12 rounded bg-mine-950 shrink-0 overflow-hidden flex items-center justify-center text-mine-700">
+                  {cover ? <img src={`${API_URL}/api/minerals/${l.id}/images/${cover.id}`} alt="" className="w-full h-full object-cover" /> : "⛏"}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="text-xs font-semibold truncate">{t(`mineralTypes.${l.mineralType}`)}</div>
+                  <div className="text-[11px] text-mine-400 truncate">{l.site?.name}</div>
+                </div>
+                <button className={`${buttonDanger} text-[10px] px-2 py-1 shrink-0`} onClick={() => unfavorite(l.id)}>
+                  {t("buyerPortal.unfavorite")}
+                </button>
+              </div>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+}
 
 function ChangePasswordCard() {
   const { t } = useTranslation();
@@ -166,6 +223,8 @@ export default function BuyerPortal() {
             </div>
           )}
         </div>
+
+        <FavoritesCard />
 
         <ChangePasswordCard />
       </div>

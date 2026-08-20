@@ -87,9 +87,17 @@ const listingSelect = {
   certifications: true,
   status: true,
   listedBy: { select: { id: true, name: true } },
-  images: { select: { id: true, fileName: true, fileMimeType: true, fileSize: true } },
+  images: { select: { id: true, fileName: true, fileMimeType: true, fileSize: true, isPrimary: true } },
+  _count: { select: { bids: true } },
   createdAt: true,
 } as const;
+
+// _count is a Prisma query-shape detail, not something the client should have to know
+// about — flatten it to a plain bidCount alongside every listing response instead.
+function withBidCount<T extends { _count: { bids: number } }>(listing: T) {
+  const { _count, ...rest } = listing;
+  return { ...rest, bidCount: _count.bids };
+}
 
 const bidSelect = {
   id: true,
@@ -104,17 +112,72 @@ const bidSelect = {
   createdAt: true,
 } as const;
 
+const SORT_OPTIONS = {
+  newest: { createdAt: "desc" as const },
+  price_asc: { pricePerUnit: "asc" as const },
+  price_desc: { pricePerUnit: "desc" as const },
+  quantity_desc: { quantity: "desc" as const },
+};
+
 // Public: anyone can browse listings (this is a marketplace storefront) — intentionally
 // not mine-scoped, unlike every authenticated management route below it.
 router.get("/", async (req, res) => {
   const siteId = req.query.siteId as string | undefined;
   const status = req.query.status as string | undefined;
+  const mineralType = req.query.mineralType as string | undefined;
+  const search = (req.query.search as string | undefined)?.trim();
+  const minPrice = req.query.minPrice ? Number(req.query.minPrice) : undefined;
+  const maxPrice = req.query.maxPrice ? Number(req.query.maxPrice) : undefined;
+  const sortBy = (req.query.sortBy as string | undefined) ?? "newest";
+  const orderBy = SORT_OPTIONS[sortBy as keyof typeof SORT_OPTIONS] ?? SORT_OPTIONS.newest;
+
   const listings = await prisma.mineralListing.findMany({
-    where: { siteId: siteId || undefined, status: (status as any) || undefined },
+    where: {
+      siteId: siteId || undefined,
+      status: (status as any) || undefined,
+      mineralType: (mineralType as any) || undefined,
+      pricePerUnit: minPrice !== undefined || maxPrice !== undefined ? { gte: minPrice, lte: maxPrice } : undefined,
+      OR: search
+        ? [
+            { description: { contains: search, mode: "insensitive" } },
+            { grade: { contains: search, mode: "insensitive" } },
+            { certifications: { contains: search, mode: "insensitive" } },
+            { site: { name: { contains: search, mode: "insensitive" } } },
+          ]
+        : undefined,
+    },
     select: listingSelect,
-    orderBy: { createdAt: "desc" },
+    orderBy,
   });
-  res.json(listings);
+  res.json(listings.map(withBidCount));
+});
+
+// Public, free, no API key — same source and caching convention as liveData.ts's
+// fetchUsdToZarRate, generalized to a small fixed currency set so a buyer can view any
+// listing's price converted into the currency they think in, regardless of what currency
+// the mine listed it in.
+const FX_CURRENCIES = ["USD", "ZAR", "EUR", "GBP"];
+const FX_TTL_MS = 60 * 60 * 1000;
+let fxRatesCache: { data: Record<string, number>; expiresAt: number } | null = null;
+
+router.get("/fx-rates", async (_req, res) => {
+  if (fxRatesCache && fxRatesCache.expiresAt > Date.now()) {
+    return res.json({ base: "USD", rates: fxRatesCache.data });
+  }
+  try {
+    const response = await fetch("https://open.er-api.com/v6/latest/USD");
+    if (!response.ok) return res.json({ base: "USD", rates: fxRatesCache?.data ?? null });
+    const data: any = await response.json();
+    const rates: Record<string, number> = {};
+    for (const currency of FX_CURRENCIES) {
+      const rate = data?.rates?.[currency];
+      if (typeof rate === "number") rates[currency] = rate;
+    }
+    fxRatesCache = { data: rates, expiresAt: Date.now() + FX_TTL_MS };
+    res.json({ base: "USD", rates });
+  } catch {
+    res.json({ base: "USD", rates: fxRatesCache?.data ?? null });
+  }
 });
 
 // Public: listing photos are shown in the storefront, so serving them needs no auth.
@@ -163,6 +226,33 @@ router.post("/:id/bids", requireBuyerAuth, async (req, res) => {
   res.status(201).json(bid);
 });
 
+// A buyer's watchlist — plain listing-id membership, resolved client-side against the
+// already-fetched public listings rather than the server re-embedding favorite state into
+// every anonymous GET / response (which has no buyer identity to check against anyway).
+router.get("/favorites", requireBuyerAuth, async (req, res) => {
+  const favorites = await prisma.buyerFavorite.findMany({
+    where: { buyerId: req.buyerAuth!.buyerId },
+    select: { listingId: true },
+  });
+  res.json(favorites.map((f) => f.listingId));
+});
+
+router.post("/:id/favorite", requireBuyerAuth, async (req, res) => {
+  const listing = await prisma.mineralListing.findUnique({ where: { id: req.params.id }, select: { id: true } });
+  if (!listing) return res.status(404).json({ error: "Listing not found" });
+  await prisma.buyerFavorite.upsert({
+    where: { buyerId_listingId: { buyerId: req.buyerAuth!.buyerId, listingId: listing.id } },
+    create: { buyerId: req.buyerAuth!.buyerId, listingId: listing.id },
+    update: {},
+  });
+  res.status(204).send();
+});
+
+router.delete("/:id/favorite", requireBuyerAuth, async (req, res) => {
+  await prisma.buyerFavorite.deleteMany({ where: { buyerId: req.buyerAuth!.buyerId, listingId: req.params.id } });
+  res.status(204).send();
+});
+
 router.use(requireAuth);
 
 // Lets the listing form show real-time available stock for a site + mineral before submitting.
@@ -196,7 +286,7 @@ router.post("/", requireRole("ADMIN", "SUPERVISOR", "EXECUTIVE"), async (req, re
     data: { ...parsed.data, listedById: req.auth!.userId },
     select: listingSelect,
   });
-  res.status(201).json(listing);
+  res.status(201).json(withBidCount(listing));
 });
 
 router.put("/:id", requireRole("ADMIN", "SUPERVISOR", "EXECUTIVE"), async (req, res) => {
@@ -219,7 +309,7 @@ router.put("/:id", requireRole("ADMIN", "SUPERVISOR", "EXECUTIVE"), async (req, 
     }
   }
   const listing = await prisma.mineralListing.update({ where: { id: existing.id }, data: parsed.data, select: listingSelect });
-  res.json(listing);
+  res.json(withBidCount(listing));
 });
 
 router.delete("/:id", requireRole("ADMIN", "EXECUTIVE"), async (req, res) => {
@@ -238,17 +328,22 @@ router.post("/:id/images", requireRole("ADMIN", "SUPERVISOR", "EXECUTIVE"), uplo
   if (!listing) return res.status(404).json({ error: "Listing not found" });
   const files = (req.files as Express.Multer.File[] | undefined) ?? [];
   if (files.length === 0) return res.status(400).json({ error: "At least one image is required" });
+  const existingImageCount = await prisma.mineralListingImage.count({ where: { listingId: listing.id } });
   await prisma.mineralListingImage.createMany({
-    data: files.map((f) => ({
+    data: files.map((f, i) => ({
       listingId: listing.id,
       fileName: f.originalname,
       fileMimeType: f.mimetype,
       fileSize: f.size,
       fileData: Uint8Array.from(f.buffer),
+      // The very first image ever uploaded for a listing becomes its cover photo
+      // automatically, so a listing is never left without one just because staff didn't
+      // think to click "set as primary" on a single-photo listing.
+      isPrimary: existingImageCount === 0 && i === 0,
     })),
   });
   const updated = await prisma.mineralListing.findUnique({ where: { id: listing.id }, select: listingSelect });
-  res.status(201).json(updated);
+  res.status(201).json(updated ? withBidCount(updated) : updated);
 });
 
 router.delete("/:id/images/:imageId", requireRole("ADMIN", "SUPERVISOR", "EXECUTIVE"), async (req, res) => {
@@ -259,6 +354,26 @@ router.delete("/:id/images/:imageId", requireRole("ADMIN", "SUPERVISOR", "EXECUT
   });
   if (!image) return res.status(404).json({ error: "Image not found" });
   await prisma.mineralListingImage.delete({ where: { id: image.id } });
+  // If the cover photo was just deleted, promote whichever image is left (if any) so the
+  // listing doesn't silently end up with zero primary images.
+  if (image.isPrimary) {
+    const next = await prisma.mineralListingImage.findFirst({ where: { listingId: req.params.id }, orderBy: { createdAt: "asc" } });
+    if (next) await prisma.mineralListingImage.update({ where: { id: next.id }, data: { isPrimary: true } });
+  }
+  res.status(204).send();
+});
+
+router.post("/:id/images/:imageId/primary", requireRole("ADMIN", "SUPERVISOR", "EXECUTIVE"), async (req, res) => {
+  const mineId = requireMineId(req, res);
+  if (!mineId) return;
+  const image = await prisma.mineralListingImage.findFirst({
+    where: { id: req.params.imageId, listingId: req.params.id, listing: { site: { mineId } } },
+  });
+  if (!image) return res.status(404).json({ error: "Image not found" });
+  await prisma.$transaction([
+    prisma.mineralListingImage.updateMany({ where: { listingId: req.params.id }, data: { isPrimary: false } }),
+    prisma.mineralListingImage.update({ where: { id: image.id }, data: { isPrimary: true } }),
+  ]);
   res.status(204).send();
 });
 
