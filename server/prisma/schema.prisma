@@ -5620,3 +5620,27 @@ model SystemSetting {
   updatedAt     DateTime @updatedAt
   updatedByName String?
 }
+
+enum CustomApiKeyAuthStyle {
+  BEARER // sent as "Authorization: Bearer <value>"
+  HEADER // sent as "<headerName>: <value>"
+  QUERY // sent as "?<queryParam>=<value>"
+}
+
+// Admin-added integration keys beyond the fixed, code-wired list in SYSTEM_SETTING_KEYS —
+// "add a new API key" from Cyber Command Center's System Configuration tab. value is never
+// returned to the client in any response (see routes/cyberSettings.ts), only used
+// server-side when Execute is clicked, which replays it against testUrl through the
+// SSRF-guarded fetch in lib/ssrfGuard.ts.
+model CustomApiKey {
+  id            String                 @id @default(cuid())
+  name          String                 @unique
+  value         String
+  testUrl       String?
+  authStyle     CustomApiKeyAuthStyle  @default(BEARER)
+  headerName    String?
+  queryParam    String?
+  createdByName String?
+  createdAt     DateTime               @default(now())
+  updatedAt     DateTime               @updatedAt
+}

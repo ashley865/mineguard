@@ -101,6 +101,7 @@
     "signingIn": "Signing in…",
     "createAccount": "Create Account",
     "registerMine": "Register a new mine",
+    "privacyPolicy": "Privacy Policy",
     "error": "Login failed",
     "mfaCode": "Authenticator code",
     "mfaCodeHint": "Enter the 6-digit code from your authenticator app.",
@@ -4711,9 +4712,12 @@
     "settings": {
       "title": "Integration & System Configuration",
       "hint": "Manage the API keys, security policy, and integration settings that power this deployment, without needing a server redeploy. A value saved here overrides the server's environment variable (or built-in default) for every mine.",
+      "hiddenNotice": "Secret values (API keys, webhook URLs) are never sent back to the browser once saved — not even masked. Only whether one is configured is shown.",
       "currentValue": "Current value",
       "newValue": "New value",
       "notSet": "Not configured",
+      "secretConfigured": "Configured (hidden)",
+      "secretHidden": "For your security, the current value is never shown here. Enter a new value to replace it.",
       "edit": "Edit",
       "on": "On",
       "off": "Off",
@@ -4731,7 +4735,25 @@
         "environment": "From server environment",
         "default": "Using default",
         "unset": "Not set"
-      }
+      },
+      "customTitle": "Custom API Keys",
+      "customHint": "Add any other integration key MineGuard doesn't manage out of the box. Values are write-only — once saved, they can be executed against a test URL but never viewed again.",
+      "customNone": "No custom API keys added yet.",
+      "customAdd": "Add API key",
+      "customAddTitle": "Add a Custom API Key",
+      "customName": "Key name",
+      "customNameHint": "Uppercase letters, numbers, and underscores only, e.g. SLACK_API_KEY.",
+      "customValue": "Key value",
+      "customTestUrl": "Test URL (optional)",
+      "customTestUrlHint": "If provided, this key can be executed against this URL to prove it works. Must be an https:// address.",
+      "customAuthStyle": "How to send the key",
+      "authBearer": "Authorization: Bearer <key>",
+      "authHeader": "Custom header",
+      "authQuery": "Query parameter",
+      "customExecute": "Execute",
+      "customNoTestUrl": "No test URL configured",
+      "customAddedBy": "added by {{name}} on {{date}}",
+      "customConfirmDelete": "Delete this API key? This cannot be undone."
     }
   }
 }

@@ -1,5 +1,5 @@
 import { FormEvent, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { BuyerType } from "../api/types";
 import { useBuyerAuth } from "../context/BuyerAuthContext";
@@ -281,7 +281,12 @@ export default function BuyerRegister() {
           </div>
 
           <div className="space-y-2 border border-mine-800 rounded-md p-3 bg-mine-900/40">
-            <p className="text-xs text-mine-400">{t("buyerRegister.declarationsIntro")}</p>
+            <p className="text-xs text-mine-400">
+              {t("buyerRegister.declarationsIntro")}{" "}
+              <Link to="/privacy-policy" target="_blank" className="underline hover:text-mine-100">
+                {t("login.privacyPolicy")}
+              </Link>
+            </p>
             <label className="flex items-start gap-2 text-xs">
               <input type="checkbox" className="mt-0.5" checked={popiaConsentAccepted} onChange={(e) => setPopiaConsentAccepted(e.target.checked)} />
               <span>{t("buyerRegister.popiaDeclaration")}</span>

@@ -83,6 +83,7 @@
     "signingIn": "Meld tans aan…",
     "createAccount": "Skep Rekening",
     "registerMine": "Registreer 'n nuwe myn",
+    "privacyPolicy": "Privaatheidsbeleid",
     "error": "Aanmelding het misluk",
     "mfaCode": "Verifikeerderkode",
     "mfaCodeHint": "Voer die 6-syfer kode van jou verifikeerder-app in.",
@@ -4711,9 +4712,12 @@
     "settings": {
       "title": "Integrasie- en Stelselkonfigurasie",
       "hint": "Bestuur die API-sleutels, sekuriteitsbeleid en integrasie-instellings wat hierdie ontplooiing aandryf, sonder om die bediener te moet herontplooi. 'n Waarde wat hier gestoor word, oorskryf die bediener se omgewingveranderlike (of verstekwaarde) vir elke myn.",
+      "hiddenNotice": "Geheime waardes (API-sleutels, webhook-URL's) word nooit na die blaaier teruggestuur nadat dit gestoor is nie — selfs nie eers gemasker nie. Slegs of dit gekonfigureer is, word gewys.",
       "currentValue": "Huidige waarde",
       "newValue": "Nuwe waarde",
       "notSet": "Nie gekonfigureer nie",
+      "secretConfigured": "Gekonfigureer (versteek)",
+      "secretHidden": "Vir u veiligheid word die huidige waarde nooit hier gewys nie. Voer 'n nuwe waarde in om dit te vervang.",
       "edit": "Wysig",
       "on": "Aan",
       "off": "Af",
@@ -4731,7 +4735,25 @@
         "environment": "Vanaf bediener-omgewing",
         "default": "Gebruik verstekwaarde",
         "unset": "Nie gestel nie"
-      }
+      },
+      "customTitle": "Pasgemaakte API-sleutels",
+      "customHint": "Voeg enige ander integrasiesleutel by wat MineGuard nie self bestuur nie. Waardes is skryf-alleen — sodra dit gestoor is, kan dit teen 'n toets-URL uitgevoer word, maar nooit weer gesien word nie.",
+      "customNone": "Nog geen pasgemaakte API-sleutels bygevoeg nie.",
+      "customAdd": "Voeg API-sleutel by",
+      "customAddTitle": "Voeg 'n Pasgemaakte API-sleutel By",
+      "customName": "Sleutelnaam",
+      "customNameHint": "Slegs hoofletters, syfers en onderstrepe, bv. SLACK_API_KEY.",
+      "customValue": "Sleutelwaarde",
+      "customTestUrl": "Toets-URL (opsioneel)",
+      "customTestUrlHint": "Indien verskaf, kan hierdie sleutel teen hierdie URL uitgevoer word om te bewys dit werk. Moet 'n https://-adres wees.",
+      "customAuthStyle": "Hoe om die sleutel te stuur",
+      "authBearer": "Authorization: Bearer <sleutel>",
+      "authHeader": "Pasgemaakte kopstuk",
+      "authQuery": "Navraagparameter",
+      "customExecute": "Voer uit",
+      "customNoTestUrl": "Geen toets-URL gekonfigureer nie",
+      "customAddedBy": "bygevoeg deur {{name}} op {{date}}",
+      "customConfirmDelete": "Verwyder hierdie API-sleutel? Dit kan nie ontdoen word nie."
     }
   }
 }

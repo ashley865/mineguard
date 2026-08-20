@@ -3953,9 +3953,25 @@ export interface CyberSystemSetting {
   testable: boolean;
   defaultValue?: string;
   source: "database" | "environment" | "default" | "unset";
-  maskedValue: string | null;
+  configured: boolean;
+  /** Never present for secret settings — the server omits it entirely, not just masks it. */
+  value: string | null;
   updatedAt: string | null;
   updatedByName: string | null;
+}
+
+export type CustomApiKeyAuthStyle = "BEARER" | "HEADER" | "QUERY";
+
+export interface CyberCustomApiKey {
+  id: string;
+  name: string;
+  testUrl: string | null;
+  authStyle: CustomApiKeyAuthStyle;
+  headerName: string | null;
+  queryParam: string | null;
+  createdByName: string | null;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface BudgetPlan {

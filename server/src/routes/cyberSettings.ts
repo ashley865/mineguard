@@ -13,14 +13,22 @@ import {
 } from "../lib/systemSettings";
 import { aiChatComplete, AiNotConfiguredError } from "../lib/ai";
 import { sendTestWebhook } from "../lib/securityWebhook";
+import {
+  createCustomApiKey,
+  deleteCustomApiKey,
+  executeCustomApiKey,
+  listCustomApiKeys,
+  updateCustomApiKey,
+  validateCustomKeyName,
+} from "../lib/customApiKeys";
 
 const router = Router();
 
 // Global, not mine-scoped — these settings drive shared infrastructure (the AI assistant,
-// the metals price feed, the security webhook, maintenance mode, brute-force policy) used
-// by every mine on this deployment, same reasoning as the buyer-threats/global-blocklist
-// routes in cyberAccessControl.ts. Any Owner or IT Manager on any mine can view and change
-// them.
+// the metals price feed, the security webhook, maintenance mode, brute-force policy, and
+// any custom keys an admin adds) used by every mine on this deployment, same reasoning as
+// the buyer-threats/global-blocklist routes in cyberAccessControl.ts. Any Owner or IT
+// Manager on any mine can view and change them.
 router.use(requireAuth, requireRole("ADMIN", "EXECUTIVE"));
 
 router.get("/", async (req, res) => {
@@ -96,6 +104,81 @@ router.post("/:key/test", async (req, res) => {
   }
 
   return res.status(400).json({ error: "This setting cannot be tested" });
+});
+
+// Custom API keys — "add a new API key" beyond the fixed, code-wired list above. Values
+// are write-only from the client's perspective: list/create/update responses never echo
+// the key back (see lib/customApiKeys.ts's listSelect), only execute() reads it internally.
+const authStyleSchema = z.enum(["BEARER", "HEADER", "QUERY"]);
+
+const createCustomKeySchema = z.object({
+  name: z.string().trim().toUpperCase(),
+  value: z.string().trim().min(1).max(2000),
+  testUrl: z.string().trim().url().optional().nullable(),
+  authStyle: authStyleSchema.optional(),
+  headerName: z.string().trim().max(200).optional().nullable(),
+  queryParam: z.string().trim().max(200).optional().nullable(),
+});
+
+router.get("/custom", async (req, res) => {
+  if (!(await requireCyberAccess(req, res))) return;
+  res.json(await listCustomApiKeys());
+});
+
+router.post("/custom", async (req, res) => {
+  if (!(await requireCyberAccess(req, res))) return;
+  const parsed = createCustomKeySchema.safeParse(req.body);
+  if (!parsed.success) return res.status(400).json({ error: parsed.error.flatten() });
+  const nameError = validateCustomKeyName(parsed.data.name);
+  if (nameError) return res.status(400).json({ error: nameError });
+  if (isKnownSystemSetting(parsed.data.name)) return res.status(409).json({ error: "This name is already used by a built-in setting" });
+  if (parsed.data.authStyle === "HEADER" && !parsed.data.headerName) return res.status(400).json({ error: "A header name is required for this auth style" });
+  if (parsed.data.authStyle === "QUERY" && !parsed.data.queryParam) return res.status(400).json({ error: "A query parameter name is required for this auth style" });
+
+  const existing = await prisma.customApiKey.findUnique({ where: { name: parsed.data.name } });
+  if (existing) return res.status(409).json({ error: "A key with this name already exists" });
+
+  const me = await prisma.user.findUnique({ where: { id: req.auth!.userId }, select: { name: true } });
+  try {
+    const created = await createCustomApiKey({ ...parsed.data, createdByName: me?.name ?? null });
+    res.status(201).json(created);
+  } catch {
+    res.status(409).json({ error: "A key with this name already exists" });
+  }
+});
+
+const updateCustomKeySchema = z.object({
+  value: z.string().trim().min(1).max(2000).optional(),
+  testUrl: z.string().trim().url().optional().nullable(),
+  authStyle: authStyleSchema.optional(),
+  headerName: z.string().trim().max(200).optional().nullable(),
+  queryParam: z.string().trim().max(200).optional().nullable(),
+});
+
+router.put("/custom/:id", async (req, res) => {
+  if (!(await requireCyberAccess(req, res))) return;
+  const parsed = updateCustomKeySchema.safeParse(req.body);
+  if (!parsed.success) return res.status(400).json({ error: parsed.error.flatten() });
+  const existing = await prisma.customApiKey.findUnique({ where: { id: req.params.id } });
+  if (!existing) return res.status(404).json({ error: "Key not found" });
+  const updated = await updateCustomApiKey(existing.id, parsed.data);
+  res.json(updated);
+});
+
+router.delete("/custom/:id", async (req, res) => {
+  if (!(await requireCyberAccess(req, res))) return;
+  const existing = await prisma.customApiKey.findUnique({ where: { id: req.params.id } });
+  if (!existing) return res.status(404).json({ error: "Key not found" });
+  await deleteCustomApiKey(existing.id);
+  res.status(204).send();
+});
+
+// "Execute" — actually calls testUrl with this key attached, through the SSRF guard.
+router.post("/custom/:id/execute", async (req, res) => {
+  if (!(await requireCyberAccess(req, res))) return;
+  const existing = await prisma.customApiKey.findUnique({ where: { id: req.params.id }, select: { id: true } });
+  if (!existing) return res.status(404).json({ error: "Key not found" });
+  res.json(await executeCustomApiKey(existing.id));
 });
 
 export default router;

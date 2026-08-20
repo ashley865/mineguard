@@ -140,7 +140,7 @@ router.post("/register", authLimiter, upload.array("documents", 6), async (req, 
   const existing = await prisma.buyer.findUnique({ where: { contactEmail: parsed.data.contactEmail } });
   if (existing) return res.status(409).json({ error: "A buyer with this email is already registered" });
 
-  const passwordHash = await bcrypt.hash(password, 10);
+  const passwordHash = await bcrypt.hash(password, 12);
   const files = (req.files as Express.Multer.File[] | undefined) ?? [];
   const buyer = await prisma.buyer.create({
     data: {
@@ -217,7 +217,7 @@ router.post("/:id/set-password", async (req, res) => {
   if (password.length < 8) return res.status(400).json({ error: "Password must be at least 8 characters" });
   const buyer = await prisma.buyer.findUnique({ where: { id: req.params.id } });
   if (!buyer) return res.status(404).json({ error: "Buyer not found" });
-  const passwordHash = await bcrypt.hash(password, 10);
+  const passwordHash = await bcrypt.hash(password, 12);
   await prisma.buyer.update({ where: { id: buyer.id }, data: { passwordHash } });
   res.status(204).send();
 });

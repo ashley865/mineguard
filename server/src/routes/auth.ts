@@ -70,7 +70,7 @@ router.post("/register", authLimiter, async (req, res) => {
     return res.status(401).json({ error: "Invalid mine passkey" });
   }
 
-  const passwordHash = await bcrypt.hash(password, 10);
+  const passwordHash = await bcrypt.hash(password, 12);
   const user = await prisma.user.create({
     data: { email, passwordHash, name, role: "ADMIN", mineId: mine.id },
   });
@@ -210,7 +210,7 @@ router.post("/change-password", requireAuth, passwordChangeLimiter, async (req, 
   if (!user) return res.status(404).json({ error: "User not found" });
   const valid = await bcrypt.compare(parsed.data.currentPassword, user.passwordHash);
   if (!valid) return res.status(401).json({ error: "Current password is incorrect" });
-  const passwordHash = await bcrypt.hash(parsed.data.newPassword, 10);
+  const passwordHash = await bcrypt.hash(parsed.data.newPassword, 12);
   await prisma.user.update({ where: { id: user.id }, data: { passwordHash } });
   res.status(204).send();
 });

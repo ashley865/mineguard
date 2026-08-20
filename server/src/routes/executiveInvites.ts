@@ -72,7 +72,7 @@ router.post("/:id/accept", authLimiter, async (req, res) => {
   const existing = await prisma.user.findUnique({ where: { email: invite.email } });
   if (existing) return res.status(409).json({ error: "Email already registered" });
 
-  const passwordHash = await bcrypt.hash(parsed.data.password, 10);
+  const passwordHash = await bcrypt.hash(parsed.data.password, 12);
   const user = await prisma.user.create({
     data: {
       email: invite.email,
@@ -119,7 +119,7 @@ router.post("/", async (req, res) => {
   if (existingUser) return res.status(409).json({ error: "Email already registered" });
 
   const key = crypto.randomBytes(20).toString("hex");
-  const keyHash = await bcrypt.hash(key, 10);
+  const keyHash = await bcrypt.hash(key, 12);
   const invite = await prisma.executiveInvite.create({
     data: {
       mineId: admin.mineId,

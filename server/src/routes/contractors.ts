@@ -106,7 +106,7 @@ router.post("/register/:siteId", authLimiter, upload.array("documents", 6), asyn
   if (existing) return res.status(409).json({ error: "A contractor with this email is already registered" });
 
   const { password, ...contractorData } = parsed.data;
-  const passwordHash = await bcrypt.hash(password, 10);
+  const passwordHash = await bcrypt.hash(password, 12);
   const files = (req.files as Express.Multer.File[] | undefined) ?? [];
   const item = await prisma.contractor.create({
     data: {
@@ -165,7 +165,7 @@ router.post("/:id/set-password", requireRole("ADMIN", "SUPERVISOR", "EXECUTIVE")
   if (password.length < 8) return res.status(400).json({ error: "Password must be at least 8 characters" });
   const existing = await prisma.contractor.findFirst({ where: { id: req.params.id, site: { mineId } } });
   if (!existing) return res.status(404).json({ error: "Contractor not found" });
-  const passwordHash = await bcrypt.hash(password, 10);
+  const passwordHash = await bcrypt.hash(password, 12);
   await prisma.contractor.update({ where: { id: existing.id }, data: { passwordHash } });
   res.status(204).send();
 });

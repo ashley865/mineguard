@@ -99,6 +99,11 @@ export default function Login() {
             </Link>
           </div>
         </form>
+        <div className="text-center mt-4">
+          <Link to="/privacy-policy" className="text-xs text-mine-500 hover:text-mine-300 underline">
+            {t("login.privacyPolicy")}
+          </Link>
+        </div>
       </div>
     </div>
   );

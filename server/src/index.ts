@@ -1,8 +1,10 @@
 import "dotenv/config";
 import express from "express";
 import cors from "cors";
+import helmet from "helmet";
 import { createServer } from "http";
 import { Server as SocketServer } from "socket.io";
+import { apiLimiter } from "./middleware/rateLimit";
 
 import authRoutes from "./routes/auth";
 import sitesRoutes from "./routes/sites";
@@ -165,9 +167,15 @@ io.use(async (socket, next) => {
 // (see middleware/rateLimit.ts) would be meaningless.
 app.set("trust proxy", 1);
 
+// Baseline security headers (HSTS, X-Content-Type-Options, X-Frame-Options, Referrer-Policy,
+// etc.) on every response. CSP is disabled here — this server only ever returns JSON, never
+// HTML, so a content policy meant to constrain a rendered page has nothing to protect; the
+// SPA that actually renders HTML is a separate deployment with its own CSP concerns.
+app.use(helmet({ contentSecurityPolicy: false, crossOriginResourcePolicy: { policy: "same-site" } }));
 app.use(cors({ origin: clientOrigin }));
 app.use(express.json());
 app.use(sanitizeBody);
+app.use("/api", apiLimiter);
 
 app.get("/api/health", (_req, res) => res.json({ status: "ok" }));
 

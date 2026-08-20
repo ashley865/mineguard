@@ -1,4 +1,5 @@
 import { resolveSetting } from "./systemSettings";
+import { assertSafeExternalUrl, UnsafeUrlError } from "./ssrfGuard";
 
 export class AiNotConfiguredError extends Error {
   constructor() {
@@ -30,6 +31,15 @@ export async function aiChatComplete(messages: AiMessage[]): Promise<string> {
 
   const baseUrl = ((await resolveSetting("AI_API_BASE_URL")) || "https://api.openai.com/v1").replace(/\/+$/, "");
   const model = (await resolveSetting("AI_MODEL")) || "gpt-4o-mini";
+
+  // An admin-editable base URL is an SSRF vector like any other admin-configured
+  // outbound URL — see lib/ssrfGuard.ts.
+  try {
+    await assertSafeExternalUrl(`${baseUrl}/chat/completions`);
+  } catch (err) {
+    if (err instanceof UnsafeUrlError) throw new Error(`AI provider base URL is not allowed: ${err.message}`);
+    throw err;
+  }
 
   const res = await fetch(`${baseUrl}/chat/completions`, {
     method: "POST",

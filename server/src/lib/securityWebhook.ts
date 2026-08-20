@@ -1,4 +1,5 @@
 import { resolveSetting } from "./systemSettings";
+import { assertSafeExternalUrl, UnsafeUrlError } from "./ssrfGuard";
 
 export interface SecurityWebhookEvent {
   title: string;
@@ -14,6 +15,7 @@ export async function notifySecurityWebhook(event: SecurityWebhookEvent): Promis
   try {
     const url = await resolveSetting("SECURITY_ALERT_WEBHOOK_URL");
     if (!url) return;
+    await assertSafeExternalUrl(url);
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), 5000);
     try {
@@ -33,6 +35,7 @@ export async function notifySecurityWebhook(event: SecurityWebhookEvent): Promis
 
 export async function sendTestWebhook(url: string): Promise<{ success: boolean; message: string }> {
   try {
+    await assertSafeExternalUrl(url);
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), 8000);
     let res;
@@ -49,6 +52,7 @@ export async function sendTestWebhook(url: string): Promise<{ success: boolean; 
     if (!res.ok) return { success: false, message: `Webhook endpoint responded with ${res.status}` };
     return { success: true, message: "Test notification sent" };
   } catch (err: any) {
+    if (err instanceof UnsafeUrlError) return { success: false, message: err.message };
     return { success: false, message: err?.name === "AbortError" ? "Webhook request timed out" : "Could not reach the webhook URL" };
   }
 }

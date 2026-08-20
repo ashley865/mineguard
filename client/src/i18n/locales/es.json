@@ -83,6 +83,7 @@
     "signingIn": "Iniciando sesión…",
     "createAccount": "Crear cuenta",
     "registerMine": "Registrar una nueva mina",
+    "privacyPolicy": "Política de Privacidad",
     "error": "Error al iniciar sesión",
     "mfaCode": "Código del autenticador",
     "mfaCodeHint": "Ingresa el código de 6 dígitos de tu aplicación de autenticación.",
@@ -4711,9 +4712,12 @@
     "settings": {
       "title": "Configuración de Integraciones y del Sistema",
       "hint": "Gestione las claves API, la política de seguridad y los ajustes de integración que impulsan este despliegue, sin necesidad de volver a implementar el servidor. Un valor guardado aquí sustituye la variable de entorno del servidor (o el valor predeterminado) para todas las minas.",
+      "hiddenNotice": "Los valores secretos (claves API, URLs de webhook) nunca se devuelven al navegador una vez guardados — ni siquiera enmascarados. Solo se muestra si están configurados.",
       "currentValue": "Valor actual",
       "newValue": "Nuevo valor",
       "notSet": "No configurado",
+      "secretConfigured": "Configurado (oculto)",
+      "secretHidden": "Por su seguridad, el valor actual nunca se muestra aquí. Ingrese un nuevo valor para reemplazarlo.",
       "edit": "Editar",
       "on": "Activado",
       "off": "Desactivado",
@@ -4731,7 +4735,25 @@
         "environment": "Desde el entorno del servidor",
         "default": "Usando el valor predeterminado",
         "unset": "No establecido"
-      }
+      },
+      "customTitle": "Claves API Personalizadas",
+      "customHint": "Agregue cualquier otra clave de integración que MineGuard no gestione de forma nativa. Los valores son de solo escritura — una vez guardados, se pueden ejecutar contra una URL de prueba pero nunca volver a verse.",
+      "customNone": "Aún no se han agregado claves API personalizadas.",
+      "customAdd": "Agregar clave API",
+      "customAddTitle": "Agregar una Clave API Personalizada",
+      "customName": "Nombre de la clave",
+      "customNameHint": "Solo letras mayúsculas, números y guiones bajos, por ejemplo SLACK_API_KEY.",
+      "customValue": "Valor de la clave",
+      "customTestUrl": "URL de prueba (opcional)",
+      "customTestUrlHint": "Si se proporciona, esta clave se puede ejecutar contra esta URL para comprobar que funciona. Debe ser una dirección https://.",
+      "customAuthStyle": "Cómo enviar la clave",
+      "authBearer": "Authorization: Bearer <clave>",
+      "authHeader": "Encabezado personalizado",
+      "authQuery": "Parámetro de consulta",
+      "customExecute": "Ejecutar",
+      "customNoTestUrl": "No hay URL de prueba configurada",
+      "customAddedBy": "agregado por {{name}} el {{date}}",
+      "customConfirmDelete": "¿Eliminar esta clave API? Esta acción no se puede deshacer."
     }
   }
 }

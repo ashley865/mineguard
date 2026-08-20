@@ -99,6 +99,8 @@ export function isKnownSystemSetting(key: string): boolean {
   return SETTING_DEF_BY_KEY.has(key);
 }
 
+const URL_KEYS = new Set(["AI_API_BASE_URL", "SECURITY_ALERT_WEBHOOK_URL"]);
+
 /** Returns an error message if invalid, or null if the value is acceptable for this key's type. */
 export function validateSettingValue(key: string, value: string): string | null {
   const def = SETTING_DEF_BY_KEY.get(key);
@@ -111,6 +113,17 @@ export function validateSettingValue(key: string, value: string): string | null 
     if (!Number.isInteger(n) || n <= 0) return "Must be a positive whole number";
     if (key === "BRUTE_FORCE_THRESHOLD" && n > 1000) return "Must be 1000 or less";
     if (key === "BRUTE_FORCE_WINDOW_HOURS" && n > 8760) return "Must be 8760 (one year) or less";
+    return null;
+  }
+  if (URL_KEYS.has(key)) {
+    // Cheap, synchronous format check only — the real SSRF/DNS check (lib/ssrfGuard.ts)
+    // runs at the point each URL is actually fetched, since that check needs a live DNS
+    // lookup and shouldn't be able to block a save on a transient resolver hiccup.
+    try {
+      if (new URL(value).protocol !== "https:") return "Must be an https:// URL";
+    } catch {
+      return "Must be a valid URL";
+    }
     return null;
   }
   return value.trim().length > 0 ? null : "A non-empty value is required";
@@ -175,14 +188,15 @@ export async function clearSystemSetting(key: string): Promise<void> {
   invalidateSystemSettingsCache();
 }
 
-function mask(value: string): string {
-  if (value.length <= 4) return "••••";
-  return `••••${value.slice(-4)}`;
-}
-
 export interface SystemSettingView extends SystemSettingDef {
   source: "database" | "environment" | "default" | "unset";
-  maskedValue: string | null;
+  configured: boolean;
+  // Deliberately omitted entirely for secret settings — not masked, not truncated, not
+  // present in the JSON at all — so nothing derivable from a real key ever reaches the
+  // browser (Network tab, React DevTools, a service worker cache, an error-reporting SDK
+  // that snapshots state, etc). A non-secret setting's actual value is fine to show, since
+  // it's operational config (a model name, a URL, a threshold), not a credential.
+  value: string | null;
   updatedAt: string | null;
   updatedByName: string | null;
 }
@@ -196,7 +210,8 @@ export async function listSystemSettings(): Promise<SystemSettingView[]> {
       return {
         ...def,
         source: "database" as const,
-        maskedValue: def.secret ? mask(row.value) : row.value,
+        configured: true,
+        value: def.secret ? null : row.value,
         updatedAt: row.updatedAt.toISOString(),
         updatedByName: row.updatedByName,
       };
@@ -206,14 +221,15 @@ export async function listSystemSettings(): Promise<SystemSettingView[]> {
       return {
         ...def,
         source: "environment" as const,
-        maskedValue: def.secret ? mask(envValue) : envValue,
+        configured: true,
+        value: def.secret ? null : envValue,
         updatedAt: null,
         updatedByName: null,
       };
     }
     if (def.defaultValue !== undefined) {
-      return { ...def, source: "default" as const, maskedValue: def.defaultValue, updatedAt: null, updatedByName: null };
+      return { ...def, source: "default" as const, configured: true, value: def.secret ? null : def.defaultValue, updatedAt: null, updatedByName: null };
     }
-    return { ...def, source: "unset" as const, maskedValue: null, updatedAt: null, updatedByName: null };
+    return { ...def, source: "unset" as const, configured: false, value: null, updatedAt: null, updatedByName: null };
   });
 }

@@ -156,7 +156,7 @@ router.post("/change-password", requireBuyerAuth, passwordChangeLimiter, async (
   if (!buyer?.passwordHash) return res.status(404).json({ error: "Buyer not found" });
   const valid = await bcrypt.compare(parsed.data.currentPassword, buyer.passwordHash);
   if (!valid) return res.status(401).json({ error: "Current password is incorrect" });
-  const passwordHash = await bcrypt.hash(parsed.data.newPassword, 10);
+  const passwordHash = await bcrypt.hash(parsed.data.newPassword, 12);
   await prisma.buyer.update({ where: { id: buyer.id }, data: { passwordHash } });
   res.status(204).send();
 });

@@ -145,7 +145,7 @@ router.post("/change-password", requireContractorAuth, passwordChangeLimiter, as
   if (!contractor?.passwordHash) return res.status(404).json({ error: "Contractor not found" });
   const valid = await bcrypt.compare(parsed.data.currentPassword, contractor.passwordHash);
   if (!valid) return res.status(401).json({ error: "Current password is incorrect" });
-  const passwordHash = await bcrypt.hash(parsed.data.newPassword, 10);
+  const passwordHash = await bcrypt.hash(parsed.data.newPassword, 12);
   await prisma.contractor.update({ where: { id: contractor.id }, data: { passwordHash } });
   res.status(204).send();
 });

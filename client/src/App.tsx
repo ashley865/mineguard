@@ -78,6 +78,7 @@ import ResourceManagement from "./pages/ResourceManagement";
 import CommunityEngagementPage from "./pages/CommunityEngagement";
 import Geology from "./pages/Geology";
 import WinderShaft from "./pages/WinderShaft";
+import PrivacyPolicy from "./pages/PrivacyPolicy";
 
 function HomeRoute() {
   const { user } = useAuth();
@@ -109,6 +110,7 @@ export default function App() {
       <Route path="/buyer-portal" element={<BuyerPortal />} />
       <Route path="/tender-board" element={<TenderBoard />} />
       <Route path="/safety-report/:siteId" element={<SafetyObservationReport />} />
+      <Route path="/privacy-policy" element={<PrivacyPolicy />} />
       <Route element={<ProtectedRoute />}>
         <Route path="/" element={<HomeRoute />} />
         <Route path="/sites" element={<ModuleRoute path="/sites"><Sites /></ModuleRoute>} />

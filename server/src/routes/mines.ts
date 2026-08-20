@@ -173,8 +173,8 @@ router.post("/register", authLimiter, async (req, res) => {
   }
 
   const passkey = crypto.randomBytes(20).toString("hex");
-  const passkeyHash = await bcrypt.hash(passkey, 10);
-  const adminPasswordHash = await bcrypt.hash(adminPassword, 10);
+  const passkeyHash = await bcrypt.hash(passkey, 12);
+  const adminPasswordHash = await bcrypt.hash(adminPassword, 12);
 
   const mine = await prisma.mine.create({
     data: {

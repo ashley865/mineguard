@@ -83,6 +83,7 @@
     "signingIn": "Anmeldung läuft…",
     "createAccount": "Konto erstellen",
     "registerMine": "Neue Mine registrieren",
+    "privacyPolicy": "Datenschutzrichtlinie",
     "error": "Anmeldung fehlgeschlagen",
     "mfaCode": "Authenticator-Code",
     "mfaCodeHint": "Geben Sie den 6-stelligen Code aus Ihrer Authenticator-App ein.",
@@ -4711,9 +4712,12 @@
     "settings": {
       "title": "Integrations- und Systemkonfiguration",
       "hint": "Verwalten Sie die API-Schlüssel, die Sicherheitsrichtlinie und die Integrationseinstellungen dieser Bereitstellung, ohne den Server neu bereitstellen zu müssen. Ein hier gespeicherter Wert überschreibt die Umgebungsvariable des Servers (oder den Standardwert) für jede Mine.",
+      "hiddenNotice": "Geheime Werte (API-Schlüssel, Webhook-URLs) werden nach dem Speichern nie an den Browser zurückgesendet — nicht einmal maskiert. Es wird nur angezeigt, ob einer konfiguriert ist.",
       "currentValue": "Aktueller Wert",
       "newValue": "Neuer Wert",
       "notSet": "Nicht konfiguriert",
+      "secretConfigured": "Konfiguriert (verborgen)",
+      "secretHidden": "Zu Ihrer Sicherheit wird der aktuelle Wert hier nie angezeigt. Geben Sie einen neuen Wert ein, um ihn zu ersetzen.",
       "edit": "Bearbeiten",
       "on": "Ein",
       "off": "Aus",
@@ -4731,7 +4735,25 @@
         "environment": "Aus der Serverumgebung",
         "default": "Standardwert wird verwendet",
         "unset": "Nicht festgelegt"
-      }
+      },
+      "customTitle": "Benutzerdefinierte API-Schlüssel",
+      "customHint": "Fügen Sie jeden weiteren Integrationsschlüssel hinzu, den MineGuard nicht von Haus aus verwaltet. Werte sind nur schreibbar — einmal gespeichert, können sie gegen eine Test-URL ausgeführt, aber nie wieder angezeigt werden.",
+      "customNone": "Noch keine benutzerdefinierten API-Schlüssel hinzugefügt.",
+      "customAdd": "API-Schlüssel hinzufügen",
+      "customAddTitle": "Einen Benutzerdefinierten API-Schlüssel Hinzufügen",
+      "customName": "Schlüsselname",
+      "customNameHint": "Nur Großbuchstaben, Zahlen und Unterstriche, z. B. SLACK_API_KEY.",
+      "customValue": "Schlüsselwert",
+      "customTestUrl": "Test-URL (optional)",
+      "customTestUrlHint": "Falls angegeben, kann dieser Schlüssel gegen diese URL ausgeführt werden, um zu beweisen, dass er funktioniert. Muss eine https://-Adresse sein.",
+      "customAuthStyle": "Wie der Schlüssel gesendet wird",
+      "authBearer": "Authorization: Bearer <Schlüssel>",
+      "authHeader": "Benutzerdefinierter Header",
+      "authQuery": "Abfrageparameter",
+      "customExecute": "Ausführen",
+      "customNoTestUrl": "Keine Test-URL konfiguriert",
+      "customAddedBy": "hinzugefügt von {{name}} am {{date}}",
+      "customConfirmDelete": "Diesen API-Schlüssel löschen? Dies kann nicht rückgängig gemacht werden."
     }
   }
 }
