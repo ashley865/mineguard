@@ -31,7 +31,7 @@ router.get("/overview", async (req, res) => {
   if (!(await requireCyberAccess(req, res))) return;
   const dormantSince = new Date(Date.now() - DORMANT_THRESHOLD_DAYS * 86400000);
 
-  const [users, recentEvents, buyers, visitors, activeBlacklist, gateLogs] = await Promise.all([
+  const [users, recentEvents, buyers, visitors, activeBlacklist, gateLogs, contractors] = await Promise.all([
     prisma.user.findMany({
       where: { mineId },
       select: { id: true, name: true, email: true, role: true, title: true, isActive: true, mfaEnabled: true, lastLoginAt: true, createdAt: true },
@@ -47,6 +47,7 @@ router.get("/overview", async (req, res) => {
         flagged: true,
         occurredAt: true,
         user: { select: { id: true, name: true } },
+        contractor: { select: { id: true, companyName: true } },
       },
       orderBy: { occurredAt: "desc" },
       take: 100,
@@ -108,6 +109,23 @@ router.get("/overview", async (req, res) => {
       orderBy: { loggedAt: "desc" },
       take: 300,
     }),
+    // Unlike Buyer, a Contractor belongs directly to one site/mine, so this is scoped the
+    // same simple way as staff Users — no bid-based derivation needed.
+    prisma.contractor.findMany({
+      where: { site: { mineId } },
+      select: {
+        id: true,
+        companyName: true,
+        contactEmail: true,
+        status: true,
+        passwordHash: true,
+        lastLoginAt: true,
+        createdAt: true,
+        _count: { select: { permitsToWork: true } },
+      },
+      orderBy: { companyName: "asc" },
+      take: 200,
+    }),
   ]);
 
   // Digital access threats (below) are IP-based; this is the physical-access equivalent —
@@ -158,6 +176,17 @@ router.get("/overview", async (req, res) => {
     totalVisitors: visitors.length,
     visitors,
     physicalAccessAlerts,
+    totalContractors: contractors.length,
+    contractors: contractors.map((c) => ({
+      id: c.id,
+      companyName: c.companyName,
+      contactEmail: c.contactEmail,
+      status: c.status,
+      hasPortalAccess: !!c.passwordHash,
+      lastLoginAt: c.lastLoginAt,
+      permitCount: c._count.permitsToWork,
+      createdAt: c.createdAt,
+    })),
   });
 });
 

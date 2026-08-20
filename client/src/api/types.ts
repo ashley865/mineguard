@@ -1304,6 +1304,8 @@ export interface Contractor {
   status: ContractorStatus;
   siteId: string;
   site?: { id: string; name: string };
+  hasPortalAccess?: boolean;
+  lastLoginAt?: string | null;
   documents: ContractorDocument[];
 }
 
@@ -3768,6 +3770,7 @@ export interface CyberLoginEvent {
   flagged: boolean;
   occurredAt: string;
   user?: { id: string; name: string } | null;
+  contractor?: { id: string; companyName: string } | null;
 }
 
 export interface CyberPrivilegedAccount {
@@ -3809,6 +3812,17 @@ export interface CyberIdentityVisitor {
   checkOutAt?: string | null;
 }
 
+export interface CyberIdentityContractor {
+  id: string;
+  companyName: string;
+  contactEmail?: string | null;
+  status: ContractorStatus;
+  hasPortalAccess: boolean;
+  lastLoginAt?: string | null;
+  permitCount: number;
+  createdAt: string;
+}
+
 export interface CyberPhysicalAccessAlert {
   id: string;
   personName: string;
@@ -3833,6 +3847,8 @@ export interface CyberIdentityOverview {
   totalVisitors: number;
   visitors: CyberIdentityVisitor[];
   physicalAccessAlerts: CyberPhysicalAccessAlert[];
+  totalContractors: number;
+  contractors: CyberIdentityContractor[];
 }
 
 export interface CyberScoreBreakdownItem {

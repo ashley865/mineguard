@@ -1,13 +1,16 @@
 import { FormEvent, useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { api } from "../api/client";
+import { useContractorAuth } from "../context/ContractorAuthContext";
 import { buttonPrimary, cardClass, inputClass, labelClass } from "../components/ui";
 import DateField from "../components/DateField";
 
 export default function ContractorRegister() {
   const { t } = useTranslation();
   const { siteId } = useParams<{ siteId: string }>();
+  const { registerWithForm } = useContractorAuth();
+  const navigate = useNavigate();
   const [site, setSite] = useState<{ id: string; name: string; location: string } | null>(null);
   const [notFound, setNotFound] = useState(false);
 
@@ -21,10 +24,11 @@ export default function ContractorRegister() {
   const [contractEndDate, setContractEndDate] = useState("");
   const [goodStandingExpiry, setGoodStandingExpiry] = useState("");
   const [insuranceExpiry, setInsuranceExpiry] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
 
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [done, setDone] = useState(false);
 
   useEffect(() => {
     if (!siteId) return;
@@ -38,23 +42,32 @@ export default function ContractorRegister() {
     e.preventDefault();
     if (!siteId) return;
     setError(null);
+    if (password.length < 8) {
+      setError(t("contractorRegister.passwordTooShort"));
+      return;
+    }
+    if (password !== confirmPassword) {
+      setError(t("contractorRegister.passwordMismatch"));
+      return;
+    }
     setSubmitting(true);
     try {
-      await api.post(`/contractors/register/${siteId}`, {
-        companyName,
-        registrationNumber: registrationNumber || undefined,
-        scopeOfWork,
-        contactName,
-        contactPhone: contactPhone || undefined,
-        contactEmail: contactEmail || undefined,
-        contractStartDate,
-        contractEndDate,
-        goodStandingExpiry: goodStandingExpiry || null,
-        insuranceExpiry: insuranceExpiry || null,
-      });
-      setDone(true);
-    } catch {
-      setError(t("contractorRegister.submitError"));
+      const form = new FormData();
+      form.append("companyName", companyName);
+      if (registrationNumber) form.append("registrationNumber", registrationNumber);
+      form.append("scopeOfWork", scopeOfWork);
+      form.append("contactName", contactName);
+      if (contactPhone) form.append("contactPhone", contactPhone);
+      form.append("contactEmail", contactEmail);
+      form.append("contractStartDate", contractStartDate);
+      form.append("contractEndDate", contractEndDate);
+      if (goodStandingExpiry) form.append("goodStandingExpiry", goodStandingExpiry);
+      if (insuranceExpiry) form.append("insuranceExpiry", insuranceExpiry);
+      form.append("password", password);
+      await registerWithForm(siteId, form);
+      navigate("/contractor-portal");
+    } catch (err: any) {
+      setError(err.response?.data?.error ?? t("contractorRegister.submitError"));
     } finally {
       setSubmitting(false);
     }
@@ -64,17 +77,6 @@ export default function ContractorRegister() {
     return (
       <div className="min-h-screen flex items-center justify-center bg-mine-950 p-4">
         <div className={`${cardClass} p-6 max-w-md text-center`}>{t("contractorRegister.siteNotFound")}</div>
-      </div>
-    );
-  }
-
-  if (done) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-mine-950 p-4">
-        <div className={`${cardClass} p-6 sm:p-8 max-w-md text-center space-y-3`}>
-          <h1 className="text-lg font-bold">{t("contractorRegister.successTitle")}</h1>
-          <p className="text-mine-300 text-sm">{t("contractorRegister.successBody")}</p>
-        </div>
       </div>
     );
   }
@@ -117,7 +119,8 @@ export default function ContractorRegister() {
           </div>
           <div>
             <label className={labelClass}>{t("contractors.contactEmail")}</label>
-            <input className={inputClass} type="email" value={contactEmail} onChange={(e) => setContactEmail(e.target.value)} />
+            <input className={inputClass} type="email" value={contactEmail} onChange={(e) => setContactEmail(e.target.value)} required />
+            <p className="text-[10px] text-mine-400 mt-1">{t("contractorRegister.emailHint")}</p>
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div>
@@ -137,6 +140,21 @@ export default function ContractorRegister() {
             <div>
               <label className={labelClass}>{t("contractors.insuranceExpiry")}</label>
               <DateField value={insuranceExpiry} onChange={setInsuranceExpiry} />
+            </div>
+          </div>
+
+          <div className="text-xs font-semibold text-mine-300 uppercase pt-2 border-t border-mine-800">
+            {t("contractorRegister.sectionAccount")}
+          </div>
+          <p className="text-xs text-mine-400">{t("contractorRegister.accountHint")}</p>
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className={labelClass}>{t("contractorRegister.password")}</label>
+              <input className={inputClass} type="password" value={password} onChange={(e) => setPassword(e.target.value)} minLength={8} required />
+            </div>
+            <div>
+              <label className={labelClass}>{t("contractorRegister.confirmPassword")}</label>
+              <input className={inputClass} type="password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} minLength={8} required />
             </div>
           </div>
 

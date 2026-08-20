@@ -1672,9 +1672,15 @@ model Contractor {
   status              ContractorStatus @default(ACTIVE)
   siteId              String
   site                Site             @relation(fields: [siteId], references: [id], onDelete: Cascade)
+  // Nullable for the same reason as Buyer.passwordHash: staff-created contractors (the
+  // internal POST / route) don't set one at creation, only self-registered ones (public
+  // POST /contractors/register/:siteId) do — staff can set/reset it afterward.
+  passwordHash        String?
+  lastLoginAt         DateTime?
 
-  permitsToWork PermitToWork[]
-  documents     ContractorDocument[]
+  permitsToWork    PermitToWork[]
+  documents        ContractorDocument[]
+  cyberLoginEvents CyberLoginEvent[]
 
   createdAt DateTime @default(now())
 }
@@ -5513,18 +5519,23 @@ enum CyberLoginEventType {
 }
 
 // Written directly from the real /auth/login flow (see auth.ts) — not manually
-// logged — so identity security reflects actual authentication activity.
+// logged — so identity security reflects actual authentication activity. Also written
+// from POST /contractor-auth/login (see contractorAuth.ts): unlike Buyer, a Contractor
+// belongs to exactly one site/mine, so its login attempts fit this same mine-scoped
+// table directly rather than needing a separate un-scoped view like buyers.
 model CyberLoginEvent {
-  id         String               @id @default(cuid())
-  mineId     String
-  mine       Mine                 @relation(fields: [mineId], references: [id], onDelete: Cascade)
-  userId     String?
-  user       User?                @relation("CyberLoginEventUser", fields: [userId], references: [id], onDelete: SetNull)
-  eventType  CyberLoginEventType
-  ipAddress  String?
-  userAgent  String?
-  flagged    Boolean              @default(false)
-  occurredAt DateTime             @default(now())
+  id           String               @id @default(cuid())
+  mineId       String
+  mine         Mine                 @relation(fields: [mineId], references: [id], onDelete: Cascade)
+  userId       String?
+  user         User?                @relation("CyberLoginEventUser", fields: [userId], references: [id], onDelete: SetNull)
+  contractorId String?
+  contractor   Contractor?          @relation(fields: [contractorId], references: [id], onDelete: SetNull)
+  eventType    CyberLoginEventType
+  ipAddress    String?
+  userAgent    String?
+  flagged      Boolean              @default(false)
+  occurredAt   DateTime             @default(now())
 }
 
 // One row per mine per calendar day, upserted whenever the dashboard is loaded

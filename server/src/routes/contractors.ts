@@ -1,11 +1,14 @@
 import { Router } from "express";
 import multer from "multer";
+import bcrypt from "bcryptjs";
 import { z } from "zod";
 import { prisma } from "../prisma";
 import { requireAuth, requireRole } from "../middleware/auth";
 import { requireMineId } from "../lib/mineScope";
 import { documentFileFilter } from "../lib/uploadFilters";
 import { verifyAdminPassword } from "../lib/verifyPassword";
+import { signContractorAuthToken } from "../lib/jwt";
+import { authLimiter } from "../middleware/rateLimit";
 
 const router = Router();
 
@@ -23,6 +26,33 @@ const documentSelect = {
   fileSize: true,
   createdAt: true,
 } as const;
+
+// passwordHash is selected only so hasPortalAccess can be derived from it (see
+// withPortalAccess below) — it must never itself reach the response.
+const contractorSelect = {
+  id: true,
+  companyName: true,
+  registrationNumber: true,
+  scopeOfWork: true,
+  contactName: true,
+  contactPhone: true,
+  contactEmail: true,
+  contractStartDate: true,
+  contractEndDate: true,
+  goodStandingExpiry: true,
+  insuranceExpiry: true,
+  status: true,
+  siteId: true,
+  site: { select: { id: true, name: true } },
+  passwordHash: true,
+  lastLoginAt: true,
+  createdAt: true,
+  documents: { select: documentSelect, orderBy: { createdAt: "desc" as const } },
+} as const;
+
+function withPortalAccess<T extends { passwordHash: string | null }>({ passwordHash, ...rest }: T) {
+  return { ...rest, hasPortalAccess: !!passwordHash };
+}
 
 const contractorDocTypeEnum = z.enum([
   "INSURANCE_CERTIFICATE",
@@ -47,7 +77,13 @@ const contractorSchema = z.object({
   siteId: z.string().min(1),
 });
 
-const publicRegisterSchema = contractorSchema.omit({ status: true, siteId: true });
+// Contact email and a password are optional on the base schema (staff can register a
+// contractor by phone without either), but required for public self-registration, since
+// that's the only way this contractor will ever be able to log in to their own portal.
+const publicRegisterSchema = contractorSchema.omit({ status: true, siteId: true }).extend({
+  contactEmail: z.string().email(),
+  password: z.string().min(8),
+});
 
 // Public: lets a contractor self-register via a link or QR code shared for a specific site.
 router.get("/site/:siteId/info", async (req, res) => {
@@ -59,18 +95,23 @@ router.get("/site/:siteId/info", async (req, res) => {
   res.json(site);
 });
 
-router.post("/register/:siteId", upload.array("documents", 6), async (req, res) => {
+router.post("/register/:siteId", authLimiter, upload.array("documents", 6), async (req, res) => {
   const site = await prisma.site.findUnique({ where: { id: req.params.siteId } });
   if (!site) return res.status(404).json({ error: "Site not found" });
 
   const parsed = publicRegisterSchema.safeParse(req.body);
   if (!parsed.success) return res.status(400).json({ error: parsed.error.flatten() });
 
+  const existing = await prisma.contractor.findFirst({ where: { contactEmail: parsed.data.contactEmail } });
+  if (existing) return res.status(409).json({ error: "A contractor with this email is already registered" });
+
+  const { password, ...contractorData } = parsed.data;
+  const passwordHash = await bcrypt.hash(password, 10);
   const files = (req.files as Express.Multer.File[] | undefined) ?? [];
   const item = await prisma.contractor.create({
     data: {
-      ...parsed.data,
-      contactEmail: parsed.data.contactEmail || undefined,
+      ...contractorData,
+      passwordHash,
       siteId: site.id,
       documents: {
         create: files.map((f) => ({
@@ -83,7 +124,9 @@ router.post("/register/:siteId", upload.array("documents", 6), async (req, res) 
       },
     },
   });
-  res.status(201).json(item);
+  const token = signContractorAuthToken(item.id);
+  const { passwordHash: _passwordHash, ...safeContractor } = item;
+  res.status(201).json({ token, contractor: safeContractor });
 });
 
 router.use(requireAuth);
@@ -94,13 +137,10 @@ router.get("/", async (req, res) => {
   const siteId = req.query.siteId as string | undefined;
   const items = await prisma.contractor.findMany({
     where: { site: { mineId }, siteId: siteId || undefined },
-    include: {
-      site: { select: { id: true, name: true } },
-      documents: { select: documentSelect, orderBy: { createdAt: "desc" } },
-    },
+    select: contractorSelect,
     orderBy: { contractEndDate: "asc" },
   });
-  res.json(items);
+  res.json(items.map(withPortalAccess));
 });
 
 router.post("/", requireRole("ADMIN", "SUPERVISOR", "EXECUTIVE"), async (req, res) => {
@@ -111,8 +151,23 @@ router.post("/", requireRole("ADMIN", "SUPERVISOR", "EXECUTIVE"), async (req, re
   const site = await prisma.site.findFirst({ where: { id: parsed.data.siteId, mineId } });
   if (!site) return res.status(404).json({ error: "Site not found" });
   const data = { ...parsed.data, contactEmail: parsed.data.contactEmail || undefined };
-  const item = await prisma.contractor.create({ data });
-  res.status(201).json(item);
+  const item = await prisma.contractor.create({ data, select: contractorSelect });
+  res.status(201).json(withPortalAccess(item));
+});
+
+// Staff-onboarded contractors (POST / above) have no password until staff hands them one,
+// matching the identical pattern already used for staff-onboarded buyers (see
+// POST /buyers/:id/set-password) — e.g. after verifying identity over the phone.
+router.post("/:id/set-password", requireRole("ADMIN", "SUPERVISOR", "EXECUTIVE"), async (req, res) => {
+  const mineId = requireMineId(req, res);
+  if (!mineId) return;
+  const password = typeof req.body?.password === "string" ? req.body.password : "";
+  if (password.length < 8) return res.status(400).json({ error: "Password must be at least 8 characters" });
+  const existing = await prisma.contractor.findFirst({ where: { id: req.params.id, site: { mineId } } });
+  if (!existing) return res.status(404).json({ error: "Contractor not found" });
+  const passwordHash = await bcrypt.hash(password, 10);
+  await prisma.contractor.update({ where: { id: existing.id }, data: { passwordHash } });
+  res.status(204).send();
 });
 
 router.put("/:id", requireRole("ADMIN", "SUPERVISOR", "EXECUTIVE"), async (req, res) => {
@@ -123,8 +178,8 @@ router.put("/:id", requireRole("ADMIN", "SUPERVISOR", "EXECUTIVE"), async (req, 
   const existing = await prisma.contractor.findFirst({ where: { id: req.params.id, site: { mineId } } });
   if (!existing) return res.status(404).json({ error: "Contractor not found" });
   const data = { ...parsed.data, contactEmail: parsed.data.contactEmail || undefined };
-  const item = await prisma.contractor.update({ where: { id: existing.id }, data });
-  res.json(item);
+  const item = await prisma.contractor.update({ where: { id: existing.id }, data, select: contractorSelect });
+  res.json(withPortalAccess(item));
 });
 
 router.delete("/:id", requireRole("ADMIN", "EXECUTIVE"), async (req, res) => {

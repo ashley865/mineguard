@@ -22,6 +22,8 @@ import GovernmentInspection from "./pages/GovernmentInspection";
 import Reporting from "./pages/Reporting";
 import Contractors from "./pages/Contractors";
 import ContractorRegister from "./pages/ContractorRegister";
+import ContractorLogin from "./pages/ContractorLogin";
+import ContractorPortal from "./pages/ContractorPortal";
 import VisitorManagement from "./pages/VisitorManagement";
 import SecurityHub from "./pages/SecurityHub";
 import VisitorCheckIn from "./pages/VisitorCheckIn";
@@ -98,6 +100,8 @@ export default function App() {
       <Route path="/patrol/:siteId" element={<PatrolDuty />} />
       <Route path="/patrol/g/:token" element={<PatrolDutyLink />} />
       <Route path="/contractor-register/:siteId" element={<ContractorRegister />} />
+      <Route path="/contractor-login" element={<ContractorLogin />} />
+      <Route path="/contractor-portal" element={<ContractorPortal />} />
       <Route path="/join-executive/:inviteId" element={<AcceptExecutiveInvite />} />
       <Route path="/buy" element={<MarketplaceBrowse />} />
       <Route path="/buyer-register" element={<BuyerRegister />} />

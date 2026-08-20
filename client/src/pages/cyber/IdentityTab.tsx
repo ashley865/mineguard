@@ -137,9 +137,10 @@ export default function IdentityTab({ theme, canEdit }: { theme: CyberTheme; can
         />
       </div>
 
-      <div className="grid grid-cols-3 gap-2">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
         <StatBlock theme={theme} label={t("cyber.identity.staffCount")} value={data.totalUsers} />
         <StatBlock theme={theme} label={t("cyber.identity.tabBuyers")} value={data.totalBuyers} />
+        <StatBlock theme={theme} label={t("cyber.identity.tabContractors")} value={data.totalContractors} />
         <StatBlock theme={theme} label={t("cyber.identity.tabVisitors")} value={data.totalVisitors} />
       </div>
 
@@ -312,6 +313,27 @@ export default function IdentityTab({ theme, canEdit }: { theme: CyberTheme; can
       </div>
 
       <div className="space-y-2">
+        <h4 className={`text-xs font-semibold uppercase tracking-wide ${theme.subtext}`}>{t("cyber.identity.tabContractors")}</h4>
+        <CyberTable
+          theme={theme}
+          columns={
+            [
+              { key: "name", header: t("cyber.identity.name"), render: (c) => <span className={theme.text}>{c.companyName}</span>, sortValue: (c) => c.companyName },
+              { key: "email", header: t("cyber.identity.email"), render: (c) => c.contactEmail ?? "—" },
+              { key: "status", header: t("common.status"), render: (c) => <StatusPill status={c.status} /> },
+              { key: "portal", header: t("cyber.identity.portalAccess"), render: (c) => <StatusPill status={c.hasPortalAccess ? "PROTECTED" : "MISSING"} /> },
+              { key: "permits", header: t("cyber.identity.permitCount"), render: (c) => c.permitCount, sortValue: (c) => c.permitCount },
+              { key: "lastLogin", header: t("cyber.identity.lastLoginAt"), render: (c) => (c.lastLoginAt ? new Date(c.lastLoginAt).toLocaleString() : t("cyber.identity.never")) },
+            ] as CyberTableColumn<(typeof data.contractors)[number]>[]
+          }
+          rows={data.contractors}
+          rowKey={(c) => c.id}
+          emptyMessage={t("cyber.identity.noContractors")}
+          searchValue={(c) => `${c.companyName} ${c.contactEmail ?? ""}`}
+        />
+      </div>
+
+      <div className="space-y-2">
         <h4 className={`text-xs font-semibold uppercase tracking-wide ${theme.subtext}`}>{t("cyber.identity.tabVisitors")}</h4>
         <CyberTable
           theme={theme}
@@ -338,7 +360,11 @@ export default function IdentityTab({ theme, canEdit }: { theme: CyberTheme; can
           theme={theme}
           columns={
             [
-              { key: "user", header: t("cyber.identity.name"), render: (e) => e.user?.name ?? "—" },
+              {
+                key: "user",
+                header: t("cyber.identity.name"),
+                render: (e) => e.user?.name ?? (e.contractor ? `${e.contractor.companyName} (${t("cyber.identity.contractorLabel")})` : "—"),
+              },
               { key: "type", header: t("cyber.identity.eventType"), render: (e) => <StatusPill status={e.eventType === "LOGIN_SUCCESS" ? "PROTECTED" : e.eventType === "BLOCKED" ? "BLOCKED" : "MISSING"} /> },
               { key: "ip", header: t("cyber.identity.ipAddress"), render: (e) => e.ipAddress ?? "—" },
               { key: "occurred", header: t("cyber.identity.occurredAt"), render: (e) => new Date(e.occurredAt).toLocaleString() },

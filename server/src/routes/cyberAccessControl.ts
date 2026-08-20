@@ -32,7 +32,7 @@ router.get("/devices", async (req, res) => {
   const since = new Date(Date.now() - DEVICE_WINDOW_DAYS * 86400000);
 
   const groups = await prisma.cyberLoginEvent.groupBy({
-    by: ["userId", "ipAddress", "userAgent"],
+    by: ["userId", "contractorId", "ipAddress", "userAgent"],
     where: { mineId, eventType: "LOGIN_SUCCESS", occurredAt: { gte: since } },
     _count: true,
     _min: { occurredAt: true },
@@ -40,8 +40,13 @@ router.get("/devices", async (req, res) => {
   });
 
   const userIds = [...new Set(groups.map((g) => g.userId).filter((id): id is string => !!id))];
-  const users = await prisma.user.findMany({ where: { id: { in: userIds } }, select: { id: true, name: true } });
+  const contractorIds = [...new Set(groups.map((g) => g.contractorId).filter((id): id is string => !!id))];
+  const [users, contractors] = await Promise.all([
+    prisma.user.findMany({ where: { id: { in: userIds } }, select: { id: true, name: true } }),
+    prisma.contractor.findMany({ where: { id: { in: contractorIds } }, select: { id: true, companyName: true } }),
+  ]);
   const userById = new Map(users.map((u) => [u.id, u.name]));
+  const contractorById = new Map(contractors.map((c) => [c.id, c.companyName]));
 
   const blockedEntries = await prisma.cyberBlockedIp.findMany({ where: { mineId }, select: { ipOrCidr: true } });
   const blockedRaw = new Set(blockedEntries.map((b) => b.ipOrCidr));
@@ -49,7 +54,11 @@ router.get("/devices", async (req, res) => {
   const devices = groups
     .map((g) => ({
       userId: g.userId,
-      userName: g.userId ? userById.get(g.userId) ?? "Unknown user" : "Unknown user",
+      userName: g.userId
+        ? userById.get(g.userId) ?? "Unknown user"
+        : g.contractorId
+          ? `${contractorById.get(g.contractorId) ?? "Unknown contractor"} (contractor)`
+          : "Unknown user",
       ipAddress: g.ipAddress,
       deviceLabel: parseDeviceLabel(g.userAgent),
       loginCount: g._count,
@@ -75,15 +84,15 @@ router.get("/threats", async (req, res) => {
   const [failedEvents, successEvents, blockedEvents] = await Promise.all([
     prisma.cyberLoginEvent.findMany({
       where: { mineId, eventType: "LOGIN_FAILED", occurredAt: { gte: bruteForceSince }, ipAddress: { not: null } },
-      select: { ipAddress: true, user: { select: { name: true } }, occurredAt: true },
+      select: { ipAddress: true, user: { select: { name: true } }, contractor: { select: { companyName: true } }, occurredAt: true },
     }),
     prisma.cyberLoginEvent.findMany({
       where: { mineId, eventType: "LOGIN_SUCCESS", occurredAt: { gte: multiAccountSince }, ipAddress: { not: null } },
-      select: { ipAddress: true, userId: true, user: { select: { name: true } } },
+      select: { ipAddress: true, userId: true, contractorId: true },
     }),
     prisma.cyberLoginEvent.findMany({
       where: { mineId, eventType: "BLOCKED", occurredAt: { gte: bruteForceSince } },
-      select: { ipAddress: true, user: { select: { name: true } }, occurredAt: true },
+      select: { ipAddress: true, user: { select: { name: true } }, contractor: { select: { companyName: true } }, occurredAt: true },
     }),
   ]);
 
@@ -92,7 +101,8 @@ router.get("/threats", async (req, res) => {
     const ip = e.ipAddress!;
     const bucket = byIpFailed.get(ip) ?? { count: 0, usernames: new Set<string>(), lastAttempt: e.occurredAt };
     bucket.count += 1;
-    if (e.user?.name) bucket.usernames.add(e.user.name);
+    const label = e.user?.name ?? (e.contractor ? `${e.contractor.companyName} (contractor)` : null);
+    if (label) bucket.usernames.add(label);
     if (e.occurredAt > bucket.lastAttempt) bucket.lastAttempt = e.occurredAt;
     byIpFailed.set(ip, bucket);
   }
@@ -105,7 +115,9 @@ router.get("/threats", async (req, res) => {
   for (const e of successEvents) {
     const ip = e.ipAddress!;
     const set = byIpAccounts.get(ip) ?? new Set<string>();
-    if (e.userId) set.add(e.userId);
+    // Prefixed so a user id and a contractor id can never collide into the same key.
+    if (e.userId) set.add(`user:${e.userId}`);
+    if (e.contractorId) set.add(`contractor:${e.contractorId}`);
     byIpAccounts.set(ip, set);
   }
   const multiAccountIps = [...byIpAccounts.entries()]
@@ -114,7 +126,11 @@ router.get("/threats", async (req, res) => {
     .sort((a, b) => b.distinctAccounts - a.distinctAccounts);
 
   const recentBlockedAttempts = blockedEvents
-    .map((e) => ({ ipAddress: e.ipAddress, userName: e.user?.name ?? null, occurredAt: e.occurredAt }))
+    .map((e) => ({
+      ipAddress: e.ipAddress,
+      userName: e.user?.name ?? (e.contractor ? `${e.contractor.companyName} (contractor)` : null),
+      occurredAt: e.occurredAt,
+    }))
     .sort((a, b) => b.occurredAt.getTime() - a.occurredAt.getTime());
 
   res.json({ bruteForceIps, multiAccountIps, recentBlockedAttempts });

@@ -8,6 +8,7 @@ const AUDIENCE = "mineguard-client";
 // cryptographically unable to cross into each other's routes, without either verifier
 // needing to inspect a "type" claim that a forged/tampered token could try to spoof.
 const BUYER_AUDIENCE = "mineguard-buyer-client";
+const CONTRACTOR_AUDIENCE = "mineguard-contractor-client";
 
 export interface TokenPayload {
   userId: string;
@@ -15,6 +16,10 @@ export interface TokenPayload {
 
 export interface BuyerTokenPayload {
   buyerId: string;
+}
+
+export interface ContractorTokenPayload {
+  contractorId: string;
 }
 
 /**
@@ -65,4 +70,27 @@ export function verifyBuyerAuthToken(token: string): BuyerTokenPayload {
     throw new Error("Malformed token payload");
   }
   return { buyerId: (decoded as any).buyerId };
+}
+
+// Same pattern as buyer tokens — a distinct audience, so a contractor token can never be
+// accepted by requireAuth or requireBuyerAuth (or vice versa) purely by construction.
+export function signContractorAuthToken(contractorId: string): string {
+  return jwt.sign({ contractorId }, process.env.JWT_SECRET as string, {
+    algorithm: "HS256",
+    issuer: ISSUER,
+    audience: CONTRACTOR_AUDIENCE,
+    expiresIn: process.env.JWT_EXPIRES_IN || "7d",
+  } as jwt.SignOptions);
+}
+
+export function verifyContractorAuthToken(token: string): ContractorTokenPayload {
+  const decoded = jwt.verify(token, process.env.JWT_SECRET as string, {
+    algorithms: ["HS256"],
+    issuer: ISSUER,
+    audience: CONTRACTOR_AUDIENCE,
+  });
+  if (typeof decoded !== "object" || decoded === null || typeof (decoded as any).contractorId !== "string") {
+    throw new Error("Malformed token payload");
+  }
+  return { contractorId: (decoded as any).contractorId };
 }

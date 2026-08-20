@@ -303,6 +303,18 @@ export default function Contractors() {
     await load();
   }
 
+  async function setPassword(id: string) {
+    const password = prompt(t("contractors.setPasswordPrompt") ?? "");
+    if (password === null) return;
+    if (password.length < 8) {
+      alert(t("contractors.setPasswordTooShort"));
+      return;
+    }
+    await api.post(`/contractors/${id}/set-password`, { password });
+    alert(t("contractors.setPasswordSuccess"));
+    await load();
+  }
+
   if (loading) return <div className="text-mine-300">{t("contractors.loading")}</div>;
   if (loadError) return <LoadError onRetry={load} />;
 
@@ -332,6 +344,7 @@ export default function Contractors() {
               <th className="text-left px-4 py-2">{t("contractors.colSite")}</th>
               <th className="text-left px-4 py-2">{t("contractors.colContractEnd")}</th>
               <th className="text-left px-4 py-2">{t("contractors.colStatus")}</th>
+              <th className="text-left px-4 py-2">{t("contractors.colPortal")}</th>
               <th className="px-4 py-2"></th>
             </tr>
           </thead>
@@ -343,6 +356,13 @@ export default function Contractors() {
                 <td className="px-4 py-2 text-mine-300">{item.site?.name}</td>
                 <td className="px-4 py-2 text-mine-300">{new Date(item.contractEndDate).toLocaleDateString()}</td>
                 <td className="px-4 py-2"><StatusBadge status={item.status} /></td>
+                <td className="px-4 py-2 text-xs text-mine-300">
+                  {item.hasPortalAccess ? (
+                    <span className="text-success-500">{t("contractors.portalActive")}</span>
+                  ) : (
+                    <span className="text-mine-400">{t("contractors.portalNone")}</span>
+                  )}
+                </td>
                 <td className="px-4 py-2 text-right">
                   <div className="flex justify-end gap-2">
                     <button className="text-xs text-mine-300 hover:text-mine-50" onClick={() => setDocsContractorId(item.id)}>
@@ -350,6 +370,9 @@ export default function Contractors() {
                     </button>
                     {canEdit && (
                       <>
+                        <button className="text-xs text-mine-300 hover:text-mine-50" onClick={() => setPassword(item.id)}>
+                          {item.hasPortalAccess ? t("contractors.resetPassword") : t("contractors.setPassword")}
+                        </button>
                         <button className="text-xs text-mine-300 hover:text-mine-50" onClick={() => setModal(item)}>{t("common.edit")}</button>
                         <button className={buttonDanger} onClick={() => remove(item.id)}>{t("common.delete")}</button>
                       </>
@@ -359,7 +382,7 @@ export default function Contractors() {
               </tr>
             ))}
             {items.length === 0 && (
-              <tr><td colSpan={6} className="px-4 py-6 text-center text-mine-400">{t("contractors.noneYet")}</td></tr>
+              <tr><td colSpan={7} className="px-4 py-6 text-center text-mine-400">{t("contractors.noneYet")}</td></tr>
             )}
           </tbody>
         </table>
