@@ -115,6 +115,40 @@ router.get("/hr-workforce", async (req, res) => {
       }),
   ].sort((a, b) => a.daysUntil - b.daysUntil);
 
+  const ninetyDaysAgo = new Date(Date.now() - 90 * 86400000);
+  const [openRequisitions, activeCandidates, pendingOnboarding, trainingEnrollments] = await Promise.all([
+    prisma.jobRequisition.count({ where: { site: { mineId }, status: { in: ["OPEN", "ON_HOLD"] } } }),
+    prisma.candidate.count({ where: { requisition: { site: { mineId } }, stage: { notIn: ["HIRED", "REJECTED", "WITHDRAWN"] } } }),
+    prisma.onboardingChecklist.count({ where: { worker: { site: { mineId } }, completedAt: null } }),
+    prisma.trainingEnrollment.findMany({
+      where: { session: { course: { mineId }, scheduledDate: { gte: ninetyDaysAgo } } },
+      select: { attendanceStatus: true, session: { select: { course: { select: { courseName: true } } } } },
+    }),
+  ]);
+
+  const trainingByCourseMap = new Map<string, { total: number; completed: number }>();
+  let trainingCompleted = 0;
+  for (const e of trainingEnrollments) {
+    const courseName = e.session.course.courseName;
+    const entry = trainingByCourseMap.get(courseName) ?? { total: 0, completed: 0 };
+    entry.total += 1;
+    const isDone = e.attendanceStatus === "COMPLETED" || e.attendanceStatus === "ATTENDED";
+    if (isDone) {
+      entry.completed += 1;
+      trainingCompleted += 1;
+    }
+    trainingByCourseMap.set(courseName, entry);
+  }
+  const trainingByCourse = Array.from(trainingByCourseMap.entries())
+    .map(([courseName, { total, completed }]) => ({
+      courseName,
+      total,
+      completed,
+      completionPct: total === 0 ? 0 : Math.round((completed / total) * 1000) / 10,
+    }))
+    .sort((a, b) => b.total - a.total)
+    .slice(0, 6);
+
   res.json({
     totalWorkers,
     onShiftWorkers,
@@ -124,6 +158,12 @@ router.get("/hr-workforce", async (req, res) => {
     onLeaveToday,
     newHires,
     workerWarnings,
+    recruitment: { openRequisitions, activeCandidates, pendingOnboarding },
+    training: {
+      totalEnrollments: trainingEnrollments.length,
+      completionPct: trainingEnrollments.length === 0 ? 0 : Math.round((trainingCompleted / trainingEnrollments.length) * 1000) / 10,
+      byCourse: trainingByCourse,
+    },
   });
 });
 

@@ -333,6 +333,25 @@ function CoursesTab({ sites, canEdit, canDelete }: { sites: Site[]; canEdit: boo
   );
 }
 
+function SessionCompletionBar({ session }: { session: TrainingSession }) {
+  const enrollments = session.enrollments ?? [];
+  if (enrollments.length === 0) return <span className="text-mine-400 text-xs">—</span>;
+  const completed = enrollments.filter((e) => e.attendanceStatus === "COMPLETED" || e.attendanceStatus === "ATTENDED").length;
+  const noShow = enrollments.filter((e) => e.attendanceStatus === "NO_SHOW").length;
+  const total = enrollments.length;
+  const completedPct = (completed / total) * 100;
+  const noShowPct = (noShow / total) * 100;
+  return (
+    <div className="flex items-center gap-1.5 w-24">
+      <div className="flex-1 h-1.5 rounded-full bg-mine-800 overflow-hidden flex">
+        <div className="h-full bg-success-500" style={{ width: `${completedPct}%` }} />
+        <div className="h-full bg-danger-500" style={{ width: `${noShowPct}%` }} />
+      </div>
+      <span className="text-[10px] text-mine-400 shrink-0">{completed}/{total}</span>
+    </div>
+  );
+}
+
 function SessionsTab({ canEdit, canDelete }: { canEdit: boolean; canDelete: boolean }) {
   const { t } = useTranslation();
   const [sessions, setSessions] = useState<TrainingSession[]>([]);
@@ -341,11 +360,13 @@ function SessionsTab({ canEdit, canDelete }: { canEdit: boolean; canDelete: bool
   const [loading, setLoading] = useState(true);
   const [modal, setModal] = useState(false);
   const [enrollmentsSession, setEnrollmentsSession] = useState<TrainingSession | null>(null);
+  const [search, setSearch] = useState("");
+  const [statusFilter, setStatusFilter] = useState<TrainingSessionStatus | "ALL">("ALL");
 
   async function load() {
     setLoading(true);
     const [se, co, wo] = await Promise.all([
-      api.get<TrainingSession[]>("/training-lms/sessions"),
+      api.get<TrainingSession[]>("/training-lms/sessions", { params: { status: statusFilter, search: search || undefined } }),
       api.get<TrainingCourse[]>("/training-lms/courses"),
       api.get<Worker[]>("/workers"),
     ]);
@@ -356,8 +377,10 @@ function SessionsTab({ canEdit, canDelete }: { canEdit: boolean; canDelete: bool
   }
 
   useEffect(() => {
-    load();
-  }, []);
+    const timer = setTimeout(load, 250);
+    return () => clearTimeout(timer);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [search, statusFilter]);
 
   async function create(data: any) {
     await api.post("/training-lms/sessions", data);
@@ -371,15 +394,39 @@ function SessionsTab({ canEdit, canDelete }: { canEdit: boolean; canDelete: bool
     await load();
   }
 
-  if (loading) return <div className="text-mine-300">{t("common.loading")}</div>;
+  async function setStatus(id: string, status: TrainingSessionStatus) {
+    await api.put(`/training-lms/sessions/${id}`, { status });
+    await load();
+  }
 
   return (
     <div className="space-y-4">
-      {canEdit && courses.length > 0 && (
-        <div className="flex justify-end">
-          <button className={buttonPrimary} onClick={() => setModal(true)}>{t("trainingLms.newSession")}</button>
+      <div className="flex flex-wrap items-end gap-2 justify-between">
+        <div className="flex flex-wrap items-end gap-2">
+          <div>
+            <label className={labelClass}>{t("common.search")}</label>
+            <input
+              className={inputClass}
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder={t("trainingLms.searchSessions")}
+            />
+          </div>
+          <div>
+            <label className={labelClass}>{t("common.status")}</label>
+            <select className={selectClass} value={statusFilter} onChange={(e) => setStatusFilter(e.target.value as TrainingSessionStatus | "ALL")}>
+              <option value="ALL">{t("trainingLms.allStatuses")}</option>
+              {sessionStatuses.map((s) => <option key={s} value={s}>{t(`trainingLms.sessionStatus.${s}`)}</option>)}
+            </select>
+          </div>
         </div>
-      )}
+        {canEdit && courses.length > 0 && (
+          <button className={buttonPrimary} onClick={() => setModal(true)}>{t("trainingLms.newSession")}</button>
+        )}
+      </div>
+      {loading ? (
+        <div className="text-mine-300">{t("common.loading")}</div>
+      ) : (
       <div className={`${cardClass} overflow-x-auto`}>
         <table className="w-full text-sm">
           <thead className="bg-mine-800/50 text-mine-300 text-xs uppercase">
@@ -387,6 +434,7 @@ function SessionsTab({ canEdit, canDelete }: { canEdit: boolean; canDelete: bool
               <th className="text-left px-4 py-2">{t("trainingLms.course")}</th>
               <th className="text-left px-4 py-2">{t("trainingLms.scheduledDate")}</th>
               <th className="text-left px-4 py-2">{t("trainingLms.enrolled")}</th>
+              <th className="text-left px-4 py-2">{t("trainingLms.completion")}</th>
               <th className="text-left px-4 py-2">{t("common.status")}</th>
               <th className="px-4 py-2"></th>
             </tr>
@@ -397,9 +445,16 @@ function SessionsTab({ canEdit, canDelete }: { canEdit: boolean; canDelete: bool
                 <td className="px-4 py-2 font-medium">{s.course?.courseName}</td>
                 <td className="px-4 py-2 text-mine-300">{new Date(s.scheduledDate).toLocaleDateString()}</td>
                 <td className="px-4 py-2 text-mine-300">{s._count.enrollments}{s.capacity ? ` / ${s.capacity}` : ""}</td>
+                <td className="px-4 py-2"><SessionCompletionBar session={s} /></td>
                 <td className="px-4 py-2"><StatusBadge status={s.status} /></td>
                 <td className="px-4 py-2 text-right">
                   <div className="flex justify-end gap-2">
+                    {canEdit && s.status === "SCHEDULED" && (
+                      <>
+                        <button className="text-xs text-success-500 hover:underline" onClick={() => setStatus(s.id, "COMPLETED")}>{t("trainingLms.markCompleted")}</button>
+                        <button className="text-xs text-danger-500 hover:underline" onClick={() => setStatus(s.id, "CANCELLED")}>{t("trainingLms.cancelSession")}</button>
+                      </>
+                    )}
                     <button className="text-xs text-mine-300 hover:text-mine-50" onClick={() => setEnrollmentsSession(s)}>{t("trainingLms.manageEnrollments")}</button>
                     {canDelete && (
                       <button className={buttonDanger} onClick={() => remove(s.id)}>{t("common.delete")}</button>
@@ -409,11 +464,12 @@ function SessionsTab({ canEdit, canDelete }: { canEdit: boolean; canDelete: bool
               </tr>
             ))}
             {sessions.length === 0 && (
-              <tr><td colSpan={5} className="px-4 py-6 text-center text-mine-400">{t("trainingLms.noneYetSessions")}</td></tr>
+              <tr><td colSpan={6} className="px-4 py-6 text-center text-mine-400">{t("trainingLms.noneYetSessions")}</td></tr>
             )}
           </tbody>
         </table>
       </div>
+      )}
       {modal && (
         <Modal title={t("trainingLms.newSessionTitle")} onClose={() => setModal(false)}>
           <SessionForm courses={courses} onSubmit={create} onCancel={() => setModal(false)} />

@@ -3,7 +3,7 @@ import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from "recharts";
 import { api } from "../api/client";
-import { HrWorkforceSnapshot } from "../api/types";
+import { BceaComplianceReport, HrWorkforceSnapshot } from "../api/types";
 import { SeverityBadge } from "./Badges";
 import { cardClass } from "./ui";
 
@@ -29,12 +29,18 @@ function barColor(pct: number) {
 export default function HrWorkforceWidget() {
   const { t } = useTranslation();
   const [snapshot, setSnapshot] = useState<HrWorkforceSnapshot | null>(null);
+  const [bcea, setBcea] = useState<BceaComplianceReport | null>(null);
 
   useEffect(() => {
     api.get<HrWorkforceSnapshot>("/executive/hr-workforce").then((res) => setSnapshot(res.data)).catch(() => {});
+    api.get<BceaComplianceReport>("/payroll/bcea-compliance").then((res) => setBcea(res.data)).catch(() => {});
   }, []);
 
   if (!snapshot) return null;
+
+  const training = snapshot.training ?? { totalEnrollments: 0, completionPct: 0, byCourse: [] };
+  const recruitment = snapshot.recruitment ?? { openRequisitions: 0, activeCandidates: 0, pendingOnboarding: 0 };
+  const trainingChartData = training.byCourse.map((c) => ({ ...c, name: c.courseName.length > 16 ? `${c.courseName.slice(0, 16)}…` : c.courseName }));
 
   const newHires = snapshot.newHires ?? [];
   const workerWarnings = snapshot.workerWarnings ?? [];
@@ -107,6 +113,64 @@ export default function HrWorkforceWidget() {
           </table>
         </div>
       )}
+    </div>
+
+    {/* Training & Recruitment */}
+    <div className={`${cardClass} p-3`}>
+      <h2 className="text-xs font-semibold mb-2">{t("executive.trainingRecruitmentTitle")}</h2>
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-2 mb-3">
+        <StatCard
+          label={t("executive.trainingCompletionRate")}
+          value={training.totalEnrollments === 0 ? "—" : `${training.completionPct}%`}
+          tone={training.totalEnrollments === 0 ? undefined : training.completionPct >= 80 ? "positive" : training.completionPct >= 50 ? "caution" : "negative"}
+        />
+        <StatCard label={t("executive.openRequisitions")} value={recruitment.openRequisitions} />
+        <StatCard label={t("executive.activeCandidates")} value={recruitment.activeCandidates} />
+        <StatCard
+          label={t("executive.pendingOnboarding")}
+          value={recruitment.pendingOnboarding}
+          tone={recruitment.pendingOnboarding > 0 ? "caution" : "positive"}
+        />
+      </div>
+      {trainingChartData.length > 0 && (
+        <>
+          <div className="text-[10px] text-mine-400 mb-1 uppercase tracking-wide">{t("executive.trainingByCourse")}</div>
+          <div className="h-40 mb-3">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={trainingChartData} margin={{ left: -10 }}>
+                <XAxis dataKey="name" tick={CHART_TICK_STYLE} interval={0} angle={-30} textAnchor="end" height={50} />
+                <YAxis tick={CHART_TICK_STYLE} unit="%" domain={[0, 100]} />
+                <Tooltip
+                  contentStyle={CHART_TOOLTIP_STYLE}
+                  formatter={(value: number, _name, item: any) => [`${value}% (${item.payload.completed}/${item.payload.total})`, t("executive.trainingCompletionRate")]}
+                />
+                <Bar dataKey="completionPct" radius={[3, 3, 0, 0]}>
+                  {trainingChartData.map((d, i) => (
+                    <Cell key={i} fill={barColor(d.completionPct)} />
+                  ))}
+                </Bar>
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        </>
+      )}
+      <div className="flex items-center justify-between border-t border-mine-800 pt-2">
+        <div className="min-w-0">
+          <div className="text-[10px] text-mine-400 uppercase tracking-wide">{t("executive.bceaRisk")}</div>
+          {!bcea ? (
+            <div className="text-mine-400 text-xs">—</div>
+          ) : bcea.breaches.length === 0 ? (
+            <div className="text-success-500 text-xs font-medium">{t("executive.bceaNoBreaches")}</div>
+          ) : (
+            <div className="text-danger-500 text-xs font-medium">
+              {t("executive.bceaBreachCount", { count: bcea.breaches.length })}
+            </div>
+          )}
+        </div>
+        <Link to="/payroll" className="px-2.5 py-1 rounded-lg text-xs font-medium text-mine-300 hover:text-mine-50 hover:bg-mine-800 transition-colors shrink-0">
+          {t("executive.viewPayroll")}
+        </Link>
+      </div>
     </div>
 
     {/* Worker Warnings */}

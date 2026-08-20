@@ -160,6 +160,8 @@ export interface HrWorkforceSnapshot {
   onLeaveToday: number;
   newHires: HrNewHire[];
   workerWarnings: HrWorkerWarning[];
+  recruitment: { openRequisitions: number; activeCandidates: number; pendingOnboarding: number };
+  training: { totalEnrollments: number; completionPct: number; byCourse: { courseName: string; total: number; completed: number; completionPct: number }[] };
 }
 
 export type SiteStatus = "OPERATIONAL" | "RESTRICTED" | "SHUT_DOWN";
@@ -2049,6 +2051,7 @@ export interface TrainingSession {
   capacity?: number | null;
   status: TrainingSessionStatus;
   _count: { enrollments: number };
+  enrollments?: { attendanceStatus: TrainingAttendanceStatus }[];
   createdAt: string;
 }
 

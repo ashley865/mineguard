@@ -66,6 +66,7 @@ const sessionSelect = {
   capacity: true,
   status: true,
   _count: { select: { enrollments: true } },
+  enrollments: { select: { attendanceStatus: true } },
   createdAt: true,
 } as const;
 
@@ -133,8 +134,23 @@ router.get("/sessions", async (req, res) => {
   const mineId = requireMineId(req, res);
   if (!mineId) return;
   const courseId = req.query.courseId as string | undefined;
+  const status = req.query.status as string | undefined;
+  const search = req.query.search as string | undefined;
   const sessions = await prisma.trainingSession.findMany({
-    where: { course: { mineId }, courseId: courseId || undefined },
+    where: {
+      course: { mineId },
+      courseId: courseId || undefined,
+      status: status && status !== "ALL" ? (status as "SCHEDULED" | "COMPLETED" | "CANCELLED") : undefined,
+      ...(search
+        ? {
+            OR: [
+              { course: { courseName: { contains: search, mode: "insensitive" } } },
+              { location: { contains: search, mode: "insensitive" } },
+              { instructor: { contains: search, mode: "insensitive" } },
+            ],
+          }
+        : {}),
+    },
     select: sessionSelect,
     orderBy: { scheduledDate: "desc" },
   });
