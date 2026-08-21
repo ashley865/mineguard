@@ -1477,6 +1477,8 @@
     "contractLabel": "Contract",
     "invoiceLabel": "Invoice",
     "orderLabel": "Purchase Order",
+    "expenseLabel": "Expense",
+    "budgetLabel": "Budget",
     "dueOn": "Due {{date}}",
     "viewWorker": "View Worker",
     "endContract": "End Contract",
@@ -1485,7 +1487,8 @@
     "viewInvoice": "View Invoice",
     "cancelOrder": "Cancel Order",
     "confirmCancelOrder": "Cancel this purchase order?",
-    "viewOrder": "View Order"
+    "viewOrder": "View Order",
+    "viewBudget": "View Budget"
   },
   "contractors": {
     "nav": "Contractors",
@@ -4374,7 +4377,10 @@
     "recommendations": "Recommendations",
     "reviewNote": "Note (optional)",
     "approveTitle": "Approve Budget Plan",
-    "rejectTitle": "Reject Budget Plan"
+    "rejectTitle": "Reject Budget Plan",
+    "viewSpending": "View Spending",
+    "spendingTitle": "Spending — {{category}}",
+    "noSpendingYet": "No matching expenses recorded yet for this period."
   },
   "toolboxTalks": {
     "nav": "Toolbox Talks",

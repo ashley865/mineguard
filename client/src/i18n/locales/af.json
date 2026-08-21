@@ -1460,6 +1460,8 @@
     "dueOn": "Verval {{date}}",
     "invoiceLabel": "Faktuur",
     "orderLabel": "Aankooporder",
+    "expenseLabel": "Uitgawe",
+    "budgetLabel": "Begroting",
     "viewWorker": "Bekyk Werker",
     "endContract": "Beëindig Kontrak",
     "confirmEndContract": "Beëindig hierdie kontrakteur se kontrak? Dit sal hulle as BEËINDIG merk.",
@@ -1467,7 +1469,8 @@
     "viewInvoice": "Bekyk Faktuur",
     "cancelOrder": "Kanselleer Order",
     "confirmCancelOrder": "Kanselleer hierdie aankooporder?",
-    "viewOrder": "Bekyk Order"
+    "viewOrder": "Bekyk Order",
+    "viewBudget": "Bekyk Begroting"
   },
   "contractors": {
     "nav": "Kontrakteurs",
@@ -4374,7 +4377,10 @@
     "recommendations": "Aanbevelings",
     "reviewNote": "Nota (opsioneel)",
     "approveTitle": "Keur Begrotingsplan Goed",
-    "rejectTitle": "Verwerp Begrotingsplan"
+    "rejectTitle": "Verwerp Begrotingsplan",
+    "viewSpending": "Bekyk Besteding",
+    "spendingTitle": "Besteding — {{category}}",
+    "noSpendingYet": "Nog geen ooreenstemmende uitgawes vir hierdie tydperk aangeteken nie."
   },
   "toolboxTalks": {
     "nav": "Veiligheidsgesprekke",

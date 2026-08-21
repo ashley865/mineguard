@@ -1460,6 +1460,8 @@
     "dueOn": "Échéance {{date}}",
     "invoiceLabel": "Facture",
     "orderLabel": "Bon de Commande",
+    "expenseLabel": "Dépense",
+    "budgetLabel": "Budget",
     "viewWorker": "Voir le Travailleur",
     "endContract": "Résilier le Contrat",
     "confirmEndContract": "Résilier le contrat de cet entrepreneur ? Il sera marqué comme RÉSILIÉ.",
@@ -1467,7 +1469,8 @@
     "viewInvoice": "Voir la Facture",
     "cancelOrder": "Annuler la Commande",
     "confirmCancelOrder": "Annuler ce bon de commande ?",
-    "viewOrder": "Voir la Commande"
+    "viewOrder": "Voir la Commande",
+    "viewBudget": "Voir le Budget"
   },
   "contractors": {
     "nav": "Sous-traitants",
@@ -4374,7 +4377,10 @@
     "recommendations": "Recommandations",
     "reviewNote": "Note (facultatif)",
     "approveTitle": "Approuver le Plan Budgétaire",
-    "rejectTitle": "Rejeter le Plan Budgétaire"
+    "rejectTitle": "Rejeter le Plan Budgétaire",
+    "viewSpending": "Voir les Dépenses",
+    "spendingTitle": "Dépenses — {{category}}",
+    "noSpendingYet": "Aucune dépense correspondante enregistrée pour cette période."
   },
   "toolboxTalks": {
     "nav": "Causeries Sécurité",

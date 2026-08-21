@@ -72,7 +72,10 @@ async function attachActuals<T extends PlanRow>(mineId: string, plans: T[]): Pro
   const minStart = new Date(Math.min(...plans.map((p) => p.periodStart.getTime())));
   const maxEnd = new Date(Math.max(...plans.map((p) => p.periodEnd.getTime())));
   const expenses = await prisma.expense.findMany({
-    where: { category: { in: categories as any }, expenseDate: { gte: minStart, lte: maxEnd }, site: { mineId } },
+    // A CANCELLED expense was proposed but never actually paid — counting it toward
+    // "actual" spend would overstate real budget usage. PENDING counts (money already
+    // committed/incurred, just not yet paid out); only CANCELLED is excluded.
+    where: { category: { in: categories as any }, expenseDate: { gte: minStart, lte: maxEnd }, site: { mineId }, status: { not: "CANCELLED" } },
     select: { category: true, amount: true, expenseDate: true, siteId: true },
   });
   return plans.map((plan) => {
@@ -105,6 +108,37 @@ router.get("/", async (req, res) => {
 // Feature 1: a real KPI/summary endpoint (totals, category and site rollups, status
 // counts, over-budget count) instead of forcing the client to derive all of this from the
 // flat list — backs the summary cards and both charts on the redesigned page.
+// Itemized breakdown behind a plan's actualAmount — the same category/period/site
+// match attachActuals() sums, returned as real rows instead of a lump number, so
+// "actual spend" is verifiable rather than a figure the viewer has to take on faith.
+router.get("/:id/expenses", async (req, res) => {
+  const mineId = requireMineId(req, res);
+  if (!mineId) return;
+  const plan = await prisma.budgetPlan.findFirst({ where: { id: req.params.id, mineId } });
+  if (!plan) return res.status(404).json({ error: "Budget plan not found" });
+  const expenses = await prisma.expense.findMany({
+    where: {
+      category: plan.category,
+      expenseDate: { gte: plan.periodStart, lte: plan.periodEnd },
+      site: plan.siteId ? { id: plan.siteId } : { mineId },
+      status: { not: "CANCELLED" },
+    },
+    select: {
+      id: true,
+      expenseNumber: true,
+      description: true,
+      amount: true,
+      currency: true,
+      expenseDate: true,
+      status: true,
+      site: { select: { id: true, name: true } },
+      payee: { select: { id: true, name: true } },
+    },
+    orderBy: { expenseDate: "desc" },
+  });
+  res.json(expenses);
+});
+
 router.get("/summary", async (req, res) => {
   const mineId = requireMineId(req, res);
   if (!mineId) return;
@@ -185,7 +219,9 @@ router.post("/", requireRole("ADMIN", "EXECUTIVE"), async (req, res) => {
       type: "BUDGET_APPROVAL",
       title: `Budget needs approval — ${plan.category.replace(/_/g, " ")}`,
       body: `R${plan.budgetedAmount.toLocaleString()} · ${new Date(plan.periodStart).toLocaleDateString()} – ${new Date(plan.periodEnd).toLocaleDateString()}`,
-      link: "/budget-planning",
+      // The planId query param lets approve/reject find and clear exactly this
+      // notification for every approver once the decision is made — see below.
+      link: `/budget-planning?planId=${plan.id}`,
     });
   }
 
@@ -229,6 +265,12 @@ router.post("/:id/approve", requireRole("ADMIN"), async (req, res) => {
     data: { status: "APPROVED", approvedById: req.auth!.userId, approvedAt: new Date(), reviewNote: parsed.data.reviewNote },
     select: planSelect,
   });
+  // The decision is made — clear the "needs approval" notification for every approver
+  // it was sent to, not just the one who acted, so it doesn't linger as if still open.
+  await prisma.notification.updateMany({
+    where: { mineId, type: "BUDGET_APPROVAL", link: `/budget-planning?planId=${existing.id}`, readAt: null },
+    data: { readAt: new Date() },
+  });
   if (existing.submittedById) {
     await notifyExecutives(req.app.get("io"), {
       mineId,
@@ -254,6 +296,12 @@ router.post("/:id/reject", requireRole("ADMIN"), async (req, res) => {
     where: { id: existing.id },
     data: { status: "REJECTED", approvedById: req.auth!.userId, approvedAt: new Date(), reviewNote: parsed.data.reviewNote },
     select: planSelect,
+  });
+  // Same as approve — the decision is made, clear the pending notification for every
+  // approver it went to.
+  await prisma.notification.updateMany({
+    where: { mineId, type: "BUDGET_APPROVAL", link: `/budget-planning?planId=${existing.id}`, readAt: null },
+    data: { readAt: new Date() },
   });
   if (existing.submittedById) {
     await notifyExecutives(req.app.get("io"), {

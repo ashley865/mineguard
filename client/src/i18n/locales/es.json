@@ -1460,6 +1460,8 @@
     "dueOn": "Vence el {{date}}",
     "invoiceLabel": "Factura",
     "orderLabel": "Orden de Compra",
+    "expenseLabel": "Gasto",
+    "budgetLabel": "Presupuesto",
     "viewWorker": "Ver Trabajador",
     "endContract": "Finalizar Contrato",
     "confirmEndContract": "¿Finalizar el contrato de este contratista? Esto lo marcará como TERMINADO.",
@@ -1467,7 +1469,8 @@
     "viewInvoice": "Ver Factura",
     "cancelOrder": "Cancelar Orden",
     "confirmCancelOrder": "¿Cancelar esta orden de compra?",
-    "viewOrder": "Ver Orden"
+    "viewOrder": "Ver Orden",
+    "viewBudget": "Ver Presupuesto"
   },
   "contractors": {
     "nav": "Contratistas",
@@ -4374,7 +4377,10 @@
     "recommendations": "Recomendaciones",
     "reviewNote": "Nota (opcional)",
     "approveTitle": "Aprobar Plan de Presupuesto",
-    "rejectTitle": "Rechazar Plan de Presupuesto"
+    "rejectTitle": "Rechazar Plan de Presupuesto",
+    "viewSpending": "Ver Gastos",
+    "spendingTitle": "Gastos — {{category}}",
+    "noSpendingYet": "Aún no hay gastos registrados que coincidan con este período."
   },
   "toolboxTalks": {
     "nav": "Charlas de Seguridad",

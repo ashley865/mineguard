@@ -213,6 +213,11 @@ export default function NotificationBell() {
                         {t("notifications.viewInvoice")}
                       </button>
                     )}
+                    {n.kind === "budget" && (
+                      <button className="px-2.5 py-1 rounded-lg text-xs font-medium text-mine-300 hover:text-mine-50 hover:bg-mine-800 transition-colors" onClick={() => goTo("/budget-planning")}>
+                        {t("notifications.viewBudget")}
+                      </button>
+                    )}
                     {n.kind === "order" && (
                       <>
                         {canAct && (

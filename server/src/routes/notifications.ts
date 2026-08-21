@@ -24,6 +24,9 @@ export const ORDER_AUDIENCE: ExecutiveTitle[] = ["GENERAL_MANAGER", "COO", "OPER
 // Executive titles who own sign-off on logged expenses before they're paid.
 export const EXPENSE_APPROVAL_AUDIENCE: ExecutiveTitle[] = ["CFO", "GENERAL_MANAGER", "COO"];
 const EXPENSE_PENDING_NOTICE_DAYS = 3;
+// Same finance-mandate audience budgetPlans.ts notifies on submission — visibility here
+// even though only ADMIN can actually action the approve/reject buttons.
+export const BUDGET_APPROVAL_AUDIENCE: ExecutiveTitle[] = ["CFO", "GENERAL_MANAGER", "COO"];
 
 function daysFromNow(date: Date): number {
   return Math.ceil((date.getTime() - Date.now()) / (1000 * 60 * 60 * 24));
@@ -45,8 +48,9 @@ router.get("/", async (req, res) => {
   const seesInvoices = role === "ADMIN" || (role === "EXECUTIVE" && !!title && INVOICE_AUDIENCE.includes(title));
   const seesOrders = role === "ADMIN" || (role === "EXECUTIVE" && !!title && ORDER_AUDIENCE.includes(title));
   const seesExpenseApprovals = role === "ADMIN" || (role === "EXECUTIVE" && !!title && EXPENSE_APPROVAL_AUDIENCE.includes(title));
+  const seesBudgetApprovals = role === "ADMIN" || (role === "EXECUTIVE" && !!title && BUDGET_APPROVAL_AUDIENCE.includes(title));
 
-  const [reviewedAlerts, reviewedIncidents, certificates, trainingRecords, contractors, invoices, orders, pendingExpenses] = await Promise.all([
+  const [reviewedAlerts, reviewedIncidents, certificates, trainingRecords, contractors, invoices, orders, pendingExpenses, pendingBudgets] = await Promise.all([
     prisma.alert.findMany({
       where: { reviewStatus: { in: ["APPROVED", "REJECTED"] }, site: { mineId } },
       include: {
@@ -99,6 +103,12 @@ router.get("/", async (req, res) => {
       ? prisma.expense.findMany({
           where: { status: "PENDING", site: { mineId } },
           include: { site: { select: { id: true, name: true } }, payee: { select: { name: true } } },
+        })
+      : Promise.resolve([]),
+    seesBudgetApprovals
+      ? prisma.budgetPlan.findMany({
+          where: { status: "PENDING_APPROVAL", mineId },
+          include: { site: { select: { id: true, name: true } } },
         })
       : Promise.resolve([]),
   ]);
@@ -204,6 +214,19 @@ router.get("/", async (req, res) => {
       site: e.site,
     }));
 
+  const budgetItems = pendingBudgets
+    .map((p) => ({ p, ageDays: Math.floor((Date.now() - p.createdAt.getTime()) / 86400000) }))
+    .map(({ p, ageDays }) => ({
+      id: `budget-${p.id}`,
+      kind: "budget" as const,
+      entityId: p.id,
+      title: `Budget ${p.category.replace(/_/g, " ")} — R${Math.round(p.budgetedAmount).toLocaleString()} awaiting approval`,
+      severity: (ageDays >= 7 ? "HIGH" : ageDays >= 3 ? "MEDIUM" : "LOW") as "HIGH" | "MEDIUM" | "LOW",
+      reviewStatus: "OVERDUE" as const,
+      reviewedAt: p.createdAt,
+      site: p.site,
+    }));
+
   const items = [
     ...reviewedAlerts.map((a) => ({
       id: `alert-${a.id}`,
@@ -232,6 +255,7 @@ router.get("/", async (req, res) => {
     ...invoiceItems,
     ...orderItems,
     ...expenseApprovalItems,
+    ...budgetItems,
   ]
     .filter((item) => item.reviewedAt)
     .sort((a, b) => new Date(b.reviewedAt!).getTime() - new Date(a.reviewedAt!).getTime())

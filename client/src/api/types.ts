@@ -82,7 +82,7 @@ export interface ExecutiveInvite {
 
 export interface ReviewNotification {
   id: string;
-  kind: "alert" | "incident" | "certification" | "contract" | "invoice" | "order";
+  kind: "alert" | "incident" | "certification" | "contract" | "invoice" | "order" | "expense" | "budget";
   entityId?: string;
   title: string;
   severity: AlertSeverity;
@@ -4036,6 +4036,18 @@ export interface BudgetPlan {
   reviewNote?: string | null;
   createdBy?: { id: string; name: string } | null;
   createdAt: string;
+}
+
+export interface BudgetPlanExpense {
+  id: string;
+  expenseNumber: string;
+  description: string;
+  amount: number;
+  currency: string;
+  expenseDate: string;
+  status: ExpenseStatus;
+  site?: { id: string; name: string } | null;
+  payee?: { id: string; name: string } | null;
 }
 
 export interface BudgetSummary {

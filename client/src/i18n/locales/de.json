@@ -1460,6 +1460,8 @@
     "dueOn": "Fällig am {{date}}",
     "invoiceLabel": "Rechnung",
     "orderLabel": "Bestellung",
+    "expenseLabel": "Ausgabe",
+    "budgetLabel": "Budget",
     "viewWorker": "Mitarbeiter Anzeigen",
     "endContract": "Vertrag Beenden",
     "confirmEndContract": "Vertrag mit diesem Auftragnehmer beenden? Der Status wird auf BEENDET gesetzt.",
@@ -1467,7 +1469,8 @@
     "viewInvoice": "Rechnung Anzeigen",
     "cancelOrder": "Bestellung Stornieren",
     "confirmCancelOrder": "Diese Bestellung stornieren?",
-    "viewOrder": "Bestellung Anzeigen"
+    "viewOrder": "Bestellung Anzeigen",
+    "viewBudget": "Budget Anzeigen"
   },
   "contractors": {
     "nav": "Auftragnehmer",
@@ -4374,7 +4377,10 @@
     "recommendations": "Empfehlungen",
     "reviewNote": "Notiz (optional)",
     "approveTitle": "Budgetplan Genehmigen",
-    "rejectTitle": "Budgetplan Ablehnen"
+    "rejectTitle": "Budgetplan Ablehnen",
+    "viewSpending": "Ausgaben Anzeigen",
+    "spendingTitle": "Ausgaben — {{category}}",
+    "noSpendingYet": "Für diesen Zeitraum sind noch keine passenden Ausgaben erfasst."
   },
   "toolboxTalks": {
     "nav": "Sicherheitsunterweisungen",

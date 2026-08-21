@@ -3,13 +3,65 @@ import { useTranslation } from "react-i18next";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer } from "recharts";
 import { api } from "../api/client";
 import { useAuth } from "../context/AuthContext";
-import { AiBudgetInsight, BudgetPlan, BudgetSummary, ExpenseCategory, Site } from "../api/types";
+import { AiBudgetInsight, BudgetPlan, BudgetPlanExpense, BudgetSummary, ExpenseCategory, Site } from "../api/types";
 import { StatusBadge } from "../components/Badges";
 import Modal from "../components/Modal";
 import { buttonDanger, buttonPrimary, buttonSecondary, cardClass, inputClass, labelClass, selectClass } from "../components/ui";
 import DateField from "../components/DateField";
 import LoadError from "../components/LoadError";
 import DataTable, { DataTableColumn } from "../components/DataTable";
+
+// Itemized breakdown behind a plan's actualAmount, so "actual spend" is a verifiable
+// list of real expenses rather than a lump number the viewer has to take on faith.
+function SpendingModal({ plan, onClose }: { plan: BudgetPlan; onClose: () => void }) {
+  const { t } = useTranslation();
+  const [expenses, setExpenses] = useState<BudgetPlanExpense[] | null>(null);
+  const [loadError, setLoadError] = useState(false);
+
+  async function load() {
+    setLoadError(false);
+    try {
+      const res = await api.get<BudgetPlanExpense[]>(`/budget-plans/${plan.id}/expenses`);
+      setExpenses(res.data);
+    } catch {
+      setLoadError(true);
+    }
+  }
+
+  useEffect(() => {
+    load();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  return (
+    <Modal title={t("budgetPlanning.spendingTitle", { category: t(`expenses.categories.${plan.category}`) })} onClose={onClose} size="lg">
+      {loadError && <LoadError onRetry={load} />}
+      {!loadError && !expenses && <div className="text-mine-300 text-sm">{t("common.loading")}</div>}
+      {!loadError && expenses && (
+        expenses.length === 0 ? (
+          <div className="text-mine-400 text-sm">{t("budgetPlanning.noSpendingYet")}</div>
+        ) : (
+          <div className="space-y-2">
+            {expenses.map((e) => (
+              <div key={e.id} className="flex items-center justify-between text-sm border-b border-mine-800 pb-2">
+                <div className="min-w-0">
+                  <div className="font-medium truncate">{e.description}</div>
+                  <div className="text-xs text-mine-400">
+                    {e.expenseNumber} · {e.payee?.name ?? "—"} · {e.site?.name ?? "—"} · {new Date(e.expenseDate).toLocaleDateString()}
+                  </div>
+                </div>
+                <div className="flex items-center gap-2 shrink-0 ml-3">
+                  <StatusBadge status={e.status} />
+                  <span className="font-semibold tabular-nums">{e.currency} {e.amount.toLocaleString()}</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        )
+      )}
+    </Modal>
+  );
+}
 
 const categories: ExpenseCategory[] = [
   "OPERATIONS",
@@ -225,6 +277,7 @@ export default function BudgetPlanning() {
   const [loadError, setLoadError] = useState(false);
   const [modal, setModal] = useState<null | { mode: "create"; seed?: BudgetPlan } | { mode: "edit"; plan: BudgetPlan }>(null);
   const [reviewModal, setReviewModal] = useState<null | { plan: BudgetPlan; decision: "approve" | "reject" }>(null);
+  const [spendingPlan, setSpendingPlan] = useState<BudgetPlan | null>(null);
 
   async function load() {
     setLoading(true);
@@ -386,6 +439,7 @@ export default function BudgetPlanning() {
         ]}
         actions={(p) => (
           <div className="flex justify-end gap-2">
+            <button className="text-xs text-mine-300 hover:text-mine-50" onClick={() => setSpendingPlan(p)}>{t("budgetPlanning.viewSpending")}</button>
             {canApprove && p.status === "PENDING_APPROVAL" && (
               <>
                 <button className="text-xs text-success-500 hover:text-success-400" onClick={() => setReviewModal({ plan: p, decision: "approve" })}>
@@ -432,6 +486,8 @@ export default function BudgetPlanning() {
           <ReviewForm decision={reviewModal.decision} onSubmit={review} onCancel={() => setReviewModal(null)} />
         </Modal>
       )}
+
+      {spendingPlan && <SpendingModal plan={spendingPlan} onClose={() => setSpendingPlan(null)} />}
     </div>
   );
 }
