@@ -135,14 +135,15 @@ function ReviewRow({
 export default function ExecutiveDashboard() {
   const { t } = useTranslation();
   const { user } = useAuth();
-  const canSeeFinancials = user?.title === "CFO" || user?.title === "GENERAL_MANAGER";
+  // CFO has its own dedicated CfoDashboard.tsx and COO its own CooDashboard.tsx
+  // (both routed in App.tsx's HomeRoute) — neither title ever renders this component,
+  // so this file's gates only need to account for GM and the other titles.
+  const canSeeFinancials = user?.title === "GENERAL_MANAGER";
   const canSeeHrWorkforce = user?.title === "HR_MANAGER";
   const canSeeVisitorHistory = user?.title === "SECURITY_MANAGER";
   // GM has full module access to Production/Inventory/Maintenance already (see
   // executiveAccess.ts's fullAccess list) but this dashboard didn't reflect it — GM
   // was the only "full access" title with nothing operational of their own here.
-  // COO has its own dedicated CooDashboard.tsx (routed in App.tsx's HomeRoute) and
-  // never renders this component, so it isn't in any of these gates.
   const canSeeProductionAnalytics = user?.title === "OPERATIONS_MANAGER" || user?.title === "GENERAL_MANAGER";
   const isGeneralManager = user?.title === "GENERAL_MANAGER";
   const canSeeBudget = canSeeFinancials;

@@ -279,6 +279,13 @@
       "targetZero": "Ziel: 0 offen",
       "sitesOperational": "Standorte Betriebsbereit",
       "openCriticalIncidents": "Offene Kritische Vorfälle"
+    },
+    "cfo": {
+      "title": "Finanzleitzentrale",
+      "briefing": "{{margin}} Nettomarge · {{outstanding}} ausstehend · {{compliance}}% Compliance",
+      "targetPositive": "Ziel: positiv",
+      "targetMaxPct": "Ziel: ≤{{pct}}%",
+      "targetCollect": "Vor Fälligkeit einziehen"
     }
   },
   "sites": {

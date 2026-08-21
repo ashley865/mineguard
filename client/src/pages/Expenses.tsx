@@ -7,13 +7,26 @@ import { useAuth } from "../context/AuthContext";
 import { CostSummary, Expense, ExpenseCategory, ExpenseStatus, Payee, PayeeType, PaymentMethod, Site } from "../api/types";
 import { StatusBadge } from "../components/Badges";
 import Modal from "../components/Modal";
-import { buttonDanger, buttonPrimary, buttonSecondary, cardClass, inputClass, labelClass, selectClass } from "../components/ui";
+import { buttonDanger, buttonPrimary, buttonSecondary, inputClass, labelClass, selectClass } from "../components/ui";
+import { ReceiptIcon, ClockIcon, WalletIcon, CoinsIcon } from "../components/icons/DashboardIcons";
 import DateField from "../components/DateField";
 import FileDropzone from "../components/FileDropzone";
 import DataTable, { DataTableColumn } from "../components/DataTable";
 import { AuditHistoryButton } from "../components/AuditHistoryPanel";
 import SummaryCards from "../components/SummaryCards";
 import LoadError from "../components/LoadError";
+
+const cardOuter = "bg-mine-900 border border-mine-800 rounded-[20px] shadow-sm shadow-black/5 p-6";
+
+function IconStatCard({ icon, label, value, tone }: { icon: React.ReactNode; label: string; value: string | number; tone?: "hazard" }) {
+  return (
+    <div className={`${cardOuter} p-[18px]`}>
+      <div className={`w-8 h-8 rounded-[9px] flex items-center justify-center mb-2.5 ${tone === "hazard" ? "bg-hazard-500/10 text-hazard-500" : "bg-mine-400/10 text-mine-400"}`}>{icon}</div>
+      <div className={`text-lg font-bold mt-0.5 tabular-nums ${tone === "hazard" ? "text-hazard-500" : ""}`}>{value}</div>
+      <div className="text-[10px] text-mine-400 mt-1.5 uppercase tracking-wide">{label}</div>
+    </div>
+  );
+}
 
 const CHART_TOOLTIP_STYLE = { background: "#fafafa", border: "1px solid #e5e5e5", fontSize: 11 };
 const CHART_TICK_STYLE = { fontSize: 9, fill: "#52525b" };
@@ -437,28 +450,16 @@ export default function Expenses() {
         <>
           {costSummary && (
             <>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
-                <div className={`${cardClass} px-4 py-3`}>
-                  <div className="text-[10px] text-mine-400 uppercase tracking-wide">{t("expenses.tabExpenses")}</div>
-                  <div className="text-lg font-bold mt-0.5">{costSummary.totals.expenses.toLocaleString()}</div>
-                </div>
-                <div className={`${cardClass} px-4 py-3`}>
-                  <div className="text-[10px] text-mine-400 uppercase tracking-wide">{t("maintenance.nav")}</div>
-                  <div className="text-lg font-bold mt-0.5">{costSummary.totals.maintenance.toLocaleString()}</div>
-                </div>
-                <div className={`${cardClass} px-4 py-3`}>
-                  <div className="text-[10px] text-mine-400 uppercase tracking-wide">{t("payroll.nav")}</div>
-                  <div className="text-lg font-bold mt-0.5">{costSummary.totals.payroll.toLocaleString()}</div>
-                </div>
-                <div className={`${cardClass} px-4 py-3 border-hazard-500/40`}>
-                  <div className="text-[10px] text-mine-400 uppercase tracking-wide">{t("expenses.totalCosts")}</div>
-                  <div className="text-lg font-bold mt-0.5 text-hazard-500">{costSummary.totals.grandTotal.toLocaleString()}</div>
-                </div>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <IconStatCard icon={<ReceiptIcon />} label={t("expenses.tabExpenses")} value={costSummary.totals.expenses.toLocaleString()} />
+                <IconStatCard icon={<ClockIcon />} label={t("maintenance.nav")} value={costSummary.totals.maintenance.toLocaleString()} />
+                <IconStatCard icon={<WalletIcon />} label={t("payroll.nav")} value={costSummary.totals.payroll.toLocaleString()} />
+                <IconStatCard icon={<CoinsIcon />} label={t("expenses.totalCosts")} value={costSummary.totals.grandTotal.toLocaleString()} tone="hazard" />
               </div>
 
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
-                <div className={`${cardClass} p-4`}>
-                  <h3 className="text-sm font-semibold mb-3">{t("expenses.costsBySource")}</h3>
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                <div className={cardOuter}>
+                  <h3 className="text-sm font-semibold mb-4">{t("expenses.costsBySource")}</h3>
                   <div className="h-56">
                     <ResponsiveContainer width="100%" height="100%">
                       <BarChart data={costSummary.months}>
@@ -474,8 +475,8 @@ export default function Expenses() {
                   </div>
                 </div>
 
-                <div className={`${cardClass} p-4`}>
-                  <h3 className="text-sm font-semibold mb-3">{t("expenses.byCategory")}</h3>
+                <div className={cardOuter}>
+                  <h3 className="text-sm font-semibold mb-4">{t("expenses.byCategory")}</h3>
                   {costSummary.byCategory.length === 0 ? (
                     <div className="text-mine-400 text-xs h-56 flex items-center justify-center">{t("expenses.noneYet")}</div>
                   ) : (
@@ -499,7 +500,7 @@ export default function Expenses() {
                               <span className="w-2 h-2 rounded-full shrink-0" style={{ background: CATEGORY_COLORS[i % CATEGORY_COLORS.length] }} />
                               {t(`expenses.categories.${d.category}`)}
                             </span>
-                            <span className="font-semibold text-mine-50">{d.amount.toLocaleString()}</span>
+                            <span className="font-semibold text-mine-50 tabular-nums">{d.amount.toLocaleString()}</span>
                           </div>
                         ))}
                       </div>
@@ -510,9 +511,9 @@ export default function Expenses() {
             </>
           )}
 
-          <div className={`${cardClass} p-4 flex items-center gap-2`}>
+          <div className={`${cardOuter} flex items-center gap-2`}>
             <span className="text-mine-400 text-xs uppercase">{t("expenses.totalPaid")}</span>
-            <span className="text-lg font-bold">{totalExpenses.toLocaleString()}</span>
+            <span className="text-lg font-bold tabular-nums">{totalExpenses.toLocaleString()}</span>
           </div>
 
           <DataTable
@@ -536,7 +537,7 @@ export default function Expenses() {
                 },
                 { key: "category", header: t("expenses.category"), render: (ex) => t(`expenses.categories.${ex.category}`), sortValue: (ex) => ex.category },
                 { key: "date", header: t("expenses.expenseDate"), render: (ex) => new Date(ex.expenseDate).toLocaleDateString(), sortValue: (ex) => ex.expenseDate },
-                { key: "amount", header: t("expenses.amount"), render: (ex) => `${ex.currency} ${ex.amount.toLocaleString()}`, sortValue: (ex) => ex.amount },
+                { key: "amount", header: t("expenses.amount"), className: "tabular-nums", render: (ex) => `${ex.currency} ${ex.amount.toLocaleString()}`, sortValue: (ex) => ex.amount },
                 { key: "status", header: t("common.status"), render: (ex) => <StatusBadge status={ex.status} />, sortValue: (ex) => ex.status },
               ] as DataTableColumn<Expense>[]
             }

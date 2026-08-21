@@ -6,12 +6,26 @@ import { useAuth } from "../context/AuthContext";
 import { Invoice, InvoiceStatus, Mine, Site } from "../api/types";
 import { StatusBadge } from "../components/Badges";
 import Modal from "../components/Modal";
-import { buttonDanger, buttonPrimary, buttonSecondary, cardClass, inputClass, labelClass, selectClass } from "../components/ui";
+import { buttonDanger, buttonPrimary, buttonSecondary, inputClass, labelClass, selectClass } from "../components/ui";
+import { WalletIcon, AlertTriangleIcon, ReceiptIcon, ClockIcon } from "../components/icons/DashboardIcons";
 import DateField from "../components/DateField";
 import DataTable, { DataTableColumn } from "../components/DataTable";
 import { AuditHistoryButton } from "../components/AuditHistoryPanel";
 
 const invoiceStatuses: InvoiceStatus[] = ["DRAFT", "SENT", "PAID", "OVERDUE", "CANCELLED"];
+const cardOuter = "bg-mine-900 border border-mine-800 rounded-[20px] shadow-sm shadow-black/5 p-6";
+const TONE_BADGE = { positive: "bg-success-500/10 text-success-500", negative: "bg-danger-500/10 text-danger-500", neutral: "bg-mine-400/10 text-mine-400" } as const;
+
+function IconStatCard({ icon, label, value, tone = "neutral" }: { icon: React.ReactNode; label: string; value: string | number; tone?: keyof typeof TONE_BADGE }) {
+  const toneText = { positive: "text-success-500", negative: "text-danger-500", neutral: "" }[tone];
+  return (
+    <div className={`${cardOuter} p-[18px]`}>
+      <div className={`w-8 h-8 rounded-[9px] flex items-center justify-center mb-2.5 ${TONE_BADGE[tone]}`}>{icon}</div>
+      <div className={`text-lg font-bold mt-0.5 tabular-nums ${toneText}`}>{value}</div>
+      <div className="text-[10px] text-mine-400 mt-1.5 uppercase tracking-wide">{label}</div>
+    </div>
+  );
+}
 
 const CHART_TOOLTIP_STYLE = { background: "#fafafa", border: "1px solid #e5e5e5", fontSize: 11 };
 const CHART_TICK_STYLE = { fontSize: 10, fill: "#52525b" };
@@ -171,7 +185,7 @@ function InvoiceForm({ sites, initial, onSubmit, onCancel }: {
           </div>
         ))}
         <button type="button" className={`${buttonSecondary} text-xs px-3`} onClick={addLine}>{t("procurement.addLine")}</button>
-        <div className="text-xs text-right pt-1 space-y-0.5">
+        <div className="text-xs text-right pt-1 space-y-0.5 tabular-nums">
           <div>{t("invoices.subtotal")}: {subtotal.toLocaleString()}</div>
           <div>{t("invoices.vatAmount")}: {vatAmount.toLocaleString()}</div>
           <div className="font-semibold text-sm">{t("invoices.total")}: {(subtotal + vatAmount).toLocaleString()}</div>
@@ -231,7 +245,7 @@ function InvoiceView({ invoice, mine, onBack, onStatusChange, onEdit }: {
         </div>
       </div>
 
-      <div className={`${cardClass} p-4 sm:p-6 md:p-8 space-y-6 overflow-x-auto`}>
+      <div className={`${cardOuter} sm:p-8 md:p-10 space-y-6 overflow-x-auto`}>
         <div className="flex items-start justify-between flex-wrap gap-4">
           <div className="flex items-center gap-3">
             {mine?.hasLogo ? (
@@ -279,8 +293,8 @@ function InvoiceView({ invoice, mine, onBack, onStatusChange, onEdit }: {
               <tr key={l.id} className="border-b border-mine-800">
                 <td className="py-2">{l.description}</td>
                 <td className="py-2 text-right">{l.quantity}</td>
-                <td className="py-2 text-right">{l.unitPrice.toLocaleString()}</td>
-                <td className="py-2 text-right">{l.lineTotal.toLocaleString()}</td>
+                <td className="py-2 text-right tabular-nums">{l.unitPrice.toLocaleString()}</td>
+                <td className="py-2 text-right tabular-nums">{l.lineTotal.toLocaleString()}</td>
               </tr>
             ))}
           </tbody>
@@ -288,9 +302,9 @@ function InvoiceView({ invoice, mine, onBack, onStatusChange, onEdit }: {
 
         <div className="flex justify-end">
           <div className="w-56 space-y-1 text-sm">
-            <div className="flex justify-between"><span className="text-mine-400">{t("invoices.subtotal")}</span><span>{invoice.currency} {subtotal.toLocaleString()}</span></div>
-            <div className="flex justify-between"><span className="text-mine-400">{t("invoices.vatAmount")} ({invoice.vatRate}%)</span><span>{invoice.currency} {vatAmount.toLocaleString()}</span></div>
-            <div className="flex justify-between font-bold text-base border-t border-mine-800 pt-1"><span>{t("invoices.total")}</span><span>{invoice.currency} {total.toLocaleString()}</span></div>
+            <div className="flex justify-between tabular-nums"><span className="text-mine-400">{t("invoices.subtotal")}</span><span>{invoice.currency} {subtotal.toLocaleString()}</span></div>
+            <div className="flex justify-between tabular-nums"><span className="text-mine-400">{t("invoices.vatAmount")} ({invoice.vatRate}%)</span><span>{invoice.currency} {vatAmount.toLocaleString()}</span></div>
+            <div className="flex justify-between font-bold text-base border-t border-mine-800 pt-1 tabular-nums"><span>{t("invoices.total")}</span><span>{invoice.currency} {total.toLocaleString()}</span></div>
           </div>
         </div>
 
@@ -410,29 +424,17 @@ export default function Invoices() {
         )}
       </div>
 
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
-        <div className={`${cardClass} px-4 py-3`}>
-          <div className="text-[10px] text-mine-400 uppercase tracking-wide">{t("invoices.totalOutstanding")}</div>
-          <div className="text-lg font-bold mt-0.5 text-hazard-500">{totalOutstanding.toLocaleString()}</div>
-        </div>
-        <div className={`${cardClass} px-4 py-3`}>
-          <div className="text-[10px] text-mine-400 uppercase tracking-wide">{t("invoices.totalOverdue")}</div>
-          <div className={`text-lg font-bold mt-0.5 ${totalOverdue > 0 ? "text-danger-500" : ""}`}>{totalOverdue.toLocaleString()}</div>
-        </div>
-        <div className={`${cardClass} px-4 py-3`}>
-          <div className="text-[10px] text-mine-400 uppercase tracking-wide">{t("invoices.unpaidCount")}</div>
-          <div className="text-lg font-bold mt-0.5">{unpaidInvoices.length}</div>
-        </div>
-        <div className={`${cardClass} px-4 py-3`}>
-          <div className="text-[10px] text-mine-400 uppercase tracking-wide">{t("invoices.overdueCount")}</div>
-          <div className={`text-lg font-bold mt-0.5 ${overdueInvoices.length > 0 ? "text-danger-500" : ""}`}>{overdueInvoices.length}</div>
-        </div>
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <IconStatCard icon={<WalletIcon />} label={t("invoices.totalOutstanding")} value={totalOutstanding.toLocaleString()} tone="neutral" />
+        <IconStatCard icon={<AlertTriangleIcon />} label={t("invoices.totalOverdue")} value={totalOverdue.toLocaleString()} tone={totalOverdue > 0 ? "negative" : "positive"} />
+        <IconStatCard icon={<ReceiptIcon />} label={t("invoices.unpaidCount")} value={unpaidInvoices.length} />
+        <IconStatCard icon={<ClockIcon />} label={t("invoices.overdueCount")} value={overdueInvoices.length} tone={overdueInvoices.length > 0 ? "negative" : "positive"} />
       </div>
 
       {invoices.length > 0 && (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
-          <div className={`${cardClass} p-4`}>
-            <h3 className="text-sm font-semibold mb-3">{t("invoices.agingTitle")}</h3>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          <div className={cardOuter}>
+            <h3 className="text-sm font-semibold mb-4">{t("invoices.agingTitle")}</h3>
             <div className="h-56">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={agingData}>
@@ -449,8 +451,8 @@ export default function Invoices() {
             </div>
           </div>
 
-          <div className={`${cardClass} p-4`}>
-            <h3 className="text-sm font-semibold mb-3">{t("invoices.byStatusTitle")}</h3>
+          <div className={cardOuter}>
+            <h3 className="text-sm font-semibold mb-4">{t("invoices.byStatusTitle")}</h3>
             {statusData.length === 0 ? (
               <div className="text-mine-400 text-xs h-56 flex items-center justify-center">{t("invoices.noneYet")}</div>
             ) : (
@@ -474,7 +476,7 @@ export default function Invoices() {
                         <span className="w-2 h-2 rounded-full shrink-0" style={{ background: STATUS_COLORS[d.status] }} />
                         {t(`badges.status.${d.status}`)}
                       </span>
-                      <span className="font-semibold text-mine-50">{d.amount.toLocaleString()}</span>
+                      <span className="font-semibold text-mine-50 tabular-nums">{d.amount.toLocaleString()}</span>
                     </div>
                   ))}
                 </div>

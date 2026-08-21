@@ -297,6 +297,13 @@
       "targetZero": "Target: 0 open",
       "sitesOperational": "Sites Operational",
       "openCriticalIncidents": "Open Critical Incidents"
+    },
+    "cfo": {
+      "title": "Financial Command Center",
+      "briefing": "{{margin}} net margin · {{outstanding}} outstanding · {{compliance}}% compliance",
+      "targetPositive": "Target: positive",
+      "targetMaxPct": "Target: ≤{{pct}}%",
+      "targetCollect": "Collect before due date"
     }
   },
   "sites": {

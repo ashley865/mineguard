@@ -279,6 +279,13 @@
       "targetZero": "Teiken: 0 oop",
       "sitesOperational": "Terreine Operasioneel",
       "openCriticalIncidents": "Oop Kritieke Insidente"
+    },
+    "cfo": {
+      "title": "Finansiële Bevelsentrum",
+      "briefing": "{{margin}} netto marge · {{outstanding}} uitstaande · {{compliance}}% nakoming",
+      "targetPositive": "Teiken: positief",
+      "targetMaxPct": "Teiken: ≤{{pct}}%",
+      "targetCollect": "Vorder voor die vervaldatum in"
     }
   },
   "sites": {

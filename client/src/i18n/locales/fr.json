@@ -279,6 +279,13 @@
       "targetZero": "Cible : 0 ouvert",
       "sitesOperational": "Sites Opérationnels",
       "openCriticalIncidents": "Incidents Critiques Ouverts"
+    },
+    "cfo": {
+      "title": "Centre de Commandement Financier",
+      "briefing": "{{margin}} marge nette · {{outstanding}} en attente · {{compliance}}% de conformité",
+      "targetPositive": "Cible : positif",
+      "targetMaxPct": "Cible : ≤{{pct}}%",
+      "targetCollect": "Encaisser avant la date d'échéance"
     }
   },
   "sites": {

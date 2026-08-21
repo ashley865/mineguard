@@ -9,6 +9,7 @@ import RegisterMine from "./pages/RegisterMine";
 import Dashboard from "./pages/Dashboard";
 import ExecutiveDashboard from "./pages/ExecutiveDashboard";
 import CooDashboard from "./pages/CooDashboard";
+import CfoDashboard from "./pages/CfoDashboard";
 import Sites from "./pages/Sites";
 import Sensors from "./pages/Sensors";
 import Alerts from "./pages/Alerts";
@@ -84,7 +85,9 @@ import PrivacyPolicy from "./pages/PrivacyPolicy";
 function HomeRoute() {
   const { user } = useAuth();
   if (user?.role !== "EXECUTIVE") return <Dashboard />;
-  return user.title === "COO" ? <CooDashboard /> : <ExecutiveDashboard />;
+  if (user.title === "COO") return <CooDashboard />;
+  if (user.title === "CFO") return <CfoDashboard />;
+  return <ExecutiveDashboard />;
 }
 
 function ModuleRoute({ path, children }: { path: RestrictedModule; children: ReactElement }) {

@@ -279,6 +279,13 @@
       "targetZero": "Meta: 0 abiertos",
       "sitesOperational": "Sitios Operativos",
       "openCriticalIncidents": "Incidentes Críticos Abiertos"
+    },
+    "cfo": {
+      "title": "Centro de Mando Financiero",
+      "briefing": "{{margin}} margen neto · {{outstanding}} pendiente · {{compliance}}% de cumplimiento",
+      "targetPositive": "Meta: positivo",
+      "targetMaxPct": "Meta: ≤{{pct}}%",
+      "targetCollect": "Cobrar antes de la fecha de vencimiento"
     }
   },
   "sites": {
