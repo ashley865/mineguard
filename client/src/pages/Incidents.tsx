@@ -5,9 +5,27 @@ import { useAuth } from "../context/AuthContext";
 import { AiIncidentInvestigationResponse, AlertSeverity, Incident, IncidentMedia, IncidentStatus, Site, Zone } from "../api/types";
 import { SeverityBadge, StatusBadge } from "../components/Badges";
 import Modal from "../components/Modal";
-import { buttonPrimary, buttonSecondary, cardClass, inputClass, labelClass, selectClass } from "../components/ui";
+import { buttonPrimary, buttonSecondary, inputClass, labelClass, selectClass } from "../components/ui";
+import { AlertTriangleIcon, ClockIcon, CheckCircleIcon, ClipboardIcon } from "../components/icons/DashboardIcons";
 import LoadError from "../components/LoadError";
 import FileDropzone from "../components/FileDropzone";
+
+const cardOuter = "bg-mine-900 border border-mine-800 rounded-[20px] shadow-sm shadow-black/5 p-6";
+const TONE_BADGE = { positive: "bg-success-500/10 text-success-500", negative: "bg-danger-500/10 text-danger-500", caution: "bg-hazard-500/10 text-hazard-500", neutral: "bg-mine-400/10 text-mine-400" } as const;
+
+function IconStatCard({ icon, label, value, tone = "neutral" }: { icon: React.ReactNode; label: string; value: string | number; tone?: keyof typeof TONE_BADGE }) {
+  const toneText = { positive: "text-success-500", negative: "text-danger-500", caution: "text-hazard-500", neutral: "" }[tone];
+  return (
+    <div className={`${cardOuter} p-[22px]`}>
+      <div className={`w-8 h-8 rounded-[9px] flex items-center justify-center mb-2.5 ${TONE_BADGE[tone]}`}>{icon}</div>
+      <div className={`text-lg font-bold mt-0.5 tabular-nums truncate ${toneText}`}>{value}</div>
+      <div className="text-[10px] text-mine-400 mt-1.5 uppercase tracking-wide">{label}</div>
+    </div>
+  );
+}
+
+const statusFilters: (IncidentStatus | "ALL")[] = ["ALL", "OPEN", "INVESTIGATING", "RESOLVED"];
+const severityFilters: (AlertSeverity | "ALL")[] = ["ALL", "CRITICAL", "HIGH", "MEDIUM", "LOW"];
 
 // The media GET endpoint requires the normal Bearer auth header, which a plain
 // <img src="..."> / <a href="..."> can't send (the browser never attaches it) — so the
@@ -201,6 +219,9 @@ export default function Incidents() {
   const [modal, setModal] = useState(false);
   const [reviewNotes, setReviewNotes] = useState<Record<string, string>>({});
   const [investigatingId, setInvestigatingId] = useState<string | null>(null);
+  const [statusFilter, setStatusFilter] = useState<IncidentStatus | "ALL">("ALL");
+  const [severityFilter, setSeverityFilter] = useState<AlertSeverity | "ALL">("ALL");
+  const [search, setSearch] = useState("");
 
   async function load() {
     setLoading(true);
@@ -244,6 +265,22 @@ export default function Incidents() {
   if (loading) return <div className="text-mine-300">{t("incidents.loading")}</div>;
   if (loadError) return <LoadError onRetry={load} />;
 
+  const openCount = incidents.filter((i) => i.status === "OPEN").length;
+  const investigatingCount = incidents.filter((i) => i.status === "INVESTIGATING").length;
+  const resolvedCount = incidents.filter((i) => i.status === "RESOLVED").length;
+  const pendingReviewCount = incidents.filter((i) => i.reviewStatus === "PENDING").length;
+  const criticalOpenCount = incidents.filter((i) => i.severity === "CRITICAL" && i.status !== "RESOLVED").length;
+
+  const filteredIncidents = incidents.filter((incident) => {
+    if (statusFilter !== "ALL" && incident.status !== statusFilter) return false;
+    if (severityFilter !== "ALL" && incident.severity !== severityFilter) return false;
+    if (search.trim()) {
+      const q = search.trim().toLowerCase();
+      if (!incident.title.toLowerCase().includes(q) && !incident.description.toLowerCase().includes(q)) return false;
+    }
+    return true;
+  });
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between flex-wrap gap-3">
@@ -256,9 +293,36 @@ export default function Incidents() {
         )}
       </div>
 
+      <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+        <IconStatCard icon={<AlertTriangleIcon />} label={t("incidents.openCount")} value={openCount} tone={openCount > 0 ? "caution" : "positive"} />
+        <IconStatCard icon={<ClockIcon />} label={t("incidents.investigatingCount")} value={investigatingCount} />
+        <IconStatCard icon={<CheckCircleIcon />} label={t("incidents.resolvedCount")} value={resolvedCount} tone="positive" />
+        <IconStatCard icon={<ClipboardIcon />} label={t("incidents.pendingReviewCount")} value={pendingReviewCount} tone={pendingReviewCount > 0 ? "caution" : "positive"} />
+        <IconStatCard icon={<AlertTriangleIcon />} label={t("incidents.criticalOpenCount")} value={criticalOpenCount} tone={criticalOpenCount > 0 ? "negative" : "positive"} />
+      </div>
+
+      <div className="flex flex-wrap items-end gap-2">
+        <div>
+          <label className={labelClass}>{t("common.search")}</label>
+          <input className={inputClass} value={search} onChange={(e) => setSearch(e.target.value)} placeholder={t("incidents.searchPlaceholder") ?? ""} />
+        </div>
+        <div>
+          <label className={labelClass}>{t("common.status")}</label>
+          <select className={selectClass} value={statusFilter} onChange={(e) => setStatusFilter(e.target.value as IncidentStatus | "ALL")}>
+            {statusFilters.map((s) => <option key={s} value={s}>{s === "ALL" ? t("incidents.allStatuses") : t(`badges.status.${s}`)}</option>)}
+          </select>
+        </div>
+        <div>
+          <label className={labelClass}>{t("incidents.severity")}</label>
+          <select className={selectClass} value={severityFilter} onChange={(e) => setSeverityFilter(e.target.value as AlertSeverity | "ALL")}>
+            {severityFilters.map((s) => <option key={s} value={s}>{s === "ALL" ? t("incidents.allSeverities") : t(`badges.severity.${s}`)}</option>)}
+          </select>
+        </div>
+      </div>
+
       <div className="space-y-3">
-        {incidents.map((incident) => (
-          <div key={incident.id} className={`${cardClass} p-4`}>
+        {filteredIncidents.map((incident) => (
+          <div key={incident.id} className={cardOuter}>
             <div className="flex items-start justify-between gap-4">
               <div className="flex-1">
                 <div className="flex items-center gap-2 mb-1">
@@ -322,8 +386,10 @@ export default function Incidents() {
             </div>
           </div>
         ))}
-        {incidents.length === 0 && (
-          <div className={`${cardClass} p-6 text-center text-mine-400`}>{t("incidents.noIncidentsReported")}</div>
+        {filteredIncidents.length === 0 && (
+          <div className={`${cardOuter} text-center text-mine-400`}>
+            {incidents.length === 0 ? t("incidents.noIncidentsReported") : t("incidents.noneMatchFilters")}
+          </div>
         )}
       </div>
 
