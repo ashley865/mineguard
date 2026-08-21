@@ -288,6 +288,15 @@
     "budgetHealth": {
       "title": "Budget Health",
       "viewAll": "View Budget Planning →"
+    },
+    "coo": {
+      "title": "Operations Command Center",
+      "briefing": "{{operational}}/{{total}} sites operational · {{compliance}}% compliance · {{uptime}}% equipment uptime",
+      "targetPct": "Target: {{pct}}%+",
+      "targetAllSites": "Target: all sites operational",
+      "targetZero": "Target: 0 open",
+      "sitesOperational": "Sites Operational",
+      "openCriticalIncidents": "Open Critical Incidents"
     }
   },
   "sites": {

@@ -270,6 +270,15 @@
     "budgetHealth": {
       "title": "Salud Presupuestaria",
       "viewAll": "Ver Planificación de Presupuesto →"
+    },
+    "coo": {
+      "title": "Centro de Mando de Operaciones",
+      "briefing": "{{operational}}/{{total}} sitios operativos · {{compliance}}% de cumplimiento · {{uptime}}% de tiempo de actividad de equipos",
+      "targetPct": "Meta: {{pct}}%+",
+      "targetAllSites": "Meta: todos los sitios operativos",
+      "targetZero": "Meta: 0 abiertos",
+      "sitesOperational": "Sitios Operativos",
+      "openCriticalIncidents": "Incidentes Críticos Abiertos"
     }
   },
   "sites": {

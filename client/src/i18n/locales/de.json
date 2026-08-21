@@ -270,6 +270,15 @@
     "budgetHealth": {
       "title": "Budgetgesundheit",
       "viewAll": "Budgetplanung ansehen →"
+    },
+    "coo": {
+      "title": "Betriebsleitzentrale",
+      "briefing": "{{operational}}/{{total}} Standorte betriebsbereit · {{compliance}}% Compliance · {{uptime}}% Anlagenverfügbarkeit",
+      "targetPct": "Ziel: {{pct}}%+",
+      "targetAllSites": "Ziel: alle Standorte betriebsbereit",
+      "targetZero": "Ziel: 0 offen",
+      "sitesOperational": "Standorte Betriebsbereit",
+      "openCriticalIncidents": "Offene Kritische Vorfälle"
     }
   },
   "sites": {

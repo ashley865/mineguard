@@ -270,6 +270,15 @@
     "budgetHealth": {
       "title": "Begrotingsgesondheid",
       "viewAll": "Bekyk Begrotingsbeplanning →"
+    },
+    "coo": {
+      "title": "Operasionele Bevelsentrum",
+      "briefing": "{{operational}}/{{total}} terreine operasioneel · {{compliance}}% nakoming · {{uptime}}% toerustingsbedryfstyd",
+      "targetPct": "Teiken: {{pct}}%+",
+      "targetAllSites": "Teiken: alle terreine operasioneel",
+      "targetZero": "Teiken: 0 oop",
+      "sitesOperational": "Terreine Operasioneel",
+      "openCriticalIncidents": "Oop Kritieke Insidente"
     }
   },
   "sites": {
