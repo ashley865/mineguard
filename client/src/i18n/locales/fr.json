@@ -44,7 +44,8 @@
     "email": "E-mail",
     "none": "Aucun",
     "loadError": "Impossible de charger — une erreur s'est produite lors de la connexion au serveur.",
-    "retry": "Réessayer"
+    "retry": "Réessayer",
+    "total": "Total"
   },
   "nav": {
     "dashboard": "Tableau de bord",
@@ -213,6 +214,8 @@
     "pendingIncidents": "Incidents",
     "noPendingAlerts": "Aucune alerte en attente de révision.",
     "noPendingIncidents": "Aucun incident en attente de révision.",
+    "noPendingReviews": "Rien n'est actuellement en attente de révision.",
+    "alertsTrendCaption": "Nouvelles alertes par jour, {{days}} derniers jours",
     "loading": "Chargement du tableau de bord exécutif…",
     "visitorsOnSite": "Visiteurs sur le Site",
     "pendingPermitsToWork": "Permis de Travail en Attente d'Approbation",

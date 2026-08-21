@@ -44,7 +44,8 @@
     "email": "Correo Electrónico",
     "none": "Ninguno",
     "loadError": "No se pudo cargar esto — algo salió mal al conectar con el servidor.",
-    "retry": "Reintentar"
+    "retry": "Reintentar",
+    "total": "Total"
   },
   "nav": {
     "dashboard": "Panel",
@@ -213,6 +214,8 @@
     "pendingIncidents": "Incidentes",
     "noPendingAlerts": "No hay alertas pendientes de revisión.",
     "noPendingIncidents": "No hay incidentes pendientes de revisión.",
+    "noPendingReviews": "No hay nada pendiente de revisión por ahora.",
+    "alertsTrendCaption": "Alertas nuevas por día, últimos {{days}} días",
     "loading": "Cargando panel ejecutivo…",
     "visitorsOnSite": "Visitantes en el Sitio",
     "pendingPermitsToWork": "Permisos de Trabajo Pendientes de Aprobación",

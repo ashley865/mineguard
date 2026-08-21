@@ -1,11 +1,12 @@
-import { useEffect, useState } from "react";
+import { useEffect, useId, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
-import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
+import { AreaChart, Area, BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
 import { api } from "../api/client";
 import { Alert, BudgetSummary, ExecutiveSummary, Incident, Invoice, ProductionFinancialSummary, ReportTrends } from "../api/types";
 import { SeverityBadge } from "../components/Badges";
 import { buttonPrimary, buttonSecondary } from "../components/ui";
+import DataTable, { DataTableColumn } from "../components/DataTable";
 import { CoinsIcon, GaugeIcon, ReceiptIcon, ClockIcon, ShieldCheckIcon } from "../components/icons/DashboardIcons";
 import FinancialSummaryWidget from "../components/FinancialSummaryWidget";
 import BudgetSummaryWidget from "../components/BudgetSummaryWidget";
@@ -42,13 +43,61 @@ function invoiceTotal(invoice: Invoice): number {
   return subtotal * (1 + invoice.vatRate / 100);
 }
 
-function HeadlineKpi({ icon, label, value, target, tone, to }: { icon: React.ReactNode; label: string; value: string | number; target: string; tone?: Tone; to?: string }) {
+// Small inline trend line, no axes/grid — a decorative-but-real indicator dropped into
+// KPI cards and chart headers wherever genuine day-by-day or month-by-month data backs
+// it (never fabricated). Each instance needs its own gradient id or multiple sparklines
+// on the same page collide on the same <defs> id and borrow each other's color.
+function Sparkline({ data, color, className = "h-7 w-full" }: { data: number[]; color: string; className?: string }) {
+  const gradientId = `spark-${useId().replace(/:/g, "")}`;
+  if (data.length < 2) return null;
+  const points = data.map((v, i) => ({ i, v }));
+  return (
+    <div className={className}>
+      <ResponsiveContainer width="100%" height="100%">
+        <AreaChart data={points} margin={{ top: 2, right: 0, bottom: 0, left: 0 }}>
+          <defs>
+            <linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor={color} stopOpacity={0.35} />
+              <stop offset="100%" stopColor={color} stopOpacity={0} />
+            </linearGradient>
+          </defs>
+          <Area type="monotone" dataKey="v" stroke={color} strokeWidth={1.5} fill={`url(#${gradientId})`} dot={false} isAnimationActive={false} />
+        </AreaChart>
+      </ResponsiveContainer>
+    </div>
+  );
+}
+
+function HeadlineKpi({
+  icon,
+  label,
+  value,
+  target,
+  tone,
+  to,
+  trend,
+  trendColor,
+}: {
+  icon: React.ReactNode;
+  label: string;
+  value: string | number;
+  target: string;
+  tone?: Tone;
+  to?: string;
+  trend?: number[];
+  trendColor?: string;
+}) {
   const content = (
     <>
       <div className={`w-9 h-9 rounded-[11px] flex items-center justify-center mb-4 ${TONE_BADGE[tone ?? "neutral"]}`}>{icon}</div>
       <div className={`text-xl font-bold leading-none tabular-nums truncate ${toneText(tone)}`}>{value}</div>
       <div className="text-xs text-mine-300 mt-2.5 truncate">{label}</div>
       <div className="text-[10px] text-mine-500 mt-1 truncate">{target}</div>
+      {trend && trend.length >= 2 && (
+        <div className="mt-2 -mx-1">
+          <Sparkline data={trend} color={trendColor ?? "#8a9ab5"} />
+        </div>
+      )}
     </>
   );
   return to ? (
@@ -70,13 +119,14 @@ function RateRow({ label, numerator, denominator }: { label: string; numerator: 
 }
 
 function MiniPie({ data, emptyLabel }: { data: { name: string; value: number; color: string }[]; emptyLabel: string }) {
+  const { t } = useTranslation();
   const total = data.reduce((sum, d) => sum + d.value, 0);
   if (total === 0) {
     return <div className="text-mine-400 text-xs h-32 flex items-center justify-center">{emptyLabel}</div>;
   }
   return (
     <div className="h-32 flex items-center gap-2">
-      <div className="w-24 h-24 shrink-0">
+      <div className="w-24 h-24 shrink-0 relative">
         <ResponsiveContainer width="100%" height="100%">
           <PieChart>
             <Pie data={data} dataKey="value" nameKey="name" innerRadius={22} outerRadius={40} paddingAngle={2}>
@@ -87,6 +137,10 @@ function MiniPie({ data, emptyLabel }: { data: { name: string; value: number; co
             <Tooltip contentStyle={{ background: "#fafafa", border: "1px solid #e5e5e5", fontSize: 11 }} />
           </PieChart>
         </ResponsiveContainer>
+        <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+          <div className="text-sm font-bold text-mine-50 tabular-nums leading-none">{total}</div>
+          <div className="text-[7px] text-mine-400 uppercase tracking-wide mt-0.5">{t("common.total")}</div>
+        </div>
       </div>
       <div className="space-y-1 text-xs flex-1 min-w-0">
         {data.filter((d) => d.value > 0).map((d) => (
@@ -103,25 +157,29 @@ function MiniPie({ data, emptyLabel }: { data: { name: string; value: number; co
   );
 }
 
-function ReviewRow({ label, onApprove, onReject }: { label: React.ReactNode; onApprove: (note: string) => void; onReject: (note: string) => void }) {
+// Compact approve/reject cell for a table row — the note input and buttons only;
+// the item's own details render as ordinary table columns instead of being bundled
+// into the same block, so a page of pending items reads as one scannable table.
+function ReviewActions({ onApprove, onReject }: { onApprove: (note: string) => void; onReject: (note: string) => void }) {
   const { t } = useTranslation();
   const [note, setNote] = useState("");
   return (
-    <div className="border border-mine-800 rounded-md p-3 space-y-2">
-      {label}
-      <div className="flex gap-2 items-center">
-        <input
-          className="flex-1 bg-mine-800 border border-mine-700 rounded-md px-2 py-1 text-xs"
-          placeholder={t("common.reviewNotePlaceholder") ?? ""}
-          value={note}
-          onChange={(e) => setNote(e.target.value)}
-        />
-        <button className={`${buttonPrimary} text-xs px-3 py-1`} onClick={() => onApprove(note)}>{t("common.approve")}</button>
-        <button className={`${buttonSecondary} text-xs px-3 py-1`} onClick={() => onReject(note)}>{t("common.reject")}</button>
+    <div className="flex flex-col items-end gap-1">
+      <input
+        className="w-32 bg-mine-800 border border-mine-700 rounded-md px-1.5 py-1 text-[10px]"
+        placeholder={t("common.reviewNotePlaceholder") ?? ""}
+        value={note}
+        onChange={(e) => setNote(e.target.value)}
+      />
+      <div className="flex gap-1">
+        <button className={`${buttonPrimary} text-[10px] px-2 py-0.5`} onClick={() => onApprove(note)}>{t("common.approve")}</button>
+        <button className={`${buttonSecondary} text-[10px] px-2 py-0.5`} onClick={() => onReject(note)}>{t("common.reject")}</button>
       </div>
     </div>
   );
 }
+
+type ReviewItem = { kind: "alert"; data: Alert } | { kind: "incident"; data: Incident };
 
 export default function CfoDashboard() {
   const { t } = useTranslation();
@@ -171,6 +229,52 @@ export default function CfoDashboard() {
   const netMargin = financial?.totals.netMargin ?? 0;
   const utilizationPct = budget && budget.planCount > 0 ? budget.utilizationPct : null;
 
+  // Real monthly net margin (earnings - expenses per month, same as the totals figure
+  // above) and real daily new-alert counts from /reports/trends — never fabricated.
+  const netMarginSparkline = financial?.months.map((m) => m.earnings - m.expenses) ?? [];
+  const alertsSparkline = trends?.trend.map((d) => d.alerts) ?? [];
+
+  const reviewItems: ReviewItem[] = [
+    ...pendingReviews.alerts.map((a): ReviewItem => ({ kind: "alert", data: a })),
+    ...pendingReviews.incidents.map((i): ReviewItem => ({ kind: "incident", data: i })),
+  ].sort((a, b) => new Date(b.data.createdAt).getTime() - new Date(a.data.createdAt).getTime());
+
+  const reviewColumns: DataTableColumn<ReviewItem>[] = [
+    {
+      key: "date",
+      header: t("common.date"),
+      sortValue: (r) => r.data.createdAt,
+      render: (r) => <span className="text-mine-400 whitespace-nowrap">{new Date(r.data.createdAt).toLocaleString()}</span>,
+    },
+    {
+      key: "type",
+      header: t("common.type"),
+      render: (r) => (
+        <span className="text-[10px] uppercase tracking-wide text-mine-400">
+          {r.kind === "alert" ? t("executive.pendingAlerts") : t("executive.pendingIncidents")}
+        </span>
+      ),
+    },
+    {
+      key: "detail",
+      header: t("common.description"),
+      render: (r) => (
+        <div className="max-w-xs">
+          <div className="font-medium text-mine-50 truncate">{r.kind === "alert" ? r.data.message : r.data.title}</div>
+          <div className="text-[10px] text-mine-400 truncate">
+            {r.data.site?.name}
+            {r.data.zone?.name ? ` · ${r.data.zone.name}` : ""}
+          </div>
+        </div>
+      ),
+    },
+    {
+      key: "severity",
+      header: t("common.status"),
+      render: (r) => <SeverityBadge severity={r.data.severity} />,
+    },
+  ];
+
   return (
     <div className="space-y-6">
       <div>
@@ -188,6 +292,8 @@ export default function CfoDashboard() {
           value={money(netMargin)}
           target={t("executive.cfo.targetPositive")}
           tone={netMargin >= 0 ? "positive" : "negative"}
+          trend={netMarginSparkline}
+          trendColor={netMargin >= 0 ? "#16a34a" : "#e13b2e"}
         />
         <HeadlineKpi
           icon={<GaugeIcon />}
@@ -251,7 +357,13 @@ export default function CfoDashboard() {
       {/* Supporting detail */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         <div className={cardOuter}>
-          <h2 className="text-sm font-semibold mb-3">{t("executive.openAlertsBySeverity")}</h2>
+          <div className="flex items-center justify-between gap-3 mb-1">
+            <h2 className="text-sm font-semibold">{t("executive.openAlertsBySeverity")}</h2>
+            {alertsSparkline.length >= 2 && <Sparkline data={alertsSparkline} color="#8a9ab5" className="h-6 w-20 shrink-0" />}
+          </div>
+          {alertsSparkline.length >= 2 && (
+            <p className="text-[10px] text-mine-400 mb-2">{t("executive.alertsTrendCaption", { days: trends?.days ?? 30 })}</p>
+          )}
           <MiniPie
             emptyLabel={t("dashboard.noOpenAlerts")}
             data={[
@@ -278,61 +390,19 @@ export default function CfoDashboard() {
 
       <div className={cardOuter}>
         <h2 className="text-sm font-semibold mb-4">{t("executive.pendingReviews")}</h2>
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-          <div>
-            <h3 className="text-[10px] font-semibold text-mine-300 uppercase mb-1.5">{t("executive.pendingAlerts")}</h3>
-            <div className="space-y-1.5">
-              {pendingReviews.alerts.length === 0 && <div className="text-mine-400 text-xs">{t("executive.noPendingAlerts")}</div>}
-              {pendingReviews.alerts.map((alert: Alert) => (
-                <ReviewRow
-                  key={alert.id}
-                  label={
-                    <div>
-                      <div className="flex items-center gap-2 mb-1">
-                        <SeverityBadge severity={alert.severity} />
-                        <span className="text-[10px] text-mine-400">{new Date(alert.createdAt).toLocaleString()}</span>
-                      </div>
-                      <div className="text-xs">{alert.message}</div>
-                      <div className="text-[10px] text-mine-400">
-                        {alert.site?.name}
-                        {alert.zone?.name ? ` · ${alert.zone.name}` : ""}
-                      </div>
-                    </div>
-                  }
-                  onApprove={(note) => reviewAlert(alert.id, "APPROVED", note)}
-                  onReject={(note) => reviewAlert(alert.id, "REJECTED", note)}
-                />
-              ))}
-            </div>
-          </div>
-
-          <div>
-            <h3 className="text-[10px] font-semibold text-mine-300 uppercase mb-1.5">{t("executive.pendingIncidents")}</h3>
-            <div className="space-y-1.5">
-              {pendingReviews.incidents.length === 0 && <div className="text-mine-400 text-xs">{t("executive.noPendingIncidents")}</div>}
-              {pendingReviews.incidents.map((incident: Incident) => (
-                <ReviewRow
-                  key={incident.id}
-                  label={
-                    <div>
-                      <div className="flex items-center gap-2 mb-1">
-                        <SeverityBadge severity={incident.severity} />
-                        <span className="text-[10px] text-mine-400">{new Date(incident.createdAt).toLocaleString()}</span>
-                      </div>
-                      <div className="text-xs font-medium">{incident.title}</div>
-                      <div className="text-[10px] text-mine-400">
-                        {incident.site?.name}
-                        {incident.zone?.name ? ` · ${incident.zone.name}` : ""}
-                      </div>
-                    </div>
-                  }
-                  onApprove={(note) => reviewIncident(incident.id, "APPROVED", note)}
-                  onReject={(note) => reviewIncident(incident.id, "REJECTED", note)}
-                />
-              ))}
-            </div>
-          </div>
-        </div>
+        <DataTable
+          columns={reviewColumns}
+          rows={reviewItems}
+          rowKey={(r) => `${r.kind}-${r.data.id}`}
+          emptyMessage={t("executive.noPendingReviews")}
+          actions={(r) =>
+            r.kind === "alert" ? (
+              <ReviewActions onApprove={(note) => reviewAlert(r.data.id, "APPROVED", note)} onReject={(note) => reviewAlert(r.data.id, "REJECTED", note)} />
+            ) : (
+              <ReviewActions onApprove={(note) => reviewIncident(r.data.id, "APPROVED", note)} onReject={(note) => reviewIncident(r.data.id, "REJECTED", note)} />
+            )
+          }
+        />
       </div>
     </div>
   );

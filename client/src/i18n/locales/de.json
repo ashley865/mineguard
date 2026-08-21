@@ -44,7 +44,8 @@
     "email": "E-Mail",
     "none": "Keine",
     "loadError": "Konnte nicht geladen werden — beim Erreichen des Servers ist etwas schiefgelaufen.",
-    "retry": "Erneut Versuchen"
+    "retry": "Erneut Versuchen",
+    "total": "Gesamt"
   },
   "nav": {
     "dashboard": "Übersicht",
@@ -213,6 +214,8 @@
     "pendingIncidents": "Vorfälle",
     "noPendingAlerts": "Keine Alarme zur Prüfung ausstehend.",
     "noPendingIncidents": "Keine Vorfälle zur Prüfung ausstehend.",
+    "noPendingReviews": "Derzeit nichts zur Prüfung ausstehend.",
+    "alertsTrendCaption": "Neue Alarme pro Tag, letzte {{days}} Tage",
     "loading": "Führungskräfte-Dashboard wird geladen…",
     "visitorsOnSite": "Besucher vor Ort",
     "pendingPermitsToWork": "Arbeitserlaubnisse, die auf Genehmigung warten",

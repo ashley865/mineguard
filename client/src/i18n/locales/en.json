@@ -62,7 +62,8 @@
     "email": "Email",
     "none": "None",
     "loadError": "Couldn't load this — something went wrong reaching the server.",
-    "retry": "Retry"
+    "retry": "Retry",
+    "total": "Total"
   },
   "nav": {
     "dashboard": "Dashboard",
@@ -231,6 +232,8 @@
     "pendingIncidents": "Incidents",
     "noPendingAlerts": "No alerts awaiting review.",
     "noPendingIncidents": "No incidents awaiting review.",
+    "noPendingReviews": "Nothing awaiting review right now.",
+    "alertsTrendCaption": "New alerts per day, last {{days}} days",
     "loading": "Loading executive dashboard…",
     "visitorsOnSite": "Visitors On Site",
     "pendingPermitsToWork": "Permits to Work Awaiting Approval",
