@@ -78,7 +78,7 @@ function IconStatCard({
       <div className={`w-[34px] h-[34px] rounded-[10px] flex items-center justify-center mb-3.5 ${badgeBg(toneClass, theme.dark)} ${toneClass ?? theme.mutedText}`}>
         {icon}
       </div>
-      <div className={`text-[28px] font-bold leading-none ${toneClass ?? theme.text}`}>{value}</div>
+      <div className={`text-lg font-bold leading-none truncate ${toneClass ?? theme.text}`}>{value}</div>
       <div className={`text-xs mt-2 ${theme.mutedText}`}>{label}</div>
     </div>
   );

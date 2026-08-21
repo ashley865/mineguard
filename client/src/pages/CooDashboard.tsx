@@ -44,9 +44,9 @@ function HeadlineKpi({ icon, label, value, target, tone }: { icon: React.ReactNo
   return (
     <div className={`${cardOuter} p-6`}>
       <div className={`w-9 h-9 rounded-[11px] flex items-center justify-center mb-4 ${TONE_BADGE[tone ?? "neutral"]}`}>{icon}</div>
-      <div className={`text-[32px] font-bold leading-none tabular-nums ${toneText(tone)}`}>{value}</div>
-      <div className="text-xs text-mine-300 mt-2.5">{label}</div>
-      <div className="text-[10px] text-mine-500 mt-1">{target}</div>
+      <div className={`text-2xl font-bold leading-none tabular-nums truncate ${toneText(tone)}`}>{value}</div>
+      <div className="text-xs text-mine-300 mt-2.5 truncate">{label}</div>
+      <div className="text-[10px] text-mine-500 mt-1 truncate">{target}</div>
     </div>
   );
 }

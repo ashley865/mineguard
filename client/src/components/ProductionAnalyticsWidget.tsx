@@ -31,7 +31,7 @@ function IconStatCard({ icon, tone, label, value }: { icon: React.ReactNode; ton
   return (
     <div className={`${cardOuter} p-[22px]`}>
       <div className={`w-[34px] h-[34px] rounded-[10px] flex items-center justify-center mb-3.5 ${tone}`}>{icon}</div>
-      <div className="text-[26px] font-bold leading-none">{value}</div>
+      <div className="text-lg font-bold leading-none truncate">{value}</div>
       <div className="text-xs text-mine-400 mt-2">{label}</div>
     </div>
   );

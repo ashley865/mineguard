@@ -84,7 +84,7 @@ function IconStatCard({ icon, label, value, tone = "neutral" }: { icon: React.Re
   return (
     <div className={`${cardOuter} p-[22px]`}>
       <div className={`w-[34px] h-[34px] rounded-[10px] flex items-center justify-center mb-3.5 ${TONE_BADGE_BG[tone]}`}>{icon}</div>
-      <div className={`text-[28px] font-bold leading-none ${TONE_TEXT[tone]}`}>{value}</div>
+      <div className={`text-lg font-bold leading-none truncate ${TONE_TEXT[tone]}`}>{value}</div>
       <div className="text-xs text-mine-400 mt-2">{label}</div>
     </div>
   );
