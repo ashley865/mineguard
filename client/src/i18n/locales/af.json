@@ -4019,6 +4019,8 @@
     "humidity": "Humiditeit",
     "mineralPrices": "Mineraalpryse",
     "asOf": "vanaf {{date}}",
+    "live": "Regstreeks",
+    "staleData": "Vertraag",
     "didYouKnow": "Het Jy Geweet?",
     "industryNews": "Bedryfsnuus",
     "unknownSource": "Onbekende bron",

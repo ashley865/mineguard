@@ -4019,6 +4019,8 @@
     "humidity": "Luftfeuchtigkeit",
     "mineralPrices": "Mineralpreise",
     "asOf": "Stand {{date}}",
+    "live": "Live",
+    "staleData": "Verzögert",
     "didYouKnow": "Wussten Sie Schon?",
     "industryNews": "Branchennachrichten",
     "unknownSource": "Unbekannte Quelle",

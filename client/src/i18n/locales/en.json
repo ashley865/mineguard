@@ -4023,6 +4023,8 @@
     "humidity": "Humidity",
     "mineralPrices": "Mineral Prices",
     "asOf": "as of {{date}}",
+    "live": "Live",
+    "staleData": "Delayed",
     "didYouKnow": "Did You Know?",
     "industryNews": "Industry News",
     "unknownSource": "Unknown source",

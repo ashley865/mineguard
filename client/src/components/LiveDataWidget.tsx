@@ -22,6 +22,43 @@ const TIER_HEX: Record<Tier, string> = { up: "#16a34a", down: "#e13b2e", flat: "
 const TIER_TEXT: Record<Tier, string> = { up: "text-success-400", down: "text-danger-400", flat: "text-hazard-400" };
 const TIER_BORDER: Record<Tier, string> = { up: "border-success-500/40", down: "border-danger-500/40", flat: "border-hazard-500/40" };
 
+// Financial UI number-formatting convention: percentages always show 2dp and an
+// explicit sign, and every price/percent figure gets `tabular-nums` so digits don't
+// jitter horizontally as they update.
+function formatPct(pct: number): string {
+  return `${pct >= 0 ? "+" : ""}${pct.toFixed(2)}%`;
+}
+
+// Prices are cached server-side for PRICE_TTL_MS (15 min); anything older than that
+// plus a grace window means the refresh itself likely failed, not just "due soon" —
+// worth surfacing rather than silently showing an old number as if it were live.
+const STALE_THRESHOLD_MS = 20 * 60 * 1000;
+
+function formatRelativeTime(date: Date): string {
+  const secs = Math.max(0, (Date.now() - date.getTime()) / 1000);
+  if (secs < 60) return "just now";
+  if (secs < 3600) return `${Math.floor(secs / 60)}m ago`;
+  return `${Math.floor(secs / 3600)}h ago`;
+}
+
+function FreshnessPill({ asOf }: { asOf: string }) {
+  const { t } = useTranslation();
+  const [, setTick] = useState(0);
+  useEffect(() => {
+    const id = setInterval(() => setTick((v) => v + 1), 30_000);
+    return () => clearInterval(id);
+  }, []);
+  const date = new Date(asOf);
+  const stale = Date.now() - date.getTime() > STALE_THRESHOLD_MS;
+  return (
+    <span className="inline-flex items-center gap-1.5 text-[10px] text-white/40 tabular-nums">
+      <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${stale ? "bg-hazard-400" : "bg-success-400"}`} />
+      {stale ? t("liveData.staleData") : t("liveData.live")}
+      <span>· {formatRelativeTime(date)}</span>
+    </span>
+  );
+}
+
 function WeatherIcon({ icon, className }: { icon: string; className?: string }) {
   const common = { className, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: 1.6, strokeLinecap: "round" as const, strokeLinejoin: "round" as const };
   switch (icon) {
@@ -128,13 +165,10 @@ function PriceChangeTooltip({ active, payload }: any) {
   return (
     <div style={NAVY_TOOLTIP_STYLE} className="px-2.5 py-1.5">
       <div className="font-bold">{t(`mineralTypes.${p.key}`)}</div>
-      <div className="text-white/60">{lines.primary}</div>
-      {lines.secondary && <div className="text-white/40 text-[10px]">{lines.secondary}</div>}
+      <div className="text-white/60 tabular-nums">{lines.primary}</div>
+      {lines.secondary && <div className="text-white/40 text-[10px] tabular-nums">{lines.secondary}</div>}
       {p.changePercent != null && (
-        <div className={`font-semibold ${TIER_TEXT[tier]}`}>
-          {p.changePercent >= 0 ? "+" : ""}
-          {p.changePercent}%
-        </div>
+        <div className={`font-semibold tabular-nums ${TIER_TEXT[tier]}`}>{formatPct(p.changePercent)}</div>
       )}
     </div>
   );
@@ -179,6 +213,7 @@ export default function LiveDataWidget({ showMineralPrices = false }: { showMine
 
   const hasWeather = weather.length > 0;
   const hasPrices = showMineralPrices && !!prices && prices.prices.length > 0;
+  const isStale = hasPrices && Date.now() - new Date(prices!.asOf).getTime() > STALE_THRESHOLD_MS;
   const chartData = hasPrices
     ? prices!.prices.filter((p) => p.available).map((p) => ({ ...p, label: t(`mineralTypes.${p.key}`) }))
     : [];
@@ -230,9 +265,7 @@ export default function LiveDataWidget({ showMineralPrices = false }: { showMine
           <div>
             <div className="flex items-center justify-between mb-1.5">
               <div className="text-[10px] text-white/40 uppercase tracking-wide">{t("liveData.mineralPrices")}</div>
-              <div className="text-[10px] text-white/40">
-                {t("liveData.asOf", { date: new Date(prices!.asOf).toLocaleTimeString() })}
-              </div>
+              <FreshnessPill asOf={prices!.asOf} />
             </div>
 
             {chartData.length > 0 && (
@@ -250,7 +283,7 @@ export default function LiveDataWidget({ showMineralPrices = false }: { showMine
                       <LabelList
                         dataKey="changePercent"
                         position="top"
-                        formatter={(v: number) => `${v >= 0 ? "+" : ""}${v}%`}
+                        formatter={(v: number) => formatPct(v)}
                         style={{ fontSize: 9, fontWeight: 700, fill: "rgba(255,255,255,0.75)" }}
                       />
                     </Bar>
@@ -277,14 +310,11 @@ export default function LiveDataWidget({ showMineralPrices = false }: { showMine
                     <div className="flex items-center justify-between gap-1">
                       <span className="text-[10px] text-white/50 uppercase tracking-wide truncate">{label}</span>
                       {p.changePercent != null && (
-                        <span className={`text-[10px] font-bold ${TIER_TEXT[tier]}`}>
-                          {p.changePercent >= 0 ? "+" : ""}
-                          {p.changePercent}%
-                        </span>
+                        <span className={`text-[10px] font-bold tabular-nums ${TIER_TEXT[tier]}`}>{formatPct(p.changePercent)}</span>
                       )}
                     </div>
-                    <div className="text-xs font-bold text-white truncate">{lines.primary}</div>
-                    {lines.secondary && <div className="text-[10px] text-white/40 truncate">{lines.secondary}</div>}
+                    <div className={`text-xs font-bold text-white truncate tabular-nums transition-opacity ${isStale ? "opacity-50" : ""}`}>{lines.primary}</div>
+                    {lines.secondary && <div className={`text-[10px] text-white/40 truncate tabular-nums transition-opacity ${isStale ? "opacity-50" : ""}`}>{lines.secondary}</div>}
                   </div>
                 );
               })}
