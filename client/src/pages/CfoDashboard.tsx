@@ -222,11 +222,10 @@ export default function CfoDashboard() {
         />
       </div>
 
-      {/* Supporting detail — P&L and budget health side by side */}
-      <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
-        <FinancialSummaryWidget />
-        <BudgetSummaryWidget />
-      </div>
+      {/* Supporting detail — each full-width; both are chart-heavy enough that
+          squeezing them into half-width columns made everything cramped */}
+      <FinancialSummaryWidget />
+      <BudgetSummaryWidget />
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <Link to="/invoices" className={`${cardOuter} block hover:border-hazard-500 transition-colors flex items-center justify-between`}>
