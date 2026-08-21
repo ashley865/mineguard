@@ -6,7 +6,8 @@ import { api } from "../api/client";
 import { useAuth } from "../context/AuthContext";
 import { Alert, ExecutiveSummary, Incident, ReportTrends } from "../api/types";
 import { SeverityBadge } from "../components/Badges";
-import { buttonPrimary, buttonSecondary, cardClass } from "../components/ui";
+import { buttonPrimary, buttonSecondary } from "../components/ui";
+import { CheckCircleIcon, AlertTriangleIcon, XCircleIcon, GaugeIcon } from "../components/icons/DashboardIcons";
 import FinancialSummaryWidget from "../components/FinancialSummaryWidget";
 import HrWorkforceWidget from "../components/HrWorkforceWidget";
 import SecurityVisitorHistoryWidget from "../components/SecurityVisitorHistoryWidget";
@@ -23,6 +24,13 @@ type Tone = "positive" | "negative" | "caution";
 
 const CHART_TOOLTIP_STYLE = { background: "#fafafa", border: "1px solid #e5e5e5", fontSize: 11 };
 const CHART_TICK_STYLE = { fontSize: 9, fill: "#52525b" };
+const cardOuter = "bg-mine-900 border border-mine-800 rounded-[20px] shadow-sm shadow-black/5 p-6";
+const TONE_BADGE: Record<Tone | "neutral", string> = {
+  positive: "bg-success-500/10 text-success-500",
+  negative: "bg-danger-500/10 text-danger-500",
+  caution: "bg-hazard-500/10 text-hazard-500",
+  neutral: "bg-mine-400/10 text-mine-400",
+};
 
 function toneText(tone?: Tone) {
   return tone === "positive" ? "text-success-500" : tone === "negative" ? "text-danger-500" : tone === "caution" ? "text-hazard-500" : "text-mine-50";
@@ -30,18 +38,19 @@ function toneText(tone?: Tone) {
 
 function OpsCard({ label, value, to, tone }: { label: string; value: number; to: string; tone?: Tone }) {
   return (
-    <Link to={to} className={`${cardClass} px-3 py-2.5 block hover:border-hazard-500 transition-colors`}>
+    <Link to={to} className={`${cardOuter} p-[22px] block hover:border-hazard-500 transition-colors`}>
       <div className="text-[10px] text-mine-300 uppercase tracking-wide">{label}</div>
       <div className={`text-lg font-bold mt-0.5 ${toneText(tone)}`}>{value}</div>
     </Link>
   );
 }
 
-function StatCard({ label, value, tone }: { label: string; value: string | number; tone?: Tone }) {
+function IconStatCard({ icon, label, value, tone }: { icon: React.ReactNode; label: string; value: string | number; tone?: Tone }) {
   return (
-    <div className={`${cardClass} px-3 py-2.5`}>
-      <div className="text-[10px] text-mine-300 uppercase tracking-wide">{label}</div>
-      <div className={`text-lg font-bold mt-0.5 ${toneText(tone)}`}>{value}</div>
+    <div className={`${cardOuter} p-[22px]`}>
+      <div className={`w-[34px] h-[34px] rounded-[10px] flex items-center justify-center mb-3.5 ${TONE_BADGE[tone ?? "neutral"]}`}>{icon}</div>
+      <div className={`text-[26px] font-bold leading-none ${toneText(tone)}`}>{value}</div>
+      <div className="text-xs text-mine-400 mt-2">{label}</div>
     </div>
   );
 }
@@ -219,27 +228,27 @@ export default function ExecutiveDashboard() {
           <h1 className="text-lg font-bold">{t("executive.title")}</h1>
           <p className="text-mine-300 text-xs">{t("executive.subtitle")}</p>
         </div>
-        <div className={`${cardClass} px-3 py-2 text-right`}>
+        <div className={`${cardOuter} px-5 py-3.5 text-right`}>
           <div className="text-[10px] text-mine-300 uppercase tracking-wide">{t("executive.complianceScore")}</div>
-          <div className={`text-xl font-bold ${scoreTone}`}>{complianceScore}%</div>
+          <div className={`text-2xl font-bold ${scoreTone}`}>{complianceScore}%</div>
         </div>
       </div>
 
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
-        <StatCard label={t("executive.operational")} value={siteStatus.OPERATIONAL} tone="positive" />
-        <StatCard label={t("executive.restricted")} value={siteStatus.RESTRICTED} tone={siteStatus.RESTRICTED > 0 ? "caution" : undefined} />
-        <StatCard label={t("executive.shutDown")} value={siteStatus.SHUT_DOWN} tone={siteStatus.SHUT_DOWN > 0 ? "negative" : undefined} />
-        <StatCard label={t("executive.equipmentUptime")} value={`${equipment.uptimePct}%`} tone={equipment.uptimePct >= 80 ? "positive" : equipment.uptimePct >= 50 ? "caution" : "negative"} />
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <IconStatCard icon={<CheckCircleIcon />} label={t("executive.operational")} value={siteStatus.OPERATIONAL} tone="positive" />
+        <IconStatCard icon={<AlertTriangleIcon />} label={t("executive.restricted")} value={siteStatus.RESTRICTED} tone={siteStatus.RESTRICTED > 0 ? "caution" : undefined} />
+        <IconStatCard icon={<XCircleIcon />} label={t("executive.shutDown")} value={siteStatus.SHUT_DOWN} tone={siteStatus.SHUT_DOWN > 0 ? "negative" : undefined} />
+        <IconStatCard icon={<GaugeIcon />} label={t("executive.equipmentUptime")} value={`${equipment.uptimePct}%`} tone={equipment.uptimePct >= 80 ? "positive" : equipment.uptimePct >= 50 ? "caution" : "negative"} />
       </div>
 
       {(isGeneralManager || isCOO) && <ExecutiveScorecard summary={summary} />}
 
       {executiveOps.hasSiteAccess ? (
         <>
-          <div className={`${cardClass} p-3 flex items-center justify-between flex-wrap gap-3`}>
+          <div className={`${cardOuter} flex items-center justify-between flex-wrap gap-3`}>
             <div>
-              <h2 className="text-xs font-semibold">{t("executive.peopleOnSite")}</h2>
-              <p className="text-[10px] text-mine-400 mt-0.5">
+              <h2 className="text-sm font-semibold">{t("executive.peopleOnSite")}</h2>
+              <p className="text-xs text-mine-400 mt-1">
                 {t("executive.peopleOnSiteBreakdown", {
                   visitors: executiveOps.peopleOnSite.visitors,
                   staff: executiveOps.peopleOnSite.staff,
@@ -250,7 +259,7 @@ export default function ExecutiveDashboard() {
             <div className="text-2xl font-bold text-mine-50">{executiveOps.peopleOnSite.total}</div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <OpsCard label={t("executive.visitorsOnSite")} value={executiveOps.visitorsOnSite} to="/visitors" />
             <OpsCard
               label={t("executive.pendingPermitsToWork")}
@@ -267,13 +276,13 @@ export default function ExecutiveDashboard() {
           </div>
         </>
       ) : (
-        <div className={`${cardClass} p-3 text-xs text-mine-300`}>{t("executive.noSiteAccess")}</div>
+        <div className={`${cardOuter} text-xs text-mine-300`}>{t("executive.noSiteAccess")}</div>
       )}
 
       {trends && (
-        <div className={`${cardClass} p-3`}>
-          <h2 className="text-xs font-semibold mb-2">{t("executive.complianceBreakdown")}</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-x-4 gap-y-1.5">
+        <div className={cardOuter}>
+          <h2 className="text-sm font-semibold mb-4">{t("executive.complianceBreakdown")}</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-x-4 gap-y-2">
             <RateRow label={t("compliance.tabCop")} numerator={trends.compliance.codesOfPractice.active} denominator={trends.compliance.codesOfPractice.total} />
             <RateRow label={t("compliance.tabRisk")} numerator={trends.compliance.riskAssessments.approved} denominator={trends.compliance.riskAssessments.total} />
             <RateRow label={t("permits.nav")} numerator={trends.compliance.permits.active} denominator={trends.compliance.permits.total} />
@@ -306,9 +315,9 @@ export default function ExecutiveDashboard() {
       {canSeeProductionAnalytics && <InventoryProcurementWidget />}
       {canSeeProductionAnalytics && <MaintenanceDowntimeWidget />}
 
-      <div className={`${cardClass} p-3`}>
-        <h2 className="text-xs font-semibold mb-2">{t("executive.suggestionsTitle")}</h2>
-        <ul className="space-y-1.5">
+      <div className={cardOuter}>
+        <h2 className="text-sm font-semibold mb-4">{t("executive.suggestionsTitle")}</h2>
+        <ul className="space-y-2">
           {suggestions.map((s, i) => (
             <li key={i} className="flex items-start gap-2 text-xs text-mine-200">
               <span className={`w-1.5 h-1.5 rounded-full shrink-0 mt-1 ${suggestionDot[s.tone]}`} />
@@ -318,9 +327,9 @@ export default function ExecutiveDashboard() {
         </ul>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
-        <div className={`${cardClass} p-3`}>
-          <h2 className="text-xs font-semibold mb-2">{t("executive.openAlertsBySeverity")}</h2>
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+        <div className={cardOuter}>
+          <h2 className="text-sm font-semibold mb-3">{t("executive.openAlertsBySeverity")}</h2>
           <MiniPie
             emptyLabel={t("dashboard.noOpenAlerts")}
             data={[
@@ -332,8 +341,8 @@ export default function ExecutiveDashboard() {
           />
         </div>
 
-        <div className={`${cardClass} p-3`}>
-          <h2 className="text-xs font-semibold mb-2">{t("executive.incidentOverview")}</h2>
+        <div className={cardOuter}>
+          <h2 className="text-sm font-semibold mb-3">{t("executive.incidentOverview")}</h2>
           <MiniPie
             emptyLabel={t("executive.noPendingIncidents")}
             data={[
@@ -344,9 +353,9 @@ export default function ExecutiveDashboard() {
           />
         </div>
 
-        <div className={`${cardClass} p-3`}>
-          <h2 className="text-xs font-semibold mb-2">{t("executive.workforce")}</h2>
-          <div className="space-y-1.5 text-xs">
+        <div className={cardOuter}>
+          <h2 className="text-sm font-semibold mb-3">{t("executive.workforce")}</h2>
+          <div className="space-y-2 text-xs">
             <div className="flex items-center justify-between">
               <span className="text-mine-300">{t("executive.totalWorkers")}</span>
               <span className="font-semibold">{workers.total}</span>
@@ -365,8 +374,8 @@ export default function ExecutiveDashboard() {
         </div>
       </div>
 
-      <div className={`${cardClass} p-3`}>
-        <h2 className="text-xs font-semibold mb-2">{t("executive.incidentTrend")}</h2>
+      <div className={cardOuter}>
+        <h2 className="text-sm font-semibold mb-4">{t("executive.incidentTrend")}</h2>
         <div className="h-40">
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={incidentTrend}>
@@ -384,8 +393,8 @@ export default function ExecutiveDashboard() {
         </div>
       </div>
 
-      <div className={`${cardClass} p-3`}>
-        <h2 className="text-xs font-semibold mb-2">{t("executive.pendingReviews")}</h2>
+      <div className={cardOuter}>
+        <h2 className="text-sm font-semibold mb-4">{t("executive.pendingReviews")}</h2>
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
           <div>
             <h3 className="text-[10px] font-semibold text-mine-300 uppercase mb-1.5">{t("executive.pendingAlerts")}</h3>

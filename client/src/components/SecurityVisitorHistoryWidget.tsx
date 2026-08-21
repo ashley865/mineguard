@@ -3,7 +3,8 @@ import { useTranslation } from "react-i18next";
 import { api } from "../api/client";
 import { Visitor } from "../api/types";
 import { StatusBadge } from "./Badges";
-import { cardClass } from "./ui";
+
+const cardOuter = "bg-mine-900 border border-mine-800 rounded-[20px] shadow-sm shadow-black/5 p-6";
 
 export default function SecurityVisitorHistoryWidget() {
   const { t } = useTranslation();
@@ -16,8 +17,8 @@ export default function SecurityVisitorHistoryWidget() {
   if (!visitors) return null;
 
   return (
-    <div className={`${cardClass} p-3`}>
-      <h2 className="text-xs font-semibold mb-2">{t("executive.visitorHistoryTitle")}</h2>
+    <div className={cardOuter}>
+      <h2 className="text-sm font-semibold mb-4">{t("executive.visitorHistoryTitle")}</h2>
       {visitors.length === 0 ? (
         <div className="text-mine-400 text-xs">{t("executive.noVisitorHistory")}</div>
       ) : (
