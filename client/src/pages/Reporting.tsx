@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { Link } from "react-router-dom";
 import { BarChart, Bar, LineChart, Line, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer } from "recharts";
 import { api } from "../api/client";
 import { useAuth } from "../context/AuthContext";
@@ -34,18 +35,96 @@ async function downloadReport(url: string, params: Record<string, unknown> | und
   window.URL.revokeObjectURL(objectUrl);
 }
 
-function RateCard({ icon, label, numerator, denominator }: { icon: React.ReactNode; label: string; numerator: number; denominator: number }) {
+// KPI-dashboard convention: every headline tile drills down to the page that owns
+// the underlying data, rather than being a dead-end number.
+function RateCard({ icon, label, numerator, denominator, to }: { icon: React.ReactNode; label: string; numerator: number; denominator: number; to: string }) {
   const pct = denominator === 0 ? 100 : Math.round((numerator / denominator) * 100);
   const tone = pct >= 80 ? "positive" : pct >= 50 ? "caution" : "negative";
   const toneBadge = { positive: "bg-success-500/10 text-success-500", caution: "bg-hazard-500/10 text-hazard-500", negative: "bg-danger-500/10 text-danger-500" }[tone];
   const toneText = { positive: "text-success-500", caution: "text-hazard-500", negative: "text-danger-500" }[tone];
   return (
-    <div className={`${cardOuter} p-[18px]`}>
+    <Link to={to} className={`${cardOuter} p-[18px] block hover:border-hazard-500 transition-colors`}>
       <div className={`w-[30px] h-[30px] rounded-[9px] flex items-center justify-center mb-3 ${toneBadge}`}>{icon}</div>
       <div className={`text-xl font-bold leading-none tabular-nums ${toneText}`}>{pct}%</div>
       <div className="text-[11px] text-mine-400 mt-2 truncate">{label}</div>
       <div className="text-[10px] text-mine-500 mt-0.5 tabular-nums">{numerator} / {denominator}</div>
+    </Link>
+  );
+}
+
+type AlertLine = { text: string; tone: "negative" | "caution" };
+
+// Executive-summary "key alerts" strip — a KPI-dashboard convention (see Pattern 1:
+// headline tiles + trend + a scannable alert row) built entirely from data this page
+// already fetches, not a new call.
+function KeyAlerts({ data }: { data: ReportTrends }) {
+  const { t } = useTranslation();
+  const lines: AlertLine[] = [];
+  if (data.alertsBySeverity.CRITICAL > 0) {
+    lines.push({ text: t("reporting.keyAlertCritical", { count: data.alertsBySeverity.CRITICAL }), tone: "negative" });
+  }
+  if (data.alertsBySeverity.HIGH > 0) {
+    lines.push({ text: t("reporting.keyAlertHigh", { count: data.alertsBySeverity.HIGH }), tone: "caution" });
+  }
+  const compliancePairs: { key: string; labelKey: string; numerator: number; denominator: number }[] = [
+    { key: "codesOfPractice", labelKey: "compliance.tabCop", numerator: data.compliance.codesOfPractice.active, denominator: data.compliance.codesOfPractice.total },
+    { key: "riskAssessments", labelKey: "compliance.tabRisk", numerator: data.compliance.riskAssessments.approved, denominator: data.compliance.riskAssessments.total },
+    { key: "permits", labelKey: "permits.nav", numerator: data.compliance.permits.active, denominator: data.compliance.permits.total },
+    { key: "safetyInspections", labelKey: "compliance.tabInspections", numerator: data.compliance.safetyInspections.completed, denominator: data.compliance.safetyInspections.total },
+    { key: "certificates", labelKey: "workforce.tabCertificates", numerator: data.compliance.certificates.active, denominator: data.compliance.certificates.total },
+    { key: "contractors", labelKey: "contractors.nav", numerator: data.compliance.contractors.active, denominator: data.compliance.contractors.total },
+  ];
+  for (const c of compliancePairs) {
+    if (c.denominator === 0) continue;
+    const pct = Math.round((c.numerator / c.denominator) * 100);
+    if (pct < 50) lines.push({ text: t("reporting.keyAlertLowRate", { label: t(c.labelKey), pct }), tone: "negative" });
+  }
+
+  if (lines.length === 0) {
+    return (
+      <div className={`${cardOuter} flex items-center gap-2.5`}>
+        <span className="w-1.5 h-1.5 rounded-full bg-success-500 shrink-0" />
+        <span className="text-xs text-mine-300">{t("reporting.keyAlertsClear")}</span>
+      </div>
+    );
+  }
+
+  return (
+    <div className={cardOuter}>
+      <h2 className="text-sm font-semibold mb-3">{t("reporting.keyAlertsTitle")}</h2>
+      <div className="space-y-2">
+        {lines.map((l, i) => (
+          <div key={i} className="flex items-start gap-2.5 text-xs">
+            <span className={`w-1.5 h-1.5 rounded-full shrink-0 mt-1 ${l.tone === "negative" ? "bg-danger-500" : "bg-hazard-500"}`} />
+            <span className="text-mine-200">{l.text}</span>
+          </div>
+        ))}
+      </div>
     </div>
+  );
+}
+
+// Period-over-period context for the trend chart: compares the first half of the
+// selected window to the second half — real signal computed from data already
+// fetched, not a fabricated delta.
+function trendDelta(trend: { incidents: number; alerts: number }[], key: "incidents" | "alerts"): number | null {
+  if (trend.length < 4) return null;
+  const mid = Math.floor(trend.length / 2);
+  const first = trend.slice(0, mid).reduce((sum, d) => sum + d[key], 0);
+  const second = trend.slice(mid).reduce((sum, d) => sum + d[key], 0);
+  if (first === 0) return second === 0 ? 0 : null;
+  return Math.round(((second - first) / first) * 100);
+}
+
+function TrendDeltaBadge({ label, delta }: { label: string; delta: number | null }) {
+  if (delta == null) return null;
+  // For incidents/alerts, "up" is bad — invert the usual green-up convention.
+  const tone = delta > 5 ? "text-danger-500" : delta < -5 ? "text-success-500" : "text-mine-400";
+  const arrow = delta > 0 ? "▲" : delta < 0 ? "▼" : "—";
+  return (
+    <span className={`text-[10px] font-semibold tabular-nums ${tone}`}>
+      {label} {arrow} {delta > 0 ? "+" : ""}{delta}%
+    </span>
   );
 }
 
@@ -370,18 +449,26 @@ export default function Reporting() {
             </div>
           </div>
 
+          <KeyAlerts data={data} />
+
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-7 gap-3">
-            <RateCard icon={<ClipboardIcon />} label={t("compliance.tabCop")} numerator={data.compliance.codesOfPractice.active} denominator={data.compliance.codesOfPractice.total} />
-            <RateCard icon={<AlertTriangleIcon />} label={t("compliance.tabRisk")} numerator={data.compliance.riskAssessments.approved} denominator={data.compliance.riskAssessments.total} />
-            <RateCard icon={<IdCardIcon />} label={t("permits.nav")} numerator={data.compliance.permits.active} denominator={data.compliance.permits.total} />
-            <RateCard icon={<CheckCircleIcon />} label={t("compliance.tabInspections")} numerator={data.compliance.safetyInspections.completed} denominator={data.compliance.safetyInspections.total} />
-            <RateCard icon={<ShieldCheckIcon />} label={t("workforce.tabCertificates")} numerator={data.compliance.certificates.active} denominator={data.compliance.certificates.total} />
-            <RateCard icon={<GraduationCapIcon />} label={t("reporting.trainingCurrent")} numerator={data.compliance.trainingRecords.total - data.compliance.trainingRecords.expiringSoon} denominator={data.compliance.trainingRecords.total} />
-            <RateCard icon={<UsersIcon />} label={t("contractors.nav")} numerator={data.compliance.contractors.active} denominator={data.compliance.contractors.total} />
+            <RateCard to="/compliance" icon={<ClipboardIcon />} label={t("compliance.tabCop")} numerator={data.compliance.codesOfPractice.active} denominator={data.compliance.codesOfPractice.total} />
+            <RateCard to="/compliance" icon={<AlertTriangleIcon />} label={t("compliance.tabRisk")} numerator={data.compliance.riskAssessments.approved} denominator={data.compliance.riskAssessments.total} />
+            <RateCard to="/permits" icon={<IdCardIcon />} label={t("permits.nav")} numerator={data.compliance.permits.active} denominator={data.compliance.permits.total} />
+            <RateCard to="/inspection" icon={<CheckCircleIcon />} label={t("compliance.tabInspections")} numerator={data.compliance.safetyInspections.completed} denominator={data.compliance.safetyInspections.total} />
+            <RateCard to="/workforce" icon={<ShieldCheckIcon />} label={t("workforce.tabCertificates")} numerator={data.compliance.certificates.active} denominator={data.compliance.certificates.total} />
+            <RateCard to="/workforce" icon={<GraduationCapIcon />} label={t("reporting.trainingCurrent")} numerator={data.compliance.trainingRecords.total - data.compliance.trainingRecords.expiringSoon} denominator={data.compliance.trainingRecords.total} />
+            <RateCard to="/contractors" icon={<UsersIcon />} label={t("contractors.nav")} numerator={data.compliance.contractors.active} denominator={data.compliance.contractors.total} />
           </div>
 
           <div className={cardOuter}>
-            <h2 className="text-sm font-semibold mb-4">{t("reporting.trendTitle")}</h2>
+            <div className="flex items-center justify-between flex-wrap gap-2 mb-4">
+              <h2 className="text-sm font-semibold">{t("reporting.trendTitle")}</h2>
+              <div className="flex items-center gap-3">
+                <TrendDeltaBadge label={t("reporting.incidents")} delta={trendDelta(data.trend, "incidents")} />
+                <TrendDeltaBadge label={t("reporting.alerts")} delta={trendDelta(data.trend, "alerts")} />
+              </div>
+            </div>
             <div className="h-44">
               <ResponsiveContainer width="100%" height="100%">
                 <LineChart data={data.trend}>
