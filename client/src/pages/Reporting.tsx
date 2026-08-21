@@ -5,12 +5,14 @@ import { api } from "../api/client";
 import { useAuth } from "../context/AuthContext";
 import { BalanceSheet, ExportableEntity, exportableEntities, JournalEntry, ReportTrends, Site } from "../api/types";
 import { SeverityBadge } from "../components/Badges";
-import { buttonPrimary, buttonSecondary, cardClass, inputClass } from "../components/ui";
+import { buttonPrimary, buttonSecondary, inputClass } from "../components/ui";
+import { ClipboardIcon, AlertTriangleIcon, IdCardIcon, CheckCircleIcon, ShieldCheckIcon, GraduationCapIcon, UsersIcon } from "../components/icons/DashboardIcons";
 import LoadError from "../components/LoadError";
 import DataTable, { DataTableColumn } from "../components/DataTable";
 
 const dayOptions = [30, 90, 180, 365];
 type ReportingTab = "overview" | "balanceSheet" | "journal";
+const cardOuter = "bg-mine-900 border border-mine-800 rounded-[20px] shadow-sm shadow-black/5 p-6";
 
 async function downloadReport(url: string, params: Record<string, unknown> | undefined, fallbackName: string) {
   const res = await api.get(url, { params, responseType: "blob" });
@@ -26,23 +28,26 @@ async function downloadReport(url: string, params: Record<string, unknown> | und
   window.URL.revokeObjectURL(objectUrl);
 }
 
-function RateCard({ label, numerator, denominator }: { label: string; numerator: number; denominator: number }) {
+function RateCard({ icon, label, numerator, denominator }: { icon: React.ReactNode; label: string; numerator: number; denominator: number }) {
   const pct = denominator === 0 ? 100 : Math.round((numerator / denominator) * 100);
-  const tone = pct >= 80 ? "text-success-500" : pct >= 50 ? "text-hazard-500" : "text-danger-500";
+  const tone = pct >= 80 ? "positive" : pct >= 50 ? "caution" : "negative";
+  const toneBadge = { positive: "bg-success-500/10 text-success-500", caution: "bg-hazard-500/10 text-hazard-500", negative: "bg-danger-500/10 text-danger-500" }[tone];
+  const toneText = { positive: "text-success-500", caution: "text-hazard-500", negative: "text-danger-500" }[tone];
   return (
-    <div className={`${cardClass} px-3 py-2`}>
-      <div className="text-[10px] text-mine-300 uppercase tracking-wide">{label}</div>
-      <div className={`text-lg font-bold mt-0.5 ${tone}`}>{pct}%</div>
-      <div className="text-[10px] text-mine-400 mt-0.5">{numerator} / {denominator}</div>
+    <div className={`${cardOuter} p-[18px]`}>
+      <div className={`w-[30px] h-[30px] rounded-[9px] flex items-center justify-center mb-3 ${toneBadge}`}>{icon}</div>
+      <div className={`text-xl font-bold leading-none tabular-nums ${toneText}`}>{pct}%</div>
+      <div className="text-[11px] text-mine-400 mt-2 truncate">{label}</div>
+      <div className="text-[10px] text-mine-500 mt-0.5 tabular-nums">{numerator} / {denominator}</div>
     </div>
   );
 }
 
 function BalanceSheetLine({ label, value, bold }: { label: string; value: number; bold?: boolean }) {
   return (
-    <div className={`flex items-center justify-between py-1.5 ${bold ? "font-bold text-sm border-t border-mine-800 mt-1 pt-2" : "text-xs text-mine-300"}`}>
+    <div className={`flex items-center justify-between py-1.5 ${bold ? "font-bold text-sm border-t border-mine-800 mt-1 pt-2.5" : "text-xs text-mine-300"}`}>
       <span>{label}</span>
-      <span className={bold ? "text-mine-50" : ""}>{value.toLocaleString()}</span>
+      <span className={`tabular-nums ${bold ? "text-mine-50" : ""}`}>{value.toLocaleString()}</span>
     </div>
   );
 }
@@ -83,21 +88,21 @@ function BalanceSheetTab() {
           {downloading ? t("reporting.downloading") : t("reporting.downloadPdf")}
         </button>
       </div>
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-        <div className={`${cardClass} p-4`}>
-          <h3 className="text-xs font-semibold uppercase tracking-wide text-mine-300 mb-2">{t("reporting.assets")}</h3>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className={cardOuter}>
+          <h3 className="text-xs font-semibold uppercase tracking-wide text-mine-300 mb-3">{t("reporting.assets")}</h3>
           <BalanceSheetLine label={t("reporting.cashAndEquivalents")} value={sheet.assets.cashAndEquivalents} />
           <BalanceSheetLine label={t("reporting.accountsReceivable")} value={sheet.assets.accountsReceivable} />
           <BalanceSheetLine label={t("reporting.inventoryValue")} value={sheet.assets.inventory} />
           <BalanceSheetLine label={t("reporting.totalAssets")} value={sheet.assets.total} bold />
         </div>
-        <div className={`${cardClass} p-4`}>
-          <h3 className="text-xs font-semibold uppercase tracking-wide text-mine-300 mb-2">{t("reporting.liabilities")}</h3>
+        <div className={cardOuter}>
+          <h3 className="text-xs font-semibold uppercase tracking-wide text-mine-300 mb-3">{t("reporting.liabilities")}</h3>
           <BalanceSheetLine label={t("reporting.accountsPayable")} value={sheet.liabilities.accountsPayable} />
           <BalanceSheetLine label={t("reporting.totalLiabilities")} value={sheet.liabilities.total} bold />
         </div>
-        <div className={`${cardClass} p-4`}>
-          <h3 className="text-xs font-semibold uppercase tracking-wide text-mine-300 mb-2">{t("reporting.equity")}</h3>
+        <div className={cardOuter}>
+          <h3 className="text-xs font-semibold uppercase tracking-wide text-mine-300 mb-3">{t("reporting.equity")}</h3>
           <BalanceSheetLine label={t("reporting.retainedEarnings")} value={sheet.equity.retainedEarnings} />
           <BalanceSheetLine label={t("reporting.totalEquity")} value={sheet.equity.total} bold />
         </div>
@@ -171,13 +176,18 @@ function JournalTab() {
                 header: t("reporting.journalAmount"),
                 className: "text-right",
                 render: (e) => (
-                  <span className={`font-semibold ${e.type === "INCOME" ? "text-success-500" : "text-danger-400"}`}>
-                    {e.type === "INCOME" ? "+" : "-"}{e.currency} {e.amount.toLocaleString()}
+                  <span className={`font-semibold tabular-nums ${e.type === "INCOME" ? "text-success-500" : "text-danger-400"}`}>
+                    {e.type === "INCOME" ? "+" : "-"}{e.currency} {e.amount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                   </span>
                 ),
                 sortValue: (e) => e.amount,
               },
-              { key: "balance", header: t("reporting.journalBalance"), className: "text-right text-mine-300", render: (e) => `${e.currency} ${e.runningBalance.toLocaleString()}` },
+              {
+                key: "balance",
+                header: t("reporting.journalBalance"),
+                className: "text-right text-mine-300 tabular-nums",
+                render: (e) => `${e.currency} ${e.runningBalance.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
+              },
             ] as DataTableColumn<JournalEntry>[]
           }
           rows={entries}
@@ -304,13 +314,13 @@ export default function Reporting() {
 
       {!loading && data && (
         <>
-          <div className={`${cardClass} p-3 flex items-center justify-between flex-wrap gap-3`}>
+          <div className={`${cardOuter} flex items-center justify-between flex-wrap gap-3`}>
             <div>
-              <h2 className="text-xs font-semibold">{t("reporting.complianceScore")}</h2>
-              <p className="text-[10px] text-mine-400 mt-0.5">{t("reporting.complianceScoreNote")}</p>
+              <h2 className="text-sm font-semibold">{t("reporting.complianceScore")}</h2>
+              <p className="text-xs text-mine-400 mt-1">{t("reporting.complianceScoreNote")}</p>
             </div>
             <div
-              className={`text-2xl font-bold ${
+              className={`text-2xl font-bold tabular-nums ${
                 data.complianceScore >= 80
                   ? "text-success-500"
                   : data.complianceScore >= 50
@@ -322,18 +332,18 @@ export default function Reporting() {
             </div>
           </div>
 
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-7 gap-2">
-            <RateCard label={t("compliance.tabCop")} numerator={data.compliance.codesOfPractice.active} denominator={data.compliance.codesOfPractice.total} />
-            <RateCard label={t("compliance.tabRisk")} numerator={data.compliance.riskAssessments.approved} denominator={data.compliance.riskAssessments.total} />
-            <RateCard label={t("permits.nav")} numerator={data.compliance.permits.active} denominator={data.compliance.permits.total} />
-            <RateCard label={t("compliance.tabInspections")} numerator={data.compliance.safetyInspections.completed} denominator={data.compliance.safetyInspections.total} />
-            <RateCard label={t("workforce.tabCertificates")} numerator={data.compliance.certificates.active} denominator={data.compliance.certificates.total} />
-            <RateCard label={t("reporting.trainingCurrent")} numerator={data.compliance.trainingRecords.total - data.compliance.trainingRecords.expiringSoon} denominator={data.compliance.trainingRecords.total} />
-            <RateCard label={t("contractors.nav")} numerator={data.compliance.contractors.active} denominator={data.compliance.contractors.total} />
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-7 gap-3">
+            <RateCard icon={<ClipboardIcon />} label={t("compliance.tabCop")} numerator={data.compliance.codesOfPractice.active} denominator={data.compliance.codesOfPractice.total} />
+            <RateCard icon={<AlertTriangleIcon />} label={t("compliance.tabRisk")} numerator={data.compliance.riskAssessments.approved} denominator={data.compliance.riskAssessments.total} />
+            <RateCard icon={<IdCardIcon />} label={t("permits.nav")} numerator={data.compliance.permits.active} denominator={data.compliance.permits.total} />
+            <RateCard icon={<CheckCircleIcon />} label={t("compliance.tabInspections")} numerator={data.compliance.safetyInspections.completed} denominator={data.compliance.safetyInspections.total} />
+            <RateCard icon={<ShieldCheckIcon />} label={t("workforce.tabCertificates")} numerator={data.compliance.certificates.active} denominator={data.compliance.certificates.total} />
+            <RateCard icon={<GraduationCapIcon />} label={t("reporting.trainingCurrent")} numerator={data.compliance.trainingRecords.total - data.compliance.trainingRecords.expiringSoon} denominator={data.compliance.trainingRecords.total} />
+            <RateCard icon={<UsersIcon />} label={t("contractors.nav")} numerator={data.compliance.contractors.active} denominator={data.compliance.contractors.total} />
           </div>
 
-          <div className={`${cardClass} p-3`}>
-            <h2 className="text-xs font-semibold mb-2">{t("reporting.trendTitle")}</h2>
+          <div className={cardOuter}>
+            <h2 className="text-sm font-semibold mb-4">{t("reporting.trendTitle")}</h2>
             <div className="h-44">
               <ResponsiveContainer width="100%" height="100%">
                 <LineChart data={data.trend}>
@@ -348,21 +358,21 @@ export default function Reporting() {
             </div>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
-            <div className={`${cardClass} p-3`}>
-              <h2 className="text-xs font-semibold mb-2">{t("reporting.alertsBySeverity")}</h2>
-              <div className="space-y-1.5">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            <div className={cardOuter}>
+              <h2 className="text-sm font-semibold mb-4">{t("reporting.alertsBySeverity")}</h2>
+              <div className="space-y-2">
                 {(["CRITICAL", "HIGH", "MEDIUM", "LOW"] as const).map((sev) => (
                   <div key={sev} className="flex items-center justify-between text-xs">
                     <SeverityBadge severity={sev} />
-                    <span className="font-semibold">{data.alertsBySeverity[sev]}</span>
+                    <span className="font-semibold tabular-nums">{data.alertsBySeverity[sev]}</span>
                   </div>
                 ))}
               </div>
             </div>
 
-            <div className={`${cardClass} p-3`}>
-              <h2 className="text-xs font-semibold mb-2">{t("reporting.expiryForecast")}</h2>
+            <div className={cardOuter}>
+              <h2 className="text-sm font-semibold mb-4">{t("reporting.expiryForecast")}</h2>
               <div className="h-36">
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart data={data.expiryForecast.map((f) => ({ ...f, label: t(`reporting.categories.${f.category}`) }))}>
@@ -377,8 +387,8 @@ export default function Reporting() {
             </div>
           </div>
 
-          <div className={`${cardClass} p-3`}>
-            <h2 className="text-xs font-semibold mb-2">{t("reporting.exportTitle")}</h2>
+          <div className={cardOuter}>
+            <h2 className="text-sm font-semibold mb-4">{t("reporting.exportTitle")}</h2>
             <div className="flex flex-wrap gap-2">
               {exportableEntities.filter((entity) => canSeeFinancials || (entity !== "expenses" && entity !== "invoices")).map((entity) => (
                 <button
