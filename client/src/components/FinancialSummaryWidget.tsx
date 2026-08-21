@@ -37,6 +37,20 @@ export default function FinancialSummaryWidget() {
   const money = (n: number) => `ZAR ${Math.round(n).toLocaleString()}`;
   const minerals = summary.minerals ?? [];
 
+  const firstMonth = summary.months[0];
+  const lastMonth = summary.months[summary.months.length - 1];
+  const earningsChangePct = firstMonth && lastMonth && firstMonth.earnings > 0
+    ? Math.round(((lastMonth.earnings - firstMonth.earnings) / firstMonth.earnings) * 100)
+    : null;
+
+  const mineralTotals = minerals.map((mineral) => ({
+    mineral,
+    total: summary.months.reduce((sum, m) => sum + (m.tonnesByMineral?.[mineral] ?? 0), 0),
+  }));
+  const topMineral = mineralTotals.length > 0 ? mineralTotals.reduce((a, b) => (b.total > a.total ? b : a)) : null;
+  const mineralGrandTotal = mineralTotals.reduce((sum, m) => sum + m.total, 0);
+  const topMineralPct = topMineral && mineralGrandTotal > 0 ? Math.round((topMineral.total / mineralGrandTotal) * 100) : null;
+
   return (
     <div className={cardOuter}>
       <h2 className="text-sm font-semibold mb-5">{t("dashboard.financialPerformance")}</h2>
@@ -48,8 +62,15 @@ export default function FinancialSummaryWidget() {
       </div>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
-          <div className="text-sm font-semibold mb-4">{t("production.earningsVsExpenses")}</div>
-          <div className="h-48">
+          <div className="text-sm font-semibold">{t("production.earningsVsExpenses")}</div>
+          {earningsChangePct !== null && (
+            <p className="text-[11px] text-mine-400 mt-0.5 mb-3">
+              {earningsChangePct >= 0
+                ? t("production.earningsTrendUp", { pct: earningsChangePct })
+                : t("production.earningsTrendDown", { pct: Math.abs(earningsChangePct) })}
+            </p>
+          )}
+          <div className={`h-48 ${earningsChangePct === null ? "mt-4" : ""}`}>
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={summary.months}>
                 <XAxis dataKey="month" tick={CHART_TICK_STYLE} tickFormatter={(m: string) => m.slice(2)} />
@@ -63,8 +84,11 @@ export default function FinancialSummaryWidget() {
           </div>
         </div>
         <div>
-          <div className="text-sm font-semibold mb-4">{t("production.tonnesByMineral")}</div>
-          <div className="h-48">
+          <div className="text-sm font-semibold">{t("production.tonnesByMineral")}</div>
+          {topMineral && topMineralPct !== null && (
+            <p className="text-[11px] text-mine-400 mt-0.5 mb-3">{t("production.topMineralInsight", { mineral: topMineral.mineral, pct: topMineralPct })}</p>
+          )}
+          <div className={`h-48 ${!topMineral ? "mt-4" : ""}`}>
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={summary.months.map((m) => ({ month: m.month, ...m.tonnesByMineral }))}>
                 <XAxis dataKey="month" tick={CHART_TICK_STYLE} tickFormatter={(m: string) => m.slice(2)} />

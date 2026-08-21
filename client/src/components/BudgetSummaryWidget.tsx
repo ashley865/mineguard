@@ -46,6 +46,7 @@ export default function BudgetSummaryWidget() {
 
   const money = (n: number) => `R ${Math.round(n).toLocaleString()}`;
   const chartData = data.byCategory.slice(0, 6).map((c) => ({ ...c, label: t(`expenses.categories.${c.category}`) }));
+  const overBudgetLabels = chartData.filter((c) => c.actual > c.budgeted).map((c) => c.label);
 
   return (
     <div className={cardOuter}>
@@ -71,6 +72,11 @@ export default function BudgetSummaryWidget() {
           tone={data.overBudgetCount > 0 ? "negative" : "positive"}
         />
       </div>
+      <p className="text-[11px] text-mine-400 mb-3">
+        {overBudgetLabels.length > 0
+          ? t("budgetPlanning.overBudgetInsight", { categories: overBudgetLabels.join(", ") })
+          : t("budgetPlanning.withinBudgetInsight")}
+      </p>
       <div className="h-40">
         <ResponsiveContainer width="100%" height="100%">
           <BarChart data={chartData}>

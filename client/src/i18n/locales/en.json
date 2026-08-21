@@ -2369,7 +2369,10 @@
     "totalExpenses": "Total Expenses",
     "netMargin": "Net Margin",
     "earningsVsExpenses": "Earnings vs Expenses",
+    "earningsTrendUp": "Earnings rose {{pct}}% from the first to the last month shown.",
+    "earningsTrendDown": "Earnings fell {{pct}}% from the first to the last month shown.",
     "tonnesByMineral": "Tonnes Mined by Mineral",
+    "topMineralInsight": "{{mineral}} accounts for {{pct}}% of tonnes mined over this period.",
     "earnings": "Earnings",
     "expenses": "Expenses"
   },
@@ -2896,6 +2899,8 @@
     "unpaidCount": "Unpaid Invoices",
     "overdueCount": "Overdue Invoices",
     "agingTitle": "Outstanding by Age",
+    "agingInsight": "Heaviest overdue exposure is in the {{bucket}} bucket, at R {{amount}}.",
+    "agingInsightClear": "No overdue invoices in the aging buckets right now.",
     "byStatusTitle": "By Status",
     "agingBuckets": {
       "current": "Not yet due",
@@ -2955,6 +2960,7 @@
     "deletePayeeError": "Could not delete this payee",
     "expenseCount": "Expenses",
     "byCategory": "Expenses by Category",
+    "topCategoryInsight": "{{category}} is the largest cost driver, at {{pct}}% of tracked spend.",
     "categories": {
       "OPERATIONS": "Operations",
       "MAINTENANCE": "Maintenance",
@@ -4368,6 +4374,8 @@
     "totalVariance": "Total Variance",
     "utilization": "Budget Utilization",
     "overBudgetCount": "Over Budget",
+    "overBudgetInsight": "Over budget: {{categories}}.",
+    "withinBudgetInsight": "All shown categories are within budget.",
     "pendingApprovalCount": "Pending Approval",
     "chartByCategory": "Budgeted vs Actual by Category",
     "chartBySite": "Budgeted vs Actual by Site",

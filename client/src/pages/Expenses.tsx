@@ -1,7 +1,7 @@
 import { FormEvent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer } from "recharts";
+import { BarChart, Bar, Cell, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer } from "recharts";
 import { api, API_URL } from "../api/client";
 import { useAuth } from "../context/AuthContext";
 import { CostSummary, Expense, ExpenseCategory, ExpenseStatus, Payee, PayeeType, PaymentMethod, Site } from "../api/types";
@@ -476,36 +476,46 @@ export default function Expenses() {
                 </div>
 
                 <div className={cardOuter}>
-                  <h3 className="text-sm font-semibold mb-4">{t("expenses.byCategory")}</h3>
+                  <h3 className="text-sm font-semibold">{t("expenses.byCategory")}</h3>
                   {costSummary.byCategory.length === 0 ? (
                     <div className="text-mine-400 text-xs h-56 flex items-center justify-center">{t("expenses.noneYet")}</div>
-                  ) : (
-                    <div className="h-56 flex items-center gap-4">
-                      <div className="w-36 h-36 shrink-0">
-                        <ResponsiveContainer width="100%" height="100%">
-                          <PieChart>
-                            <Pie data={costSummary.byCategory} dataKey="amount" nameKey="category" innerRadius={36} outerRadius={64} paddingAngle={2}>
-                              {costSummary.byCategory.map((d, i) => (
-                                <Cell key={d.category} fill={CATEGORY_COLORS[i % CATEGORY_COLORS.length]} />
-                              ))}
-                            </Pie>
-                            <Tooltip contentStyle={CHART_TOOLTIP_STYLE} formatter={(v: number) => v.toLocaleString()} />
-                          </PieChart>
-                        </ResponsiveContainer>
-                      </div>
-                      <div className="space-y-1 text-xs flex-1 min-w-0 max-h-56 overflow-y-auto">
-                        {costSummary.byCategory.map((d, i) => (
-                          <div key={d.category} className="flex items-center justify-between gap-2">
-                            <span className="flex items-center gap-1.5 text-mine-300 truncate">
-                              <span className="w-2 h-2 rounded-full shrink-0" style={{ background: CATEGORY_COLORS[i % CATEGORY_COLORS.length] }} />
-                              {t(`expenses.categories.${d.category}`)}
-                            </span>
-                            <span className="font-semibold text-mine-50 tabular-nums">{d.amount.toLocaleString()}</span>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
+                  ) : (() => {
+                    const ranked = [...costSummary.byCategory].sort((a, b) => b.amount - a.amount);
+                    const categoryTotal = ranked.reduce((sum, d) => sum + d.amount, 0);
+                    const top = ranked[0];
+                    const topPct = categoryTotal > 0 ? Math.round((top.amount / categoryTotal) * 100) : 0;
+                    return (
+                      <>
+                        <p className="text-[11px] text-mine-400 mt-1 mb-3">
+                          {t("expenses.topCategoryInsight", { category: t(`expenses.categories.${top.category}`), pct: topPct })}
+                        </p>
+                        <div className="h-56">
+                          <ResponsiveContainer width="100%" height="100%">
+                            <BarChart data={ranked} layout="vertical" margin={{ left: 0, right: 12, top: 4, bottom: 4 }}>
+                              <XAxis type="number" tick={CHART_TICK_STYLE} />
+                              <YAxis
+                                type="category"
+                                dataKey="category"
+                                tick={CHART_TICK_STYLE}
+                                tickFormatter={(c: ExpenseCategory) => t(`expenses.categories.${c}`)}
+                                width={108}
+                              />
+                              <Tooltip
+                                contentStyle={CHART_TOOLTIP_STYLE}
+                                formatter={(v: number) => v.toLocaleString()}
+                                labelFormatter={(c: ExpenseCategory) => t(`expenses.categories.${c}`)}
+                              />
+                              <Bar dataKey="amount" radius={[0, 3, 3, 0]}>
+                                {ranked.map((d, i) => (
+                                  <Cell key={d.category} fill={CATEGORY_COLORS[i % CATEGORY_COLORS.length]} />
+                                ))}
+                              </Bar>
+                            </BarChart>
+                          </ResponsiveContainer>
+                        </div>
+                      </>
+                    );
+                  })()}
                 </div>
               </div>
             </>

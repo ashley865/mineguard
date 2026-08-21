@@ -380,6 +380,9 @@ export default function Invoices() {
   const agingTotals: Record<AgingBucket, number> = { current: 0, "1-30": 0, "31-60": 0, "61-90": 0, "90+": 0 };
   for (const inv of unpaidInvoices) agingTotals[agingBucket(inv.dueDate)] += invoiceTotal(inv);
   const agingData = AGING_BUCKETS.map((bucket) => ({ bucket, amount: Math.round(agingTotals[bucket]) }));
+  const worstOverdueBucket = agingData
+    .filter((d) => d.bucket !== "current" && d.amount > 0)
+    .reduce((worst, d) => (!worst || d.amount > worst.amount ? d : worst), null as { bucket: AgingBucket; amount: number } | null);
 
   const statusTotals: Record<InvoiceStatus, number> = { DRAFT: 0, SENT: 0, PAID: 0, OVERDUE: 0, CANCELLED: 0 };
   for (const inv of invoices) statusTotals[inv.status] += invoiceTotal(inv);
@@ -434,7 +437,12 @@ export default function Invoices() {
       {invoices.length > 0 && (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
           <div className={cardOuter}>
-            <h3 className="text-sm font-semibold mb-4">{t("invoices.agingTitle")}</h3>
+            <h3 className="text-sm font-semibold">{t("invoices.agingTitle")}</h3>
+            <p className="text-[11px] text-mine-400 mt-0.5 mb-4">
+              {worstOverdueBucket
+                ? t("invoices.agingInsight", { bucket: t(`invoices.agingBuckets.${worstOverdueBucket.bucket}`), amount: worstOverdueBucket.amount.toLocaleString() })
+                : t("invoices.agingInsightClear")}
+            </p>
             <div className="h-56">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={agingData}>
