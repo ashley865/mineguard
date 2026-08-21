@@ -43,7 +43,7 @@ function RateCard({ icon, label, numerator, denominator, to }: { icon: React.Rea
   const toneBadge = { positive: "bg-success-500/10 text-success-500", caution: "bg-hazard-500/10 text-hazard-500", negative: "bg-danger-500/10 text-danger-500" }[tone];
   const toneText = { positive: "text-success-500", caution: "text-hazard-500", negative: "text-danger-500" }[tone];
   return (
-    <Link to={to} className={`${cardOuter} p-[18px] block hover:border-hazard-500 transition-colors`}>
+    <Link to={to} className={`${cardOuter} p-[22px] block hover:border-hazard-500 transition-colors`}>
       <div className={`w-[30px] h-[30px] rounded-[9px] flex items-center justify-center mb-3 ${toneBadge}`}>{icon}</div>
       <div className={`text-xl font-bold leading-none tabular-nums ${toneText}`}>{pct}%</div>
       <div className="text-[11px] text-mine-400 mt-2 truncate">{label}</div>

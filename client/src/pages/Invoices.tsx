@@ -19,7 +19,7 @@ const TONE_BADGE = { positive: "bg-success-500/10 text-success-500", negative: "
 function IconStatCard({ icon, label, value, tone = "neutral" }: { icon: React.ReactNode; label: string; value: string | number; tone?: keyof typeof TONE_BADGE }) {
   const toneText = { positive: "text-success-500", negative: "text-danger-500", neutral: "" }[tone];
   return (
-    <div className={`${cardOuter} p-[18px]`}>
+    <div className={`${cardOuter} p-[22px]`}>
       <div className={`w-8 h-8 rounded-[9px] flex items-center justify-center mb-2.5 ${TONE_BADGE[tone]}`}>{icon}</div>
       <div className={`text-lg font-bold mt-0.5 tabular-nums ${toneText}`}>{value}</div>
       <div className="text-[10px] text-mine-400 mt-1.5 uppercase tracking-wide">{label}</div>

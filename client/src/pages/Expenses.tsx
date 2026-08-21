@@ -20,7 +20,7 @@ const cardOuter = "bg-mine-900 border border-mine-800 rounded-[20px] shadow-sm s
 
 function IconStatCard({ icon, label, value, tone }: { icon: React.ReactNode; label: string; value: string | number; tone?: "hazard" }) {
   return (
-    <div className={`${cardOuter} p-[18px]`}>
+    <div className={`${cardOuter} p-[22px]`}>
       <div className={`w-8 h-8 rounded-[9px] flex items-center justify-center mb-2.5 ${tone === "hazard" ? "bg-hazard-500/10 text-hazard-500" : "bg-mine-400/10 text-mine-400"}`}>{icon}</div>
       <div className={`text-lg font-bold mt-0.5 tabular-nums ${tone === "hazard" ? "text-hazard-500" : ""}`}>{value}</div>
       <div className="text-[10px] text-mine-400 mt-1.5 uppercase tracking-wide">{label}</div>

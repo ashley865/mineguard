@@ -228,7 +228,7 @@ export default function ExecutiveDashboard() {
           <h1 className="text-lg font-bold">{t("executive.title")}</h1>
           <p className="text-mine-300 text-xs">{t("executive.subtitle")}</p>
         </div>
-        <div className={`${cardOuter} px-5 py-3.5 text-right`}>
+        <div className={`${cardOuter} p-[22px] text-right`}>
           <div className="text-[10px] text-mine-300 uppercase tracking-wide">{t("executive.complianceScore")}</div>
           <div className={`text-2xl font-bold ${scoreTone}`}>{complianceScore}%</div>
         </div>
