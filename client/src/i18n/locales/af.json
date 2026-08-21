@@ -215,6 +215,8 @@
     "noPendingAlerts": "Geen waarskuwings wag vir hersiening nie.",
     "noPendingIncidents": "Geen voorvalle wag vir hersiening nie.",
     "noPendingReviews": "Niks wag tans vir hersiening nie.",
+    "readMoreReviews": "Lees {{count}} meer",
+    "showFewerReviews": "Wys minder",
     "alertsTrendCaption": "Nuwe waarskuwings per dag, afgelope {{days}} dae",
     "loading": "Laai uitvoerende dashboard tans…",
     "visitorsOnSite": "Besoekers op die Terrein",

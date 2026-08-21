@@ -233,6 +233,8 @@
     "noPendingAlerts": "No alerts awaiting review.",
     "noPendingIncidents": "No incidents awaiting review.",
     "noPendingReviews": "Nothing awaiting review right now.",
+    "readMoreReviews": "Read {{count}} more",
+    "showFewerReviews": "Show fewer",
     "alertsTrendCaption": "New alerts per day, last {{days}} days",
     "loading": "Loading executive dashboard…",
     "visitorsOnSite": "Visitors On Site",

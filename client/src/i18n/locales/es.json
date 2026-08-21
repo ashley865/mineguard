@@ -215,6 +215,8 @@
     "noPendingAlerts": "No hay alertas pendientes de revisión.",
     "noPendingIncidents": "No hay incidentes pendientes de revisión.",
     "noPendingReviews": "No hay nada pendiente de revisión por ahora.",
+    "readMoreReviews": "Ver {{count}} más",
+    "showFewerReviews": "Mostrar menos",
     "alertsTrendCaption": "Alertas nuevas por día, últimos {{days}} días",
     "loading": "Cargando panel ejecutivo…",
     "visitorsOnSite": "Visitantes en el Sitio",

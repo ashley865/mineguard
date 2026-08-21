@@ -215,6 +215,8 @@
     "noPendingAlerts": "Keine Alarme zur Prüfung ausstehend.",
     "noPendingIncidents": "Keine Vorfälle zur Prüfung ausstehend.",
     "noPendingReviews": "Derzeit nichts zur Prüfung ausstehend.",
+    "readMoreReviews": "{{count}} weitere anzeigen",
+    "showFewerReviews": "Weniger anzeigen",
     "alertsTrendCaption": "Neue Alarme pro Tag, letzte {{days}} Tage",
     "loading": "Führungskräfte-Dashboard wird geladen…",
     "visitorsOnSite": "Besucher vor Ort",

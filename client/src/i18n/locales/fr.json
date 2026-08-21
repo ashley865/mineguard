@@ -215,6 +215,8 @@
     "noPendingAlerts": "Aucune alerte en attente de révision.",
     "noPendingIncidents": "Aucun incident en attente de révision.",
     "noPendingReviews": "Rien n'est actuellement en attente de révision.",
+    "readMoreReviews": "Voir {{count}} de plus",
+    "showFewerReviews": "Afficher moins",
     "alertsTrendCaption": "Nouvelles alertes par jour, {{days}} derniers jours",
     "loading": "Chargement du tableau de bord exécutif…",
     "visitorsOnSite": "Visiteurs sur le Site",

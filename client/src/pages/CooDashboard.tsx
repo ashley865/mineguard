@@ -6,7 +6,7 @@ import { Alert, ExecutiveSummary, Incident, ReportTrends } from "../api/types";
 import { SeverityBadge } from "../components/Badges";
 import { buttonPrimary, buttonSecondary } from "../components/ui";
 import DataTable, { DataTableColumn } from "../components/DataTable";
-import { CheckCircleIcon, ShieldCheckIcon, GaugeIcon, UsersIcon, AlertTriangleIcon } from "../components/icons/DashboardIcons";
+import { CheckCircleIcon, ShieldCheckIcon, GaugeIcon, UsersIcon, AlertTriangleIcon, ChevronRightIcon } from "../components/icons/DashboardIcons";
 import ExecutiveScorecard from "../components/ExecutiveScorecard";
 import ProductionAnalyticsWidget from "../components/ProductionAnalyticsWidget";
 import InventoryProcurementWidget from "../components/InventoryProcurementWidget";
@@ -179,6 +179,7 @@ export default function CooDashboard() {
   const [summary, setSummary] = useState<ExecutiveSummary | null>(null);
   const [trends, setTrends] = useState<ReportTrends | null>(null);
   const [opsTab, setOpsTab] = useState<OpsTab>("production");
+  const [reviewsExpanded, setReviewsExpanded] = useState(false);
 
   async function load() {
     const [s, r] = await Promise.all([
@@ -383,7 +384,7 @@ export default function CooDashboard() {
         <h2 className="text-sm font-semibold mb-4">{t("executive.pendingReviews")}</h2>
         <DataTable
           columns={reviewColumns}
-          rows={reviewItems}
+          rows={reviewsExpanded ? reviewItems : reviewItems.slice(0, 5)}
           rowKey={(r) => `${r.kind}-${r.data.id}`}
           emptyMessage={t("executive.noPendingReviews")}
           actions={(r) =>
@@ -394,6 +395,20 @@ export default function CooDashboard() {
             )
           }
         />
+        {reviewItems.length > 5 && (
+          <div className="flex justify-center mt-4 pt-4 border-t border-mine-800">
+            <button
+              type="button"
+              onClick={() => setReviewsExpanded((v) => !v)}
+              className="inline-flex items-center gap-1.5 text-xs font-semibold text-hazard-600 hover:text-hazard-500 bg-hazard-500/5 hover:bg-hazard-500/10 border border-hazard-500/20 hover:border-hazard-500/40 rounded-full px-4 py-2 transition-colors"
+            >
+              {reviewsExpanded ? t("executive.showFewerReviews") : t("executive.readMoreReviews", { count: reviewItems.length - 5 })}
+              <span className={`inline-flex transition-transform duration-200 ${reviewsExpanded ? "-rotate-90" : "rotate-90"}`}>
+                <ChevronRightIcon />
+              </span>
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );
