@@ -1371,6 +1371,11 @@
       "contractors": "Kontrakteurs"
     },
     "tabOverview": "Oorsig",
+    "tabProduction": "Produksie",
+    "tabInventory": "Voorraad",
+    "tabMaintenance": "Instandhouding",
+    "tabWorkforce": "Werkmag",
+    "tabFinancials": "Finansies",
     "tabBalanceSheet": "Balansstaat",
     "tabJournal": "Joernaal",
     "lastNMonths": "Afgelope {{count}} maande",

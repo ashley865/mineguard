@@ -1371,6 +1371,11 @@
       "contractors": "Contratistas"
     },
     "tabOverview": "Resumen",
+    "tabProduction": "Producción",
+    "tabInventory": "Inventario",
+    "tabMaintenance": "Mantenimiento",
+    "tabWorkforce": "Personal",
+    "tabFinancials": "Finanzas",
     "tabBalanceSheet": "Balance General",
     "tabJournal": "Diario",
     "lastNMonths": "Últimos {{count}} meses",

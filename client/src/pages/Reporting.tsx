@@ -9,9 +9,15 @@ import { buttonPrimary, buttonSecondary, inputClass } from "../components/ui";
 import { ClipboardIcon, AlertTriangleIcon, IdCardIcon, CheckCircleIcon, ShieldCheckIcon, GraduationCapIcon, UsersIcon } from "../components/icons/DashboardIcons";
 import LoadError from "../components/LoadError";
 import DataTable, { DataTableColumn } from "../components/DataTable";
+import ProductionAnalyticsWidget from "../components/ProductionAnalyticsWidget";
+import InventoryProcurementWidget from "../components/InventoryProcurementWidget";
+import MaintenanceDowntimeWidget from "../components/MaintenanceDowntimeWidget";
+import HrWorkforceWidget from "../components/HrWorkforceWidget";
+import FinancialSummaryWidget from "../components/FinancialSummaryWidget";
+import BudgetSummaryWidget from "../components/BudgetSummaryWidget";
 
 const dayOptions = [30, 90, 180, 365];
-type ReportingTab = "overview" | "balanceSheet" | "journal";
+type ReportingTab = "overview" | "production" | "inventory" | "maintenance" | "workforce" | "financials" | "balanceSheet" | "journal";
 const cardOuter = "bg-mine-900 border border-mine-800 rounded-[20px] shadow-sm shadow-black/5 p-6";
 
 async function downloadReport(url: string, params: Record<string, unknown> | undefined, fallbackName: string) {
@@ -212,6 +218,9 @@ export default function Reporting() {
   const { t } = useTranslation();
   const { user } = useAuth();
   const canSeeFinancials = user?.role === "ADMIN" || ["CFO", "GENERAL_MANAGER", "COO"].includes(user?.title ?? "");
+  // Matches the backend gate on GET /executive/hr-workforce (requireRole("EXECUTIVE", "ADMIN"))
+  // — showing this tab to anyone else would just produce a 403 once the widget fetches.
+  const canSeeWorkforce = user?.role === "ADMIN" || user?.role === "EXECUTIVE";
   const [tab, setTab] = useState<ReportingTab>("overview");
   const [sites, setSites] = useState<Site[]>([]);
   const [siteId, setSiteId] = useState<string>("");
@@ -272,20 +281,49 @@ export default function Reporting() {
         <p className="text-mine-300 text-xs">{t("reporting.subtitle")}</p>
       </div>
 
-      {canSeeFinancials && (
-        <div className="flex gap-2 flex-wrap">
-          <button className={tab === "overview" ? buttonPrimary : buttonSecondary} onClick={() => setTab("overview")}>
-            {t("reporting.tabOverview")}
+      <div className="flex gap-2 flex-wrap">
+        <button className={tab === "overview" ? buttonPrimary : buttonSecondary} onClick={() => setTab("overview")}>
+          {t("reporting.tabOverview")}
+        </button>
+        <button className={tab === "production" ? buttonPrimary : buttonSecondary} onClick={() => setTab("production")}>
+          {t("reporting.tabProduction")}
+        </button>
+        <button className={tab === "inventory" ? buttonPrimary : buttonSecondary} onClick={() => setTab("inventory")}>
+          {t("reporting.tabInventory")}
+        </button>
+        <button className={tab === "maintenance" ? buttonPrimary : buttonSecondary} onClick={() => setTab("maintenance")}>
+          {t("reporting.tabMaintenance")}
+        </button>
+        {canSeeWorkforce && (
+          <button className={tab === "workforce" ? buttonPrimary : buttonSecondary} onClick={() => setTab("workforce")}>
+            {t("reporting.tabWorkforce")}
           </button>
-          <button className={tab === "balanceSheet" ? buttonPrimary : buttonSecondary} onClick={() => setTab("balanceSheet")}>
-            {t("reporting.tabBalanceSheet")}
-          </button>
-          <button className={tab === "journal" ? buttonPrimary : buttonSecondary} onClick={() => setTab("journal")}>
-            {t("reporting.tabJournal")}
-          </button>
-        </div>
-      )}
+        )}
+        {canSeeFinancials && (
+          <>
+            <button className={tab === "financials" ? buttonPrimary : buttonSecondary} onClick={() => setTab("financials")}>
+              {t("reporting.tabFinancials")}
+            </button>
+            <button className={tab === "balanceSheet" ? buttonPrimary : buttonSecondary} onClick={() => setTab("balanceSheet")}>
+              {t("reporting.tabBalanceSheet")}
+            </button>
+            <button className={tab === "journal" ? buttonPrimary : buttonSecondary} onClick={() => setTab("journal")}>
+              {t("reporting.tabJournal")}
+            </button>
+          </>
+        )}
+      </div>
 
+      {tab === "production" && <ProductionAnalyticsWidget />}
+      {tab === "inventory" && <InventoryProcurementWidget />}
+      {tab === "maintenance" && <MaintenanceDowntimeWidget />}
+      {tab === "workforce" && canSeeWorkforce && <HrWorkforceWidget />}
+      {tab === "financials" && canSeeFinancials && (
+        <>
+          <FinancialSummaryWidget />
+          <BudgetSummaryWidget />
+        </>
+      )}
       {tab === "balanceSheet" && canSeeFinancials && <BalanceSheetTab />}
       {tab === "journal" && canSeeFinancials && <JournalTab />}
 

@@ -1371,6 +1371,11 @@
       "contractors": "Auftragnehmer"
     },
     "tabOverview": "Übersicht",
+    "tabProduction": "Produktion",
+    "tabInventory": "Bestand",
+    "tabMaintenance": "Wartung",
+    "tabWorkforce": "Belegschaft",
+    "tabFinancials": "Finanzen",
     "tabBalanceSheet": "Bilanz",
     "tabJournal": "Journal",
     "lastNMonths": "Letzte {{count}} Monate",

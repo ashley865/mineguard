@@ -1389,6 +1389,11 @@
       "contractors": "Contractors"
     },
     "tabOverview": "Overview",
+    "tabProduction": "Production",
+    "tabInventory": "Inventory",
+    "tabMaintenance": "Maintenance",
+    "tabWorkforce": "Workforce",
+    "tabFinancials": "Financials",
     "tabBalanceSheet": "Balance Sheet",
     "tabJournal": "Journal",
     "lastNMonths": "Last {{count}} months",

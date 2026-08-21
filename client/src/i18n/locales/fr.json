@@ -1371,6 +1371,11 @@
       "contractors": "Sous-traitants"
     },
     "tabOverview": "Aperçu",
+    "tabProduction": "Production",
+    "tabInventory": "Inventaire",
+    "tabMaintenance": "Maintenance",
+    "tabWorkforce": "Personnel",
+    "tabFinancials": "Finances",
     "tabBalanceSheet": "Bilan",
     "tabJournal": "Journal",
     "lastNMonths": "{{count}} derniers mois",
