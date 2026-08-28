@@ -2,6 +2,7 @@ import { ExecutiveTitle, NotificationType } from "@prisma/client";
 import { Server as SocketServer } from "socket.io";
 import { prisma } from "../prisma";
 import { sendEmail } from "./email";
+import { sendWhatsAppMessage } from "./whatsapp";
 
 export interface NotifyExecutivesInput {
   mineId: string;
@@ -40,7 +41,7 @@ export async function notifyExecutives(io: SocketServer | undefined, input: Noti
 
   const recipients = await prisma.user.findMany({
     where: { mineId, isActive: true, OR: orConditions },
-    select: { id: true, email: true },
+    select: { id: true, email: true, phone: true },
   });
   if (recipients.length === 0) return;
 
@@ -61,5 +62,6 @@ export async function notifyExecutives(io: SocketServer | undefined, input: Noti
       text: `${body ?? ""}\n\n${url}`,
       html: `<p>${body ?? ""}</p><p><a href="${url}">Open in MineGuard</a></p>`,
     });
+    if (r.phone) void sendWhatsAppMessage({ to: r.phone, text: `${title}\n\n${body ?? ""}\n\n${url}` });
   }
 }

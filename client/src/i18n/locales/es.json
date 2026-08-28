@@ -1635,6 +1635,8 @@
       "changePhoto": "Cambiar foto",
       "name": "Nombre completo",
       "email": "Correo electrónico",
+      "phone": "Número de teléfono",
+      "phoneHint": "Se usa para alertas de WhatsApp, si tu mina lo tiene configurado. Incluye el código de país, p. ej. +15551234567.",
       "saveError": "No se pudo actualizar tu perfil",
       "saved": "Guardado",
       "passwordTitle": "Cambiar contraseña",

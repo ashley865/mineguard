@@ -21,7 +21,7 @@ interface AuthContextValue {
   register: (email: string, password: string, name: string, mineId: string, passkey: string) => Promise<void>;
   registerMine: (payload: RegisterMinePayload) => Promise<{ mine: Mine; passkey: string }>;
   acceptExecutiveInvite: (inviteId: string, key: string, password: string) => Promise<void>;
-  updateProfile: (name: string) => Promise<void>;
+  updateProfile: (name: string, phone?: string) => Promise<void>;
   changePassword: (currentPassword: string, newPassword: string) => Promise<void>;
   refreshUser: () => Promise<void>;
   logout: () => void;
@@ -99,8 +99,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     persist(res.data.token, res.data.user);
   }
 
-  async function updateProfile(name: string) {
-    const res = await api.put("/auth/me", { name });
+  async function updateProfile(name: string, phone?: string) {
+    const res = await api.put("/auth/me", { name, phone });
     const newUser = res.data as User;
     localStorage.setItem("mineguard_user", JSON.stringify(newUser));
     setUser(newUser);

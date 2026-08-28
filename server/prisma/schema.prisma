@@ -199,6 +199,9 @@ model User {
   email        String          @unique
   passwordHash String
   name         String
+  // Free-form as entered; sendWhatsAppMessage() strips non-digits before building the
+  // WhatsApp chat id, so no format is enforced here.
+  phone        String?
   role         Role            @default(VIEWER)
   title        ExecutiveTitle?
   photoData    Bytes?

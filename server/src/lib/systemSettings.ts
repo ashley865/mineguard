@@ -161,6 +161,31 @@ export const SYSTEM_SETTING_KEYS: SystemSettingDef[] = [
     testable: false,
     defaultValue: "MineGuard",
   },
+  {
+    key: "WHATSAPP_API_URL",
+    label: "WhatsApp gateway URL",
+    description: "Base URL of your self-hosted OpenWA instance, e.g. http://localhost:2785.",
+    type: "text",
+    secret: false,
+    testable: false,
+  },
+  {
+    key: "WHATSAPP_API_KEY",
+    label: "WhatsApp gateway API key",
+    description:
+      "OpenWA X-API-Key (OPERATOR role or higher). Testing this sends a WhatsApp message to your own account — add a phone number in your profile first.",
+    type: "password",
+    secret: true,
+    testable: true,
+  },
+  {
+    key: "WHATSAPP_SESSION_ID",
+    label: "WhatsApp session ID",
+    description: "The OpenWA session paired to the mine's alerts WhatsApp number (set up once in the OpenWA dashboard).",
+    type: "text",
+    secret: false,
+    testable: false,
+  },
 ];
 
 const SETTING_DEF_BY_KEY = new Map(SYSTEM_SETTING_KEYS.map((s) => [s.key, s]));

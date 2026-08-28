@@ -1869,6 +1869,8 @@
       "changePhoto": "Change photo",
       "name": "Full name",
       "email": "Email",
+      "phone": "Phone number",
+      "phoneHint": "Used for WhatsApp alerts, if your mine has that configured. Include country code, e.g. +15551234567.",
       "saveError": "Could not update your profile",
       "saved": "Saved",
       "passwordTitle": "Change password",

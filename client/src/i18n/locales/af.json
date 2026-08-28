@@ -1635,6 +1635,8 @@
       "changePhoto": "Verander foto",
       "name": "Volle naam",
       "email": "E-pos",
+      "phone": "Telefoonnommer",
+      "phoneHint": "Word gebruik vir WhatsApp-kennisgewings, indien jou myn dit opgestel het. Sluit landkode in, bv. +15551234567.",
       "saveError": "Kon nie jou profiel opdateer nie",
       "saved": "Gestoor",
       "passwordTitle": "Verander wagwoord",

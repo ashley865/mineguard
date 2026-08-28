@@ -24,3 +24,11 @@ services:
       # dashboard. Works with any OpenAI-compatible endpoint — see server/.env.example.
       - key: AI_API_KEY
         sync: false
+      # Optional: WhatsApp notifications stay dormant until these are set in the Render
+      # dashboard. Requires a self-hosted OpenWA gateway — see server/.env.example.
+      - key: WHATSAPP_API_URL
+        sync: false
+      - key: WHATSAPP_API_KEY
+        sync: false
+      - key: WHATSAPP_SESSION_ID
+        sync: false

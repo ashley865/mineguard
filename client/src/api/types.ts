@@ -17,6 +17,7 @@ export interface User {
   id: string;
   email: string;
   name: string;
+  phone?: string | null;
   role: Role;
   title?: ExecutiveTitle | null;
   mineId?: string | null;

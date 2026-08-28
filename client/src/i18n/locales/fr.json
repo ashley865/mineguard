@@ -1635,6 +1635,8 @@
       "changePhoto": "Changer la photo",
       "name": "Nom complet",
       "email": "E-mail",
+      "phone": "Numéro de téléphone",
+      "phoneHint": "Utilisé pour les alertes WhatsApp, si votre mine l'a configuré. Incluez l'indicatif du pays, par ex. +15551234567.",
       "saveError": "Impossible de mettre à jour votre profil",
       "saved": "Enregistré",
       "passwordTitle": "Changer le mot de passe",

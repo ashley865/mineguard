@@ -14,6 +14,7 @@ import {
 import { aiChatComplete, AiNotConfiguredError } from "../lib/ai";
 import { sendTestWebhook } from "../lib/securityWebhook";
 import { sendTestEmail } from "../lib/email";
+import { sendTestWhatsApp } from "../lib/whatsapp";
 import {
   createCustomApiKey,
   deleteCustomApiKey,
@@ -117,6 +118,12 @@ router.post("/:key/test", async (req, res) => {
     const me = await prisma.user.findUnique({ where: { id: req.auth!.userId }, select: { email: true } });
     if (!me?.email) return res.json({ success: false, message: "Could not determine your account email" });
     return res.json(await sendTestEmail(me.email));
+  }
+
+  if (key === "WHATSAPP_API_KEY") {
+    const me = await prisma.user.findUnique({ where: { id: req.auth!.userId }, select: { phone: true } });
+    if (!me?.phone) return res.json({ success: false, message: "Add a phone number to your profile first" });
+    return res.json(await sendTestWhatsApp(me.phone));
   }
 
   return res.status(400).json({ error: "This setting cannot be tested" });

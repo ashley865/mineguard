@@ -1635,6 +1635,8 @@
       "changePhoto": "Foto ändern",
       "name": "Vollständiger Name",
       "email": "E-Mail",
+      "phone": "Telefonnummer",
+      "phoneHint": "Wird für WhatsApp-Benachrichtigungen verwendet, falls Ihre Mine dies konfiguriert hat. Landesvorwahl angeben, z. B. +15551234567.",
       "saveError": "Ihr Profil konnte nicht aktualisiert werden",
       "saved": "Gespeichert",
       "passwordTitle": "Passwort ändern",

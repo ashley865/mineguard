@@ -151,6 +151,7 @@ export default function ProfileTab() {
   const { user, updateProfile, changePassword, refreshUser } = useAuth();
 
   const [name, setName] = useState(user?.name ?? "");
+  const [phone, setPhone] = useState(user?.phone ?? "");
   const [savingProfile, setSavingProfile] = useState(false);
   const [profileSaved, setProfileSaved] = useState(false);
   const [profileError, setProfileError] = useState<string | null>(null);
@@ -185,7 +186,7 @@ export default function ProfileTab() {
     setProfileError(null);
     setSavingProfile(true);
     try {
-      await updateProfile(name);
+      await updateProfile(name, phone);
       setProfileSaved(true);
       setTimeout(() => setProfileSaved(false), 2000);
     } catch (err: any) {
@@ -259,6 +260,17 @@ export default function ProfileTab() {
         <div>
           <label className={labelClass}>{t("settings.profile.email")}</label>
           <input className={inputClass} value={user?.email ?? ""} readOnly disabled />
+        </div>
+        <div>
+          <label className={labelClass}>{t("settings.profile.phone")}</label>
+          <input
+            className={inputClass}
+            type="tel"
+            value={phone}
+            onChange={(e) => setPhone(e.target.value)}
+            placeholder="+15551234567"
+          />
+          <p className="text-[11px] text-mine-400 mt-1">{t("settings.profile.phoneHint")}</p>
         </div>
         <div>
           <label className={labelClass}>{t("common.role")}</label>

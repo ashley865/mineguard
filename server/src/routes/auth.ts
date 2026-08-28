@@ -40,6 +40,7 @@ const loginSchema = z.object({
 
 const updateProfileSchema = z.object({
   name: z.string().min(1),
+  phone: z.string().trim().max(32).optional(),
 });
 
 const changePasswordSchema = z.object({
@@ -191,6 +192,7 @@ router.get("/me", requireAuth, async (req, res) => {
     id: user.id,
     email: user.email,
     name: user.name,
+    phone: user.phone,
     role: user.role,
     title: user.title,
     mineId: user.mineId,
@@ -204,12 +206,13 @@ router.put("/me", requireAuth, async (req, res) => {
   if (!parsed.success) return res.status(400).json({ error: parsed.error.flatten() });
   const user = await prisma.user.update({
     where: { id: req.auth!.userId },
-    data: { name: parsed.data.name },
+    data: { name: parsed.data.name, phone: parsed.data.phone !== undefined ? parsed.data.phone || null : undefined },
   });
   res.json({
     id: user.id,
     email: user.email,
     name: user.name,
+    phone: user.phone,
     role: user.role,
     title: user.title,
     mineId: user.mineId,
