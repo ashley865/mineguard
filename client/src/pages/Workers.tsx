@@ -248,6 +248,49 @@ function WorkerForm({ sites, zones, workers, initial, onSubmit, onCancel }: {
   );
 }
 
+function AnnounceModal({ onClose }: { onClose: () => void }) {
+  const { t } = useTranslation();
+  const [text, setText] = useState("");
+  const [sending, setSending] = useState(false);
+  const [result, setResult] = useState<{ success: boolean; message: string } | null>(null);
+
+  async function handleSubmit(e: FormEvent) {
+    e.preventDefault();
+    setSending(true);
+    setResult(null);
+    try {
+      const res = await api.post<{ success: boolean; message: string }>("/workers/announce", { text });
+      setResult(res.data);
+      if (res.data.success) setText("");
+    } catch (err: any) {
+      setResult({ success: false, message: err.response?.data?.error ?? t("workers.announceError") });
+    } finally {
+      setSending(false);
+    }
+  }
+
+  return (
+    <Modal title={t("workers.announceTitle")} onClose={onClose}>
+      <form onSubmit={handleSubmit} className="space-y-3">
+        <p className="text-xs text-mine-400">{t("workers.announceHint")}</p>
+        <textarea
+          className={`${inputClass} min-h-[120px]`}
+          value={text}
+          onChange={(e) => setText(e.target.value)}
+          maxLength={2000}
+          required
+          autoFocus
+        />
+        {result && <div className={`text-sm ${result.success ? "text-success-400" : "text-danger-400"}`}>{result.message}</div>}
+        <div className="flex justify-end gap-2 pt-2">
+          <button type="button" className={buttonSecondary} onClick={onClose}>{t("common.cancel")}</button>
+          <button type="submit" className={buttonPrimary} disabled={sending}>{sending ? t("workers.announceSending") : t("workers.announceSend")}</button>
+        </div>
+      </form>
+    </Modal>
+  );
+}
+
 export default function Workers() {
   const { t } = useTranslation();
   const { user } = useAuth();
@@ -255,6 +298,10 @@ export default function Workers() {
   // Adding a new worker is an HR function — other executive titles can still edit/manage
   // existing workers via canEdit above, but only HR (or Admin/Supervisor) registers a hire.
   const canAddWorker = user?.role === "ADMIN" || user?.role === "SUPERVISOR" || (user?.role === "EXECUTIVE" && user?.title === "HR_MANAGER");
+  // WhatsApp announcements go to the whole workforce, so this is narrower than
+  // canAddWorker above — Admin and HR only, not Supervisor.
+  const canAnnounce = user?.role === "ADMIN" || (user?.role === "EXECUTIVE" && user?.title === "HR_MANAGER");
+  const [announceOpen, setAnnounceOpen] = useState(false);
   const [workers, setWorkers] = useState<Worker[]>([]);
   const [sites, setSites] = useState<Site[]>([]);
   const [zones, setZones] = useState<Zone[]>([]);
@@ -315,10 +362,16 @@ export default function Workers() {
           <h1 className="text-xl font-bold">{t("workers.title")}</h1>
           <p className="text-mine-300 text-sm">{t("workers.subtitle")}</p>
         </div>
-        {canAddWorker && sites.length > 0 && (
-          <button className={buttonPrimary} onClick={() => setModal("create")}>{t("workers.newWorker")}</button>
-        )}
+        <div className="flex items-center gap-2">
+          {canAnnounce && (
+            <button className={buttonSecondary} onClick={() => setAnnounceOpen(true)}>{t("workers.announceButton")}</button>
+          )}
+          {canAddWorker && sites.length > 0 && (
+            <button className={buttonPrimary} onClick={() => setModal("create")}>{t("workers.newWorker")}</button>
+          )}
+        </div>
       </div>
+      {announceOpen && <AnnounceModal onClose={() => setAnnounceOpen(false)} />}
 
       <div className={`${cardClass} p-4 flex items-center justify-between flex-wrap gap-3`}>
         <select className={`${selectClass} max-w-xs`} value={categoryFilter} onChange={(e) => setCategoryFilter(e.target.value)}>

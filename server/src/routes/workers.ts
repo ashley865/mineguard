@@ -6,6 +6,7 @@ import { prisma } from "../prisma";
 import { requireAuth, requireRole } from "../middleware/auth";
 import { imageFileFilter, documentFileFilter } from "../lib/uploadFilters";
 import { requireMineId } from "../lib/mineScope";
+import { sendWhatsAppBroadcast } from "../lib/whatsapp";
 
 const router = Router();
 
@@ -131,6 +132,25 @@ async function requireWorkerCreateAccess(req: Request, res: Response): Promise<b
   return true;
 }
 
+// WhatsApp announcements are an HR function, same reasoning as requireWorkerCreateAccess
+// above — other executive titles manage workers day-to-day but don't broadcast to the
+// whole workforce.
+async function requireHrAnnounceAccess(req: Request, res: Response): Promise<boolean> {
+  if (req.auth!.role === "ADMIN") return true;
+  if (req.auth!.role !== "EXECUTIVE") {
+    res.status(403).json({ error: "Insufficient permissions" });
+    return false;
+  }
+  const me = await prisma.user.findUnique({ where: { id: req.auth!.userId }, select: { title: true } });
+  if (me?.title !== "HR_MANAGER") {
+    res.status(403).json({ error: "Only HR can send WhatsApp announcements" });
+    return false;
+  }
+  return true;
+}
+
+const announceSchema = z.object({ text: z.string().trim().min(1).max(2000) });
+
 function startOfWeek(): Date {
   const d = new Date();
   d.setHours(0, 0, 0, 0);
@@ -210,6 +230,21 @@ router.post("/", requireRole("ADMIN", "SUPERVISOR", "EXECUTIVE"), async (req, re
   } catch {
     res.status(409).json({ error: "Employee ID already exists" });
   }
+});
+
+router.post("/announce", requireRole("ADMIN", "EXECUTIVE"), async (req, res) => {
+  const mineId = requireMineId(req, res);
+  if (!mineId) return;
+  if (!(await requireHrAnnounceAccess(req, res))) return;
+  const parsed = announceSchema.safeParse(req.body);
+  if (!parsed.success) return res.status(400).json({ error: parsed.error.flatten() });
+
+  const workers = await prisma.worker.findMany({
+    where: { site: { mineId }, phone: { not: null } },
+    select: { phone: true },
+  });
+  const result = await sendWhatsAppBroadcast(workers.map((w) => w.phone!), parsed.data.text);
+  res.json(result);
 });
 
 router.put("/:id", requireRole("ADMIN", "SUPERVISOR", "EXECUTIVE"), async (req, res) => {
