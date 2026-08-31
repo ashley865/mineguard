@@ -2628,6 +2628,42 @@ export interface LegalComplianceItem {
   createdAt: string;
 }
 
+export type LandTenureType = "SURFACE_RIGHTS_LEASE" | "SERVITUDE" | "PERMISSION_TO_OCCUPY" | "RESETTLEMENT_AGREEMENT" | "OTHER";
+export type LandAgreementStatus = "DRAFT" | "NEGOTIATING" | "SIGNED" | "EXPIRED" | "TERMINATED";
+export type ResettlementStatus = "IDENTIFIED" | "CONSULTATION" | "COMPENSATION_AGREED" | "RELOCATED" | "LIVELIHOOD_RESTORED" | "CLOSED";
+
+export interface LandAgreement {
+  id: string;
+  siteId?: string | null;
+  site?: { id: string; name: string } | null;
+  parcelReference?: string | null;
+  counterpartyName: string;
+  tenureType: LandTenureType;
+  areaHectares?: number | null;
+  startDate?: string | null;
+  expiryDate?: string | null;
+  annualPaymentAmount?: number | null;
+  status: LandAgreementStatus;
+  notes?: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface ResettlementCase {
+  id: string;
+  landAgreementId?: string | null;
+  landAgreement?: { id: string; counterpartyName: string; parcelReference?: string | null } | null;
+  householdName: string;
+  householdSize?: number | null;
+  status: ResettlementStatus;
+  compensationAmount?: number | null;
+  compensationPaidAt?: string | null;
+  relocationDate?: string | null;
+  notes?: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export interface LegalComplianceCalendarEntry {
   source: "LEGAL_ITEM" | "PERMIT" | "CERTIFICATE" | "MEDICAL_SURVEILLANCE" | "EXPLOSIVES_MAGAZINE";
   id: string;

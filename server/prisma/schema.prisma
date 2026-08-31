@@ -445,6 +445,7 @@ model Site {
   tailingsFacilities     TailingsFacility[]
   closureRehabilitationPlans ClosureRehabilitationPlan[]
   legalComplianceItems   LegalComplianceItem[]
+  landAgreements         LandAgreement[]
 
   groundControlDistricts GroundControlDistrict[]
   seismicEvents          SeismicEvent[]
@@ -1554,6 +1555,8 @@ model Mine {
   workplaceSkillsPlans    WorkplaceSkillsPlan[]
   learnerships            Learnership[]
   legalComplianceItems    LegalComplianceItem[]
+  landAgreements          LandAgreement[]
+  resettlementCases       ResettlementCase[]
 
   unionAgreements    UnionAgreement[]
   ghgEmissionsRecords GhgEmissionsRecord[]
@@ -3431,6 +3434,80 @@ model LegalComplianceItem {
   notes                 String?
 
   createdAt DateTime @default(now())
+}
+
+// ---------------------------------------------------------------------------
+// Module: Land, Servitudes & Resettlement Management (MPRDA s.5(4)(c) surface
+// rights, IFC Performance Standard 5) — the mine's actual land tenure
+// agreements with landowners/communities/traditional authorities, and any
+// resettlement/compensation cases arising from them. Distinct from
+// CommunityEngagement/CommunityGrievance/CommunitySpendRecord above, which
+// cover ongoing CSI relations rather than land tenure itself.
+// ---------------------------------------------------------------------------
+
+enum LandTenureType {
+  SURFACE_RIGHTS_LEASE
+  SERVITUDE
+  PERMISSION_TO_OCCUPY
+  RESETTLEMENT_AGREEMENT
+  OTHER
+}
+
+enum LandAgreementStatus {
+  DRAFT
+  NEGOTIATING
+  SIGNED
+  EXPIRED
+  TERMINATED
+}
+
+model LandAgreement {
+  id                  String              @id @default(cuid())
+  mineId              String
+  mine                Mine                @relation(fields: [mineId], references: [id], onDelete: Cascade)
+  siteId              String?
+  site                Site?               @relation(fields: [siteId], references: [id], onDelete: SetNull)
+  parcelReference     String?
+  counterpartyName    String
+  tenureType          LandTenureType
+  areaHectares        Float?
+  startDate           DateTime?
+  expiryDate          DateTime?
+  annualPaymentAmount Float?
+  status              LandAgreementStatus @default(DRAFT)
+  notes               String?
+
+  resettlementCases ResettlementCase[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+enum ResettlementStatus {
+  IDENTIFIED
+  CONSULTATION
+  COMPENSATION_AGREED
+  RELOCATED
+  LIVELIHOOD_RESTORED
+  CLOSED
+}
+
+model ResettlementCase {
+  id                 String             @id @default(cuid())
+  mineId             String
+  mine               Mine               @relation(fields: [mineId], references: [id], onDelete: Cascade)
+  landAgreementId    String?
+  landAgreement      LandAgreement?     @relation(fields: [landAgreementId], references: [id], onDelete: SetNull)
+  householdName      String
+  householdSize      Int?
+  status             ResettlementStatus @default(IDENTIFIED)
+  compensationAmount Float?
+  compensationPaidAt DateTime?
+  relocationDate     DateTime?
+  notes              String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 // ---------------------------------------------------------------------------
