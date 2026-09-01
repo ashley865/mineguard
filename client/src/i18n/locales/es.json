@@ -564,6 +564,37 @@
       "whatToMonitor": "Qué Monitorear",
       "none": "No se encontró un patrón claro en el historial de mantenimiento.",
       "noHistory": "Aún no hay historial de mantenimiento registrado para este equipo — nada que analizar."
+    },
+    "consumableParts": {
+      "button": "Neumáticos y GET",
+      "title": "Neumáticos y GET — {{name}}",
+      "partType": "Tipo de pieza",
+      "partTypes": {
+        "TYRE": "Neumático",
+        "GET_BUCKET_TOOTH": "Diente de Cuchara",
+        "GET_CUTTING_EDGE": "Filo de Corte",
+        "GET_BLADE": "Cuchilla",
+        "OTHER": "Otro"
+      },
+      "position": "Posición",
+      "positionPlaceholder": "p. ej. Delantero Izquierdo",
+      "brand": "Marca",
+      "installDate": "Fecha de instalación",
+      "initialMeasurement": "Medición inicial",
+      "currentMeasurement": "Medición actual",
+      "measurementUnit": "Unidad",
+      "cost": "Costo",
+      "wear": "Desgaste (actual / inicial)",
+      "statuses": {
+        "IN_SERVICE": "En Servicio",
+        "REMOVED": "Removido",
+        "SCRAPPED": "Desechado"
+      },
+      "newPart": "+ Nueva Pieza",
+      "newPartTitle": "Nueva Pieza de Neumático / GET",
+      "editPartTitle": "Editar Pieza de Neumático / GET",
+      "noneYet": "Aún no hay neumáticos o piezas GET registrados para este equipo.",
+      "confirmDelete": "¿Eliminar este registro de pieza?"
     }
   },
   "incidents": {

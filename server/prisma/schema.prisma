@@ -736,8 +736,9 @@ model Incident {
   reviewedById String?
   reviewedBy   User?            @relation("IncidentReviewedBy", fields: [reviewedById], references: [id], onDelete: SetNull)
 
-  iodClaims IodClaim[]
-  media     IncidentMedia[]
+  iodClaims       IodClaim[]
+  media           IncidentMedia[]
+  insuranceClaims InsuranceClaim[]
 
   createdAt  DateTime  @default(now())
   resolvedAt DateTime?
@@ -787,6 +788,7 @@ model Equipment {
   assignedOperator    Worker?     @relation("EquipmentAssignedOperator", fields: [assignedOperatorId], references: [id], onDelete: SetNull)
 
   maintenanceSchedules MaintenanceSchedule[]
+  consumableParts      EquipmentConsumablePart[]
 
   createdAt DateTime @default(now())
 }
@@ -2291,6 +2293,55 @@ model MaintenancePartUsed {
   quantity              Float
 
   createdAt DateTime @default(now())
+}
+
+// ---------------------------------------------------------------------------
+// Module: Tyre & GET (Ground Engaging Tools) Lifecycle Management — tyres,
+// bucket teeth, cutting edges, and blades are consumed continuously by haul
+// trucks, loaders, dozers, graders and excavators and are one of the largest
+// opex line items in mining, but nothing tracks their wear/cost lifecycle
+// today: MaintenancePartUsed above only records a one-off inventory quantity
+// consumed at a maintenance event, not a tracked component installed on a
+// specific piece of equipment with its own wear measurements over time.
+// ---------------------------------------------------------------------------
+
+enum ConsumablePartType {
+  TYRE
+  GET_BUCKET_TOOTH
+  GET_CUTTING_EDGE
+  GET_BLADE
+  OTHER
+}
+
+enum ConsumablePartStatus {
+  IN_SERVICE
+  REMOVED
+  SCRAPPED
+}
+
+model EquipmentConsumablePart {
+  id                 String                @id @default(cuid())
+  equipmentId        String
+  equipment          Equipment             @relation(fields: [equipmentId], references: [id], onDelete: Cascade)
+  partType           ConsumablePartType
+  position           String?
+  brand              String?
+  serialOrPartNumber String?
+  installDate        DateTime?
+  installHoursMeter  Float?
+  cost               Float?
+  // Tread depth (tyres) or wear thickness (GET), in whatever unit is recorded —
+  // free-form so operators aren't forced into mm when their spec sheet is in inches.
+  initialMeasurement Float?
+  currentMeasurement Float?
+  measurementUnit    String?
+  status             ConsumablePartStatus  @default(IN_SERVICE)
+  removedDate        DateTime?
+  removalReason      String?
+  notes              String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model FleetPosition {

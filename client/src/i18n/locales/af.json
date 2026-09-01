@@ -564,6 +564,37 @@
       "whatToMonitor": "Wat om Dop te Hou",
       "none": "Geen duidelike patroon gevind in die onderhoudsgeskiedenis nie.",
       "noHistory": "Nog geen onderhoudsgeskiedenis vir hierdie toerusting aangeteken nie — niks om te ontleed nie."
+    },
+    "consumableParts": {
+      "button": "Bande & GET",
+      "title": "Bande & GET — {{name}}",
+      "partType": "Onderdeel tipe",
+      "partTypes": {
+        "TYRE": "Band",
+        "GET_BUCKET_TOOTH": "Emmertand",
+        "GET_CUTTING_EDGE": "Snyrand",
+        "GET_BLADE": "Lem",
+        "OTHER": "Ander"
+      },
+      "position": "Posisie",
+      "positionPlaceholder": "bv. Voor Links",
+      "brand": "Handelsmerk",
+      "installDate": "Installasiedatum",
+      "initialMeasurement": "Aanvanklike meting",
+      "currentMeasurement": "Huidige meting",
+      "measurementUnit": "Eenheid",
+      "cost": "Koste",
+      "wear": "Slytasie (huidig / aanvanklik)",
+      "statuses": {
+        "IN_SERVICE": "In Diens",
+        "REMOVED": "Verwyder",
+        "SCRAPPED": "Uitgeskrot"
+      },
+      "newPart": "+ Nuwe Onderdeel",
+      "newPartTitle": "Nuwe Band / GET Onderdeel",
+      "editPartTitle": "Wysig Band / GET Onderdeel",
+      "noneYet": "Nog geen bande of GET-onderdele vir hierdie toerusting aangeteken nie.",
+      "confirmDelete": "Verwyder hierdie onderdeelrekord?"
     }
   },
   "incidents": {

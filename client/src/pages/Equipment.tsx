@@ -2,11 +2,203 @@ import { FormEvent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { api } from "../api/client";
 import { useAuth } from "../context/AuthContext";
-import { AiEquipmentAnalysisResponse, Equipment as EquipmentItem, EquipmentStatus, EquipmentType, Site, Worker, Zone } from "../api/types";
+import { AiEquipmentAnalysisResponse, ConsumablePartStatus, ConsumablePartType, Equipment as EquipmentItem, EquipmentConsumablePart, EquipmentStatus, EquipmentType, Site, Worker, Zone } from "../api/types";
 import { StatusBadge } from "../components/Badges";
 import Modal from "../components/Modal";
 import { buttonDanger, buttonPrimary, buttonSecondary, cardClass, inputClass, labelClass, selectClass } from "../components/ui";
+import DataTable, { DataTableColumn } from "../components/DataTable";
 import LoadError from "../components/LoadError";
+
+// Only the mobile equipment types that actually consume tyres/GET wear parts.
+const TYRE_GET_APPLICABLE_TYPES: EquipmentType[] = ["EXCAVATOR", "HAUL_TRUCK", "LOADER", "DOZER", "GRADER"];
+const consumablePartTypes: ConsumablePartType[] = ["TYRE", "GET_BUCKET_TOOTH", "GET_CUTTING_EDGE", "GET_BLADE", "OTHER"];
+const consumablePartStatuses: ConsumablePartStatus[] = ["IN_SERVICE", "REMOVED", "SCRAPPED"];
+
+function ConsumablePartForm({ initial, onSubmit, onCancel }: {
+  initial?: EquipmentConsumablePart;
+  onSubmit: (data: any) => Promise<void>;
+  onCancel: () => void;
+}) {
+  const { t } = useTranslation();
+  const [partType, setPartType] = useState<ConsumablePartType>(initial?.partType ?? "TYRE");
+  const [position, setPosition] = useState(initial?.position ?? "");
+  const [brand, setBrand] = useState(initial?.brand ?? "");
+  const [installDate, setInstallDate] = useState(initial?.installDate?.slice(0, 10) ?? "");
+  const [cost, setCost] = useState(initial?.cost?.toString() ?? "");
+  const [initialMeasurement, setInitialMeasurement] = useState(initial?.initialMeasurement?.toString() ?? "");
+  const [currentMeasurement, setCurrentMeasurement] = useState(initial?.currentMeasurement?.toString() ?? "");
+  const [measurementUnit, setMeasurementUnit] = useState(initial?.measurementUnit ?? "mm");
+  const [status, setStatus] = useState<ConsumablePartStatus>(initial?.status ?? "IN_SERVICE");
+  const [notes, setNotes] = useState(initial?.notes ?? "");
+  const [saving, setSaving] = useState(false);
+
+  async function handleSubmit(e: FormEvent) {
+    e.preventDefault();
+    setSaving(true);
+    try {
+      await onSubmit({
+        partType,
+        position: position || undefined,
+        brand: brand || undefined,
+        installDate: installDate || null,
+        cost: cost ? Number(cost) : null,
+        initialMeasurement: initialMeasurement ? Number(initialMeasurement) : null,
+        currentMeasurement: currentMeasurement ? Number(currentMeasurement) : null,
+        measurementUnit: measurementUnit || undefined,
+        status,
+        notes: notes || undefined,
+      });
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  return (
+    <form onSubmit={handleSubmit} className="space-y-4">
+      <div className="grid grid-cols-2 gap-3">
+        <div>
+          <label className={labelClass}>{t("equipment.consumableParts.partType")}</label>
+          <select className={selectClass} value={partType} onChange={(e) => setPartType(e.target.value as ConsumablePartType)}>
+            {consumablePartTypes.map((pt) => <option key={pt} value={pt}>{t(`equipment.consumableParts.partTypes.${pt}`)}</option>)}
+          </select>
+        </div>
+        <div>
+          <label className={labelClass}>{t("equipment.consumableParts.position")}</label>
+          <input className={inputClass} value={position} onChange={(e) => setPosition(e.target.value)} placeholder={t("equipment.consumableParts.positionPlaceholder")} />
+        </div>
+      </div>
+      <div className="grid grid-cols-2 gap-3">
+        <div>
+          <label className={labelClass}>{t("equipment.consumableParts.brand")}</label>
+          <input className={inputClass} value={brand} onChange={(e) => setBrand(e.target.value)} />
+        </div>
+        <div>
+          <label className={labelClass}>{t("equipment.consumableParts.installDate")}</label>
+          <input className={inputClass} type="date" value={installDate} onChange={(e) => setInstallDate(e.target.value)} />
+        </div>
+      </div>
+      <div className="grid grid-cols-3 gap-3">
+        <div>
+          <label className={labelClass}>{t("equipment.consumableParts.initialMeasurement")}</label>
+          <input className={inputClass} type="number" step="0.01" value={initialMeasurement} onChange={(e) => setInitialMeasurement(e.target.value)} />
+        </div>
+        <div>
+          <label className={labelClass}>{t("equipment.consumableParts.currentMeasurement")}</label>
+          <input className={inputClass} type="number" step="0.01" value={currentMeasurement} onChange={(e) => setCurrentMeasurement(e.target.value)} />
+        </div>
+        <div>
+          <label className={labelClass}>{t("equipment.consumableParts.measurementUnit")}</label>
+          <input className={inputClass} value={measurementUnit} onChange={(e) => setMeasurementUnit(e.target.value)} placeholder="mm" />
+        </div>
+      </div>
+      <div className="grid grid-cols-2 gap-3">
+        <div>
+          <label className={labelClass}>{t("equipment.consumableParts.cost")}</label>
+          <input className={inputClass} type="number" min={0} step="0.01" value={cost} onChange={(e) => setCost(e.target.value)} />
+        </div>
+        <div>
+          <label className={labelClass}>{t("common.status")}</label>
+          <select className={selectClass} value={status} onChange={(e) => setStatus(e.target.value as ConsumablePartStatus)}>
+            {consumablePartStatuses.map((s) => <option key={s} value={s}>{t(`equipment.consumableParts.statuses.${s}`)}</option>)}
+          </select>
+        </div>
+      </div>
+      <div>
+        <label className={labelClass}>{t("common.notes")}</label>
+        <textarea className={inputClass} rows={2} value={notes} onChange={(e) => setNotes(e.target.value)} />
+      </div>
+      <div className="flex justify-end gap-2 pt-2">
+        <button type="button" className={buttonSecondary} onClick={onCancel}>{t("common.cancel")}</button>
+        <button type="submit" className={buttonPrimary} disabled={saving}>{saving ? t("common.saving") : t("common.save")}</button>
+      </div>
+    </form>
+  );
+}
+
+function TyreGetModal({ equipment, canEdit, onClose }: { equipment: EquipmentItem; canEdit: boolean; onClose: () => void }) {
+  const { t } = useTranslation();
+  const [parts, setParts] = useState<EquipmentConsumablePart[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
+  const [formModal, setFormModal] = useState<null | "create" | EquipmentConsumablePart>(null);
+
+  async function load() {
+    setLoading(true);
+    setLoadError(false);
+    try {
+      const res = await api.get<EquipmentConsumablePart[]>(`/equipment/${equipment.id}/consumable-parts`);
+      setParts(res.data);
+    } catch {
+      setLoadError(true);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  useEffect(() => {
+    load();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  async function create(data: any) {
+    await api.post(`/equipment/${equipment.id}/consumable-parts`, data);
+    setFormModal(null);
+    await load();
+  }
+  async function update(id: string, data: any) {
+    await api.put(`/equipment/${equipment.id}/consumable-parts/${id}`, data);
+    setFormModal(null);
+    await load();
+  }
+  async function remove(id: string) {
+    if (!confirm(t("equipment.consumableParts.confirmDelete"))) return;
+    await api.delete(`/equipment/${equipment.id}/consumable-parts/${id}`);
+    await load();
+  }
+
+  const columns: DataTableColumn<EquipmentConsumablePart>[] = [
+    { key: "partType", header: t("equipment.consumableParts.partType"), render: (p) => t(`equipment.consumableParts.partTypes.${p.partType}`), sortValue: (p) => p.partType },
+    { key: "position", header: t("equipment.consumableParts.position"), render: (p) => p.position ?? "—", sortValue: (p) => p.position ?? "" },
+    { key: "measurement", header: t("equipment.consumableParts.wear"), render: (p) => (p.currentMeasurement != null ? `${p.currentMeasurement}${p.initialMeasurement != null ? ` / ${p.initialMeasurement}` : ""} ${p.measurementUnit ?? ""}` : "—"), sortValue: (p) => p.currentMeasurement ?? 0 },
+    { key: "status", header: t("common.status"), render: (p) => <StatusBadge status={p.status} />, sortValue: (p) => p.status },
+  ];
+
+  return (
+    <Modal title={t("equipment.consumableParts.title", { name: equipment.name })} onClose={onClose}>
+      {loading && <div className="text-mine-300">{t("common.loading")}</div>}
+      {loadError && <LoadError onRetry={load} />}
+      {!loading && !loadError && (
+        <div className="space-y-4">
+          <div className="flex justify-end">
+            {canEdit && <button className={buttonPrimary} onClick={() => setFormModal("create")}>{t("equipment.consumableParts.newPart")}</button>}
+          </div>
+          <DataTable
+            columns={columns}
+            rows={parts}
+            rowKey={(p) => p.id}
+            emptyMessage={t("equipment.consumableParts.noneYet")}
+            searchValue={(p) => `${p.partType} ${p.position ?? ""}`}
+            actions={(p) => (
+              <div className="flex justify-end gap-2">
+                {canEdit && <button className="text-xs text-mine-300 hover:text-mine-50" onClick={() => setFormModal(p)}>{t("common.edit")}</button>}
+                {canEdit && <button className={buttonDanger} onClick={() => remove(p.id)}>{t("common.delete")}</button>}
+              </div>
+            )}
+          />
+        </div>
+      )}
+      {formModal && (
+        <Modal title={formModal === "create" ? t("equipment.consumableParts.newPartTitle") : t("equipment.consumableParts.editPartTitle")} onClose={() => setFormModal(null)}>
+          <ConsumablePartForm
+            initial={formModal === "create" ? undefined : formModal}
+            onSubmit={(data) => (formModal === "create" ? create(data) : update(formModal.id, data))}
+            onCancel={() => setFormModal(null)}
+          />
+        </Modal>
+      )}
+    </Modal>
+  );
+}
 
 function EquipmentAnalysisModal({ equipmentId, onClose }: { equipmentId: string; onClose: () => void }) {
   const { t } = useTranslation();
@@ -187,6 +379,7 @@ export default function Equipment() {
   const [loadError, setLoadError] = useState(false);
   const [modal, setModal] = useState<null | "create" | EquipmentItem>(null);
   const [analyzingId, setAnalyzingId] = useState<string | null>(null);
+  const [tyreGetEquipment, setTyreGetEquipment] = useState<EquipmentItem | null>(null);
 
   async function load() {
     setLoading(true);
@@ -273,6 +466,11 @@ export default function Equipment() {
                     <button className="text-xs font-bold text-hazard-600 hover:text-hazard-500" onClick={() => setAnalyzingId(eq.id)}>
                       {t("equipment.aiAnalysis.button")}
                     </button>
+                    {TYRE_GET_APPLICABLE_TYPES.includes(eq.type) && (
+                      <button className="text-xs text-mine-300 hover:text-mine-50" onClick={() => setTyreGetEquipment(eq)}>
+                        {t("equipment.consumableParts.button")}
+                      </button>
+                    )}
                     {canEdit && (
                       <>
                         <button className="text-xs text-mine-300 hover:text-mine-50" onClick={() => setModal(eq)}>{t("common.edit")}</button>
@@ -305,6 +503,10 @@ export default function Equipment() {
 
       {analyzingId && (
         <EquipmentAnalysisModal equipmentId={analyzingId} onClose={() => setAnalyzingId(null)} />
+      )}
+
+      {tyreGetEquipment && (
+        <TyreGetModal equipment={tyreGetEquipment} canEdit={canEdit} onClose={() => setTyreGetEquipment(null)} />
       )}
     </div>
   );

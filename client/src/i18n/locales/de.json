@@ -564,6 +564,37 @@
       "whatToMonitor": "Worauf zu Achten Ist",
       "none": "Kein klares Muster in der Wartungshistorie gefunden.",
       "noHistory": "Noch keine Wartungshistorie für dieses Gerät erfasst — nichts zu analysieren."
+    },
+    "consumableParts": {
+      "button": "Reifen & GET",
+      "title": "Reifen & GET — {{name}}",
+      "partType": "Teiletyp",
+      "partTypes": {
+        "TYRE": "Reifen",
+        "GET_BUCKET_TOOTH": "Schaufelzahn",
+        "GET_CUTTING_EDGE": "Schneidkante",
+        "GET_BLADE": "Klinge",
+        "OTHER": "Sonstiges"
+      },
+      "position": "Position",
+      "positionPlaceholder": "z.B. Vorne Links",
+      "brand": "Marke",
+      "installDate": "Einbaudatum",
+      "initialMeasurement": "Anfangsmessung",
+      "currentMeasurement": "Aktuelle Messung",
+      "measurementUnit": "Einheit",
+      "cost": "Kosten",
+      "wear": "Verschleiß (aktuell / anfänglich)",
+      "statuses": {
+        "IN_SERVICE": "Im Einsatz",
+        "REMOVED": "Entfernt",
+        "SCRAPPED": "Verschrottet"
+      },
+      "newPart": "+ Neues Teil",
+      "newPartTitle": "Neues Reifen-/GET-Teil",
+      "editPartTitle": "Reifen-/GET-Teil bearbeiten",
+      "noneYet": "Noch keine Reifen oder GET-Teile für dieses Gerät erfasst.",
+      "confirmDelete": "Diesen Teileeintrag löschen?"
     }
   },
   "incidents": {

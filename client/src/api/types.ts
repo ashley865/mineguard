@@ -454,6 +454,30 @@ export interface Equipment {
   assignedOperator?: { id: string; name: string; employeeId: string } | null;
 }
 
+export type ConsumablePartType = "TYRE" | "GET_BUCKET_TOOTH" | "GET_CUTTING_EDGE" | "GET_BLADE" | "OTHER";
+export type ConsumablePartStatus = "IN_SERVICE" | "REMOVED" | "SCRAPPED";
+
+export interface EquipmentConsumablePart {
+  id: string;
+  equipmentId: string;
+  partType: ConsumablePartType;
+  position?: string | null;
+  brand?: string | null;
+  serialOrPartNumber?: string | null;
+  installDate?: string | null;
+  installHoursMeter?: number | null;
+  cost?: number | null;
+  initialMeasurement?: number | null;
+  currentMeasurement?: number | null;
+  measurementUnit?: string | null;
+  status: ConsumablePartStatus;
+  removedDate?: string | null;
+  removalReason?: string | null;
+  notes?: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export type CameraType = "FIXED" | "PTZ" | "DOME" | "THERMAL" | "BODY_WORN" | "DRONE" | "OTHER";
 export type CameraOperationalStatus = "ONLINE" | "OFFLINE" | "MAINTENANCE" | "DECOMMISSIONED";
 export type VmsIntegrationMethod = "ONVIF" | "RTSP_STREAM" | "VENDOR_API" | "NVR_EXPORT" | "NOT_INTEGRATED";

@@ -564,6 +564,37 @@
       "whatToMonitor": "Points à Surveiller",
       "none": "Aucun schéma clair trouvé dans l'historique de maintenance.",
       "noHistory": "Aucun historique de maintenance enregistré pour cet équipement — rien à analyser."
+    },
+    "consumableParts": {
+      "button": "Pneus & GET",
+      "title": "Pneus & GET — {{name}}",
+      "partType": "Type de pièce",
+      "partTypes": {
+        "TYRE": "Pneu",
+        "GET_BUCKET_TOOTH": "Dent de Godet",
+        "GET_CUTTING_EDGE": "Tranchant",
+        "GET_BLADE": "Lame",
+        "OTHER": "Autre"
+      },
+      "position": "Position",
+      "positionPlaceholder": "ex. Avant Gauche",
+      "brand": "Marque",
+      "installDate": "Date d'installation",
+      "initialMeasurement": "Mesure initiale",
+      "currentMeasurement": "Mesure actuelle",
+      "measurementUnit": "Unité",
+      "cost": "Coût",
+      "wear": "Usure (actuelle / initiale)",
+      "statuses": {
+        "IN_SERVICE": "En Service",
+        "REMOVED": "Retiré",
+        "SCRAPPED": "Mis au Rebut"
+      },
+      "newPart": "+ Nouvelle Pièce",
+      "newPartTitle": "Nouvelle Pièce Pneu / GET",
+      "editPartTitle": "Modifier la Pièce Pneu / GET",
+      "noneYet": "Aucun pneu ou pièce GET enregistré pour cet équipement pour l'instant.",
+      "confirmDelete": "Supprimer cet enregistrement de pièce ?"
     }
   },
   "incidents": {

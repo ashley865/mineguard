@@ -582,6 +582,37 @@
       "whatToMonitor": "What to Monitor",
       "none": "No clear pattern found in the maintenance history.",
       "noHistory": "No maintenance history recorded for this equipment yet — nothing to analyze."
+    },
+    "consumableParts": {
+      "button": "Tyres & GET",
+      "title": "Tyres & GET — {{name}}",
+      "partType": "Part type",
+      "partTypes": {
+        "TYRE": "Tyre",
+        "GET_BUCKET_TOOTH": "Bucket Tooth",
+        "GET_CUTTING_EDGE": "Cutting Edge",
+        "GET_BLADE": "Blade",
+        "OTHER": "Other"
+      },
+      "position": "Position",
+      "positionPlaceholder": "e.g. Front Left",
+      "brand": "Brand",
+      "installDate": "Install date",
+      "initialMeasurement": "Initial measurement",
+      "currentMeasurement": "Current measurement",
+      "measurementUnit": "Unit",
+      "cost": "Cost",
+      "wear": "Wear (current / initial)",
+      "statuses": {
+        "IN_SERVICE": "In Service",
+        "REMOVED": "Removed",
+        "SCRAPPED": "Scrapped"
+      },
+      "newPart": "+ New Part",
+      "newPartTitle": "New Tyre / GET Part",
+      "editPartTitle": "Edit Tyre / GET Part",
+      "noneYet": "No tyres or GET parts recorded for this equipment yet.",
+      "confirmDelete": "Delete this part record?"
     }
   },
   "incidents": {
