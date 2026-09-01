@@ -3278,6 +3278,36 @@
     "noCasesYet": "No resettlement cases recorded yet.",
     "confirmDeleteCase": "Delete this resettlement case?"
   },
+  "fatigueManagement": {
+    "nav": "Fatigue Risk Management",
+    "title": "Pre-Shift Fatigue Assessments",
+    "hint": "Fitness-for-duty checks for haul-truck and heavy-equipment operators — hours worked/rested and consecutive shifts, so an at-risk operator is restricted or stood down before an incident.",
+    "summaryFail": "Failed Assessments",
+    "summaryStoodDown": "Stood Down",
+    "worker": "Worker",
+    "assessedAt": "Assessed on",
+    "hoursWorkedLast24h": "Hours worked (last 24h)",
+    "hoursRestLast24h": "Hours rested (last 24h)",
+    "consecutiveShifts": "Consecutive shifts",
+    "testResult": "Test result",
+    "testResults": {
+      "PASS": "Pass",
+      "BORDERLINE": "Borderline",
+      "FAIL": "Fail"
+    },
+    "outcome": "Outcome",
+    "outcomes": {
+      "CLEARED": "Cleared",
+      "RESTRICTED_DUTY": "Restricted Duty",
+      "STOOD_DOWN": "Stood Down"
+    },
+    "assessedByName": "Assessed by",
+    "newAssessment": "+ New Assessment",
+    "newAssessmentTitle": "New Fatigue Assessment",
+    "editAssessmentTitle": "Edit Fatigue Assessment",
+    "noneYet": "No fatigue assessments recorded yet.",
+    "confirmDelete": "Delete this fatigue assessment?"
+  },
   "employmentEquity": {
     "nav": "Employment Equity & Charter",
     "totalProcurementSpend": "Total Procurement Spend",

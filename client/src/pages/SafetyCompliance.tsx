@@ -19,6 +19,7 @@ import TailingsTab from "./compliance/TailingsTab";
 import ClosureRehabilitationTab from "./compliance/ClosureRehabilitationTab";
 import LegalComplianceTab from "./compliance/LegalComplianceTab";
 import LandManagementTab from "./compliance/LandManagementTab";
+import FatigueManagementTab from "./compliance/FatigueManagementTab";
 import { buttonPrimary, buttonSecondary } from "../components/ui";
 
 type TabKey =
@@ -37,7 +38,8 @@ type TabKey =
   | "tailings"
   | "closure"
   | "legal"
-  | "land";
+  | "land"
+  | "fatigue";
 const TAB_KEYS: TabKey[] = [
   "hazards",
   "cop",
@@ -55,6 +57,7 @@ const TAB_KEYS: TabKey[] = [
   "closure",
   "legal",
   "land",
+  "fatigue",
 ];
 
 export default function SafetyCompliance() {
@@ -99,6 +102,7 @@ export default function SafetyCompliance() {
     { key: "closure", label: t("closureRehabilitation.nav") },
     { key: "legal", label: t("legalCompliance.nav") },
     { key: "land", label: t("landManagement.nav") },
+    { key: "fatigue", label: t("fatigueManagement.nav") },
   ];
 
   if (loading) return <div className="text-mine-300">{t("compliance.loading")}</div>;
@@ -138,6 +142,7 @@ export default function SafetyCompliance() {
       {tab === "closure" && <ClosureRehabilitationTab sites={sites} />}
       {tab === "legal" && <LegalComplianceTab sites={sites} />}
       {tab === "land" && <LandManagementTab sites={sites} />}
+      {tab === "fatigue" && <FatigueManagementTab workers={workers} />}
     </div>
   );
 }

@@ -2724,6 +2724,24 @@ export interface InsuranceClaim {
   updatedAt: string;
 }
 
+export type FatigueTestResult = "PASS" | "BORDERLINE" | "FAIL";
+export type FatigueAssessmentOutcome = "CLEARED" | "RESTRICTED_DUTY" | "STOOD_DOWN";
+
+export interface FatigueAssessment {
+  id: string;
+  workerId: string;
+  worker?: { id: string; name: string; category: string } | null;
+  assessedAt: string;
+  hoursWorkedLast24h?: number | null;
+  hoursRestLast24h?: number | null;
+  consecutiveShifts?: number | null;
+  testResult: FatigueTestResult;
+  outcome: FatigueAssessmentOutcome;
+  assessedByName?: string | null;
+  notes?: string | null;
+  createdAt: string;
+}
+
 export interface LegalComplianceCalendarEntry {
   source: "LEGAL_ITEM" | "PERMIT" | "CERTIFICATE" | "MEDICAL_SURVEILLANCE" | "EXPLOSIVES_MAGAZINE";
   id: string;

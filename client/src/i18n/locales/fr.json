@@ -3274,6 +3274,36 @@
     "noCasesYet": "Aucun dossier de réinstallation enregistré pour l'instant.",
     "confirmDeleteCase": "Supprimer ce dossier de réinstallation ?"
   },
+  "fatigueManagement": {
+    "nav": "Gestion du Risque de Fatigue",
+    "title": "Évaluations de Fatigue Avant Poste",
+    "hint": "Contrôles d'aptitude au service pour les conducteurs de camions-bennes et d'engins lourds — heures travaillées/de repos et postes consécutifs, afin qu'un opérateur à risque soit limité ou retiré du service avant un incident.",
+    "summaryFail": "Évaluations Échouées",
+    "summaryStoodDown": "Retirés du Service",
+    "worker": "Travailleur",
+    "assessedAt": "Évalué le",
+    "hoursWorkedLast24h": "Heures travaillées (24h)",
+    "hoursRestLast24h": "Heures de repos (24h)",
+    "consecutiveShifts": "Postes consécutifs",
+    "testResult": "Résultat du test",
+    "testResults": {
+      "PASS": "Réussi",
+      "BORDERLINE": "Limite",
+      "FAIL": "Échoué"
+    },
+    "outcome": "Résultat",
+    "outcomes": {
+      "CLEARED": "Autorisé",
+      "RESTRICTED_DUTY": "Service Restreint",
+      "STOOD_DOWN": "Retiré du Service"
+    },
+    "assessedByName": "Évalué par",
+    "newAssessment": "+ Nouvelle Évaluation",
+    "newAssessmentTitle": "Nouvelle Évaluation de Fatigue",
+    "editAssessmentTitle": "Modifier l'Évaluation de Fatigue",
+    "noneYet": "Aucune évaluation de fatigue enregistrée pour l'instant.",
+    "confirmDelete": "Supprimer cette évaluation de fatigue ?"
+  },
   "employmentEquity": {
     "nav": "Équité en Emploi et Charte Minière",
     "totalProcurementSpend": "Dépenses Totales d'Approvisionnement",

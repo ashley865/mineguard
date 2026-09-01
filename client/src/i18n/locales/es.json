@@ -3274,6 +3274,36 @@
     "noCasesYet": "Aún no hay casos de reasentamiento registrados.",
     "confirmDeleteCase": "¿Eliminar este caso de reasentamiento?"
   },
+  "fatigueManagement": {
+    "nav": "Gestión de Riesgo de Fatiga",
+    "title": "Evaluaciones de Fatiga Pre-Turno",
+    "hint": "Verificaciones de aptitud para el servicio de operadores de camiones de acarreo y equipo pesado — horas trabajadas/descansadas y turnos consecutivos, para restringir o retirar del servicio a un operador en riesgo antes de un incidente.",
+    "summaryFail": "Evaluaciones Fallidas",
+    "summaryStoodDown": "Retirados del Servicio",
+    "worker": "Trabajador",
+    "assessedAt": "Evaluado el",
+    "hoursWorkedLast24h": "Horas trabajadas (últimas 24h)",
+    "hoursRestLast24h": "Horas de descanso (últimas 24h)",
+    "consecutiveShifts": "Turnos consecutivos",
+    "testResult": "Resultado de la prueba",
+    "testResults": {
+      "PASS": "Aprobado",
+      "BORDERLINE": "Límite",
+      "FAIL": "Reprobado"
+    },
+    "outcome": "Resultado",
+    "outcomes": {
+      "CLEARED": "Autorizado",
+      "RESTRICTED_DUTY": "Servicio Restringido",
+      "STOOD_DOWN": "Retirado del Servicio"
+    },
+    "assessedByName": "Evaluado por",
+    "newAssessment": "+ Nueva Evaluación",
+    "newAssessmentTitle": "Nueva Evaluación de Fatiga",
+    "editAssessmentTitle": "Editar Evaluación de Fatiga",
+    "noneYet": "Aún no hay evaluaciones de fatiga registradas.",
+    "confirmDelete": "¿Eliminar esta evaluación de fatiga?"
+  },
   "employmentEquity": {
     "nav": "Equidad Laboral y Carta Minera",
     "totalProcurementSpend": "Gasto Total en Adquisiciones",

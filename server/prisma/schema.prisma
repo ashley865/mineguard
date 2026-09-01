@@ -634,6 +634,7 @@ model Worker {
   nextOfKinPhone        String?
 
   medicalRecords  MedicalSurveillance[]
+  fatigueAssessments FatigueAssessment[]
   certificates    Certificate[]
   trainingRecords TrainingRecord[]
   complianceChecks EmployeeComplianceCheck[]
@@ -5967,4 +5968,41 @@ model InsuranceClaim {
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+// ---------------------------------------------------------------------------
+// Module: Fatigue Risk Management (MHSA Mandatory Code of Practice on Fatigue
+// Risk Management) — pre-shift fatigue checks for haul-truck/heavy-equipment
+// operators, tracking hours worked/rested and consecutive shifts so an
+// at-risk operator is restricted or stood down before, not after, an
+// incident. Distinct from MedicalSurveillance above, which is periodic
+// occupational-health screening, not a per-shift fitness-for-duty check.
+// ---------------------------------------------------------------------------
+
+enum FatigueTestResult {
+  PASS
+  BORDERLINE
+  FAIL
+}
+
+enum FatigueAssessmentOutcome {
+  CLEARED
+  RESTRICTED_DUTY
+  STOOD_DOWN
+}
+
+model FatigueAssessment {
+  id                 String                   @id @default(cuid())
+  workerId           String
+  worker             Worker                   @relation(fields: [workerId], references: [id], onDelete: Cascade)
+  assessedAt         DateTime                 @default(now())
+  hoursWorkedLast24h Float?
+  hoursRestLast24h   Float?
+  consecutiveShifts  Int?
+  testResult         FatigueTestResult
+  outcome            FatigueAssessmentOutcome @default(CLEARED)
+  assessedByName     String?
+  notes              String?
+
+  createdAt DateTime @default(now())
 }

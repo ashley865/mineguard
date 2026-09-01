@@ -126,6 +126,12 @@ const statusColors: Record<string, string> = {
   CANCELLED: "bg-mine-600 text-mine-100",
   PROVISIONED: "bg-success-600 text-white",
   ROLLED_BACK: "bg-hazard-600/80 text-white",
+  PASS: "bg-success-600 text-white",
+  BORDERLINE: "bg-hazard-500 text-white",
+  FAIL: "bg-danger-500 text-white",
+  CLEARED: "bg-success-600 text-white",
+  RESTRICTED_DUTY: "bg-hazard-500 text-white",
+  STOOD_DOWN: "bg-danger-600 text-white",
 };
 
 export function StatusBadge({

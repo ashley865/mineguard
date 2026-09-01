@@ -3274,6 +3274,36 @@
     "noCasesYet": "Noch keine Umsiedlungsfälle erfasst.",
     "confirmDeleteCase": "Diesen Umsiedlungsfall löschen?"
   },
+  "fatigueManagement": {
+    "nav": "Ermüdungsrisikomanagement",
+    "title": "Schichtbeginn-Ermüdungsbeurteilungen",
+    "hint": "Diensttauglichkeitsprüfungen für Muldenkipper- und Schwergerätefahrer — geleistete/erholte Stunden und aufeinanderfolgende Schichten, damit ein gefährdeter Fahrer vor einem Vorfall eingeschränkt oder aus dem Dienst genommen wird.",
+    "summaryFail": "Nicht Bestandene Beurteilungen",
+    "summaryStoodDown": "Aus dem Dienst Genommen",
+    "worker": "Mitarbeiter",
+    "assessedAt": "Beurteilt am",
+    "hoursWorkedLast24h": "Gearbeitete Stunden (letzte 24h)",
+    "hoursRestLast24h": "Erholte Stunden (letzte 24h)",
+    "consecutiveShifts": "Aufeinanderfolgende Schichten",
+    "testResult": "Testergebnis",
+    "testResults": {
+      "PASS": "Bestanden",
+      "BORDERLINE": "Grenzwertig",
+      "FAIL": "Nicht Bestanden"
+    },
+    "outcome": "Ergebnis",
+    "outcomes": {
+      "CLEARED": "Freigegeben",
+      "RESTRICTED_DUTY": "Eingeschränkter Dienst",
+      "STOOD_DOWN": "Aus dem Dienst Genommen"
+    },
+    "assessedByName": "Beurteilt von",
+    "newAssessment": "+ Neue Beurteilung",
+    "newAssessmentTitle": "Neue Ermüdungsbeurteilung",
+    "editAssessmentTitle": "Ermüdungsbeurteilung bearbeiten",
+    "noneYet": "Noch keine Ermüdungsbeurteilungen erfasst.",
+    "confirmDelete": "Diese Ermüdungsbeurteilung löschen?"
+  },
   "employmentEquity": {
     "nav": "Chancengleichheit & Charta",
     "totalProcurementSpend": "Gesamte Beschaffungsausgaben",

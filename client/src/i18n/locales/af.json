@@ -3274,6 +3274,36 @@
     "noCasesYet": "Nog geen hervestigingsake aangeteken nie.",
     "confirmDeleteCase": "Verwyder hierdie hervestigingsaak?"
   },
+  "fatigueManagement": {
+    "nav": "Moegheidsrisikobestuur",
+    "title": "Pre-skof Moegheidsassesserings",
+    "hint": "Geskiktheid-vir-diens toetse vir vervoertrok- en swaartoerustingoperateurs — ure gewerk/gerus en opeenvolgende skofte, sodat 'n operateur met risiko beperk of onttrek word voor 'n voorval.",
+    "summaryFail": "Gefaalde Assesserings",
+    "summaryStoodDown": "Onttrek",
+    "worker": "Werker",
+    "assessedAt": "Geassesseer op",
+    "hoursWorkedLast24h": "Ure gewerk (laaste 24u)",
+    "hoursRestLast24h": "Ure gerus (laaste 24u)",
+    "consecutiveShifts": "Opeenvolgende skofte",
+    "testResult": "Toetsresultaat",
+    "testResults": {
+      "PASS": "Geslaag",
+      "BORDERLINE": "Grens",
+      "FAIL": "Gefaal"
+    },
+    "outcome": "Uitkoms",
+    "outcomes": {
+      "CLEARED": "Vrygestel",
+      "RESTRICTED_DUTY": "Beperkte Diens",
+      "STOOD_DOWN": "Onttrek"
+    },
+    "assessedByName": "Geassesseer deur",
+    "newAssessment": "+ Nuwe Assessering",
+    "newAssessmentTitle": "Nuwe Moegheidsassessering",
+    "editAssessmentTitle": "Wysig Moegheidsassessering",
+    "noneYet": "Nog geen moegheidsassesserings aangeteken nie.",
+    "confirmDelete": "Verwyder hierdie moegheidsassessering?"
+  },
   "employmentEquity": {
     "nav": "Diensbillikheid & Handves",
     "totalProcurementSpend": "Totale Verkrygingsuitgawe",
