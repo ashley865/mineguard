@@ -121,6 +121,7 @@ export default function Layout() {
         { to: "/invoices", label: t("invoices.nav") },
         { to: "/expenses", label: t("expenses.nav") },
         { to: "/budget-planning", label: t("budgetPlanning.nav") },
+        { to: "/insurance", label: t("insurance.nav") },
         ...(canSeeFinancials ? [{ to: "/cash-flow-forecast", label: t("cashFlowForecast.nav") }] : []),
         ...(canSeeFinancials ? [{ to: "/approvals-inbox", label: t("approvalsInbox.nav") }] : []),
       ],

@@ -2688,6 +2688,42 @@ export interface ResettlementCase {
   updatedAt: string;
 }
 
+export type InsurancePolicyType = "PROPERTY" | "EQUIPMENT" | "LIABILITY" | "BUSINESS_INTERRUPTION" | "MARINE_TRANSIT" | "DIRECTORS_OFFICERS" | "OTHER";
+export type InsurancePolicyStatus = "ACTIVE" | "EXPIRED" | "CANCELLED" | "PENDING_RENEWAL";
+export type InsuranceClaimStatus = "LODGED" | "UNDER_ASSESSMENT" | "APPROVED" | "REJECTED" | "SETTLED" | "CLOSED";
+
+export interface InsurancePolicy {
+  id: string;
+  policyNumber: string;
+  insurer: string;
+  policyType: InsurancePolicyType;
+  coverageAmount?: number | null;
+  premiumAmount?: number | null;
+  startDate: string;
+  expiryDate: string;
+  status: InsurancePolicyStatus;
+  notes?: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface InsuranceClaim {
+  id: string;
+  policyId: string;
+  policy?: { id: string; policyNumber: string; insurer: string } | null;
+  incidentId?: string | null;
+  incident?: { id: string; title: string } | null;
+  claimNumber?: string | null;
+  dateOfLoss: string;
+  description: string;
+  amountClaimed?: number | null;
+  amountSettled?: number | null;
+  status: InsuranceClaimStatus;
+  notes?: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export interface LegalComplianceCalendarEntry {
   source: "LEGAL_ITEM" | "PERMIT" | "CERTIFICATE" | "MEDICAL_SURVEILLANCE" | "EXPLOSIVES_MAGAZINE";
   id: string;

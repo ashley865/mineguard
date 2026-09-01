@@ -52,6 +52,7 @@ export const restrictedModules = [
   "/downtime",
   "/it-operations",
   "/budget-planning",
+  "/insurance",
   "/toolbox-talks",
   "/regulatory-submissions",
   "/skills-matrix",
@@ -68,7 +69,7 @@ const fullAccess: RestrictedModule[] = [...restrictedModules];
 export const executiveTitleModules: Partial<Record<ExecutiveTitle, RestrictedModule[]>> = {
   GENERAL_MANAGER: fullAccess,
   COO: fullAccess,
-  CFO: ["/reporting", "/contractors", "/permits", "/documents", "/compliance", "/incidents", "/marketplace", "/tenders", "/production", "/inventory", "/payroll", "/procurement", "/invoices", "/expenses", "/resources", "/geology", "/budget-planning"],
+  CFO: ["/reporting", "/contractors", "/permits", "/documents", "/compliance", "/incidents", "/marketplace", "/tenders", "/production", "/inventory", "/payroll", "/procurement", "/invoices", "/expenses", "/resources", "/geology", "/budget-planning", "/insurance"],
   HR_MANAGER: ["/workers", "/workforce", "/visitors", "/documents", "/reporting", "/emergency", "/payroll", "/scanner", "/labour-relations", "/skills-matrix"],
   SECURITY_MANAGER: ["/visitors", "/scanner", "/trucks", "/incidents", "/alerts", "/workers", "/sites", "/safety-observations", "/emergency", "/security", "/vetting-records"],
   SAFETY_MANAGER: [

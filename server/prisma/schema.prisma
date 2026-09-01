@@ -1559,6 +1559,8 @@ model Mine {
   legalComplianceItems    LegalComplianceItem[]
   landAgreements          LandAgreement[]
   resettlementCases       ResettlementCase[]
+  insurancePolicies       InsurancePolicy[]
+  insuranceClaims         InsuranceClaim[]
 
   unionAgreements    UnionAgreement[]
   ghgEmissionsRecords GhgEmissionsRecord[]
@@ -5892,4 +5894,77 @@ model MfaBackupCode {
   createdAt       DateTime  @default(now())
 
   @@index([userId])
+}
+
+// ---------------------------------------------------------------------------
+// Module: Insurance & Asset Risk Register — the mine's own property, equipment,
+// liability, and other business insurance policies, and claims lodged against
+// them. Distinct from IodClaim above, which tracks worker-injury compensation
+// (COIDA) claims, not the mine's business insurance.
+// ---------------------------------------------------------------------------
+
+enum InsurancePolicyType {
+  PROPERTY
+  EQUIPMENT
+  LIABILITY
+  BUSINESS_INTERRUPTION
+  MARINE_TRANSIT
+  DIRECTORS_OFFICERS
+  OTHER
+}
+
+enum InsurancePolicyStatus {
+  ACTIVE
+  EXPIRED
+  CANCELLED
+  PENDING_RENEWAL
+}
+
+model InsurancePolicy {
+  id             String                 @id @default(cuid())
+  mineId         String
+  mine           Mine                   @relation(fields: [mineId], references: [id], onDelete: Cascade)
+  policyNumber   String
+  insurer        String
+  policyType     InsurancePolicyType
+  coverageAmount Float?
+  premiumAmount  Float?
+  startDate      DateTime
+  expiryDate     DateTime
+  status         InsurancePolicyStatus  @default(ACTIVE)
+  notes          String?
+
+  claims InsuranceClaim[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+enum InsuranceClaimStatus {
+  LODGED
+  UNDER_ASSESSMENT
+  APPROVED
+  REJECTED
+  SETTLED
+  CLOSED
+}
+
+model InsuranceClaim {
+  id            String               @id @default(cuid())
+  mineId        String
+  mine          Mine                 @relation(fields: [mineId], references: [id], onDelete: Cascade)
+  policyId      String
+  policy        InsurancePolicy      @relation(fields: [policyId], references: [id], onDelete: Cascade)
+  incidentId    String?
+  incident      Incident?            @relation(fields: [incidentId], references: [id], onDelete: SetNull)
+  claimNumber   String?
+  dateOfLoss    DateTime
+  description   String
+  amountClaimed Float?
+  amountSettled Float?
+  status        InsuranceClaimStatus @default(LODGED)
+  notes         String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }

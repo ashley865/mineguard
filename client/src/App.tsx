@@ -51,6 +51,7 @@ import DowntimeTracker from "./pages/DowntimeTracker";
 import ITOperations from "./pages/ITOperations";
 import CyberCommandCenter from "./pages/CyberCommandCenter";
 import BudgetPlanning from "./pages/BudgetPlanning";
+import Insurance from "./pages/Insurance";
 import ToolboxTalks from "./pages/ToolboxTalks";
 import RegulatorySubmissions from "./pages/RegulatorySubmissions";
 import AiDailyBriefing from "./pages/AiDailyBriefing";
@@ -145,6 +146,7 @@ export default function App() {
         <Route path="/it-operations" element={<ModuleRoute path="/it-operations"><ITOperations /></ModuleRoute>} />
         <Route path="/cyber-command-center" element={<ModuleRoute path="/cyber-command-center"><CyberCommandCenter /></ModuleRoute>} />
         <Route path="/budget-planning" element={<ModuleRoute path="/budget-planning"><BudgetPlanning /></ModuleRoute>} />
+        <Route path="/insurance" element={<ModuleRoute path="/insurance"><Insurance /></ModuleRoute>} />
         <Route path="/toolbox-talks" element={<ModuleRoute path="/toolbox-talks"><ToolboxTalks /></ModuleRoute>} />
         <Route path="/regulatory-submissions" element={<ModuleRoute path="/regulatory-submissions"><RegulatorySubmissions /></ModuleRoute>} />
         <Route path="/ai-daily-briefing" element={<AiDailyBriefing />} />
