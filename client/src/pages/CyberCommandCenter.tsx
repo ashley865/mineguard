@@ -12,8 +12,9 @@ import ComplianceTab from "./cyber/ComplianceTab";
 import IdentityTab from "./cyber/IdentityTab";
 import AiAnalystTab from "./cyber/AiAnalystTab";
 import SettingsTab from "./cyber/SettingsTab";
+import SensorProvisioningTab from "./cyber/SensorProvisioningTab";
 
-type CyberTab = "dashboard" | "endpoints" | "identity" | "network" | "vulnerabilities" | "incidents" | "compliance" | "ai" | "settings";
+type CyberTab = "dashboard" | "endpoints" | "identity" | "network" | "sensors" | "vulnerabilities" | "incidents" | "compliance" | "ai" | "settings";
 
 const THEME_STORAGE_KEY = "mineguard.cyberCommandCenter.dark";
 
@@ -51,6 +52,7 @@ export default function CyberCommandCenter() {
     { key: "endpoints", label: t("cyber.tabEndpoints") },
     { key: "vulnerabilities", label: t("cyber.tabVulnerabilities") },
     { key: "network", label: t("cyber.tabNetwork") },
+    { key: "sensors", label: t("cyber.tabSensors") },
     { key: "identity", label: t("cyber.tabIdentity") },
     { key: "compliance", label: t("cyber.tabCompliance") },
     { key: "ai", label: t("cyber.tabAi") },
@@ -107,6 +109,7 @@ export default function CyberCommandCenter() {
         {tab === "dashboard" && <DashboardTab theme={theme} onNavigate={(t) => setTab(t as CyberTab)} />}
         {tab === "endpoints" && <EndpointsTab theme={theme} canEdit={canEdit} canDelete={canDelete} />}
         {tab === "network" && <NetworkTab theme={theme} canEdit={canEdit} canDelete={canDelete} />}
+        {tab === "sensors" && <SensorProvisioningTab theme={theme} canEdit={canEdit} />}
         {tab === "vulnerabilities" && <VulnerabilitiesTab theme={theme} canEdit={canEdit} canDelete={canDelete} />}
         {tab === "incidents" && <IncidentsTab theme={theme} canEdit={canEdit} canDelete={canDelete} canApprove={canApprove} />}
         {tab === "compliance" && <ComplianceTab theme={theme} canEdit={canEdit} canDelete={canDelete} />}
