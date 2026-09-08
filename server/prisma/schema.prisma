@@ -549,6 +549,26 @@ model Sensor {
   apiKeyLastUsedAt DateTime?
   lastSeenIp       String?
 
+  // Pull mode. Two collectors can do the pulling, and pollAgentId is what distinguishes
+  // them: null means this server polls the sensor itself (only ever HTTP_JSON — a cloud
+  // deployment can't route to a mine LAN, and Modbus/SNMP have no business crossing the
+  // internet), while a set agent means an on-site SensorAgent polls it locally and pushes
+  // the values up. Push-only sensors leave pollEnabled false and are unaffected by either.
+  pollEnabled         Boolean             @default(false)
+  pollProtocol        SensorPollProtocol?
+  // An https:// or http:// URL for HTTP_JSON; host or host:port for Modbus/SNMP.
+  pollTarget          String?
+  // Protocol-specific read instructions, kept as JSON rather than a dozen mostly-null
+  // columns: { jsonPath } for HTTP, { unitId, register, registerType, scale } for Modbus,
+  // { oid, community, version } for SNMP.
+  pollConfig          Json?
+  pollIntervalSeconds Int?
+  pollAgentId         String?
+  pollAgent           SensorAgent?        @relation(fields: [pollAgentId], references: [id], onDelete: SetNull)
+  lastPollAt          DateTime?
+  lastPollOk          Boolean?
+  lastPollError       String?
+
   requestedById String?
   requestedBy   User?     @relation("SensorRequestedBy", fields: [requestedById], references: [id], onDelete: SetNull)
   requestedAt   DateTime?
@@ -1574,6 +1594,7 @@ model Mine {
   resettlementCases       ResettlementCase[]
   insurancePolicies       InsurancePolicy[]
   insuranceClaims         InsuranceClaim[]
+  sensorAgents            SensorAgent[]
 
   unionAgreements    UnionAgreement[]
   ghgEmissionsRecords GhgEmissionsRecord[]
@@ -5907,6 +5928,42 @@ model MfaBackupCode {
   createdAt       DateTime  @default(now())
 
   @@index([userId])
+}
+
+// ---------------------------------------------------------------------------
+// Sensor pull collection
+// ---------------------------------------------------------------------------
+
+enum SensorPollProtocol {
+  HTTP_JSON
+  MODBUS_TCP
+  SNMP
+}
+
+/**
+ * A collector process running on the mine's own network (see the agent/ package). It exists
+ * because the API is cloud-hosted and cannot reach a 192.168.x sensor, and because Modbus
+ * and SNMP are LAN protocols that shouldn't be exposed to the internet to make them
+ * pollable. The agent asks this server which sensors it owns, polls them locally, and
+ * pushes the readings back — so the traffic direction is always outbound from the mine.
+ *
+ * One key per agent rather than per sensor: the agent speaks for every sensor assigned to
+ * it, and issuing dozens of per-sensor keys to a single process would be bookkeeping with
+ * no security gain, since a compromised agent host holds all of them either way.
+ */
+model SensorAgent {
+  id           String    @id @default(cuid())
+  mineId       String
+  mine         Mine      @relation(fields: [mineId], references: [id], onDelete: Cascade)
+  name         String
+  apiKeyHash   String
+  agentVersion String?
+  lastSeenAt   DateTime?
+  lastSeenIp   String?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  sensors Sensor[]
 }
 
 // ---------------------------------------------------------------------------

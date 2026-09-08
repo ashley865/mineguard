@@ -28,7 +28,11 @@ export function startSimulator(io: SocketServer) {
   setInterval(async () => {
     try {
       const sensors = await prisma.sensor.findMany({
-        where: { status: "ACTIVE" },
+        // Sensors with a real data source are excluded: a unit that pushes its own
+        // readings (device key issued) or is polled by the server/an agent would
+        // otherwise have invented values interleaved with its real ones, which is worse
+        // than no data — it makes a broken feed look healthy and can trip real alerts.
+        where: { status: "ACTIVE", apiKeyHash: null, pollEnabled: false },
         include: {
           readings: { orderBy: { recordedAt: "desc" }, take: 1 },
           zone: { select: { site: { select: { mineId: true } } } },

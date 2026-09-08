@@ -90,3 +90,78 @@ export async function assertSafeExternalUrl(rawUrl: string): Promise<URL> {
 
   return url;
 }
+
+/**
+ * The variant used for sensor polling (services/sensorPoller.ts), which cannot use the
+ * function above: a sensor's whole purpose is to sit on an internal network, so a guard
+ * that rejects every private range would reject every legitimate target.
+ *
+ * What stays blocked is the subset that has nothing to do with reaching a sensor and
+ * everything to do with pivoting off this server:
+ *   - loopback (127.x, ::1) and 0.0.0.0 — the server's own services, including its
+ *     unauthenticated internal surfaces
+ *   - link-local 169.254.x, which is where the cloud metadata endpoint lives and where
+ *     instance credentials would be exposed
+ *   - multicast/reserved
+ *
+ * Private LAN ranges (10.x, 172.16-31.x, 192.168.x) are allowed *because* that is the
+ * target. The residual risk — an IT Manager pointing a poll at an internal service on the
+ * same network as a self-hosted deployment — is accepted knowingly: the role is already
+ * the most infrastructure-privileged in the app, the poller only ever reads and only ever
+ * stores a single parsed number, and the alternative is a pull feature that cannot pull.
+ * http:// is permitted alongside https:// since field instruments rarely terminate TLS.
+ */
+export async function assertSafePollUrl(rawUrl: string): Promise<URL> {
+  let url: URL;
+  try {
+    url = new URL(rawUrl);
+  } catch {
+    throw new UnsafeUrlError("Not a valid URL");
+  }
+  if (url.protocol !== "https:" && url.protocol !== "http:") {
+    throw new UnsafeUrlError("Only http:// or https:// URLs can be polled");
+  }
+  if (url.hostname.toLowerCase() === "localhost") {
+    throw new UnsafeUrlError("Requests to localhost are not allowed");
+  }
+
+  const literalVersion = net.isIP(url.hostname);
+  let addresses: string[];
+  if (literalVersion) {
+    addresses = [url.hostname];
+  } else {
+    try {
+      addresses = (await dns.lookup(url.hostname, { all: true })).map((r) => r.address);
+    } catch {
+      throw new UnsafeUrlError("Could not resolve hostname");
+    }
+  }
+  if (addresses.length === 0) throw new UnsafeUrlError("Could not resolve hostname");
+
+  for (const address of addresses) {
+    if (isBlockedPollAddress(address)) {
+      throw new UnsafeUrlError("Requests to loopback, link-local or reserved addresses are not allowed");
+    }
+  }
+  return url;
+}
+
+function isBlockedPollAddress(ip: string): boolean {
+  const version = net.isIP(ip);
+  if (version === 4) {
+    const parts = ip.split(".").map(Number);
+    const [a, b] = parts;
+    if (a === 0 || a === 127) return true;
+    if (a === 169 && b === 254) return true;
+    if (a >= 224) return true;
+    return false;
+  }
+  const lower = ip.toLowerCase();
+  if (lower === "::1" || lower === "::") return true;
+  if (/^fe[89ab][0-9a-f]:/.test(lower)) return true;
+  if (lower.startsWith("::ffff:")) {
+    const v4 = lower.split(":").pop()!;
+    if (v4.includes(".")) return isBlockedPollAddress(v4);
+  }
+  return false;
+}

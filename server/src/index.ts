@@ -119,6 +119,9 @@ import landManagementRoutes from "./routes/landManagement";
 import insuranceRoutes from "./routes/insurance";
 import fatigueAssessmentsRoutes from "./routes/fatigueAssessments";
 import sensorIngestRoutes from "./routes/sensorIngest";
+import sensorAgentApiRoutes from "./routes/sensorAgentApi";
+import sensorAgentsRoutes from "./routes/sensorAgents";
+import { startSensorPoller } from "./services/sensorPoller";
 import groundControlRoutes from "./routes/groundControl";
 import ventilationRoutes from "./routes/ventilation";
 import mineRescueRoutes from "./routes/mineRescue";
@@ -186,6 +189,9 @@ app.use(sanitizeBody);
 // one gateway IP, so an IP-keyed budget would have them starving each other. This router
 // applies its own per-sensor limit instead (see routes/sensorIngest.ts).
 app.use("/api/sensor-ingest", sensorIngestRoutes);
+// Same reasoning for the on-site collector: one agent speaks for many sensors from a
+// single gateway address, and it carries its own per-agent limit.
+app.use("/api/sensor-agent", sensorAgentApiRoutes);
 
 app.use("/api", apiLimiter);
 
@@ -267,6 +273,7 @@ app.use("/api/legal-compliance", legalComplianceRoutes);
 app.use("/api/land-management", landManagementRoutes);
 app.use("/api/insurance", insuranceRoutes);
 app.use("/api/fatigue-assessments", fatigueAssessmentsRoutes);
+app.use("/api/sensor-agents", sensorAgentsRoutes);
 app.use("/api/ground-control", groundControlRoutes);
 app.use("/api/ventilation", ventilationRoutes);
 app.use("/api/mine-rescue", mineRescueRoutes);
@@ -376,6 +383,7 @@ const port = Number(process.env.PORT) || 4000;
 httpServer.listen(port, () => {
   console.log(`Mine Guard API listening on port ${port}`);
   startSimulator(io);
+  startSensorPoller(io);
   scanCompliance(io).catch((err) => console.error("Compliance scan failed", err));
   setInterval(() => {
     scanCompliance(io).catch((err) => console.error("Compliance scan failed", err));

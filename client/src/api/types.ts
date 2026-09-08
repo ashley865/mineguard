@@ -258,6 +258,27 @@ export interface Sensor {
   apiKeyIssuedAt?: string | null;
   apiKeyLastUsedAt?: string | null;
   lastSeenIp?: string | null;
+  pollEnabled?: boolean;
+  pollProtocol?: SensorPollProtocol | null;
+  pollTarget?: string | null;
+  pollConfig?: Record<string, unknown> | null;
+  pollIntervalSeconds?: number | null;
+  pollAgentId?: string | null;
+  lastPollAt?: string | null;
+  lastPollOk?: boolean | null;
+  lastPollError?: string | null;
+}
+
+export type SensorPollProtocol = "HTTP_JSON" | "MODBUS_TCP" | "SNMP";
+
+export interface SensorAgent {
+  id: string;
+  name: string;
+  agentVersion?: string | null;
+  lastSeenAt?: string | null;
+  lastSeenIp?: string | null;
+  sensorCount: number;
+  createdAt: string;
 }
 
 export interface SensorCatalogSiteBucket {

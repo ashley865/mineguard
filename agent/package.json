@@ -1,0 +1,18 @@
+{
+  "name": "mineguard-sensor-agent",
+  "version": "1.0.0",
+  "private": true,
+  "description": "On-site collector that polls sensors on the mine network and pushes readings to MineGuard",
+  "main": "index.js",
+  "type": "commonjs",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "modbus-serial": "^8.0.17",
+    "net-snmp": "^3.11.2"
+  }
+}
