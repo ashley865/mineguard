@@ -1,7 +1,7 @@
 import { Fragment, FormEvent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, ReferenceLine } from "recharts";
-import { api } from "../api/client";
+import { api, API_URL } from "../api/client";
 import { useAuth } from "../context/AuthContext";
 import { useSocket } from "../context/SocketContext";
 import { Sensor, SensorCatalog, SensorReading, SensorType, Zone } from "../api/types";
@@ -61,6 +61,7 @@ function SensorForm({ zones, initial, defaultType, onSubmit, onCancel }: {
   const [manufacturer, setManufacturer] = useState(initial?.manufacturer ?? "");
   const [model, setModel] = useState(initial?.model ?? "");
   const [serialNumber, setSerialNumber] = useState(initial?.serialNumber ?? "");
+  const [ipAddress, setIpAddress] = useState(initial?.ipAddress ?? "");
   const [requestInstallation, setRequestInstallation] = useState(false);
   const [saving, setSaving] = useState(false);
 
@@ -79,6 +80,7 @@ function SensorForm({ zones, initial, defaultType, onSubmit, onCancel }: {
         manufacturer: manufacturer || undefined,
         model: model || undefined,
         serialNumber: serialNumber || undefined,
+        ipAddress: ipAddress.trim() || null,
         requestInstallation: isNew ? requestInstallation : undefined,
       });
     } finally {
@@ -146,6 +148,11 @@ function SensorForm({ zones, initial, defaultType, onSubmit, onCancel }: {
           <input className={inputClass} value={serialNumber} onChange={(e) => setSerialNumber(e.target.value)} />
         </div>
       </div>
+      <div>
+        <label className={labelClass}>{t("sensors.ipAddress")}</label>
+        <input className={inputClass} value={ipAddress} onChange={(e) => setIpAddress(e.target.value)} placeholder="192.168.10.42" />
+        <p className="text-xs text-mine-400 mt-1">{t("sensors.ipAddressHint")}</p>
+      </div>
       {isNew && (
         <label className="flex items-start gap-2 text-sm border border-mine-800 rounded-md p-3">
           <input type="checkbox" checked={requestInstallation} onChange={(e) => setRequestInstallation(e.target.checked)} className="mt-0.5" />
@@ -160,6 +167,117 @@ function SensorForm({ zones, initial, defaultType, onSubmit, onCancel }: {
         <button type="submit" className={buttonPrimary} disabled={saving}>{saving ? t("common.saving") : t("common.save")}</button>
       </div>
     </form>
+  );
+}
+
+// IT's provisioning panel for one networked sensor: issue or rotate the device key, and
+// hand over the exact request the unit (or its gateway) must make. The key is shown once,
+// here, and never again — the server only keeps its hash.
+function DeviceKeyModal({ sensor, onClose, onChanged }: { sensor: Sensor; onClose: () => void; onChanged: () => Promise<void> }) {
+  const { t } = useTranslation();
+  const [issuedKey, setIssuedKey] = useState<string | null>(null);
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [copied, setCopied] = useState(false);
+
+  const ingestUrl = `${API_URL}/api/sensor-ingest/${sensor.id}/readings`;
+
+  async function issue() {
+    setBusy(true);
+    setError(null);
+    try {
+      const res = await api.post<{ key: string }>(`/sensors/${sensor.id}/api-key`);
+      setIssuedKey(res.data.key);
+      await onChanged();
+    } catch (err: any) {
+      setError(err.response?.data?.error ?? t("sensors.deviceKeyError"));
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function revoke() {
+    if (!confirm(t("sensors.confirmRevokeKey"))) return;
+    setBusy(true);
+    setError(null);
+    try {
+      await api.delete(`/sensors/${sensor.id}/api-key`);
+      setIssuedKey(null);
+      await onChanged();
+      onClose();
+    } catch (err: any) {
+      setError(err.response?.data?.error ?? t("sensors.deviceKeyError"));
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function copyKey() {
+    if (!issuedKey) return;
+    try {
+      await navigator.clipboard.writeText(issuedKey);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      // Clipboard permission can be denied; the key is selectable on screen regardless.
+    }
+  }
+
+  return (
+    <Modal title={`${sensor.name} — ${t("sensors.deviceKeyTitle")}`} onClose={onClose}>
+      <div className="space-y-4">
+        <p className="text-xs text-mine-400">{t("sensors.deviceKeyHint")}</p>
+
+        <div className="text-xs space-y-1 border border-mine-800 rounded-md p-3">
+          <div className="flex justify-between gap-3">
+            <span className="text-mine-400">{t("sensors.deviceKeyStatus")}</span>
+            <span className={sensor.hasApiKey ? "text-success-500 font-semibold" : "text-mine-300"}>
+              {sensor.hasApiKey ? t("sensors.deviceKeyIssued") : t("sensors.deviceKeyNotIssued")}
+            </span>
+          </div>
+          {sensor.apiKeyLastUsedAt && (
+            <div className="flex justify-between gap-3">
+              <span className="text-mine-400">{t("sensors.deviceKeyLastReading")}</span>
+              <span>{new Date(sensor.apiKeyLastUsedAt).toLocaleString()}</span>
+            </div>
+          )}
+          {sensor.lastSeenIp && (
+            <div className="flex justify-between gap-3">
+              <span className="text-mine-400">{t("sensors.deviceKeyLastSeenIp")}</span>
+              <span className="font-mono">{sensor.lastSeenIp}</span>
+            </div>
+          )}
+        </div>
+
+        {issuedKey && (
+          <div className="space-y-2 border border-hazard-500/40 bg-hazard-500/5 rounded-md p-3">
+            <div className="text-xs font-semibold text-hazard-500">{t("sensors.deviceKeyShownOnce")}</div>
+            <code className="block text-xs bg-mine-800/60 rounded px-2 py-2 break-all font-mono">{issuedKey}</code>
+            <button type="button" className={buttonSecondary} onClick={copyKey}>
+              {copied ? t("sensors.deviceKeyCopied") : t("sensors.deviceKeyCopy")}
+            </button>
+          </div>
+        )}
+
+        <div className="space-y-1">
+          <div className="text-xs font-semibold text-mine-200">{t("sensors.deviceKeyEndpoint")}</div>
+          <code className="block text-[11px] bg-mine-800/60 rounded px-2 py-2 break-all font-mono whitespace-pre-wrap">
+            {`POST ${ingestUrl}\nX-Sensor-Api-Key: <key>\nContent-Type: application/json\n\n{"value": 1.4}`}
+          </code>
+        </div>
+
+        {error && <div className="text-xs text-danger-500">{error}</div>}
+
+        <div className="flex justify-end gap-2 pt-1">
+          {sensor.hasApiKey && (
+            <button type="button" className={buttonDanger} onClick={revoke} disabled={busy}>{t("sensors.deviceKeyRevoke")}</button>
+          )}
+          <button type="button" className={buttonPrimary} onClick={issue} disabled={busy}>
+            {busy ? t("common.saving") : sensor.hasApiKey ? t("sensors.deviceKeyRotate") : t("sensors.deviceKeyGenerate")}
+          </button>
+        </div>
+      </div>
+    </Modal>
   );
 }
 
@@ -316,6 +434,8 @@ export default function Sensors() {
   const { t } = useTranslation();
   const { user } = useAuth();
   const canEdit = user?.role === "ADMIN" || user?.role === "SUPERVISOR" || user?.role === "EXECUTIVE";
+  // Mirrors requireItAccess on the server: only IT (or the owner) provisions device keys.
+  const canManageDeviceKeys = user?.role === "ADMIN" || (user?.role === "EXECUTIVE" && user?.title === "IT_MANAGER");
   const [tab, setTab] = useState<"sensors" | "catalog">("sensors");
   const [sensors, setSensors] = useState<Sensor[]>([]);
   const [zones, setZones] = useState<Zone[]>([]);
@@ -325,6 +445,7 @@ export default function Sensors() {
   const [defaultType, setDefaultType] = useState<SensorType | undefined>(undefined);
   const [chartSensor, setChartSensor] = useState<Sensor | null>(null);
   const [schedulingSensor, setSchedulingSensor] = useState<Sensor | null>(null);
+  const [deviceKeySensor, setDeviceKeySensor] = useState<Sensor | null>(null);
   const socket = useSocket();
 
   async function load() {
@@ -433,6 +554,7 @@ export default function Sensors() {
               <th className="text-left px-4 py-2">{t("sensors.colSensor")}</th>
               <th className="text-left px-4 py-2">{t("sensors.colZone")}</th>
               <th className="text-left px-4 py-2">{t("sensors.colType")}</th>
+              <th className="text-left px-4 py-2">{t("sensors.colNetwork")}</th>
               <th className="text-left px-4 py-2">{t("sensors.colLatestReading")}</th>
               <th className="text-left px-4 py-2">{t("sensors.colSafeRange")}</th>
               <th className="text-left px-4 py-2">{t("sensors.colStatus")}</th>
@@ -456,6 +578,20 @@ export default function Sensors() {
                     </td>
                     <td className="px-4 py-2 text-mine-300">{sensor.zone?.name}</td>
                     <td className="px-4 py-2 text-mine-300">{t(`sensors.types.${sensor.type}`)}</td>
+                    <td className="px-4 py-2 text-mine-300">
+                      {sensor.ipAddress ? (
+                        <span className="flex items-center gap-2">
+                          <span className="font-mono text-xs">{sensor.ipAddress}</span>
+                          {sensor.hasApiKey && (
+                            <span className="text-[10px] uppercase tracking-wide text-success-500 font-semibold" title={t("sensors.deviceKeyIssued") ?? ""}>
+                              {t("sensors.pushEnabled")}
+                            </span>
+                          )}
+                        </span>
+                      ) : (
+                        <span className="text-mine-500">—</span>
+                      )}
+                    </td>
                     <td className={`px-4 py-2 font-semibold ${outOfRange ? "text-danger-400" : ""}`}>
                       {latest ? `${latest.value}${sensor.unit}` : "—"}
                     </td>
@@ -480,17 +616,22 @@ export default function Sensors() {
                       )}
                     </td>
                     <td className="px-4 py-2 text-right">
-                      {canEdit && (
-                        <div className="flex justify-end gap-2">
-                          <button className="text-xs text-mine-300 hover:text-mine-50" onClick={() => setSensorModal(sensor)}>{t("common.edit")}</button>
-                          <button className={buttonDanger} onClick={() => deleteSensor(sensor.id)}>{t("common.delete")}</button>
-                        </div>
-                      )}
+                      <div className="flex justify-end gap-2">
+                        {canManageDeviceKeys && (
+                          <button className="text-xs text-mine-300 hover:text-mine-50" onClick={() => setDeviceKeySensor(sensor)}>{t("sensors.deviceKey")}</button>
+                        )}
+                        {canEdit && (
+                          <>
+                            <button className="text-xs text-mine-300 hover:text-mine-50" onClick={() => setSensorModal(sensor)}>{t("common.edit")}</button>
+                            <button className={buttonDanger} onClick={() => deleteSensor(sensor.id)}>{t("common.delete")}</button>
+                          </>
+                        )}
+                      </div>
                     </td>
                   </tr>
                   {outOfRange && (
                     <tr className="bg-danger-500/10">
-                      <td colSpan={8} className="px-4 py-2 text-xs text-danger-500 font-semibold">
+                      <td colSpan={9} className="px-4 py-2 text-xs text-danger-500 font-semibold">
                         ⚠ {t("sensors.safetyAlertBanner", {
                           type: t(`sensors.types.${sensor.type}`),
                           zone: sensor.zone?.name ?? "",
@@ -504,7 +645,7 @@ export default function Sensors() {
             })}
             {sensors.length === 0 && (
               <tr>
-                <td colSpan={8} className="px-4 py-6 text-center text-mine-400">
+                <td colSpan={9} className="px-4 py-6 text-center text-mine-400">
                   {t("sensors.noSensorsYet")}
                 </td>
               </tr>
@@ -524,6 +665,20 @@ export default function Sensors() {
             onCancel={() => setSensorModal(null)}
           />
         </Modal>
+      )}
+
+      {deviceKeySensor && (
+        <DeviceKeyModal
+          sensor={deviceKeySensor}
+          onClose={() => setDeviceKeySensor(null)}
+          onChanged={async () => {
+            const res = await api.get<Sensor[]>("/sensors");
+            setSensors(res.data);
+            // Re-point at the refreshed row so the panel reflects the key it just issued
+            // or revoked, rather than the snapshot it was opened with.
+            setDeviceKeySensor(res.data.find((s) => s.id === deviceKeySensor.id) ?? null);
+          }}
+        />
       )}
 
       {chartSensor && <SensorChart sensor={chartSensor} onClose={() => setChartSensor(null)} />}

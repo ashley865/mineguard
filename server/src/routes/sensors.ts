@@ -1,9 +1,10 @@
-import { Router } from "express";
+import { Router, Request, Response } from "express";
 import { z } from "zod";
 import { prisma } from "../prisma";
 import { requireAuth, requireRole } from "../middleware/auth";
-import { evaluateReading } from "../services/alertEngine";
 import { requireMineId } from "../lib/mineScope";
+import { recordSensorReading } from "../lib/sensorReadings";
+import { generateSensorApiKey } from "../lib/sensorApiKeys";
 
 const router = Router();
 
@@ -48,6 +49,10 @@ const sensorSchema = z.object({
   model: z.string().optional(),
   serialNumber: z.string().optional(),
   installationNotes: z.string().optional(),
+  // Accepts IPv4, IPv6 and hostnames — a sensor reached through a DNS name or a
+  // gateway alias is as common on a mine network as a static address, and rejecting
+  // those would just push IT into recording them in the notes field instead.
+  ipAddress: z.string().trim().max(255).optional().nullable(),
   // Registering a sensor that already physically exists skips straight to COMMISSIONED
   // (the historical one-step behaviour); requesting a not-yet-installed sensor starts the
   // REQUESTED -> SCHEDULED -> INSTALLED -> COMMISSIONED workflow instead.
@@ -68,6 +73,32 @@ const sensorInclude = {
   commissionedBy: { select: { id: true, name: true } },
 } as const;
 
+// The device key's hash never leaves the server — the client only needs to know whether a
+// key has been issued, so it can show "Regenerate" rather than "Generate". Same shape as
+// withHasPhoto in routes/workers.ts.
+function withApiKeyFlag<T extends { apiKeyHash: string | null }>(sensor: T) {
+  const { apiKeyHash, ...rest } = sensor;
+  return { ...rest, hasApiKey: !!apiKeyHash };
+}
+
+// Issuing a device credential is an IT function specifically, not general sensor
+// administration: whoever holds a sensor's key can post readings as that sensor, and a
+// forged gas reading is a safety event. Other executives keep full day-to-day sensor
+// management (adding units, thresholds, commissioning) — they just can't mint credentials.
+async function requireItAccess(req: Request, res: Response): Promise<boolean> {
+  if (req.auth!.role === "ADMIN") return true;
+  if (req.auth!.role !== "EXECUTIVE") {
+    res.status(403).json({ error: "Insufficient permissions" });
+    return false;
+  }
+  const me = await prisma.user.findUnique({ where: { id: req.auth!.userId }, select: { title: true } });
+  if (me?.title !== "IT_MANAGER") {
+    res.status(403).json({ error: "Only IT can issue sensor device keys" });
+    return false;
+  }
+  return true;
+}
+
 router.use(requireAuth);
 
 router.get("/", async (req, res) => {
@@ -79,7 +110,7 @@ router.get("/", async (req, res) => {
     include: sensorInclude,
     orderBy: { createdAt: "desc" },
   });
-  res.json(sensors);
+  res.json(sensors.map(withApiKeyFlag));
 });
 
 // Powers the client Sensor Catalog page: how many of each sensor type are installed
@@ -108,7 +139,7 @@ router.get("/:id", async (req, res) => {
   if (!mineId) return;
   const sensor = await prisma.sensor.findFirst({ where: { id: req.params.id, zone: { site: { mineId } } } });
   if (!sensor) return res.status(404).json({ error: "Sensor not found" });
-  res.json(sensor);
+  res.json(withApiKeyFlag(sensor));
 });
 
 router.get("/:id/readings", async (req, res) => {
@@ -134,16 +165,7 @@ router.post("/:id/readings", async (req, res) => {
   const sensor = await prisma.sensor.findFirst({ where: { id: req.params.id, zone: { site: { mineId } } } });
   if (!sensor) return res.status(404).json({ error: "Sensor not found" });
 
-  const reading = await prisma.sensorReading.create({
-    data: { sensorId: sensor.id, value: parsed.data.value },
-  });
-
-  const io = req.app.get("io");
-  io?.to(`mine:${mineId}`).emit("sensor:reading", { sensorId: sensor.id, value: reading.value, recordedAt: reading.recordedAt });
-
-  const alert = await evaluateReading(sensor, reading.value);
-  if (alert) io?.to(`mine:${mineId}`).emit("alert:new", alert);
-
+  const reading = await recordSensorReading(sensor, parsed.data.value, mineId, req.app.get("io"));
   res.status(201).json(reading);
 });
 
@@ -161,7 +183,7 @@ router.post("/", requireRole("ADMIN", "SUPERVISOR", "EXECUTIVE"), async (req, re
       : data,
     include: sensorInclude,
   });
-  res.status(201).json(sensor);
+  res.status(201).json(withApiKeyFlag(sensor));
 });
 
 router.post("/:id/schedule", requireRole("ADMIN", "SUPERVISOR", "EXECUTIVE"), async (req, res) => {
@@ -176,7 +198,7 @@ router.post("/:id/schedule", requireRole("ADMIN", "SUPERVISOR", "EXECUTIVE"), as
     data: { installationStatus: "SCHEDULED", scheduledDate: parsed.data.scheduledDate },
     include: sensorInclude,
   });
-  res.json(sensor);
+  res.json(withApiKeyFlag(sensor));
 });
 
 router.post("/:id/install", requireRole("ADMIN", "SUPERVISOR", "EXECUTIVE"), async (req, res) => {
@@ -189,7 +211,7 @@ router.post("/:id/install", requireRole("ADMIN", "SUPERVISOR", "EXECUTIVE"), asy
     data: { installationStatus: "INSTALLED", installedById: req.auth!.userId, installedAt: new Date() },
     include: sensorInclude,
   });
-  res.json(sensor);
+  res.json(withApiKeyFlag(sensor));
 });
 
 router.post("/:id/commission", requireRole("ADMIN", "SUPERVISOR", "EXECUTIVE"), async (req, res) => {
@@ -202,7 +224,7 @@ router.post("/:id/commission", requireRole("ADMIN", "SUPERVISOR", "EXECUTIVE"), 
     data: { installationStatus: "COMMISSIONED", commissionedById: req.auth!.userId, commissionedAt: new Date(), status: "ACTIVE" },
     include: sensorInclude,
   });
-  res.json(sensor);
+  res.json(withApiKeyFlag(sensor));
 });
 
 router.put("/:id", requireRole("ADMIN", "SUPERVISOR", "EXECUTIVE"), async (req, res) => {
@@ -218,7 +240,39 @@ router.put("/:id", requireRole("ADMIN", "SUPERVISOR", "EXECUTIVE"), async (req, 
   }
   const { requestInstallation, ...data } = parsed.data;
   const sensor = await prisma.sensor.update({ where: { id: existing.id }, data, include: sensorInclude });
-  res.json(sensor);
+  res.json(withApiKeyFlag(sensor));
+});
+
+// Issues (or rotates) the device key a network sensor presents when pushing its own
+// readings. The plaintext key is returned exactly once, here — only its hash is stored,
+// so a lost key is replaced by rotating rather than recovered. Rotating immediately
+// invalidates the previous one, which is also how a compromised unit is cut off.
+router.post("/:id/api-key", async (req, res) => {
+  const mineId = requireMineId(req, res);
+  if (!mineId) return;
+  if (!(await requireItAccess(req, res))) return;
+  const existing = await prisma.sensor.findFirst({ where: { id: req.params.id, zone: { site: { mineId } } } });
+  if (!existing) return res.status(404).json({ error: "Sensor not found" });
+
+  const { key, hash } = await generateSensorApiKey();
+  await prisma.sensor.update({
+    where: { id: existing.id },
+    data: { apiKeyHash: hash, apiKeyIssuedAt: new Date(), apiKeyLastUsedAt: null },
+  });
+  res.status(201).json({ key, sensorId: existing.id });
+});
+
+router.delete("/:id/api-key", async (req, res) => {
+  const mineId = requireMineId(req, res);
+  if (!mineId) return;
+  if (!(await requireItAccess(req, res))) return;
+  const existing = await prisma.sensor.findFirst({ where: { id: req.params.id, zone: { site: { mineId } } } });
+  if (!existing) return res.status(404).json({ error: "Sensor not found" });
+  await prisma.sensor.update({
+    where: { id: existing.id },
+    data: { apiKeyHash: null, apiKeyIssuedAt: null, apiKeyLastUsedAt: null },
+  });
+  res.status(204).send();
 });
 
 router.delete("/:id", requireRole("ADMIN", "EXECUTIVE"), async (req, res) => {

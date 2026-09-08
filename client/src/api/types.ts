@@ -252,6 +252,12 @@ export interface Sensor {
   installedAt?: string | null;
   commissionedBy?: { id: string; name: string } | null;
   commissionedAt?: string | null;
+  ipAddress?: string | null;
+  // The key itself is never sent to the client — only whether one has been issued.
+  hasApiKey?: boolean;
+  apiKeyIssuedAt?: string | null;
+  apiKeyLastUsedAt?: string | null;
+  lastSeenIp?: string | null;
 }
 
 export interface SensorCatalogSiteBucket {

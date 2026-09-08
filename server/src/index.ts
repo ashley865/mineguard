@@ -118,6 +118,7 @@ import legalComplianceRoutes from "./routes/legalCompliance";
 import landManagementRoutes from "./routes/landManagement";
 import insuranceRoutes from "./routes/insurance";
 import fatigueAssessmentsRoutes from "./routes/fatigueAssessments";
+import sensorIngestRoutes from "./routes/sensorIngest";
 import groundControlRoutes from "./routes/groundControl";
 import ventilationRoutes from "./routes/ventilation";
 import mineRescueRoutes from "./routes/mineRescue";
@@ -180,6 +181,12 @@ app.use(helmet({ contentSecurityPolicy: false, crossOriginResourcePolicy: { poli
 app.use(cors({ origin: clientOrigin }));
 app.use(express.json());
 app.use(sanitizeBody);
+
+// Mounted ahead of the blanket per-IP apiLimiter on purpose: a site's sensors usually share
+// one gateway IP, so an IP-keyed budget would have them starving each other. This router
+// applies its own per-sensor limit instead (see routes/sensorIngest.ts).
+app.use("/api/sensor-ingest", sensorIngestRoutes);
+
 app.use("/api", apiLimiter);
 
 app.get("/api/health", (_req, res) => res.json({ status: "ok" }));

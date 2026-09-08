@@ -537,6 +537,18 @@ model Sensor {
   serialNumber       String?
   installationNotes  String?
 
+  // Network-connected sensors that push their own readings in, rather than being read
+  // by the simulator or entered by hand. ipAddress is IT's own reference for where the
+  // unit lives on the network; the bcrypt-hashed device key below is what actually
+  // authenticates an incoming reading (see routes/sensorIngest.ts), since an IP alone
+  // is spoofable and unreliable behind NAT. lastSeenIp records where readings actually
+  // arrive from, which is what tells IT a unit has been moved or re-addressed.
+  ipAddress        String?
+  apiKeyHash       String?
+  apiKeyIssuedAt   DateTime?
+  apiKeyLastUsedAt DateTime?
+  lastSeenIp       String?
+
   requestedById String?
   requestedBy   User?     @relation("SensorRequestedBy", fields: [requestedById], references: [id], onDelete: SetNull)
   requestedAt   DateTime?
