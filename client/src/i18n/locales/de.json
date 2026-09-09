@@ -2092,6 +2092,9 @@
         "OPERATIONS_MANAGER": "Betriebsleiter (Operations)",
         "COMPLIANCE_OFFICER": "Compliance-Beauftragter",
         "IT_MANAGER": "IT-Leiter",
+        "ENGINEERING_MANAGER": "Technischer Leiter",
+        "ENVIRONMENTAL_MANAGER": "Umweltmanager",
+        "MINERAL_RESOURCES_MANAGER": "Leiter Mineralische Ressourcen",
         "OTHER": "Sonstiges"
       },
       "summaryPending": "Ausstehende Einladungen",

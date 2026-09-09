@@ -14,6 +14,13 @@ enum Role {
   EXECUTIVE
 }
 
+// The three titles below the original set each correspond to an appointment the MHSA
+// already requires a mine to make — see StatutoryAppointmentType (ENGINEER,
+// ENVIRONMENTAL_CONTROL_OFFICER, SURVEYOR). Before they existed, the modules those roles
+// are accountable for had no owner: equipment/maintenance/winders/ventilation were split
+// between Safety, Operations and IT; environmental, water, energy and GHG were shared by
+// three titles and owned by none; and geology was visible only to CFO and Operations,
+// neither of whom can sign off a resource estimate.
 enum ExecutiveTitle {
   GENERAL_MANAGER
   CFO
@@ -24,6 +31,9 @@ enum ExecutiveTitle {
   OPERATIONS_MANAGER
   COMPLIANCE_OFFICER
   IT_MANAGER
+  ENGINEERING_MANAGER
+  ENVIRONMENTAL_MANAGER
+  MINERAL_RESOURCES_MANAGER
   OTHER
 }
 

@@ -2326,6 +2326,9 @@
         "OPERATIONS_MANAGER": "Operations Manager",
         "COMPLIANCE_OFFICER": "Compliance Officer",
         "IT_MANAGER": "IT Manager",
+        "ENGINEERING_MANAGER": "Engineering Manager",
+        "ENVIRONMENTAL_MANAGER": "Environmental Manager",
+        "MINERAL_RESOURCES_MANAGER": "Mineral Resources Manager",
         "OTHER": "Other"
       },
       "summaryPending": "Pending Invites",

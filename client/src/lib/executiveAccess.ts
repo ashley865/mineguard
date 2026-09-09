@@ -149,6 +149,65 @@ export const executiveTitleModules: Partial<Record<ExecutiveTitle, RestrictedMod
     "/document-acknowledgements",
   ],
   IT_MANAGER: ["/sites", "/sensors", "/equipment", "/alerts", "/reporting", "/security", "/scanner", "/documents", "/maintenance", "/it-operations", "/cyber-command-center"],
+  // The MHSA 2.13.1 engineering appointee: accountable for machinery and plant, which is
+  // why winders and ventilation plant are here alongside equipment/maintenance. Permits to
+  // work is included deliberately — isolation and lock-out sit with the engineer.
+  ENGINEERING_MANAGER: [
+    "/sites",
+    "/sensors",
+    "/alerts",
+    "/equipment",
+    "/maintenance",
+    "/downtime",
+    "/winders",
+    "/ventilation",
+    "/incidents",
+    "/inventory",
+    "/procurement",
+    "/production",
+    "/shift-handovers",
+    "/permits-to-work",
+    "/workforce",
+    "/contractors",
+    "/compliance",
+    "/documents",
+    "/reporting",
+    "/emergency",
+  ],
+  // The environmental control officer appointment. "/resources" is the water/energy/GHG
+  // module (National Water Act, Carbon Tax Act), not mineral resources — that belongs to
+  // the Mineral Resources Manager below, despite the similar name.
+  ENVIRONMENTAL_MANAGER: [
+    "/sites",
+    "/sensors",
+    "/alerts",
+    "/environmental",
+    "/resources",
+    "/compliance",
+    "/permits",
+    "/inspection",
+    "/regulatory-submissions",
+    "/incidents",
+    "/safety-observations",
+    "/community",
+    "/contractors",
+    "/emergency",
+    "/documents",
+    "/reporting",
+  ],
+  // The surveyor appointment, extended to the resource function: owns geology (drill holes,
+  // resource estimates, assays) and needs production to reconcile actual output against the
+  // estimate. Deliberately narrow — this is a technical sign-off role, not an operational one.
+  MINERAL_RESOURCES_MANAGER: [
+    "/sites",
+    "/geology",
+    "/production",
+    "/inventory",
+    "/compliance",
+    "/inspection",
+    "/documents",
+    "/reporting",
+  ],
 };
 
 export function isModuleAllowed(role: Role | undefined, title: ExecutiveTitle | null | undefined, path: string): boolean {

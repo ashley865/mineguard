@@ -11,6 +11,9 @@ export type ExecutiveTitle =
   | "OPERATIONS_MANAGER"
   | "COMPLIANCE_OFFICER"
   | "IT_MANAGER"
+  | "ENGINEERING_MANAGER"
+  | "ENVIRONMENTAL_MANAGER"
+  | "MINERAL_RESOURCES_MANAGER"
   | "OTHER";
 
 export interface User {

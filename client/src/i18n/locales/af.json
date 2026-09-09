@@ -2092,6 +2092,9 @@
         "OPERATIONS_MANAGER": "Bedryfsbestuurder",
         "COMPLIANCE_OFFICER": "Voldoeningsbeampte",
         "IT_MANAGER": "IT-bestuurder",
+        "ENGINEERING_MANAGER": "Ingenieursbestuurder",
+        "ENVIRONMENTAL_MANAGER": "Omgewingsbestuurder",
+        "MINERAL_RESOURCES_MANAGER": "Mineraalhulpbronbestuurder",
         "OTHER": "Ander"
       },
       "summaryPending": "Hangende Uitnodigings",

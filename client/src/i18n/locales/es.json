@@ -2092,6 +2092,9 @@
         "OPERATIONS_MANAGER": "Gerente de Operaciones",
         "COMPLIANCE_OFFICER": "Oficial de Cumplimiento",
         "IT_MANAGER": "Gerente de TI",
+        "ENGINEERING_MANAGER": "Gerente de Ingeniería",
+        "ENVIRONMENTAL_MANAGER": "Gerente Ambiental",
+        "MINERAL_RESOURCES_MANAGER": "Gerente de Recursos Minerales",
         "OTHER": "Otro"
       },
       "summaryPending": "Invitaciones Pendientes",

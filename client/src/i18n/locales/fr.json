@@ -2092,6 +2092,9 @@
         "OPERATIONS_MANAGER": "Responsable des Opérations",
         "COMPLIANCE_OFFICER": "Responsable de la Conformité",
         "IT_MANAGER": "Responsable Informatique",
+        "ENGINEERING_MANAGER": "Directeur Technique",
+        "ENVIRONMENTAL_MANAGER": "Responsable Environnement",
+        "MINERAL_RESOURCES_MANAGER": "Responsable des Ressources Minérales",
         "OTHER": "Autre"
       },
       "summaryPending": "Invitations en Attente",
