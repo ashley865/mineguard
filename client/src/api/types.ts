@@ -312,6 +312,41 @@ export interface OperationsDashboardSummary {
   };
 }
 
+export interface HrDashboardSummary {
+  headline: {
+    activeHeadcount: number;
+    /** checked-in-today / active headcount — attendance, not true absenteeism (no rostered-shift data to compare against). */
+    attendanceTodayPct: number;
+    openRelationsCases: number;
+    certificatesExpired: number;
+    certificatesExpiringSoon: number;
+  };
+  trends: {
+    headcount: { date: string; count: number }[];
+  };
+  breakdowns: {
+    workersByCategory: Record<string, number>;
+    relationsCasesByType: { DISCIPLINARY: number; GRIEVANCE: number; CCMA: number };
+  };
+  recruitment: {
+    openRequisitions: number;
+    positionsOpen: number;
+    candidatesInPipeline: number;
+    candidatesHiredLast30: number;
+  };
+  leave: {
+    pendingCount: number;
+    approvedDaysLast30: number;
+  };
+  actionQueue: {
+    pendingLeave: { id: string; workerName: string; leaveType: string; daysRequested: number; createdAt: string }[];
+    expiringCertificates: { id: string; workerName: string; type: string; expiryDate: string; expired: boolean }[];
+    disciplinaryCases: { id: string; workerName: string; chargeDescription: string; hearingDate: string | null; status: string }[];
+    grievanceCases: { id: string; workerName: string; description: string; dateRaised: string; status: string }[];
+    openRequisitions: { id: string; positionTitle: string; numberOfPositions: number; candidateCount: number; targetFillDate: string | null }[];
+  };
+}
+
 export interface SafetyDashboardSummary {
   headline: {
     openIncidents: number;
