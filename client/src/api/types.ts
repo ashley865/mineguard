@@ -271,6 +271,47 @@ export interface Sensor {
 
 export type SensorPollProtocol = "HTTP_JSON" | "MODBUS_TCP" | "SNMP";
 
+export interface OperationsDashboardSummary {
+  headline: {
+    productionToday: number;
+    productionTargetToday: number;
+    /** null when no target tonnage was recorded across the 30-day window. */
+    productionAttainmentPct30: number | null;
+    equipmentUptimePct: number;
+    equipmentDownCount: number;
+    downtimeHoursLast30: number;
+    overdueMaintenanceCount: number;
+  };
+  trends: {
+    production: { date: string; tonnes: number; target: number }[];
+  };
+  breakdowns: {
+    equipmentByStatus: Record<string, number>;
+    downtimeByCategory: Record<string, number>;
+    productionByMineral: Record<string, number>;
+  };
+  fleet: {
+    deliveriesToday: number;
+    inboundToday: number;
+    outboundToday: number;
+    onSiteNow: number;
+  };
+  shifts: {
+    rostersToday: number;
+    workersRosteredToday: number;
+    handoverIssuesLast7: number;
+  };
+  maintenanceStats: {
+    downtimeHoursFromMaintenanceLast30: number;
+  };
+  actionQueue: {
+    overdueMaintenance: { id: string; equipmentName: string; maintenanceType: string; scheduledDate: string }[];
+    activeDowntime: { id: string; category: string; description: string; affectedArea: string | null; startedAt: string }[];
+    equipmentDown: { id: string; name: string; type: string; lastMaintenance: string | null }[];
+    handoverIssues: { id: string; shiftDate: string; shift: string; outgoingSupervisor: string; issues: string | null; actionItems: string | null }[];
+  };
+}
+
 export interface SafetyDashboardSummary {
   headline: {
     openIncidents: number;
