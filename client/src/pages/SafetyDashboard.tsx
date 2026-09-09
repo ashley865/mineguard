@@ -269,8 +269,14 @@ export default function SafetyDashboard() {
         </div>
       </div>
 
+      {/* The AI assistant is a standalone feature, not a panel: it renders its own
+          hazard-bordered card, so boxing it inside a cardOuter column would double the
+          border and padding and mute the styling that marks it out. Full width, same as
+          CooDashboard/CfoDashboard. */}
+      <AiAssistantWidget />
+
       {/* Level 3 — supporting detail */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         <div className={`${cardOuter} space-y-3`}>
           <div>
             <h2 className="text-sm font-semibold">{t("safetyDashboard.leadingTitle")}</h2>
@@ -298,10 +304,6 @@ export default function SafetyDashboard() {
           <div className="pt-2">
             <Link to="/workforce" className="text-xs text-hazard-500 hover:underline">{t("safetyDashboard.openWorkforce")}</Link>
           </div>
-        </div>
-
-        <div className={cardOuter}>
-          <AiAssistantWidget />
         </div>
       </div>
 
@@ -340,7 +342,7 @@ export default function SafetyDashboard() {
               <p className="text-xs text-mine-400 py-4 text-center">{t("safetyDashboard.queueEmpty")}</p>
             ) : (
               actionQueue.overdueHazards.map((h) => (
-                <div key={h.id} className="flex items-center justify-between gap-3 text-xs border-b border-mine-800 pb-2 last:border-0">
+                <div key={h.id} className="flex items-center justify-between gap-3 text-xs border-b border-mine-800 pb-2 last:border-0 last:pb-0">
                   <div className="min-w-0">
                     <div className="truncate">{h.description}</div>
                     <div className="text-mine-500 text-[11px]">{h.location}</div>
@@ -360,7 +362,7 @@ export default function SafetyDashboard() {
               <p className="text-xs text-mine-400 py-4 text-center">{t("safetyDashboard.queueEmpty")}</p>
             ) : (
               actionQueue.overdueInspections.map((i) => (
-                <div key={i.id} className="flex items-center justify-between gap-3 text-xs border-b border-mine-800 pb-2 last:border-0">
+                <div key={i.id} className="flex items-center justify-between gap-3 text-xs border-b border-mine-800 pb-2 last:border-0 last:pb-0">
                   <span className="truncate">{i.title}</span>
                   <span className="text-danger-500 tabular-nums shrink-0">{new Date(i.scheduledDate).toLocaleDateString()}</span>
                 </div>
@@ -372,7 +374,7 @@ export default function SafetyDashboard() {
               <p className="text-xs text-mine-400 py-4 text-center">{t("safetyDashboard.queueEmpty")}</p>
             ) : (
               actionQueue.riskAssessmentsDue.map((r) => (
-                <div key={r.id} className="flex items-center justify-between gap-3 text-xs border-b border-mine-800 pb-2 last:border-0">
+                <div key={r.id} className="flex items-center justify-between gap-3 text-xs border-b border-mine-800 pb-2 last:border-0 last:pb-0">
                   <span className="truncate">{r.title}</span>
                   <div className="flex items-center gap-3 shrink-0">
                     <span className="font-semibold" style={{ color: RISK_COLORS[r.residualRiskLevel] ?? "#8a9ab5" }}>
@@ -389,7 +391,7 @@ export default function SafetyDashboard() {
               <p className="text-xs text-mine-400 py-4 text-center">{t("safetyDashboard.queueEmpty")}</p>
             ) : (
               actionQueue.permitsAwaitingApproval.map((p) => (
-                <div key={p.id} className="flex items-center justify-between gap-3 text-xs border-b border-mine-800 pb-2 last:border-0">
+                <div key={p.id} className="flex items-center justify-between gap-3 text-xs border-b border-mine-800 pb-2 last:border-0 last:pb-0">
                   <span className="truncate">{p.workDescription}</span>
                   <span className="text-hazard-500 tabular-nums shrink-0">{new Date(p.endDate).toLocaleDateString()}</span>
                 </div>
@@ -401,7 +403,7 @@ export default function SafetyDashboard() {
               <p className="text-xs text-mine-400 py-4 text-center">{t("safetyDashboard.queueEmpty")}</p>
             ) : (
               actionQueue.medicalsOverdue.map((m) => (
-                <div key={m.id} className="flex items-center justify-between gap-3 text-xs border-b border-mine-800 pb-2 last:border-0">
+                <div key={m.id} className="flex items-center justify-between gap-3 text-xs border-b border-mine-800 pb-2 last:border-0 last:pb-0">
                   <span className="truncate">{m.workerName}</span>
                   <span className="text-danger-500 tabular-nums shrink-0">{new Date(m.nextExamDue).toLocaleDateString()}</span>
                 </div>

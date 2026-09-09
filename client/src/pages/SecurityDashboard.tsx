@@ -226,8 +226,14 @@ export default function SecurityDashboard() {
         </div>
       </div>
 
+      {/* The AI assistant is a standalone feature, not a panel: it renders its own
+          hazard-bordered card, so boxing it inside a cardOuter column would double the
+          border and padding and mute the styling that marks it out. Full width, same as
+          CooDashboard/CfoDashboard. */}
+      <AiAssistantWidget />
+
       {/* Level 3 — supporting detail */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         <div className={`${cardOuter} space-y-3`}>
           <div>
             <h2 className="text-sm font-semibold">{t("securityDashboard.gateActivityTitle")}</h2>
@@ -257,10 +263,6 @@ export default function SecurityDashboard() {
           <div className="pt-2">
             <Link to="/visitors" className="text-xs text-hazard-500 hover:underline">{t("securityDashboard.openVisitors")}</Link>
           </div>
-        </div>
-
-        <div className={cardOuter}>
-          <AiAssistantWidget />
         </div>
       </div>
 
@@ -299,7 +301,7 @@ export default function SecurityDashboard() {
               <p className="text-xs text-mine-400 py-4 text-center">{t("securityDashboard.queueEmpty")}</p>
             ) : (
               actionQueue.openIncidents.map((i) => (
-                <div key={i.id} className="flex items-center justify-between gap-3 text-xs border-b border-mine-800 pb-2 last:border-0">
+                <div key={i.id} className="flex items-center justify-between gap-3 text-xs border-b border-mine-800 pb-2 last:border-0 last:pb-0">
                   <div className="min-w-0">
                     <div className="truncate">{i.description}</div>
                     <div className="text-mine-500 text-[11px]">{t(`securityDashboard.incidentCategories.${i.category}`, i.category)} {i.location ? `· ${i.location}` : ""}</div>
@@ -317,7 +319,7 @@ export default function SecurityDashboard() {
               <p className="text-xs text-mine-400 py-4 text-center">{t("securityDashboard.queueEmpty")}</p>
             ) : (
               actionQueue.pendingVisitors.map((v) => (
-                <div key={v.id} className="flex items-center justify-between gap-3 text-xs border-b border-mine-800 pb-2 last:border-0">
+                <div key={v.id} className="flex items-center justify-between gap-3 text-xs border-b border-mine-800 pb-2 last:border-0 last:pb-0">
                   <div className="min-w-0">
                     <div className="truncate">
                       {v.fullName} {v.isEmergency && <span className="text-danger-500 font-semibold">· {t("securityDashboard.emergency")}</span>}
@@ -334,7 +336,7 @@ export default function SecurityDashboard() {
               <p className="text-xs text-mine-400 py-4 text-center">{t("securityDashboard.queueEmpty")}</p>
             ) : (
               actionQueue.missedPatrols.map((p) => (
-                <div key={p.id} className="flex items-center justify-between gap-3 text-xs border-b border-mine-800 pb-2 last:border-0">
+                <div key={p.id} className="flex items-center justify-between gap-3 text-xs border-b border-mine-800 pb-2 last:border-0 last:pb-0">
                   <div className="min-w-0">
                     <div className="truncate">{p.routeName}</div>
                     <div className="text-mine-500 text-[11px]">{p.workerName}</div>
@@ -349,7 +351,7 @@ export default function SecurityDashboard() {
               <p className="text-xs text-mine-400 py-4 text-center">{t("securityDashboard.queueEmpty")}</p>
             ) : (
               actionQueue.vettingFailed.map((v) => (
-                <div key={v.id} className="flex items-center justify-between gap-3 text-xs border-b border-mine-800 pb-2 last:border-0">
+                <div key={v.id} className="flex items-center justify-between gap-3 text-xs border-b border-mine-800 pb-2 last:border-0 last:pb-0">
                   <div className="min-w-0">
                     <div className="truncate">{v.subjectName}</div>
                     <div className="text-mine-500 text-[11px]">{t(`securityDashboard.vettingCheckTypes.${v.checkType}`, v.checkType)}</div>

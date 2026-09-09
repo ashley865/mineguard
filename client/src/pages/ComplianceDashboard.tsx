@@ -249,8 +249,14 @@ export default function ComplianceDashboard() {
         </div>
       </div>
 
+      {/* The AI assistant is a standalone feature, not a panel: it renders its own
+          hazard-bordered card, so boxing it inside a cardOuter column would double the
+          border and padding and mute the styling that marks it out. Full width, same as
+          CooDashboard/CfoDashboard. */}
+      <AiAssistantWidget />
+
       {/* Level 3 — supporting detail */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         <div className={`${cardOuter} space-y-3`}>
           <div>
             <h2 className="text-sm font-semibold">{t("complianceDashboard.noticesBySectionTitle")}</h2>
@@ -275,10 +281,6 @@ export default function ComplianceDashboard() {
           </div>
           <StatRow label={t("complianceDashboard.workersAssessed")} value={workforceCompliance.workersAssessed} />
           <StatRow label={t("complianceDashboard.workersWithGap")} value={workforceCompliance.workersWithGap} tone={workforceCompliance.workersWithGap > 0 ? "negative" : "positive"} />
-        </div>
-
-        <div className={cardOuter}>
-          <AiAssistantWidget />
         </div>
       </div>
 
@@ -317,7 +319,7 @@ export default function ComplianceDashboard() {
               <p className="text-xs text-mine-400 py-4 text-center">{t("complianceDashboard.queueEmpty")}</p>
             ) : (
               actionQueue.openNotices.map((n) => (
-                <div key={n.id} className="flex items-center justify-between gap-3 text-xs border-b border-mine-800 pb-2 last:border-0">
+                <div key={n.id} className="flex items-center justify-between gap-3 text-xs border-b border-mine-800 pb-2 last:border-0 last:pb-0">
                   <div className="min-w-0">
                     <div className="truncate">{n.noticeNumber} — {t(`complianceDashboard.noticeSections.${n.section}`, n.section)}</div>
                     <div className="text-mine-500 text-[11px] truncate">{n.description}</div>
@@ -334,7 +336,7 @@ export default function ComplianceDashboard() {
               <p className="text-xs text-mine-400 py-4 text-center">{t("complianceDashboard.queueEmpty")}</p>
             ) : (
               actionQueue.openFindings.map((f) => (
-                <div key={f.id} className="flex items-center justify-between gap-3 text-xs border-b border-mine-800 pb-2 last:border-0">
+                <div key={f.id} className="flex items-center justify-between gap-3 text-xs border-b border-mine-800 pb-2 last:border-0 last:pb-0">
                   <div className="min-w-0">
                     <div className="truncate">{f.findingNumber} — {f.requirementViolated}</div>
                     <div className="text-mine-500 text-[11px]">{t(`complianceDashboard.riskLevels.${f.severity}`, f.severity)}</div>
@@ -349,7 +351,7 @@ export default function ComplianceDashboard() {
               <p className="text-xs text-mine-400 py-4 text-center">{t("complianceDashboard.queueEmpty")}</p>
             ) : (
               actionQueue.legalItems.map((l) => (
-                <div key={l.id} className="flex items-center justify-between gap-3 text-xs border-b border-mine-800 pb-2 last:border-0">
+                <div key={l.id} className="flex items-center justify-between gap-3 text-xs border-b border-mine-800 pb-2 last:border-0 last:pb-0">
                   <div className="min-w-0">
                     <div className="truncate">{l.title}</div>
                     <div className="text-mine-500 text-[11px]">{t(`complianceDashboard.legalCategories.${l.category}`, l.category)}</div>
@@ -366,7 +368,7 @@ export default function ComplianceDashboard() {
               <p className="text-xs text-mine-400 py-4 text-center">{t("complianceDashboard.queueEmpty")}</p>
             ) : (
               actionQueue.submissionsOverdue.map((s) => (
-                <div key={s.id} className="flex items-center justify-between gap-3 text-xs border-b border-mine-800 pb-2 last:border-0">
+                <div key={s.id} className="flex items-center justify-between gap-3 text-xs border-b border-mine-800 pb-2 last:border-0 last:pb-0">
                   <div className="min-w-0">
                     <div className="truncate">{s.subject}</div>
                     <div className="text-mine-500 text-[11px]">{s.regulator}</div>

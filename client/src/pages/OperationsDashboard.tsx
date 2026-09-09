@@ -266,8 +266,14 @@ export default function OperationsDashboard() {
         </div>
       </div>
 
+      {/* The AI assistant is a standalone feature, not a panel: it renders its own
+          hazard-bordered card, so boxing it inside a cardOuter column would double the
+          border and padding and mute the styling that marks it out. Full width, same as
+          CooDashboard/CfoDashboard. */}
+      <AiAssistantWidget />
+
       {/* Level 3 — supporting detail */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         <div className={`${cardOuter} space-y-3`}>
           <div>
             <h2 className="text-sm font-semibold">{t("operationsDashboard.fleetTitle")}</h2>
@@ -307,10 +313,6 @@ export default function OperationsDashboard() {
             <Link to="/equipment" className="text-xs text-hazard-500 hover:underline">{t("operationsDashboard.openEquipment")}</Link>
           </div>
         </div>
-
-        <div className={cardOuter}>
-          <AiAssistantWidget />
-        </div>
       </div>
 
       {/* Action queue — tabbed rather than four stacked tables */}
@@ -348,7 +350,7 @@ export default function OperationsDashboard() {
               <p className="text-xs text-mine-400 py-4 text-center">{t("operationsDashboard.queueEmpty")}</p>
             ) : (
               actionQueue.overdueMaintenance.map((m) => (
-                <div key={m.id} className="flex items-center justify-between gap-3 text-xs border-b border-mine-800 pb-2 last:border-0">
+                <div key={m.id} className="flex items-center justify-between gap-3 text-xs border-b border-mine-800 pb-2 last:border-0 last:pb-0">
                   <div className="min-w-0">
                     <div className="truncate">{m.equipmentName}</div>
                     <div className="text-mine-500 text-[11px]">{t(`operationsDashboard.maintenanceTypes.${m.maintenanceType}`, m.maintenanceType)}</div>
@@ -363,7 +365,7 @@ export default function OperationsDashboard() {
               <p className="text-xs text-mine-400 py-4 text-center">{t("operationsDashboard.queueEmpty")}</p>
             ) : (
               actionQueue.activeDowntime.map((d) => (
-                <div key={d.id} className="flex items-center justify-between gap-3 text-xs border-b border-mine-800 pb-2 last:border-0">
+                <div key={d.id} className="flex items-center justify-between gap-3 text-xs border-b border-mine-800 pb-2 last:border-0 last:pb-0">
                   <div className="min-w-0">
                     <div className="truncate">{d.description}</div>
                     <div className="text-mine-500 text-[11px]">{d.affectedArea ?? t(`operationsDashboard.downtimeCategories.${d.category}`, d.category)}</div>
@@ -378,7 +380,7 @@ export default function OperationsDashboard() {
               <p className="text-xs text-mine-400 py-4 text-center">{t("operationsDashboard.queueEmpty")}</p>
             ) : (
               actionQueue.equipmentDown.map((e) => (
-                <div key={e.id} className="flex items-center justify-between gap-3 text-xs border-b border-mine-800 pb-2 last:border-0">
+                <div key={e.id} className="flex items-center justify-between gap-3 text-xs border-b border-mine-800 pb-2 last:border-0 last:pb-0">
                   <span className="truncate">{e.name}</span>
                   <span className="text-mine-400 shrink-0">
                     {e.lastMaintenance ? new Date(e.lastMaintenance).toLocaleDateString() : t("operationsDashboard.noMaintenanceRecord")}
@@ -392,7 +394,7 @@ export default function OperationsDashboard() {
               <p className="text-xs text-mine-400 py-4 text-center">{t("operationsDashboard.queueEmpty")}</p>
             ) : (
               actionQueue.handoverIssues.map((h) => (
-                <div key={h.id} className="text-xs border-b border-mine-800 pb-2 last:border-0">
+                <div key={h.id} className="text-xs border-b border-mine-800 pb-2 last:border-0 last:pb-0">
                   <div className="flex items-center justify-between gap-3">
                     <span className="font-medium">{h.outgoingSupervisor}</span>
                     <span className="text-mine-500 tabular-nums shrink-0">{new Date(h.shiftDate).toLocaleDateString()}</span>

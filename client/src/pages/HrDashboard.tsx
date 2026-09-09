@@ -222,8 +222,14 @@ export default function HrDashboard() {
         </div>
       </div>
 
+      {/* The AI assistant is a standalone feature, not a panel: it renders its own
+          hazard-bordered card, so boxing it inside a cardOuter column would double the
+          border and padding and mute the styling that marks it out. Full width, same as
+          CooDashboard/CfoDashboard. */}
+      <AiAssistantWidget showHrReportGenerator />
+
       {/* Level 3 — supporting detail */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         <div className={`${cardOuter} space-y-3`}>
           <div>
             <h2 className="text-sm font-semibold">{t("hrDashboard.recruitmentTitle")}</h2>
@@ -250,10 +256,6 @@ export default function HrDashboard() {
           <div className="pt-2">
             <Link to="/labour-relations" className="text-xs text-hazard-500 hover:underline">{t("hrDashboard.openLabourRelations")}</Link>
           </div>
-        </div>
-
-        <div className={cardOuter}>
-          <AiAssistantWidget showHrReportGenerator />
         </div>
       </div>
 
@@ -292,7 +294,7 @@ export default function HrDashboard() {
               <p className="text-xs text-mine-400 py-4 text-center">{t("hrDashboard.queueEmpty")}</p>
             ) : (
               actionQueue.pendingLeave.map((l) => (
-                <div key={l.id} className="flex items-center justify-between gap-3 text-xs border-b border-mine-800 pb-2 last:border-0">
+                <div key={l.id} className="flex items-center justify-between gap-3 text-xs border-b border-mine-800 pb-2 last:border-0 last:pb-0">
                   <div className="min-w-0">
                     <div className="truncate">{l.workerName}</div>
                     <div className="text-mine-500 text-[11px]">{t(`hrDashboard.leaveTypes.${l.leaveType}`, l.leaveType)} · {l.daysRequested} {t("hrDashboard.days")}</div>
@@ -307,7 +309,7 @@ export default function HrDashboard() {
               <p className="text-xs text-mine-400 py-4 text-center">{t("hrDashboard.queueEmpty")}</p>
             ) : (
               actionQueue.expiringCertificates.map((c) => (
-                <div key={c.id} className="flex items-center justify-between gap-3 text-xs border-b border-mine-800 pb-2 last:border-0">
+                <div key={c.id} className="flex items-center justify-between gap-3 text-xs border-b border-mine-800 pb-2 last:border-0 last:pb-0">
                   <div className="min-w-0">
                     <div className="truncate">{c.workerName}</div>
                     <div className="text-mine-500 text-[11px]">{t(`hrDashboard.certificateTypes.${c.type}`, c.type)}</div>
@@ -324,7 +326,7 @@ export default function HrDashboard() {
               <p className="text-xs text-mine-400 py-4 text-center">{t("hrDashboard.queueEmpty")}</p>
             ) : (
               actionQueue.disciplinaryCases.map((d) => (
-                <div key={d.id} className="flex items-center justify-between gap-3 text-xs border-b border-mine-800 pb-2 last:border-0">
+                <div key={d.id} className="flex items-center justify-between gap-3 text-xs border-b border-mine-800 pb-2 last:border-0 last:pb-0">
                   <div className="min-w-0">
                     <div className="truncate">{d.workerName}</div>
                     <div className="text-mine-500 text-[11px] truncate">{d.chargeDescription}</div>
@@ -339,7 +341,7 @@ export default function HrDashboard() {
               <p className="text-xs text-mine-400 py-4 text-center">{t("hrDashboard.queueEmpty")}</p>
             ) : (
               actionQueue.grievanceCases.map((g) => (
-                <div key={g.id} className="flex items-center justify-between gap-3 text-xs border-b border-mine-800 pb-2 last:border-0">
+                <div key={g.id} className="flex items-center justify-between gap-3 text-xs border-b border-mine-800 pb-2 last:border-0 last:pb-0">
                   <div className="min-w-0">
                     <div className="truncate">{g.workerName}</div>
                     <div className="text-mine-500 text-[11px] truncate">{g.description}</div>
@@ -354,7 +356,7 @@ export default function HrDashboard() {
               <p className="text-xs text-mine-400 py-4 text-center">{t("hrDashboard.queueEmpty")}</p>
             ) : (
               actionQueue.openRequisitions.map((r) => (
-                <div key={r.id} className="flex items-center justify-between gap-3 text-xs border-b border-mine-800 pb-2 last:border-0">
+                <div key={r.id} className="flex items-center justify-between gap-3 text-xs border-b border-mine-800 pb-2 last:border-0 last:pb-0">
                   <div className="min-w-0">
                     <div className="truncate">{r.positionTitle}</div>
                     <div className="text-mine-500 text-[11px]">{t("hrDashboard.candidatesCount", { count: r.candidateCount })}</div>
