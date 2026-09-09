@@ -565,6 +565,72 @@
       "OTHER": "Otro"
     }
   },
+  "complianceDashboard": {
+    "title": "Panel de Cumplimiento",
+    "subtitle": "Notificaciones regulatorias, registro de requisitos, hallazgos de auditoría y plazos legales",
+    "openNotices": "Notificaciones regulatorias abiertas",
+    "overdueNoticesTarget": "{{count}} vencidas · objetivo 0",
+    "compliancePct": "Requisitos conformes",
+    "nonCompliantTarget": "{{count}} no conformes/vencidos",
+    "openFindings": "Hallazgos de auditoría abiertos",
+    "overdueFindingsTarget": "{{count}} vencidos · objetivo 0",
+    "itemsDueSoon": "Elementos legales por vencer (30d)",
+    "itemsDueSoonTarget": "Plazos legales + presentaciones",
+    "trendTitle": "Notificaciones y hallazgos abiertos, últimos 30 días",
+    "trendHint": "Nuevas notificaciones regulatorias y hallazgos de auditoría por día durante el período.",
+    "noticesSeries": "Notificaciones",
+    "findingsSeries": "Hallazgos",
+    "requirementsByStatus": "Registro de requisitos por estado",
+    "noRequirements": "Aún no hay requisitos en el registro.",
+    "requirementStatuses": {
+      "NON_COMPLIANT": "No conforme",
+      "OVERDUE": "Vencido",
+      "IN_PROGRESS": "En curso",
+      "PENDING": "Pendiente",
+      "COMPLIANT": "Conforme"
+    },
+    "noticesBySectionTitle": "Notificaciones abiertas por sección",
+    "noticesBySectionHint": "Notificaciones de Sección 54/55/53 actualmente abiertas.",
+    "noOpenNotices": "No hay notificaciones regulatorias abiertas.",
+    "noticeSections": {
+      "SECTION_54": "Sección 54",
+      "SECTION_55": "Sección 55",
+      "SECTION_53": "Sección 53",
+      "OTHER": "Otro"
+    },
+    "openCompliance": "Abrir módulo de cumplimiento →",
+    "workforceComplianceTitle": "Cumplimiento del personal",
+    "workforceComplianceHint": "Verificación de competencia/autorización más reciente por trabajador.",
+    "workersAssessed": "Trabajadores evaluados",
+    "workersWithGap": "Trabajadores con brecha señalada",
+    "actionQueueTitle": "Cola de acciones",
+    "actionQueueClear": "Nada pendiente — la cola está limpia.",
+    "actionQueueCount": "{{count}} elemento(s) requieren atención",
+    "openModule": "Abrir módulo →",
+    "queueEmpty": "No hay nada pendiente aquí.",
+    "queue": {
+      "notices": "Notificaciones abiertas",
+      "findings": "Hallazgos abiertos",
+      "legalItems": "Elementos legales por vencer",
+      "submissions": "Presentaciones vencidas"
+    },
+    "legalCategories": {
+      "MINING_RIGHT": "Derecho minero",
+      "ENVIRONMENTAL": "Ambiental",
+      "WATER_USE": "Uso del agua",
+      "LABOUR": "Laboral",
+      "HEALTH_SAFETY": "Salud y seguridad",
+      "TAX_LEVY": "Impuesto/gravamen",
+      "OTHER": "Otro"
+    },
+    "riskLevels": {
+      "CRITICAL": "Crítico",
+      "HIGH": "Alto",
+      "MEDIUM": "Medio",
+      "LOW": "Bajo"
+    },
+    "noDeadline": "Sin plazo establecido"
+  },
   "sites": {
     "title": "Sitios y Zonas",
     "subtitle": "Gestiona los sitios mineros y sus zonas internas",

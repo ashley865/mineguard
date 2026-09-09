@@ -156,12 +156,12 @@ type ReviewItem = { kind: "alert"; data: Alert } | { kind: "incident"; data: Inc
 export default function ExecutiveDashboard() {
   const { t } = useTranslation();
   const { user } = useAuth();
-  // CFO, COO, Safety Manager, Operations Manager, HR Manager and Security Manager each
-  // have their own dedicated dashboard now (CfoDashboard.tsx, CooDashboard.tsx,
-  // SafetyDashboard.tsx, OperationsDashboard.tsx, HrDashboard.tsx, SecurityDashboard.tsx —
-  // all routed in App.tsx's HomeRoute), so none of those titles ever render this component.
-  // This file's gates only need to account for GM and the remaining titles without a
-  // dedicated view yet (Compliance, IT).
+  // Every executive title except GM and IT Manager now has its own dedicated dashboard
+  // (CfoDashboard.tsx, CooDashboard.tsx, SafetyDashboard.tsx, OperationsDashboard.tsx,
+  // HrDashboard.tsx, SecurityDashboard.tsx, ComplianceDashboard.tsx — all routed in
+  // App.tsx's HomeRoute), so none of those titles ever render this component. IT Manager's
+  // real dashboard is the Cyber Command Center, reached via nav rather than as their home
+  // screen. This file's gates only need to account for GM and the generic "OTHER" title.
   const canSeeFinancials = user?.title === "GENERAL_MANAGER";
   // GM has full module access to Production/Inventory/Maintenance already (see
   // executiveAccess.ts's fullAccess list) but this dashboard didn't reflect it — GM

@@ -565,6 +565,72 @@
       "OTHER": "Autre"
     }
   },
+  "complianceDashboard": {
+    "title": "Tableau de Bord Conformité",
+    "subtitle": "Avis réglementaires, registre des exigences, constats d'audit et échéances légales",
+    "openNotices": "Avis réglementaires ouverts",
+    "overdueNoticesTarget": "{{count}} en retard · objectif 0",
+    "compliancePct": "Exigences conformes",
+    "nonCompliantTarget": "{{count}} non conformes/en retard",
+    "openFindings": "Constats d'audit ouverts",
+    "overdueFindingsTarget": "{{count}} en retard · objectif 0",
+    "itemsDueSoon": "Éléments légaux à échéance (30j)",
+    "itemsDueSoonTarget": "Échéances légales + soumissions",
+    "trendTitle": "Avis et constats ouverts, 30 derniers jours",
+    "trendHint": "Nouveaux avis réglementaires et constats d'audit soulevés par jour sur la période.",
+    "noticesSeries": "Avis",
+    "findingsSeries": "Constats",
+    "requirementsByStatus": "Registre des exigences par statut",
+    "noRequirements": "Aucune exigence dans le registre pour l'instant.",
+    "requirementStatuses": {
+      "NON_COMPLIANT": "Non conforme",
+      "OVERDUE": "En retard",
+      "IN_PROGRESS": "En cours",
+      "PENDING": "En attente",
+      "COMPLIANT": "Conforme"
+    },
+    "noticesBySectionTitle": "Avis ouverts par article",
+    "noticesBySectionHint": "Avis d'Article 54/55/53 actuellement ouverts.",
+    "noOpenNotices": "Aucun avis réglementaire ouvert.",
+    "noticeSections": {
+      "SECTION_54": "Article 54",
+      "SECTION_55": "Article 55",
+      "SECTION_53": "Article 53",
+      "OTHER": "Autre"
+    },
+    "openCompliance": "Ouvrir le module conformité →",
+    "workforceComplianceTitle": "Conformité du personnel",
+    "workforceComplianceHint": "Vérification de compétence/autorisation la plus récente par travailleur.",
+    "workersAssessed": "Travailleurs évalués",
+    "workersWithGap": "Travailleurs avec un écart signalé",
+    "actionQueueTitle": "File d'actions",
+    "actionQueueClear": "Rien en attente — la file est vide.",
+    "actionQueueCount": "{{count}} élément(s) nécessitent une attention",
+    "openModule": "Ouvrir le module →",
+    "queueEmpty": "Rien en attente ici.",
+    "queue": {
+      "notices": "Avis ouverts",
+      "findings": "Constats ouverts",
+      "legalItems": "Éléments légaux à échéance",
+      "submissions": "Soumissions en retard"
+    },
+    "legalCategories": {
+      "MINING_RIGHT": "Droit minier",
+      "ENVIRONMENTAL": "Environnement",
+      "WATER_USE": "Usage de l'eau",
+      "LABOUR": "Travail",
+      "HEALTH_SAFETY": "Santé et sécurité",
+      "TAX_LEVY": "Taxe/redevance",
+      "OTHER": "Autre"
+    },
+    "riskLevels": {
+      "CRITICAL": "Critique",
+      "HIGH": "Élevé",
+      "MEDIUM": "Moyen",
+      "LOW": "Faible"
+    },
+    "noDeadline": "Aucune échéance définie"
+  },
   "sites": {
     "title": "Sites et zones",
     "subtitle": "Gérez les sites miniers et leurs zones internes",

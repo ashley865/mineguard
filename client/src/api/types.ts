@@ -384,6 +384,36 @@ export interface SecurityDashboardSummary {
   };
 }
 
+export interface ComplianceDashboardSummary {
+  headline: {
+    openNotices: number;
+    overdueNotices: number;
+    compliancePct: number;
+    nonCompliantRequirements: number;
+    openFindings: number;
+    overdueFindings: number;
+    itemsDueSoon: number;
+  };
+  trends: {
+    notices: { date: string; count: number }[];
+    findings: { date: string; count: number }[];
+  };
+  breakdowns: {
+    requirementsByStatus: Record<string, number>;
+    noticesBySection: Record<string, number>;
+  };
+  workforceCompliance: {
+    workersAssessed: number;
+    workersWithGap: number;
+  };
+  actionQueue: {
+    openNotices: { id: string; noticeNumber: string; section: string; description: string; complianceDeadline: string | null }[];
+    openFindings: { id: string; findingNumber: string; requirementViolated: string; severity: string; status: string; dueDate: string }[];
+    legalItems: { id: string; title: string; category: string; dueDate: string; status: string }[];
+    submissionsOverdue: { id: string; regulator: string; subject: string; dueDate: string | null }[];
+  };
+}
+
 export interface SafetyDashboardSummary {
   headline: {
     openIncidents: number;

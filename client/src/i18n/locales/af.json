@@ -565,6 +565,72 @@
       "OTHER": "Ander"
     }
   },
+  "complianceDashboard": {
+    "title": "Nakomingspaneel",
+    "subtitle": "Regulatoriese kennisgewings, die vereistesregister, ouditbevindinge en wetlike sperdatums",
+    "openNotices": "Oop regulatoriese kennisgewings",
+    "overdueNoticesTarget": "{{count}} agterstallig · teiken 0",
+    "compliancePct": "Vereistes voldoen",
+    "nonCompliantTarget": "{{count}} nie-voldoen/agterstallig",
+    "openFindings": "Oop ouditbevindinge",
+    "overdueFindingsTarget": "{{count}} agterstallig · teiken 0",
+    "itemsDueSoon": "Wetlike items verskuldig (30d)",
+    "itemsDueSoonTarget": "Wetlike sperdatums + indienings",
+    "trendTitle": "Kennisgewings & bevindinge geopen, laaste 30 dae",
+    "trendHint": "Nuwe regulatoriese kennisgewings en ouditbevindinge per dag oor die tydperk aangeteken.",
+    "noticesSeries": "Kennisgewings",
+    "findingsSeries": "Bevindinge",
+    "requirementsByStatus": "Vereisteregister volgens status",
+    "noRequirements": "Nog geen vereistes op die register nie.",
+    "requirementStatuses": {
+      "NON_COMPLIANT": "Nie-voldoen",
+      "OVERDUE": "Agterstallig",
+      "IN_PROGRESS": "In proses",
+      "PENDING": "Hangend",
+      "COMPLIANT": "Voldoen"
+    },
+    "noticesBySectionTitle": "Oop kennisgewings volgens artikel",
+    "noticesBySectionHint": "Tans oop Artikel 54/55/53-kennisgewings.",
+    "noOpenNotices": "Geen oop regulatoriese kennisgewings nie.",
+    "noticeSections": {
+      "SECTION_54": "Artikel 54",
+      "SECTION_55": "Artikel 55",
+      "SECTION_53": "Artikel 53",
+      "OTHER": "Ander"
+    },
+    "openCompliance": "Open nakomingsmodule →",
+    "workforceComplianceTitle": "Werksmagnakoming",
+    "workforceComplianceHint": "Mees onlangse bevoegdheids-/magtigingskontrole per werker.",
+    "workersAssessed": "Werkers geassesseer",
+    "workersWithGap": "Werkers met 'n gaping gemerk",
+    "actionQueueTitle": "Aksietou",
+    "actionQueueClear": "Niks uitstaande nie — die tou is skoon.",
+    "actionQueueCount": "{{count}} item(s) benodig aandag",
+    "openModule": "Open module →",
+    "queueEmpty": "Niks uitstaande hier nie.",
+    "queue": {
+      "notices": "Oop kennisgewings",
+      "findings": "Oop bevindinge",
+      "legalItems": "Wetlike items verskuldig",
+      "submissions": "Agterstallige indienings"
+    },
+    "legalCategories": {
+      "MINING_RIGHT": "Mynreg",
+      "ENVIRONMENTAL": "Omgewing",
+      "WATER_USE": "Watergebruik",
+      "LABOUR": "Arbeid",
+      "HEALTH_SAFETY": "Gesondheid & veiligheid",
+      "TAX_LEVY": "Belasting/heffing",
+      "OTHER": "Ander"
+    },
+    "riskLevels": {
+      "CRITICAL": "Krities",
+      "HIGH": "Hoog",
+      "MEDIUM": "Medium",
+      "LOW": "Laag"
+    },
+    "noDeadline": "Geen sperdatum gestel nie"
+  },
   "sites": {
     "title": "Terreine & Sones",
     "subtitle": "Bestuur mynterreine en hul interne sones",

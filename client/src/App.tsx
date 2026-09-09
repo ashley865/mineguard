@@ -14,6 +14,7 @@ import SafetyDashboard from "./pages/SafetyDashboard";
 import OperationsDashboard from "./pages/OperationsDashboard";
 import HrDashboard from "./pages/HrDashboard";
 import SecurityDashboard from "./pages/SecurityDashboard";
+import ComplianceDashboard from "./pages/ComplianceDashboard";
 import Sites from "./pages/Sites";
 import Sensors from "./pages/Sensors";
 import Alerts from "./pages/Alerts";
@@ -96,6 +97,7 @@ function HomeRoute() {
   if (user.title === "OPERATIONS_MANAGER") return <OperationsDashboard />;
   if (user.title === "HR_MANAGER") return <HrDashboard />;
   if (user.title === "SECURITY_MANAGER") return <SecurityDashboard />;
+  if (user.title === "COMPLIANCE_OFFICER") return <ComplianceDashboard />;
   return <ExecutiveDashboard />;
 }
 

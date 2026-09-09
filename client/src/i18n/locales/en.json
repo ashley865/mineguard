@@ -583,6 +583,72 @@
       "OTHER": "Other"
     }
   },
+  "complianceDashboard": {
+    "title": "Compliance Dashboard",
+    "subtitle": "Regulatory notices, the requirements register, audit findings and legal deadlines",
+    "openNotices": "Open regulatory notices",
+    "overdueNoticesTarget": "{{count}} overdue · target 0",
+    "compliancePct": "Requirements compliant",
+    "nonCompliantTarget": "{{count}} non-compliant/overdue",
+    "openFindings": "Open audit findings",
+    "overdueFindingsTarget": "{{count}} overdue · target 0",
+    "itemsDueSoon": "Legal items due (30d)",
+    "itemsDueSoonTarget": "Legal deadlines + submissions",
+    "trendTitle": "Notices & findings opened, last 30 days",
+    "trendHint": "New regulatory notices and audit findings raised per day across the period.",
+    "noticesSeries": "Notices",
+    "findingsSeries": "Findings",
+    "requirementsByStatus": "Requirements register by status",
+    "noRequirements": "No requirements on the register yet.",
+    "requirementStatuses": {
+      "NON_COMPLIANT": "Non-compliant",
+      "OVERDUE": "Overdue",
+      "IN_PROGRESS": "In progress",
+      "PENDING": "Pending",
+      "COMPLIANT": "Compliant"
+    },
+    "noticesBySectionTitle": "Open notices by section",
+    "noticesBySectionHint": "Currently open Section 54/55/53 notices.",
+    "noOpenNotices": "No open regulatory notices.",
+    "noticeSections": {
+      "SECTION_54": "Section 54",
+      "SECTION_55": "Section 55",
+      "SECTION_53": "Section 53",
+      "OTHER": "Other"
+    },
+    "openCompliance": "Open compliance module →",
+    "workforceComplianceTitle": "Workforce compliance",
+    "workforceComplianceHint": "Most recent competency/authorisation check per worker.",
+    "workersAssessed": "Workers assessed",
+    "workersWithGap": "Workers with a gap flagged",
+    "actionQueueTitle": "Action queue",
+    "actionQueueClear": "Nothing outstanding — the queue is clear.",
+    "actionQueueCount": "{{count}} item(s) need attention",
+    "openModule": "Open module →",
+    "queueEmpty": "Nothing outstanding here.",
+    "queue": {
+      "notices": "Open notices",
+      "findings": "Open findings",
+      "legalItems": "Legal items due",
+      "submissions": "Submissions overdue"
+    },
+    "legalCategories": {
+      "MINING_RIGHT": "Mining right",
+      "ENVIRONMENTAL": "Environmental",
+      "WATER_USE": "Water use",
+      "LABOUR": "Labour",
+      "HEALTH_SAFETY": "Health & safety",
+      "TAX_LEVY": "Tax/levy",
+      "OTHER": "Other"
+    },
+    "riskLevels": {
+      "CRITICAL": "Critical",
+      "HIGH": "High",
+      "MEDIUM": "Medium",
+      "LOW": "Low"
+    },
+    "noDeadline": "No deadline set"
+  },
   "sites": {
     "title": "Sites & Zones",
     "subtitle": "Manage mine sites and their internal zones",

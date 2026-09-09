@@ -565,6 +565,72 @@
       "OTHER": "Sonstiges"
     }
   },
+  "complianceDashboard": {
+    "title": "Compliance-Dashboard",
+    "subtitle": "Behördliche Anordnungen, Anforderungsregister, Auditfeststellungen und rechtliche Fristen",
+    "openNotices": "Offene behördliche Anordnungen",
+    "overdueNoticesTarget": "{{count}} überfällig · Ziel 0",
+    "compliancePct": "Anforderungen konform",
+    "nonCompliantTarget": "{{count}} nicht konform/überfällig",
+    "openFindings": "Offene Auditfeststellungen",
+    "overdueFindingsTarget": "{{count}} überfällig · Ziel 0",
+    "itemsDueSoon": "Rechtliche Fristen fällig (30T)",
+    "itemsDueSoonTarget": "Rechtliche Fristen + Einreichungen",
+    "trendTitle": "Eröffnete Anordnungen & Feststellungen, letzte 30 Tage",
+    "trendHint": "Neue behördliche Anordnungen und Auditfeststellungen pro Tag über den Zeitraum.",
+    "noticesSeries": "Anordnungen",
+    "findingsSeries": "Feststellungen",
+    "requirementsByStatus": "Anforderungsregister nach Status",
+    "noRequirements": "Noch keine Anforderungen im Register.",
+    "requirementStatuses": {
+      "NON_COMPLIANT": "Nicht konform",
+      "OVERDUE": "Überfällig",
+      "IN_PROGRESS": "In Bearbeitung",
+      "PENDING": "Ausstehend",
+      "COMPLIANT": "Konform"
+    },
+    "noticesBySectionTitle": "Offene Anordnungen nach Abschnitt",
+    "noticesBySectionHint": "Derzeit offene Anordnungen nach Abschnitt 54/55/53.",
+    "noOpenNotices": "Keine offenen behördlichen Anordnungen.",
+    "noticeSections": {
+      "SECTION_54": "Abschnitt 54",
+      "SECTION_55": "Abschnitt 55",
+      "SECTION_53": "Abschnitt 53",
+      "OTHER": "Sonstiges"
+    },
+    "openCompliance": "Compliance-Modul öffnen →",
+    "workforceComplianceTitle": "Compliance der Belegschaft",
+    "workforceComplianceHint": "Aktuellste Kompetenz-/Berechtigungsprüfung je Mitarbeiter.",
+    "workersAssessed": "Bewertete Mitarbeiter",
+    "workersWithGap": "Mitarbeiter mit markierter Lücke",
+    "actionQueueTitle": "Aufgabenliste",
+    "actionQueueClear": "Nichts ausstehend — die Liste ist leer.",
+    "actionQueueCount": "{{count}} Eintrag/Einträge erfordern Aufmerksamkeit",
+    "openModule": "Modul öffnen →",
+    "queueEmpty": "Hier ist nichts offen.",
+    "queue": {
+      "notices": "Offene Anordnungen",
+      "findings": "Offene Feststellungen",
+      "legalItems": "Fällige rechtliche Fristen",
+      "submissions": "Überfällige Einreichungen"
+    },
+    "legalCategories": {
+      "MINING_RIGHT": "Bergbaurecht",
+      "ENVIRONMENTAL": "Umwelt",
+      "WATER_USE": "Wassernutzung",
+      "LABOUR": "Arbeit",
+      "HEALTH_SAFETY": "Gesundheit & Sicherheit",
+      "TAX_LEVY": "Steuer/Abgabe",
+      "OTHER": "Sonstiges"
+    },
+    "riskLevels": {
+      "CRITICAL": "Kritisch",
+      "HIGH": "Hoch",
+      "MEDIUM": "Mittel",
+      "LOW": "Niedrig"
+    },
+    "noDeadline": "Keine Frist festgelegt"
+  },
   "sites": {
     "title": "Standorte & Zonen",
     "subtitle": "Minenstandorte und ihre internen Zonen verwalten",
