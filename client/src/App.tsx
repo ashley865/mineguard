@@ -10,6 +10,7 @@ import Dashboard from "./pages/Dashboard";
 import ExecutiveDashboard from "./pages/ExecutiveDashboard";
 import CooDashboard from "./pages/CooDashboard";
 import CfoDashboard from "./pages/CfoDashboard";
+import SafetyDashboard from "./pages/SafetyDashboard";
 import Sites from "./pages/Sites";
 import Sensors from "./pages/Sensors";
 import Alerts from "./pages/Alerts";
@@ -88,6 +89,7 @@ function HomeRoute() {
   if (user?.role !== "EXECUTIVE") return <Dashboard />;
   if (user.title === "COO") return <CooDashboard />;
   if (user.title === "CFO") return <CfoDashboard />;
+  if (user.title === "SAFETY_MANAGER") return <SafetyDashboard />;
   return <ExecutiveDashboard />;
 }
 

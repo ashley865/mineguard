@@ -271,6 +271,49 @@ export interface Sensor {
 
 export type SensorPollProtocol = "HTTP_JSON" | "MODBUS_TCP" | "SNMP";
 
+export interface SafetyDashboardSummary {
+  headline: {
+    openIncidents: number;
+    criticalIncidents: number;
+    openHazards: number;
+    overdueHazards: number;
+    /** null when no incident has ever been recorded — not the same as zero days. */
+    daysSinceLastIncident: number | null;
+    openObservations: number;
+    openIodClaims: number;
+  };
+  trends: {
+    incidents: { date: string; count: number }[];
+    observations: { date: string; count: number }[];
+  };
+  breakdowns: {
+    incidentsBySeverity: Record<string, number>;
+    hazardsByRisk: Record<string, number>;
+    observationsByType: Record<string, number>;
+  };
+  leadingIndicators: {
+    observationsLast30: number;
+    toolboxTalksLast30: number;
+    toolboxAttendeesLast30: number;
+    inspectionsCompletedLast30: number;
+    fatigueAssessmentsLast30: number;
+    fatigueFailuresLast30: number;
+    fatigueStoodDownLast30: number;
+  };
+  workforceHealth: {
+    unfitWorkers: number;
+    medicalsOverdue: number;
+  };
+  actionQueue: {
+    overdueHazards: { id: string; description: string; location: string; riskLevel: string; dueDate: string | null }[];
+    overdueInspections: { id: string; title: string; scheduledDate: string }[];
+    riskAssessmentsDue: { id: string; title: string; residualRiskLevel: string; reviewDate: string }[];
+    permitsAwaitingApproval: { id: string; workDescription: string; status: string; endDate: string }[];
+    medicalsOverdue: { id: string; workerName: string; nextExamDue: string }[];
+  };
+  recentIncidents: { id: string; title: string; severity: AlertSeverity; status: string; siteName: string; createdAt: string }[];
+}
+
 export interface SensorAgent {
   id: string;
   name: string;
