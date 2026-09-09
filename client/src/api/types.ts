@@ -347,6 +347,43 @@ export interface HrDashboardSummary {
   };
 }
 
+export interface SecurityDashboardSummary {
+  headline: {
+    openIncidents: number;
+    criticalIncidents: number;
+    cameraUptimePct: number;
+    camerasDownCount: number;
+    /** null when nothing was scheduled to patrol today — there's nothing to be compliant against. */
+    patrolCompliancePct: number | null;
+    patrolsScheduledToday: number;
+    pendingVisitorApprovals: number;
+  };
+  trends: {
+    incidents: { date: string; count: number }[];
+  };
+  breakdowns: {
+    incidentsByCategory: Record<string, number>;
+    visitorsByStatusToday: Record<string, number>;
+  };
+  gateActivity: {
+    inToday: number;
+    outToday: number;
+  };
+  vetting: {
+    pending: number;
+    failed: number;
+  };
+  blacklist: {
+    activeEntries: number;
+  };
+  actionQueue: {
+    openIncidents: { id: string; description: string; category: string; severity: AlertSeverity; location: string | null; occurredAt: string }[];
+    pendingVisitors: { id: string; fullName: string; hostName: string; purposeOfVisit: string; scheduledFor: string; isEmergency: boolean }[];
+    missedPatrols: { id: string; workerName: string; routeName: string; shiftDate: string }[];
+    vettingFailed: { id: string; subjectName: string; checkType: string; checkedDate: string | null }[];
+  };
+}
+
 export interface SafetyDashboardSummary {
   headline: {
     openIncidents: number;

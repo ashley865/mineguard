@@ -10,7 +10,6 @@ import { buttonPrimary, buttonSecondary } from "../components/ui";
 import DataTable, { DataTableColumn } from "../components/DataTable";
 import { CheckCircleIcon, AlertTriangleIcon, XCircleIcon, GaugeIcon, ChevronRightIcon } from "../components/icons/DashboardIcons";
 import FinancialSummaryWidget from "../components/FinancialSummaryWidget";
-import SecurityVisitorHistoryWidget from "../components/SecurityVisitorHistoryWidget";
 import ProductionAnalyticsWidget from "../components/ProductionAnalyticsWidget";
 import InventoryProcurementWidget from "../components/InventoryProcurementWidget";
 import MaintenanceDowntimeWidget from "../components/MaintenanceDowntimeWidget";
@@ -157,13 +156,13 @@ type ReviewItem = { kind: "alert"; data: Alert } | { kind: "incident"; data: Inc
 export default function ExecutiveDashboard() {
   const { t } = useTranslation();
   const { user } = useAuth();
-  // CFO, COO, Safety Manager, Operations Manager and HR Manager each have their own
-  // dedicated dashboard now (CfoDashboard.tsx, CooDashboard.tsx, SafetyDashboard.tsx,
-  // OperationsDashboard.tsx, HrDashboard.tsx — all routed in App.tsx's HomeRoute), so none
-  // of those titles ever render this component. This file's gates only need to account for
-  // GM and the remaining titles without a dedicated view yet (Security, Compliance, IT).
+  // CFO, COO, Safety Manager, Operations Manager, HR Manager and Security Manager each
+  // have their own dedicated dashboard now (CfoDashboard.tsx, CooDashboard.tsx,
+  // SafetyDashboard.tsx, OperationsDashboard.tsx, HrDashboard.tsx, SecurityDashboard.tsx —
+  // all routed in App.tsx's HomeRoute), so none of those titles ever render this component.
+  // This file's gates only need to account for GM and the remaining titles without a
+  // dedicated view yet (Compliance, IT).
   const canSeeFinancials = user?.title === "GENERAL_MANAGER";
-  const canSeeVisitorHistory = user?.title === "SECURITY_MANAGER";
   // GM has full module access to Production/Inventory/Maintenance already (see
   // executiveAccess.ts's fullAccess list) but this dashboard didn't reflect it — GM
   // was the only "full access" title with nothing operational of their own here.
@@ -375,7 +374,6 @@ export default function ExecutiveDashboard() {
       )}
       {canSeeFinancials && <FinancialSummaryWidget />}
       {canSeeBudget && <BudgetSummaryWidget />}
-      {canSeeVisitorHistory && <SecurityVisitorHistoryWidget />}
       {canSeeProductionAnalytics && <ProductionAnalyticsWidget />}
       {canSeeProductionAnalytics && <InventoryProcurementWidget />}
       {canSeeProductionAnalytics && <MaintenanceDowntimeWidget />}
