@@ -1223,6 +1223,134 @@ async function buildEnvironmentalManagerContext(mineId: string) {
   };
 }
 
+// The surveyor/resource appointee. ResourceEstimate is versioned: a revision supersedes
+// rather than overwrites its predecessor, so every tonnage here is derived from the latest
+// version per site/mineral/classification. Summing the raw table would count each revision
+// again and inflate the resource statement — the one figure in this context that cannot be
+// allowed to be wrong. Mirrors routes/mineralResourcesDashboard.ts.
+async function buildMineralResourcesManagerContext(mineId: string) {
+  const now = new Date();
+  const thirtyDaysAgo = new Date(Date.now() - 30 * 86400000);
+  const oneYearAgo = new Date(Date.now() - 365 * 86400000);
+
+  const [mine, estimates, holesByStatus, completedHoles, assays, productionYear] = await Promise.all([
+    prisma.mine.findUnique({ where: { id: mineId }, select: { name: true } }),
+    prisma.resourceEstimate.findMany({
+      where: { site: { mineId } },
+      select: {
+        siteId: true,
+        estimateDate: true,
+        mineralType: true,
+        classification: true,
+        tonnage: true,
+        grade: true,
+        gradeUnit: true,
+        competentPerson: true,
+        version: true,
+      },
+    }),
+    prisma.drillHole.groupBy({ by: ["status"], where: { site: { mineId } }, _count: true }),
+    prisma.drillHole.findMany({
+      where: { status: "COMPLETED", site: { mineId } },
+      select: { totalDepth: true, drilledDate: true, _count: { select: { assayIntervals: true } } },
+    }),
+    prisma.assayInterval.findMany({
+      where: { drillHole: { site: { mineId } } },
+      select: { mineralType: true, grade: true, gradeUnit: true, fromDepth: true, toDepth: true },
+    }),
+    prisma.productionRecord.findMany({
+      where: { shiftDate: { gte: oneYearAgo }, site: { mineId } },
+      select: { tonnesMined: true },
+    }),
+  ]);
+
+  // Highest version per site + mineral + classification; most recent date breaks a tie.
+  const latest = new Map<string, (typeof estimates)[number]>();
+  for (const e of estimates) {
+    const key = `${e.siteId}|${e.mineralType}|${e.classification}`;
+    const held = latest.get(key);
+    if (!held || e.version > held.version || (e.version === held.version && e.estimateDate > held.estimateDate)) {
+      latest.set(key, e);
+    }
+  }
+  const current = [...latest.values()];
+
+  const tonnageByClassification: Record<string, number> = {};
+  for (const e of current) tonnageByClassification[e.classification] = (tonnageByClassification[e.classification] ?? 0) + e.tonnage;
+  for (const k of Object.keys(tonnageByClassification)) tonnageByClassification[k] = Math.round(tonnageByClassification[k] * 10) / 10;
+
+  const sumOf = (classes: string[]) =>
+    Math.round(current.filter((e) => classes.includes(e.classification)).reduce((s, e) => s + e.tonnage, 0) * 10) / 10;
+
+  const reserves = sumOf(["PROVED_RESERVE", "PROBABLE_RESERVE"]);
+  const annualProduction = productionYear.reduce((s, p) => s + p.tonnesMined, 0);
+  // null rather than a number when nothing was mined: with no production the ratio is
+  // undefined, not unlimited, and an "infinite reserve life" would be a dangerous readout.
+  const reserveLifeYears = annualProduction > 0 && reserves > 0 ? Math.round((reserves / annualProduction) * 10) / 10 : null;
+
+  const holeStatus: Record<string, number> = {};
+  for (const row of holesByStatus) holeStatus[row.status] = row._count;
+
+  const holesAwaitingAssay = completedHoles.filter((h) => h._count.assayIntervals === 0).length;
+  const holesDrilledLast30Days = completedHoles.filter((h) => h.drilledDate != null && h.drilledDate >= thirtyDaysAgo).length;
+
+  // Length-weighted, because a 20 m interval at 3 g/t and a 1 m interval at 9 g/t do not
+  // average to 6 g/t. An unweighted mean would misstate the deposit.
+  const gradeAcc: Record<string, { weighted: number; metres: number; unit: string | null }> = {};
+  for (const a of assays) {
+    if (a.grade == null) continue;
+    const length = Math.max(0, a.toDepth - a.fromDepth);
+    if (length === 0) continue;
+    const bucket = (gradeAcc[a.mineralType] ??= { weighted: 0, metres: 0, unit: a.gradeUnit });
+    bucket.weighted += a.grade * length;
+    bucket.metres += length;
+  }
+  const averageGrades = Object.fromEntries(
+    Object.entries(gradeAcc).map(([mineral, b]) => [
+      mineral,
+      { lengthWeightedGrade: Math.round((b.weighted / b.metres) * 1000) / 1000, unit: b.unit, metresSampled: Math.round(b.metres * 10) / 10 },
+    ])
+  );
+
+  const staleEstimates = current.filter((e) => e.estimateDate < oneYearAgo).length;
+  const missingCompetentPerson = current.filter((e) => !e.competentPerson || !e.competentPerson.trim()).length;
+
+  return {
+    mine: { name: mine?.name ?? "the mine" },
+    resourceStatement: {
+      measuredPlusIndicated: sumOf(["MEASURED", "INDICATED"]),
+      inferred: sumOf(["INFERRED"]),
+      reserves,
+      tonnageByClassification,
+      basisNote:
+        "Latest version of each estimate only — superseded revisions are excluded. Confidence descends Measured > Indicated > Inferred; only Proved/Probable reserves are the economically mineable subset.",
+    },
+    depletion: {
+      tonnesMinedLast12Months: Math.round(annualProduction * 10) / 10,
+      reserveLifeYears,
+      reserveLifeNote: "null means no production was recorded in the window, so reserve life is undefined rather than unlimited.",
+    },
+    drilling: {
+      holesByStatus: holeStatus,
+      completedHoles: completedHoles.length,
+      holesDrilledLast30Days,
+      metresDrilled: Math.round(completedHoles.reduce((s, h) => s + (h.totalDepth ?? 0), 0) * 10) / 10,
+      assayIntervals: assays.length,
+      holesAwaitingAssay,
+      awaitingAssayNote: "Completed holes with no assay intervals — drilling spend that has not yet become usable data.",
+    },
+    averageGradesByMineral: averageGrades,
+    estimateGovernance: {
+      currentEstimates: current.length,
+      supersededVersions: estimates.length - current.length,
+      notRevisedIn12Months: staleEstimates,
+      missingCompetentPerson,
+      governanceNote:
+        "SAMREC requires a named competent person behind a public resource or reserve figure; an estimate without one is a reporting gap, not merely a blank field.",
+    },
+  };
+}
+
 // Guardrail applied to every title's prompt, both chat and the pipeline summary below —
 // the AI is structurally advisory-only (see AiRecommendation in schema.prisma: it can
 // create rows, but only a human review endpoint can ever change their status).
@@ -1377,6 +1505,25 @@ const AI_MODULES: Record<string, AiModule> = {
       `before the limit is reached rather than reporting the breach afterwards. ` +
       `This is an operational environmental assistant — the filing and authorisation status of these same ` +
       `obligations belongs to the Compliance Officer.`,
+  },
+  MINERAL_RESOURCES_MANAGER: {
+    buildContext: buildMineralResourcesManagerContext,
+    systemPrompt: (ctx) =>
+      BASE_SYSTEM_PROMPT(ctx.mine.name, "Mineral Resources Manager") +
+      ` You advise the resource and survey appointee. Focus on the resource and reserve statement, depletion ` +
+      `against reserves, the drilling programme, sampled grades, and competent-person governance. ` +
+      `Be precise about confidence categories and never blur them: Measured, Indicated and Inferred are ` +
+      `progressively less certain, and only Proved and Probable reserves are the economically mineable subset. ` +
+      `Never add Inferred material into a reserve figure or describe a resource as a reserve — under SAMREC that ` +
+      `is a reporting misstatement, not a rounding choice. ` +
+      `Every tonnage in the snapshot already excludes superseded estimate versions; do not attempt to re-derive ` +
+      `totals by adding figures across versions. ` +
+      `When reserve life is null, say that no production was recorded in the window and the ratio is undefined — ` +
+      `never describe reserve life as unlimited or indefinite. ` +
+      `Flag estimates with no named competent person as a reporting gap that blocks public disclosure, and treat ` +
+      `completed holes awaiting assay as drilling spend not yet converted into usable data. ` +
+      `Grades in this snapshot are length-weighted; do not average them further. ` +
+      `This is a geology and resource assistant — mining rate and plant performance belong to Operations.`,
   },
 };
 
@@ -2025,6 +2172,7 @@ const DEPARTMENT_REPORT_TITLES: ExecutiveTitle[] = [
   "IT_MANAGER",
   "ENGINEERING_MANAGER",
   "ENVIRONMENTAL_MANAGER",
+  "MINERAL_RESOURCES_MANAGER",
 ];
 
 const EXEC_TITLE_LABELS: Partial<Record<ExecutiveTitle, string>> = {
