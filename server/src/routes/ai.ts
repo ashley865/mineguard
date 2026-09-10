@@ -1069,6 +1069,160 @@ async function buildEngineeringManagerContext(mineId: string) {
   };
 }
 
+// The environmental control officer appointee. Covers the operational environmental
+// picture — monitoring, tailings integrity, water balance, closure provision — as distinct
+// from the Compliance Officer's context, which tracks filing and authorisation status for
+// the same obligations. Thresholds mirror routes/environmentalDashboard.ts.
+async function buildEnvironmentalManagerContext(mineId: string) {
+  const now = new Date();
+  const thirtyDaysAgo = new Date(Date.now() - 30 * 86400000);
+  const in30Days = new Date(Date.now() + 30 * 86400000);
+  const staleInspectionBefore = new Date(Date.now() - 90 * 86400000);
+
+  const [
+    mine,
+    readingsTotal,
+    exceedancesByParameter,
+    tailingsFacilities,
+    waterRecords,
+    latestEnergy,
+    latestGhg,
+    closurePlans,
+    pollutionDams,
+    environmentalIncidents,
+  ] = await Promise.all([
+    prisma.mine.findUnique({ where: { id: mineId }, select: { name: true } }),
+    prisma.environmentalReading.count({ where: { recordedAt: { gte: thirtyDaysAgo }, site: { mineId } } }),
+    prisma.environmentalReading.groupBy({
+      by: ["parameterType"],
+      where: { withinLimits: false, recordedAt: { gte: thirtyDaysAgo }, site: { mineId } },
+      _count: true,
+    }),
+    prisma.tailingsFacility.findMany({
+      where: { site: { mineId } },
+      select: {
+        name: true,
+        gistmClassification: true,
+        inspections: {
+          orderBy: { inspectionDate: "desc" },
+          take: 1,
+          select: { inspectionDate: true, structuralRating: true, seepageObserved: true, freeboardMeters: true, engineerSignOff: true },
+        },
+      },
+    }),
+    prisma.waterBalanceRecord.findMany({
+      where: { recordDate: { gte: thirtyDaysAgo }, site: { mineId } },
+      select: { abstractedVolume: true, dischargedVolume: true, recycledVolume: true, licenseLimit: true, withinLimit: true, unit: true },
+    }),
+    prisma.energyConsumptionRecord.findFirst({
+      where: { site: { mineId } },
+      orderBy: { recordMonth: "desc" },
+      select: { recordMonth: true, gridConsumptionKwh: true, renewableConsumptionKwh: true, dieselConsumptionLiters: true },
+    }),
+    prisma.ghgEmissionsRecord.findFirst({
+      where: { mineId },
+      orderBy: { reportingYear: "desc" },
+      select: { reportingYear: true, scope1TonnesCO2e: true, scope2TonnesCO2e: true, carbonTaxLiability: true },
+    }),
+    prisma.closureRehabilitationPlan.findMany({
+      where: { site: { mineId } },
+      select: { financialProvisionAmount: true, nextAssessmentDue: true, status: true },
+    }),
+    prisma.pollutionControlDam.findMany({
+      where: { site: { mineId } },
+      select: { status: true, currentLevel: true, capacity: true, lastInspectionDate: true },
+    }),
+    prisma.incident.count({
+      where: { status: { in: ["OPEN", "INVESTIGATING"] }, site: { mineId } },
+    }),
+  ]);
+
+  const exceedanceCounts: Record<string, number> = {};
+  for (const row of exceedancesByParameter) exceedanceCounts[row.parameterType] = row._count;
+  const totalExceedances = Object.values(exceedanceCounts).reduce((a, b) => a + b, 0);
+
+  // A facility is at risk on a poor rating, observed seepage, or no inspection inside the
+  // assumed interval. Never-inspected counts as at risk rather than unknown — an
+  // uninspected dam is precisely the case worth escalating.
+  const tailingsAtRisk = tailingsFacilities.filter((f) => {
+    const latest = f.inspections[0];
+    if (!latest) return true;
+    if (["POOR", "UNSATISFACTORY"].includes(latest.structuralRating)) return true;
+    if (latest.seepageObserved) return true;
+    return latest.inspectionDate < staleInspectionBefore;
+  });
+  const tailingsNeverInspected = tailingsFacilities.filter((f) => !f.inspections[0]).length;
+  const tailingsSeepage = tailingsFacilities.filter((f) => f.inspections[0]?.seepageObserved).length;
+  const tailingsPoorRating = tailingsFacilities.filter((f) =>
+    ["POOR", "UNSATISFACTORY"].includes(f.inspections[0]?.structuralRating ?? "")
+  ).length;
+  const tailingsNoEngineerSignOff = tailingsFacilities.filter((f) => f.inspections[0] && !f.inspections[0].engineerSignOff).length;
+
+  const abstracted = waterRecords.reduce((sum, w) => sum + w.abstractedVolume, 0);
+  const limitTotal = waterRecords.reduce((sum, w) => sum + (w.licenseLimit ?? 0), 0);
+  // Licence limits are per-record, so abstraction is compared against the sum of the limits
+  // that actually applied over the window rather than any single figure.
+  const licenceUsedPct = limitTotal > 0 ? Math.round((abstracted / limitTotal) * 1000) / 10 : null;
+
+  const closureDue = closurePlans.filter((p) => p.nextAssessmentDue != null && p.nextAssessmentDue <= in30Days).length;
+  const closureOverdue = closurePlans.filter((p) => p.nextAssessmentDue != null && p.nextAssessmentDue < now).length;
+
+  const damsOverdueInspection = pollutionDams.filter(
+    (d) => d.lastInspectionDate == null || d.lastInspectionDate < staleInspectionBefore
+  ).length;
+
+  return {
+    mine: { name: mine?.name ?? "the mine" },
+    tailingsFacilities: {
+      total: tailingsFacilities.length,
+      atRisk: tailingsAtRisk.length,
+      neverInspected: tailingsNeverInspected,
+      seepageObserved: tailingsSeepage,
+      poorOrUnsatisfactoryRating: tailingsPoorRating,
+      latestInspectionLacksEngineerSignOff: tailingsNoEngineerSignOff,
+      note: "A tailings storage facility is the highest-consequence structure on most mines. Seepage, a poor structural rating, or an uninspected facility outranks any larger number elsewhere in this snapshot.",
+    },
+    monitoringLast30Days: {
+      totalReadings: readingsTotal,
+      exceedances: totalExceedances,
+      exceedancesByParameter: exceedanceCounts,
+      note: "Exceedances must be read against total readings: a fall in exceedances alongside a fall in readings means less was measured, not that performance improved.",
+    },
+    waterBalanceLast30Days: {
+      abstracted: Math.round(abstracted * 10) / 10,
+      discharged: Math.round(waterRecords.reduce((sum, w) => sum + w.dischargedVolume, 0) * 10) / 10,
+      recycled: Math.round(waterRecords.reduce((sum, w) => sum + w.recycledVolume, 0) * 10) / 10,
+      unit: waterRecords[0]?.unit ?? "kL",
+      licenceUsedPct,
+      licenceBreaches: waterRecords.filter((w) => !w.withinLimit).length,
+    },
+    energyLatestMonth: latestEnergy
+      ? {
+          month: latestEnergy.recordMonth,
+          gridKwh: latestEnergy.gridConsumptionKwh,
+          renewableKwh: latestEnergy.renewableConsumptionKwh,
+          dieselLitres: latestEnergy.dieselConsumptionLiters,
+        }
+      : null,
+    greenhouseGas: latestGhg
+      ? {
+          reportingYear: latestGhg.reportingYear,
+          scope1TonnesCO2e: latestGhg.scope1TonnesCO2e,
+          scope2TonnesCO2e: latestGhg.scope2TonnesCO2e,
+          carbonTaxLiability: latestGhg.carbonTaxLiability,
+        }
+      : null,
+    closureRehabilitation: {
+      plans: closurePlans.length,
+      assessmentsDueWithin30Days: closureDue,
+      assessmentsOverdue: closureOverdue,
+      totalFinancialProvision: Math.round(closurePlans.reduce((sum, p) => sum + (p.financialProvisionAmount ?? 0), 0)),
+    },
+    pollutionControlDams: { total: pollutionDams.length, overdueInspection: damsOverdueInspection },
+    openIncidentsAtMine: environmentalIncidents,
+  };
+}
+
 // Guardrail applied to every title's prompt, both chat and the pipeline summary below —
 // the AI is structurally advisory-only (see AiRecommendation in schema.prisma: it can
 // create rows, but only a human review endpoint can ever change their status).
@@ -1204,6 +1358,25 @@ const AI_MODULES: Record<string, AiModule> = {
       `not healthy, and should be reported as a data gap rather than counted as compliant. ` +
       `This is a plant-engineering assistant — production output and shift performance belong to the Operations ` +
       `Manager, and occupational safety to the Safety Manager.`,
+  },
+  ENVIRONMENTAL_MANAGER: {
+    buildContext: buildEnvironmentalManagerContext,
+    systemPrompt: (ctx) =>
+      BASE_SYSTEM_PROMPT(ctx.mine.name, "Environmental Manager") +
+      ` You advise the environmental control officer, accountable under NEMA, the National Water Act and the ` +
+      `Carbon Tax Act. Focus on the operational environmental picture: tailings integrity, monitoring exceedances, ` +
+      `the water balance against licence, energy and greenhouse gas position, closure provision, and pollution ` +
+      `control dam condition. ` +
+      `Rank tailings above everything else. Observed seepage, a poor or unsatisfactory structural rating, or an ` +
+      `uninspected facility must be raised first and named explicitly, ahead of any larger-looking number — a ` +
+      `tailings failure is a loss-of-life event, not a compliance finding, and a latest inspection without ` +
+      `engineer sign-off is an incomplete control regardless of what it recorded. ` +
+      `Never read a fall in exceedances as an improvement without checking total readings in the same period: if ` +
+      `both fell, say plainly that monitoring effort dropped and the trend is not evidence of better performance. ` +
+      `Treat water licence usage as a ceiling being approached, not a budget being spent — flag the trajectory ` +
+      `before the limit is reached rather than reporting the breach afterwards. ` +
+      `This is an operational environmental assistant — the filing and authorisation status of these same ` +
+      `obligations belongs to the Compliance Officer.`,
   },
 };
 
@@ -1851,6 +2024,7 @@ const DEPARTMENT_REPORT_TITLES: ExecutiveTitle[] = [
   "COMPLIANCE_OFFICER",
   "IT_MANAGER",
   "ENGINEERING_MANAGER",
+  "ENVIRONMENTAL_MANAGER",
 ];
 
 const EXEC_TITLE_LABELS: Partial<Record<ExecutiveTitle, string>> = {
