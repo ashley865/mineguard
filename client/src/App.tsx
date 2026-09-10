@@ -17,6 +17,7 @@ import SecurityDashboard from "./pages/SecurityDashboard";
 import ComplianceDashboard from "./pages/ComplianceDashboard";
 import EngineeringDashboard from "./pages/EngineeringDashboard";
 import EnvironmentalDashboard from "./pages/EnvironmentalDashboard";
+import MineralResourcesDashboard from "./pages/MineralResourcesDashboard";
 import Sites from "./pages/Sites";
 import Sensors from "./pages/Sensors";
 import Alerts from "./pages/Alerts";
@@ -102,6 +103,7 @@ function HomeRoute() {
   if (user.title === "COMPLIANCE_OFFICER") return <ComplianceDashboard />;
   if (user.title === "ENGINEERING_MANAGER") return <EngineeringDashboard />;
   if (user.title === "ENVIRONMENTAL_MANAGER") return <EnvironmentalDashboard />;
+  if (user.title === "MINERAL_RESOURCES_MANAGER") return <MineralResourcesDashboard />;
   return <ExecutiveDashboard />;
 }
 

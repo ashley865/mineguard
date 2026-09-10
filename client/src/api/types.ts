@@ -501,6 +501,45 @@ export interface EnvironmentalDashboardSummary {
   };
 }
 
+export interface MineralResourcesDashboardSummary {
+  headline: {
+    measuredIndicated: number;
+    inferred: number;
+    reserves: number;
+    /** null when nothing was mined in the last year — the ratio is undefined, not infinite. */
+    reserveLifeYears: number | null;
+    annualProduction: number;
+    holesInProgress: number;
+    holesAwaitingAssay: number;
+  };
+  trends: {
+    drilling: { date: string; count: number }[];
+  };
+  breakdowns: {
+    tonnageByClassification: Record<string, number>;
+    holesByStatus: Record<string, number>;
+  };
+  drilling: {
+    totalHoles: number;
+    completedHoles: number;
+    metresDrilled: number;
+    assayIntervals: number;
+  };
+  grades: { mineralType: string; grade: number; unit: string | null; metres: number }[];
+  estimateGovernance: {
+    currentEstimates: number;
+    supersededVersions: number;
+    staleEstimates: number;
+    missingCompetentPerson: number;
+  };
+  actionQueue: {
+    staleEstimates: { id: string; siteName: string; mineralType: string; classification: string; estimateDate: string; version: number }[];
+    missingCompetentPerson: { id: string; siteName: string; mineralType: string; classification: string; reportReference: string | null }[];
+    holesAwaitingAssay: { id: string; holeId: string; totalDepth: number | null; drilledDate: string | null; contractor: string | null }[];
+    holesInProgress: { id: string; holeId: string; status: string; totalDepth: number | null; contractor: string | null }[];
+  };
+}
+
 export interface SafetyDashboardSummary {
   headline: {
     openIncidents: number;
