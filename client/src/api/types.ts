@@ -430,6 +430,8 @@ export interface EngineeringDashboardSummary {
     statutoryInspectionsDue: number;
     ropesOverdue: number;
     maintenanceCostLast30: number;
+    /** Everything in the three statutory plant registers that is out of date right now. */
+    plantRegisterLapsed: number;
   };
   trends: {
     maintenance: { date: string; proactive: number; reactive: number }[];
@@ -455,12 +457,49 @@ export interface EngineeringDashboardSummary {
     downtimeHoursLast30: number;
     equipmentDownNow: number;
   };
+  plantIntegrity: {
+    lifting: { inService: number; overdue: number; loadTestOverdue: number; noSwl: number };
+    pressure: { inService: number; certLapsed: number; inspectionOverdue: number; valveOverdue: number };
+    electrical: {
+      inService: number;
+      hazardousArea: number;
+      unprotected: number;
+      exLapsed: number;
+      testOverdue: number;
+      noEarthLeakageProtection: number;
+    };
+  };
+  reliability: {
+    profiledAssets: number;
+    criticalAssets: number;
+    assetsBelowTarget: number;
+    failuresLast30: number;
+    failureDowntimeHoursLast30: number;
+    /** Null when nothing failed — 0% would read as a broken RCA process. */
+    rcaCompletionPct: number | null;
+    downtimeByFailureMode: Record<string, number>;
+  };
   actionQueue: {
     overdueMaintenance: { id: string; equipmentName: string; maintenanceType: string; scheduledDate: string }[];
     ropesDue: { id: string; ropeIdentifier: string; winderName: string; discardDate: string | null; nextTestDue: string | null }[];
     windersDue: { id: string; name: string; shaftName: string | null; nextInspectionDue: string | null }[];
     shaftsDue: { id: string; shaftName: string; nextInspectionDue: string | null }[];
     partsPastWearLimit: { id: string; equipmentName: string; partType: string; position: string | null; remainingPct: number }[];
+    plantRegisterLapsed: {
+      id: string;
+      register: "LIFTING" | "PRESSURE" | "ELECTRICAL";
+      identifier: string;
+      issue: "INSPECTION" | "LOAD_TEST" | "CERTIFICATE" | "UNPROTECTED";
+      dueDate: string | null;
+    }[];
+    assetsBelowTarget: {
+      equipmentId: string;
+      equipmentName: string;
+      criticality: AssetCriticality;
+      targetAvailabilityPct: number | null;
+      downtimeHours: number;
+      failureCount: number;
+    }[];
   };
 }
 
@@ -3082,6 +3121,274 @@ export interface FatigueAssessment {
   assessedByName?: string | null;
   notes?: string | null;
   createdAt: string;
+}
+
+// --- Plant integrity & reliability (engineering) ---------------------------
+
+export type LiftingEquipmentType =
+  | "OVERHEAD_CRANE"
+  | "MOBILE_CRANE"
+  | "GANTRY"
+  | "CHAIN_BLOCK"
+  | "LEVER_HOIST"
+  | "WINCH"
+  | "WIRE_ROPE_SLING"
+  | "CHAIN_SLING"
+  | "WEBBING_SLING"
+  | "SHACKLE"
+  | "EYEBOLT"
+  | "SPREADER_BEAM"
+  | "LIFTING_MAGNET"
+  | "OTHER";
+export type LiftingEquipmentStatus = "IN_SERVICE" | "QUARANTINED" | "UNDER_REPAIR" | "CONDEMNED";
+export type LiftingInspectionType = "VISUAL" | "THOROUGH_EXAMINATION" | "LOAD_TEST";
+export type LiftingInspectionResult = "PASS" | "PASS_WITH_DEFECTS" | "FAIL";
+
+export interface LiftingInspection {
+  id: string;
+  equipmentId: string;
+  inspectionDate: string;
+  inspectionType: LiftingInspectionType;
+  inspectorName: string;
+  result: LiftingInspectionResult;
+  defectsFound?: string | null;
+  loadTestedKg?: number | null;
+  certificateNumber?: string | null;
+  colourCodeApplied?: string | null;
+  nextInspectionDue?: string | null;
+  notes?: string | null;
+}
+
+export interface LiftingEquipment {
+  id: string;
+  siteId: string;
+  site?: { id: string; name: string } | null;
+  identifier: string;
+  equipmentType: LiftingEquipmentType;
+  description?: string | null;
+  safeWorkingLoadKg?: number | null;
+  location?: string | null;
+  manufacturer?: string | null;
+  serialNumber?: string | null;
+  colourCode?: string | null;
+  lastInspectionDate?: string | null;
+  nextInspectionDue?: string | null;
+  lastLoadTestDate?: string | null;
+  nextLoadTestDue?: string | null;
+  status: LiftingEquipmentStatus;
+  notes?: string | null;
+  inspections?: LiftingInspection[];
+  createdAt: string;
+}
+
+export type PressureEquipmentType =
+  | "AIR_RECEIVER"
+  | "BOILER"
+  | "PRESSURE_VESSEL"
+  | "AUTOCLAVE"
+  | "ACCUMULATOR"
+  | "STEAM_PIPING"
+  | "OTHER";
+export type PressureEquipmentStatus = "IN_SERVICE" | "AWAITING_INSPECTION" | "OUT_OF_SERVICE" | "DECOMMISSIONED";
+export type PressureInspectionType = "EXTERNAL" | "INTERNAL" | "HYDROSTATIC" | "SAFETY_VALVE" | "ULTRASONIC_THICKNESS";
+
+export interface PressureEquipmentInspection {
+  id: string;
+  equipmentId: string;
+  inspectionDate: string;
+  inspectionType: PressureInspectionType;
+  inspectorName: string;
+  inspectionAuthority?: string | null;
+  passed: boolean;
+  findings?: string | null;
+  certificateNumber?: string | null;
+  certificateExpiry?: string | null;
+  nextInspectionDue?: string | null;
+  notes?: string | null;
+}
+
+export interface PressureEquipment {
+  id: string;
+  siteId: string;
+  site?: { id: string; name: string } | null;
+  identifier: string;
+  equipmentType: PressureEquipmentType;
+  description?: string | null;
+  location?: string | null;
+  designPressureKpa?: number | null;
+  operatingPressureKpa?: number | null;
+  capacityLitres?: number | null;
+  manufacturer?: string | null;
+  serialNumber?: string | null;
+  yearBuilt?: number | null;
+  inspectionAuthority?: string | null;
+  certificateNumber?: string | null;
+  certificateExpiry?: string | null;
+  lastInspectionDate?: string | null;
+  nextInspectionDue?: string | null;
+  safetyValveLastTested?: string | null;
+  safetyValveNextDue?: string | null;
+  status: PressureEquipmentStatus;
+  notes?: string | null;
+  inspections?: PressureEquipmentInspection[];
+  createdAt: string;
+}
+
+export type ElectricalInstallationType =
+  | "SUBSTATION"
+  | "TRANSFORMER"
+  | "SWITCHGEAR"
+  | "DISTRIBUTION_BOARD"
+  | "MOTOR_CONTROL_CENTRE"
+  | "CABLE_RETICULATION"
+  | "EARTH_LEAKAGE_UNIT"
+  | "GENERATOR"
+  | "OTHER";
+export type ExProtectionType =
+  | "NONE"
+  | "FLAMEPROOF_D"
+  | "INCREASED_SAFETY_E"
+  | "INTRINSICALLY_SAFE_I"
+  | "PRESSURIZED_P"
+  | "ENCAPSULATION_M"
+  | "NON_SPARKING_N"
+  | "DUST_PROTECTION_T"
+  | "OTHER";
+export type ElectricalTestType =
+  | "EARTH_CONTINUITY"
+  | "EARTH_LEAKAGE"
+  | "INSULATION_RESISTANCE"
+  | "POLARITY"
+  | "EX_INSPECTION"
+  | "THERMOGRAPHIC";
+export type ElectricalTestResult = "PASS" | "MARGINAL" | "FAIL";
+export type ElectricalInstallationStatus = "IN_SERVICE" | "ISOLATED" | "UNDER_REPAIR" | "DECOMMISSIONED";
+
+export interface ElectricalTest {
+  id: string;
+  installationId: string;
+  testDate: string;
+  testType: ElectricalTestType;
+  testedByName: string;
+  result: ElectricalTestResult;
+  measuredValue?: number | null;
+  unit?: string | null;
+  findings?: string | null;
+  nextTestDue?: string | null;
+  notes?: string | null;
+}
+
+export interface ElectricalInstallation {
+  id: string;
+  siteId: string;
+  site?: { id: string; name: string } | null;
+  zoneId?: string | null;
+  zone?: { id: string; name: string } | null;
+  identifier: string;
+  installationType: ElectricalInstallationType;
+  description?: string | null;
+  location?: string | null;
+  voltageRating?: string | null;
+  hazardousArea: boolean;
+  exProtection: ExProtectionType;
+  exCertificateNumber?: string | null;
+  exCertificateExpiry?: string | null;
+  earthLeakageProtected: boolean;
+  cocNumber?: string | null;
+  cocIssuedDate?: string | null;
+  lastTestDate?: string | null;
+  nextTestDue?: string | null;
+  status: ElectricalInstallationStatus;
+  notes?: string | null;
+  tests?: ElectricalTest[];
+  createdAt: string;
+}
+
+export type AssetCriticality = "CRITICAL" | "HIGH" | "MEDIUM" | "LOW";
+export type EquipmentFailureMode =
+  | "MECHANICAL_WEAR"
+  | "BEARING_FAILURE"
+  | "LUBRICATION_FAILURE"
+  | "ELECTRICAL_FAULT"
+  | "HYDRAULIC_FAILURE"
+  | "PNEUMATIC_FAILURE"
+  | "STRUCTURAL_CRACK"
+  | "CONTROL_SYSTEM"
+  | "CONTAMINATION"
+  | "OVERLOAD"
+  | "CORROSION"
+  | "OPERATOR_ERROR"
+  | "OTHER";
+
+interface ReliabilityEquipmentBrief {
+  id: string;
+  name: string;
+  type: string;
+  status: string;
+  siteId: string;
+  site?: { id: string; name: string } | null;
+}
+
+export interface AssetReliabilityProfile {
+  id: string;
+  equipmentId: string;
+  equipment?: ReliabilityEquipmentBrief | null;
+  criticality: AssetCriticality;
+  criticalityRationale?: string | null;
+  commissionedDate?: string | null;
+  expectedLifeYears?: number | null;
+  replacementValue?: number | null;
+  currentRunHours?: number | null;
+  runHoursUpdatedAt?: string | null;
+  targetAvailabilityPct?: number | null;
+  notes?: string | null;
+  createdAt: string;
+}
+
+export interface EquipmentFailure {
+  id: string;
+  equipmentId: string;
+  equipment?: ReliabilityEquipmentBrief | null;
+  failureDate: string;
+  failureMode: EquipmentFailureMode;
+  description: string;
+  detectedBy?: string | null;
+  downtimeHours?: number | null;
+  repairCost?: number | null;
+  runHoursAtFailure?: number | null;
+  rootCause?: string | null;
+  correctiveAction?: string | null;
+  recurrencePrevented: boolean;
+  notes?: string | null;
+  createdAt: string;
+}
+
+export interface AssetReliabilitySummary {
+  windowDays: number;
+  profiledAssets: number;
+  criticalAssets: number;
+  failureCount: number;
+  totalDowntimeHours: number;
+  totalRepairCost: number;
+  /** Null when nothing failed in the window — 0% would misread as a process problem. */
+  rcaCompletionPct: number | null;
+  assetsBelowTarget: number;
+  failureModeBreakdown: { failureMode: EquipmentFailureMode; count: number; downtimeHours: number }[];
+  assets: {
+    equipmentId: string;
+    equipmentName: string;
+    equipmentType: string;
+    criticality: AssetCriticality;
+    currentRunHours: number | null;
+    failureCount: number;
+    downtimeHours: number;
+    repairCost: number;
+    /** Null when run hours or failures are unknown — "no data" is not "infinitely reliable". */
+    mtbfHours: number | null;
+    availabilityPct: number;
+    targetAvailabilityPct: number | null;
+    belowTarget: boolean;
+  }[];
 }
 
 export interface LegalComplianceCalendarEntry {

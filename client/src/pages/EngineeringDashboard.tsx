@@ -13,7 +13,7 @@ import { AlertTriangleIcon, GaugeIcon, ShieldCheckIcon, WalletIcon } from "../co
 // integrity and maintenance discipline, not production output.
 
 type Tone = "positive" | "negative" | "caution";
-type QueueTab = "maintenance" | "ropes" | "winders" | "shafts" | "parts";
+type QueueTab = "maintenance" | "plantRegisters" | "reliability" | "ropes" | "winders" | "shafts" | "parts";
 
 const cardOuter = "bg-mine-900 border border-mine-800 rounded-[20px] shadow-sm shadow-black/5 p-6";
 const TONE_BADGE: Record<Tone | "neutral", string> = {
@@ -111,7 +111,7 @@ export default function EngineeringDashboard() {
   if (loadError) return <LoadError onRetry={load} />;
   if (!summary) return <div className="text-mine-300">{t("common.loading")}</div>;
 
-  const { headline, trends, breakdowns, assetIntegrity, consumables, maintenanceStats, actionQueue } = summary;
+  const { headline, trends, breakdowns, assetIntegrity, consumables, maintenanceStats, plantIntegrity, reliability, actionQueue } = summary;
 
   const proactiveTrend = trends.maintenance.map((d) => d.proactive);
   const maintenanceChartData = trends.maintenance.map((d) => ({
@@ -127,6 +127,8 @@ export default function EngineeringDashboard() {
 
   const queueCounts: Record<QueueTab, number> = {
     maintenance: actionQueue.overdueMaintenance.length,
+    plantRegisters: actionQueue.plantRegisterLapsed.length,
+    reliability: actionQueue.assetsBelowTarget.length,
     ropes: actionQueue.ropesDue.length,
     winders: actionQueue.windersDue.length,
     shafts: actionQueue.shaftsDue.length,
@@ -136,11 +138,22 @@ export default function EngineeringDashboard() {
 
   const queueTabs: { key: QueueTab; label: string; to: string }[] = [
     { key: "maintenance", label: t("engineeringDashboard.queue.maintenance"), to: "/maintenance" },
+    { key: "plantRegisters", label: t("engineeringDashboard.queue.plantRegisters"), to: "/plant-integrity" },
+    { key: "reliability", label: t("engineeringDashboard.queue.reliability"), to: "/plant-integrity?tab=reliability" },
     { key: "ropes", label: t("engineeringDashboard.queue.ropes"), to: "/winders" },
     { key: "winders", label: t("engineeringDashboard.queue.winders"), to: "/winders" },
     { key: "shafts", label: t("engineeringDashboard.queue.shafts"), to: "/winders" },
     { key: "parts", label: t("engineeringDashboard.queue.parts"), to: "/equipment" },
   ];
+
+  // The three plant registers as one "what is out of date today" number. Kept
+  // separate from statutoryInspectionsDue (winders/ropes/shafts), which is a
+  // due-soon horizon rather than a lapse.
+  const plantRegisterTotals = {
+    lifting: plantIntegrity.lifting.overdue + plantIntegrity.lifting.loadTestOverdue,
+    pressure: plantIntegrity.pressure.certLapsed + plantIntegrity.pressure.inspectionOverdue + plantIntegrity.pressure.valveOverdue,
+    electrical: plantIntegrity.electrical.unprotected + plantIntegrity.electrical.exLapsed + plantIntegrity.electrical.testOverdue,
+  };
 
   return (
     <div className="space-y-6">
@@ -152,7 +165,7 @@ export default function EngineeringDashboard() {
       {/* Level 1 — headline KPIs. Leads on maintenance discipline rather than uptime:
           uptime is the symptom Operations already reports, the planned/reactive split is
           what says whether it's being held up by design or by emergency callouts. */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-5 gap-4">
         <HeadlineKpi
           icon={<GaugeIcon />}
           label={t("engineeringDashboard.plannedShare")}
@@ -179,6 +192,15 @@ export default function EngineeringDashboard() {
           value={headline.statutoryInspectionsDue}
           target={t("engineeringDashboard.ropesOverdueTarget", { count: headline.ropesOverdue })}
           tone={headline.ropesOverdue > 0 ? "negative" : headline.statutoryInspectionsDue > 0 ? "caution" : "positive"}
+        />
+        {/* Distinct from statutoryDue above: that is a due-soon horizon, this is what is
+            already out of date — the number an inspector would find today. */}
+        <HeadlineKpi
+          icon={<ShieldCheckIcon />}
+          label={t("engineeringDashboard.plantRegisterLapsed")}
+          value={headline.plantRegisterLapsed}
+          target={t("engineeringDashboard.plantRegisterLapsedTarget")}
+          tone={headline.plantRegisterLapsed > 0 ? "negative" : "positive"}
         />
         <HeadlineKpi
           icon={<WalletIcon />}
@@ -298,6 +320,81 @@ export default function EngineeringDashboard() {
         </div>
       </div>
 
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <div className={`${cardOuter} space-y-3`}>
+          <div>
+            <h2 className="text-sm font-semibold">{t("engineeringDashboard.plantRegistersTitle")}</h2>
+            <p className="text-[11px] text-mine-400 mt-0.5">{t("engineeringDashboard.plantRegistersHint")}</p>
+          </div>
+          <StatRow
+            label={t("engineeringDashboard.liftingLapsed", { count: plantIntegrity.lifting.inService })}
+            value={plantRegisterTotals.lifting}
+            tone={plantRegisterTotals.lifting > 0 ? "negative" : "positive"}
+          />
+          <StatRow
+            label={t("engineeringDashboard.pressureLapsed", { count: plantIntegrity.pressure.inService })}
+            value={plantRegisterTotals.pressure}
+            tone={plantRegisterTotals.pressure > 0 ? "negative" : "positive"}
+          />
+          <StatRow
+            label={t("engineeringDashboard.electricalLapsed", { count: plantIntegrity.electrical.inService })}
+            value={plantRegisterTotals.electrical}
+            tone={plantRegisterTotals.electrical > 0 ? "negative" : "positive"}
+          />
+          <div className="border-t border-mine-800 pt-3 space-y-3">
+            {/* Called out on its own: unprotected apparatus in a classified area is an
+                ignition source, not a paperwork lapse like the rows above. */}
+            <StatRow
+              label={t("engineeringDashboard.exUnprotected", { count: plantIntegrity.electrical.hazardousArea })}
+              value={plantIntegrity.electrical.unprotected}
+              tone={plantIntegrity.electrical.unprotected > 0 ? "negative" : "positive"}
+            />
+            <StatRow
+              label={t("engineeringDashboard.noEarthLeakage")}
+              value={plantIntegrity.electrical.noEarthLeakageProtection}
+              tone={plantIntegrity.electrical.noEarthLeakageProtection > 0 ? "caution" : "positive"}
+            />
+          </div>
+          <div className="pt-2">
+            <Link to="/plant-integrity" className="text-xs text-hazard-500 hover:underline">{t("engineeringDashboard.openPlantIntegrity")}</Link>
+          </div>
+        </div>
+
+        <div className={`${cardOuter} space-y-3`}>
+          <div>
+            <h2 className="text-sm font-semibold">{t("engineeringDashboard.reliabilityTitle")}</h2>
+            <p className="text-[11px] text-mine-400 mt-0.5">{t("engineeringDashboard.reliabilityHint")}</p>
+          </div>
+          <StatRow label={t("engineeringDashboard.profiledAssets")} value={reliability.profiledAssets} />
+          <StatRow label={t("engineeringDashboard.criticalAssets")} value={reliability.criticalAssets} />
+          <StatRow
+            label={t("engineeringDashboard.assetsBelowTarget")}
+            value={reliability.assetsBelowTarget}
+            tone={reliability.assetsBelowTarget > 0 ? "negative" : "positive"}
+          />
+          <div className="border-t border-mine-800 pt-3 space-y-3">
+            <StatRow label={t("engineeringDashboard.failuresLast30")} value={reliability.failuresLast30} />
+            <StatRow label={t("engineeringDashboard.failureDowntimeHours")} value={reliability.failureDowntimeHoursLast30} />
+            <StatRow
+              label={t("engineeringDashboard.rcaCompletion")}
+              value={reliability.rcaCompletionPct !== null ? `${reliability.rcaCompletionPct}%` : "—"}
+              tone={
+                reliability.rcaCompletionPct === null
+                  ? undefined
+                  : reliability.rcaCompletionPct >= 80
+                    ? "positive"
+                    : reliability.rcaCompletionPct >= 50
+                      ? "caution"
+                      : "negative"
+              }
+            />
+          </div>
+          <div className="pt-2">
+            <Link to="/plant-integrity?tab=reliability" className="text-xs text-hazard-500 hover:underline">{t("engineeringDashboard.openReliability")}</Link>
+          </div>
+        </div>
+      </div>
+
       {/* Action queue — tabbed rather than five stacked tables */}
       <div className={cardOuter}>
         <div className="flex items-start justify-between flex-wrap gap-3 mb-4">
@@ -339,6 +436,47 @@ export default function EngineeringDashboard() {
                     <div className="text-mine-500 text-[11px]">{t(`engineeringDashboard.maintenanceTypes.${m.maintenanceType}`, m.maintenanceType)}</div>
                   </div>
                   <span className="text-danger-500 tabular-nums shrink-0">{new Date(m.scheduledDate).toLocaleDateString()}</span>
+                </div>
+              ))
+            ))}
+
+          {queueTab === "plantRegisters" &&
+            (actionQueue.plantRegisterLapsed.length === 0 ? (
+              <p className="text-xs text-mine-400 py-4 text-center">{t("engineeringDashboard.queueEmpty")}</p>
+            ) : (
+              actionQueue.plantRegisterLapsed.map((r) => (
+                <div key={r.id} className="flex items-center justify-between gap-3 text-xs border-b border-mine-800 pb-2 last:border-0 last:pb-0">
+                  <div className="min-w-0">
+                    <div className="truncate">{r.identifier}</div>
+                    <div className="text-mine-500 text-[11px]">
+                      {t(`engineeringDashboard.registers.${r.register}`)} · {t(`engineeringDashboard.registerIssues.${r.issue}`)}
+                    </div>
+                  </div>
+                  <span className="text-danger-500 tabular-nums shrink-0">
+                    {r.dueDate ? new Date(r.dueDate).toLocaleDateString() : t("engineeringDashboard.noDueDate")}
+                  </span>
+                </div>
+              ))
+            ))}
+
+          {queueTab === "reliability" &&
+            (actionQueue.assetsBelowTarget.length === 0 ? (
+              <p className="text-xs text-mine-400 py-4 text-center">{t("engineeringDashboard.queueEmpty")}</p>
+            ) : (
+              actionQueue.assetsBelowTarget.map((a) => (
+                <div key={a.equipmentId} className="flex items-center justify-between gap-3 text-xs border-b border-mine-800 pb-2 last:border-0 last:pb-0">
+                  <div className="min-w-0">
+                    <div className="truncate">{a.equipmentName}</div>
+                    <div className="text-mine-500 text-[11px]">
+                      {t(`engineeringDashboard.criticalities.${a.criticality}`)} · {t("engineeringDashboard.failuresCount", { count: a.failureCount })}
+                    </div>
+                  </div>
+                  <div className="text-right shrink-0">
+                    <div className="text-danger-500 tabular-nums">{t("engineeringDashboard.downtimeAgainstTarget", { hours: a.downtimeHours })}</div>
+                    {a.targetAvailabilityPct !== null && (
+                      <div className="text-mine-500 tabular-nums text-[11px]">{t("engineeringDashboard.targetPct", { pct: a.targetAvailabilityPct })}</div>
+                    )}
+                  </div>
                 </div>
               ))
             ))}

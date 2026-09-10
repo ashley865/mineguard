@@ -132,6 +132,15 @@ const statusColors: Record<string, string> = {
   CLEARED: "bg-success-600 text-white",
   RESTRICTED_DUTY: "bg-hazard-500 text-white",
   STOOD_DOWN: "bg-danger-600 text-white",
+  // Plant integrity registers. Quarantined and isolated are amber rather than red:
+  // the item is off the job, which is the correct state, not an outstanding failure.
+  QUARANTINED: "bg-hazard-500 text-white",
+  CONDEMNED: "bg-danger-600 text-white",
+  UNDER_REPAIR: "bg-hazard-500 text-white",
+  ISOLATED: "bg-hazard-500 text-white",
+  AWAITING_INSPECTION: "bg-hazard-500 text-white",
+  PASS_WITH_DEFECTS: "bg-hazard-500 text-white",
+  MARGINAL: "bg-hazard-500 text-white",
 };
 
 export function StatusBadge({

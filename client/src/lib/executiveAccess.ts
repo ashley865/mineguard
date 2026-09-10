@@ -58,6 +58,7 @@ export const restrictedModules = [
   "/skills-matrix",
   "/document-acknowledgements",
   "/vetting-records",
+  "/plant-integrity",
 ] as const;
 
 export type RestrictedModule = (typeof restrictedModules)[number];
@@ -93,6 +94,9 @@ export const executiveTitleModules: Partial<Record<ExecutiveTitle, RestrictedMod
     "/resources",
     "/winders",
     "/toolbox-talks",
+    // The lifting, pressure and Ex registers are safety-critical plant evidence,
+    // even though the engineer owns the appointment and the maintenance of them.
+    "/plant-integrity",
   ],
   OPERATIONS_MANAGER: [
     "/sites",
@@ -125,6 +129,7 @@ export const executiveTitleModules: Partial<Record<ExecutiveTitle, RestrictedMod
     "/community",
     "/shift-handovers",
     "/downtime",
+    "/plant-integrity",
   ],
   COMPLIANCE_OFFICER: [
     "/compliance",
@@ -147,6 +152,10 @@ export const executiveTitleModules: Partial<Record<ExecutiveTitle, RestrictedMod
     "/community",
     "/regulatory-submissions",
     "/document-acknowledgements",
+    // Read access to the statutory plant registers: these are exactly what an
+    // inspector asks to see, so the compliance officer must be able to check them
+    // before the DMRE does.
+    "/plant-integrity",
   ],
   IT_MANAGER: ["/sites", "/sensors", "/equipment", "/alerts", "/reporting", "/security", "/scanner", "/documents", "/maintenance", "/it-operations", "/cyber-command-center"],
   // The MHSA 2.13.1 engineering appointee: accountable for machinery and plant, which is
@@ -173,6 +182,7 @@ export const executiveTitleModules: Partial<Record<ExecutiveTitle, RestrictedMod
     "/documents",
     "/reporting",
     "/emergency",
+    "/plant-integrity",
   ],
   // The environmental control officer appointment. "/resources" is the water/energy/GHG
   // module (National Water Act, Carbon Tax Act), not mineral resources — that belongs to

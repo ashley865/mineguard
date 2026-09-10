@@ -57,7 +57,19 @@ router.get("/summary", async (req, res) => {
   const dueSoonHorizon = new Date(now.getTime() + DUE_SOON_DAYS * DAY_MS);
   const bySite = { site: { mineId } };
 
-  const [equipment, maintenance, consumableParts, winders, ropes, shaftInspections] = await Promise.all([
+  const [
+    equipment,
+    maintenance,
+    consumableParts,
+    winders,
+    ropes,
+    shaftInspections,
+    liftingEquipment,
+    pressureEquipment,
+    electricalInstallations,
+    reliabilityProfiles,
+    recentFailures,
+  ] = await Promise.all([
     prisma.equipment.findMany({
       where: bySite,
       select: { id: true, name: true, type: true, status: true, lastMaintenance: true },
@@ -105,6 +117,29 @@ router.get("/summary", async (req, res) => {
       where: bySite,
       select: { id: true, shaftName: true, inspectionDate: true, nextInspectionDue: true, findings: true },
       orderBy: { inspectionDate: "desc" },
+    }),
+    // Only items actually in service can be "overdue" — a quarantined sling or an
+    // isolated board is already off the job, and counting it again would inflate
+    // the number the appointee has to act on.
+    prisma.liftingEquipment.findMany({
+      where: { ...bySite, status: "IN_SERVICE" },
+      select: { id: true, identifier: true, equipmentType: true, nextInspectionDue: true, nextLoadTestDue: true, safeWorkingLoadKg: true },
+    }),
+    prisma.pressureEquipment.findMany({
+      where: { ...bySite, status: "IN_SERVICE" },
+      select: { id: true, identifier: true, equipmentType: true, certificateExpiry: true, nextInspectionDue: true, safetyValveNextDue: true },
+    }),
+    prisma.electricalInstallation.findMany({
+      where: { ...bySite, status: "IN_SERVICE" },
+      select: { id: true, identifier: true, hazardousArea: true, exProtection: true, exCertificateExpiry: true, earthLeakageProtected: true, nextTestDue: true },
+    }),
+    prisma.assetReliabilityProfile.findMany({
+      where: { equipment: bySite },
+      select: { equipmentId: true, criticality: true, targetAvailabilityPct: true, equipment: { select: { name: true } } },
+    }),
+    prisma.equipmentFailure.findMany({
+      where: { equipment: bySite, failureDate: { gte: trendStart } },
+      select: { equipmentId: true, failureMode: true, downtimeHours: true, recurrencePrevented: true },
     }),
   ]);
 
@@ -176,6 +211,59 @@ router.get("/summary", async (req, res) => {
 
   const equipmentDown = equipment.filter((e) => e.status === "DOWN");
 
+  // --- Plant integrity registers -------------------------------------------
+  // A missing due date counts as lapsed, not as compliant: on a register the mine
+  // must produce on demand, "we never set a date" is the same finding as "the date
+  // passed". The one exception is the load test, which not all tackle carries.
+  const lapsed = (date: Date | null) => !date || date < now;
+
+  const liftingOverdue = liftingEquipment.filter((i) => lapsed(i.nextInspectionDue));
+  const liftingLoadTestOverdue = liftingEquipment.filter((i) => i.nextLoadTestDue != null && i.nextLoadTestDue < now);
+  const liftingNoSwl = liftingEquipment.filter((i) => i.safeWorkingLoadKg == null).length;
+
+  const pressureCertLapsed = pressureEquipment.filter((i) => lapsed(i.certificateExpiry));
+  const pressureInspectionOverdue = pressureEquipment.filter((i) => lapsed(i.nextInspectionDue));
+  const pressureValveOverdue = pressureEquipment.filter((i) => i.safetyValveNextDue != null && i.safetyValveNextDue < now).length;
+
+  const hazardousInstallations = electricalInstallations.filter((i) => i.hazardousArea);
+  const electricalUnprotected = hazardousInstallations.filter((i) => i.exProtection === "NONE");
+  const electricalExLapsed = hazardousInstallations.filter((i) => i.exProtection !== "NONE" && lapsed(i.exCertificateExpiry)).length;
+  const electricalTestOverdue = electricalInstallations.filter((i) => lapsed(i.nextTestDue)).length;
+  const electricalNoElp = electricalInstallations.filter((i) => !i.earthLeakageProtected).length;
+
+  // One number the appointee is judged on: everything in the three statutory plant
+  // registers that is out of date right now.
+  const plantRegisterLapsed =
+    liftingOverdue.length +
+    liftingLoadTestOverdue.length +
+    pressureCertLapsed.length +
+    pressureInspectionOverdue.length +
+    pressureValveOverdue +
+    electricalUnprotected.length +
+    electricalExLapsed +
+    electricalTestOverdue;
+
+  // --- Reliability ---------------------------------------------------------
+  const failureDowntimeByEquipment = new Map<string, number>();
+  const failureCountByEquipment = new Map<string, number>();
+  const downtimeByFailureMode: Record<string, number> = {};
+  for (const f of recentFailures) {
+    const hours = f.downtimeHours ?? 0;
+    failureDowntimeByEquipment.set(f.equipmentId, (failureDowntimeByEquipment.get(f.equipmentId) ?? 0) + hours);
+    failureCountByEquipment.set(f.equipmentId, (failureCountByEquipment.get(f.equipmentId) ?? 0) + 1);
+    downtimeByFailureMode[f.failureMode] = (downtimeByFailureMode[f.failureMode] ?? 0) + hours;
+  }
+  const failureDowntimeHoursLast30 = recentFailures.reduce((sum, f) => sum + (f.downtimeHours ?? 0), 0);
+  const rcaAddressed = recentFailures.filter((f) => f.recurrencePrevented).length;
+
+  const windowHours = TREND_DAYS * 24;
+  const criticalAssets = reliabilityProfiles.filter((p) => p.criticality === "CRITICAL");
+  const assetsBelowTarget = reliabilityProfiles.filter((p) => {
+    if (p.targetAvailabilityPct == null) return false;
+    const downtime = failureDowntimeByEquipment.get(p.equipmentId) ?? 0;
+    return ((windowHours - downtime) / windowHours) * 100 < p.targetAvailabilityPct;
+  });
+
   res.json({
     headline: {
       overdueMaintenance: overdueMaintenance.length,
@@ -185,6 +273,7 @@ router.get("/summary", async (req, res) => {
       statutoryInspectionsDue,
       ropesOverdue: ropesOverdue.length,
       maintenanceCostLast30: Math.round(maintenanceCostLast30 * 100) / 100,
+      plantRegisterLapsed,
     },
     trends: { maintenance: maintenanceSeries },
     breakdowns: {
@@ -207,6 +296,39 @@ router.get("/summary", async (req, res) => {
     maintenanceStats: {
       downtimeHoursLast30: Math.round(maintenanceDowntimeHoursLast30 * 10) / 10,
       equipmentDownNow: equipmentDown.length,
+    },
+    plantIntegrity: {
+      lifting: {
+        inService: liftingEquipment.length,
+        overdue: liftingOverdue.length,
+        loadTestOverdue: liftingLoadTestOverdue.length,
+        noSwl: liftingNoSwl,
+      },
+      pressure: {
+        inService: pressureEquipment.length,
+        certLapsed: pressureCertLapsed.length,
+        inspectionOverdue: pressureInspectionOverdue.length,
+        valveOverdue: pressureValveOverdue,
+      },
+      electrical: {
+        inService: electricalInstallations.length,
+        hazardousArea: hazardousInstallations.length,
+        unprotected: electricalUnprotected.length,
+        exLapsed: electricalExLapsed,
+        testOverdue: electricalTestOverdue,
+        noEarthLeakageProtection: electricalNoElp,
+      },
+    },
+    reliability: {
+      profiledAssets: reliabilityProfiles.length,
+      criticalAssets: criticalAssets.length,
+      assetsBelowTarget: assetsBelowTarget.length,
+      failuresLast30: recentFailures.length,
+      failureDowntimeHoursLast30: Math.round(failureDowntimeHoursLast30 * 10) / 10,
+      // Null when nothing failed — 0% would read as a broken RCA process rather
+      // than an uneventful month.
+      rcaCompletionPct: recentFailures.length > 0 ? Math.round((rcaAddressed / recentFailures.length) * 100) : null,
+      downtimeByFailureMode,
     },
     actionQueue: {
       overdueMaintenance: overdueMaintenance.slice(0, 8).map((m) => ({
@@ -235,6 +357,27 @@ router.get("/summary", async (req, res) => {
         partType: p.partType,
         position: p.position,
         remainingPct: Math.round((p.currentMeasurement! / p.initialMeasurement!) * 100),
+      })),
+      // The three registers merged into one queue, because to the appointee they are
+      // one obligation: what in my plant registers is out of date today.
+      plantRegisterLapsed: [
+        ...liftingOverdue.map((i) => ({ id: i.id, register: "LIFTING" as const, identifier: i.identifier, issue: "INSPECTION" as const, dueDate: i.nextInspectionDue })),
+        ...liftingLoadTestOverdue.map((i) => ({ id: `${i.id}-lt`, register: "LIFTING" as const, identifier: i.identifier, issue: "LOAD_TEST" as const, dueDate: i.nextLoadTestDue })),
+        ...pressureCertLapsed.map((i) => ({ id: `${i.id}-cert`, register: "PRESSURE" as const, identifier: i.identifier, issue: "CERTIFICATE" as const, dueDate: i.certificateExpiry })),
+        ...pressureInspectionOverdue.map((i) => ({ id: i.id, register: "PRESSURE" as const, identifier: i.identifier, issue: "INSPECTION" as const, dueDate: i.nextInspectionDue })),
+        ...electricalUnprotected.map((i) => ({ id: `${i.id}-ex`, register: "ELECTRICAL" as const, identifier: i.identifier, issue: "UNPROTECTED" as const, dueDate: null })),
+      ]
+        // Undated entries first: an item with no due date is the least visible and
+        // the longest neglected, not the least urgent.
+        .sort((a, b) => (a.dueDate?.getTime() ?? 0) - (b.dueDate?.getTime() ?? 0))
+        .slice(0, 8),
+      assetsBelowTarget: assetsBelowTarget.slice(0, 8).map((p) => ({
+        equipmentId: p.equipmentId,
+        equipmentName: p.equipment.name,
+        criticality: p.criticality,
+        targetAvailabilityPct: p.targetAvailabilityPct,
+        downtimeHours: Math.round((failureDowntimeByEquipment.get(p.equipmentId) ?? 0) * 10) / 10,
+        failureCount: failureCountByEquipment.get(p.equipmentId) ?? 0,
       })),
     },
   });

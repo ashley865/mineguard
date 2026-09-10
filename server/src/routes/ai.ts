@@ -948,6 +948,11 @@ async function buildEngineeringManagerContext(mineId: string) {
     ropes,
     shaftInspections,
     consumableParts,
+    liftingEquipment,
+    pressureEquipment,
+    electricalInstallations,
+    reliabilityProfiles,
+    recentFailures,
   ] = await Promise.all([
     prisma.mine.findUnique({ where: { id: mineId }, select: { name: true } }),
     prisma.equipment.groupBy({ by: ["status"], where: { site: { mineId } }, _count: true }),
@@ -985,6 +990,29 @@ async function buildEngineeringManagerContext(mineId: string) {
     prisma.equipmentConsumablePart.findMany({
       where: { status: "IN_SERVICE", equipment: { site: { mineId } } },
       select: { partType: true, initialMeasurement: true, currentMeasurement: true },
+    }),
+    // Statutory plant registers. Scoped to items actually in service — a quarantined
+    // sling or an isolated board is already off the job, so counting it as a lapse
+    // would tell the model to chase something the department has already handled.
+    prisma.liftingEquipment.findMany({
+      where: { site: { mineId }, status: "IN_SERVICE" },
+      select: { equipmentType: true, nextInspectionDue: true, nextLoadTestDue: true, safeWorkingLoadKg: true },
+    }),
+    prisma.pressureEquipment.findMany({
+      where: { site: { mineId }, status: "IN_SERVICE" },
+      select: { equipmentType: true, certificateExpiry: true, nextInspectionDue: true, safetyValveNextDue: true },
+    }),
+    prisma.electricalInstallation.findMany({
+      where: { site: { mineId }, status: "IN_SERVICE" },
+      select: { hazardousArea: true, exProtection: true, exCertificateExpiry: true, earthLeakageProtected: true, nextTestDue: true },
+    }),
+    prisma.assetReliabilityProfile.findMany({
+      where: { equipment: { site: { mineId } } },
+      select: { equipmentId: true, criticality: true, currentRunHours: true, targetAvailabilityPct: true },
+    }),
+    prisma.equipmentFailure.findMany({
+      where: { equipment: { site: { mineId } }, failureDate: { gte: thirtyDaysAgo } },
+      select: { equipmentId: true, failureMode: true, downtimeHours: true, rootCause: true, recurrencePrevented: true },
     }),
   ]);
 
@@ -1032,6 +1060,41 @@ async function buildEngineeringManagerContext(mineId: string) {
   );
   const partsPastWearLimit = measuredParts.filter((p) => p.currentMeasurement! / p.initialMeasurement! <= 0.2).length;
 
+  // A missing due date counts as lapsed, not as compliant: on a register the mine must
+  // produce on demand, "we never set a date" is the same finding as "the date passed",
+  // and reporting it as compliant would hide the worst-maintained items entirely.
+  const lapsed = (date: Date | null) => !date || date < now;
+
+  const liftingInspectionOverdue = liftingEquipment.filter((i) => lapsed(i.nextInspectionDue)).length;
+  const liftingLoadTestOverdue = liftingEquipment.filter((i) => i.nextLoadTestDue != null && i.nextLoadTestDue < now).length;
+  const liftingWithoutSwl = liftingEquipment.filter((i) => i.safeWorkingLoadKg == null).length;
+
+  const pressureCertificateLapsed = pressureEquipment.filter((i) => lapsed(i.certificateExpiry)).length;
+  const pressureInspectionOverdue = pressureEquipment.filter((i) => lapsed(i.nextInspectionDue)).length;
+  const pressureValveOverdue = pressureEquipment.filter((i) => i.safetyValveNextDue != null && i.safetyValveNextDue < now).length;
+
+  const hazardousInstallations = electricalInstallations.filter((i) => i.hazardousArea);
+  const exUnprotectedInHazardousArea = hazardousInstallations.filter((i) => i.exProtection === "NONE").length;
+  const exCertificateLapsed = hazardousInstallations.filter((i) => i.exProtection !== "NONE" && lapsed(i.exCertificateExpiry)).length;
+  const electricalTestOverdue = electricalInstallations.filter((i) => lapsed(i.nextTestDue)).length;
+  const withoutEarthLeakageProtection = electricalInstallations.filter((i) => !i.earthLeakageProtected).length;
+
+  const failureDowntimeByEquipment = new Map<string, number>();
+  const downtimeByFailureMode: Record<string, number> = {};
+  for (const f of recentFailures) {
+    const hours = f.downtimeHours ?? 0;
+    failureDowntimeByEquipment.set(f.equipmentId, (failureDowntimeByEquipment.get(f.equipmentId) ?? 0) + hours);
+    downtimeByFailureMode[f.failureMode] = Math.round(((downtimeByFailureMode[f.failureMode] ?? 0) + hours) * 10) / 10;
+  }
+  const windowHours = 30 * 24;
+  const assetsBelowAvailabilityTarget = reliabilityProfiles.filter((p) => {
+    if (p.targetAvailabilityPct == null) return false;
+    const downtime = failureDowntimeByEquipment.get(p.equipmentId) ?? 0;
+    return ((windowHours - downtime) / windowHours) * 100 < p.targetAvailabilityPct;
+  }).length;
+  const failuresWithRootCause = recentFailures.filter((f) => f.rootCause).length;
+  const failuresRecurrencePrevented = recentFailures.filter((f) => f.recurrencePrevented).length;
+
   return {
     mine: { name: mine?.name ?? "the mine" },
     equipment: { byStatus: equipmentStatus, total: Object.values(equipmentStatus).reduce((a, b) => a + b, 0) },
@@ -1065,6 +1128,52 @@ async function buildEngineeringManagerContext(mineId: string) {
       withWearReadings: measuredParts.length,
       pastWearLimit: partsPastWearLimit,
       unmeasured: consumableParts.length - measuredParts.length,
+    },
+    liftingRegister: {
+      inService: liftingEquipment.length,
+      inspectionOverdue: liftingInspectionOverdue,
+      loadTestOverdue: liftingLoadTestOverdue,
+      withoutSafeWorkingLoad: liftingWithoutSwl,
+      note:
+        "Driven Machinery Regulations. Every lifting machine and every piece of loose tackle needs a current examination; " +
+        "inspectionOverdue counts items with no next-inspection date as overdue, because an undated item is the least " +
+        "visible and the longest neglected. Tackle without a legible safe working load must be withdrawn from service.",
+    },
+    pressureRegister: {
+      inService: pressureEquipment.length,
+      certificateLapsed: pressureCertificateLapsed,
+      inspectionOverdue: pressureInspectionOverdue,
+      safetyValveTestOverdue: pressureValveOverdue,
+      note:
+        "Pressure Equipment Regulations. certificateLapsed and inspectionOverdue are separate failures: a vessel can be " +
+        "inside its inspection interval while its Approved Inspection Authority certificate has expired, and only the " +
+        "certificate is what an inspector asks to see. A receiver failure is an explosive event, not a leak.",
+    },
+    electricalRegister: {
+      inService: electricalInstallations.length,
+      inHazardousArea: hazardousInstallations.length,
+      unprotectedInHazardousArea: exUnprotectedInHazardousArea,
+      exCertificateLapsed: exCertificateLapsed,
+      testOverdue: electricalTestOverdue,
+      withoutEarthLeakageProtection,
+      note:
+        "MHSA Chapter 8 and IEC 60079. unprotectedInHazardousArea is energised apparatus with no explosion-protection " +
+        "technique in a classified area — an ignition source, and the most serious item in this register by a wide margin. " +
+        "exCertificateLapsed is protected apparatus whose certification has expired.",
+    },
+    assetReliability: {
+      profiledAssets: reliabilityProfiles.length,
+      criticalAssets: reliabilityProfiles.filter((p) => p.criticality === "CRITICAL").length,
+      assetsBelowAvailabilityTarget,
+      failuresLast30Days: recentFailures.length,
+      failureDowntimeHoursLast30Days: Math.round(recentFailures.reduce((sum, f) => sum + (f.downtimeHours ?? 0), 0) * 10) / 10,
+      downtimeByFailureMode,
+      failuresWithRootCause,
+      failuresRecurrencePrevented,
+      note:
+        "downtimeByFailureMode is a Pareto in hours lost, not incident count — a rare failure costing a week beats a " +
+        "weekly one costing an hour. failuresRecurrencePrevented is where the corrective action was judged to address " +
+        "the cause rather than the symptom; a repeat of the same mode on the same asset means that judgement was wrong.",
     },
   };
 }
@@ -1774,7 +1883,15 @@ const AI_MODULES: Record<string, AiModule> = {
       `Treat the winding plant as the highest-consequence item in this snapshot: a conveyance rope past its discard ` +
       `date, a winder that has failed a brake test, or a winder never inspected must be raised first and named ` +
       `explicitly, ahead of any larger-looking number elsewhere — these are regulatory ceilings and people ride ` +
-      `on that rope. ` +
+      `on that rope. Immediately after the winding plant, rank electricalRegister.unprotectedInHazardousArea: ` +
+      `energised apparatus with no explosion protection in a classified area is a live ignition source, and it ` +
+      `outranks every paperwork lapse in the three plant registers no matter how many of those there are. ` +
+      `The lifting, pressure and electrical registers are statutory — the mine must be able to produce a current ` +
+      `record on demand — so report a lapse there as a legal exposure, not a housekeeping backlog, and never ` +
+      `describe an item with no due date recorded as compliant. ` +
+      `Use the reliability data to argue for the spend rather than only to describe it: point at the top entry in ` +
+      `downtimeByFailureMode and say which assets it is concentrated in, and treat a gap between failuresWithRootCause ` +
+      `and failuresRecurrencePrevented as failures that were repaired but not understood. ` +
       `When the planned share is low, say what it implies — the plant is dictating the schedule rather than the ` +
       `department — rather than only restating the percentage. Note that a low planned share can coexist with ` +
       `healthy availability, and that this is exactly the condition worth flagging early. ` +

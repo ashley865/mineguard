@@ -488,6 +488,9 @@ model Site {
   resourceEstimates     ResourceEstimate[]
   winders               Winder[]
   shaftInspections      ShaftInspection[]
+  liftingEquipment      LiftingEquipment[]
+  pressureEquipment     PressureEquipment[]
+  electricalInstallations ElectricalInstallation[]
   patrolLogEntries      PatrolLogEntry[]
   jobRequisitions       JobRequisition[]
 
@@ -534,6 +537,7 @@ model Zone {
   rockfallIncidents      RockfallIncident[]
   ventilationDistricts   VentilationDistrict[]
   refugeBays             RefugeBay[]
+  electricalInstallations ElectricalInstallation[]
 
   createdAt DateTime @default(now())
 }
@@ -840,6 +844,8 @@ model Equipment {
 
   maintenanceSchedules MaintenanceSchedule[]
   consumableParts      EquipmentConsumablePart[]
+  reliabilityProfile   AssetReliabilityProfile?
+  failures             EquipmentFailure[]
 
   createdAt DateTime @default(now())
 }
@@ -6090,6 +6096,365 @@ model FatigueAssessment {
   outcome            FatigueAssessmentOutcome @default(CLEARED)
   assessedByName     String?
   notes              String?
+
+  createdAt DateTime @default(now())
+}
+
+// ---------------------------------------------------------------------------
+// Module: Lifting Equipment & Tackle Register (Driven Machinery Regulations)
+// Every lifting machine and every piece of loose tackle — slings, shackles,
+// chain blocks, eyebolts — must be registered, periodically examined and load
+// tested, with the certificate available on site. Mines run a quarterly colour
+// code so a rigger can tell at a glance whether tackle is in date; an
+// out-of-date sling still hanging on the rack is both a legal breach and how a
+// dropped load happens.
+// ---------------------------------------------------------------------------
+
+enum LiftingEquipmentType {
+  OVERHEAD_CRANE
+  MOBILE_CRANE
+  GANTRY
+  CHAIN_BLOCK
+  LEVER_HOIST
+  WINCH
+  WIRE_ROPE_SLING
+  CHAIN_SLING
+  WEBBING_SLING
+  SHACKLE
+  EYEBOLT
+  SPREADER_BEAM
+  LIFTING_MAGNET
+  OTHER
+}
+
+enum LiftingEquipmentStatus {
+  IN_SERVICE
+  QUARANTINED
+  UNDER_REPAIR
+  CONDEMNED
+}
+
+enum LiftingInspectionType {
+  VISUAL
+  THOROUGH_EXAMINATION
+  LOAD_TEST
+}
+
+enum LiftingInspectionResult {
+  PASS
+  PASS_WITH_DEFECTS
+  FAIL
+}
+
+model LiftingEquipment {
+  id             String                 @id @default(cuid())
+  siteId         String
+  site           Site                   @relation(fields: [siteId], references: [id], onDelete: Cascade)
+  identifier     String
+  equipmentType  LiftingEquipmentType
+  description    String?
+  // The rated capacity stamped on the item. Loose tackle without a legible SWL
+  // must be withdrawn, so a null here is itself a finding rather than missing data.
+  safeWorkingLoadKg Float?
+  location       String?
+  manufacturer   String?
+  serialNumber   String?
+  // The current quarterly colour code applied to the item, e.g. "RED Q1 2027".
+  colourCode     String?
+  lastInspectionDate DateTime?
+  nextInspectionDue  DateTime?
+  lastLoadTestDate   DateTime?
+  nextLoadTestDue    DateTime?
+  status         LiftingEquipmentStatus @default(IN_SERVICE)
+  notes          String?
+
+  inspections LiftingInspection[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model LiftingInspection {
+  id                String                  @id @default(cuid())
+  equipmentId       String
+  equipment         LiftingEquipment        @relation(fields: [equipmentId], references: [id], onDelete: Cascade)
+  inspectionDate    DateTime
+  inspectionType    LiftingInspectionType
+  inspectorName     String
+  result            LiftingInspectionResult
+  defectsFound      String?
+  loadTestedKg      Float?
+  certificateNumber String?
+  colourCodeApplied String?
+  nextInspectionDue DateTime?
+  notes             String?
+
+  createdAt DateTime @default(now())
+}
+
+// ---------------------------------------------------------------------------
+// Module: Pressure Equipment Register (Pressure Equipment Regulations)
+// Air receivers, boilers and vessels require periodic inspection and
+// certification by an Approved Inspection Authority, with a valid certificate
+// held on site. A receiver failure is an explosive event, not a leak — which is
+// why certificate expiry is tracked as hard a date as the inspection interval.
+// ---------------------------------------------------------------------------
+
+enum PressureEquipmentType {
+  AIR_RECEIVER
+  BOILER
+  PRESSURE_VESSEL
+  AUTOCLAVE
+  ACCUMULATOR
+  STEAM_PIPING
+  OTHER
+}
+
+enum PressureEquipmentStatus {
+  IN_SERVICE
+  AWAITING_INSPECTION
+  OUT_OF_SERVICE
+  DECOMMISSIONED
+}
+
+enum PressureInspectionType {
+  EXTERNAL
+  INTERNAL
+  HYDROSTATIC
+  SAFETY_VALVE
+  ULTRASONIC_THICKNESS
+}
+
+model PressureEquipment {
+  id                   String                  @id @default(cuid())
+  siteId               String
+  site                 Site                    @relation(fields: [siteId], references: [id], onDelete: Cascade)
+  identifier           String
+  equipmentType        PressureEquipmentType
+  description          String?
+  location             String?
+  designPressureKpa    Float?
+  operatingPressureKpa Float?
+  capacityLitres       Float?
+  manufacturer         String?
+  serialNumber         String?
+  yearBuilt            Int?
+  // The Approved Inspection Authority that certified it, and the certificate's
+  // own expiry — distinct from nextInspectionDue, because a vessel can be
+  // inside its inspection interval while its certificate has lapsed.
+  inspectionAuthority  String?
+  certificateNumber    String?
+  certificateExpiry    DateTime?
+  lastInspectionDate   DateTime?
+  nextInspectionDue    DateTime?
+  safetyValveLastTested DateTime?
+  safetyValveNextDue    DateTime?
+  status               PressureEquipmentStatus @default(IN_SERVICE)
+  notes                String?
+
+  inspections PressureEquipmentInspection[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model PressureEquipmentInspection {
+  id                  String                 @id @default(cuid())
+  equipmentId         String
+  equipment           PressureEquipment      @relation(fields: [equipmentId], references: [id], onDelete: Cascade)
+  inspectionDate      DateTime
+  inspectionType      PressureInspectionType
+  inspectorName       String
+  inspectionAuthority String?
+  passed              Boolean                @default(true)
+  findings            String?
+  certificateNumber   String?
+  certificateExpiry   DateTime?
+  nextInspectionDue   DateTime?
+  notes               String?
+
+  createdAt DateTime @default(now())
+}
+
+// ---------------------------------------------------------------------------
+// Module: Electrical Compliance & Explosion-Protected Equipment (MHSA Ch 8)
+// Earth leakage protection, earthing and bonding integrity, and — in gassy or
+// dusty workings — explosion-protected apparatus that must stay certified. A
+// compromised flameproof enclosure is an ignition source in a methane
+// atmosphere, so Ex certification is tracked separately from general condition.
+// ---------------------------------------------------------------------------
+
+enum ElectricalInstallationType {
+  SUBSTATION
+  TRANSFORMER
+  SWITCHGEAR
+  DISTRIBUTION_BOARD
+  MOTOR_CONTROL_CENTRE
+  CABLE_RETICULATION
+  EARTH_LEAKAGE_UNIT
+  GENERATOR
+  OTHER
+}
+
+// Explosion-protection technique per IEC 60079. NONE is meaningful data, not a
+// blank: it says this apparatus is not rated for a hazardous area, which only
+// matters once you know where it is installed.
+enum ExProtectionType {
+  NONE
+  FLAMEPROOF_D
+  INCREASED_SAFETY_E
+  INTRINSICALLY_SAFE_I
+  PRESSURIZED_P
+  ENCAPSULATION_M
+  NON_SPARKING_N
+  DUST_PROTECTION_T
+  OTHER
+}
+
+enum ElectricalTestType {
+  EARTH_CONTINUITY
+  EARTH_LEAKAGE
+  INSULATION_RESISTANCE
+  POLARITY
+  EX_INSPECTION
+  THERMOGRAPHIC
+}
+
+enum ElectricalTestResult {
+  PASS
+  MARGINAL
+  FAIL
+}
+
+enum ElectricalInstallationStatus {
+  IN_SERVICE
+  ISOLATED
+  UNDER_REPAIR
+  DECOMMISSIONED
+}
+
+model ElectricalInstallation {
+  id                String                       @id @default(cuid())
+  siteId            String
+  site              Site                         @relation(fields: [siteId], references: [id], onDelete: Cascade)
+  zoneId            String?
+  zone              Zone?                        @relation(fields: [zoneId], references: [id], onDelete: SetNull)
+  identifier        String
+  installationType  ElectricalInstallationType
+  description       String?
+  location          String?
+  voltageRating     String?
+  // Whether this sits in a classified hazardous area. Ex protection only has to
+  // be right where the atmosphere can be explosive, so the two are recorded
+  // together — Ex apparatus outside a hazardous area is over-specified, and
+  // non-Ex apparatus inside one is an ignition source.
+  hazardousArea     Boolean                      @default(false)
+  exProtection      ExProtectionType             @default(NONE)
+  exCertificateNumber String?
+  exCertificateExpiry DateTime?
+  earthLeakageProtected Boolean                   @default(false)
+  cocNumber         String?
+  cocIssuedDate     DateTime?
+  lastTestDate      DateTime?
+  nextTestDue       DateTime?
+  status            ElectricalInstallationStatus @default(IN_SERVICE)
+  notes             String?
+
+  tests ElectricalTest[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model ElectricalTest {
+  id             String                 @id @default(cuid())
+  installationId String
+  installation   ElectricalInstallation @relation(fields: [installationId], references: [id], onDelete: Cascade)
+  testDate       DateTime
+  testType       ElectricalTestType
+  testedByName   String
+  result         ElectricalTestResult
+  measuredValue  Float?
+  unit           String?
+  findings       String?
+  nextTestDue    DateTime?
+  notes          String?
+
+  createdAt DateTime @default(now())
+}
+
+// ---------------------------------------------------------------------------
+// Module: Asset Reliability & Criticality
+// The maintenance tables record what was done; this records how the asset base
+// actually behaves. Run hours make usage-based maintenance and MTBF possible
+// (EquipmentConsumablePart already assumes an hours meter exists via
+// installHoursMeter, but Equipment had nowhere to store the current reading),
+// structured failure modes turn free-text findings into a Pareto, and
+// criticality is what makes maintenance priority risk-based rather than
+// first-come-first-served.
+// ---------------------------------------------------------------------------
+
+enum AssetCriticality {
+  CRITICAL
+  HIGH
+  MEDIUM
+  LOW
+}
+
+enum EquipmentFailureMode {
+  MECHANICAL_WEAR
+  BEARING_FAILURE
+  LUBRICATION_FAILURE
+  ELECTRICAL_FAULT
+  HYDRAULIC_FAILURE
+  PNEUMATIC_FAILURE
+  STRUCTURAL_CRACK
+  CONTROL_SYSTEM
+  CONTAMINATION
+  OVERLOAD
+  CORROSION
+  OPERATOR_ERROR
+  OTHER
+}
+
+model AssetReliabilityProfile {
+  id                    String           @id @default(cuid())
+  equipmentId           String           @unique
+  equipment             Equipment        @relation(fields: [equipmentId], references: [id], onDelete: Cascade)
+  criticality           AssetCriticality @default(MEDIUM)
+  criticalityRationale  String?
+  commissionedDate      DateTime?
+  expectedLifeYears     Int?
+  replacementValue      Float?
+  // Current meter reading. MTBF is only meaningful against running time, not
+  // calendar time — an idle machine that never fails is not reliable, it is unused.
+  currentRunHours       Float?
+  runHoursUpdatedAt     DateTime?
+  targetAvailabilityPct Float?
+  notes                 String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model EquipmentFailure {
+  id                String               @id @default(cuid())
+  equipmentId       String
+  equipment         Equipment            @relation(fields: [equipmentId], references: [id], onDelete: Cascade)
+  failureDate       DateTime
+  failureMode       EquipmentFailureMode
+  description       String
+  detectedBy        String?
+  downtimeHours     Float?
+  repairCost        Float?
+  runHoursAtFailure Float?
+  rootCause         String?
+  correctiveAction  String?
+  // Whether the corrective action addressed the cause rather than the symptom.
+  // A repeat of the same failure mode on the same asset with this set is the
+  // clearest signal that the analysis was wrong.
+  recurrencePrevented Boolean            @default(false)
+  notes             String?
 
   createdAt DateTime @default(now())
 }

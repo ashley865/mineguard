@@ -63,6 +63,7 @@ export default function Layout() {
         { to: "/sensors", label: t("nav.sensors") },
         { to: "/equipment", label: t("nav.equipment") },
         { to: "/maintenance", label: t("maintenance.nav") },
+        { to: "/plant-integrity", label: t("plantIntegrity.nav") },
         { to: "/production", label: t("production.nav") },
         { to: "/geology", label: t("geology.nav") },
         { to: "/shift-handovers", label: t("shiftHandover.nav") },
