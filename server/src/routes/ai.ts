@@ -926,6 +926,149 @@ async function buildItManagerContext(mineId: string) {
   };
 }
 
+// The MHSA 2.13.1 engineering appointee. Deliberately narrower than the Operations
+// Manager's context, which covers the production side of the same plant: this one is about
+// whether the asset base is being maintained and whether the statutory inspection regime on
+// winding plant and shafts is current. Thresholds mirror routes/engineeringDashboard.ts so
+// the assistant and the dashboard can't tell the executive two different things.
+async function buildEngineeringManagerContext(mineId: string) {
+  const now = new Date();
+  const thirtyDaysAgo = new Date(Date.now() - 30 * 86400000);
+  const in30Days = new Date(Date.now() + 30 * 86400000);
+  const staleInspectionBefore = new Date(Date.now() - 90 * 86400000);
+
+  const [
+    mine,
+    equipmentByStatus,
+    openMaintenance,
+    overdueMaintenance,
+    completedMaintenance,
+    downtimeByCategory,
+    winders,
+    ropes,
+    shaftInspections,
+    consumableParts,
+  ] = await Promise.all([
+    prisma.mine.findUnique({ where: { id: mineId }, select: { name: true } }),
+    prisma.equipment.groupBy({ by: ["status"], where: { site: { mineId } }, _count: true }),
+    prisma.maintenanceSchedule.count({
+      where: { status: { notIn: ["COMPLETED", "CANCELLED"] }, equipment: { site: { mineId } } },
+    }),
+    prisma.maintenanceSchedule.count({
+      where: { status: { notIn: ["COMPLETED", "CANCELLED"] }, scheduledDate: { lt: now }, equipment: { site: { mineId } } },
+    }),
+    prisma.maintenanceSchedule.findMany({
+      where: { completedDate: { gte: thirtyDaysAgo }, equipment: { site: { mineId } } },
+      select: { maintenanceType: true, cost: true, downtimeMinutes: true },
+    }),
+    prisma.downtimeEvent.groupBy({
+      by: ["category"],
+      where: { startedAt: { gte: thirtyDaysAgo }, site: { mineId } },
+      _count: true,
+    }),
+    prisma.winder.findMany({
+      where: { site: { mineId } },
+      select: {
+        status: true,
+        inspections: { orderBy: { inspectionDate: "desc" }, take: 1, select: { inspectionDate: true, nextInspectionDue: true, brakeTestResult: true } },
+      },
+    }),
+    prisma.conveyanceRope.findMany({
+      where: { status: "IN_SERVICE", winder: { site: { mineId } } },
+      select: { discardDate: true, nextTestDue: true },
+    }),
+    prisma.shaftInspection.findMany({
+      where: { site: { mineId } },
+      select: { shaftName: true, inspectionDate: true, nextInspectionDue: true },
+      orderBy: { inspectionDate: "desc" },
+    }),
+    prisma.equipmentConsumablePart.findMany({
+      where: { status: "IN_SERVICE", equipment: { site: { mineId } } },
+      select: { partType: true, initialMeasurement: true, currentMeasurement: true },
+    }),
+  ]);
+
+  const equipmentStatus = { OPERATIONAL: 0, MAINTENANCE: 0, DOWN: 0 } as Record<string, number>;
+  for (const row of equipmentByStatus) equipmentStatus[row.status] = row._count;
+
+  const maintenanceTypeCounts: Record<string, number> = {};
+  for (const m of completedMaintenance) maintenanceTypeCounts[m.maintenanceType] = (maintenanceTypeCounts[m.maintenanceType] ?? 0) + 1;
+
+  // Work chosen versus work forced on the plant. The ratio is the maintenance-maturity
+  // signal the appointee is judged on, so it's precomputed rather than left for the model
+  // to derive from the type counts and risk it arithmetically.
+  const proactiveTypes = ["PLANNED", "PREVENTIVE", "INSPECTION"];
+  const proactiveCount = completedMaintenance.filter((m) => proactiveTypes.includes(m.maintenanceType)).length;
+  const plannedSharePct = completedMaintenance.length === 0 ? null : Math.round((proactiveCount / completedMaintenance.length) * 1000) / 10;
+
+  const downtimeCategories: Record<string, number> = {};
+  for (const row of downtimeByCategory) downtimeCategories[row.category] = row._count;
+
+  const windersNeverInspected = winders.filter((w) => !w.inspections[0]).length;
+  const windersInspectionOverdue = winders.filter((w) => {
+    const next = w.inspections[0]?.nextInspectionDue;
+    return next != null && next < now;
+  }).length;
+  const windersFailedBrakeTest = winders.filter((w) => w.inspections[0]?.brakeTestResult === "FAIL").length;
+
+  // Rope discard dates are a hard regulatory ceiling, not a soft reminder — a rope past
+  // its discard date is the single most serious item this context can carry.
+  const ropesPastDiscard = ropes.filter((r) => r.discardDate != null && r.discardDate < now).length;
+  const ropesDiscardWithin30Days = ropes.filter((r) => r.discardDate != null && r.discardDate >= now && r.discardDate <= in30Days).length;
+  const ropesTestOverdue = ropes.filter((r) => r.nextTestDue != null && r.nextTestDue < now).length;
+
+  // Latest inspection per shaft only; older rows for the same shaft would each otherwise
+  // read as separately overdue.
+  const latestByShaft = new Map<string, (typeof shaftInspections)[number]>();
+  for (const s of shaftInspections) if (!latestByShaft.has(s.shaftName)) latestByShaft.set(s.shaftName, s);
+  const shaftsOverdue = [...latestByShaft.values()].filter(
+    (s) => (s.nextInspectionDue != null && s.nextInspectionDue < now) || (s.nextInspectionDue == null && s.inspectionDate < staleInspectionBefore)
+  ).length;
+
+  // Only parts with both readings can have a wear ratio; an unmeasured part is unknown,
+  // not healthy, so it's reported separately rather than folded into the "within limit" count.
+  const measuredParts = consumableParts.filter(
+    (p) => p.initialMeasurement != null && p.currentMeasurement != null && p.initialMeasurement > 0
+  );
+  const partsPastWearLimit = measuredParts.filter((p) => p.currentMeasurement! / p.initialMeasurement! <= 0.2).length;
+
+  return {
+    mine: { name: mine?.name ?? "the mine" },
+    equipment: { byStatus: equipmentStatus, total: Object.values(equipmentStatus).reduce((a, b) => a + b, 0) },
+    maintenanceBacklog: { open: openMaintenance, overdue: overdueMaintenance },
+    maintenanceLast30Days: {
+      completed: completedMaintenance.length,
+      byType: maintenanceTypeCounts,
+      plannedSharePct,
+      plannedShareNote:
+        "Share of completed work that was PLANNED/PREVENTIVE/INSPECTION rather than CORRECTIVE/EMERGENCY. Industry expectation is 80%+; a low share means the plant is dictating the schedule.",
+      totalCost: Math.round(completedMaintenance.reduce((sum, m) => sum + (m.cost ?? 0), 0)),
+      downtimeHours: Math.round(completedMaintenance.reduce((sum, m) => sum + (m.downtimeMinutes ?? 0), 0) / 6) / 10,
+    },
+    downtimeEventsLast30DaysByCategory: downtimeCategories,
+    windingPlant: {
+      winders: winders.length,
+      neverInspected: windersNeverInspected,
+      inspectionOverdue: windersInspectionOverdue,
+      failedBrakeTest: windersFailedBrakeTest,
+    },
+    conveyanceRopes: {
+      inService: ropes.length,
+      pastDiscardDate: ropesPastDiscard,
+      discardDueWithin30Days: ropesDiscardWithin30Days,
+      testOverdue: ropesTestOverdue,
+      discardNote: "A rope past its discard date must be replaced — this is a regulatory ceiling, not a scheduling preference.",
+    },
+    shafts: { tracked: latestByShaft.size, inspectionOverdue: shaftsOverdue },
+    consumableParts: {
+      inService: consumableParts.length,
+      withWearReadings: measuredParts.length,
+      pastWearLimit: partsPastWearLimit,
+      unmeasured: consumableParts.length - measuredParts.length,
+    },
+  };
+}
+
 // Guardrail applied to every title's prompt, both chat and the pipeline summary below —
 // the AI is structurally advisory-only (see AiRecommendation in schema.prisma: it can
 // create rows, but only a human review endpoint can ever change their status).
@@ -1041,6 +1184,26 @@ const AI_MODULES: Record<string, AiModule> = {
       `urgent ones), software license renewals/over-allocation, backup failures and untested disaster-recovery ` +
       `plans, open/unresolved cybersecurity incidents, high-risk pending change requests, IT vendor contract ` +
       `renewals and spend, and pending access provisioning requests — this is a systems/infrastructure assistant.`,
+  },
+  ENGINEERING_MANAGER: {
+    buildContext: buildEngineeringManagerContext,
+    systemPrompt: (ctx) =>
+      BASE_SYSTEM_PROMPT(ctx.mine.name, "Engineering Manager") +
+      ` You advise the MHSA 2.13.1 engineering appointee, who is personally accountable for machinery and plant. ` +
+      `Focus on asset integrity and maintenance discipline: the maintenance backlog (open vs overdue), the planned ` +
+      `share of completed work, downtime causes, equipment availability, consumable part wear, and above all the ` +
+      `statutory inspection regime on winding plant and shafts. ` +
+      `Treat the winding plant as the highest-consequence item in this snapshot: a conveyance rope past its discard ` +
+      `date, a winder that has failed a brake test, or a winder never inspected must be raised first and named ` +
+      `explicitly, ahead of any larger-looking number elsewhere — these are regulatory ceilings and people ride ` +
+      `on that rope. ` +
+      `When the planned share is low, say what it implies — the plant is dictating the schedule rather than the ` +
+      `department — rather than only restating the percentage. Note that a low planned share can coexist with ` +
+      `healthy availability, and that this is exactly the condition worth flagging early. ` +
+      `Distinguish "unmeasured" from "within limit" for consumable parts: parts without wear readings are unknown, ` +
+      `not healthy, and should be reported as a data gap rather than counted as compliant. ` +
+      `This is a plant-engineering assistant — production output and shift performance belong to the Operations ` +
+      `Manager, and occupational safety to the Safety Manager.`,
   },
 };
 
@@ -1687,6 +1850,7 @@ const DEPARTMENT_REPORT_TITLES: ExecutiveTitle[] = [
   "OPERATIONS_MANAGER",
   "COMPLIANCE_OFFICER",
   "IT_MANAGER",
+  "ENGINEERING_MANAGER",
 ];
 
 const EXEC_TITLE_LABELS: Partial<Record<ExecutiveTitle, string>> = {

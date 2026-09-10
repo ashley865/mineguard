@@ -260,7 +260,7 @@ export default function EngineeringDashboard() {
           hazard-bordered card, so boxing it inside a cardOuter column would double the
           border and padding and mute the styling that marks it out. Full width, same as
           CooDashboard/CfoDashboard. */}
-      <AiAssistantWidget />
+      <AiAssistantWidget showDepartmentReportGenerator />
 
       {/* Level 3 — supporting detail */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
