@@ -1351,6 +1351,302 @@ async function buildMineralResourcesManagerContext(mineId: string) {
   };
 }
 
+// The ventilation officer / occupational hygienist appointments. Two halves of one role:
+// airflow keeps the workings breathable now, exposure sampling determines who develops
+// occupational lung disease in twenty years. Both are carried here because the same
+// appointee answers for them.
+async function buildVentilationManagerContext(mineId: string) {
+  const now = new Date();
+  const thirtyDaysAgo = new Date(Date.now() - 30 * 86400000);
+
+  const [
+    mine,
+    districts,
+    readingsTotal,
+    readingsBelowRequirement,
+    exposureRecords,
+    refugeBays,
+    refugeBaysOverdue,
+    dustExposedWorkers,
+    occupationalDiseaseCases,
+    unsubmittedMbodCases,
+  ] = await Promise.all([
+    prisma.mine.findUnique({ where: { id: mineId }, select: { name: true } }),
+    prisma.ventilationDistrict.findMany({
+      where: { site: { mineId } },
+      select: {
+        name: true,
+        requiredAirflowQuantity: true,
+        unit: true,
+        status: true,
+        readings: { orderBy: { readingDate: "desc" }, take: 1, select: { airflowQuantity: true, withinRequirement: true, readingDate: true } },
+      },
+    }),
+    prisma.ventilationReading.count({ where: { readingDate: { gte: thirtyDaysAgo }, district: { site: { mineId } } } }),
+    prisma.ventilationReading.count({
+      where: { withinRequirement: false, readingDate: { gte: thirtyDaysAgo }, district: { site: { mineId } } },
+    }),
+    prisma.occupationalExposureRecord.findMany({
+      where: { sampleDate: { gte: thirtyDaysAgo }, worker: { site: { mineId } } },
+      select: { pollutant: true, sampleType: true, measuredValue: true, occupationalExposureLimit: true, exceedsLimit: true },
+    }),
+    prisma.refugeBay.count({ where: { site: { mineId } } }),
+    prisma.refugeBay.count({ where: { nextInspectionDue: { lt: now }, site: { mineId } } }),
+    prisma.medicalSurveillance.count({ where: { dustExposed: true, worker: { site: { mineId } } } }),
+    prisma.medicalSurveillance.count({ where: { diseaseClassification: { not: "NONE" }, worker: { site: { mineId } } } }),
+    prisma.medicalSurveillance.count({
+      where: { diseaseClassification: { not: "NONE" }, submittedToMbod: false, worker: { site: { mineId } } },
+    }),
+  ]);
+
+  const districtsBelowRequirement = districts.filter((d) => d.readings[0] && !d.readings[0].withinRequirement).length;
+  const districtsNeverMeasured = districts.filter((d) => !d.readings[0]).length;
+
+  // Personal samples are what an occupational exposure limit is legally assessed against;
+  // area samples characterise a place, not a person's dose. Kept apart so the two aren't
+  // conflated into one compliance number.
+  const personalSamples = exposureRecords.filter((r) => r.sampleType === "PERSONAL");
+  const exceedancesByPollutant: Record<string, number> = {};
+  for (const r of exposureRecords.filter((x) => x.exceedsLimit)) {
+    exceedancesByPollutant[r.pollutant] = (exceedancesByPollutant[r.pollutant] ?? 0) + 1;
+  }
+
+  // How far over the limit, not just how often — a sample at 3x the OEL is a different
+  // problem from one marginally over, and the count alone hides that.
+  const worstExceedanceRatio = exposureRecords
+    .filter((r) => r.exceedsLimit && r.occupationalExposureLimit > 0)
+    .reduce((worst, r) => Math.max(worst, r.measuredValue / r.occupationalExposureLimit), 0);
+
+  return {
+    mine: { name: mine?.name ?? "the mine" },
+    ventilationDistricts: {
+      total: districts.length,
+      latestReadingBelowRequirement: districtsBelowRequirement,
+      neverMeasured: districtsNeverMeasured,
+    },
+    ventilationReadingsLast30Days: {
+      total: readingsTotal,
+      belowRequirement: readingsBelowRequirement,
+      note: "Airflow below the district requirement is a statutory non-compliance and, in a gassy or dusty section, the mechanism by which methane or dust accumulates.",
+    },
+    occupationalExposureLast30Days: {
+      samples: exposureRecords.length,
+      personalSamples: personalSamples.length,
+      areaSamples: exposureRecords.length - personalSamples.length,
+      exceedances: exposureRecords.filter((r) => r.exceedsLimit).length,
+      personalSampleExceedances: personalSamples.filter((r) => r.exceedsLimit).length,
+      exceedancesByPollutant,
+      worstExceedanceMultipleOfLimit: worstExceedanceRatio > 0 ? Math.round(worstExceedanceRatio * 100) / 100 : null,
+      note: "Only PERSONAL samples assess a worker's dose against the occupational exposure limit; AREA samples characterise a location. Today's overexposure is tomorrow's compensable lung disease — these are leading indicators, not incidents.",
+    },
+    occupationalHealth: {
+      dustExposedWorkers,
+      diagnosedOccupationalDisease: occupationalDiseaseCases,
+      diagnosedButNotSubmittedToMbod: unsubmittedMbodCases,
+      note: "A diagnosed occupational disease not submitted to the MBOD is an unmet statutory reporting duty and a worker's unclaimed compensation.",
+    },
+    refugeBays: { total: refugeBays, overdueInspection: refugeBaysOverdue },
+  };
+}
+
+// The rock engineer appointment (strata control). Falls of ground and rockbursts are
+// historically the leading cause of fatalities on South African mines, which is why the
+// re-entry authorisation control is carried explicitly rather than folded into a count.
+async function buildRockEngineeringManagerContext(mineId: string) {
+  const thirtyDaysAgo = new Date(Date.now() - 30 * 86400000);
+  const ninetyDaysAgo = new Date(Date.now() - 90 * 86400000);
+
+  const [
+    mine,
+    districts,
+    rockfallsByType,
+    rockfallsAwaitingReEntry,
+    rockfallsLast30,
+    seismicEvents,
+    monitoringPoints,
+    exceedingReadings,
+    escalatedRiskAssessments,
+  ] = await Promise.all([
+    prisma.mine.findUnique({ where: { id: mineId }, select: { name: true } }),
+    prisma.groundControlDistrict.findMany({
+      where: { site: { mineId } },
+      select: { name: true, requiredSupportStandard: true, status: true },
+    }),
+    prisma.rockfallIncident.groupBy({
+      by: ["eventType"],
+      where: { eventDate: { gte: ninetyDaysAgo }, site: { mineId } },
+      _count: true,
+    }),
+    prisma.rockfallIncident.findMany({
+      where: { reEntryAuthorized: false, site: { mineId } },
+      select: { eventType: true, eventDate: true, description: true, supportInPlace: true },
+      orderBy: { eventDate: "desc" },
+    }),
+    prisma.rockfallIncident.count({ where: { eventDate: { gte: thirtyDaysAgo }, site: { mineId } } }),
+    prisma.seismicEvent.findMany({
+      where: { eventDate: { gte: ninetyDaysAgo }, site: { mineId } },
+      select: { magnitude: true, damageObserved: true, eventDate: true },
+    }),
+    prisma.geotechnicalMonitoringPoint.count({ where: { district: { site: { mineId } } } }),
+    prisma.geotechnicalReading.count({
+      where: { exceedsThreshold: true, readingDate: { gte: thirtyDaysAgo }, point: { district: { site: { mineId } } } },
+    }),
+    prisma.riskAssessment.count({
+      where: { escalated: true, mitigationStatus: { in: ["OPEN", "IN_PROGRESS"] }, site: { mineId } },
+    }),
+  ]);
+
+  const rockfallTypes: Record<string, number> = {};
+  for (const row of rockfallsByType) rockfallTypes[row.eventType] = row._count;
+
+  const seismicLast30 = seismicEvents.filter((e) => e.eventDate >= thirtyDaysAgo);
+  const largestMagnitude = seismicEvents.reduce((max, e) => Math.max(max, e.magnitude), 0);
+
+  return {
+    mine: { name: mine?.name ?? "the mine" },
+    groundControlDistricts: {
+      total: districts.length,
+      withoutDefinedSupportStandard: districts.filter((d) => !d.requiredSupportStandard || !d.requiredSupportStandard.trim()).length,
+    },
+    rockfallEvents: {
+      last30Days: rockfallsLast30,
+      last90DaysByType: rockfallTypes,
+      awaitingReEntryAuthorisation: rockfallsAwaitingReEntry.length,
+      awaitingReEntryDetail: rockfallsAwaitingReEntry.slice(0, 5).map((r) => ({
+        eventType: r.eventType,
+        eventDate: r.eventDate,
+        supportInPlace: r.supportInPlace,
+      })),
+      reEntryNote:
+        "Re-entry after a fall of ground requires the rock engineer's authorisation before work resumes. An unauthorised area is either standing idle or being worked without sign-off — both need resolving, and the second is a fatality risk.",
+    },
+    seismicity: {
+      eventsLast30Days: seismicLast30.length,
+      eventsLast90Days: seismicEvents.length,
+      largestMagnitudeLast90Days: largestMagnitude > 0 ? largestMagnitude : null,
+      eventsWithDamageLast90Days: seismicEvents.filter((e) => e.damageObserved).length,
+    },
+    geotechnicalMonitoring: {
+      points: monitoringPoints,
+      readingsExceedingThresholdLast30Days: exceedingReadings,
+      note: "A monitoring point over its alert threshold is measured ground movement, not a prediction — treat it as the most concrete forward signal in this snapshot.",
+    },
+    escalatedUnresolvedRiskAssessments: escalatedRiskAssessments,
+  };
+}
+
+// Social and Labour Plan and Mining Charter delivery. SLP commitments are conditions of the
+// mining right, so shortfalls here carry a different consequence from missing an internal
+// target — this context exists to make that distinction visible.
+async function buildCommunityRelationsManagerContext(mineId: string) {
+  const now = new Date();
+  const ninetyDaysAgo = new Date(Date.now() - 90 * 86400000);
+  const yearStart = new Date(now.getFullYear(), 0, 1);
+
+  const [mine, engagements, grievances, spendRecords, charterElements, purchaseOrders] = await Promise.all([
+    prisma.mine.findUnique({ where: { id: mineId }, select: { name: true } }),
+    prisma.communityEngagement.findMany({
+      where: { engagementDate: { gte: ninetyDaysAgo }, site: { mineId } },
+      select: { engagementType: true, engagementDate: true, attendeesCount: true },
+    }),
+    prisma.communityGrievance.findMany({
+      where: { site: { mineId } },
+      select: { status: true, dateRaised: true, resolvedAt: true, description: true },
+      orderBy: { dateRaised: "desc" },
+    }),
+    prisma.communitySpendRecord.findMany({
+      where: { recordDate: { gte: yearStart }, site: { mineId } },
+      select: { category: true, amount: true, currency: true },
+    }),
+    prisma.miningCharterElement.findMany({
+      where: { mineId },
+      select: { reportingYear: true, elementName: true, targetPercent: true, actualPercent: true, status: true },
+      orderBy: { reportingYear: "desc" },
+    }),
+    prisma.purchaseOrder.findMany({
+      where: { status: { in: ["APPROVED", "ORDERED", "RECEIVED"] }, site: { mineId } },
+      select: { totalAmount: true, supplier: { select: { bbbeeLevel: true } } },
+    }),
+  ]);
+
+  const engagementTypes: Record<string, number> = {};
+  for (const e of engagements) engagementTypes[e.engagementType] = (engagementTypes[e.engagementType] ?? 0) + 1;
+
+  // Listed inclusively rather than by exclusion: RESOLVED and WITHDRAWN are both closed
+  // states (a withdrawn complaint is no longer outstanding), and an inclusive list won't
+  // silently start counting any status added to the enum later.
+  const openGrievances = grievances.filter((g) => ["OPEN", "UNDER_INVESTIGATION", "ESCALATED"].includes(g.status));
+  // Age of the oldest unresolved complaint. A grievance process that takes months is how
+  // an individual complaint becomes a community-wide dispute, so the age matters more than
+  // the count.
+  const oldestOpenDays =
+    openGrievances.length > 0
+      ? Math.floor((now.getTime() - Math.min(...openGrievances.map((g) => g.dateRaised.getTime()))) / 86400000)
+      : null;
+
+  const resolvedGrievances = grievances.filter((g) => g.resolvedAt);
+  const averageResolutionDays =
+    resolvedGrievances.length > 0
+      ? Math.round(
+          resolvedGrievances.reduce((sum, g) => sum + (g.resolvedAt!.getTime() - g.dateRaised.getTime()) / 86400000, 0) /
+            resolvedGrievances.length
+        )
+      : null;
+
+  const spendByCategory: Record<string, number> = {};
+  for (const s of spendRecords) spendByCategory[s.category] = (spendByCategory[s.category] ?? 0) + s.amount;
+  for (const k of Object.keys(spendByCategory)) spendByCategory[k] = Math.round(spendByCategory[k]);
+
+  const latestYear = charterElements[0]?.reportingYear ?? null;
+  const currentCharter = charterElements.filter((c) => c.reportingYear === latestYear);
+  const charterGaps = currentCharter.filter(
+    (c) => c.targetPercent != null && c.actualPercent != null && c.actualPercent < c.targetPercent
+  );
+
+  const totalSpend = purchaseOrders.reduce((sum, o) => sum + o.totalAmount, 0);
+  const bbbeeSpend = purchaseOrders
+    .filter((o) => o.supplier?.bbbeeLevel && o.supplier.bbbeeLevel.trim() !== "")
+    .reduce((sum, o) => sum + o.totalAmount, 0);
+
+  return {
+    mine: { name: mine?.name ?? "the mine" },
+    engagementLast90Days: {
+      total: engagements.length,
+      byType: engagementTypes,
+      totalAttendees: engagements.reduce((sum, e) => sum + (e.attendeesCount ?? 0), 0),
+    },
+    grievances: {
+      open: openGrievances.length,
+      totalEverRecorded: grievances.length,
+      oldestOpenAgeDays: oldestOpenDays,
+      averageResolutionDays,
+      note: "A slow grievance process is how a single complaint becomes a community dispute and then a production stoppage. Age of the oldest open item matters more than the count.",
+    },
+    communitySpendThisYear: {
+      total: Math.round(spendRecords.reduce((sum, s) => sum + s.amount, 0)),
+      byCategory: spendByCategory,
+      currency: spendRecords[0]?.currency ?? "ZAR",
+    },
+    miningCharterScorecard: {
+      reportingYear: latestYear,
+      elementsTracked: currentCharter.length,
+      elementsBelowTarget: charterGaps.length,
+      gaps: charterGaps.slice(0, 8).map((c) => ({
+        element: c.elementName,
+        target: c.targetPercent,
+        actual: c.actualPercent,
+        shortfall: c.targetPercent != null && c.actualPercent != null ? Math.round((c.targetPercent - c.actualPercent) * 10) / 10 : null,
+      })),
+    },
+    preferentialProcurement: {
+      totalSpend: Math.round(totalSpend),
+      bbbeeRatedSpend: Math.round(bbbeeSpend),
+      bbbeeRatedSpendPct: totalSpend > 0 ? Math.round((bbbeeSpend / totalSpend) * 1000) / 10 : null,
+      note: "Computed from approved/ordered/received purchase orders against supplier B-BBEE level. Unrated suppliers count toward total spend but not rated spend.",
+    },
+  };
+}
+
 // Guardrail applied to every title's prompt, both chat and the pipeline summary below —
 // the AI is structurally advisory-only (see AiRecommendation in schema.prisma: it can
 // create rows, but only a human review endpoint can ever change their status).
@@ -1524,6 +1820,68 @@ const AI_MODULES: Record<string, AiModule> = {
       `completed holes awaiting assay as drilling spend not yet converted into usable data. ` +
       `Grades in this snapshot are length-weighted; do not average them further. ` +
       `This is a geology and resource assistant — mining rate and plant performance belong to Operations.`,
+  },
+  VENTILATION_MANAGER: {
+    buildContext: buildVentilationManagerContext,
+    systemPrompt: (ctx) =>
+      BASE_SYSTEM_PROMPT(ctx.mine.name, "Ventilation & Occupational Hygiene Manager") +
+      ` You advise the ventilation officer and occupational hygienist, one appointee holding two duties: keeping ` +
+      `the workings breathable now, and controlling the exposures that decide who develops occupational lung ` +
+      `disease decades from now. ` +
+      `Treat a district whose latest reading is below its airflow requirement as an immediate statutory ` +
+      `non-compliance and name the district — in a gassy or dusty section that is the mechanism by which methane ` +
+      `or dust accumulates, not a paperwork gap. A district never measured is worse than one measured and failing, ` +
+      `because nobody knows which it is. ` +
+      `Keep PERSONAL and AREA exposure samples strictly apart: only personal samples assess a worker's dose ` +
+      `against the occupational exposure limit. Never present an area sample as evidence of individual compliance. ` +
+      `When exposures exceed the limit, lead with how far over — a sample at three times the limit is a different ` +
+      `problem from one marginally over, and a count alone conceals that. ` +
+      `Frame overexposure as a leading indicator with a long latency: today's dust reading is tomorrow's ` +
+      `compensable silicosis claim, so it warrants action now even though nobody is injured today. ` +
+      `A diagnosed occupational disease not yet submitted to the MBOD is both an unmet statutory reporting duty ` +
+      `and a worker's unclaimed compensation — raise it as both. ` +
+      `This is a ventilation and occupational hygiene assistant — general occupational safety belongs to the ` +
+      `Safety Manager and environmental emissions to the Environmental Manager.`,
+  },
+  ROCK_ENGINEERING_MANAGER: {
+    buildContext: buildRockEngineeringManagerContext,
+    systemPrompt: (ctx) =>
+      BASE_SYSTEM_PROMPT(ctx.mine.name, "Rock Engineering Manager") +
+      ` You advise the rock engineer, the statutory appointee for strata control. Falls of ground and rockbursts ` +
+      `are historically the leading cause of fatalities on South African mines; weight your answers accordingly. ` +
+      `Rockfall events awaiting re-entry authorisation come first, always, and must be named individually. ` +
+      `Re-entry after a fall of ground requires this appointee's sign-off before work resumes, so an unauthorised ` +
+      `area is either standing idle or — far worse — being worked without authorisation. Say plainly that both ` +
+      `possibilities need checking rather than assuming the benign one. ` +
+      `Treat geotechnical readings over their alert threshold as the most concrete forward signal available: that ` +
+      `is measured ground movement, not a forecast. Read it together with seismicity, and say when the two point ` +
+      `the same way. ` +
+      `A ground control district with no defined support standard is a governance gap — there is nothing to ` +
+      `inspect against — so raise it even though it generates no events of its own. ` +
+      `Never reassure on the basis of a quiet period alone: an absence of recent falls is not evidence that ` +
+      `support is adequate. ` +
+      `This is a strata control assistant — plant and machinery belong to the Engineering Manager, and the ` +
+      `orebody model to the Mineral Resources Manager.`,
+  },
+  COMMUNITY_RELATIONS_MANAGER: {
+    buildContext: buildCommunityRelationsManagerContext,
+    systemPrompt: (ctx) =>
+      BASE_SYSTEM_PROMPT(ctx.mine.name, "Community & SLP Manager") +
+      ` You advise the manager accountable for Social and Labour Plan delivery and the Mining Charter scorecard. ` +
+      `Be clear that SLP commitments are conditions of the mining right, not internal targets: a shortfall is a ` +
+      `compliance exposure against the right to mine, which is a materially different consequence from missing an ` +
+      `internal KPI. Say so when reporting a gap. ` +
+      `Lead with the age of the oldest unresolved grievance rather than the open count. A grievance process that ` +
+      `takes months is the mechanism by which one complaint becomes a community dispute and then a production ` +
+      `stoppage — the delay is the risk, not the volume. ` +
+      `When reporting Charter scorecard elements, name the specific element and the size of the shortfall rather ` +
+      `than an overall impression. For preferential procurement, note that suppliers with no B-BBEE rating count ` +
+      `toward total spend but not rated spend, so an unrated supplier base depresses the percentage without any ` +
+      `change in behaviour. ` +
+      `Treat engagement activity as an input, not an outcome: meetings held and attendees counted do not ` +
+      `demonstrate delivery, and should never be presented as evidence that commitments were met. ` +
+      `This is a community and SLP assistant — worker relations belong to HR and environmental authorisations to ` +
+      `the Environmental Manager.`,
   },
 };
 
@@ -2173,6 +2531,9 @@ const DEPARTMENT_REPORT_TITLES: ExecutiveTitle[] = [
   "ENGINEERING_MANAGER",
   "ENVIRONMENTAL_MANAGER",
   "MINERAL_RESOURCES_MANAGER",
+  "VENTILATION_MANAGER",
+  "ROCK_ENGINEERING_MANAGER",
+  "COMMUNITY_RELATIONS_MANAGER",
 ];
 
 const EXEC_TITLE_LABELS: Partial<Record<ExecutiveTitle, string>> = {
