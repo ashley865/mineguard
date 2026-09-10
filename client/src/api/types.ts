@@ -461,6 +461,46 @@ export interface EngineeringDashboardSummary {
   };
 }
 
+export interface EnvironmentalDashboardSummary {
+  headline: {
+    tailingsFacilities: number;
+    tailingsAtRisk: number;
+    exceedances: number;
+    readingsLast30: number;
+    /** null when no licence limits were recorded — no denominator, so no percentage. */
+    waterLicenceUsedPct: number | null;
+    waterBreaches: number;
+    closureDue: number;
+    closureProvisionTotal: number;
+  };
+  trends: {
+    monitoring: { date: string; readings: number; exceedances: number }[];
+  };
+  breakdowns: {
+    exceedancesByParameter: Record<string, number>;
+    tailingsByRating: Record<string, number>;
+  };
+  waterEnergy: {
+    abstracted: number;
+    discharged: number;
+    recycled: number;
+    unit: string;
+    energyRenewablePct: number | null;
+    gridKwh: number | null;
+    dieselLiters: number | null;
+    ghgYear: number | null;
+    ghgScope1: number | null;
+    ghgScope2: number | null;
+    carbonTaxLiability: number | null;
+  };
+  actionQueue: {
+    exceedances: { id: string; monitoringPoint: string; parameterType: string; value: number; unit: string; thresholdMax: number | null; recordedAt: string }[];
+    tailingsAtRisk: { id: string; name: string; gistmClassification: string | null; structuralRating: string | null; seepageObserved: boolean; lastInspectionDate: string | null }[];
+    closureDue: { id: string; planReferenceNumber: string | null; siteName: string; nextAssessmentDue: string | null; status: string }[];
+    damsNeedingInspection: { id: string; name: string; currentLevel: number | null; capacity: number | null; lastInspectionDate: string | null }[];
+  };
+}
+
 export interface SafetyDashboardSummary {
   headline: {
     openIncidents: number;
