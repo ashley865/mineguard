@@ -417,6 +417,50 @@ export interface ComplianceDashboardSummary {
   };
 }
 
+export interface EngineeringDashboardSummary {
+  headline: {
+    overdueMaintenance: number;
+    openMaintenance: number;
+    /** null when nothing was completed in the window — no work means no ratio, not 0%. */
+    plannedSharePct: number | null;
+    completedLast30: number;
+    statutoryInspectionsDue: number;
+    ropesOverdue: number;
+    maintenanceCostLast30: number;
+  };
+  trends: {
+    maintenance: { date: string; proactive: number; reactive: number }[];
+  };
+  breakdowns: {
+    maintenanceByType: Record<string, number>;
+    equipmentByStatus: Record<string, number>;
+  };
+  assetIntegrity: {
+    winders: number;
+    windersInspectionDue: number;
+    ropesInService: number;
+    ropesDue: number;
+    shaftsTracked: number;
+    shaftsDue: number;
+  };
+  consumables: {
+    partsInService: number;
+    partsMeasured: number;
+    partsPastWearLimit: number;
+  };
+  maintenanceStats: {
+    downtimeHoursLast30: number;
+    equipmentDownNow: number;
+  };
+  actionQueue: {
+    overdueMaintenance: { id: string; equipmentName: string; maintenanceType: string; scheduledDate: string }[];
+    ropesDue: { id: string; ropeIdentifier: string; winderName: string; discardDate: string | null; nextTestDue: string | null }[];
+    windersDue: { id: string; name: string; shaftName: string | null; nextInspectionDue: string | null }[];
+    shaftsDue: { id: string; shaftName: string; nextInspectionDue: string | null }[];
+    partsPastWearLimit: { id: string; equipmentName: string; partType: string; position: string | null; remainingPct: number }[];
+  };
+}
+
 export interface SafetyDashboardSummary {
   headline: {
     openIncidents: number;
