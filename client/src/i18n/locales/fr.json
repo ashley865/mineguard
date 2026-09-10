@@ -2296,6 +2296,9 @@
         "ENGINEERING_MANAGER": "Directeur Technique",
         "ENVIRONMENTAL_MANAGER": "Responsable Environnement",
         "MINERAL_RESOURCES_MANAGER": "Responsable des Ressources Minérales",
+        "VENTILATION_MANAGER": "Responsable Aérage et Hygiène du Travail",
+        "ROCK_ENGINEERING_MANAGER": "Responsable Mécanique des Roches",
+        "COMMUNITY_RELATIONS_MANAGER": "Responsable Communauté et SLP",
         "OTHER": "Autre"
       },
       "summaryPending": "Invitations en Attente",

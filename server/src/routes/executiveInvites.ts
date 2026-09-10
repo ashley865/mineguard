@@ -25,6 +25,9 @@ const executiveTitleEnum = z.enum([
   "ENGINEERING_MANAGER",
   "ENVIRONMENTAL_MANAGER",
   "MINERAL_RESOURCES_MANAGER",
+  "VENTILATION_MANAGER",
+  "ROCK_ENGINEERING_MANAGER",
+  "COMMUNITY_RELATIONS_MANAGER",
 ]);
 
 const createInviteSchema = z.object({

@@ -2530,6 +2530,9 @@
         "ENGINEERING_MANAGER": "Engineering Manager",
         "ENVIRONMENTAL_MANAGER": "Environmental Manager",
         "MINERAL_RESOURCES_MANAGER": "Mineral Resources Manager",
+        "VENTILATION_MANAGER": "Ventilation & Occupational Hygiene Manager",
+        "ROCK_ENGINEERING_MANAGER": "Rock Engineering Manager",
+        "COMMUNITY_RELATIONS_MANAGER": "Community & SLP Manager",
         "OTHER": "Other"
       },
       "summaryPending": "Pending Invites",

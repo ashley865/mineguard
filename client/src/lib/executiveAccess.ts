@@ -208,6 +208,52 @@ export const executiveTitleModules: Partial<Record<ExecutiveTitle, RestrictedMod
     "/documents",
     "/reporting",
   ],
+  // The ventilation officer / occupational hygienist appointments. Sensors are here because
+  // gas, dust and airflow monitoring is the raw feed for this role, and mine rescue because
+  // refuge bays and breathing apparatus are ventilation-department assets.
+  VENTILATION_MANAGER: [
+    "/sites",
+    "/sensors",
+    "/alerts",
+    "/ventilation",
+    "/environmental",
+    "/compliance",
+    "/incidents",
+    "/emergency",
+    "/mine-rescue",
+    "/workforce",
+    "/documents",
+    "/reporting",
+  ],
+  // The rock engineer appointment (strata control). Geology is included because rock mass
+  // behaviour is read against the orebody model, and production because the mining sequence
+  // is what changes ground conditions in the first place.
+  ROCK_ENGINEERING_MANAGER: [
+    "/sites",
+    "/sensors",
+    "/alerts",
+    "/ground-control",
+    "/geology",
+    "/production",
+    "/incidents",
+    "/compliance",
+    "/permits-to-work",
+    "/emergency",
+    "/documents",
+    "/reporting",
+  ],
+  // Social and Labour Plan and Mining Charter delivery. Procurement and contractors are
+  // included deliberately: preferential procurement and enterprise development are Charter
+  // scorecard elements this role reports on, not just finance concerns. Worker records are
+  // excluded — SLP local-employment reporting doesn't require access to personal data.
+  COMMUNITY_RELATIONS_MANAGER: [
+    "/sites",
+    "/community",
+    "/contractors",
+    "/procurement",
+    "/documents",
+    "/reporting",
+  ],
 };
 
 export function isModuleAllowed(role: Role | undefined, title: ExecutiveTitle | null | undefined, path: string): boolean {

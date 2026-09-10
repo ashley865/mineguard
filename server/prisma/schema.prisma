@@ -34,6 +34,14 @@ enum ExecutiveTitle {
   ENGINEERING_MANAGER
   ENVIRONMENTAL_MANAGER
   MINERAL_RESOURCES_MANAGER
+  // Two more statutory appointments (VENTILATION_OFFICER + OCCUPATIONAL_HYGIENIST, and
+  // ROCK_ENGINEER in StatutoryAppointmentType) whose modules were shared by five or six
+  // titles and owned by none. COMMUNITY_RELATIONS_MANAGER is not a statutory appointment
+  // but carries the Social and Labour Plan and the Mining Charter's community development,
+  // preferential procurement and enterprise development elements.
+  VENTILATION_MANAGER
+  ROCK_ENGINEERING_MANAGER
+  COMMUNITY_RELATIONS_MANAGER
   OTHER
 }
 

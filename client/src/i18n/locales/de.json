@@ -2296,6 +2296,9 @@
         "ENGINEERING_MANAGER": "Technischer Leiter",
         "ENVIRONMENTAL_MANAGER": "Umweltmanager",
         "MINERAL_RESOURCES_MANAGER": "Leiter Mineralische Ressourcen",
+        "VENTILATION_MANAGER": "Leiter Bewetterung & Arbeitshygiene",
+        "ROCK_ENGINEERING_MANAGER": "Leiter Gebirgsmechanik",
+        "COMMUNITY_RELATIONS_MANAGER": "Leiter Gemeinwesen & SLP",
         "OTHER": "Sonstiges"
       },
       "summaryPending": "Ausstehende Einladungen",

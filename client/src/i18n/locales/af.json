@@ -2296,6 +2296,9 @@
         "ENGINEERING_MANAGER": "Ingenieursbestuurder",
         "ENVIRONMENTAL_MANAGER": "Omgewingsbestuurder",
         "MINERAL_RESOURCES_MANAGER": "Mineraalhulpbronbestuurder",
+        "VENTILATION_MANAGER": "Ventilasie- & Beroepshigiënebestuurder",
+        "ROCK_ENGINEERING_MANAGER": "Rotsingenieursbestuurder",
+        "COMMUNITY_RELATIONS_MANAGER": "Gemeenskaps- & SLP-bestuurder",
         "OTHER": "Ander"
       },
       "summaryPending": "Hangende Uitnodigings",

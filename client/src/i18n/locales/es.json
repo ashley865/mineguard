@@ -2296,6 +2296,9 @@
         "ENGINEERING_MANAGER": "Gerente de Ingeniería",
         "ENVIRONMENTAL_MANAGER": "Gerente Ambiental",
         "MINERAL_RESOURCES_MANAGER": "Gerente de Recursos Minerales",
+        "VENTILATION_MANAGER": "Gerente de Ventilación e Higiene Ocupacional",
+        "ROCK_ENGINEERING_MANAGER": "Gerente de Geomecánica",
+        "COMMUNITY_RELATIONS_MANAGER": "Gerente de Comunidad y SLP",
         "OTHER": "Otro"
       },
       "summaryPending": "Invitaciones Pendientes",
