@@ -59,7 +59,20 @@ router.get("/summary", async (req, res) => {
   const tsfStaleBefore = new Date(now.getTime() - TSF_INSPECTION_INTERVAL_DAYS * DAY_MS);
   const bySite = { site: { mineId } };
 
-  const [readings, tailingsFacilities, waterRecords, energyRecords, ghgRecords, closurePlans, pollutionDams] = await Promise.all([
+  const [
+    readings,
+    tailingsFacilities,
+    waterRecords,
+    energyRecords,
+    ghgRecords,
+    closurePlans,
+    pollutionDams,
+    wasteStreams,
+    emissionLicences,
+    dustExceedancesLast30,
+    boreholes,
+    environmentalIncidents,
+  ] = await Promise.all([
     prisma.environmentalReading.findMany({
       where: { ...bySite, recordedAt: { gte: trendStart } },
       select: {
@@ -113,6 +126,51 @@ router.get("/summary", async (req, res) => {
     prisma.pollutionControlDam.findMany({
       where: bySite,
       select: { id: true, name: true, capacity: true, currentLevel: true, status: true, lastInspectionDate: true },
+    }),
+    // Statutory environmental registers. Scoped to items actually active — a
+    // decommissioned waste stream or borehole is already off the mine's obligations.
+    prisma.wasteStream.findMany({
+      where: { ...bySite, status: "ACTIVE" },
+      select: {
+        id: true,
+        name: true,
+        wasteType: true,
+        storageStartDate: true,
+        storageLimitMonths: true,
+        manifests: { select: { id: true }, take: 1, orderBy: { dispatchDate: "desc" } },
+      },
+    }),
+    prisma.emissionLicence.findMany({
+      where: bySite,
+      select: {
+        id: true,
+        licenceNumber: true,
+        status: true,
+        expiryDate: true,
+        stackTests: { orderBy: { testDate: "desc" }, take: 1, select: { compliant: true, testDate: true } },
+      },
+    }),
+    prisma.dustFalloutReading.count({ where: { ...bySite, readingMonth: { gte: trendStart }, withinLimit: false } }),
+    prisma.monitoringBorehole.findMany({
+      where: { ...bySite, status: "ACTIVE" },
+      select: {
+        id: true,
+        identifier: true,
+        staticWaterLevelBaselineM: true,
+        readings: { orderBy: { readingDate: "desc" }, take: 1, select: { waterLevelMbgl: true, withinLimits: true, readingDate: true } },
+      },
+    }),
+    prisma.environmentalIncident.findMany({
+      where: { ...bySite, incidentDate: { gte: new Date(now.getTime() - 365 * DAY_MS) } },
+      select: {
+        id: true,
+        category: true,
+        severity: true,
+        incidentDate: true,
+        regulatorNotificationRequired: true,
+        regulatorNotifiedAt: true,
+        remediationStatus: true,
+      },
     }),
   ]);
 
@@ -168,6 +226,44 @@ router.get("/summary", async (req, res) => {
 
   const damsNeedingInspection = pollutionDams.filter((d) => !d.lastInspectionDate || d.lastInspectionDate < tsfStaleBefore);
 
+  // --- Statutory registers: waste, emissions, groundwater --------------------
+  // A missing date counts as lapsed, not compliant — the same reasoning as the
+  // engineering plant registers: an unset date is the least visible, longest
+  // neglected case, and reporting it as clean would hide exactly that.
+  const hazardousStreams = wasteStreams.filter((s) => s.wasteType === "HAZARDOUS");
+  const hazardousOverStorageLimit = hazardousStreams.filter((s) => {
+    if (s.storageLimitMonths == null) return false;
+    if (!s.storageStartDate) return true;
+    const monthsInStorage = (now.getTime() - s.storageStartDate.getTime()) / (30.44 * DAY_MS);
+    return monthsInStorage > s.storageLimitMonths;
+  });
+  const wasteNeverManifested = wasteStreams.filter((s) => s.manifests.length === 0).length;
+
+  const activeLicences = emissionLicences.filter((l) => l.status === "ACTIVE");
+  const licencesLapsedOrUndated = activeLicences.filter((l) => !l.expiryDate || l.expiryDate < now);
+  const nonCompliantStackTests = emissionLicences.filter((l) => l.stackTests[0] && !l.stackTests[0].compliant);
+
+  const boreholesOutOfLimits = boreholes.filter((b) => b.readings[0] && !b.readings[0].withinLimits);
+  const boreholesDrawingDown = boreholes.filter((b) => {
+    const latest = b.readings[0]?.waterLevelMbgl;
+    if (latest == null || b.staticWaterLevelBaselineM == null || b.staticWaterLevelBaselineM <= 0) return false;
+    return latest > b.staticWaterLevelBaselineM * 1.1;
+  });
+
+  const registerLapsedCount =
+    hazardousOverStorageLimit.length + licencesLapsedOrUndated.length + nonCompliantStackTests.length + boreholesOutOfLimits.length;
+
+  // --- Incident notification & remediation -----------------------------------
+  const notificationsRequired = environmentalIncidents.filter((i) => i.regulatorNotificationRequired);
+  const notificationsOutstanding = notificationsRequired.filter((i) => !i.regulatorNotifiedAt);
+  const notifiedHours = notificationsRequired
+    .filter((i) => i.regulatorNotifiedAt)
+    .map((i) => (i.regulatorNotifiedAt!.getTime() - i.incidentDate.getTime()) / 3_600_000);
+  const avgNotificationHours = notifiedHours.length > 0 ? Math.round((notifiedHours.reduce((a, b) => a + b, 0) / notifiedHours.length) * 10) / 10 : null;
+  const incidentsUnremediated = environmentalIncidents.filter(
+    (i) => i.remediationStatus === "NOT_STARTED" || i.remediationStatus === "IN_PROGRESS"
+  );
+
   res.json({
     headline: {
       tailingsFacilities: tailingsFacilities.length,
@@ -178,6 +274,9 @@ router.get("/summary", async (req, res) => {
       waterBreaches: waterBreaches.length,
       closureDue: closureDue.length,
       closureProvisionTotal: Math.round(closureProvisionTotal * 100) / 100,
+      // Everything in the waste, air quality and groundwater registers that is
+      // out of date right now — what an inspector would find today.
+      registerLapsed: registerLapsedCount,
     },
     trends: { monitoring: monitoringSeries },
     breakdowns: {
@@ -199,6 +298,32 @@ router.get("/summary", async (req, res) => {
       ghgScope1: latestGhg?.scope1TonnesCO2e ?? null,
       ghgScope2: latestGhg?.scope2TonnesCO2e ?? null,
       carbonTaxLiability: latestGhg?.carbonTaxLiability ?? null,
+    },
+    registers: {
+      waste: {
+        activeStreams: wasteStreams.length,
+        hazardousStreams: hazardousStreams.length,
+        hazardousOverStorageLimit: hazardousOverStorageLimit.length,
+        neverManifested: wasteNeverManifested,
+      },
+      emissions: {
+        activeLicences: activeLicences.length,
+        licencesLapsedOrUndated: licencesLapsedOrUndated.length,
+        nonCompliantStackTests: nonCompliantStackTests.length,
+        dustExceedancesLast30: dustExceedancesLast30,
+      },
+      groundwater: {
+        activeBoreholes: boreholes.length,
+        outOfLimits: boreholesOutOfLimits.length,
+        drawingDown: boreholesDrawingDown.length,
+      },
+    },
+    incidentNotification: {
+      totalLast365Days: environmentalIncidents.length,
+      notificationsRequired: notificationsRequired.length,
+      notificationsOutstanding: notificationsOutstanding.length,
+      avgNotificationHours,
+      unremediated: incidentsUnremediated.length,
     },
     actionQueue: {
       exceedances: exceedances.slice(0, 8).map((r) => ({
@@ -232,6 +357,28 @@ router.get("/summary", async (req, res) => {
         capacity: d.capacity,
         lastInspectionDate: d.lastInspectionDate,
       })),
+      // The three statutory registers merged into one queue — to the officer they are
+      // one obligation: what in my environmental registers is out of date today.
+      registerLapsed: [
+        ...hazardousOverStorageLimit.map((s) => ({ id: s.id, register: "WASTE" as const, identifier: s.name, issue: "STORAGE_LIMIT" as const, dueDate: null })),
+        ...licencesLapsedOrUndated.map((l) => ({ id: l.id, register: "EMISSIONS" as const, identifier: l.licenceNumber, issue: "LICENCE_EXPIRY" as const, dueDate: l.expiryDate })),
+        ...nonCompliantStackTests.map((l) => ({ id: `${l.id}-test`, register: "EMISSIONS" as const, identifier: l.licenceNumber, issue: "STACK_TEST" as const, dueDate: l.stackTests[0]?.testDate ?? null })),
+        ...boreholesOutOfLimits.map((b) => ({ id: b.id, register: "GROUNDWATER" as const, identifier: b.identifier, issue: "QUALITY_EXCEEDANCE" as const, dueDate: b.readings[0]?.readingDate ?? null })),
+      ]
+        // Undated entries first — an item with no date is the least visible and the
+        // longest neglected, not the least urgent.
+        .sort((a, b) => (a.dueDate?.getTime() ?? 0) - (b.dueDate?.getTime() ?? 0))
+        .slice(0, 8),
+      incidentNotifications: [...notificationsOutstanding, ...incidentsUnremediated.filter((i) => !notificationsOutstanding.includes(i))]
+        .slice(0, 8)
+        .map((i) => ({
+          id: i.id,
+          category: i.category,
+          severity: i.severity,
+          incidentDate: i.incidentDate,
+          notificationOutstanding: i.regulatorNotificationRequired && !i.regulatorNotifiedAt,
+          remediationStatus: i.remediationStatus,
+        })),
     },
   });
 });

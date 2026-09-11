@@ -77,6 +77,7 @@ export default function Layout() {
         { to: "/compliance", label: t("compliance.nav") },
         { to: "/safety-observations", label: t("safetyObservations.nav") },
         { to: "/environmental", label: t("environmental.nav") },
+        { to: "/environmental-registers", label: t("environmentalRegisters.nav") },
         { to: "/emergency", label: t("emergency.nav") },
         { to: "/permits", label: t("permits.nav") },
         { to: "/inspection", label: t("inspection.nav") },

@@ -514,6 +514,8 @@ export interface EnvironmentalDashboardSummary {
     waterBreaches: number;
     closureDue: number;
     closureProvisionTotal: number;
+    /** Everything in the waste, air quality and groundwater registers lapsed right now. */
+    registerLapsed: number;
   };
   trends: {
     monitoring: { date: string; readings: number; exceedances: number }[];
@@ -535,11 +537,39 @@ export interface EnvironmentalDashboardSummary {
     ghgScope2: number | null;
     carbonTaxLiability: number | null;
   };
+  registers: {
+    waste: { activeStreams: number; hazardousStreams: number; hazardousOverStorageLimit: number; neverManifested: number };
+    emissions: { activeLicences: number; licencesLapsedOrUndated: number; nonCompliantStackTests: number; dustExceedancesLast30: number };
+    groundwater: { activeBoreholes: number; outOfLimits: number; drawingDown: number };
+  };
+  incidentNotification: {
+    totalLast365Days: number;
+    notificationsRequired: number;
+    notificationsOutstanding: number;
+    /** Null when nothing required notification in the window. */
+    avgNotificationHours: number | null;
+    unremediated: number;
+  };
   actionQueue: {
     exceedances: { id: string; monitoringPoint: string; parameterType: string; value: number; unit: string; thresholdMax: number | null; recordedAt: string }[];
     tailingsAtRisk: { id: string; name: string; gistmClassification: string | null; structuralRating: string | null; seepageObserved: boolean; lastInspectionDate: string | null }[];
     closureDue: { id: string; planReferenceNumber: string | null; siteName: string; nextAssessmentDue: string | null; status: string }[];
     damsNeedingInspection: { id: string; name: string; currentLevel: number | null; capacity: number | null; lastInspectionDate: string | null }[];
+    registerLapsed: {
+      id: string;
+      register: "WASTE" | "EMISSIONS" | "GROUNDWATER";
+      identifier: string;
+      issue: "STORAGE_LIMIT" | "LICENCE_EXPIRY" | "STACK_TEST" | "QUALITY_EXCEEDANCE";
+      dueDate: string | null;
+    }[];
+    incidentNotifications: {
+      id: string;
+      category: EnvironmentalIncidentCategory;
+      severity: EnvironmentalIncidentSeverity;
+      incidentDate: string;
+      notificationOutstanding: boolean;
+      remediationStatus: EnvironmentalRemediationStatus;
+    }[];
   };
 }
 
@@ -3389,6 +3419,178 @@ export interface AssetReliabilitySummary {
     targetAvailabilityPct: number | null;
     belowTarget: boolean;
   }[];
+}
+
+// --- Environmental registers (environmental manager) ------------------------
+
+export type WasteType = "HAZARDOUS" | "GENERAL" | "RECYCLABLE";
+export type WasteStreamStatus = "ACTIVE" | "DECOMMISSIONED";
+export type WasteDisposalMethod = "LANDFILL" | "INCINERATION" | "RECYCLING" | "TREATMENT" | "RECOVERY" | "OTHER";
+
+export interface WasteManifest {
+  id: string;
+  wasteStreamId: string;
+  manifestNumber: string;
+  dispatchDate: string;
+  quantity: number;
+  quantityUnit: string;
+  transporterName?: string | null;
+  transporterRegistrationNumber?: string | null;
+  disposalFacilityName: string;
+  disposalFacilityLicenceNumber?: string | null;
+  disposalMethod: WasteDisposalMethod;
+  receivedConfirmationDate?: string | null;
+  notes?: string | null;
+}
+
+export interface WasteStream {
+  id: string;
+  siteId: string;
+  site?: { id: string; name: string } | null;
+  name: string;
+  wasteType: WasteType;
+  classificationCode?: string | null;
+  sourceActivity?: string | null;
+  storageLocation?: string | null;
+  storageCapacity?: number | null;
+  storageCapacityUnit?: string | null;
+  storageStartDate?: string | null;
+  storageLimitMonths?: number | null;
+  status: WasteStreamStatus;
+  notes?: string | null;
+  manifests?: WasteManifest[];
+  createdAt: string;
+}
+
+export type EmissionLicenceStatus = "ACTIVE" | "EXPIRED" | "SUSPENDED" | "UNDER_REVIEW";
+
+export interface StackEmissionTest {
+  id: string;
+  emissionLicenceId: string;
+  testDate: string;
+  stackName: string;
+  pollutant: string;
+  measuredValue: number;
+  unit: string;
+  licensedLimit?: number | null;
+  compliant: boolean;
+  testingAuthority?: string | null;
+  certificateNumber?: string | null;
+  nextTestDue?: string | null;
+  notes?: string | null;
+}
+
+export interface EmissionLicence {
+  id: string;
+  siteId: string;
+  site?: { id: string; name: string } | null;
+  licenceNumber: string;
+  issuingAuthority?: string | null;
+  issueDate?: string | null;
+  expiryDate?: string | null;
+  status: EmissionLicenceStatus;
+  conditionsSummary?: string | null;
+  notes?: string | null;
+  stackTests?: StackEmissionTest[];
+  createdAt: string;
+}
+
+export interface DustFalloutReading {
+  id: string;
+  siteId: string;
+  site?: { id: string; name: string } | null;
+  monitoringPoint: string;
+  readingMonth: string;
+  dustFalloutRate: number;
+  thresholdMgM2Day?: number | null;
+  withinLimit: boolean;
+  notes?: string | null;
+  createdAt: string;
+}
+
+export type BoreholeType = "UPGRADIENT" | "DOWNGRADIENT" | "SUPPLY" | "OTHER";
+export type BoreholeStatus = "ACTIVE" | "DECOMMISSIONED" | "DRY";
+
+export interface GroundwaterReading {
+  id: string;
+  boreholeId: string;
+  readingDate: string;
+  waterLevelMbgl?: number | null;
+  ph?: number | null;
+  electricalConductivity?: number | null;
+  totalDissolvedSolids?: number | null;
+  sulfateConcentration?: number | null;
+  withinLimits: boolean;
+  notes?: string | null;
+}
+
+export interface MonitoringBorehole {
+  id: string;
+  siteId: string;
+  site?: { id: string; name: string } | null;
+  identifier: string;
+  boreholeType: BoreholeType;
+  latitude?: number | null;
+  longitude?: number | null;
+  installedDate?: string | null;
+  staticWaterLevelBaselineM?: number | null;
+  status: BoreholeStatus;
+  notes?: string | null;
+  readings?: GroundwaterReading[];
+  createdAt: string;
+}
+
+export type EnvironmentalIncidentCategory =
+  | "SPILL"
+  | "WATER_POLLUTION"
+  | "AIR_POLLUTION"
+  | "DUST_EXCEEDANCE"
+  | "WASTE_MISMANAGEMENT"
+  | "NOISE"
+  | "ECOLOGICAL_DAMAGE"
+  | "OTHER";
+export type EnvironmentalIncidentSeverity = "MINOR" | "MODERATE" | "MAJOR" | "CATASTROPHIC";
+export type EnvironmentalRemediationStatus = "NOT_STARTED" | "IN_PROGRESS" | "COMPLETE" | "VERIFIED";
+
+export interface EnvironmentalIncident {
+  id: string;
+  siteId: string;
+  site?: { id: string; name: string } | null;
+  incidentDate: string;
+  category: EnvironmentalIncidentCategory;
+  severity: EnvironmentalIncidentSeverity;
+  description: string;
+  receivingEnvironment?: string | null;
+  estimatedVolume?: number | null;
+  volumeUnit?: string | null;
+  immediateActionTaken?: string | null;
+  regulatorNotificationRequired: boolean;
+  regulatorNotifiedAt?: string | null;
+  regulatorNotifiedTo?: string | null;
+  remediationStatus: EnvironmentalRemediationStatus;
+  remediationCompletedAt?: string | null;
+  rootCause?: string | null;
+  recurrencePrevented: boolean;
+  reportedBy?: { id: string; name: string } | null;
+  verifiedBy?: { id: string; name: string } | null;
+  notes?: string | null;
+  createdAt: string;
+}
+
+export interface EnvironmentalIncidentSummary {
+  windowDays: number;
+  total: number;
+  byCategory: Record<string, number>;
+  majorOrWorse: number;
+  notificationsRequired: number;
+  notificationsOutstanding: number;
+  /** Null when nothing required notification in the window. */
+  avgNotificationHours: number | null;
+  unremediated: number;
+  completeButUnverified: number;
+  /** Null when nothing happened in the window — 0% would read as a broken process. */
+  rcaCompletionPct: number | null;
+  recurrencePreventedPct: number | null;
 }
 
 export interface LegalComplianceCalendarEntry {

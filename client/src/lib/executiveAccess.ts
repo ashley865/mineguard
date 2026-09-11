@@ -59,6 +59,7 @@ export const restrictedModules = [
   "/document-acknowledgements",
   "/vetting-records",
   "/plant-integrity",
+  "/environmental-registers",
 ] as const;
 
 export type RestrictedModule = (typeof restrictedModules)[number];
@@ -156,6 +157,9 @@ export const executiveTitleModules: Partial<Record<ExecutiveTitle, RestrictedMod
     // inspector asks to see, so the compliance officer must be able to check them
     // before the DMRE does.
     "/plant-integrity",
+    // Same reasoning for the environmental statutory registers — waste manifests,
+    // the AEL, and groundwater monitoring are what DWS/DMRE ask to see on a visit.
+    "/environmental-registers",
   ],
   IT_MANAGER: ["/sites", "/sensors", "/equipment", "/alerts", "/reporting", "/security", "/scanner", "/documents", "/maintenance", "/it-operations", "/cyber-command-center"],
   // The MHSA 2.13.1 engineering appointee: accountable for machinery and plant, which is
@@ -204,6 +208,7 @@ export const executiveTitleModules: Partial<Record<ExecutiveTitle, RestrictedMod
     "/emergency",
     "/documents",
     "/reporting",
+    "/environmental-registers",
   ],
   // The surveyor appointment, extended to the resource function: owns geology (drill holes,
   // resource estimates, assays) and needs production to reconcile actual output against the

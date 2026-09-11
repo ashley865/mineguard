@@ -11,7 +11,7 @@ import { AlertTriangleIcon, GaugeIcon, LayersIcon, ZapIcon } from "../components
 // Same F-pattern / dashboard-designer approach as the other department dashboards.
 
 type Tone = "positive" | "negative" | "caution";
-type QueueTab = "exceedances" | "tailings" | "closure" | "dams";
+type QueueTab = "exceedances" | "tailings" | "closure" | "dams" | "registers" | "incidents";
 
 const cardOuter = "bg-mine-900 border border-mine-800 rounded-[20px] shadow-sm shadow-black/5 p-6";
 const TONE_BADGE: Record<Tone | "neutral", string> = {
@@ -109,7 +109,7 @@ export default function EnvironmentalDashboard() {
   if (loadError) return <LoadError onRetry={load} />;
   if (!summary) return <div className="text-mine-300">{t("common.loading")}</div>;
 
-  const { headline, trends, breakdowns, waterEnergy, actionQueue } = summary;
+  const { headline, trends, breakdowns, waterEnergy, registers, incidentNotification, actionQueue } = summary;
 
   const exceedanceTrend = trends.monitoring.map((d) => d.exceedances);
   const monitoringChartData = trends.monitoring.map((d) => ({
@@ -128,12 +128,16 @@ export default function EnvironmentalDashboard() {
     tailings: actionQueue.tailingsAtRisk.length,
     closure: actionQueue.closureDue.length,
     dams: actionQueue.damsNeedingInspection.length,
+    registers: actionQueue.registerLapsed.length,
+    incidents: actionQueue.incidentNotifications.length,
   };
   const totalActions = Object.values(queueCounts).reduce((a, b) => a + b, 0);
 
   const queueTabs: { key: QueueTab; label: string; to: string }[] = [
     { key: "tailings", label: t("environmentalDashboard.queue.tailings"), to: "/compliance" },
     { key: "exceedances", label: t("environmentalDashboard.queue.exceedances"), to: "/environmental" },
+    { key: "registers", label: t("environmentalDashboard.queue.registers"), to: "/environmental-registers" },
+    { key: "incidents", label: t("environmentalDashboard.queue.incidents"), to: "/environmental-registers?tab=incidents" },
     { key: "closure", label: t("environmentalDashboard.queue.closure"), to: "/compliance" },
     { key: "dams", label: t("environmentalDashboard.queue.dams"), to: "/resources" },
   ];
@@ -147,7 +151,7 @@ export default function EnvironmentalDashboard() {
 
       {/* Level 1 — headline KPIs. Tailings leads rather than the metric with the bigger
           number: an exceedance is a compliance problem, a dam wall is a catastrophe. */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-5 gap-4">
         <HeadlineKpi
           icon={<LayersIcon />}
           label={t("environmentalDashboard.tailingsAtRisk")}
@@ -189,6 +193,16 @@ export default function EnvironmentalDashboard() {
           value={headline.closureDue}
           target={t("environmentalDashboard.closureProvisionTarget", { amount: headline.closureProvisionTotal.toLocaleString() })}
           tone={headline.closureDue > 0 ? "caution" : "positive"}
+        />
+        {/* Distinct from exceedances above: that is monitoring readings out of limits, this
+            is the three statutory registers — waste, air quality, groundwater — lapsed
+            right now, the evidence an inspector would ask to see. */}
+        <HeadlineKpi
+          icon={<AlertTriangleIcon />}
+          label={t("environmentalDashboard.registerLapsed")}
+          value={headline.registerLapsed}
+          target={t("environmentalDashboard.registerLapsedTarget")}
+          tone={headline.registerLapsed > 0 ? "negative" : "positive"}
         />
       </div>
 
@@ -314,6 +328,72 @@ export default function EnvironmentalDashboard() {
         </div>
       </div>
 
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <div className={`${cardOuter} space-y-3`}>
+          <div>
+            <h2 className="text-sm font-semibold">{t("environmentalDashboard.registersTitle")}</h2>
+            <p className="text-[11px] text-mine-400 mt-0.5">{t("environmentalDashboard.registersHint")}</p>
+          </div>
+          <StatRow
+            label={t("environmentalDashboard.wasteOverLimit", { count: registers.waste.hazardousStreams })}
+            value={registers.waste.hazardousOverStorageLimit}
+            tone={registers.waste.hazardousOverStorageLimit > 0 ? "negative" : "positive"}
+          />
+          <StatRow
+            label={t("environmentalDashboard.licencesLapsed", { count: registers.emissions.activeLicences })}
+            value={registers.emissions.licencesLapsedOrUndated}
+            tone={registers.emissions.licencesLapsedOrUndated > 0 ? "negative" : "positive"}
+          />
+          <StatRow
+            label={t("environmentalDashboard.nonCompliantStackTests")}
+            value={registers.emissions.nonCompliantStackTests}
+            tone={registers.emissions.nonCompliantStackTests > 0 ? "negative" : "positive"}
+          />
+          <div className="border-t border-mine-800 pt-3 space-y-3">
+            <StatRow
+              label={t("environmentalDashboard.groundwaterOutOfLimits", { count: registers.groundwater.activeBoreholes })}
+              value={registers.groundwater.outOfLimits}
+              tone={registers.groundwater.outOfLimits > 0 ? "negative" : "positive"}
+            />
+            <StatRow
+              label={t("environmentalDashboard.groundwaterDrawingDown")}
+              value={registers.groundwater.drawingDown}
+              tone={registers.groundwater.drawingDown > 0 ? "caution" : "positive"}
+            />
+          </div>
+          <div className="pt-2">
+            <Link to="/environmental-registers" className="text-xs text-hazard-500 hover:underline">{t("environmentalDashboard.openRegisters")}</Link>
+          </div>
+        </div>
+
+        <div className={`${cardOuter} space-y-3`}>
+          <div>
+            <h2 className="text-sm font-semibold">{t("environmentalDashboard.incidentsTitle")}</h2>
+            <p className="text-[11px] text-mine-400 mt-0.5">{t("environmentalDashboard.incidentsHint")}</p>
+          </div>
+          <StatRow
+            label={t("environmentalDashboard.notificationsOutstanding")}
+            value={incidentNotification.notificationsOutstanding}
+            tone={incidentNotification.notificationsOutstanding > 0 ? "negative" : "positive"}
+          />
+          <StatRow
+            label={t("environmentalDashboard.avgNotificationHours")}
+            value={incidentNotification.avgNotificationHours !== null ? `${incidentNotification.avgNotificationHours} h` : "—"}
+          />
+          <StatRow
+            label={t("environmentalDashboard.incidentsUnremediated")}
+            value={incidentNotification.unremediated}
+            tone={incidentNotification.unremediated > 0 ? "caution" : "positive"}
+          />
+          <div className="border-t border-mine-800 pt-3">
+            <StatRow label={t("environmentalDashboard.incidentsLast365")} value={incidentNotification.totalLast365Days} />
+          </div>
+          <div className="pt-2">
+            <Link to="/environmental-registers?tab=incidents" className="text-xs text-hazard-500 hover:underline">{t("environmentalDashboard.openIncidents")}</Link>
+          </div>
+        </div>
+      </div>
+
       {/* Action queue — tabbed rather than four stacked tables */}
       <div className={cardOuter}>
         <div className="flex items-start justify-between flex-wrap gap-3 mb-4">
@@ -403,6 +483,45 @@ export default function EnvironmentalDashboard() {
                   <span className="text-hazard-500 tabular-nums shrink-0">
                     {p.nextAssessmentDue ? new Date(p.nextAssessmentDue).toLocaleDateString() : "—"}
                   </span>
+                </div>
+              ))
+            ))}
+
+          {queueTab === "registers" &&
+            (actionQueue.registerLapsed.length === 0 ? (
+              <p className="text-xs text-mine-400 py-4 text-center">{t("environmentalDashboard.queueEmpty")}</p>
+            ) : (
+              actionQueue.registerLapsed.map((r) => (
+                <div key={r.id} className="flex items-center justify-between gap-3 text-xs border-b border-mine-800 pb-2 last:border-0 last:pb-0">
+                  <div className="min-w-0">
+                    <div className="truncate">{r.identifier}</div>
+                    <div className="text-mine-500 text-[11px]">
+                      {t(`environmentalDashboard.registers.${r.register}`)} · {t(`environmentalDashboard.registerIssues.${r.issue}`)}
+                    </div>
+                  </div>
+                  <span className="text-danger-500 tabular-nums shrink-0">
+                    {r.dueDate ? new Date(r.dueDate).toLocaleDateString() : t("environmentalDashboard.noDueDate")}
+                  </span>
+                </div>
+              ))
+            ))}
+
+          {queueTab === "incidents" &&
+            (actionQueue.incidentNotifications.length === 0 ? (
+              <p className="text-xs text-mine-400 py-4 text-center">{t("environmentalDashboard.queueEmpty")}</p>
+            ) : (
+              actionQueue.incidentNotifications.map((i) => (
+                <div key={i.id} className="flex items-center justify-between gap-3 text-xs border-b border-mine-800 pb-2 last:border-0 last:pb-0">
+                  <div className="min-w-0">
+                    <div className="truncate">
+                      {t(`environmentalRegisters.incidents.categories.${i.category}`)}
+                      {i.notificationOutstanding && <span className="text-danger-500 font-semibold"> · {t("environmentalDashboard.notificationOutstandingShort")}</span>}
+                    </div>
+                    <div className="text-mine-500 text-[11px]">
+                      {t(`environmentalRegisters.incidents.severities.${i.severity}`)} · {t(`environmentalRegisters.incidents.remediationStatuses.${i.remediationStatus}`)}
+                    </div>
+                  </div>
+                  <span className="text-mine-400 tabular-nums shrink-0">{new Date(i.incidentDate).toLocaleDateString()}</span>
                 </div>
               ))
             ))}

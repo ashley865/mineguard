@@ -308,6 +308,9 @@ model User {
   learnershipsRecorded      Learnership[]           @relation("LearnershipRecordedBy")
   legalComplianceItemsOwned LegalComplianceItem[]   @relation("LegalComplianceOwner")
 
+  environmentalIncidentsReported EnvironmentalIncident[] @relation("EnvironmentalIncidentReportedBy")
+  environmentalIncidentsVerified EnvironmentalIncident[] @relation("EnvironmentalIncidentVerifiedBy")
+
   geotechReadingsRecorded  GeotechnicalReading[] @relation("GeotechReadingRecordedBy")
   rockfallSignOffs         RockfallIncident[]    @relation("RockfallSignOffBy")
   rescueDrillsConducted    RescueDrill[]         @relation("RescueDrillConductedBy")
@@ -493,6 +496,12 @@ model Site {
   electricalInstallations ElectricalInstallation[]
   patrolLogEntries      PatrolLogEntry[]
   jobRequisitions       JobRequisition[]
+
+  wasteStreams          WasteStream[]
+  emissionLicences      EmissionLicence[]
+  dustFalloutReadings   DustFalloutReading[]
+  monitoringBoreholes   MonitoringBorehole[]
+  environmentalIncidents EnvironmentalIncident[]
 
   gatePasses             GatePass[]
   gateLogs               GateLog[]
@@ -6457,4 +6466,278 @@ model EquipmentFailure {
   notes             String?
 
   createdAt DateTime @default(now())
+}
+
+// ---------------------------------------------------------------------------
+// Module: Waste Management Register (NEMWA + Waste Classification & Management
+// Regulations)
+// Every hazardous or general waste stream leaving the mine must be classified,
+// manifested to a licensed disposal facility, and — for hazardous waste — moved
+// off site within the legal accumulation ceiling (23 months without a stockpile
+// permit). storageStartDate resets whenever a manifest clears the stockpile, so
+// "time in storage" is measured from the last dispatch, not from record creation.
+// ---------------------------------------------------------------------------
+
+enum WasteType {
+  HAZARDOUS
+  GENERAL
+  RECYCLABLE
+}
+
+enum WasteStreamStatus {
+  ACTIVE
+  DECOMMISSIONED
+}
+
+enum WasteDisposalMethod {
+  LANDFILL
+  INCINERATION
+  RECYCLING
+  TREATMENT
+  RECOVERY
+  OTHER
+}
+
+model WasteStream {
+  id             String            @id @default(cuid())
+  siteId         String
+  site           Site              @relation(fields: [siteId], references: [id], onDelete: Cascade)
+  name           String
+  wasteType      WasteType
+  // SANS/NEMWA waste classification code or UN number, e.g. "UN 3082" — required to
+  // determine handling, storage and disposal rules for hazardous streams.
+  classificationCode String?
+  sourceActivity String?
+  storageLocation String?
+  storageCapacity Float?
+  storageCapacityUnit String?
+  storageStartDate   DateTime?
+  storageLimitMonths Int?
+  status         WasteStreamStatus @default(ACTIVE)
+  notes          String?
+
+  manifests WasteManifest[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model WasteManifest {
+  id                             String              @id @default(cuid())
+  wasteStreamId                  String
+  wasteStream                    WasteStream         @relation(fields: [wasteStreamId], references: [id], onDelete: Cascade)
+  manifestNumber                 String
+  dispatchDate                   DateTime
+  quantity                       Float
+  quantityUnit                   String
+  transporterName                String?
+  transporterRegistrationNumber  String?
+  disposalFacilityName           String
+  disposalFacilityLicenceNumber  String?
+  disposalMethod                 WasteDisposalMethod
+  // The signed manifest/waybill returned by the disposal facility confirming safe
+  // receipt — the actual proof of lawful disposal, not just that a truck left site.
+  receivedConfirmationDate       DateTime?
+  notes                          String?
+
+  createdAt DateTime @default(now())
+}
+
+// ---------------------------------------------------------------------------
+// Module: Atmospheric Emission Licence & Air Quality Compliance (NEMAQA)
+// A mine with listed activities (crushing, calcining, etc.) holds an Atmospheric
+// Emission Licence with numeric limits and a renewal date, is periodically stack-
+// tested against those limits, and runs a dust fallout bucket network per SANS
+// 1929. Distinct from EnvironmentalReading, which captures ad hoc AIR_QUALITY/
+// DUST spot readings with no licence, certificate or bucket-network structure.
+// ---------------------------------------------------------------------------
+
+enum EmissionLicenceStatus {
+  ACTIVE
+  EXPIRED
+  SUSPENDED
+  UNDER_REVIEW
+}
+
+model EmissionLicence {
+  id                String                @id @default(cuid())
+  siteId            String
+  site              Site                  @relation(fields: [siteId], references: [id], onDelete: Cascade)
+  licenceNumber     String
+  issuingAuthority  String?
+  issueDate         DateTime?
+  expiryDate        DateTime?
+  status            EmissionLicenceStatus @default(ACTIVE)
+  conditionsSummary String?
+  notes             String?
+
+  stackTests StackEmissionTest[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model StackEmissionTest {
+  id                String          @id @default(cuid())
+  emissionLicenceId String
+  emissionLicence   EmissionLicence @relation(fields: [emissionLicenceId], references: [id], onDelete: Cascade)
+  testDate          DateTime
+  stackName         String
+  pollutant         String
+  measuredValue     Float
+  unit              String
+  licensedLimit     Float?
+  compliant         Boolean         @default(true)
+  testingAuthority  String?
+  certificateNumber String?
+  nextTestDue       DateTime?
+  notes             String?
+
+  createdAt DateTime @default(now())
+}
+
+model DustFalloutReading {
+  id              String   @id @default(cuid())
+  siteId          String
+  site            Site     @relation(fields: [siteId], references: [id], onDelete: Cascade)
+  monitoringPoint String
+  readingMonth    DateTime
+  // 30-day average dust fallout rate from the bucket method, mg/m²/day (SANS 1929).
+  dustFalloutRate Float
+  thresholdMgM2Day Float?
+  withinLimit     Boolean  @default(true)
+  notes           String?
+
+  createdAt DateTime @default(now())
+}
+
+// ---------------------------------------------------------------------------
+// Module: Groundwater & Borehole Monitoring (National Water Act, GN 704)
+// A water use licence's monitoring conditions require a network of boreholes
+// tracked for water-level drawdown and quality trend — distinct from
+// WaterBalanceRecord (surface abstraction/discharge accounting) and
+// AcidMineDrainageReading (a specific dam's seepage points). Pairing an
+// upgradient (background) borehole against downgradient ones is how a mine
+// demonstrates whether it is causing groundwater contamination, not just that
+// groundwater exists nearby.
+// ---------------------------------------------------------------------------
+
+enum BoreholeType {
+  UPGRADIENT
+  DOWNGRADIENT
+  SUPPLY
+  OTHER
+}
+
+enum BoreholeStatus {
+  ACTIVE
+  DECOMMISSIONED
+  DRY
+}
+
+model MonitoringBorehole {
+  id            String         @id @default(cuid())
+  siteId        String
+  site          Site           @relation(fields: [siteId], references: [id], onDelete: Cascade)
+  identifier    String
+  boreholeType  BoreholeType   @default(OTHER)
+  latitude      Float?
+  longitude     Float?
+  installedDate DateTime?
+  // Water level at installation, in metres below ground level — the baseline
+  // drawdown is measured against.
+  staticWaterLevelBaselineM Float?
+  status        BoreholeStatus @default(ACTIVE)
+  notes         String?
+
+  readings GroundwaterReading[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model GroundwaterReading {
+  id                     String             @id @default(cuid())
+  boreholeId             String
+  borehole               MonitoringBorehole @relation(fields: [boreholeId], references: [id], onDelete: Cascade)
+  readingDate            DateTime
+  waterLevelMbgl         Float?
+  ph                     Float?
+  electricalConductivity Float?
+  totalDissolvedSolids   Float?
+  sulfateConcentration   Float?
+  withinLimits           Boolean            @default(true)
+  notes                  String?
+
+  createdAt DateTime @default(now())
+}
+
+// ---------------------------------------------------------------------------
+// Module: Environmental Incidents & Non-Conformances (NEMA s28 duty of care /
+// s30 emergency incident reporting)
+// NEMA imposes a duty to prevent pollution and a specific duty to notify the
+// relevant authority of a material incident without delay. The generic
+// Incident model has no receiving-environment, regulator-notification or
+// remediation-verification fields, so today the mine has no way to demonstrate
+// it met the notification duty or that a spill was actually remediated. This
+// register also ties the other three together: recurrence by source,
+// notification timeliness and remediation status are the accountability trail
+// their register data feeds into.
+// ---------------------------------------------------------------------------
+
+enum EnvironmentalIncidentCategory {
+  SPILL
+  WATER_POLLUTION
+  AIR_POLLUTION
+  DUST_EXCEEDANCE
+  WASTE_MISMANAGEMENT
+  NOISE
+  ECOLOGICAL_DAMAGE
+  OTHER
+}
+
+enum EnvironmentalIncidentSeverity {
+  MINOR
+  MODERATE
+  MAJOR
+  CATASTROPHIC
+}
+
+enum EnvironmentalRemediationStatus {
+  NOT_STARTED
+  IN_PROGRESS
+  COMPLETE
+  VERIFIED
+}
+
+model EnvironmentalIncident {
+  id                    String                         @id @default(cuid())
+  siteId                String
+  site                  Site                           @relation(fields: [siteId], references: [id], onDelete: Cascade)
+  incidentDate          DateTime
+  category              EnvironmentalIncidentCategory
+  severity              EnvironmentalIncidentSeverity  @default(MINOR)
+  description           String
+  receivingEnvironment  String?
+  estimatedVolume       Float?
+  volumeUnit            String?
+  immediateActionTaken  String?
+  regulatorNotificationRequired Boolean               @default(false)
+  regulatorNotifiedAt   DateTime?
+  regulatorNotifiedTo   String?
+  remediationStatus     EnvironmentalRemediationStatus @default(NOT_STARTED)
+  remediationCompletedAt DateTime?
+  rootCause             String?
+  // Whether the corrective action addressed the cause rather than the symptom —
+  // mirrors EquipmentFailure.recurrencePrevented. A repeat incident at the same
+  // source with this set is the clearest signal the analysis was wrong.
+  recurrencePrevented   Boolean                        @default(false)
+  verifiedById          String?
+  verifiedBy            User?                          @relation("EnvironmentalIncidentVerifiedBy", fields: [verifiedById], references: [id], onDelete: SetNull)
+  reportedById          String?
+  reportedBy            User?                          @relation("EnvironmentalIncidentReportedBy", fields: [reportedById], references: [id], onDelete: SetNull)
+  notes                 String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }

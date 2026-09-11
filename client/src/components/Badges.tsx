@@ -141,6 +141,14 @@ const statusColors: Record<string, string> = {
   AWAITING_INSPECTION: "bg-hazard-500 text-white",
   PASS_WITH_DEFECTS: "bg-hazard-500 text-white",
   MARGINAL: "bg-hazard-500 text-white",
+  // Environmental registers.
+  DRY: "bg-hazard-500 text-white",
+  NOT_STARTED: "bg-danger-500 text-white",
+  COMPLETE: "bg-success-600 text-white",
+  MINOR: "bg-mine-600 text-mine-100",
+  MODERATE: "bg-hazard-500 text-white",
+  MAJOR: "bg-danger-500 text-white",
+  CATASTROPHIC: "bg-danger-600 text-white animate-pulse",
 };
 
 export function StatusBadge({

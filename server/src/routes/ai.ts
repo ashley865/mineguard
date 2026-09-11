@@ -1198,7 +1198,12 @@ async function buildEnvironmentalManagerContext(mineId: string) {
     latestGhg,
     closurePlans,
     pollutionDams,
-    environmentalIncidents,
+    environmentalIncidentsOpen,
+    wasteStreams,
+    emissionLicences,
+    dustExceedancesLast30Days,
+    boreholes,
+    environmentalIncidentsYear,
   ] = await Promise.all([
     prisma.mine.findUnique({ where: { id: mineId }, select: { name: true } }),
     prisma.environmentalReading.count({ where: { recordedAt: { gte: thirtyDaysAgo }, site: { mineId } } }),
@@ -1244,6 +1249,37 @@ async function buildEnvironmentalManagerContext(mineId: string) {
     prisma.incident.count({
       where: { status: { in: ["OPEN", "INVESTIGATING"] }, site: { mineId } },
     }),
+    prisma.wasteStream.findMany({
+      where: { site: { mineId }, status: "ACTIVE" },
+      select: {
+        wasteType: true,
+        storageStartDate: true,
+        storageLimitMonths: true,
+        manifests: { select: { id: true }, take: 1 },
+      },
+    }),
+    prisma.emissionLicence.findMany({
+      where: { site: { mineId } },
+      select: {
+        status: true,
+        expiryDate: true,
+        stackTests: { orderBy: { testDate: "desc" }, take: 1, select: { compliant: true } },
+      },
+    }),
+    prisma.dustFalloutReading.count({
+      where: { site: { mineId }, readingMonth: { gte: thirtyDaysAgo }, withinLimit: false },
+    }),
+    prisma.monitoringBorehole.findMany({
+      where: { site: { mineId }, status: "ACTIVE" },
+      select: {
+        staticWaterLevelBaselineM: true,
+        readings: { orderBy: { readingDate: "desc" }, take: 1, select: { waterLevelMbgl: true, withinLimits: true } },
+      },
+    }),
+    prisma.environmentalIncident.findMany({
+      where: { site: { mineId }, incidentDate: { gte: new Date(Date.now() - 365 * 86400000) } },
+      select: { regulatorNotificationRequired: true, regulatorNotifiedAt: true, incidentDate: true, remediationStatus: true },
+    }),
   ]);
 
   const exceedanceCounts: Record<string, number> = {};
@@ -1278,6 +1314,43 @@ async function buildEnvironmentalManagerContext(mineId: string) {
 
   const damsOverdueInspection = pollutionDams.filter(
     (d) => d.lastInspectionDate == null || d.lastInspectionDate < staleInspectionBefore
+  ).length;
+
+  // A missing due date counts as lapsed, not compliant — the same reasoning applied to
+  // the engineering plant registers. An unset date is the least visible, longest
+  // neglected case, and reporting it as clean would hide exactly that.
+  const lapsed = (date: Date | null) => !date || date < now;
+
+  const hazardousStreams = wasteStreams.filter((s) => s.wasteType === "HAZARDOUS");
+  const hazardousOverStorageLimit = hazardousStreams.filter((s) => {
+    if (s.storageLimitMonths == null) return false;
+    if (!s.storageStartDate) return true;
+    const monthsInStorage = (now.getTime() - s.storageStartDate.getTime()) / (30.44 * 86400000);
+    return monthsInStorage > s.storageLimitMonths;
+  }).length;
+  const wasteStreamsNeverManifested = wasteStreams.filter((s) => s.manifests.length === 0).length;
+
+  const activeLicences = emissionLicences.filter((l) => l.status === "ACTIVE");
+  const licencesLapsedOrUndated = activeLicences.filter((l) => lapsed(l.expiryDate)).length;
+  const nonCompliantLastStackTest = emissionLicences.filter((l) => l.stackTests[0] && !l.stackTests[0].compliant).length;
+
+  const boreholesOutOfLimits = boreholes.filter((b) => b.readings[0] && !b.readings[0].withinLimits).length;
+  // Drawdown: latest level more than 10% below the baseline is a trend worth
+  // investigating, not itself a quality exceedance (that's withinLimits above).
+  const boreholesDrawingDown = boreholes.filter((b) => {
+    const latest = b.readings[0]?.waterLevelMbgl;
+    if (latest == null || b.staticWaterLevelBaselineM == null || b.staticWaterLevelBaselineM <= 0) return false;
+    return latest > b.staticWaterLevelBaselineM * 1.1;
+  }).length;
+
+  const notificationsRequired = environmentalIncidentsYear.filter((i) => i.regulatorNotificationRequired);
+  const notificationsOutstanding = notificationsRequired.filter((i) => !i.regulatorNotifiedAt).length;
+  const notifiedHours = notificationsRequired
+    .filter((i) => i.regulatorNotifiedAt)
+    .map((i) => (i.regulatorNotifiedAt!.getTime() - i.incidentDate.getTime()) / 3_600_000);
+  const avgNotificationHours = notifiedHours.length > 0 ? Math.round((notifiedHours.reduce((a, b) => a + b, 0) / notifiedHours.length) * 10) / 10 : null;
+  const incidentsUnremediated = environmentalIncidentsYear.filter(
+    (i) => i.remediationStatus === "NOT_STARTED" || i.remediationStatus === "IN_PROGRESS"
   ).length;
 
   return {
@@ -1328,7 +1401,35 @@ async function buildEnvironmentalManagerContext(mineId: string) {
       totalFinancialProvision: Math.round(closurePlans.reduce((sum, p) => sum + (p.financialProvisionAmount ?? 0), 0)),
     },
     pollutionControlDams: { total: pollutionDams.length, overdueInspection: damsOverdueInspection },
-    openIncidentsAtMine: environmentalIncidents,
+    openIncidentsAtMine: environmentalIncidentsOpen,
+    wasteManagement: {
+      activeStreams: wasteStreams.length,
+      hazardousStreams: hazardousStreams.length,
+      hazardousOverStorageLimit,
+      neverManifested: wasteStreamsNeverManifested,
+      note: "Hazardous waste may not be stockpiled longer than its storageLimitMonths (23 months by default under NEMWA Norm 4) without a permit. A stream with no manifest yet is unproven disposal, not a minor gap.",
+    },
+    airQualityCompliance: {
+      activeLicences: activeLicences.length,
+      licencesLapsedOrUndated,
+      nonCompliantLastStackTest,
+      dustExceedancesLast30Days,
+      note: "licencesLapsedOrUndated includes licences with no expiry date on record, which is itself a finding, not missing data.",
+    },
+    groundwater: {
+      activeBoreholes: boreholes.length,
+      outOfLimits: boreholesOutOfLimits,
+      drawingDown: boreholesDrawingDown,
+      note: "drawingDown is a water-level trend worth investigating (>10% below baseline), distinct from outOfLimits which is a quality exceedance.",
+    },
+    environmentalIncidentsLast365Days: {
+      total: environmentalIncidentsYear.length,
+      notificationsRequired: notificationsRequired.length,
+      notificationsOutstanding,
+      avgNotificationHours,
+      unremediated: incidentsUnremediated,
+      note: "NEMA requires a material incident to be reported to the relevant authority without delay. notificationsOutstanding is a live legal exposure, not a backlog item — it should be raised ahead of routine monitoring data.",
+    },
   };
 }
 
@@ -1904,18 +2005,27 @@ const AI_MODULES: Record<string, AiModule> = {
     buildContext: buildEnvironmentalManagerContext,
     systemPrompt: (ctx) =>
       BASE_SYSTEM_PROMPT(ctx.mine.name, "Environmental Manager") +
-      ` You advise the environmental control officer, accountable under NEMA, the National Water Act and the ` +
-      `Carbon Tax Act. Focus on the operational environmental picture: tailings integrity, monitoring exceedances, ` +
-      `the water balance against licence, energy and greenhouse gas position, closure provision, and pollution ` +
-      `control dam condition. ` +
+      ` You advise the environmental control officer, accountable under NEMA, the National Water Act, NEMWA, ` +
+      `NEMAQA and the Carbon Tax Act. Focus on the operational environmental picture: tailings integrity, ` +
+      `monitoring exceedances, the water balance against licence, energy and greenhouse gas position, closure ` +
+      `provision, pollution control dam condition, waste management, air quality/emission licence compliance, ` +
+      `groundwater monitoring, and the environmental incident register. ` +
       `Rank tailings above everything else. Observed seepage, a poor or unsatisfactory structural rating, or an ` +
       `uninspected facility must be raised first and named explicitly, ahead of any larger-looking number — a ` +
       `tailings failure is a loss-of-life event, not a compliance finding, and a latest inspection without ` +
       `engineer sign-off is an incomplete control regardless of what it recorded. ` +
+      `Immediately after tailings, rank environmentalIncidentsLast365Days.notificationsOutstanding: NEMA requires ` +
+      `a material incident to be reported to the relevant authority without delay, so an outstanding notification ` +
+      `is a live legal exposure and must be named explicitly, not folded into a general incident count. ` +
       `Never read a fall in exceedances as an improvement without checking total readings in the same period: if ` +
       `both fell, say plainly that monitoring effort dropped and the trend is not evidence of better performance. ` +
       `Treat water licence usage as a ceiling being approached, not a budget being spent — flag the trajectory ` +
       `before the limit is reached rather than reporting the breach afterwards. ` +
+      `Treat the waste, air quality and groundwater registers as statutory evidence the mine must produce on ` +
+      `demand: report hazardousOverStorageLimit, licencesLapsedOrUndated and a borehole outOfLimits as legal ` +
+      `exposures, not housekeeping backlog, and never describe an item with no due date recorded as compliant. ` +
+      `Distinguish groundwater drawdown (a level trend worth investigating) from a quality exceedance — they are ` +
+      `different findings and should not be merged into one number. ` +
       `This is an operational environmental assistant — the filing and authorisation status of these same ` +
       `obligations belongs to the Compliance Officer.`,
   },
