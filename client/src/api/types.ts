@@ -3751,6 +3751,183 @@ export interface GradeReconciliationSummary {
   trend: { period: string; mineralType: MineralType; mcf: number }[];
 }
 
+// --- Ventilation registers (ventilation & occupational hygiene manager) -----
+
+export type FanType = "MAIN_SURFACE" | "MAIN_UNDERGROUND" | "BOOSTER" | "AUXILIARY" | "FORCE" | "EXHAUST" | "OTHER";
+export type FanStatus = "RUNNING" | "STOPPED" | "STANDBY" | "UNDER_REPAIR" | "DECOMMISSIONED";
+export type FanStoppageReason = "PLANNED_MAINTENANCE" | "BREAKDOWN" | "POWER_FAILURE" | "EMERGENCY" | "OTHER";
+
+export interface FanSurvey {
+  id: string;
+  surveyDate: string;
+  measuredQuantityM3s?: number | null;
+  measuredPressurePa?: number | null;
+  motorAmps?: number | null;
+  surveyedByName: string;
+  meetsDuty: boolean;
+  findings?: string | null;
+  nextSurveyDue?: string | null;
+  notes?: string | null;
+}
+
+export interface FanStoppage {
+  id: string;
+  startedAt: string;
+  endedAt?: string | null;
+  reason: FanStoppageReason;
+  personsWithdrawn: boolean;
+  withdrawalNote?: string | null;
+  reportedToRegulator: boolean;
+  notes?: string | null;
+}
+
+export interface VentilationFan {
+  id: string;
+  siteId: string;
+  site?: { id: string; name: string } | null;
+  zoneId?: string | null;
+  zone?: { id: string; name: string } | null;
+  identifier: string;
+  fanType: FanType;
+  location?: string | null;
+  manufacturer?: string | null;
+  serialNumber?: string | null;
+  dutyQuantityM3s?: number | null;
+  dutyPressurePa?: number | null;
+  motorKw?: number | null;
+  installedDate?: string | null;
+  lastSurveyDate?: string | null;
+  nextSurveyDue?: string | null;
+  primaryVentilation: boolean;
+  status: FanStatus;
+  notes?: string | null;
+  surveys?: FanSurvey[];
+  stoppages?: FanStoppage[];
+  createdAt: string;
+}
+
+export type GasInstrumentType =
+  | "PORTABLE_MULTI_GAS"
+  | "METHANOMETER"
+  | "CO_DETECTOR"
+  | "OXYGEN_METER"
+  | "FLAME_SAFETY_LAMP"
+  | "ANEMOMETER"
+  | "DUST_PUMP"
+  | "OTHER";
+export type GasInstrumentStatus = "IN_SERVICE" | "OUT_OF_CALIBRATION" | "UNDER_REPAIR" | "WITHDRAWN";
+export type CalibrationType = "FULL_CALIBRATION" | "BUMP_TEST" | "ZERO_CHECK" | "SPAN_CHECK";
+export type CalibrationResult = "PASS" | "ADJUSTED" | "FAIL";
+
+export interface InstrumentCalibration {
+  id: string;
+  calibrationDate: string;
+  calibrationType: CalibrationType;
+  performedByName: string;
+  gasStandardUsed?: string | null;
+  result: CalibrationResult;
+  findings?: string | null;
+  nextDue?: string | null;
+  notes?: string | null;
+}
+
+export interface GasDetectionInstrument {
+  id: string;
+  siteId: string;
+  site?: { id: string; name: string } | null;
+  identifier: string;
+  instrumentType: GasInstrumentType;
+  manufacturer?: string | null;
+  serialNumber?: string | null;
+  assignedTo?: string | null;
+  lastCalibrationDate?: string | null;
+  nextCalibrationDue?: string | null;
+  lastBumpTestDate?: string | null;
+  nextBumpTestDue?: string | null;
+  status: GasInstrumentStatus;
+  notes?: string | null;
+  calibrations?: InstrumentCalibration[];
+  createdAt: string;
+}
+
+export type ThermalStationStatus = "ACTIVE" | "INACTIVE" | "DECOMMISSIONED";
+
+export interface ThermalStressReading {
+  id: string;
+  readingDate: string;
+  wetBulbC: number;
+  dryBulbC?: number | null;
+  airVelocityMs?: number | null;
+  withinLimit: boolean;
+  measuredByName?: string | null;
+  notes?: string | null;
+}
+
+export interface ThermalStressStation {
+  id: string;
+  siteId: string;
+  site?: { id: string; name: string } | null;
+  zoneId?: string | null;
+  zone?: { id: string; name: string } | null;
+  identifier: string;
+  location?: string | null;
+  virginRockTemperatureC?: number | null;
+  wetBulbLimitC?: number | null;
+  coolingServed?: string | null;
+  status: ThermalStationStatus;
+  notes?: string | null;
+  readings?: ThermalStressReading[];
+  createdAt: string;
+}
+
+export type SelfRescuerType = "FILTER_SELF_RESCUER" | "SELF_CONTAINED_SELF_RESCUER" | "CACHE_UNIT" | "OTHER";
+export type SelfRescuerStatus = "ISSUED" | "IN_STORE" | "EXPIRED" | "WITHDRAWN" | "DEPLOYED";
+export type EscapeRouteCondition = "CLEAR" | "OBSTRUCTED" | "IMPASSABLE" | "UNDER_REPAIR";
+
+export interface SelfRescuerUnit {
+  id: string;
+  siteId: string;
+  site?: { id: string; name: string } | null;
+  serialNumber: string;
+  rescuerType: SelfRescuerType;
+  manufacturer?: string | null;
+  expiryDate?: string | null;
+  issuedDate?: string | null;
+  issuedToName?: string | null;
+  storageLocation?: string | null;
+  lastInspectionDate?: string | null;
+  nextInspectionDue?: string | null;
+  status: SelfRescuerStatus;
+  notes?: string | null;
+  createdAt: string;
+}
+
+export interface EscapeRoute {
+  id: string;
+  siteId: string;
+  site?: { id: string; name: string } | null;
+  identifier: string;
+  fromLocation: string;
+  toLocation: string;
+  routeLengthM?: number | null;
+  isSecondOutlet: boolean;
+  lastInspectionDate?: string | null;
+  nextInspectionDue?: string | null;
+  lastWalkedDate?: string | null;
+  condition: EscapeRouteCondition;
+  findings?: string | null;
+  notes?: string | null;
+  createdAt: string;
+}
+
+export interface EscapeReadinessSummary {
+  selfRescuers: { total: number; inService: number; expired: number; expiringWithin90Days: number; inspectionOverdue: number };
+  escapeRoutes: { total: number; secondOutlets: number; blocked: number; inspectionOverdue: number };
+  refugeBays: { total: number; notOperational: number; inspectionOverdue: number; operationalShelterCapacity: number };
+  /** Anything in the survivability chain that would fail tonight. */
+  readinessGaps: number;
+}
+
 export interface LegalComplianceCalendarEntry {
   source: "LEGAL_ITEM" | "PERMIT" | "CERTIFICATE" | "MEDICAL_SURVEILLANCE" | "EXPLOSIVES_MAGAZINE";
   id: string;

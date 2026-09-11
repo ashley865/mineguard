@@ -156,6 +156,17 @@ const statusColors: Record<string, string> = {
   INTACT: "bg-success-600 text-white",
   MISSING: "bg-danger-500 text-white",
   REPLACED: "bg-mine-600 text-mine-100",
+  // Ventilation registers. A stopped primary fan is red, not amber — it is the
+  // condition that withdraws people from the workings.
+  RUNNING: "bg-success-600 text-white",
+  STOPPED: "bg-danger-500 text-white",
+  STANDBY: "bg-mine-600 text-mine-100",
+  OUT_OF_CALIBRATION: "bg-danger-500 text-white",
+  ADJUSTED: "bg-hazard-500 text-white",
+  DEPLOYED: "bg-hazard-500 text-white",
+  CLEAR: "bg-success-600 text-white",
+  OBSTRUCTED: "bg-hazard-500 text-white",
+  IMPASSABLE: "bg-danger-600 text-white",
 };
 
 export function StatusBadge({

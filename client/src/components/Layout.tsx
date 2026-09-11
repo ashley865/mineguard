@@ -84,6 +84,7 @@ export default function Layout() {
         { to: "/inspection", label: t("inspection.nav") },
         { to: "/ground-control", label: t("groundControl.nav") },
         { to: "/ventilation", label: t("ventilation.nav") },
+        { to: "/ventilation-registers", label: t("ventilationRegisters.nav") },
         { to: "/mine-rescue", label: t("mineRescue.nav") },
         { to: "/resources", label: t("resources.nav") },
         { to: "/winders", label: t("winders.nav") },

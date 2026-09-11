@@ -510,6 +510,12 @@ model Site {
   mineralRights         MineralRight[]
   gradeReconciliations  GradeReconciliation[]
 
+  ventilationFans        VentilationFan[]
+  gasDetectionInstruments GasDetectionInstrument[]
+  thermalStressStations  ThermalStressStation[]
+  selfRescuerUnits       SelfRescuerUnit[]
+  escapeRoutes           EscapeRoute[]
+
   gatePasses             GatePass[]
   gateLogs               GateLog[]
   securityBlacklistEntries SecurityBlacklistEntry[]
@@ -554,6 +560,8 @@ model Zone {
   ventilationDistricts   VentilationDistrict[]
   refugeBays             RefugeBay[]
   electricalInstallations ElectricalInstallation[]
+  ventilationFans        VentilationFan[]
+  thermalStressStations  ThermalStressStation[]
 
   createdAt DateTime @default(now())
 }
@@ -6928,6 +6936,316 @@ model GradeReconciliation {
   reconciledById      String?
   reconciledBy        User?     @relation("GradeReconciliationRecordedBy", fields: [reconciledById], references: [id], onDelete: SetNull)
   notes               String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// ---------------------------------------------------------------------------
+// Module: Ventilation Fan Register (MHSA Chapter 10)
+// Fans existed only as an EquipmentType value on the general asset register —
+// which carries no duty point, no fan survey and no stoppage record. A main
+// ventilating fan is not ordinary plant: its stoppage requires the withdrawal
+// of persons from the workings it serves, so the stoppage itself is the
+// statutory event, tracked separately from any maintenance record.
+// ---------------------------------------------------------------------------
+
+enum FanType {
+  MAIN_SURFACE
+  MAIN_UNDERGROUND
+  BOOSTER
+  AUXILIARY
+  FORCE
+  EXHAUST
+  OTHER
+}
+
+enum FanStatus {
+  RUNNING
+  STOPPED
+  STANDBY
+  UNDER_REPAIR
+  DECOMMISSIONED
+}
+
+enum FanStoppageReason {
+  PLANNED_MAINTENANCE
+  BREAKDOWN
+  POWER_FAILURE
+  EMERGENCY
+  OTHER
+}
+
+model VentilationFan {
+  id         String    @id @default(cuid())
+  siteId     String
+  site       Site      @relation(fields: [siteId], references: [id], onDelete: Cascade)
+  zoneId     String?
+  zone       Zone?     @relation(fields: [zoneId], references: [id], onDelete: SetNull)
+  identifier String
+  fanType    FanType
+  location   String?
+  manufacturer String?
+  serialNumber String?
+  // The design duty point the fan was selected for. A survey that comes in under
+  // this is the difference between a fan that is running and a fan that is working.
+  dutyQuantityM3s  Float?
+  dutyPressurePa   Float?
+  motorKw          Float?
+  installedDate    DateTime?
+  lastSurveyDate   DateTime?
+  nextSurveyDue    DateTime?
+  // Whether a stoppage of this fan requires persons to be withdrawn. Set on the
+  // fan rather than judged per stoppage, so the rule is decided once, in advance.
+  primaryVentilation Boolean  @default(false)
+  status           FanStatus @default(RUNNING)
+  notes            String?
+
+  surveys   FanSurvey[]
+  stoppages FanStoppage[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model FanSurvey {
+  id                 String         @id @default(cuid())
+  fanId              String
+  fan                VentilationFan @relation(fields: [fanId], references: [id], onDelete: Cascade)
+  surveyDate         DateTime
+  measuredQuantityM3s Float?
+  measuredPressurePa  Float?
+  motorAmps          Float?
+  surveyedByName     String
+  meetsDuty          Boolean        @default(true)
+  findings           String?
+  nextSurveyDue      DateTime?
+  notes              String?
+
+  createdAt DateTime @default(now())
+}
+
+model FanStoppage {
+  id        String            @id @default(cuid())
+  fanId     String
+  fan       VentilationFan    @relation(fields: [fanId], references: [id], onDelete: Cascade)
+  startedAt DateTime
+  endedAt   DateTime?
+  reason    FanStoppageReason
+  // Recorded as fact, not inferred: on a primary ventilating fan, whether persons
+  // were actually withdrawn is the question an inquiry asks first.
+  personsWithdrawn Boolean @default(false)
+  withdrawalNote   String?
+  reportedToRegulator Boolean @default(false)
+  notes     String?
+
+  createdAt DateTime @default(now())
+}
+
+// ---------------------------------------------------------------------------
+// Module: Gas Detection Instrument Calibration Register
+// The OccupationalExposureRecord captures what a sample measured; this captures
+// whether the instrument that measured it was fit to. A reading taken on an
+// out-of-calibration detector is not evidence of anything, so the instrument's
+// calibration currency is tracked as its own obligation.
+// ---------------------------------------------------------------------------
+
+enum GasInstrumentType {
+  PORTABLE_MULTI_GAS
+  METHANOMETER
+  CO_DETECTOR
+  OXYGEN_METER
+  FLAME_SAFETY_LAMP
+  ANEMOMETER
+  DUST_PUMP
+  OTHER
+}
+
+enum GasInstrumentStatus {
+  IN_SERVICE
+  OUT_OF_CALIBRATION
+  UNDER_REPAIR
+  WITHDRAWN
+}
+
+enum CalibrationType {
+  FULL_CALIBRATION
+  BUMP_TEST
+  ZERO_CHECK
+  SPAN_CHECK
+}
+
+enum CalibrationResult {
+  PASS
+  ADJUSTED
+  FAIL
+}
+
+model GasDetectionInstrument {
+  id              String              @id @default(cuid())
+  siteId          String
+  site            Site                @relation(fields: [siteId], references: [id], onDelete: Cascade)
+  identifier      String
+  instrumentType  GasInstrumentType
+  manufacturer    String?
+  serialNumber    String?
+  assignedTo      String?
+  lastCalibrationDate DateTime?
+  nextCalibrationDue  DateTime?
+  lastBumpTestDate    DateTime?
+  nextBumpTestDue     DateTime?
+  status          GasInstrumentStatus @default(IN_SERVICE)
+  notes           String?
+
+  calibrations InstrumentCalibration[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model InstrumentCalibration {
+  id              String                 @id @default(cuid())
+  instrumentId    String
+  instrument      GasDetectionInstrument @relation(fields: [instrumentId], references: [id], onDelete: Cascade)
+  calibrationDate DateTime
+  calibrationType CalibrationType
+  performedByName String
+  gasStandardUsed String?
+  result          CalibrationResult      @default(PASS)
+  findings        String?
+  nextDue         DateTime?
+  notes           String?
+
+  createdAt DateTime @default(now())
+}
+
+// ---------------------------------------------------------------------------
+// Module: Thermal Stress Management
+// South African mines are among the deepest and hottest in the world, and heat
+// is managed as a named hazard with its own measurement regime. Wet-bulb
+// temperature — not dry-bulb — is what determines whether a working place is
+// habitable, which is why both are recorded and the limit is checked against
+// the wet-bulb value.
+// ---------------------------------------------------------------------------
+
+enum ThermalStationStatus {
+  ACTIVE
+  INACTIVE
+  DECOMMISSIONED
+}
+
+enum AcclimatisationStatus {
+  NOT_REQUIRED
+  IN_PROGRESS
+  ACCLIMATISED
+  LAPSED
+}
+
+model ThermalStressStation {
+  id          String               @id @default(cuid())
+  siteId      String
+  site        Site                 @relation(fields: [siteId], references: [id], onDelete: Cascade)
+  zoneId      String?
+  zone        Zone?                @relation(fields: [zoneId], references: [id], onDelete: SetNull)
+  identifier  String
+  location    String?
+  virginRockTemperatureC Float?
+  // The wet-bulb ceiling this station is judged against. Held per station rather
+  // than hard-coded, since the applicable limit depends on the work being done.
+  wetBulbLimitC Float?
+  coolingServed String?
+  status      ThermalStationStatus @default(ACTIVE)
+  notes       String?
+
+  readings ThermalStressReading[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model ThermalStressReading {
+  id            String               @id @default(cuid())
+  stationId     String
+  station       ThermalStressStation @relation(fields: [stationId], references: [id], onDelete: Cascade)
+  readingDate   DateTime
+  wetBulbC      Float
+  dryBulbC      Float?
+  airVelocityMs Float?
+  withinLimit   Boolean              @default(true)
+  measuredByName String?
+  notes         String?
+
+  createdAt DateTime @default(now())
+}
+
+// ---------------------------------------------------------------------------
+// Module: Escape & Self-Rescuer Readiness
+// The refuge bay register answers "where do they shelter." This answers the two
+// questions either side of it: does every person underground carry a self-rescuer
+// that has not expired, and is the escape route out of the workings passable.
+// Together with refuge bays these are the survivability chain, which is only as
+// good as its weakest link — so they are read as one picture, not three lists.
+// ---------------------------------------------------------------------------
+
+enum SelfRescuerType {
+  FILTER_SELF_RESCUER
+  SELF_CONTAINED_SELF_RESCUER
+  CACHE_UNIT
+  OTHER
+}
+
+enum SelfRescuerStatus {
+  ISSUED
+  IN_STORE
+  EXPIRED
+  WITHDRAWN
+  DEPLOYED
+}
+
+enum EscapeRouteCondition {
+  CLEAR
+  OBSTRUCTED
+  IMPASSABLE
+  UNDER_REPAIR
+}
+
+model SelfRescuerUnit {
+  id             String            @id @default(cuid())
+  siteId         String
+  site           Site              @relation(fields: [siteId], references: [id], onDelete: Cascade)
+  serialNumber   String
+  rescuerType    SelfRescuerType
+  manufacturer   String?
+  // A self-rescuer has a hard expiry — past it the unit is not equipment, it is
+  // a liability being carried underground.
+  expiryDate     DateTime?
+  issuedDate     DateTime?
+  issuedToName   String?
+  storageLocation String?
+  lastInspectionDate DateTime?
+  nextInspectionDue  DateTime?
+  status         SelfRescuerStatus @default(IN_STORE)
+  notes          String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model EscapeRoute {
+  id                 String               @id @default(cuid())
+  siteId             String
+  site               Site                 @relation(fields: [siteId], references: [id], onDelete: Cascade)
+  identifier         String
+  fromLocation       String
+  toLocation         String
+  routeLengthM       Float?
+  isSecondOutlet     Boolean              @default(false)
+  lastInspectionDate DateTime?
+  nextInspectionDue  DateTime?
+  lastWalkedDate     DateTime?
+  condition          EscapeRouteCondition @default(CLEAR)
+  findings           String?
+  notes              String?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

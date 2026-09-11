@@ -61,6 +61,7 @@ export const restrictedModules = [
   "/plant-integrity",
   "/environmental-registers",
   "/resource-governance",
+  "/ventilation-registers",
 ] as const;
 
 export type RestrictedModule = (typeof restrictedModules)[number];
@@ -99,6 +100,10 @@ export const executiveTitleModules: Partial<Record<ExecutiveTitle, RestrictedMod
     // The lifting, pressure and Ex registers are safety-critical plant evidence,
     // even though the engineer owns the appointment and the maintenance of them.
     "/plant-integrity",
+    // Escape routes, self-rescuers and fan availability decide whether an
+    // evacuation actually works — the safety appointee's concern as much as the
+    // ventilation officer's, so both can see it.
+    "/ventilation-registers",
   ],
   OPERATIONS_MANAGER: [
     "/sites",
@@ -165,6 +170,7 @@ export const executiveTitleModules: Partial<Record<ExecutiveTitle, RestrictedMod
     // and the boundary survey are exactly what determine whether the mine is
     // operating lawfully in the first place.
     "/resource-governance",
+    "/ventilation-registers",
   ],
   IT_MANAGER: ["/sites", "/sensors", "/equipment", "/alerts", "/reporting", "/security", "/scanner", "/documents", "/maintenance", "/it-operations", "/cyber-command-center"],
   // The MHSA 2.13.1 engineering appointee: accountable for machinery and plant, which is
@@ -237,6 +243,7 @@ export const executiveTitleModules: Partial<Record<ExecutiveTitle, RestrictedMod
     "/sensors",
     "/alerts",
     "/ventilation",
+    "/ventilation-registers",
     "/environmental",
     "/compliance",
     "/incidents",

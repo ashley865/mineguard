@@ -1688,6 +1688,11 @@ async function buildVentilationManagerContext(mineId: string) {
     dustExposedWorkers,
     occupationalDiseaseCases,
     unsubmittedMbodCases,
+    fans,
+    gasInstruments,
+    thermalStations,
+    selfRescuers,
+    escapeRoutes,
   ] = await Promise.all([
     prisma.mine.findUnique({ where: { id: mineId }, select: { name: true } }),
     prisma.ventilationDistrict.findMany({
@@ -1715,6 +1720,37 @@ async function buildVentilationManagerContext(mineId: string) {
     prisma.medicalSurveillance.count({
       where: { diseaseClassification: { not: "NONE" }, submittedToMbod: false, worker: { site: { mineId } } },
     }),
+    prisma.ventilationFan.findMany({
+      where: { site: { mineId }, status: { not: "DECOMMISSIONED" } },
+      select: {
+        identifier: true,
+        primaryVentilation: true,
+        status: true,
+        dutyQuantityM3s: true,
+        nextSurveyDue: true,
+        surveys: { orderBy: { surveyDate: "desc" }, take: 1, select: { meetsDuty: true, measuredQuantityM3s: true } },
+      },
+    }),
+    prisma.gasDetectionInstrument.findMany({
+      where: { site: { mineId } },
+      select: { status: true, nextCalibrationDue: true, nextBumpTestDue: true },
+    }),
+    prisma.thermalStressStation.findMany({
+      where: { site: { mineId }, status: "ACTIVE" },
+      select: {
+        identifier: true,
+        wetBulbLimitC: true,
+        readings: { orderBy: { readingDate: "desc" }, take: 1, select: { wetBulbC: true, withinLimit: true } },
+      },
+    }),
+    prisma.selfRescuerUnit.findMany({
+      where: { site: { mineId } },
+      select: { status: true, expiryDate: true, nextInspectionDue: true },
+    }),
+    prisma.escapeRoute.findMany({
+      where: { site: { mineId } },
+      select: { identifier: true, condition: true, isSecondOutlet: true, nextInspectionDue: true },
+    }),
   ]);
 
   const districtsBelowRequirement = districts.filter((d) => d.readings[0] && !d.readings[0].withinRequirement).length;
@@ -1734,6 +1770,39 @@ async function buildVentilationManagerContext(mineId: string) {
   const worstExceedanceRatio = exposureRecords
     .filter((r) => r.exceedsLimit && r.occupationalExposureLimit > 0)
     .reduce((worst, r) => Math.max(worst, r.measuredValue / r.occupationalExposureLimit), 0);
+
+  // --- Fans -------------------------------------------------------------------
+  const primaryFans = fans.filter((f) => f.primaryVentilation);
+  const primaryFansStopped = primaryFans.filter((f) => f.status === "STOPPED");
+  const fansBelowDuty = fans.filter((f) => f.surveys[0] && !f.surveys[0].meetsDuty);
+  const fansSurveyOverdue = fans.filter((f) => !f.nextSurveyDue || f.nextSurveyDue < now).length;
+  const fansNeverSurveyed = fans.filter((f) => f.surveys.length === 0).length;
+
+  // --- Gas instruments ----------------------------------------------------------
+  const instrumentsInService = gasInstruments.filter((i) => i.status === "IN_SERVICE");
+  const instrumentsOutOfCalibration = gasInstruments.filter((i) => i.status === "OUT_OF_CALIBRATION").length;
+  const calibrationOverdue = instrumentsInService.filter((i) => !i.nextCalibrationDue || i.nextCalibrationDue < now).length;
+  const bumpTestOverdue = instrumentsInService.filter((i) => !i.nextBumpTestDue || i.nextBumpTestDue < now).length;
+
+  // --- Thermal stress ------------------------------------------------------------
+  const stationsOverLimit = thermalStations.filter((s) => s.readings[0] && !s.readings[0].withinLimit);
+  const stationsNeverMeasured = thermalStations.filter((s) => s.readings.length === 0).length;
+  const stationsWithoutLimit = thermalStations.filter((s) => s.wetBulbLimitC == null).length;
+  const hottestWetBulbC = thermalStations
+    .map((s) => s.readings[0]?.wetBulbC)
+    .filter((v): v is number => v != null)
+    .reduce<number | null>((max, v) => (max == null || v > max ? v : max), null);
+
+  // --- Escape readiness ------------------------------------------------------------
+  const rescuersInService = selfRescuers.filter((r) => r.status === "ISSUED" || r.status === "IN_STORE");
+  const rescuersExpired = selfRescuers.filter(
+    (r) => r.status === "EXPIRED" || (r.expiryDate != null && r.expiryDate < now)
+  ).length;
+  const rescuersExpiringSoon = rescuersInService.filter(
+    (r) => r.expiryDate != null && r.expiryDate >= now && r.expiryDate.getTime() - now.getTime() <= 90 * 86400000
+  ).length;
+  const routesBlocked = escapeRoutes.filter((r) => r.condition === "OBSTRUCTED" || r.condition === "IMPASSABLE");
+  const routeInspectionOverdue = escapeRoutes.filter((r) => !r.nextInspectionDue || r.nextInspectionDue < now).length;
 
   return {
     mine: { name: mine?.name ?? "the mine" },
@@ -1764,6 +1833,49 @@ async function buildVentilationManagerContext(mineId: string) {
       note: "A diagnosed occupational disease not submitted to the MBOD is an unmet statutory reporting duty and a worker's unclaimed compensation.",
     },
     refugeBays: { total: refugeBays, overdueInspection: refugeBaysOverdue },
+    ventilationFans: {
+      total: fans.length,
+      primaryVentilationFans: primaryFans.length,
+      primaryFansStopped: primaryFansStopped.length,
+      stoppedPrimaryFanIdentifiers: primaryFansStopped.map((f) => f.identifier),
+      belowDutyOnLatestSurvey: fansBelowDuty.length,
+      belowDutyIdentifiers: fansBelowDuty.map((f) => f.identifier),
+      surveyOverdue: fansSurveyOverdue,
+      neverSurveyed: fansNeverSurveyed,
+      note:
+        "A stopped primary ventilating fan requires the withdrawal of persons from the workings it serves — it is an evacuation trigger, not a maintenance item, and outranks every other figure in this snapshot. A fan running below its design duty is moving air but not enough of it, which is invisible unless the survey is compared against the duty point.",
+    },
+    gasDetectionInstruments: {
+      total: gasInstruments.length,
+      inService: instrumentsInService.length,
+      outOfCalibration: instrumentsOutOfCalibration,
+      calibrationOverdue,
+      bumpTestOverdue,
+      note:
+        "A reading taken on an out-of-calibration detector is not evidence of anything. Calibration and bump test run on different intervals and are counted separately — a daily bump test does not make an instrument calibrated for the year.",
+    },
+    thermalStress: {
+      activeStations: thermalStations.length,
+      stationsOverWetBulbLimit: stationsOverLimit.length,
+      overLimitIdentifiers: stationsOverLimit.map((s) => s.identifier),
+      hottestWetBulbC,
+      neverMeasured: stationsNeverMeasured,
+      stationsWithoutLimitSet: stationsWithoutLimit,
+      note:
+        "The limit is assessed against wet-bulb, never dry-bulb: dry-bulb says how hot the air is, wet-bulb says whether a person working in it can still shed heat. A station with no limit on record is unassessed, not compliant.",
+    },
+    escapeReadiness: {
+      selfRescuersInService: rescuersInService.length,
+      selfRescuersExpired: rescuersExpired,
+      selfRescuersExpiringWithin90Days: rescuersExpiringSoon,
+      escapeRoutes: escapeRoutes.length,
+      secondOutlets: escapeRoutes.filter((r) => r.isSecondOutlet).length,
+      routesBlocked: routesBlocked.length,
+      blockedRouteIdentifiers: routesBlocked.map((r) => r.identifier),
+      routeInspectionOverdue,
+      note:
+        "Refuge bays, self-rescuers and escape routes are one survivability chain, not three registers. It is only as strong as its weakest link, so an expired self-rescuer or a blocked route matters even when the other two look healthy.",
+    },
   };
 }
 
@@ -2174,6 +2286,18 @@ const AI_MODULES: Record<string, AiModule> = {
       ` You advise the ventilation officer and occupational hygienist, one appointee holding two duties: keeping ` +
       `the workings breathable now, and controlling the exposures that decide who develops occupational lung ` +
       `disease decades from now. ` +
+      `Rank ventilationFans.primaryFansStopped above everything else in this snapshot and name the fan: a stopped ` +
+      `primary ventilating fan requires persons to be withdrawn from the workings it serves, which makes it an ` +
+      `evacuation trigger rather than a maintenance item. Immediately after it, rank escapeReadiness — a blocked ` +
+      `escape route or an expired self-rescuer is the difference between an evacuation that works and one that ` +
+      `does not, and the chain is only as strong as its weakest link. ` +
+      `Treat a fan below its design duty as a distinct and easily-missed failure: it is running, so nothing looks ` +
+      `wrong, but it is not moving the air the district was designed for. ` +
+      `Never present a gas reading as evidence when the instrument behind it is out of calibration — say the ` +
+      `reading is unverified. Calibration and bump tests are separate intervals; do not let one stand in for ` +
+      `the other. ` +
+      `Assess heat against wet-bulb, never dry-bulb, and say so when explaining a thermal exceedance: dry-bulb ` +
+      `describes the air, wet-bulb describes whether a person working in it can still shed heat. ` +
       `Treat a district whose latest reading is below its airflow requirement as an immediate statutory ` +
       `non-compliance and name the district — in a gassy or dusty section that is the mechanism by which methane ` +
       `or dust accumulates, not a paperwork gap. A district never measured is worse than one measured and failing, ` +
