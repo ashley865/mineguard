@@ -60,6 +60,7 @@ export const restrictedModules = [
   "/vetting-records",
   "/plant-integrity",
   "/environmental-registers",
+  "/resource-governance",
 ] as const;
 
 export type RestrictedModule = (typeof restrictedModules)[number];
@@ -160,6 +161,10 @@ export const executiveTitleModules: Partial<Record<ExecutiveTitle, RestrictedMod
     // Same reasoning for the environmental statutory registers — waste manifests,
     // the AEL, and groundwater monitoring are what DWS/DMRE ask to see on a visit.
     "/environmental-registers",
+    // And again for the mineral resources registers — the mineral right itself
+    // and the boundary survey are exactly what determine whether the mine is
+    // operating lawfully in the first place.
+    "/resource-governance",
   ],
   IT_MANAGER: ["/sites", "/sensors", "/equipment", "/alerts", "/reporting", "/security", "/scanner", "/documents", "/maintenance", "/it-operations", "/cyber-command-center"],
   // The MHSA 2.13.1 engineering appointee: accountable for machinery and plant, which is
@@ -222,6 +227,7 @@ export const executiveTitleModules: Partial<Record<ExecutiveTitle, RestrictedMod
     "/inspection",
     "/documents",
     "/reporting",
+    "/resource-governance",
   ],
   // The ventilation officer / occupational hygienist appointments. Sensors are here because
   // gas, dust and airflow monitoring is the raw feed for this role, and mine rescue because

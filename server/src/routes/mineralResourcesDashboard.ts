@@ -61,7 +61,17 @@ router.get("/summary", async (req, res) => {
   const staleBefore = new Date(now.getTime() - ESTIMATE_STALE_DAYS * DAY_MS);
   const bySite = { site: { mineId } };
 
-  const [estimates, drillHoles, assays, productionYear] = await Promise.all([
+  const [
+    estimates,
+    drillHoles,
+    assays,
+    productionYear,
+    surveyPlans,
+    beacons,
+    qaqcSamples,
+    mineralRights,
+    reconciliations,
+  ] = await Promise.all([
     prisma.resourceEstimate.findMany({
       where: bySite,
       select: {
@@ -100,6 +110,40 @@ router.get("/summary", async (req, res) => {
     prisma.productionRecord.findMany({
       where: { ...bySite, shiftDate: { gte: yearStart } },
       select: { tonnesMined: true },
+    }),
+    prisma.surveyPlan.findMany({
+      where: bySite,
+      select: { id: true, siteId: true, site: { select: { name: true } }, surveyDate: true, nextSurveyDue: true },
+    }),
+    prisma.boundaryBeacon.findMany({
+      where: bySite,
+      select: { id: true, identifier: true, site: { select: { name: true } }, condition: true, nextVerificationDue: true },
+    }),
+    prisma.qaqcSample.findMany({
+      where: { ...bySite, sampleDate: { gte: trendStart } },
+      select: { sampleType: true, result: true },
+    }),
+    prisma.mineralRight.findMany({
+      where: { mineId },
+      select: { id: true, rightReferenceNumber: true, status: true, expiryDate: true, renewalApplicationDue: true, renewalLodgedDate: true },
+    }),
+    prisma.gradeReconciliation.findMany({
+      where: { ...bySite, periodStart: { gte: yearStart } },
+      select: {
+        id: true,
+        siteId: true,
+        site: { select: { name: true } },
+        periodStart: true,
+        periodEnd: true,
+        mineralType: true,
+        estimatedTonnes: true,
+        estimatedGrade: true,
+        actualTonnesMined: true,
+        actualGradeMined: true,
+        actualTonnesMilled: true,
+        actualGradeMilled: true,
+        varianceExplanation: true,
+      },
     }),
   ]);
 
@@ -178,6 +222,46 @@ router.get("/summary", async (req, res) => {
   // reporting gap, not merely a missing field.
   const estimatesWithoutCompetentPerson = current.filter((e) => !e.competentPerson || !e.competentPerson.trim());
 
+  // --- Survey & boundary compliance ------------------------------------------
+  const latestSurveyBySite = new Map<string, (typeof surveyPlans)[number]>();
+  for (const p of surveyPlans) {
+    const held = latestSurveyBySite.get(p.siteId);
+    if (!held || p.surveyDate > held.surveyDate) latestSurveyBySite.set(p.siteId, p);
+  }
+  const sitesWithoutCurrentSurvey = [...latestSurveyBySite.values()].filter((p) => !p.nextSurveyDue || p.nextSurveyDue < now);
+  const beaconsWithIssue = beacons.filter((b) => b.condition === "DAMAGED" || b.condition === "MISSING");
+  const beaconsVerificationOverdue = beacons.filter((b) => !b.nextVerificationDue || b.nextVerificationDue < now);
+
+  // --- QAQC program ------------------------------------------------------------
+  const qaqcFail = qaqcSamples.filter((s) => s.result === "FAIL").length;
+  const qaqcPassRatePct = qaqcSamples.length > 0 ? Math.round(((qaqcSamples.length - qaqcFail) / qaqcSamples.length) * 100) : null;
+  const qaqcTypesCovered = new Set(qaqcSamples.map((s) => s.sampleType)).size;
+
+  // --- Mineral rights & tenure -------------------------------------------------
+  const activeRights = mineralRights.filter((r) => r.status === "ACTIVE" || r.status === "RENEWAL_PENDING");
+  const renewalOverdue = activeRights.filter((r) => r.renewalApplicationDue && !r.renewalLodgedDate && r.renewalApplicationDue < now);
+  const expiredStillActive = mineralRights.filter((r) => r.status === "ACTIVE" && r.expiryDate && r.expiryDate < now);
+
+  // Everything that says "this obligation is currently out of date" merged into
+  // one headline number — the same shape as plantRegisterLapsed/registerLapsed
+  // on the other two department dashboards.
+  const registerLapsedCount =
+    sitesWithoutCurrentSurvey.length + beaconsWithIssue.length + renewalOverdue.length + expiredStillActive.length;
+
+  // --- Grade reconciliation (Mine Call Factor) --------------------------------
+  const reconciled = reconciliations
+    .map((r) => {
+      const estimatedMetal = r.estimatedTonnes * r.estimatedGrade;
+      const actualTonnes = r.actualTonnesMilled ?? r.actualTonnesMined;
+      const actualGrade = r.actualGradeMilled ?? r.actualGradeMined;
+      const mcf = estimatedMetal > 0 && actualTonnes != null && actualGrade != null ? ((actualTonnes * actualGrade) / estimatedMetal) * 100 : null;
+      return { ...r, mcf: mcf != null ? Math.round(mcf * 10) / 10 : null };
+    });
+  const withMcf = reconciled.filter((r) => r.mcf != null) as (typeof reconciled[number] & { mcf: number })[];
+  const avgMcfPct = withMcf.length > 0 ? Math.round((withMcf.reduce((s, r) => s + r.mcf, 0) / withMcf.length) * 10) / 10 : null;
+  const unexplainedVariances = withMcf.filter((r) => Math.abs(r.mcf - 100) > 10 && !r.varianceExplanation?.trim());
+  const reconciliationsAwaitingActuals = reconciled.length - withMcf.length;
+
   res.json({
     headline: {
       measuredIndicated: Math.round(measuredIndicated * 10) / 10,
@@ -187,6 +271,9 @@ router.get("/summary", async (req, res) => {
       annualProduction: Math.round(annualProduction * 10) / 10,
       holesInProgress: (holesByStatus.PLANNED ?? 0) + (holesByStatus.DRILLING ?? 0),
       holesAwaitingAssay: holesAwaitingAssay.length,
+      // Survey/boundary, mineral rights and QAQC lapses merged into one number —
+      // what an inspector or a due-diligence review would find out of date today.
+      registerLapsed: registerLapsedCount,
     },
     trends: { drilling: drillingSeries },
     breakdowns: {
@@ -207,6 +294,30 @@ router.get("/summary", async (req, res) => {
       supersededVersions: supersededCount,
       staleEstimates: staleEstimates.length,
       missingCompetentPerson: estimatesWithoutCompetentPerson.length,
+    },
+    surveyAndBoundary: {
+      sitesTracked: latestSurveyBySite.size,
+      sitesWithoutCurrentSurvey: sitesWithoutCurrentSurvey.length,
+      beaconsTracked: beacons.length,
+      beaconsWithIssue: beaconsWithIssue.length,
+      beaconsVerificationOverdue: beaconsVerificationOverdue.length,
+    },
+    qaqc: {
+      totalSamplesLast30Days: qaqcSamples.length,
+      failed: qaqcFail,
+      passRatePct: qaqcPassRatePct,
+      sampleTypesCovered: qaqcTypesCovered,
+    },
+    mineralRights: {
+      activeRights: activeRights.length,
+      renewalOverdue: renewalOverdue.length,
+      expiredStillActive: expiredStillActive.length,
+    },
+    gradeReconciliation: {
+      periodsRecorded: reconciled.length,
+      periodsAwaitingActuals: reconciliationsAwaitingActuals,
+      avgMineCallFactorPct: avgMcfPct,
+      unexplainedVariances: unexplainedVariances.length,
     },
     actionQueue: {
       staleEstimates: staleEstimates.slice(0, 8).map((e) => ({
@@ -235,6 +346,24 @@ router.get("/summary", async (req, res) => {
         .filter((h) => h.status === "PLANNED" || h.status === "DRILLING")
         .slice(0, 8)
         .map((h) => ({ id: h.id, holeId: h.holeId, status: h.status, totalDepth: h.totalDepth, contractor: h.contractor })),
+      // Survey, beacon and mineral-right lapses merged into one queue — to the
+      // appointee they are one obligation: what is out of date right now.
+      registerLapsed: [
+        ...sitesWithoutCurrentSurvey.map((p) => ({ id: p.id, register: "SURVEY" as const, identifier: p.site.name, issue: "SURVEY_OVERDUE" as const, dueDate: p.nextSurveyDue })),
+        ...beaconsWithIssue.map((b) => ({ id: b.id, register: "BEACON" as const, identifier: b.identifier, issue: "BEACON_CONDITION" as const, dueDate: null })),
+        ...renewalOverdue.map((r) => ({ id: r.id, register: "MINERAL_RIGHT" as const, identifier: r.rightReferenceNumber, issue: "RENEWAL_OVERDUE" as const, dueDate: r.renewalApplicationDue })),
+        ...expiredStillActive.map((r) => ({ id: `${r.id}-expired`, register: "MINERAL_RIGHT" as const, identifier: r.rightReferenceNumber, issue: "EXPIRED" as const, dueDate: r.expiryDate })),
+      ]
+        .sort((a, b) => (a.dueDate?.getTime() ?? 0) - (b.dueDate?.getTime() ?? 0))
+        .slice(0, 8),
+      unexplainedVariances: unexplainedVariances.slice(0, 8).map((r) => ({
+        id: r.id,
+        siteName: r.site.name,
+        mineralType: r.mineralType,
+        periodStart: r.periodStart,
+        periodEnd: r.periodEnd,
+        mcf: r.mcf,
+      })),
     },
   });
 });

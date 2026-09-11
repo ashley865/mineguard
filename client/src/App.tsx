@@ -62,6 +62,7 @@ import BudgetPlanning from "./pages/BudgetPlanning";
 import Insurance from "./pages/Insurance";
 import PlantIntegrity from "./pages/PlantIntegrity";
 import EnvironmentalRegisters from "./pages/EnvironmentalRegisters";
+import ResourceGovernance from "./pages/ResourceGovernance";
 import ToolboxTalks from "./pages/ToolboxTalks";
 import RegulatorySubmissions from "./pages/RegulatorySubmissions";
 import AiDailyBriefing from "./pages/AiDailyBriefing";
@@ -167,6 +168,7 @@ export default function App() {
         <Route path="/insurance" element={<ModuleRoute path="/insurance"><Insurance /></ModuleRoute>} />
         <Route path="/plant-integrity" element={<ModuleRoute path="/plant-integrity"><PlantIntegrity /></ModuleRoute>} />
         <Route path="/environmental-registers" element={<ModuleRoute path="/environmental-registers"><EnvironmentalRegisters /></ModuleRoute>} />
+        <Route path="/resource-governance" element={<ModuleRoute path="/resource-governance"><ResourceGovernance /></ModuleRoute>} />
         <Route path="/toolbox-talks" element={<ModuleRoute path="/toolbox-talks"><ToolboxTalks /></ModuleRoute>} />
         <Route path="/regulatory-submissions" element={<ModuleRoute path="/regulatory-submissions"><RegulatorySubmissions /></ModuleRoute>} />
         <Route path="/ai-daily-briefing" element={<AiDailyBriefing />} />

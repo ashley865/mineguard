@@ -6,12 +6,12 @@ import { api } from "../api/client";
 import { MineralResourcesDashboardSummary } from "../api/types";
 import LoadError from "../components/LoadError";
 import AiAssistantWidget from "../components/AiAssistantWidget";
-import { GemIcon, LayersIcon, ClockIcon, ClipboardIcon } from "../components/icons/DashboardIcons";
+import { GemIcon, LayersIcon, ClockIcon, ClipboardIcon, ShieldCheckIcon } from "../components/icons/DashboardIcons";
 
 // Same F-pattern / dashboard-designer approach as the other department dashboards.
 
 type Tone = "positive" | "negative" | "caution";
-type QueueTab = "stale" | "competentPerson" | "assay" | "inProgress";
+type QueueTab = "stale" | "competentPerson" | "assay" | "inProgress" | "registers" | "variances";
 
 const cardOuter = "bg-mine-900 border border-mine-800 rounded-[20px] shadow-sm shadow-black/5 p-6";
 const TONE_BADGE: Record<Tone | "neutral", string> = {
@@ -118,7 +118,7 @@ export default function MineralResourcesDashboard() {
   if (loadError) return <LoadError onRetry={load} />;
   if (!summary) return <div className="text-mine-300">{t("common.loading")}</div>;
 
-  const { headline, trends, breakdowns, drilling, grades, estimateGovernance, actionQueue } = summary;
+  const { headline, trends, breakdowns, drilling, grades, estimateGovernance, surveyAndBoundary, qaqc, mineralRights, gradeReconciliation, actionQueue } = summary;
 
   const drillingTrend = trends.drilling.map((d) => d.count);
 
@@ -137,12 +137,16 @@ export default function MineralResourcesDashboard() {
     competentPerson: actionQueue.missingCompetentPerson.length,
     assay: actionQueue.holesAwaitingAssay.length,
     inProgress: actionQueue.holesInProgress.length,
+    registers: actionQueue.registerLapsed.length,
+    variances: actionQueue.unexplainedVariances.length,
   };
   const totalActions = Object.values(queueCounts).reduce((a, b) => a + b, 0);
 
   const queueTabs: { key: QueueTab; label: string }[] = [
     { key: "stale", label: t("mineralResourcesDashboard.queue.stale") },
     { key: "competentPerson", label: t("mineralResourcesDashboard.queue.competentPerson") },
+    { key: "registers", label: t("mineralResourcesDashboard.queue.registers") },
+    { key: "variances", label: t("mineralResourcesDashboard.queue.variances") },
     { key: "assay", label: t("mineralResourcesDashboard.queue.assay") },
     { key: "inProgress", label: t("mineralResourcesDashboard.queue.inProgress") },
   ];
@@ -155,7 +159,7 @@ export default function MineralResourcesDashboard() {
       </div>
 
       {/* Level 1 — headline KPIs */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-5 gap-4">
         <HeadlineKpi
           icon={<GemIcon />}
           label={t("mineralResourcesDashboard.measuredIndicated")}
@@ -187,6 +191,16 @@ export default function MineralResourcesDashboard() {
           tone={headline.holesAwaitingAssay > 0 ? "caution" : "positive"}
           trend={drillingTrend}
           trendColor="#3b82f6"
+        />
+        {/* Distinct from the estimate-governance figures below: those are resource-statement
+            hygiene, this is the survey, boundary and mineral-right evidence that determines
+            whether the mine is operating lawfully at all. */}
+        <HeadlineKpi
+          icon={<ShieldCheckIcon />}
+          label={t("mineralResourcesDashboard.registerLapsed")}
+          value={headline.registerLapsed}
+          target={t("mineralResourcesDashboard.registerLapsedTarget")}
+          tone={headline.registerLapsed > 0 ? "negative" : "positive"}
         />
       </div>
 
@@ -295,6 +309,79 @@ export default function MineralResourcesDashboard() {
         </div>
       </div>
 
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <div className={`${cardOuter} space-y-3`}>
+          <div>
+            <h2 className="text-sm font-semibold">{t("mineralResourcesDashboard.registersTitle")}</h2>
+            <p className="text-[11px] text-mine-400 mt-0.5">{t("mineralResourcesDashboard.registersHint")}</p>
+          </div>
+          <StatRow
+            label={t("mineralResourcesDashboard.sitesWithoutSurvey", { count: surveyAndBoundary.sitesTracked })}
+            value={surveyAndBoundary.sitesWithoutCurrentSurvey}
+            tone={surveyAndBoundary.sitesWithoutCurrentSurvey > 0 ? "negative" : "positive"}
+          />
+          <StatRow
+            label={t("mineralResourcesDashboard.beaconIssues", { count: surveyAndBoundary.beaconsTracked })}
+            value={surveyAndBoundary.beaconsWithIssue}
+            tone={surveyAndBoundary.beaconsWithIssue > 0 ? "negative" : "positive"}
+          />
+          <StatRow
+            label={t("mineralResourcesDashboard.renewalOverdue")}
+            value={mineralRights.renewalOverdue}
+            tone={mineralRights.renewalOverdue > 0 ? "negative" : "positive"}
+          />
+          <div className="border-t border-mine-800 pt-3 space-y-3">
+            <StatRow
+              label={t("mineralResourcesDashboard.qaqcPassRate", { days: 30 })}
+              value={qaqc.passRatePct !== null ? `${qaqc.passRatePct}%` : "—"}
+              tone={qaqc.passRatePct === null ? undefined : qaqc.passRatePct >= 95 ? "positive" : qaqc.passRatePct >= 85 ? "caution" : "negative"}
+            />
+            <StatRow
+              label={t("mineralResourcesDashboard.qaqcTypesCovered")}
+              value={t("mineralResourcesDashboard.qaqcTypesCoveredValue", { count: qaqc.sampleTypesCovered })}
+              tone={qaqc.sampleTypesCovered >= 4 ? "positive" : "caution"}
+            />
+          </div>
+          <div className="pt-2">
+            <Link to="/resource-governance" className="text-xs text-hazard-500 hover:underline">{t("mineralResourcesDashboard.openResourceGovernance")}</Link>
+          </div>
+        </div>
+
+        <div className={`${cardOuter} space-y-3`}>
+          <div>
+            <h2 className="text-sm font-semibold">{t("mineralResourcesDashboard.reconciliationTitle")}</h2>
+            <p className="text-[11px] text-mine-400 mt-0.5">{t("mineralResourcesDashboard.reconciliationHint")}</p>
+          </div>
+          <StatRow
+            label={t("mineralResourcesDashboard.avgMcf")}
+            value={gradeReconciliation.avgMineCallFactorPct !== null ? `${gradeReconciliation.avgMineCallFactorPct}%` : "—"}
+            tone={
+              gradeReconciliation.avgMineCallFactorPct === null
+                ? undefined
+                : Math.abs(gradeReconciliation.avgMineCallFactorPct - 100) <= 10
+                  ? "positive"
+                  : "negative"
+            }
+          />
+          <StatRow
+            label={t("mineralResourcesDashboard.unexplainedVariances")}
+            value={gradeReconciliation.unexplainedVariances}
+            tone={gradeReconciliation.unexplainedVariances > 0 ? "negative" : "positive"}
+          />
+          <StatRow
+            label={t("mineralResourcesDashboard.periodsAwaitingActuals")}
+            value={gradeReconciliation.periodsAwaitingActuals}
+            tone={gradeReconciliation.periodsAwaitingActuals > 0 ? "caution" : "positive"}
+          />
+          <div className="border-t border-mine-800 pt-3">
+            <StatRow label={t("mineralResourcesDashboard.periodsRecorded")} value={gradeReconciliation.periodsRecorded} />
+          </div>
+          <div className="pt-2">
+            <Link to="/resource-governance?tab=reconciliation" className="text-xs text-hazard-500 hover:underline">{t("mineralResourcesDashboard.openReconciliation")}</Link>
+          </div>
+        </div>
+      </div>
+
       {/* Action queue — tabbed rather than four stacked tables */}
       <div className={cardOuter}>
         <div className="flex items-start justify-between flex-wrap gap-3 mb-4">
@@ -359,6 +446,42 @@ export default function MineralResourcesDashboard() {
                     <div className="text-mine-500 text-[11px]">{e.siteName}</div>
                   </div>
                   <span className="text-mine-400 shrink-0">{e.reportReference ?? t("mineralResourcesDashboard.noReport")}</span>
+                </div>
+              ))
+            ))}
+
+          {queueTab === "registers" &&
+            (actionQueue.registerLapsed.length === 0 ? (
+              <p className="text-xs text-mine-400 py-4 text-center">{t("mineralResourcesDashboard.queueEmpty")}</p>
+            ) : (
+              actionQueue.registerLapsed.map((r) => (
+                <div key={r.id} className="flex items-center justify-between gap-3 text-xs border-b border-mine-800 pb-2 last:border-0 last:pb-0">
+                  <div className="min-w-0">
+                    <div className="truncate">{r.identifier}</div>
+                    <div className="text-mine-500 text-[11px]">
+                      {t(`mineralResourcesDashboard.registers.${r.register}`)} · {t(`mineralResourcesDashboard.registerIssues.${r.issue}`)}
+                    </div>
+                  </div>
+                  <span className="text-danger-500 tabular-nums shrink-0">
+                    {r.dueDate ? new Date(r.dueDate).toLocaleDateString() : t("mineralResourcesDashboard.noDueDate")}
+                  </span>
+                </div>
+              ))
+            ))}
+
+          {queueTab === "variances" &&
+            (actionQueue.unexplainedVariances.length === 0 ? (
+              <p className="text-xs text-mine-400 py-4 text-center">{t("mineralResourcesDashboard.queueEmpty")}</p>
+            ) : (
+              actionQueue.unexplainedVariances.map((v) => (
+                <div key={v.id} className="flex items-center justify-between gap-3 text-xs border-b border-mine-800 pb-2 last:border-0 last:pb-0">
+                  <div className="min-w-0">
+                    <div className="truncate">{v.siteName} · {t(`mineralResourcesDashboard.minerals.${v.mineralType}`, v.mineralType)}</div>
+                    <div className="text-mine-500 text-[11px]">
+                      {new Date(v.periodStart).toLocaleDateString()} – {new Date(v.periodEnd).toLocaleDateString()}
+                    </div>
+                  </div>
+                  <span className="text-danger-500 font-semibold tabular-nums shrink-0">{v.mcf}%</span>
                 </div>
               ))
             ))}

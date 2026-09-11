@@ -1443,7 +1443,19 @@ async function buildMineralResourcesManagerContext(mineId: string) {
   const thirtyDaysAgo = new Date(Date.now() - 30 * 86400000);
   const oneYearAgo = new Date(Date.now() - 365 * 86400000);
 
-  const [mine, estimates, holesByStatus, completedHoles, assays, productionYear] = await Promise.all([
+  const [
+    mine,
+    estimates,
+    holesByStatus,
+    completedHoles,
+    assays,
+    productionYear,
+    surveyPlans,
+    beacons,
+    qaqcSamplesRecent,
+    mineralRights,
+    reconciliations,
+  ] = await Promise.all([
     prisma.mine.findUnique({ where: { id: mineId }, select: { name: true } }),
     prisma.resourceEstimate.findMany({
       where: { site: { mineId } },
@@ -1471,6 +1483,35 @@ async function buildMineralResourcesManagerContext(mineId: string) {
     prisma.productionRecord.findMany({
       where: { shiftDate: { gte: oneYearAgo }, site: { mineId } },
       select: { tonnesMined: true },
+    }),
+    prisma.surveyPlan.findMany({
+      where: { site: { mineId } },
+      select: { siteId: true, surveyDate: true, nextSurveyDue: true },
+    }),
+    prisma.boundaryBeacon.findMany({
+      where: { site: { mineId } },
+      select: { condition: true, nextVerificationDue: true },
+    }),
+    prisma.qaqcSample.findMany({
+      where: { site: { mineId }, sampleDate: { gte: new Date(Date.now() - 90 * 86400000) } },
+      select: { sampleType: true, result: true },
+    }),
+    prisma.mineralRight.findMany({
+      where: { mineId },
+      select: { rightReferenceNumber: true, rightType: true, status: true, expiryDate: true, renewalApplicationDue: true, renewalLodgedDate: true },
+    }),
+    prisma.gradeReconciliation.findMany({
+      where: { site: { mineId }, periodStart: { gte: oneYearAgo } },
+      select: {
+        mineralType: true,
+        estimatedTonnes: true,
+        estimatedGrade: true,
+        actualTonnesMined: true,
+        actualGradeMined: true,
+        actualTonnesMilled: true,
+        actualGradeMilled: true,
+        varianceExplanation: true,
+      },
     }),
   ]);
 
@@ -1525,6 +1566,41 @@ async function buildMineralResourcesManagerContext(mineId: string) {
   const staleEstimates = current.filter((e) => e.estimateDate < oneYearAgo).length;
   const missingCompetentPerson = current.filter((e) => !e.competentPerson || !e.competentPerson.trim()).length;
 
+  // --- Survey & boundary compliance ------------------------------------------
+  const latestSurveyBySite = new Map<string, (typeof surveyPlans)[number]>();
+  for (const p of surveyPlans) {
+    const held = latestSurveyBySite.get(p.siteId);
+    if (!held || p.surveyDate > held.surveyDate) latestSurveyBySite.set(p.siteId, p);
+  }
+  const sitesWithoutCurrentSurvey = [...latestSurveyBySite.values()].filter((p) => !p.nextSurveyDue || p.nextSurveyDue < now).length;
+  const beaconsWithIssue = beacons.filter((b) => b.condition === "DAMAGED" || b.condition === "MISSING").length;
+  const beaconsVerificationOverdue = beacons.filter((b) => !b.nextVerificationDue || b.nextVerificationDue < now).length;
+
+  // --- QAQC program (last 90 days) -------------------------------------------
+  const qaqcFail = qaqcSamplesRecent.filter((s) => s.result === "FAIL").length;
+  const qaqcPassRatePct = qaqcSamplesRecent.length > 0 ? Math.round(((qaqcSamplesRecent.length - qaqcFail) / qaqcSamplesRecent.length) * 100) : null;
+  const qaqcTypesCovered = new Set(qaqcSamplesRecent.map((s) => s.sampleType)).size;
+
+  // --- Mineral rights & tenure -------------------------------------------------
+  const activeRights = mineralRights.filter((r) => r.status === "ACTIVE" || r.status === "RENEWAL_PENDING");
+  const renewalOverdue = activeRights.filter((r) => r.renewalApplicationDue && !r.renewalLodgedDate && r.renewalApplicationDue < now).length;
+  const expiredStillActive = mineralRights.filter((r) => r.status === "ACTIVE" && r.expiryDate && r.expiryDate < now).length;
+
+  // --- Grade reconciliation (Mine Call Factor) --------------------------------
+  const mcfValues = reconciliations
+    .map((r) => {
+      const estimatedMetal = r.estimatedTonnes * r.estimatedGrade;
+      if (estimatedMetal <= 0) return null;
+      const actualTonnes = r.actualTonnesMilled ?? r.actualTonnesMined;
+      const actualGrade = r.actualGradeMilled ?? r.actualGradeMined;
+      if (actualTonnes == null || actualGrade == null) return null;
+      return { mcf: (actualTonnes * actualGrade / estimatedMetal) * 100, explained: !!r.varianceExplanation?.trim() };
+    })
+    .filter((v): v is { mcf: number; explained: boolean } => v != null);
+  const avgMcfPct = mcfValues.length > 0 ? Math.round((mcfValues.reduce((s, v) => s + v.mcf, 0) / mcfValues.length) * 10) / 10 : null;
+  const unexplainedVariances = mcfValues.filter((v) => Math.abs(v.mcf - 100) > 10 && !v.explained).length;
+  const reconciliationsAwaitingActuals = reconciliations.length - mcfValues.length;
+
   return {
     mine: { name: mine?.name ?? "the mine" },
     resourceStatement: {
@@ -1557,6 +1633,38 @@ async function buildMineralResourcesManagerContext(mineId: string) {
       missingCompetentPerson,
       governanceNote:
         "SAMREC requires a named competent person behind a public resource or reserve figure; an estimate without one is a reporting gap, not merely a blank field.",
+    },
+    surveyAndBoundary: {
+      sitesTracked: latestSurveyBySite.size,
+      sitesWithoutCurrentSurvey,
+      beaconsTracked: beacons.length,
+      beaconsWithIssue,
+      beaconsVerificationOverdue,
+      note:
+        "Mine Survey Regulations. A site with no current survey plan, or a damaged/missing boundary beacon, is evidence the mine cannot currently prove it hasn't mined beyond its boundary — treat as a compliance exposure, not a scheduling backlog.",
+    },
+    qaqcProgramLast90Days: {
+      totalSamples: qaqcSamplesRecent.length,
+      failed: qaqcFail,
+      passRatePct: qaqcPassRatePct,
+      sampleTypesCovered: qaqcTypesCovered,
+      note:
+        "SAMREC Table 1 expects certified standards, field/pulp duplicates and blanks all represented, not just one. sampleTypesCovered below 4 means the program has a gap even if the pass rate looks healthy. passRatePct is null when nothing was submitted.",
+    },
+    mineralRightsAndTenure: {
+      activeRights: activeRights.length,
+      renewalApplicationOverdueWithNoLodgement: renewalOverdue,
+      expiredButStillMarkedActive: expiredStillActive,
+      note:
+        "MPRDA s23. A missed renewal-application deadline with nothing lodged is a live risk of losing the legal right to mine — rank it above resource/reserve figures, since without the right the resource is unmineable regardless of its size.",
+    },
+    gradeReconciliationLast12Months: {
+      periodsRecorded: reconciliations.length,
+      periodsAwaitingActuals: reconciliationsAwaitingActuals,
+      avgMineCallFactorPct: avgMcfPct,
+      unexplainedVariances,
+      note:
+        "Mine Call Factor: actual metal accounted for against what the resource model predicted for the same tonnes. A factor persistently off 100% without explanation calls the resource model itself into question — this is the evidence for or against the reserve figures reported above, not a separate production metric.",
     },
   };
 }
@@ -2034,11 +2142,17 @@ const AI_MODULES: Record<string, AiModule> = {
     systemPrompt: (ctx) =>
       BASE_SYSTEM_PROMPT(ctx.mine.name, "Mineral Resources Manager") +
       ` You advise the resource and survey appointee. Focus on the resource and reserve statement, depletion ` +
-      `against reserves, the drilling programme, sampled grades, and competent-person governance. ` +
+      `against reserves, the drilling programme, sampled grades, competent-person governance, survey and boundary ` +
+      `compliance, the assay QAQC program, mineral rights and tenure, and grade reconciliation (Mine Call Factor). ` +
       `Be precise about confidence categories and never blur them: Measured, Indicated and Inferred are ` +
       `progressively less certain, and only Proved and Probable reserves are the economically mineable subset. ` +
       `Never add Inferred material into a reserve figure or describe a resource as a reserve — under SAMREC that ` +
       `is a reporting misstatement, not a rounding choice. ` +
+      `Rank mineralRightsAndTenure.renewalApplicationOverdueWithNoLodgement above every resource and reserve figure: ` +
+      `without a valid mining right the resource is unmineable regardless of its size, so a missed renewal deadline ` +
+      `with nothing lodged is a live legal exposure, not a governance footnote. Immediately after that, rank a ` +
+      `boundary beacon that is damaged, missing, or a site with no current survey plan — the same reasoning applies ` +
+      `to proving the mine has not worked beyond its legal boundary. ` +
       `Every tonnage in the snapshot already excludes superseded estimate versions; do not attempt to re-derive ` +
       `totals by adding figures across versions. ` +
       `When reserve life is null, say that no production was recorded in the window and the ratio is undefined — ` +
@@ -2046,6 +2160,11 @@ const AI_MODULES: Record<string, AiModule> = {
       `Flag estimates with no named competent person as a reporting gap that blocks public disclosure, and treat ` +
       `completed holes awaiting assay as drilling spend not yet converted into usable data. ` +
       `Grades in this snapshot are length-weighted; do not average them further. ` +
+      `Treat qaqcProgramLast90Days.sampleTypesCovered below 4 as a program gap even when the pass rate looks ` +
+      `healthy — SAMREC expects standards, duplicates and blanks all represented, not just whichever is easiest. ` +
+      `Use gradeReconciliationLast12Months to say whether the resource model is actually being validated: a Mine ` +
+      `Call Factor persistently away from 100% with unexplained variances calls the reserve figures above into ` +
+      `question, and is the evidence for or against them rather than a separate production metric. ` +
       `This is a geology and resource assistant — mining rate and plant performance belong to Operations.`,
   },
   VENTILATION_MANAGER: {

@@ -149,6 +149,13 @@ const statusColors: Record<string, string> = {
   MODERATE: "bg-hazard-500 text-white",
   MAJOR: "bg-danger-500 text-white",
   CATASTROPHIC: "bg-danger-600 text-white animate-pulse",
+  // Mineral resources registers.
+  RENEWAL_PENDING: "bg-hazard-500 text-white",
+  RELINQUISHED: "bg-mine-600 text-mine-100",
+  WARNING: "bg-hazard-500 text-white",
+  INTACT: "bg-success-600 text-white",
+  MISSING: "bg-danger-500 text-white",
+  REPLACED: "bg-mine-600 text-mine-100",
 };
 
 export function StatusBadge({

@@ -583,6 +583,8 @@ export interface MineralResourcesDashboardSummary {
     annualProduction: number;
     holesInProgress: number;
     holesAwaitingAssay: number;
+    /** Survey/boundary, mineral-rights and QAQC lapses merged into one number. */
+    registerLapsed: number;
   };
   trends: {
     drilling: { date: string; count: number }[];
@@ -604,11 +606,44 @@ export interface MineralResourcesDashboardSummary {
     staleEstimates: number;
     missingCompetentPerson: number;
   };
+  surveyAndBoundary: {
+    sitesTracked: number;
+    sitesWithoutCurrentSurvey: number;
+    beaconsTracked: number;
+    beaconsWithIssue: number;
+    beaconsVerificationOverdue: number;
+  };
+  qaqc: {
+    totalSamplesLast30Days: number;
+    failed: number;
+    /** Null when nothing was submitted in the window. */
+    passRatePct: number | null;
+    sampleTypesCovered: number;
+  };
+  mineralRights: {
+    activeRights: number;
+    renewalOverdue: number;
+    expiredStillActive: number;
+  };
+  gradeReconciliation: {
+    periodsRecorded: number;
+    periodsAwaitingActuals: number;
+    avgMineCallFactorPct: number | null;
+    unexplainedVariances: number;
+  };
   actionQueue: {
     staleEstimates: { id: string; siteName: string; mineralType: string; classification: string; estimateDate: string; version: number }[];
     missingCompetentPerson: { id: string; siteName: string; mineralType: string; classification: string; reportReference: string | null }[];
     holesAwaitingAssay: { id: string; holeId: string; totalDepth: number | null; drilledDate: string | null; contractor: string | null }[];
     holesInProgress: { id: string; holeId: string; status: string; totalDepth: number | null; contractor: string | null }[];
+    registerLapsed: {
+      id: string;
+      register: "SURVEY" | "BEACON" | "MINERAL_RIGHT";
+      identifier: string;
+      issue: "SURVEY_OVERDUE" | "BEACON_CONDITION" | "RENEWAL_OVERDUE" | "EXPIRED";
+      dueDate: string | null;
+    }[];
+    unexplainedVariances: { id: string; siteName: string; mineralType: MineralType; periodStart: string; periodEnd: string; mcf: number }[];
   };
 }
 
@@ -3591,6 +3626,129 @@ export interface EnvironmentalIncidentSummary {
   /** Null when nothing happened in the window — 0% would read as a broken process. */
   rcaCompletionPct: number | null;
   recurrencePreventedPct: number | null;
+}
+
+// --- Mineral resources registers (mineral resources manager) ---------------
+
+export type BeaconType = "PRIMARY_SG_BEACON" | "SECONDARY_MINE_BEACON" | "UNDERGROUND_STATION" | "OTHER";
+export type BeaconCondition = "INTACT" | "DAMAGED" | "MISSING" | "REPLACED";
+
+export interface SurveyPlan {
+  id: string;
+  siteId: string;
+  site?: { id: string; name: string } | null;
+  planReferenceNumber?: string | null;
+  surveyDate: string;
+  surveyorName: string;
+  surveyorRegistrationNumber?: string | null;
+  workingsExtentDescription?: string | null;
+  submittedToRegulator: boolean;
+  submittedDate?: string | null;
+  nextSurveyDue?: string | null;
+  notes?: string | null;
+  createdAt: string;
+}
+
+export interface BoundaryBeacon {
+  id: string;
+  siteId: string;
+  site?: { id: string; name: string } | null;
+  identifier: string;
+  beaconType: BeaconType;
+  latitude?: number | null;
+  longitude?: number | null;
+  lastVerifiedDate?: string | null;
+  nextVerificationDue?: string | null;
+  condition: BeaconCondition;
+  notes?: string | null;
+  createdAt: string;
+}
+
+export type QaqcSampleType = "CERTIFIED_REFERENCE_STANDARD" | "FIELD_DUPLICATE" | "PULP_DUPLICATE" | "BLANK" | "CHECK_ASSAY";
+export type QaqcResult = "PASS" | "WARNING" | "FAIL";
+
+export interface QaqcSample {
+  id: string;
+  siteId: string;
+  site?: { id: string; name: string } | null;
+  drillHoleId?: string | null;
+  drillHole?: { id: string; holeId: string } | null;
+  sampleType: QaqcSampleType;
+  sampleDate: string;
+  labName?: string | null;
+  batchNumber?: string | null;
+  mineralType: MineralType;
+  referenceValue?: number | null;
+  measuredValue?: number | null;
+  toleranceRangeLow?: number | null;
+  toleranceRangeHigh?: number | null;
+  result: QaqcResult;
+  notes?: string | null;
+  createdAt: string;
+}
+
+export interface QaqcSummary {
+  windowDays: number;
+  total: number;
+  fail: number;
+  warning: number;
+  /** Null when nothing was submitted in the window — 0% would read as a failed program. */
+  passRatePct: number | null;
+  byType: Record<string, { total: number; fail: number; warning: number }>;
+  byLab: Record<string, { total: number; fail: number }>;
+}
+
+export type MineralRightType = "PROSPECTING_RIGHT" | "MINING_RIGHT" | "MINING_PERMIT" | "RECONNAISSANCE_PERMIT" | "RETENTION_PERMIT";
+export type MineralRightStatus = "ACTIVE" | "RENEWAL_PENDING" | "EXPIRED" | "RELINQUISHED";
+
+export interface MineralRight {
+  id: string;
+  mineId: string;
+  siteId?: string | null;
+  site?: { id: string; name: string } | null;
+  rightType: MineralRightType;
+  rightReferenceNumber: string;
+  mineralsScheduled?: string | null;
+  areaHectares?: number | null;
+  holderName?: string | null;
+  grantedDate?: string | null;
+  expiryDate?: string | null;
+  renewalApplicationDue?: string | null;
+  renewalLodgedDate?: string | null;
+  status: MineralRightStatus;
+  notes?: string | null;
+  createdAt: string;
+}
+
+export interface GradeReconciliation {
+  id: string;
+  siteId: string;
+  site?: { id: string; name: string } | null;
+  periodStart: string;
+  periodEnd: string;
+  mineralType: MineralType;
+  estimatedTonnes: number;
+  estimatedGrade: number;
+  gradeUnit?: string | null;
+  actualTonnesMined?: number | null;
+  actualGradeMined?: number | null;
+  actualTonnesMilled?: number | null;
+  actualGradeMilled?: number | null;
+  varianceExplanation?: string | null;
+  reconciledBy?: { id: string; name: string } | null;
+  notes?: string | null;
+  createdAt: string;
+  /** Null when either side of the ratio is unknown — never a fabricated 100%. */
+  mineCallFactorPct: number | null;
+}
+
+export interface GradeReconciliationSummary {
+  windowMonths: number;
+  periodsRecorded: number;
+  periodsAwaitingActuals: number;
+  avgMcfByMineral: Record<string, number>;
+  unexplainedVariances: number;
+  trend: { period: string; mineralType: MineralType; mcf: number }[];
 }
 
 export interface LegalComplianceCalendarEntry {

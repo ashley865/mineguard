@@ -310,6 +310,7 @@ model User {
 
   environmentalIncidentsReported EnvironmentalIncident[] @relation("EnvironmentalIncidentReportedBy")
   environmentalIncidentsVerified EnvironmentalIncident[] @relation("EnvironmentalIncidentVerifiedBy")
+  gradeReconciliationsRecorded   GradeReconciliation[]   @relation("GradeReconciliationRecordedBy")
 
   geotechReadingsRecorded  GeotechnicalReading[] @relation("GeotechReadingRecordedBy")
   rockfallSignOffs         RockfallIncident[]    @relation("RockfallSignOffBy")
@@ -502,6 +503,12 @@ model Site {
   dustFalloutReadings   DustFalloutReading[]
   monitoringBoreholes   MonitoringBorehole[]
   environmentalIncidents EnvironmentalIncident[]
+
+  surveyPlans           SurveyPlan[]
+  boundaryBeacons       BoundaryBeacon[]
+  qaqcSamples           QaqcSample[]
+  mineralRights         MineralRight[]
+  gradeReconciliations  GradeReconciliation[]
 
   gatePasses             GatePass[]
   gateLogs               GateLog[]
@@ -1628,6 +1635,7 @@ model Mine {
   insurancePolicies       InsurancePolicy[]
   insuranceClaims         InsuranceClaim[]
   sensorAgents            SensorAgent[]
+  mineralRights           MineralRight[]
 
   unionAgreements    UnionAgreement[]
   ghgEmissionsRecords GhgEmissionsRecord[]
@@ -4268,6 +4276,7 @@ model DrillHole {
   notes           String?
 
   assayIntervals AssayInterval[]
+  qaqcSamples    QaqcSample[]
 
   createdAt DateTime @default(now())
 }
@@ -6737,6 +6746,188 @@ model EnvironmentalIncident {
   reportedById          String?
   reportedBy            User?                          @relation("EnvironmentalIncidentReportedBy", fields: [reportedById], references: [id], onDelete: SetNull)
   notes                 String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// ---------------------------------------------------------------------------
+// Module: Mine Survey & Boundary Compliance (Mine Survey Regulations, MHSA)
+// Every mine must maintain a certified survey of its workings and verify its
+// boundary beacons on a statutory cadence — the evidence that it has not mined
+// beyond its boundary or undermined a neighbouring property or servitude.
+// Distinct from the StatutoryAppointmentType.SURVEYOR appointment record, which
+// tracks who holds the post, not whether the survey itself is current.
+// ---------------------------------------------------------------------------
+
+model SurveyPlan {
+  id                     String    @id @default(cuid())
+  siteId                 String
+  site                   Site      @relation(fields: [siteId], references: [id], onDelete: Cascade)
+  planReferenceNumber    String?
+  surveyDate             DateTime
+  surveyorName           String
+  surveyorRegistrationNumber String?
+  workingsExtentDescription String?
+  submittedToRegulator   Boolean   @default(false)
+  submittedDate          DateTime?
+  nextSurveyDue          DateTime?
+  notes                  String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+enum BeaconType {
+  PRIMARY_SG_BEACON
+  SECONDARY_MINE_BEACON
+  UNDERGROUND_STATION
+  OTHER
+}
+
+enum BeaconCondition {
+  INTACT
+  DAMAGED
+  MISSING
+  REPLACED
+}
+
+model BoundaryBeacon {
+  id                  String          @id @default(cuid())
+  siteId              String
+  site                Site            @relation(fields: [siteId], references: [id], onDelete: Cascade)
+  identifier          String
+  beaconType          BeaconType      @default(OTHER)
+  latitude            Float?
+  longitude           Float?
+  lastVerifiedDate    DateTime?
+  nextVerificationDue DateTime?
+  condition           BeaconCondition @default(INTACT)
+  notes               String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// ---------------------------------------------------------------------------
+// Module: Assay QAQC Program (SAMREC Code Table 1)
+// A competent person cannot sign a SAMREC-compliant resource or reserve
+// statement without a documented quality-assurance/quality-control program:
+// certified reference standards, field/pulp duplicates and blanks inserted
+// into the sample stream at a defined frequency, checked against a tolerance.
+// referenceValue carries whatever the sample type is judged against — the
+// certified value for a standard, ~0 for a blank, or the paired original
+// assay for a duplicate — so one model covers all four sample types.
+// ---------------------------------------------------------------------------
+
+enum QaqcSampleType {
+  CERTIFIED_REFERENCE_STANDARD
+  FIELD_DUPLICATE
+  PULP_DUPLICATE
+  BLANK
+  CHECK_ASSAY
+}
+
+enum QaqcResult {
+  PASS
+  WARNING
+  FAIL
+}
+
+model QaqcSample {
+  id                 String         @id @default(cuid())
+  siteId             String
+  site               Site           @relation(fields: [siteId], references: [id], onDelete: Cascade)
+  drillHoleId        String?
+  drillHole          DrillHole?     @relation(fields: [drillHoleId], references: [id], onDelete: SetNull)
+  sampleType         QaqcSampleType
+  sampleDate         DateTime
+  labName            String?
+  batchNumber        String?
+  mineralType        MineralType
+  referenceValue     Float?
+  measuredValue      Float?
+  toleranceRangeLow  Float?
+  toleranceRangeHigh Float?
+  result             QaqcResult     @default(PASS)
+  notes              String?
+
+  createdAt DateTime @default(now())
+}
+
+// ---------------------------------------------------------------------------
+// Module: Mineral Rights & Tenure Register (MPRDA s23)
+// The mining or prospecting right itself — distinct from LandAgreement, which
+// covers surface access negotiated with private landowners and communities.
+// A lapsed renewal application is a legal catastrophe: it is the loss of the
+// right to mine, not a compliance finding, which is why renewalApplicationDue
+// is tracked as its own date rather than inferred from expiryDate.
+// ---------------------------------------------------------------------------
+
+enum MineralRightType {
+  PROSPECTING_RIGHT
+  MINING_RIGHT
+  MINING_PERMIT
+  RECONNAISSANCE_PERMIT
+  RETENTION_PERMIT
+}
+
+enum MineralRightStatus {
+  ACTIVE
+  RENEWAL_PENDING
+  EXPIRED
+  RELINQUISHED
+}
+
+model MineralRight {
+  id                    String             @id @default(cuid())
+  mineId                String
+  mine                  Mine               @relation(fields: [mineId], references: [id], onDelete: Cascade)
+  siteId                String?
+  site                  Site?              @relation(fields: [siteId], references: [id], onDelete: SetNull)
+  rightType             MineralRightType
+  rightReferenceNumber  String
+  mineralsScheduled     String?
+  areaHectares          Float?
+  holderName            String?
+  grantedDate           DateTime?
+  expiryDate            DateTime?
+  renewalApplicationDue DateTime?
+  renewalLodgedDate     DateTime?
+  status                MineralRightStatus @default(ACTIVE)
+  notes                 String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// ---------------------------------------------------------------------------
+// Module: Grade Control & Reconciliation (Mine Call Factor)
+// Reconciling what the resource model predicted against what was actually
+// mined and milled is what validates the model — and by extension every
+// reserve figure derived from it. This is the accountability layer the other
+// three registers feed into, the same role EquipmentFailure plays for asset
+// reliability and EnvironmentalIncident plays for the environmental registers.
+// ---------------------------------------------------------------------------
+
+model GradeReconciliation {
+  id                  String    @id @default(cuid())
+  siteId              String
+  site                Site      @relation(fields: [siteId], references: [id], onDelete: Cascade)
+  periodStart         DateTime
+  periodEnd           DateTime
+  mineralType         MineralType
+  estimatedTonnes     Float
+  estimatedGrade      Float
+  gradeUnit           String?
+  actualTonnesMined   Float?
+  actualGradeMined    Float?
+  actualTonnesMilled  Float?
+  actualGradeMilled   Float?
+  varianceExplanation String?
+  reconciledById      String?
+  reconciledBy        User?     @relation("GradeReconciliationRecordedBy", fields: [reconciledById], references: [id], onDelete: SetNull)
+  notes               String?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
