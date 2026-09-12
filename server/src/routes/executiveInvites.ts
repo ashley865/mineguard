@@ -88,12 +88,24 @@ router.post("/:id/accept", authLimiter, async (req, res) => {
       role: "EXECUTIVE",
       title: invite.title,
       mineId: invite.mineId,
+      // Accepting the invite hands back a token below — it's this account's first login,
+      // not just account creation — so it needs the same bookkeeping /auth/login does, or
+      // Cyber Command Center shows this executive as never having logged in even after
+      // they've been actively using the account.
+      lastLoginAt: new Date(),
     },
   });
   await prisma.executiveInvite.update({
     where: { id: invite.id },
     data: { status: "ACCEPTED", acceptedAt: new Date(), acceptedUserId: user.id },
   });
+  await prisma.cyberLoginEvent
+    .create({
+      data: { mineId: user.mineId!, userId: user.id, eventType: "LOGIN_SUCCESS", ipAddress: req.ip, userAgent: req.headers["user-agent"], flagged: false },
+    })
+    .catch(() => {});
+  // Same auto-clock-in /auth/login gives every executive on their first login.
+  await prisma.userAttendance.create({ data: { userId: user.id } }).catch(() => {});
 
   const token = signAuthToken(user.id);
   res.status(201).json({
