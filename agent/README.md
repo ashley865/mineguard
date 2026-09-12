@@ -104,8 +104,12 @@ whoever fills it in knows what the fields mean.
 
 | Field | Example | Notes |
 | --- | --- | --- |
-| Target | `http://192.168.10.42/api/reading` | The URL to GET |
+| Target | `http://192.168.10.42/api/reading` | The URL to call |
 | `jsonPath` | `data.value` | Dotted path to the number. Omit if the body *is* the number. Array indices work: `readings.0.v` |
+| Method | `GET` or `POST` | Most instrument endpoints are GET; a software or AI API that needs a query body is usually POST |
+| Body | `{"query": "latest"}` | Sent as the POST body when Method is POST |
+| Extra headers | `X-Model-Version: 2` | Static headers beyond Accept and the authentication header, one per line |
+| Authentication | API key header / Bearer token / Basic auth | For endpoints that require a credential — a real software or AI API almost always does, a plain instrument usually doesn't. The credential itself is entered in MineGuard and never touches this machine's configuration; it arrives already turned into the right header each time this agent asks for its target list. |
 
 ### Modbus TCP
 

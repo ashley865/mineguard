@@ -8,6 +8,7 @@ import { recordSensorReading } from "../lib/sensorReadings";
 import { generateSensorApiKey } from "../lib/sensorApiKeys";
 import { MIN_POLL_INTERVAL_SECONDS, parsePollConfig, SensorPollProtocolName } from "../lib/sensorPolling";
 import { testPollHttpSensor } from "../services/sensorPoller";
+import { encryptSecret, isSecretEncryptionConfigured } from "../lib/secretEncryption";
 
 const router = Router();
 
@@ -62,6 +63,11 @@ const sensorSchema = z.object({
   pollConfig: z.record(z.unknown()).optional().nullable(),
   pollIntervalSeconds: z.coerce.number().int().min(MIN_POLL_INTERVAL_SECONDS).max(86400).optional().nullable(),
   pollAgentId: z.string().optional().nullable(),
+  // How an HTTP_JSON poll authenticates to what it reads. The credential itself is never
+  // accepted here — see POST/DELETE /:id/poll-auth-secret — only which scheme to use and,
+  // for API_KEY_HEADER, which header name to send it under.
+  pollAuthType: z.enum(["NONE", "API_KEY_HEADER", "BEARER", "BASIC"]).optional(),
+  pollAuthHeaderName: z.string().trim().max(100).optional().nullable(),
   // Registering a sensor that already physically exists skips straight to COMMISSIONED
   // (the historical one-step behaviour); requesting a not-yet-installed sensor starts the
   // REQUESTED -> SCHEDULED -> INSTALLED -> COMMISSIONED workflow instead.
@@ -82,12 +88,14 @@ const sensorInclude = {
   commissionedBy: { select: { id: true, name: true } },
 } as const;
 
-// The device key's hash never leaves the server — the client only needs to know whether a
-// key has been issued, so it can show "Regenerate" rather than "Generate". Same shape as
-// withHasPhoto in routes/workers.ts.
-function withApiKeyFlag<T extends { apiKeyHash: string | null }>(sensor: T) {
-  const { apiKeyHash, ...rest } = sensor;
-  return { ...rest, hasApiKey: !!apiKeyHash };
+// Neither secret ever leaves the server — the client only needs to know whether one has
+// been issued/set, so it can show "Regenerate"/"Rotate" rather than "Generate"/"Set". Same
+// shape as withHasPhoto in routes/workers.ts. The encrypted poll-auth secret is exactly as
+// sensitive as the device push key (both are credentials that let something act as, or
+// pull data on behalf of, this sensor) so it gets the identical treatment.
+function withApiKeyFlag<T extends { apiKeyHash: string | null; pollAuthSecretEnc?: string | null }>(sensor: T) {
+  const { apiKeyHash, pollAuthSecretEnc, ...rest } = sensor;
+  return { ...rest, hasApiKey: !!apiKeyHash, hasPollAuthSecret: !!pollAuthSecretEnc };
 }
 
 // Issuing a device credential is an IT function specifically, not general sensor
@@ -129,12 +137,20 @@ function pollConfigWrite(
  * Returns an error message, or the normalised config to persist.
  */
 async function validatePollSettings(
-  data: { pollEnabled?: boolean; pollProtocol?: string | null; pollTarget?: string | null; pollConfig?: Record<string, unknown> | null; pollAgentId?: string | null },
-  existing: { pollProtocol: string | null; pollTarget: string | null } | null,
+  data: {
+    pollEnabled?: boolean;
+    pollProtocol?: string | null;
+    pollTarget?: string | null;
+    pollConfig?: Record<string, unknown> | null;
+    pollAgentId?: string | null;
+    pollAuthType?: string;
+  },
+  existing: { pollProtocol: string | null; pollTarget: string | null; pollAuthType?: string; pollAuthSecretEnc?: string | null } | null,
   mineId: string
 ): Promise<{ error: string } | { pollConfig?: Record<string, unknown> }> {
   const protocol = (data.pollProtocol !== undefined ? data.pollProtocol : existing?.pollProtocol) as SensorPollProtocolName | null | undefined;
   const target = data.pollTarget !== undefined ? data.pollTarget : existing?.pollTarget;
+  const authType = data.pollAuthType !== undefined ? data.pollAuthType : existing?.pollAuthType ?? "NONE";
 
   if (data.pollAgentId) {
     const agent = await prisma.sensorAgent.findFirst({ where: { id: data.pollAgentId, mineId } });
@@ -149,6 +165,14 @@ async function validatePollSettings(
   // mine network, so an unassigned sensor using either would just accumulate failures.
   if (enabling && protocol && protocol !== "HTTP_JSON" && !data.pollAgentId) {
     return { error: "Modbus and SNMP sensors must be assigned to an on-site agent" };
+  }
+
+  // Authentication only applies to HTTP_JSON — a plain instrument endpoint needs none of
+  // this, a real software/AI API almost always does, and Modbus/SNMP have their own
+  // unrelated credential shapes (unit id, community string) that already live in pollConfig.
+  if (authType !== "NONE") {
+    if (protocol !== "HTTP_JSON") return { error: "Authentication only applies to HTTP_JSON polling" };
+    if (!existing?.pollAuthSecretEnc) return { error: "Set the API credential (see \"API credential\") before choosing an authentication type" };
   }
 
   if (data.pollConfig !== undefined && data.pollConfig !== null && protocol) {
@@ -329,7 +353,45 @@ router.post("/:id/test-poll", async (req, res) => {
     // from here would fail for reasons that say nothing about the sensor's configuration.
     return res.json({ success: false, message: "Only HTTP sensors can be tested from the server. Modbus and SNMP are polled by the on-site agent." });
   }
-  res.json(await testPollHttpSensor(sensor.pollTarget, sensor.pollConfig));
+  res.json(await testPollHttpSensor(sensor.pollTarget, sensor.pollConfig, sensor));
+});
+
+const pollAuthSecretSchema = z.object({ secret: z.string().min(1).max(2000) });
+
+// Sets or rotates the credential an HTTP_JSON poll presents to a real software/AI API.
+// IT-only, like the push device key below: whoever holds this can redirect what a safety
+// sensor actually reads from. The plaintext is encrypted immediately and never echoed back
+// — only hasPollAuthSecret (see withApiKeyFlag) tells the UI one has been set.
+router.post("/:id/poll-auth-secret", async (req, res) => {
+  const mineId = requireMineId(req, res);
+  if (!mineId) return;
+  if (!(await requireItAccess(req, res))) return;
+  if (!isSecretEncryptionConfigured()) return res.status(503).json({ error: "Sensor credential storage is not configured on this server" });
+  const parsed = pollAuthSecretSchema.safeParse(req.body);
+  if (!parsed.success) return res.status(400).json({ error: parsed.error.flatten() });
+  const existing = await prisma.sensor.findFirst({ where: { id: req.params.id, zone: { site: { mineId } } } });
+  if (!existing) return res.status(404).json({ error: "Sensor not found" });
+
+  await prisma.sensor.update({
+    where: { id: existing.id },
+    data: { pollAuthSecretEnc: encryptSecret(parsed.data.secret), pollAuthSecretSetAt: new Date() },
+  });
+  res.status(201).json({ ok: true });
+});
+
+router.delete("/:id/poll-auth-secret", async (req, res) => {
+  const mineId = requireMineId(req, res);
+  if (!mineId) return;
+  if (!(await requireItAccess(req, res))) return;
+  const existing = await prisma.sensor.findFirst({ where: { id: req.params.id, zone: { site: { mineId } } } });
+  if (!existing) return res.status(404).json({ error: "Sensor not found" });
+  await prisma.sensor.update({
+    where: { id: existing.id },
+    // Clearing the secret also drops back to no authentication — an authType left pointing
+    // at a credential that no longer exists would just poll unauthenticated and fail.
+    data: { pollAuthSecretEnc: null, pollAuthSecretSetAt: null, pollAuthType: "NONE" },
+  });
+  res.status(204).send();
 });
 
 // Issues (or rotates) the device key a network sensor presents when pushing its own

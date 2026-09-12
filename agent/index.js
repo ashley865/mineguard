@@ -94,11 +94,25 @@ function valueFromJson(body, jsonPath) {
   return null;
 }
 
-async function readHttp(target, config) {
+async function readHttp(target, config, authHeaders) {
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), READ_TIMEOUT_MS);
+  const method = config.method === "POST" ? "POST" : "GET";
   try {
-    const res = await fetch(target, { headers: { Accept: "application/json" }, signal: controller.signal });
+    const res = await fetch(target, {
+      method,
+      headers: {
+        Accept: "application/json",
+        ...(method === "POST" && config.body ? { "Content-Type": "application/json" } : {}),
+        // Merges credentials for a real software/AI API (Authorization or an API-key
+        // header) that MineGuard decrypted server-side — this process never stores or
+        // sees the plaintext secret except in this request.
+        ...(authHeaders || {}),
+        ...(config.headers || {}),
+      },
+      body: method === "POST" ? config.body : undefined,
+      signal: controller.signal,
+    });
     if (!res.ok) throw new Error(`Sensor responded with HTTP ${res.status}`);
     const body = await res.json().catch(() => null);
     const value = valueFromJson(body, config.jsonPath);
@@ -174,7 +188,7 @@ async function readTarget(target) {
   const config = target.config || {};
   switch (target.protocol) {
     case "HTTP_JSON":
-      return readHttp(target.target, config);
+      return readHttp(target.target, config, target.authHeaders);
     case "MODBUS_TCP":
       return readModbus(target.target, config);
     case "SNMP":

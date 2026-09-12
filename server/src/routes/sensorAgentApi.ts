@@ -4,8 +4,9 @@ import { z } from "zod";
 import { SensorAgent } from "@prisma/client";
 import { prisma } from "../prisma";
 import { verifySensorApiKey } from "../lib/sensorApiKeys";
-import { recordSensorReading } from "../lib/sensorReadings";
-import { DEFAULT_POLL_INTERVAL_SECONDS } from "../lib/sensorPolling";
+import { recordPollOutcome, recordSensorReading } from "../lib/sensorReadings";
+import { buildPollAuthHeaders, DEFAULT_POLL_INTERVAL_SECONDS, SensorPollAuthTypeName } from "../lib/sensorPolling";
+import { decryptSecret } from "../lib/secretEncryption";
 
 const router = Router();
 
@@ -67,6 +68,9 @@ router.get("/targets", async (req, res) => {
       pollTarget: true,
       pollConfig: true,
       pollIntervalSeconds: true,
+      pollAuthType: true,
+      pollAuthHeaderName: true,
+      pollAuthSecretEnc: true,
     },
   });
 
@@ -74,15 +78,29 @@ router.get("/targets", async (req, res) => {
 
   res.json({
     agent: { id: agent.id, name: agent.name },
-    targets: sensors.map((s) => ({
-      sensorId: s.id,
-      name: s.name,
-      unit: s.unit,
-      protocol: s.pollProtocol,
-      target: s.pollTarget,
-      config: s.pollConfig ?? {},
-      intervalSeconds: s.pollIntervalSeconds ?? DEFAULT_POLL_INTERVAL_SECONDS,
-    })),
+    targets: sensors.map((s) => {
+      // The agent gets ready-to-send headers, not the raw secret plus a type to interpret —
+      // one place (buildPollAuthHeaders) decides how each auth type is actually sent, rather
+      // than duplicating that logic in the agent's own JS.
+      let authHeaders: Record<string, string> | undefined;
+      if (s.pollAuthType !== "NONE" && s.pollAuthSecretEnc) {
+        try {
+          authHeaders = buildPollAuthHeaders(s.pollAuthType as SensorPollAuthTypeName, s.pollAuthHeaderName, decryptSecret(s.pollAuthSecretEnc));
+        } catch {
+          authHeaders = undefined;
+        }
+      }
+      return {
+        sensorId: s.id,
+        name: s.name,
+        unit: s.unit,
+        protocol: s.pollProtocol,
+        target: s.pollTarget,
+        config: s.pollConfig ?? {},
+        intervalSeconds: s.pollIntervalSeconds ?? DEFAULT_POLL_INTERVAL_SECONDS,
+        ...(authHeaders ? { authHeaders } : {}),
+      };
+    }),
   });
 });
 
@@ -133,16 +151,11 @@ router.post("/readings", async (req, res) => {
     const mineId = sensor.zone.site.mineId;
     if (typeof item.value === "number" && mineId) {
       await recordSensorReading(sensor, item.value, mineId, io);
-      await prisma.sensor.update({
-        where: { id: sensor.id },
-        data: { lastPollAt: new Date(), lastPollOk: true, lastPollError: null, apiKeyLastUsedAt: new Date() },
-      });
+      await recordPollOutcome(sensor, mineId, io, { ok: true });
+      await prisma.sensor.update({ where: { id: sensor.id }, data: { apiKeyLastUsedAt: new Date() } });
       accepted += 1;
     } else {
-      await prisma.sensor.update({
-        where: { id: sensor.id },
-        data: { lastPollAt: new Date(), lastPollOk: false, lastPollError: item.error ?? "Agent reported no value" },
-      });
+      await recordPollOutcome(sensor, mineId, io, { ok: false, error: item.error ?? "Agent reported no value" });
     }
   }
 

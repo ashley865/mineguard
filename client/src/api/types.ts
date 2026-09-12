@@ -273,9 +273,16 @@ export interface Sensor {
   lastPollAt?: string | null;
   lastPollOk?: boolean | null;
   lastPollError?: string | null;
+  pollConsecutiveFailures?: number;
+  pollAuthType?: SensorPollAuthType;
+  pollAuthHeaderName?: string | null;
+  // The credential itself is never sent to the client — only whether one has been set.
+  hasPollAuthSecret?: boolean;
+  pollAuthSecretSetAt?: string | null;
 }
 
 export type SensorPollProtocol = "HTTP_JSON" | "MODBUS_TCP" | "SNMP";
+export type SensorPollAuthType = "NONE" | "API_KEY_HEADER" | "BEARER" | "BASIC";
 
 export interface OperationsDashboardSummary {
   headline: {

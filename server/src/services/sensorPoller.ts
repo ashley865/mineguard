@@ -1,18 +1,23 @@
 import { Server as SocketServer } from "socket.io";
+import { Sensor } from "@prisma/client";
 import { prisma } from "../prisma";
-import { recordSensorReading } from "../lib/sensorReadings";
+import { recordPollOutcome, recordSensorReading } from "../lib/sensorReadings";
 import { assertSafePollUrl, UnsafeUrlError } from "../lib/ssrfGuard";
-import { DEFAULT_POLL_INTERVAL_SECONDS, extractJsonValue, httpPollConfigSchema } from "../lib/sensorPolling";
+import { buildPollAuthHeaders, DEFAULT_POLL_INTERVAL_SECONDS, extractJsonValue, httpPollConfigSchema, SensorPollAuthTypeName } from "../lib/sensorPolling";
+import { decryptSecret } from "../lib/secretEncryption";
 
 const TICK_MS = 10_000;
 const REQUEST_TIMEOUT_MS = 8000;
+
+/** Sensor fields the poller needs for authentication — a subset so callers (e.g. test-poll) can pass a partial sensor. */
+type PollAuthFields = Pick<Sensor, "pollAuthType" | "pollAuthHeaderName" | "pollAuthSecretEnc">;
 
 /**
  * Fetches one sensor over HTTP and returns its reading, or the reason it couldn't.
  * Never throws: a sensor that is unplugged, renamed or serving garbage is an operational
  * fact to record on that sensor, not something that should stop the other sensors polling.
  */
-async function pollHttpSensor(target: string, config: unknown): Promise<{ value: number } | { error: string }> {
+async function pollHttpSensor(target: string, config: unknown, auth?: PollAuthFields): Promise<{ value: number } | { error: string }> {
   const parsedConfig = httpPollConfigSchema.safeParse(config ?? {});
   if (!parsedConfig.success) return { error: "Invalid HTTP poll configuration" };
 
@@ -23,10 +28,33 @@ async function pollHttpSensor(target: string, config: unknown): Promise<{ value:
     return { error: err instanceof UnsafeUrlError ? err.message : "Invalid poll URL" };
   }
 
+  let authHeaders: Record<string, string> = {};
+  if (auth && auth.pollAuthType !== "NONE") {
+    if (!auth.pollAuthSecretEnc) return { error: "No API credential is configured for this sensor's authentication type" };
+    let secret: string;
+    try {
+      secret = decryptSecret(auth.pollAuthSecretEnc);
+    } catch {
+      return { error: "Could not decrypt the stored API credential" };
+    }
+    authHeaders = buildPollAuthHeaders(auth.pollAuthType as SensorPollAuthTypeName, auth.pollAuthHeaderName, secret);
+  }
+
+  const method = parsedConfig.data.method ?? "GET";
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
   try {
-    const res = await fetch(url.toString(), { headers: { Accept: "application/json" }, signal: controller.signal });
+    const res = await fetch(url.toString(), {
+      method,
+      headers: {
+        Accept: "application/json",
+        ...(method === "POST" && parsedConfig.data.body ? { "Content-Type": "application/json" } : {}),
+        ...authHeaders,
+        ...(parsedConfig.data.headers ?? {}),
+      },
+      body: method === "POST" ? parsedConfig.data.body : undefined,
+      signal: controller.signal,
+    });
     if (!res.ok) return { error: `Sensor responded with ${res.status}` };
     const body = await res.json().catch(() => null);
     const value = extractJsonValue(body, parsedConfig.data.jsonPath);
@@ -69,31 +97,21 @@ export function startSensorPoller(io: SocketServer) {
       for (const sensor of sensors) {
         const interval = sensor.pollIntervalSeconds ?? DEFAULT_POLL_INTERVAL_SECONDS;
         if (!isDue(sensor.lastPollAt, interval)) continue;
+        const mineId = sensor.zone.site.mineId;
         if (!sensor.pollTarget) {
-          await prisma.sensor.update({
-            where: { id: sensor.id },
-            data: { lastPollAt: new Date(), lastPollOk: false, lastPollError: "No poll URL configured" },
-          });
+          await recordPollOutcome(sensor, mineId, io, { ok: false, error: "No poll URL configured" });
           continue;
         }
 
-        const result = await pollHttpSensor(sensor.pollTarget, sensor.pollConfig);
-        const mineId = sensor.zone.site.mineId;
+        const result = await pollHttpSensor(sensor.pollTarget, sensor.pollConfig, sensor);
 
         if ("value" in result && mineId) {
           await recordSensorReading(sensor, result.value, mineId, io);
-          await prisma.sensor.update({
-            where: { id: sensor.id },
-            data: { lastPollAt: new Date(), lastPollOk: true, lastPollError: null },
-          });
+          await recordPollOutcome(sensor, mineId, io, { ok: true });
         } else {
-          await prisma.sensor.update({
-            where: { id: sensor.id },
-            data: {
-              lastPollAt: new Date(),
-              lastPollOk: false,
-              lastPollError: "error" in result ? result.error : "Sensor is not attached to a mine",
-            },
+          await recordPollOutcome(sensor, mineId, io, {
+            ok: false,
+            error: "error" in result ? result.error : "Sensor is not attached to a mine",
           });
         }
       }
@@ -108,8 +126,8 @@ export function startSensorPoller(io: SocketServer) {
 }
 
 /** Backs the "Test poll" button, so IT gets the real failure reason before saving. */
-export async function testPollHttpSensor(target: string, config: unknown): Promise<{ success: boolean; message: string; value?: number }> {
-  const result = await pollHttpSensor(target, config);
+export async function testPollHttpSensor(target: string, config: unknown, auth?: PollAuthFields): Promise<{ success: boolean; message: string; value?: number }> {
+  const result = await pollHttpSensor(target, config, auth);
   if ("value" in result) return { success: true, message: `Sensor returned ${result.value}`, value: result.value };
   return { success: false, message: result.error };
 }

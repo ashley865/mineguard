@@ -10,6 +10,14 @@ export const httpPollConfigSchema = z.object({
   // Dotted path into the JSON response, e.g. "data.value" or "readings.0.v". Omitted
   // means the response body is itself the number.
   jsonPath: z.string().trim().max(200).optional(),
+  // GET covers plain instrument endpoints; POST is what most software/AI APIs actually
+  // require (e.g. posting a query and reading the prediction back).
+  method: z.enum(["GET", "POST"]).default("GET"),
+  // Raw request body for POST, sent as-is (typically JSON) with Content-Type: application/json.
+  body: z.string().trim().max(4000).optional(),
+  // Extra static headers a specific API needs beyond the Accept/auth headers already sent —
+  // e.g. an API version pin. Bounded so a config can't be used to smuggle an unbounded blob.
+  headers: z.record(z.string().max(500)).refine((h) => Object.keys(h).length <= 10, "At most 10 custom headers").optional(),
 });
 
 export const modbusPollConfigSchema = z.object({
@@ -30,6 +38,23 @@ export const snmpPollConfigSchema = z.object({
 });
 
 export type SensorPollProtocolName = "HTTP_JSON" | "MODBUS_TCP" | "SNMP";
+export type SensorPollAuthTypeName = "NONE" | "API_KEY_HEADER" | "BEARER" | "BASIC";
+
+/**
+ * Turns a decrypted secret into the header(s) it needs to become. Kept as one shared
+ * function rather than duplicated in the on-site agent so there is exactly one place that
+ * knows how each auth type is supposed to be sent.
+ */
+export function buildPollAuthHeaders(
+  authType: SensorPollAuthTypeName,
+  headerName: string | null | undefined,
+  secret: string | null | undefined
+): Record<string, string> {
+  if (authType === "NONE" || !secret) return {};
+  if (authType === "API_KEY_HEADER") return { [headerName?.trim() || "X-API-Key"]: secret };
+  if (authType === "BEARER") return { Authorization: `Bearer ${secret}` };
+  return { Authorization: `Basic ${Buffer.from(secret, "utf8").toString("base64")}` };
+}
 
 /** Returns the parsed config, or an error message naming what's wrong with it. */
 export function parsePollConfig(protocol: SensorPollProtocolName, raw: unknown): { config: Record<string, unknown> } | { error: string } {

@@ -1,7 +1,7 @@
 import { FormEvent, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { api, API_URL } from "../../api/client";
-import { Sensor, SensorAgent, SensorPollProtocol } from "../../api/types";
+import { Sensor, SensorAgent, SensorPollAuthType, SensorPollProtocol } from "../../api/types";
 import { CyberTheme, cyberButtonDanger, cyberButtonPrimary, cyberButtonSecondary, cyberLinkButton } from "./cyberTheme";
 import CyberTable, { CyberTableColumn } from "./CyberTable";
 import CyberModal from "./CyberModal";
@@ -120,11 +120,64 @@ function PollConfigFields({ theme, protocol, config, onChange }: {
   const set = (key: string, value: any) => onChange({ ...config, [key]: value });
 
   if (protocol === "HTTP_JSON") {
+    const method = config.method ?? "GET";
+    const headersText = Object.entries((config.headers ?? {}) as Record<string, string>)
+      .map(([k, v]) => `${k}: ${v}`)
+      .join("\n");
+
     return (
-      <div>
-        <label className={label}>{t("cyber.sensorSetup.jsonPath")}</label>
-        <input className={theme.input} value={config.jsonPath ?? ""} onChange={(e) => set("jsonPath", e.target.value)} placeholder="data.value" />
-        <p className={`text-[10px] mt-1 ${theme.mutedText}`}>{t("cyber.sensorSetup.jsonPathHint")}</p>
+      <div className="space-y-3">
+        <div>
+          <label className={label}>{t("cyber.sensorSetup.jsonPath")}</label>
+          <input className={theme.input} value={config.jsonPath ?? ""} onChange={(e) => set("jsonPath", e.target.value)} placeholder="data.value" />
+          <p className={`text-[10px] mt-1 ${theme.mutedText}`}>{t("cyber.sensorSetup.jsonPathHint")}</p>
+        </div>
+
+        <div className="grid grid-cols-2 gap-3">
+          <div>
+            <label className={label}>{t("cyber.sensorSetup.httpMethod")}</label>
+            <select className={theme.select} value={method} onChange={(e) => set("method", e.target.value)}>
+              <option value="GET">GET</option>
+              <option value="POST">POST</option>
+            </select>
+          </div>
+        </div>
+
+        {method === "POST" && (
+          <div>
+            <label className={label}>{t("cyber.sensorSetup.httpBody")}</label>
+            <textarea
+              className={`${theme.input} font-mono text-[11px]`}
+              rows={3}
+              value={config.body ?? ""}
+              onChange={(e) => set("body", e.target.value)}
+              placeholder={'{"query": "latest reading"}'}
+            />
+            <p className={`text-[10px] mt-1 ${theme.mutedText}`}>{t("cyber.sensorSetup.httpBodyHint")}</p>
+          </div>
+        )}
+
+        <div>
+          <label className={label}>{t("cyber.sensorSetup.httpHeaders")}</label>
+          <textarea
+            className={`${theme.input} font-mono text-[11px]`}
+            rows={2}
+            defaultValue={headersText}
+            onBlur={(e) => {
+              const headers: Record<string, string> = {};
+              for (const line of e.target.value.split("\n")) {
+                const idx = line.indexOf(":");
+                if (idx <= 0) continue;
+                const name = line.slice(0, idx).trim();
+                const value = line.slice(idx + 1).trim();
+                if (name) headers[name] = value;
+              }
+              set("headers", Object.keys(headers).length ? headers : undefined);
+            }}
+            placeholder={"X-Model-Version: 2\nAccept-Language: en"}
+          />
+          <p className={`text-[10px] mt-1 ${theme.mutedText}`}>{t("cyber.sensorSetup.httpHeadersHint")}</p>
+        </div>
       </div>
     );
   }
@@ -188,6 +241,111 @@ function PollConfigFields({ theme, protocol, config, onChange }: {
   );
 }
 
+/**
+ * Authenticating an HTTP_JSON poll against a real software/AI API — as opposed to a bare
+ * instrument endpoint, which usually needs none of this. The credential is set/rotated
+ * through its own IT-gated endpoint (never inside the general PUT) and is never echoed
+ * back, so this only ever shows whether one is configured, not what it is.
+ */
+function PollAuthSection({ theme, sensor, authType, headerName, onAuthTypeChange, onHeaderNameChange, onChanged }: {
+  theme: CyberTheme;
+  sensor: Sensor;
+  authType: SensorPollAuthType;
+  headerName: string;
+  onAuthTypeChange: (v: SensorPollAuthType) => void;
+  onHeaderNameChange: (v: string) => void;
+  onChanged: () => Promise<void>;
+}) {
+  const { t } = useTranslation();
+  const label = `block text-[11px] font-semibold mb-1 ${theme.subtext}`;
+  const [secret, setSecret] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [saved, setSaved] = useState(false);
+
+  async function saveSecret() {
+    if (!secret) return;
+    setBusy(true);
+    setError(null);
+    try {
+      await api.post(`/sensors/${sensor.id}/poll-auth-secret`, { secret });
+      setSecret("");
+      setSaved(true);
+      setTimeout(() => setSaved(false), 2500);
+      await onChanged();
+    } catch (err: any) {
+      setError(err.response?.data?.error ?? t("cyber.sensorSetup.authSecretError"));
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function clearSecret() {
+    if (!confirm(t("cyber.sensorSetup.confirmClearAuthSecret"))) return;
+    setBusy(true);
+    setError(null);
+    try {
+      await api.delete(`/sensors/${sensor.id}/poll-auth-secret`);
+      onAuthTypeChange("NONE");
+      await onChanged();
+    } catch (err: any) {
+      setError(err.response?.data?.error ?? t("cyber.sensorSetup.authSecretError"));
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  return (
+    <div className={`space-y-3 rounded-md border px-3 py-3 ${theme.dark ? "border-white/15" : "border-slate-300"}`}>
+      <span className={`text-xs font-semibold ${theme.text}`}>{t("cyber.sensorSetup.authTitle")}</span>
+      <p className={`text-[10px] ${theme.mutedText}`}>{t("cyber.sensorSetup.authHint")}</p>
+
+      <div className="grid grid-cols-2 gap-3">
+        <div>
+          <label className={label}>{t("cyber.sensorSetup.authType")}</label>
+          <select className={theme.select} value={authType} onChange={(e) => onAuthTypeChange(e.target.value as SensorPollAuthType)}>
+            <option value="NONE">{t("cyber.sensorSetup.authTypes.NONE")}</option>
+            <option value="API_KEY_HEADER">{t("cyber.sensorSetup.authTypes.API_KEY_HEADER")}</option>
+            <option value="BEARER">{t("cyber.sensorSetup.authTypes.BEARER")}</option>
+            <option value="BASIC">{t("cyber.sensorSetup.authTypes.BASIC")}</option>
+          </select>
+        </div>
+        {authType === "API_KEY_HEADER" && (
+          <div>
+            <label className={label}>{t("cyber.sensorSetup.authHeaderName")}</label>
+            <input className={theme.input} value={headerName} onChange={(e) => onHeaderNameChange(e.target.value)} placeholder="X-API-Key" />
+          </div>
+        )}
+      </div>
+
+      {authType !== "NONE" && (
+        <div className="space-y-2">
+          <div className={`text-[11px] ${theme.mutedText}`}>
+            {sensor.hasPollAuthSecret ? t("cyber.sensorSetup.authSecretSet") : t("cyber.sensorSetup.authSecretMissing")}
+          </div>
+          <div className="flex gap-2 flex-wrap items-center">
+            <input
+              className={`${theme.input} flex-1 min-w-[12rem]`}
+              type="password"
+              value={secret}
+              onChange={(e) => setSecret(e.target.value)}
+              placeholder={authType === "BASIC" ? t("cyber.sensorSetup.authSecretBasicPlaceholder") ?? "" : t("cyber.sensorSetup.authSecretPlaceholder") ?? ""}
+            />
+            <button type="button" className={cyberButtonSecondary(theme)} onClick={saveSecret} disabled={busy || !secret}>
+              {busy ? t("common.saving") : sensor.hasPollAuthSecret ? t("cyber.sensorSetup.rotate") : t("cyber.sensorSetup.setCredential")}
+            </button>
+            {sensor.hasPollAuthSecret && (
+              <button type="button" className={cyberButtonDanger} onClick={clearSecret} disabled={busy}>{t("common.clear")}</button>
+            )}
+          </div>
+          {saved && <div className="text-[11px] text-green-500">{t("cyber.sensorSetup.authSecretSaved")}</div>}
+          {error && <div className="text-[11px] text-danger-500">{error}</div>}
+        </div>
+      )}
+    </div>
+  );
+}
+
 function ProvisioningModal({ theme, sensor, agents, onClose, onChanged }: {
   theme: CyberTheme;
   sensor: Sensor;
@@ -205,6 +363,8 @@ function ProvisioningModal({ theme, sensor, agents, onClose, onChanged }: {
   const [config, setConfig] = useState<Record<string, any>>((sensor.pollConfig as Record<string, any>) ?? {});
   const [intervalSeconds, setIntervalSeconds] = useState(String(sensor.pollIntervalSeconds ?? 60));
   const [agentId, setAgentId] = useState(sensor.pollAgentId ?? agents[0]?.id ?? "");
+  const [authType, setAuthType] = useState<SensorPollAuthType>(sensor.pollAuthType ?? "NONE");
+  const [authHeaderName, setAuthHeaderName] = useState(sensor.pollAuthHeaderName ?? "X-API-Key");
   const [issuedKey, setIssuedKey] = useState<string | null>(null);
   const [lang, setLang] = useState<SnippetLang>("curl");
   const [busy, setBusy] = useState(false);
@@ -264,6 +424,7 @@ function ProvisioningModal({ theme, sensor, agents, onClose, onChanged }: {
         pollConfig: config,
         pollIntervalSeconds: Number(intervalSeconds),
         pollAgentId: mode === "AGENT_POLL" ? agentId : null,
+        ...(effectiveProtocol === "HTTP_JSON" ? { pollAuthType: authType, pollAuthHeaderName: authType === "API_KEY_HEADER" ? authHeaderName : null } : {}),
       });
       await onChanged();
     } catch (err: any) {
@@ -330,6 +491,9 @@ function ProvisioningModal({ theme, sensor, agents, onClose, onChanged }: {
         {sensor.lastPollError && (
           <div className="text-[11px] text-red-400 border border-red-500/40 bg-red-500/10 rounded-md px-3 py-2">
             {t("cyber.sensorSetup.lastError", { error: sensor.lastPollError })}
+            {!!sensor.pollConsecutiveFailures && sensor.pollConsecutiveFailures > 1 && (
+              <span className="block mt-1 font-semibold">{t("cyber.sensorSetup.consecutiveFailures", { count: sensor.pollConsecutiveFailures })}</span>
+            )}
           </div>
         )}
 
@@ -448,6 +612,18 @@ function ProvisioningModal({ theme, sensor, agents, onClose, onChanged }: {
             </div>
 
             <PollConfigFields theme={theme} protocol={effectiveProtocol} config={config} onChange={setConfig} />
+
+            {effectiveProtocol === "HTTP_JSON" && (
+              <PollAuthSection
+                theme={theme}
+                sensor={sensor}
+                authType={authType}
+                headerName={authHeaderName}
+                onAuthTypeChange={setAuthType}
+                onHeaderNameChange={setAuthHeaderName}
+                onChanged={onChanged}
+              />
+            )}
 
             {testResult && (
               <div className={`text-[11px] rounded-md px-3 py-2 border ${testResult.success ? "border-green-500/40 bg-green-500/10 text-green-400" : "border-red-500/40 bg-red-500/10 text-red-400"}`}>

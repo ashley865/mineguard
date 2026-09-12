@@ -516,6 +516,11 @@ model Site {
   selfRescuerUnits       SelfRescuerUnit[]
   escapeRoutes           EscapeRoute[]
 
+  supportStandards       SupportStandard[]
+  supportQualityChecks   SupportQualityCheck[]
+  rockMassObservations   RockMassObservation[]
+  excavationExaminations ExcavationExamination[]
+
   gatePasses             GatePass[]
   gateLogs               GateLog[]
   securityBlacklistEntries SecurityBlacklistEntry[]
@@ -562,6 +567,7 @@ model Zone {
   electricalInstallations ElectricalInstallation[]
   ventilationFans        VentilationFan[]
   thermalStressStations  ThermalStressStation[]
+  excavationExaminations ExcavationExamination[]
 
   createdAt DateTime @default(now())
 }
@@ -614,6 +620,22 @@ model Sensor {
   lastPollAt          DateTime?
   lastPollOk          Boolean?
   lastPollError       String?
+  // How many scheduled polls have failed in a row since the last success — reset to 0 on
+  // any successful poll. Lets a broken integration be flagged (see notifySensorPollFailing
+  // in lib/sensorReadings.ts) instead of just quietly piling up lastPollError overwrites
+  // that nobody is watching.
+  pollConsecutiveFailures Int @default(0)
+
+  // Authenticates outbound HTTP_JSON polls against a real software/AI API, which — unlike a
+  // bare instrument endpoint — almost always requires a credential. The secret is encrypted
+  // at rest (see lib/secretEncryption.ts) rather than hashed like apiKeyHash above, because
+  // it has to be recoverable: MineGuard is the one presenting it to the third-party API, not
+  // just verifying it was presented. Only IT can set or rotate it (routes/sensors.ts), and
+  // it is never included in any response — see hasPollAuthSecret in withApiKeyFlag.
+  pollAuthType        SensorPollAuthType @default(NONE)
+  pollAuthHeaderName  String?
+  pollAuthSecretEnc   String?
+  pollAuthSecretSetAt DateTime?
 
   requestedById String?
   requestedBy   User?     @relation("SensorRequestedBy", fields: [requestedById], references: [id], onDelete: SetNull)
@@ -3672,11 +3694,20 @@ model GroundControlDistrict {
   zoneId                  String?
   zone                    Zone?    @relation(fields: [zoneId], references: [id], onDelete: SetNull)
   name                    String
+  // Free-text summary kept for the districts captured before the structured
+  // SupportStandard register existed. New work should hang off `supportStandards`,
+  // which carries the bolt length, spacing and shotcrete thickness a quality
+  // check can actually be measured against.
   requiredSupportStandard String?
   status                  String   @default("ACTIVE")
 
   monitoringPoints  GeotechnicalMonitoringPoint[]
   rockfallIncidents RockfallIncident[]
+
+  supportStandards       SupportStandard[]
+  supportQualityChecks   SupportQualityCheck[]
+  rockMassObservations   RockMassObservation[]
+  excavationExaminations ExcavationExamination[]
 
   createdAt DateTime @default(now())
 }
@@ -5929,6 +5960,7 @@ enum NotificationType {
   LEAVE_REQUEST
   IOD_CLAIM
   BUDGET_APPROVAL
+  SENSOR_POLL_FAILING
 }
 
 // A real, persisted per-recipient inbox row — created by lib/notify.ts's notifyExecutives()
@@ -5988,6 +6020,15 @@ enum SensorPollProtocol {
   HTTP_JSON
   MODBUS_TCP
   SNMP
+}
+
+// How an HTTP_JSON poll authenticates itself to the endpoint it reads — a plain instrument
+// usually needs none of this, but a real software or AI API almost always does.
+enum SensorPollAuthType {
+  NONE
+  API_KEY_HEADER
+  BEARER
+  BASIC
 }
 
 /**
@@ -7249,4 +7290,154 @@ model EscapeRoute {
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+// ---------------------------------------------------------------------------
+// Module: Support Standard Register (MHSA Rockfall/Rockburst COP)
+// GroundControlDistrict.requiredSupportStandard was a single free-text field —
+// this replaces it with a structured, measurable spec so an installed-support
+// quality check has an actual design value to be checked against.
+// ---------------------------------------------------------------------------
+
+enum SupportStandardStatus {
+  ACTIVE
+  SUPERSEDED
+  DRAFT
+}
+
+model SupportStandard {
+  id                    String                @id @default(cuid())
+  siteId                String
+  site                  Site                  @relation(fields: [siteId], references: [id], onDelete: Cascade)
+  districtId            String
+  district              GroundControlDistrict @relation(fields: [districtId], references: [id], onDelete: Cascade)
+  referenceNumber       String?
+  boltType              String?
+  boltLengthM           Float?
+  boltSpacingM          Float?
+  shotcreteThicknessMm  Float?
+  meshType              String?
+  otherSupportElements  String?
+  approvedByName        String?
+  approvedDate          DateTime?
+  effectiveDate         DateTime?
+  reviewDate            DateTime?
+  status                SupportStandardStatus @default(ACTIVE)
+  notes                 String?
+
+  qualityChecks SupportQualityCheck[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+enum SupportCheckMethod {
+  PULL_TEST
+  VISUAL_INSPECTION
+  SHOTCRETE_THICKNESS_CHECK
+  BOLT_DENSITY_COUNT
+  OTHER
+}
+
+enum SupportCheckResult {
+  PASS
+  MARGINAL
+  FAIL
+}
+
+// The evidence that a support standard was actually achieved underground, not
+// just specified on paper. A pull test compares achievedCapacityKn against the
+// design's own capacity rather than trusting a submitted pass/fail.
+model SupportQualityCheck {
+  id                  String              @id @default(cuid())
+  siteId              String
+  site                Site                @relation(fields: [siteId], references: [id], onDelete: Cascade)
+  districtId          String
+  district            GroundControlDistrict @relation(fields: [districtId], references: [id], onDelete: Cascade)
+  standardId          String?
+  standard            SupportStandard?    @relation(fields: [standardId], references: [id], onDelete: SetNull)
+  checkDate           DateTime
+  location            String?
+  checkMethod         SupportCheckMethod
+  designCapacityKn    Float?
+  achievedCapacityKn  Float?
+  boltsChecked        Int?
+  boltsFailed         Int?
+  checkedByName       String
+  result              SupportCheckResult  @default(PASS)
+  findings            String?
+  notes               String?
+
+  createdAt DateTime @default(now())
+}
+
+// ---------------------------------------------------------------------------
+// Module: Rock Mass Characterisation
+// The support standard above is only as good as the ground conditions it was
+// designed against. Recording the classification (RMR/Q/GSI) that justified a
+// support standard is what lets a rock engineer show the standard still fits
+// the ground, rather than asserting a number with nothing behind it.
+// ---------------------------------------------------------------------------
+
+enum RockMassClassificationSystem {
+  RMR
+  Q_SYSTEM
+  GSI
+  OTHER
+}
+
+model RockMassObservation {
+  id                   String                        @id @default(cuid())
+  siteId               String
+  site                 Site                          @relation(fields: [siteId], references: [id], onDelete: Cascade)
+  districtId           String?
+  district             GroundControlDistrict?        @relation(fields: [districtId], references: [id], onDelete: SetNull)
+  observationDate      DateTime
+  location             String?
+  classificationSystem RockMassClassificationSystem
+  ratingValue          Float
+  rockMassClass        String?
+  jointSetCount        Int?
+  observedByName       String
+  recommendedSupport   String?
+  notes                String?
+
+  createdAt DateTime @default(now())
+}
+
+// ---------------------------------------------------------------------------
+// Module: Excavation Examination & Barring Down
+// The front-line statutory control that closes the loop: a design (support
+// standard), verified as installed (quality check), against known ground
+// (rock mass observation) — and then examined and made safe before every
+// shift re-enters. This is the daily record, not a periodic audit.
+// ---------------------------------------------------------------------------
+
+enum ExcavationCondition {
+  SAFE
+  HAZARDOUS_CONDITIONS_FOUND
+  BARRING_DOWN_REQUIRED
+  BARRING_DOWN_COMPLETED
+  NO_ENTRY
+}
+
+model ExcavationExamination {
+  id                   String                @id @default(cuid())
+  siteId               String
+  site                 Site                  @relation(fields: [siteId], references: [id], onDelete: Cascade)
+  zoneId               String?
+  zone                 Zone?                 @relation(fields: [zoneId], references: [id], onDelete: SetNull)
+  districtId           String?
+  district             GroundControlDistrict? @relation(fields: [districtId], references: [id], onDelete: SetNull)
+  examinationDate      DateTime
+  location             String
+  examinedByName       String
+  condition            ExcavationCondition   @default(SAFE)
+  hazardsFound         String?
+  barringDownPerformed Boolean               @default(false)
+  barredDownByName     String?
+  clearedForEntry      Boolean               @default(true)
+  notes                String?
+
+  createdAt DateTime @default(now())
 }
