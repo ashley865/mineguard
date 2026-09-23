@@ -56,6 +56,7 @@ router.post("/", requireRole("ADMIN", "SUPERVISOR", "EXECUTIVE"), async (req, re
     data: { ...parsed.data, createdById: req.auth!.userId },
     select: handoverSelect,
   });
+  req.app.get("io")?.to(`mine:${mineId}`).emit("handover:new", handover);
   res.status(201).json(handover);
 });
 

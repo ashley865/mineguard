@@ -29,6 +29,7 @@ export interface User {
   mineId?: string | null;
   hasPhoto?: boolean;
   mfaEnabled?: boolean;
+  licenseWarning?: { code: "EXPIRES_SOON" | "GRACE_PERIOD"; days: number } | null;
 }
 
 export interface TeamMember {
@@ -5562,4 +5563,72 @@ export interface VettingRecord {
   notes?: string | null;
   conductedBy?: { id: string; name: string } | null;
   createdAt: string;
+}
+
+// ---------------------------------------------------------------------------
+// Platform licensing (the internal admin tool, not the mine-facing app — see
+// server/src/routes/platformAdminCustomers.ts). "Customer" rather than "Buyer": Buyer
+// above is the marketplace's mineral purchaser, a different party buying a different thing.
+// ---------------------------------------------------------------------------
+
+export interface PlatformAdmin {
+  id: string;
+  name: string;
+  email: string;
+  createdAt: string;
+}
+
+export type CustomerStatus = "LEAD" | "ACTIVE" | "INACTIVE";
+export type LicensePlan = "STARTER" | "PROFESSIONAL" | "ENTERPRISE";
+export type LicenseKeyStatus = "ACTIVE" | "SUSPENDED" | "REVOKED";
+
+export interface LicenseKey {
+  id: string;
+  key: string;
+  plan: LicensePlan;
+  seats?: number | null;
+  status: LicenseKeyStatus;
+  issuedAt: string;
+  activatedAt?: string | null;
+  expiresAt?: string | null;
+  revokedAt?: string | null;
+  notes?: string | null;
+  issuedBy?: { id: string; name: string } | null;
+  createdAt: string;
+}
+
+export interface Customer {
+  id: string;
+  companyName: string;
+  contactName: string;
+  contactEmail: string;
+  contactPhone?: string | null;
+  address?: string | null;
+  notes?: string | null;
+  status: CustomerStatus;
+  mineId?: string | null;
+  mine?: { id: string; name: string; location: string } | null;
+  createdAt: string;
+  createdBy?: { id: string; name: string } | null;
+  licenses: LicenseKey[];
+  currentLicense: LicenseKey | null;
+}
+
+export interface PlatformAdminMine {
+  id: string;
+  name: string;
+  location: string;
+  createdAt: string;
+  customer?: { id: string; companyName: string } | null;
+}
+
+export interface PlatformAdminDashboardSummary {
+  totalCustomers: number;
+  leads: number;
+  activeCustomers: number;
+  inactiveCustomers: number;
+  activeLicenses: number;
+  expiringSoon: number;
+  expiredOrSuspended: number;
+  unlinkedMines: number;
 }

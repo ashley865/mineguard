@@ -57,7 +57,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           // proof the session is bad — logging the user out in that case would
           // just bounce them to /login while the server wakes up, which looks
           // identical to "the site is broken" from their side.
-          if (err?.response?.status === 401) {
+          // A 403 with licenseBlocked means the mine's license lapsed after this session
+          // started — same forced-logout treatment as an invalid token, since continuing
+          // to hold a session open would defeat enforcing it at all.
+          if (err?.response?.status === 401 || err?.response?.data?.licenseBlocked) {
             setUser(null);
             setToken(null);
             localStorage.removeItem("mineguard_token");

@@ -5858,6 +5858,49 @@
     "hqBadge": "HQ",
     "noLivePrice": "Keine Echtzeit-Preisquelle verfügbar"
   },
+  "liveOps": {
+    "live": "Live",
+    "reconnecting": "Verbindung wird wiederhergestellt…",
+    "justNow": "gerade eben",
+    "minutesAgo": "vor {{count}} Min.",
+    "hoursAgo": "vor {{count}} Std.",
+    "daysAgo": "vor {{count}} Tg.",
+    "lastUpdated": "Aktualisiert {{time}}",
+    "feed": {
+      "title": "Live-Aktivität",
+      "empty": "Noch keine Aktivität in dieser Sitzung — neue Warnungen, Prüfungen, Besucher und Anfragen erscheinen hier sofort.",
+      "newAlert": "Neue {{severity}}-Warnung",
+      "alertReviewed": "Warnungsprüfung: {{status}}",
+      "alertAcknowledged": "Warnung bestätigt",
+      "alertResolved": "Warnung behoben",
+      "incidentReviewed": "Vorfall geprüft",
+      "visitorPending": "Besucher wartet auf Genehmigung",
+      "hostedBy": "eingeladen von {{name}}",
+      "newRequest": "Neue Anfrage von {{name}}",
+      "evacuationTriggered": "Evakuierung ausgelöst",
+      "evacuationCancelled": "Evakuierung abgebrochen",
+      "equipmentDown": "Gerät ausgefallen",
+      "equipmentUpdated": "Gerät aktualisiert: {{status}}",
+      "downtimeStarted": "Ausfallzeit begonnen: {{category}}",
+      "downtimeEnded": "Ausfallzeit beendet",
+      "maintenanceScheduled": "Wartung geplant",
+      "maintenanceCompleted": "Wartung abgeschlossen",
+      "maintenanceOverdue": "Wartung überfällig",
+      "handoverLogged": "Schichtübergabe erfasst von {{name}}",
+      "emergencyResolved": "{{type}} behoben",
+      "emergencyReported": "{{type}} gemeldet"
+    },
+    "sensors": {
+      "title": "Live-Sensorüberwachung",
+      "empty": "Noch keine Sensormesswerte."
+    },
+    "emergency": {
+      "title": "Aktiver Notfall",
+      "evacuationActive": "Evakuierung läuft",
+      "assemblyPoint": "Sammelpunkt: {{point}}",
+      "reportedBy": "Gemeldet von {{name}}"
+    }
+  },
   "financial": {
     "nav": "Finanzielle Leistung",
     "subtitle": "Erträge, Ausgaben und Marge über alle Ihre Standorte"
@@ -6890,6 +6933,12 @@
       "customNoTestUrl": "Keine Test-URL konfiguriert",
       "customAddedBy": "hinzugefügt von {{name}} am {{date}}",
       "customConfirmDelete": "Diesen API-Schlüssel löschen? Dies kann nicht rückgängig gemacht werden."
+    }
+  },
+  "license": {
+    "warning": {
+      "EXPIRES_SOON": "Ihre MineGuard-Lizenz läuft in {{count}} Tag(en) ab. Wenden Sie sich zur Verlängerung an Ihren Kundenbetreuer.",
+      "GRACE_PERIOD": "Ihre MineGuard-Lizenz ist abgelaufen. Der Zugriff bleibt noch {{count}} Tag(e) bestehen — wenden Sie sich zur Verlängerung an Ihren Kundenbetreuer."
     }
   }
 }

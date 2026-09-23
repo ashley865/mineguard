@@ -52,6 +52,12 @@ import BuyerLogin from "./pages/BuyerLogin";
 import BuyerPortal from "./pages/BuyerPortal";
 import Tenders from "./pages/Tenders";
 import TenderBoard from "./pages/TenderBoard";
+import PlatformAdminLogin from "./pages/platformAdmin/PlatformAdminLogin";
+import PlatformAdminProtectedRoute from "./pages/platformAdmin/PlatformAdminProtectedRoute";
+import PlatformAdminLayout from "./pages/platformAdmin/PlatformAdminLayout";
+import PlatformAdminDashboard from "./pages/platformAdmin/PlatformAdminDashboard";
+import PlatformAdminCustomers from "./pages/platformAdmin/PlatformAdminCustomers";
+import PlatformAdminCustomerDetail from "./pages/platformAdmin/PlatformAdminCustomerDetail";
 import ProductionTracking from "./pages/ProductionTracking";
 import FinancialPerformance from "./pages/FinancialPerformance";
 import ShiftHandoverLog from "./pages/ShiftHandoverLog";
@@ -137,6 +143,15 @@ export default function App() {
       <Route path="/tender-board" element={<TenderBoard />} />
       <Route path="/safety-report/:siteId" element={<SafetyObservationReport />} />
       <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+      <Route path="/platform-admin/login" element={<PlatformAdminLogin />} />
+      <Route element={<PlatformAdminProtectedRoute />}>
+        <Route element={<PlatformAdminLayout />}>
+          <Route path="/platform-admin" element={<Navigate to="/platform-admin/dashboard" replace />} />
+          <Route path="/platform-admin/dashboard" element={<PlatformAdminDashboard />} />
+          <Route path="/platform-admin/customers" element={<PlatformAdminCustomers />} />
+          <Route path="/platform-admin/customers/:id" element={<PlatformAdminCustomerDetail />} />
+        </Route>
+      </Route>
       <Route element={<ProtectedRoute />}>
         <Route path="/" element={<HomeRoute />} />
         <Route path="/sites" element={<ModuleRoute path="/sites"><Sites /></ModuleRoute>} />

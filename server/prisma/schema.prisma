@@ -1697,6 +1697,105 @@ model Mine {
   cyberScoreSnapshots      CyberScoreSnapshot[]
   cyberBlockedIps          CyberBlockedIp[]
   notifications            Notification[]
+
+  // The platform team's own record of who this tenant is commercially — separate from
+  // everything else on this model, which describes the tenant's mine, not MineGuard's
+  // relationship with them. Nullable: a mine created before the licensing system existed,
+  // or one never linked to a customer record, has no back-relation and is treated as
+  // unrestricted by the login check in routes/auth.ts (see lib/licensing.ts) rather than
+  // being retroactively locked out.
+  customer Customer?
+}
+
+// ---------------------------------------------------------------------------
+// Platform licensing (internal to the MineGuard team, not the mine-facing app)
+// ---------------------------------------------------------------------------
+// Manages who has bought MineGuard and what they're licensed for, entirely separate from
+// the mine-tenant data above. Named "Customer" rather than "Buyer" because "Buyer" already
+// means something else in this schema — the marketplace's mineral purchasers (see the
+// Buyer model, used by routes/buyerAuth.ts) — a different party buying a different thing.
+// Administered by PlatformAdmin accounts, a principal type with no relation to Mine/User at
+// all: platform staff aren't tenant members of any mine, the same way a Buyer or Contractor
+// isn't either (see middleware/buyerAuth.ts, middleware/contractorAuth.ts).
+
+model PlatformAdmin {
+  id           String   @id @default(cuid())
+  name         String
+  email        String   @unique
+  passwordHash String
+  createdAt    DateTime @default(now())
+
+  issuedLicenses LicenseKey[]
+  createdCustomers Customer[]
+}
+
+enum CustomerStatus {
+  LEAD
+  ACTIVE
+  INACTIVE
+}
+
+model Customer {
+  id           String         @id @default(cuid())
+  companyName  String
+  contactName  String
+  contactEmail String
+  contactPhone String?
+  address      String?
+  notes        String?
+  status       CustomerStatus @default(LEAD)
+
+  // Set once this customer's mine tenant actually exists — a lead has none yet.
+  mineId String? @unique
+  mine   Mine?   @relation(fields: [mineId], references: [id], onDelete: SetNull)
+
+  licenses LicenseKey[]
+
+  createdAt   DateTime @default(now())
+  createdById String?
+  createdBy   PlatformAdmin? @relation(fields: [createdById], references: [id], onDelete: SetNull)
+}
+
+enum LicensePlan {
+  STARTER
+  PROFESSIONAL
+  ENTERPRISE
+}
+
+// ACTIVE/SUSPENDED/REVOKED are the platform team's own deliberate calls (e.g. non-payment,
+// contract termination) and take effect immediately, with no grace period — unlike simply
+// running past expiresAt, which is a date rolling over rather than a decision, and so gets
+// a grace window before it actually blocks access (see lib/licensing.ts).
+enum LicenseKeyStatus {
+  ACTIVE
+  SUSPENDED
+  REVOKED
+}
+
+// Append-only per customer: renewing or upgrading issues a new key rather than editing the
+// old one, so the customer's licensing history stays intact. "Current" is whichever
+// non-revoked key has the latest issuedAt — see lib/licensing.ts.
+model LicenseKey {
+  id     String @id @default(cuid())
+  key    String @unique
+
+  customerId String
+  customer   Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+
+  plan  LicensePlan
+  seats Int?
+
+  status      LicenseKeyStatus @default(ACTIVE)
+  issuedAt    DateTime         @default(now())
+  activatedAt DateTime?
+  expiresAt   DateTime?
+  revokedAt   DateTime?
+  notes       String?
+
+  issuedById String?
+  issuedBy   PlatformAdmin? @relation(fields: [issuedById], references: [id], onDelete: SetNull)
+
+  createdAt DateTime @default(now())
 }
 
 enum ExecutiveRequestStatus {

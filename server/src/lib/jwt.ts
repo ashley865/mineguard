@@ -9,6 +9,11 @@ const AUDIENCE = "mineguard-client";
 // needing to inspect a "type" claim that a forged/tampered token could try to spoof.
 const BUYER_AUDIENCE = "mineguard-buyer-client";
 const CONTRACTOR_AUDIENCE = "mineguard-contractor-client";
+// Platform admin tokens are a distinct principal type again, same reasoning as buyer/
+// contractor: a platform admin isn't a member of any mine, so their token must be
+// cryptographically incapable of being accepted by requireAuth/requireBuyerAuth/
+// requireContractorAuth, and vice versa.
+const PLATFORM_ADMIN_AUDIENCE = "mineguard-platform-admin-client";
 
 export interface TokenPayload {
   userId: string;
@@ -20,6 +25,10 @@ export interface BuyerTokenPayload {
 
 export interface ContractorTokenPayload {
   contractorId: string;
+}
+
+export interface PlatformAdminTokenPayload {
+  platformAdminId: string;
 }
 
 /**
@@ -93,4 +102,28 @@ export function verifyContractorAuthToken(token: string): ContractorTokenPayload
     throw new Error("Malformed token payload");
   }
   return { contractorId: (decoded as any).contractorId };
+}
+
+// Shorter-lived than staff/buyer/contractor tokens: this account can see and change every
+// customer and license in the system, so a stolen token should go stale quickly rather
+// than riding out the same 7-day default as everything else.
+export function signPlatformAdminToken(platformAdminId: string): string {
+  return jwt.sign({ platformAdminId }, process.env.JWT_SECRET as string, {
+    algorithm: "HS256",
+    issuer: ISSUER,
+    audience: PLATFORM_ADMIN_AUDIENCE,
+    expiresIn: "12h",
+  } as jwt.SignOptions);
+}
+
+export function verifyPlatformAdminToken(token: string): PlatformAdminTokenPayload {
+  const decoded = jwt.verify(token, process.env.JWT_SECRET as string, {
+    algorithms: ["HS256"],
+    issuer: ISSUER,
+    audience: PLATFORM_ADMIN_AUDIENCE,
+  });
+  if (typeof decoded !== "object" || decoded === null || typeof (decoded as any).platformAdminId !== "string") {
+    throw new Error("Malformed token payload");
+  }
+  return { platformAdminId: (decoded as any).platformAdminId };
 }

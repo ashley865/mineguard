@@ -137,6 +137,7 @@ router.post("/", requireRole("ADMIN", "SUPERVISOR", "EXECUTIVE"), async (req, re
     data: { ...parsed.data, createdById: req.auth!.userId },
     select: scheduleSelect,
   });
+  req.app.get("io")?.to(`mine:${mineId}`).emit("maintenance:updated", schedule);
   res.status(201).json(schedule);
 });
 
@@ -153,6 +154,7 @@ router.put("/:id", requireRole("ADMIN", "SUPERVISOR", "EXECUTIVE"), async (req, 
   }
   const schedule = await prisma.maintenanceSchedule.update({ where: { id: existing.id }, data: parsed.data, select: scheduleSelect });
   await ensureMaintenanceExpense(mineId, schedule.id, req.auth!.userId);
+  req.app.get("io")?.to(`mine:${mineId}`).emit("maintenance:updated", schedule);
   res.json(schedule);
 });
 
@@ -167,6 +169,7 @@ router.post("/:id/complete", requireRole("ADMIN", "SUPERVISOR", "EXECUTIVE"), as
     select: scheduleSelect,
   });
   await ensureMaintenanceExpense(mineId, schedule.id, req.auth!.userId);
+  req.app.get("io")?.to(`mine:${mineId}`).emit("maintenance:updated", schedule);
   res.json(schedule);
 });
 
@@ -176,6 +179,7 @@ router.delete("/:id", requireRole("ADMIN", "EXECUTIVE"), async (req, res) => {
   const existing = await prisma.maintenanceSchedule.findFirst({ where: { id: req.params.id, equipment: { site: { mineId } } } });
   if (!existing) return res.status(404).json({ error: "Maintenance schedule not found" });
   await prisma.maintenanceSchedule.delete({ where: { id: existing.id } });
+  req.app.get("io")?.to(`mine:${mineId}`).emit("maintenance:updated", { id: existing.id, deleted: true });
   res.status(204).send();
 });
 

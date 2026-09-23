@@ -25,3 +25,31 @@ export function SocketProvider({ children }: { children: ReactNode }) {
 export function useSocket() {
   return useContext(SocketContext);
 }
+
+/**
+ * Tracks whether the shared socket is actually connected right now, for anything showing a
+ * "live" indicator — `useSocket()` alone only tells you an instance exists, not whether it's
+ * currently reachable (it can be mid-reconnect after a dropped wifi/VPN link).
+ */
+export function useSocketConnected(): boolean {
+  const socket = useSocket();
+  const [connected, setConnected] = useState(!!socket?.connected);
+
+  useEffect(() => {
+    if (!socket) {
+      setConnected(false);
+      return;
+    }
+    setConnected(socket.connected);
+    const onConnect = () => setConnected(true);
+    const onDisconnect = () => setConnected(false);
+    socket.on("connect", onConnect);
+    socket.on("disconnect", onDisconnect);
+    return () => {
+      socket.off("connect", onConnect);
+      socket.off("disconnect", onDisconnect);
+    };
+  }, [socket]);
+
+  return connected;
+}

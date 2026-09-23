@@ -5862,6 +5862,49 @@
     "hqBadge": "HQ",
     "noLivePrice": "No live price feed available"
   },
+  "liveOps": {
+    "live": "Live",
+    "reconnecting": "Reconnecting…",
+    "justNow": "just now",
+    "minutesAgo": "{{count}}m ago",
+    "hoursAgo": "{{count}}h ago",
+    "daysAgo": "{{count}}d ago",
+    "lastUpdated": "Updated {{time}}",
+    "feed": {
+      "title": "Live Activity",
+      "empty": "No activity yet this session — new alerts, reviews, visitors and requests will appear here the instant they happen.",
+      "newAlert": "New {{severity}} alert",
+      "alertReviewed": "Alert review: {{status}}",
+      "alertAcknowledged": "Alert acknowledged",
+      "alertResolved": "Alert resolved",
+      "incidentReviewed": "Incident reviewed",
+      "visitorPending": "Visitor pending approval",
+      "hostedBy": "hosted by {{name}}",
+      "newRequest": "New request from {{name}}",
+      "evacuationTriggered": "Evacuation triggered",
+      "evacuationCancelled": "Evacuation cancelled",
+      "equipmentDown": "Equipment down",
+      "equipmentUpdated": "Equipment updated: {{status}}",
+      "downtimeStarted": "Downtime started: {{category}}",
+      "downtimeEnded": "Downtime ended",
+      "maintenanceScheduled": "Maintenance scheduled",
+      "maintenanceCompleted": "Maintenance completed",
+      "maintenanceOverdue": "Maintenance overdue",
+      "handoverLogged": "Shift handover logged by {{name}}",
+      "emergencyResolved": "{{type}} resolved",
+      "emergencyReported": "{{type}} reported"
+    },
+    "sensors": {
+      "title": "Live Sensor Watch",
+      "empty": "No sensor readings yet."
+    },
+    "emergency": {
+      "title": "Active emergency",
+      "evacuationActive": "Evacuation in progress",
+      "assemblyPoint": "assembly point: {{point}}",
+      "reportedBy": "Reported by {{name}}"
+    }
+  },
   "shiftHandover": {
     "nav": "Shift Handover Log",
     "subtitle": "Continuity notes passed between outgoing and incoming shift supervisors",
@@ -6890,6 +6933,12 @@
       "customNoTestUrl": "No test URL configured",
       "customAddedBy": "added by {{name}} on {{date}}",
       "customConfirmDelete": "Delete this API key? This cannot be undone."
+    }
+  },
+  "license": {
+    "warning": {
+      "EXPIRES_SOON": "Your MineGuard license expires in {{count}} day(s). Contact your account manager to renew.",
+      "GRACE_PERIOD": "Your MineGuard license has expired. Access continues for {{count}} more day(s) — contact your account manager to renew."
     }
   }
 }

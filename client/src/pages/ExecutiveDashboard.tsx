@@ -4,7 +4,12 @@ import { Link } from "react-router-dom";
 import { AreaChart, Area, BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from "recharts";
 import { api } from "../api/client";
 import { useAuth } from "../context/AuthContext";
+import { useSocket, useSocketConnected } from "../context/SocketContext";
 import { Alert, ExecutiveSummary, Incident, ReportTrends } from "../api/types";
+import LivePulse from "../components/LivePulse";
+import LiveActivityFeed from "../components/LiveActivityFeed";
+import LiveSensorSnapshot from "../components/LiveSensorSnapshot";
+import LiveEmergencyBanner from "../components/LiveEmergencyBanner";
 import { SeverityBadge } from "../components/Badges";
 import { buttonPrimary, buttonSecondary } from "../components/ui";
 import DataTable, { DataTableColumn } from "../components/DataTable";
@@ -174,6 +179,9 @@ export default function ExecutiveDashboard() {
   const [summary, setSummary] = useState<ExecutiveSummary | null>(null);
   const [trends, setTrends] = useState<ReportTrends | null>(null);
   const [reviewsExpanded, setReviewsExpanded] = useState(false);
+  const [lastUpdatedAt, setLastUpdatedAt] = useState<Date | null>(null);
+  const socket = useSocket();
+  const socketConnected = useSocketConnected();
 
   async function load() {
     const [s, r] = await Promise.all([
@@ -182,11 +190,31 @@ export default function ExecutiveDashboard() {
     ]);
     setSummary(s.data);
     setTrends(r.data);
+    setLastUpdatedAt(new Date());
   }
 
   useEffect(() => {
     load();
   }, []);
+
+  // Keeps the headline stat cards current as events happen, instead of only reflecting
+  // whatever was true when the page loaded. Debounced because a burst of related events
+  // (e.g. several sensors tripping alerts at once) would otherwise fire a refetch each.
+  useEffect(() => {
+    if (!socket || !isGeneralManager) return;
+    let timeout: ReturnType<typeof setTimeout> | null = null;
+    const refresh = () => {
+      if (timeout) clearTimeout(timeout);
+      timeout = setTimeout(() => load(), 1500);
+    };
+    const events = ["alert:new", "alert:updated", "incident:updated", "visitor:pending", "emergency:evacuation", "emergency:evacuation-cancelled", "emergency:event"];
+    events.forEach((e) => socket.on(e, refresh));
+    return () => {
+      if (timeout) clearTimeout(timeout);
+      events.forEach((e) => socket.off(e, refresh));
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [socket, isGeneralManager]);
 
   async function reviewAlert(id: string, decision: "APPROVED" | "REJECTED", note: string) {
     await api.post(`/alerts/${id}/review`, { decision, note: note || undefined });
@@ -291,9 +319,16 @@ export default function ExecutiveDashboard() {
 
   return (
     <div className="space-y-6">
+      {isGeneralManager && <LiveEmergencyBanner />}
+
       <div className="flex items-start justify-between gap-3 flex-wrap">
         <div>
-          <h1 className="text-lg font-bold">{t("executive.title")}</h1>
+          <div className="flex items-center gap-3 flex-wrap">
+            <h1 className="text-lg font-bold">{t("executive.title")}</h1>
+            {isGeneralManager && (
+              <LivePulse connected={socketConnected} asOf={lastUpdatedAt} />
+            )}
+          </div>
           <p className="text-mine-300 text-xs">{t("executive.subtitle")}</p>
         </div>
         <div className={`${cardOuter} p-[22px] text-right`}>
@@ -310,6 +345,13 @@ export default function ExecutiveDashboard() {
       </div>
 
       {isGeneralManager && <ExecutiveScorecard summary={summary} />}
+
+      {isGeneralManager && (
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          <LiveActivityFeed />
+          <LiveSensorSnapshot />
+        </div>
+      )}
 
       {executiveOps.hasSiteAccess ? (
         <>

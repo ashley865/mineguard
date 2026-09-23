@@ -5,6 +5,7 @@ import App from "./App";
 import { AuthProvider } from "./context/AuthContext";
 import { BuyerAuthProvider } from "./context/BuyerAuthContext";
 import { ContractorAuthProvider } from "./context/ContractorAuthContext";
+import { PlatformAdminAuthProvider } from "./context/PlatformAdminAuthContext";
 import ErrorBoundary from "./components/ErrorBoundary";
 import "./i18n";
 import "./index.css";
@@ -16,7 +17,9 @@ createRoot(document.getElementById("root")!).render(
         <AuthProvider>
           <BuyerAuthProvider>
             <ContractorAuthProvider>
-              <App />
+              <PlatformAdminAuthProvider>
+                <App />
+              </PlatformAdminAuthProvider>
             </ContractorAuthProvider>
           </BuyerAuthProvider>
         </AuthProvider>

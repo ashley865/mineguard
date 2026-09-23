@@ -63,6 +63,7 @@ router.post("/", requireRole("ADMIN", "SUPERVISOR", "EXECUTIVE"), async (req, re
     data: parsed.data,
     select: downtimeSelect,
   });
+  req.app.get("io")?.to(`mine:${mineId}`).emit("downtime:updated", event);
   res.status(201).json(event);
 });
 
@@ -78,6 +79,7 @@ router.put("/:id", requireRole("ADMIN", "SUPERVISOR", "EXECUTIVE"), async (req, 
     data: parsed.data,
     select: downtimeSelect,
   });
+  req.app.get("io")?.to(`mine:${mineId}`).emit("downtime:updated", event);
   res.json(event);
 });
 
@@ -87,6 +89,7 @@ router.delete("/:id", requireRole("ADMIN", "EXECUTIVE"), async (req, res) => {
   const existing = await prisma.downtimeEvent.findFirst({ where: { id: req.params.id, site: { mineId } } });
   if (!existing) return res.status(404).json({ error: "Downtime event not found" });
   await prisma.downtimeEvent.delete({ where: { id: existing.id } });
+  req.app.get("io")?.to(`mine:${mineId}`).emit("downtime:updated", { id: existing.id, deleted: true });
   res.status(204).send();
 });
 

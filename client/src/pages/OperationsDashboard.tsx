@@ -7,6 +7,11 @@ import { OperationsDashboardSummary } from "../api/types";
 import LoadError from "../components/LoadError";
 import AiAssistantWidget from "../components/AiAssistantWidget";
 import { GaugeIcon, ZapIcon, ClockIcon, AlertTriangleIcon } from "../components/icons/DashboardIcons";
+import { useSocket, useSocketConnected } from "../context/SocketContext";
+import LivePulse from "../components/LivePulse";
+import LiveActivityFeed from "../components/LiveActivityFeed";
+import LiveSensorSnapshot from "../components/LiveSensorSnapshot";
+import LiveEmergencyBanner from "../components/LiveEmergencyBanner";
 
 // Same F-pattern / dashboard-designer approach as SafetyDashboard.tsx and CooDashboard.tsx:
 // headline KPIs with explicit targets, one primary trend + one breakdown, supporting
@@ -97,12 +102,16 @@ export default function OperationsDashboard() {
   const [summary, setSummary] = useState<OperationsDashboardSummary | null>(null);
   const [loadError, setLoadError] = useState(false);
   const [queueTab, setQueueTab] = useState<QueueTab>("maintenance");
+  const [lastUpdatedAt, setLastUpdatedAt] = useState<Date | null>(null);
+  const socket = useSocket();
+  const socketConnected = useSocketConnected();
 
   async function load() {
     setLoadError(false);
     try {
       const res = await api.get<OperationsDashboardSummary>("/operations-dashboard/summary");
       setSummary(res.data);
+      setLastUpdatedAt(new Date());
     } catch {
       setLoadError(true);
     }
@@ -111,6 +120,25 @@ export default function OperationsDashboard() {
   useEffect(() => {
     load();
   }, []);
+
+  // Refreshes the headline KPIs (production, uptime, downtime hours, overdue maintenance)
+  // as the underlying events happen, instead of only reflecting whatever was true when the
+  // page loaded. Debounced so a burst of related events fires one refetch, not several.
+  useEffect(() => {
+    if (!socket) return;
+    let timeout: ReturnType<typeof setTimeout> | null = null;
+    const refresh = () => {
+      if (timeout) clearTimeout(timeout);
+      timeout = setTimeout(() => load(), 1500);
+    };
+    const events = ["equipment:updated", "downtime:updated", "maintenance:updated", "handover:new", "alert:new", "incident:updated", "emergency:evacuation", "emergency:evacuation-cancelled", "emergency:event"];
+    events.forEach((e) => socket.on(e, refresh));
+    return () => {
+      if (timeout) clearTimeout(timeout);
+      events.forEach((e) => socket.off(e, refresh));
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [socket]);
 
   if (loadError) return <LoadError onRetry={load} />;
   if (!summary) return <div className="text-mine-300">{t("common.loading")}</div>;
@@ -154,9 +182,16 @@ export default function OperationsDashboard() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-xl font-bold">{t("operationsDashboard.title")}</h1>
-        <p className="text-mine-300 text-sm">{t("operationsDashboard.subtitle")}</p>
+      <LiveEmergencyBanner />
+
+      <div className="flex items-start justify-between gap-3 flex-wrap">
+        <div>
+          <div className="flex items-center gap-3 flex-wrap">
+            <h1 className="text-xl font-bold">{t("operationsDashboard.title")}</h1>
+            <LivePulse connected={socketConnected} asOf={lastUpdatedAt} />
+          </div>
+          <p className="text-mine-300 text-sm">{t("operationsDashboard.subtitle")}</p>
+        </div>
       </div>
 
       {/* Level 1 — headline KPIs, each with an explicit target */}
@@ -195,6 +230,11 @@ export default function OperationsDashboard() {
           target={t("operationsDashboard.overdueMaintenanceTarget")}
           tone={headline.overdueMaintenanceCount > 0 ? "negative" : "positive"}
         />
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <LiveActivityFeed />
+        <LiveSensorSnapshot />
       </div>
 
       {/* Level 2 — primary trend + secondary breakdown */}

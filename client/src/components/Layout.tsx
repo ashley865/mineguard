@@ -17,6 +17,7 @@ import CallUI from "./CallUI";
 import ToastContainer from "./ToastContainer";
 import RequestNotificationListener from "./RequestNotificationListener";
 import { LogoMark } from "./Logo";
+import LicenseWarningBanner from "./LicenseWarningBanner";
 
 export default function Layout() {
   const { t } = useTranslation();
@@ -323,6 +324,7 @@ export default function Layout() {
             <NotificationBell />
           </div>
         </header>
+        {!isEvacuating && <LicenseWarningBanner />}
         <main className="flex-1 bg-mine-950 overflow-y-auto">
           <div className="max-w-7xl mx-auto p-5 sm:p-6 lg:p-8">
             <ErrorBoundary key={location.pathname}>

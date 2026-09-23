@@ -68,6 +68,7 @@ router.post("/", requireRole("ADMIN", "SUPERVISOR", "EXECUTIVE"), async (req, re
     data: { ...rest, lastMaintenance: lastMaintenance ? new Date(lastMaintenance) : null },
     include: equipmentInclude,
   });
+  req.app.get("io")?.to(`mine:${mineId}`).emit("equipment:updated", equipment);
   res.status(201).json(equipment);
 });
 
@@ -97,6 +98,7 @@ router.put("/:id", requireRole("ADMIN", "SUPERVISOR", "EXECUTIVE"), async (req, 
     },
     include: equipmentInclude,
   });
+  req.app.get("io")?.to(`mine:${mineId}`).emit("equipment:updated", equipment);
   res.json(equipment);
 });
 
@@ -106,6 +108,7 @@ router.delete("/:id", requireRole("ADMIN", "SUPERVISOR", "EXECUTIVE"), async (re
   const existing = await prisma.equipment.findFirst({ where: { id: req.params.id, site: { mineId } } });
   if (!existing) return res.status(404).json({ error: "Equipment not found" });
   await prisma.equipment.delete({ where: { id: existing.id } });
+  req.app.get("io")?.to(`mine:${mineId}`).emit("equipment:updated", { id: existing.id, deleted: true });
   res.status(204).send();
 });
 

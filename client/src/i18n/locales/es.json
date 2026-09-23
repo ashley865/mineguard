@@ -5858,6 +5858,49 @@
     "hqBadge": "Sede",
     "noLivePrice": "No hay fuente de precio en vivo disponible"
   },
+  "liveOps": {
+    "live": "En vivo",
+    "reconnecting": "Reconectando…",
+    "justNow": "justo ahora",
+    "minutesAgo": "hace {{count}}m",
+    "hoursAgo": "hace {{count}}h",
+    "daysAgo": "hace {{count}}d",
+    "lastUpdated": "Actualizado {{time}}",
+    "feed": {
+      "title": "Actividad en Vivo",
+      "empty": "Aún no hay actividad en esta sesión — las nuevas alertas, revisiones, visitantes y solicitudes aparecerán aquí en el momento en que ocurran.",
+      "newAlert": "Nueva alerta {{severity}}",
+      "alertReviewed": "Revisión de alerta: {{status}}",
+      "alertAcknowledged": "Alerta reconocida",
+      "alertResolved": "Alerta resuelta",
+      "incidentReviewed": "Incidente revisado",
+      "visitorPending": "Visitante pendiente de aprobación",
+      "hostedBy": "anfitrión: {{name}}",
+      "newRequest": "Nueva solicitud de {{name}}",
+      "evacuationTriggered": "Evacuación activada",
+      "evacuationCancelled": "Evacuación cancelada",
+      "equipmentDown": "Equipo averiado",
+      "equipmentUpdated": "Equipo actualizado: {{status}}",
+      "downtimeStarted": "Inicio de inactividad: {{category}}",
+      "downtimeEnded": "Fin de inactividad",
+      "maintenanceScheduled": "Mantenimiento programado",
+      "maintenanceCompleted": "Mantenimiento completado",
+      "maintenanceOverdue": "Mantenimiento vencido",
+      "handoverLogged": "Cambio de turno registrado por {{name}}",
+      "emergencyResolved": "{{type}} resuelto",
+      "emergencyReported": "{{type}} reportado"
+    },
+    "sensors": {
+      "title": "Vigilancia de Sensores en Vivo",
+      "empty": "Aún no hay lecturas de sensores."
+    },
+    "emergency": {
+      "title": "Emergencia activa",
+      "evacuationActive": "Evacuación en curso",
+      "assemblyPoint": "punto de encuentro: {{point}}",
+      "reportedBy": "Reportado por {{name}}"
+    }
+  },
   "financial": {
     "nav": "Rendimiento Financiero",
     "subtitle": "Ganancias, gastos y margen en todos sus sitios"
@@ -6890,6 +6933,12 @@
       "customNoTestUrl": "No hay URL de prueba configurada",
       "customAddedBy": "agregado por {{name}} el {{date}}",
       "customConfirmDelete": "¿Eliminar esta clave API? Esta acción no se puede deshacer."
+    }
+  },
+  "license": {
+    "warning": {
+      "EXPIRES_SOON": "Su licencia de MineGuard vence en {{count}} día(s). Contacte a su gestor de cuenta para renovarla.",
+      "GRACE_PERIOD": "Su licencia de MineGuard ha vencido. El acceso continúa por {{count}} día(s) más — contacte a su gestor de cuenta para renovarla."
     }
   }
 }

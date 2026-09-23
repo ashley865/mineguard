@@ -7,6 +7,7 @@ import { requireAuth, requireRole } from "../middleware/auth";
 import { signAuthToken } from "../lib/jwt";
 import { authLimiter } from "../middleware/rateLimit";
 import { sendEmail } from "../lib/email";
+import { checkMineLicense } from "../lib/licensing";
 
 const router = Router();
 
@@ -78,6 +79,13 @@ router.post("/:id/accept", authLimiter, async (req, res) => {
 
   const existing = await prisma.user.findUnique({ where: { email: invite.email } });
   if (existing) return res.status(409).json({ error: "Email already registered" });
+
+  // Otherwise a new account for a blocked mine could be minted straight through the invite
+  // flow, bypassing the same gate /auth/login enforces for everyone already on the mine.
+  const license = await checkMineLicense(invite.mineId);
+  if (license.blocked) {
+    return res.status(403).json({ error: "This mine's MineGuard license does not permit new accounts. Contact your account manager.", licenseBlocked: license.code });
+  }
 
   const passwordHash = await bcrypt.hash(parsed.data.password, 12);
   const user = await prisma.user.create({

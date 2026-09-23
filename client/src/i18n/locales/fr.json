@@ -5858,6 +5858,49 @@
     "hqBadge": "Siège",
     "noLivePrice": "Aucune source de prix en direct disponible"
   },
+  "liveOps": {
+    "live": "En direct",
+    "reconnecting": "Reconnexion…",
+    "justNow": "à l'instant",
+    "minutesAgo": "il y a {{count}} min",
+    "hoursAgo": "il y a {{count}} h",
+    "daysAgo": "il y a {{count}} j",
+    "lastUpdated": "Mis à jour {{time}}",
+    "feed": {
+      "title": "Activité en Direct",
+      "empty": "Aucune activité pour l'instant dans cette session — les nouvelles alertes, révisions, visiteurs et demandes apparaîtront ici dès qu'ils se produisent.",
+      "newAlert": "Nouvelle alerte {{severity}}",
+      "alertReviewed": "Révision d'alerte : {{status}}",
+      "alertAcknowledged": "Alerte accusée réception",
+      "alertResolved": "Alerte résolue",
+      "incidentReviewed": "Incident examiné",
+      "visitorPending": "Visiteur en attente d'approbation",
+      "hostedBy": "reçu par {{name}}",
+      "newRequest": "Nouvelle demande de {{name}}",
+      "evacuationTriggered": "Évacuation déclenchée",
+      "evacuationCancelled": "Évacuation annulée",
+      "equipmentDown": "Équipement en panne",
+      "equipmentUpdated": "Équipement mis à jour : {{status}}",
+      "downtimeStarted": "Arrêt commencé : {{category}}",
+      "downtimeEnded": "Arrêt terminé",
+      "maintenanceScheduled": "Maintenance planifiée",
+      "maintenanceCompleted": "Maintenance terminée",
+      "maintenanceOverdue": "Maintenance en retard",
+      "handoverLogged": "Relève de poste enregistrée par {{name}}",
+      "emergencyResolved": "{{type}} résolu",
+      "emergencyReported": "{{type}} signalé"
+    },
+    "sensors": {
+      "title": "Surveillance des Capteurs en Direct",
+      "empty": "Aucune lecture de capteur pour l'instant."
+    },
+    "emergency": {
+      "title": "Urgence active",
+      "evacuationActive": "Évacuation en cours",
+      "assemblyPoint": "point de rassemblement : {{point}}",
+      "reportedBy": "Signalé par {{name}}"
+    }
+  },
   "financial": {
     "nav": "Performance Financière",
     "subtitle": "Revenus, dépenses et marge sur tous vos sites"
@@ -6890,6 +6933,12 @@
       "customNoTestUrl": "Aucune URL de test configurée",
       "customAddedBy": "ajouté par {{name}} le {{date}}",
       "customConfirmDelete": "Supprimer cette clé API ? Cette action est irréversible."
+    }
+  },
+  "license": {
+    "warning": {
+      "EXPIRES_SOON": "Votre licence MineGuard expire dans {{count}} jour(s). Contactez votre gestionnaire de compte pour la renouveler.",
+      "GRACE_PERIOD": "Votre licence MineGuard a expiré. L'accès reste actif encore {{count}} jour(s) — contactez votre gestionnaire de compte pour la renouveler."
     }
   }
 }

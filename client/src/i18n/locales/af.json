@@ -5858,6 +5858,49 @@
     "hqBadge": "HK",
     "noLivePrice": "Geen intydse prysbron beskikbaar nie"
   },
+  "liveOps": {
+    "live": "Regstreeks",
+    "reconnecting": "Herverbind…",
+    "justNow": "nou net",
+    "minutesAgo": "{{count}}m gelede",
+    "hoursAgo": "{{count}}u gelede",
+    "daysAgo": "{{count}}d gelede",
+    "lastUpdated": "Opgedateer {{time}}",
+    "feed": {
+      "title": "Regstreekse Aktiwiteit",
+      "empty": "Nog geen aktiwiteit hierdie sessie nie — nuwe waarskuwings, hersienings, besoekers en versoeke sal hier verskyn die oomblik dit gebeur.",
+      "newAlert": "Nuwe {{severity}} waarskuwing",
+      "alertReviewed": "Waarskuwing-hersiening: {{status}}",
+      "alertAcknowledged": "Waarskuwing erken",
+      "alertResolved": "Waarskuwing opgelos",
+      "incidentReviewed": "Voorval hersien",
+      "visitorPending": "Besoeker wag op goedkeuring",
+      "hostedBy": "gasheer: {{name}}",
+      "newRequest": "Nuwe versoek van {{name}}",
+      "evacuationTriggered": "Ontruiming geaktiveer",
+      "evacuationCancelled": "Ontruiming gekanselleer",
+      "equipmentDown": "Toerusting af",
+      "equipmentUpdated": "Toerusting bygewerk: {{status}}",
+      "downtimeStarted": "Stiltyd begin: {{category}}",
+      "downtimeEnded": "Stiltyd beëindig",
+      "maintenanceScheduled": "Onderhoud geskeduleer",
+      "maintenanceCompleted": "Onderhoud voltooi",
+      "maintenanceOverdue": "Onderhoud agterstallig",
+      "handoverLogged": "Skofoorhandiging aangeteken deur {{name}}",
+      "emergencyResolved": "{{type}} opgelos",
+      "emergencyReported": "{{type}} aangemeld"
+    },
+    "sensors": {
+      "title": "Regstreekse Sensormonitor",
+      "empty": "Nog geen sensorlesings nie."
+    },
+    "emergency": {
+      "title": "Aktiewe noodgeval",
+      "evacuationActive": "Ontruiming aan die gang",
+      "assemblyPoint": "samelpunt: {{point}}",
+      "reportedBy": "Aangemeld deur {{name}}"
+    }
+  },
   "financial": {
     "nav": "Finansiële Prestasie",
     "subtitle": "Verdienste, uitgawes en marge oor al u terreine"
@@ -6890,6 +6933,12 @@
       "customNoTestUrl": "Geen toets-URL gekonfigureer nie",
       "customAddedBy": "bygevoeg deur {{name}} op {{date}}",
       "customConfirmDelete": "Verwyder hierdie API-sleutel? Dit kan nie ontdoen word nie."
+    }
+  },
+  "license": {
+    "warning": {
+      "EXPIRES_SOON": "Jou MineGuard-lisensie verval oor {{count}} dag(e). Kontak jou rekeningbestuurder om te hernu.",
+      "GRACE_PERIOD": "Jou MineGuard-lisensie het verval. Toegang duur nog {{count}} dag(e) — kontak jou rekeningbestuurder om te hernu."
     }
   }
 }

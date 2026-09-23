@@ -160,6 +160,8 @@ import aiHrRoutes from "./routes/aiHr";
 import recruitmentRoutes from "./routes/recruitment";
 import liveDataRoutes from "./routes/liveData";
 import requestNotificationsRoutes from "./routes/requestNotifications";
+import platformAdminAuthRoutes from "./routes/platformAdminAuth";
+import platformAdminCustomersRoutes from "./routes/platformAdminCustomers";
 import { sanitizeBody } from "./middleware/sanitize";
 import { startSimulator } from "./services/simulator";
 import { scanCompliance } from "./services/complianceScanner";
@@ -372,6 +374,12 @@ app.use("/api/budget-plans", budgetPlansRoutes);
 app.use("/api/toolbox-talks", toolboxTalksRoutes);
 app.use("/api/regulatory-submissions", regulatorySubmissionsRoutes);
 app.use("/api/ai", aiRoutes);
+
+// The platform team's own tooling — buyers/licenses for MineGuard itself, not mine-tenant
+// data. Deliberately a separate auth principal (requirePlatformAdminAuth) with no relation
+// to Mine/User, same reasoning as buyer-auth/contractor-auth above.
+app.use("/api/platform-admin/auth", platformAdminAuthRoutes);
+app.use("/api/platform-admin", platformAdminCustomersRoutes);
 
 app.use((err: any, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
   if (err?.message === "UNSUPPORTED_FILE_TYPE") {

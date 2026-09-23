@@ -344,6 +344,13 @@ router.put("/events/:id", requireRole("ADMIN", "SUPERVISOR", "EXECUTIVE"), async
     data: { ...parsed.data, ...(resolvedAt ? { resolvedAt } : {}) },
     select: eventSelect,
   });
+
+  // Without this, anything live watching for open emergencies (e.g. a dashboard banner)
+  // only ever learns about a new one — it has no way to find out this one was contained
+  // or resolved short of polling, so it would sit there flagged as active indefinitely.
+  const io = req.app.get("io");
+  io?.to(`mine:${mineId}`).emit("emergency:event", event);
+
   res.json(event);
 });
 

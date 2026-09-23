@@ -15,6 +15,7 @@ import { resolveBooleanSetting } from "../lib/systemSettings";
 import { isCyberPrivilegedUser } from "../lib/cyberAccess";
 import { verifyAndConsumeBackupCode } from "../lib/mfaBackupCodes";
 import { notifySecurityWebhook } from "../lib/securityWebhook";
+import { checkMineLicense } from "../lib/licensing";
 
 const router = Router();
 
@@ -72,6 +73,12 @@ router.post("/register", authLimiter, async (req, res) => {
   if (!passkeyValid) {
     return res.status(401).json({ error: "Invalid mine passkey" });
   }
+  // Otherwise a new admin account for a blocked mine could be minted straight through
+  // self-registration, bypassing the same gate enforced at login above.
+  const license = await checkMineLicense(mine.id);
+  if (license.blocked) {
+    return res.status(403).json({ error: "This mine's MineGuard license does not permit new accounts. Contact your account manager.", licenseBlocked: license.code });
+  }
 
   const passwordHash = await bcrypt.hash(password, 12);
   const user = await prisma.user.create({
@@ -109,6 +116,15 @@ router.post("/login", authLimiter, async (req, res) => {
   // would be a self-lockout.
   if (!isCyberPrivilegedUser(user.role, user.title) && (await resolveBooleanSetting("MAINTENANCE_MODE", false))) {
     return res.status(503).json({ error: "MineGuard is temporarily down for maintenance. Please try again shortly.", maintenance: true });
+  }
+  // Same reasoning and placement as the maintenance-mode check above: whether this mine's
+  // service is available at all is checked before password verification, since it's a
+  // property of the mine's account with MineGuard, not of the individual signing in.
+  if (user.mineId) {
+    const license = await checkMineLicense(user.mineId);
+    if (license.blocked) {
+      return res.status(403).json({ error: "Your organization's MineGuard license does not permit access. Contact your account manager.", licenseBlocked: license.code });
+    }
   }
   const valid = await bcrypt.compare(password, user.passwordHash);
   if (!valid) {
@@ -188,6 +204,18 @@ router.get("/me", requireAuth, async (req, res) => {
   if (!user) {
     return res.status(404).json({ error: "User not found" });
   }
+  // Enforced here rather than in requireAuth (which runs on every API call): a license
+  // lapsing is a billing event, not a security incident, so it takes effect the next time
+  // the app checks in — on load, same as login above — rather than needing a DB round trip
+  // added to every single request in the app.
+  let licenseWarning: { code: string; days: number } | null = null;
+  if (user.mineId) {
+    const license = await checkMineLicense(user.mineId);
+    if (license.blocked) {
+      return res.status(403).json({ error: "Your organization's MineGuard license does not permit access. Contact your account manager.", licenseBlocked: license.code });
+    }
+    if (license.warning) licenseWarning = license.warning;
+  }
   res.json({
     id: user.id,
     email: user.email,
@@ -198,6 +226,7 @@ router.get("/me", requireAuth, async (req, res) => {
     mineId: user.mineId,
     hasPhoto: !!user.photoData,
     mfaEnabled: user.mfaEnabled,
+    licenseWarning,
   });
 });
 
