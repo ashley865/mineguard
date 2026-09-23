@@ -89,7 +89,8 @@
     "error": "Error al iniciar sesión",
     "mfaCode": "Código del autenticador",
     "mfaCodeHint": "Ingresa el código de 6 dígitos de tu aplicación de autenticación.",
-    "mfaInvalid": "Código inválido. Inténtalo de nuevo."
+    "mfaInvalid": "Código inválido. Inténtalo de nuevo.",
+    "visitorBuyerContractor": "¿Visitante, comprador o contratista? Ir al portal público"
   },
   "signup": {
     "title": "Únete a tu mina",
@@ -6945,5 +6946,27 @@
       "EXPIRES_SOON": "Su licencia de MineGuard vence en {{count}} día(s). Contacte a su gestor de cuenta para renovarla.",
       "GRACE_PERIOD": "Su licencia de MineGuard ha vencido. El acceso continúa por {{count}} día(s) más — contacte a su gestor de cuenta para renovarla."
     }
+  },
+  "publicPortal": {
+    "subtitle": "Un enlace para todos fuera de la mina: visitantes, contratistas, compradores y licitadores.",
+    "visitorTitle": "Visitar una mina",
+    "visitorDescription": "Regístrese para su visita en el sitio al que se dirige.",
+    "startCheckIn": "Iniciar registro",
+    "continueToCheckIn": "Continuar al registro",
+    "contractorTitle": "Contratista",
+    "contractorDescription": "Regístrese para acceso al sitio, o inicie sesión si ya está registrado.",
+    "startRegistration": "Registrarse para un sitio",
+    "continueToRegistration": "Continuar al registro",
+    "contractorLogin": "Inicio de sesión de contratista",
+    "buyerTitle": "Comprar minerales",
+    "buyerDescription": "Explore existencias minerales en venta de todas las minas de esta plataforma.",
+    "browseMarketplace": "Explorar el mercado",
+    "tenderTitle": "Ofertar en licitaciones",
+    "tenderDescription": "Vea oportunidades de contrato abiertas de todas las minas y presente una oferta.",
+    "browseTenders": "Explorar licitaciones",
+    "mine": "Mina",
+    "selectMine": "Seleccione una mina…",
+    "selectSite": "Seleccione un sitio…",
+    "staffLogin": "¿Personal de MineGuard? Inicie sesión aquí"
   }
 }

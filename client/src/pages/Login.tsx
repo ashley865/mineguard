@@ -100,7 +100,12 @@ export default function Login() {
             </Link>
           </div>
         </form>
-        <div className="text-center mt-4">
+        <div className="text-center mt-4 space-y-1.5">
+          <div>
+            <Link to="/portal" className="text-xs text-mine-400 hover:text-mine-200 underline">
+              {t("login.visitorBuyerContractor")}
+            </Link>
+          </div>
           <Link to="/privacy-policy" className="text-xs text-mine-500 hover:text-mine-300 underline">
             {t("login.privacyPolicy")}
           </Link>

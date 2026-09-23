@@ -89,7 +89,8 @@
     "error": "Aanmelding het misluk",
     "mfaCode": "Verifikeerderkode",
     "mfaCodeHint": "Voer die 6-syfer kode van jou verifikeerder-app in.",
-    "mfaInvalid": "Ongeldige kode. Probeer asseblief weer."
+    "mfaInvalid": "Ongeldige kode. Probeer asseblief weer.",
+    "visitorBuyerContractor": "Besoeker, koper of kontrakteur? Gaan na die publieke portaal"
   },
   "signup": {
     "title": "Sluit by jou myn aan",
@@ -6945,5 +6946,27 @@
       "EXPIRES_SOON": "Jou MineGuard-lisensie verval oor {{count}} dag(e). Kontak jou rekeningbestuurder om te hernu.",
       "GRACE_PERIOD": "Jou MineGuard-lisensie het verval. Toegang duur nog {{count}} dag(e) — kontak jou rekeningbestuurder om te hernu."
     }
+  },
+  "publicPortal": {
+    "subtitle": "Een skakel vir almal buite die myn — besoekers, kontrakteurs, kopers en tenderbieders.",
+    "visitorTitle": "Besoek 'n myn",
+    "visitorDescription": "Teken in vir jou besoek by die terrein waarheen jy op pad is.",
+    "startCheckIn": "Begin inteken",
+    "continueToCheckIn": "Gaan voort na inteken",
+    "contractorTitle": "Kontrakteur",
+    "contractorDescription": "Registreer vir terreintoegang, of teken in as jy reeds geregistreer is.",
+    "startRegistration": "Registreer vir 'n terrein",
+    "continueToRegistration": "Gaan voort na registrasie",
+    "contractorLogin": "Kontrakteur-aanmelding",
+    "buyerTitle": "Koop minerale",
+    "buyerDescription": "Blaai deur mineraalvoorraad te koop by elke myn op hierdie platform.",
+    "browseMarketplace": "Blaai deur die mark",
+    "tenderTitle": "Bied op tenders",
+    "tenderDescription": "Bekyk oop kontrakgeleenthede van elke myn en dien 'n bod in.",
+    "browseTenders": "Blaai deur tenders",
+    "mine": "Myn",
+    "selectMine": "Kies 'n myn…",
+    "selectSite": "Kies 'n terrein…",
+    "staffLogin": "MineGuard-personeel? Teken hier in"
   }
 }

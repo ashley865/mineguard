@@ -89,7 +89,8 @@
     "error": "Anmeldung fehlgeschlagen",
     "mfaCode": "Authenticator-Code",
     "mfaCodeHint": "Geben Sie den 6-stelligen Code aus Ihrer Authenticator-App ein.",
-    "mfaInvalid": "Ungültiger Code. Bitte versuchen Sie es erneut."
+    "mfaInvalid": "Ungültiger Code. Bitte versuchen Sie es erneut.",
+    "visitorBuyerContractor": "Besucher, Käufer oder Auftragnehmer? Zum öffentlichen Portal"
   },
   "signup": {
     "title": "Ihrer Mine beitreten",
@@ -6945,5 +6946,27 @@
       "EXPIRES_SOON": "Ihre MineGuard-Lizenz läuft in {{count}} Tag(en) ab. Wenden Sie sich zur Verlängerung an Ihren Kundenbetreuer.",
       "GRACE_PERIOD": "Ihre MineGuard-Lizenz ist abgelaufen. Der Zugriff bleibt noch {{count}} Tag(e) bestehen — wenden Sie sich zur Verlängerung an Ihren Kundenbetreuer."
     }
+  },
+  "publicPortal": {
+    "subtitle": "Ein Link für alle außerhalb der Mine — Besucher, Auftragnehmer, Käufer und Ausschreibungsbieter.",
+    "visitorTitle": "Eine Mine besuchen",
+    "visitorDescription": "Melden Sie sich für Ihren Besuch am Standort an, den Sie aufsuchen.",
+    "startCheckIn": "Anmeldung starten",
+    "continueToCheckIn": "Weiter zur Anmeldung",
+    "contractorTitle": "Auftragnehmer",
+    "contractorDescription": "Registrieren Sie sich für Standortzugang oder melden Sie sich an, falls bereits registriert.",
+    "startRegistration": "Für einen Standort registrieren",
+    "continueToRegistration": "Weiter zur Registrierung",
+    "contractorLogin": "Auftragnehmer-Anmeldung",
+    "buyerTitle": "Mineralien kaufen",
+    "buyerDescription": "Durchsuchen Sie Mineralbestände zum Verkauf von allen Minen auf dieser Plattform.",
+    "browseMarketplace": "Marktplatz durchsuchen",
+    "tenderTitle": "Auf Ausschreibungen bieten",
+    "tenderDescription": "Sehen Sie offene Vertragsmöglichkeiten aller Minen und geben Sie ein Gebot ab.",
+    "browseTenders": "Ausschreibungen durchsuchen",
+    "mine": "Mine",
+    "selectMine": "Mine auswählen…",
+    "selectSite": "Standort auswählen…",
+    "staffLogin": "MineGuard-Mitarbeiter? Hier anmelden"
   }
 }

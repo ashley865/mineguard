@@ -163,6 +163,7 @@ import requestNotificationsRoutes from "./routes/requestNotifications";
 import platformAdminAuthRoutes from "./routes/platformAdminAuth";
 import platformAdminCustomersRoutes from "./routes/platformAdminCustomers";
 import platformAdminTeamRoutes from "./routes/platformAdminTeam";
+import publicDirectoryRoutes from "./routes/publicDirectory";
 import { sendLicenseRenewalReminders } from "./services/licenseReminderScheduler";
 import { sanitizeBody } from "./middleware/sanitize";
 import { startSimulator } from "./services/simulator";
@@ -383,6 +384,7 @@ app.use("/api/ai", aiRoutes);
 app.use("/api/platform-admin/auth", platformAdminAuthRoutes);
 app.use("/api/platform-admin", platformAdminCustomersRoutes);
 app.use("/api/platform-admin", platformAdminTeamRoutes);
+app.use("/api/public", publicDirectoryRoutes);
 
 app.use((err: any, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
   if (err?.message === "UNSUPPORTED_FILE_TYPE") {

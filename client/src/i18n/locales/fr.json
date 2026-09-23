@@ -89,7 +89,8 @@
     "error": "Échec de la connexion",
     "mfaCode": "Code d'authentification",
     "mfaCodeHint": "Saisissez le code à 6 chiffres de votre application d'authentification.",
-    "mfaInvalid": "Code invalide. Veuillez réessayer."
+    "mfaInvalid": "Code invalide. Veuillez réessayer.",
+    "visitorBuyerContractor": "Visiteur, acheteur ou sous-traitant ? Accéder au portail public"
   },
   "signup": {
     "title": "Rejoignez votre mine",
@@ -6945,5 +6946,27 @@
       "EXPIRES_SOON": "Votre licence MineGuard expire dans {{count}} jour(s). Contactez votre gestionnaire de compte pour la renouveler.",
       "GRACE_PERIOD": "Votre licence MineGuard a expiré. L'accès reste actif encore {{count}} jour(s) — contactez votre gestionnaire de compte pour la renouveler."
     }
+  },
+  "publicPortal": {
+    "subtitle": "Un seul lien pour tous ceux en dehors de la mine — visiteurs, sous-traitants, acheteurs et soumissionnaires.",
+    "visitorTitle": "Visiter une mine",
+    "visitorDescription": "Enregistrez votre visite sur le site où vous vous rendez.",
+    "startCheckIn": "Commencer l'enregistrement",
+    "continueToCheckIn": "Continuer vers l'enregistrement",
+    "contractorTitle": "Sous-traitant",
+    "contractorDescription": "Inscrivez-vous pour l'accès au site, ou connectez-vous si vous êtes déjà inscrit.",
+    "startRegistration": "S'inscrire pour un site",
+    "continueToRegistration": "Continuer vers l'inscription",
+    "contractorLogin": "Connexion sous-traitant",
+    "buyerTitle": "Acheter des minéraux",
+    "buyerDescription": "Parcourez les stocks de minéraux à vendre dans toutes les mines de cette plateforme.",
+    "browseMarketplace": "Parcourir le marché",
+    "tenderTitle": "Soumissionner aux appels d'offres",
+    "tenderDescription": "Consultez les opportunités de contrat ouvertes de toutes les mines et soumettez une offre.",
+    "browseTenders": "Parcourir les appels d'offres",
+    "mine": "Mine",
+    "selectMine": "Sélectionnez une mine…",
+    "selectSite": "Sélectionnez un site…",
+    "staffLogin": "Personnel MineGuard ? Connectez-vous ici"
   }
 }

@@ -107,7 +107,8 @@
     "error": "Login failed",
     "mfaCode": "Authenticator code",
     "mfaCodeHint": "Enter the 6-digit code from your authenticator app.",
-    "mfaInvalid": "Invalid code. Please try again."
+    "mfaInvalid": "Invalid code. Please try again.",
+    "visitorBuyerContractor": "Visitor, buyer or contractor? Go to the public portal"
   },
   "signup": {
     "title": "Join your mine",
@@ -6945,5 +6946,27 @@
       "EXPIRES_SOON": "Your MineGuard license expires in {{count}} day(s). Contact your account manager to renew.",
       "GRACE_PERIOD": "Your MineGuard license has expired. Access continues for {{count}} more day(s) — contact your account manager to renew."
     }
+  },
+  "publicPortal": {
+    "subtitle": "One link for everyone outside the mine — visitors, contractors, buyers and tender bidders.",
+    "visitorTitle": "Visiting a mine",
+    "visitorDescription": "Check in for your visit at the site you're heading to.",
+    "startCheckIn": "Start check-in",
+    "continueToCheckIn": "Continue to check-in",
+    "contractorTitle": "Contractor",
+    "contractorDescription": "Register for site access, or sign in if you're already registered.",
+    "startRegistration": "Register for a site",
+    "continueToRegistration": "Continue to registration",
+    "contractorLogin": "Contractor sign in",
+    "buyerTitle": "Buying minerals",
+    "buyerDescription": "Browse mineral stock for sale across every mine on this platform.",
+    "browseMarketplace": "Browse the marketplace",
+    "tenderTitle": "Bidding on tenders",
+    "tenderDescription": "View open contract opportunities from every mine and submit a bid.",
+    "browseTenders": "Browse tenders",
+    "mine": "Mine",
+    "selectMine": "Select a mine…",
+    "selectSite": "Select a site…",
+    "staffLogin": "MineGuard staff? Sign in here"
   }
 }
