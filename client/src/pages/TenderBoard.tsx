@@ -5,7 +5,7 @@ import { ContractCategory, ContractOpportunity } from "../api/types";
 import { StatusBadge } from "../components/Badges";
 import Modal from "../components/Modal";
 import { contractCategories } from "./marketplace/ContractOpportunitiesTab";
-import { buttonPrimary, buttonSecondary, cardClass, inputClass, labelClass } from "../components/ui";
+import { buttonPrimary, buttonSecondary, cardClass, inputClass, labelClass, selectClass } from "../components/ui";
 import { LogoMark, Wordmark } from "../components/Logo";
 
 function ContractBidForm({ opportunity, onDone }: { opportunity: ContractOpportunity; onDone: () => void }) {
@@ -93,12 +93,14 @@ export default function TenderBoard() {
   const [opportunities, setOpportunities] = useState<ContractOpportunity[]>([]);
   const [loading, setLoading] = useState(true);
   const [category, setCategory] = useState<ContractCategory | "ALL">("ALL");
+  const [vendorMineId, setVendorMineId] = useState("");
+  const [vendors, setVendors] = useState<{ id: string; name: string }[]>([]);
   const [bidOpportunity, setBidOpportunity] = useState<ContractOpportunity | null>(null);
 
   async function load() {
     setLoading(true);
     const res = await api.get<ContractOpportunity[]>("/contracts", {
-      params: { status: "OPEN", category: category === "ALL" ? undefined : category },
+      params: { status: "OPEN", category: category === "ALL" ? undefined : category, mineId: vendorMineId || undefined },
     });
     setOpportunities(res.data);
     setLoading(false);
@@ -107,7 +109,19 @@ export default function TenderBoard() {
   useEffect(() => {
     load();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [category]);
+  }, [category, vendorMineId]);
+
+  // Same reasoning as MarketplaceBrowse.tsx: the vendor filter's options come from every
+  // open opportunity, unfiltered, so picking one doesn't shrink the dropdown itself.
+  useEffect(() => {
+    api.get<ContractOpportunity[]>("/contracts", { params: { status: "OPEN" } }).then((res) => {
+      const byId = new Map<string, string>();
+      for (const o of res.data) {
+        if (o.site?.mine) byId.set(o.site.mine.id, o.site.mine.name);
+      }
+      setVendors([...byId.entries()].map(([id, name]) => ({ id, name })).sort((a, b) => a.name.localeCompare(b.name)));
+    });
+  }, []);
 
   return (
     <div className="min-h-screen bg-mine-950">
@@ -141,6 +155,14 @@ export default function TenderBoard() {
           ))}
         </div>
 
+        <div className="w-56">
+          <label className={labelClass}>{t("marketplace.vendor")}</label>
+          <select className={selectClass} value={vendorMineId} onChange={(e) => setVendorMineId(e.target.value)}>
+            <option value="">{t("marketplace.allVendors")}</option>
+            {vendors.map((v) => <option key={v.id} value={v.id}>{v.name}</option>)}
+          </select>
+        </div>
+
         {loading && <div className="text-mine-300">{t("common.loading")}</div>}
 
         {!loading && (
@@ -152,7 +174,8 @@ export default function TenderBoard() {
                   <StatusBadge status={o.status} />
                 </div>
                 <div className="text-xs text-mine-400">
-                  {t(`tenders.categories.${o.category}`)} · {o.site?.name} · {t("marketplace.deadline")}: {new Date(o.submissionDeadline).toLocaleDateString()}
+                  {t(`tenders.categories.${o.category}`)} · <span className="font-semibold text-mine-300">{o.site?.mine?.name ?? o.site?.name}</span>
+                  {o.site?.mine && o.site.name !== o.site.mine.name ? ` (${o.site.name})` : ""} · {t("marketplace.deadline")}: {new Date(o.submissionDeadline).toLocaleDateString()}
                 </div>
                 <p className="text-xs text-mine-400">{o.description}</p>
                 {o.budgetRange && <div className="text-xs text-mine-400">{t("marketplace.budgetRange")}: {o.budgetRange}</div>}

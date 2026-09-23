@@ -2031,7 +2031,7 @@ export interface MineralListingImage {
 export interface MineralListing {
   id: string;
   siteId: string;
-  site?: { id: string; name: string };
+  site?: { id: string; name: string; mine?: { id: string; name: string } };
   mineralType: MineralType;
   grade?: string | null;
   quantity: number;
@@ -2090,7 +2090,7 @@ export type ContractCategory =
 export interface ContractOpportunity {
   id: string;
   siteId: string;
-  site?: { id: string; name: string };
+  site?: { id: string; name: string; mine?: { id: string; name: string } };
   category: ContractCategory;
   title: string;
   description: string;

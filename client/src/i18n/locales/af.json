@@ -2692,6 +2692,8 @@
     "search": "Soek",
     "searchPlaceholder": "Soek lysings…",
     "allTypes": "Alle tipes",
+    "vendor": "Verskaffer",
+    "allVendors": "Alle verskaffers",
     "allStatuses": "Alle status",
     "minPrice": "Min. prys",
     "maxPrice": "Maks. prys",
@@ -2703,7 +2705,10 @@
     "clearFilters": "Verwyder filters",
     "noMatchingListings": "Geen lysings pas by u filters nie.",
     "primaryImage": "Voorblad-foto",
-    "setPrimary": "Stel as voorblad"
+    "setPrimary": "Stel as voorblad",
+    "myMineTab": "My myn",
+    "allMinesTab": "Alle myne",
+    "buyersSharedHint": "'n Enkele gedeelde poel oor elke myn op hierdie platform — om 'n koper hier goed te keur, gee hulle mark toegang tot alle myne gelyktydig, nie net joune nie."
   },
   "tenders": {
     "nav": "Tenders & Kontrakte",

@@ -144,7 +144,11 @@ function ListingCard({
             </span>
           )}
         </div>
-        <div className="text-xs text-mine-400">{listing.site?.name}{listing.grade ? ` · ${t("marketplace.grade")}: ${listing.grade}` : ""}</div>
+        <div className="text-xs text-mine-400">
+          <span className="font-semibold text-mine-300">{listing.site?.mine?.name ?? listing.site?.name}</span>
+          {listing.site?.mine && listing.site.name !== listing.site.mine.name ? ` — ${listing.site.name}` : ""}
+          {listing.grade ? ` · ${t("marketplace.grade")}: ${listing.grade}` : ""}
+        </div>
         <div className="text-xs text-mine-300">{listing.quantity.toLocaleString()} {listing.unit} {t("marketplace.available")}</div>
 
         {listing.pricePerUnit != null && (
@@ -258,10 +262,12 @@ export default function MarketplaceBrowse() {
   const [search, setSearch] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
   const [mineralType, setMineralType] = useState("");
+  const [vendorMineId, setVendorMineId] = useState("");
   const [minPrice, setMinPrice] = useState("");
   const [maxPrice, setMaxPrice] = useState("");
   const [sortBy, setSortBy] = useState("newest");
   const [displayCurrency, setDisplayCurrency] = useState<DisplayCurrency>("ZAR");
+  const [vendors, setVendors] = useState<{ id: string; name: string }[]>([]);
 
   useEffect(() => {
     const timer = setTimeout(() => setDebouncedSearch(search), 400);
@@ -276,6 +282,7 @@ export default function MarketplaceBrowse() {
           status: "AVAILABLE",
           search: debouncedSearch || undefined,
           mineralType: mineralType || undefined,
+          mineId: vendorMineId || undefined,
           minPrice: minPrice || undefined,
           maxPrice: maxPrice || undefined,
           sortBy,
@@ -290,7 +297,19 @@ export default function MarketplaceBrowse() {
   useEffect(() => {
     load();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [debouncedSearch, mineralType, minPrice, maxPrice, sortBy]);
+  }, [debouncedSearch, mineralType, vendorMineId, minPrice, maxPrice, sortBy]);
+
+  // The vendor filter's own options come from every available listing, unfiltered — so
+  // picking a vendor never makes the other vendors disappear from the dropdown itself.
+  useEffect(() => {
+    api.get<MineralListing[]>("/minerals", { params: { status: "AVAILABLE" } }).then((res) => {
+      const byId = new Map<string, string>();
+      for (const l of res.data) {
+        if (l.site?.mine) byId.set(l.site.mine.id, l.site.mine.name);
+      }
+      setVendors([...byId.entries()].map(([id, name]) => ({ id, name })).sort((a, b) => a.name.localeCompare(b.name)));
+    });
+  }, []);
 
   useEffect(() => {
     if (!buyer) {
@@ -323,7 +342,7 @@ export default function MarketplaceBrowse() {
     }
   }
 
-  const hasFilters = search || mineralType || minPrice || maxPrice;
+  const hasFilters = search || mineralType || vendorMineId || minPrice || maxPrice;
 
   return (
     <div className="min-h-screen bg-mine-950">
@@ -358,6 +377,13 @@ export default function MarketplaceBrowse() {
                 {mineralTypes.map((mt) => <option key={mt} value={mt}>{t(`mineralTypes.${mt}`)}</option>)}
               </select>
             </div>
+            <div className="w-44">
+              <label className={labelClass}>{t("marketplace.vendor")}</label>
+              <select className={selectClass} value={vendorMineId} onChange={(e) => setVendorMineId(e.target.value)}>
+                <option value="">{t("marketplace.allVendors")}</option>
+                {vendors.map((v) => <option key={v.id} value={v.id}>{v.name}</option>)}
+              </select>
+            </div>
             <div className="w-28">
               <label className={labelClass}>{t("marketplace.minPrice")}</label>
               <input className={inputClass} type="number" value={minPrice} onChange={(e) => setMinPrice(e.target.value)} />
@@ -385,7 +411,7 @@ export default function MarketplaceBrowse() {
               <button
                 type="button"
                 className={`${buttonSecondary} text-xs`}
-                onClick={() => { setSearch(""); setMineralType(""); setMinPrice(""); setMaxPrice(""); }}
+                onClick={() => { setSearch(""); setMineralType(""); setVendorMineId(""); setMinPrice(""); setMaxPrice(""); }}
               >
                 {t("marketplace.clearFilters")}
               </button>

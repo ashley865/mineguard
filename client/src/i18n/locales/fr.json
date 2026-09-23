@@ -2692,6 +2692,8 @@
     "search": "Rechercher",
     "searchPlaceholder": "Rechercher des annonces…",
     "allTypes": "Tous les types",
+    "vendor": "Fournisseur",
+    "allVendors": "Tous les fournisseurs",
     "allStatuses": "Tous les statuts",
     "minPrice": "Prix min.",
     "maxPrice": "Prix max.",
@@ -2703,7 +2705,10 @@
     "clearFilters": "Effacer les filtres",
     "noMatchingListings": "Aucune annonce ne correspond à vos filtres.",
     "primaryImage": "Photo de couverture",
-    "setPrimary": "Définir comme couverture"
+    "setPrimary": "Définir comme couverture",
+    "myMineTab": "Ma mine",
+    "allMinesTab": "Toutes les mines",
+    "buyersSharedHint": "Un seul groupe partagé entre toutes les mines de cette plateforme — approuver un acheteur ici lui donne accès au marché de toutes les mines à la fois, pas seulement la vôtre."
   },
   "tenders": {
     "nav": "Appels d'Offres et Contrats",

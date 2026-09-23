@@ -2986,6 +2986,8 @@
     "search": "Search",
     "searchPlaceholder": "Search listings…",
     "allTypes": "All types",
+    "vendor": "Vendor",
+    "allVendors": "All vendors",
     "allStatuses": "All statuses",
     "minPrice": "Min price",
     "maxPrice": "Max price",
@@ -2997,7 +2999,10 @@
     "clearFilters": "Clear filters",
     "noMatchingListings": "No listings match your filters.",
     "primaryImage": "Cover photo",
-    "setPrimary": "Set as cover"
+    "setPrimary": "Set as cover",
+    "myMineTab": "My mine",
+    "allMinesTab": "All mines",
+    "buyersSharedHint": "A single shared pool across every mine on this platform — approving a buyer here grants them marketplace access to all mines at once, not just yours."
   },
   "tenders": {
     "nav": "Tenders & Contracts",

@@ -2692,6 +2692,8 @@
     "search": "Suche",
     "searchPlaceholder": "Angebote durchsuchen…",
     "allTypes": "Alle Typen",
+    "vendor": "Anbieter",
+    "allVendors": "Alle Anbieter",
     "allStatuses": "Alle Status",
     "minPrice": "Min. Preis",
     "maxPrice": "Max. Preis",
@@ -2703,7 +2705,10 @@
     "clearFilters": "Filter zurücksetzen",
     "noMatchingListings": "Keine Angebote entsprechen Ihren Filtern.",
     "primaryImage": "Titelbild",
-    "setPrimary": "Als Titelbild festlegen"
+    "setPrimary": "Als Titelbild festlegen",
+    "myMineTab": "Meine Mine",
+    "allMinesTab": "Alle Minen",
+    "buyersSharedHint": "Ein gemeinsamer Pool für alle Minen auf dieser Plattform — die Genehmigung eines Käufers hier gewährt ihm sofort Marktzugang zu allen Minen, nicht nur zu Ihrer."
   },
   "tenders": {
     "nav": "Ausschreibungen & Verträge",

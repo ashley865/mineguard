@@ -336,17 +336,23 @@ export default function MineralListingsTab({ sites }: { sites: Site[] }) {
   const [bidsListing, setBidsListing] = useState<MineralListing | null>(null);
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<MineralListingStatus | "">("");
+  // The marketplace is shared across every mine (see minerals.ts) — this defaults to just
+  // this mine's own inventory, with a separate explicit view of the whole platform, rather
+  // than silently mixing everyone's listings into one table with no indication of whose is
+  // whose.
+  const [scope, setScope] = useState<"mine" | "all">("mine");
 
   async function load() {
     setLoading(true);
-    const res = await api.get<MineralListing[]>("/minerals");
+    const res = await api.get<MineralListing[]>(scope === "mine" ? "/minerals/mine" : "/minerals");
     setItems(res.data);
     setLoading(false);
   }
 
   useEffect(() => {
     load();
-  }, []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [scope]);
 
   const filteredItems = items.filter((item) => {
     if (statusFilter && item.status !== statusFilter) return false;
@@ -380,6 +386,21 @@ export default function MineralListingsTab({ sites }: { sites: Site[] }) {
 
   return (
     <div className="space-y-4">
+      <div className="flex gap-1">
+        {(["mine", "all"] as const).map((s) => (
+          <button
+            key={s}
+            type="button"
+            onClick={() => setScope(s)}
+            className={`text-xs font-semibold px-3 py-1.5 rounded-md transition-colors ${
+              scope === s ? "bg-hazard-500 text-white" : "bg-mine-800/60 text-mine-300 hover:text-mine-50"
+            }`}
+          >
+            {t(s === "mine" ? "marketplace.myMineTab" : "marketplace.allMinesTab")}
+          </button>
+        ))}
+      </div>
+
       <div className="flex items-center justify-between gap-2 flex-wrap">
         <div className="flex items-center gap-2 flex-wrap">
           <input
@@ -393,7 +414,7 @@ export default function MineralListingsTab({ sites }: { sites: Site[] }) {
             {listingStatuses.map((s) => <option key={s} value={s}>{t(`badges.status.${s}`)}</option>)}
           </select>
         </div>
-        {canEdit && sites.length > 0 && (
+        {canEdit && sites.length > 0 && scope === "mine" && (
           <button className={buttonPrimary} onClick={() => setModal("create")}>{t("marketplace.newListing")}</button>
         )}
       </div>
@@ -403,6 +424,7 @@ export default function MineralListingsTab({ sites }: { sites: Site[] }) {
           <thead className="bg-mine-800/50 text-mine-300 text-xs uppercase">
             <tr>
               <th className="text-left px-4 py-2">{t("marketplace.mineralType")}</th>
+              <th className="text-left px-4 py-2">{t("marketplace.vendor")}</th>
               <th className="text-left px-4 py-2">{t("common.site")}</th>
               <th className="text-left px-4 py-2">{t("marketplace.quantity")}</th>
               <th className="text-left px-4 py-2">{t("common.status")}</th>
@@ -410,32 +432,38 @@ export default function MineralListingsTab({ sites }: { sites: Site[] }) {
             </tr>
           </thead>
           <tbody>
-            {filteredItems.map((item) => (
-              <tr key={item.id} className="border-t border-mine-800 hover:bg-mine-800/30">
-                <td className="px-4 py-2 font-medium">{t(`mineralTypes.${item.mineralType}`)}{item.grade ? ` (${item.grade})` : ""}</td>
-                <td className="px-4 py-2 text-mine-300">{item.site?.name}</td>
-                <td className="px-4 py-2 text-mine-300">{item.quantity} {item.unit}</td>
-                <td className="px-4 py-2"><StatusBadge status={item.status} /></td>
-                <td className="px-4 py-2 text-right">
-                  <div className="flex justify-end items-center gap-2">
-                    <button className="text-xs text-mine-300 hover:text-mine-50 flex items-center gap-1" onClick={() => setBidsListing(item)}>
-                      {t("marketplace.viewBids")}
-                      {item.bidCount > 0 && (
-                        <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-full bg-hazard-500/15 text-hazard-400">{item.bidCount}</span>
+            {filteredItems.map((item) => {
+              const isOwnMine = scope === "mine" || item.site?.mine?.id === user?.mineId;
+              return (
+                <tr key={item.id} className="border-t border-mine-800 hover:bg-mine-800/30">
+                  <td className="px-4 py-2 font-medium">{t(`mineralTypes.${item.mineralType}`)}{item.grade ? ` (${item.grade})` : ""}</td>
+                  <td className="px-4 py-2 text-mine-300">{item.site?.mine?.name ?? "—"}</td>
+                  <td className="px-4 py-2 text-mine-300">{item.site?.name}</td>
+                  <td className="px-4 py-2 text-mine-300">{item.quantity} {item.unit}</td>
+                  <td className="px-4 py-2"><StatusBadge status={item.status} /></td>
+                  <td className="px-4 py-2 text-right">
+                    <div className="flex justify-end items-center gap-2">
+                      {isOwnMine && (
+                        <button className="text-xs text-mine-300 hover:text-mine-50 flex items-center gap-1" onClick={() => setBidsListing(item)}>
+                          {t("marketplace.viewBids")}
+                          {item.bidCount > 0 && (
+                            <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-full bg-hazard-500/15 text-hazard-400">{item.bidCount}</span>
+                          )}
+                        </button>
                       )}
-                    </button>
-                    {canEdit && (
-                      <button className="text-xs text-mine-300 hover:text-mine-50" onClick={() => setModal(item)}>{t("common.edit")}</button>
-                    )}
-                    {canDelete && (
-                      <button className={buttonDanger} onClick={() => remove(item.id)}>{t("common.delete")}</button>
-                    )}
-                  </div>
-                </td>
-              </tr>
-            ))}
+                      {canEdit && isOwnMine && (
+                        <button className="text-xs text-mine-300 hover:text-mine-50" onClick={() => setModal(item)}>{t("common.edit")}</button>
+                      )}
+                      {canDelete && isOwnMine && (
+                        <button className={buttonDanger} onClick={() => remove(item.id)}>{t("common.delete")}</button>
+                      )}
+                    </div>
+                  </td>
+                </tr>
+              );
+            })}
             {filteredItems.length === 0 && (
-              <tr><td colSpan={5} className="px-4 py-6 text-center text-mine-400">{t(items.length === 0 ? "marketplace.noneYetListings" : "marketplace.noMatchingListings")}</td></tr>
+              <tr><td colSpan={6} className="px-4 py-6 text-center text-mine-400">{t(items.length === 0 ? "marketplace.noneYetListings" : "marketplace.noMatchingListings")}</td></tr>
             )}
           </tbody>
         </table>

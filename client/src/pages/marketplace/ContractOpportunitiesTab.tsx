@@ -177,12 +177,16 @@ export default function ContractOpportunitiesTab({ sites }: { sites: Site[] }) {
   const [loadError, setLoadError] = useState(false);
   const [modal, setModal] = useState<null | "create" | ContractOpportunity>(null);
   const [bidsOpportunity, setBidsOpportunity] = useState<ContractOpportunity | null>(null);
+  // Same reasoning as MineralListingsTab.tsx: tenders are shared across every mine, so this
+  // defaults to just this mine's own opportunities with an explicit separate view of the
+  // whole platform, rather than silently mixing everyone's tenders together.
+  const [scope, setScope] = useState<"mine" | "all">("mine");
 
   async function load() {
     setLoading(true);
     setLoadError(false);
     try {
-      const res = await api.get<ContractOpportunity[]>("/contracts");
+      const res = await api.get<ContractOpportunity[]>(scope === "mine" ? "/contracts/mine" : "/contracts");
       setItems(res.data);
     } catch {
       setLoadError(true);
@@ -193,7 +197,8 @@ export default function ContractOpportunitiesTab({ sites }: { sites: Site[] }) {
 
   useEffect(() => {
     load();
-  }, []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [scope]);
 
   async function create(data: any) {
     await api.post("/contracts", data);
@@ -218,7 +223,22 @@ export default function ContractOpportunitiesTab({ sites }: { sites: Site[] }) {
 
   return (
     <div className="space-y-4">
-      {canEdit && sites.length > 0 && (
+      <div className="flex gap-1">
+        {(["mine", "all"] as const).map((s) => (
+          <button
+            key={s}
+            type="button"
+            onClick={() => setScope(s)}
+            className={`text-xs font-semibold px-3 py-1.5 rounded-md transition-colors ${
+              scope === s ? "bg-hazard-500 text-white" : "bg-mine-800/60 text-mine-300 hover:text-mine-50"
+            }`}
+          >
+            {t(s === "mine" ? "marketplace.myMineTab" : "marketplace.allMinesTab")}
+          </button>
+        ))}
+      </div>
+
+      {canEdit && sites.length > 0 && scope === "mine" && (
         <div className="flex justify-end">
           <button className={buttonPrimary} onClick={() => setModal("create")}>{t("marketplace.newOpportunity")}</button>
         </div>
@@ -230,6 +250,7 @@ export default function ContractOpportunitiesTab({ sites }: { sites: Site[] }) {
             <tr>
               <th className="text-left px-4 py-2">{t("marketplace.contractTitle")}</th>
               <th className="text-left px-4 py-2">{t("tenders.category")}</th>
+              <th className="text-left px-4 py-2">{t("marketplace.vendor")}</th>
               <th className="text-left px-4 py-2">{t("common.site")}</th>
               <th className="text-left px-4 py-2">{t("marketplace.submissionDeadline")}</th>
               <th className="text-left px-4 py-2">{t("common.status")}</th>
@@ -237,28 +258,34 @@ export default function ContractOpportunitiesTab({ sites }: { sites: Site[] }) {
             </tr>
           </thead>
           <tbody>
-            {items.map((item) => (
-              <tr key={item.id} className="border-t border-mine-800 hover:bg-mine-800/30">
-                <td className="px-4 py-2 font-medium">{item.title}</td>
-                <td className="px-4 py-2 text-mine-300">{t(`tenders.categories.${item.category}`)}</td>
-                <td className="px-4 py-2 text-mine-300">{item.site?.name}</td>
-                <td className="px-4 py-2 text-mine-300">{new Date(item.submissionDeadline).toLocaleDateString()}</td>
-                <td className="px-4 py-2"><StatusBadge status={item.status} /></td>
-                <td className="px-4 py-2 text-right">
-                  <div className="flex justify-end gap-2">
-                    <button className="text-xs text-mine-300 hover:text-mine-50" onClick={() => setBidsOpportunity(item)}>{t("marketplace.viewBids")}</button>
-                    {canEdit && (
-                      <button className="text-xs text-mine-300 hover:text-mine-50" onClick={() => setModal(item)}>{t("common.edit")}</button>
-                    )}
-                    {canDelete && (
-                      <button className={buttonDanger} onClick={() => remove(item.id)}>{t("common.delete")}</button>
-                    )}
-                  </div>
-                </td>
-              </tr>
-            ))}
+            {items.map((item) => {
+              const isOwnMine = scope === "mine" || item.site?.mine?.id === user?.mineId;
+              return (
+                <tr key={item.id} className="border-t border-mine-800 hover:bg-mine-800/30">
+                  <td className="px-4 py-2 font-medium">{item.title}</td>
+                  <td className="px-4 py-2 text-mine-300">{t(`tenders.categories.${item.category}`)}</td>
+                  <td className="px-4 py-2 text-mine-300">{item.site?.mine?.name ?? "—"}</td>
+                  <td className="px-4 py-2 text-mine-300">{item.site?.name}</td>
+                  <td className="px-4 py-2 text-mine-300">{new Date(item.submissionDeadline).toLocaleDateString()}</td>
+                  <td className="px-4 py-2"><StatusBadge status={item.status} /></td>
+                  <td className="px-4 py-2 text-right">
+                    <div className="flex justify-end gap-2">
+                      {isOwnMine && (
+                        <button className="text-xs text-mine-300 hover:text-mine-50" onClick={() => setBidsOpportunity(item)}>{t("marketplace.viewBids")}</button>
+                      )}
+                      {canEdit && isOwnMine && (
+                        <button className="text-xs text-mine-300 hover:text-mine-50" onClick={() => setModal(item)}>{t("common.edit")}</button>
+                      )}
+                      {canDelete && isOwnMine && (
+                        <button className={buttonDanger} onClick={() => remove(item.id)}>{t("common.delete")}</button>
+                      )}
+                    </div>
+                  </td>
+                </tr>
+              );
+            })}
             {items.length === 0 && (
-              <tr><td colSpan={6} className="px-4 py-6 text-center text-mine-400">{t("marketplace.noneYetOpportunities")}</td></tr>
+              <tr><td colSpan={7} className="px-4 py-6 text-center text-mine-400">{t("marketplace.noneYetOpportunities")}</td></tr>
             )}
           </tbody>
         </table>

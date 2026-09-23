@@ -70,7 +70,9 @@ const CONTRACT_CATEGORY_TO_EXPENSE_CATEGORY: Record<string, string> = {
 const opportunitySelect = {
   id: true,
   siteId: true,
-  site: { select: { id: true, name: true } },
+  // Same reasoning as minerals.ts's listingSelect: the vendor a bidder deals with is the
+  // mine, not the specific site the work happens at.
+  site: { select: { id: true, name: true, mine: { select: { id: true, name: true } } } },
   category: true,
   title: true,
   description: true,
@@ -100,10 +102,28 @@ const bidSelect = {
 // mine-scoped, unlike every authenticated management route below it.
 router.get("/", async (req, res) => {
   const siteId = req.query.siteId as string | undefined;
+  const mineId = req.query.mineId as string | undefined;
   const status = req.query.status as string | undefined;
   const category = req.query.category as string | undefined;
   const opportunities = await prisma.contractOpportunity.findMany({
-    where: { siteId: siteId || undefined, status: (status as any) || undefined, category: (category as any) || undefined },
+    where: {
+      siteId: siteId || undefined,
+      site: mineId ? { mineId } : undefined,
+      status: (status as any) || undefined,
+      category: (category as any) || undefined,
+    },
+    select: opportunitySelect,
+    orderBy: { createdAt: "desc" },
+  });
+  res.json(opportunities);
+});
+
+// Staff-facing "my mine" view — same reasoning as minerals.ts's /mine route.
+router.get("/mine", requireAuth, async (req, res) => {
+  const mineId = requireMineId(req, res);
+  if (!mineId) return;
+  const opportunities = await prisma.contractOpportunity.findMany({
+    where: { site: { mineId } },
     select: opportunitySelect,
     orderBy: { createdAt: "desc" },
   });

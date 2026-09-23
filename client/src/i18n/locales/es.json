@@ -2692,6 +2692,8 @@
     "search": "Buscar",
     "searchPlaceholder": "Buscar anuncios…",
     "allTypes": "Todos los tipos",
+    "vendor": "Proveedor",
+    "allVendors": "Todos los proveedores",
     "allStatuses": "Todos los estados",
     "minPrice": "Precio mín.",
     "maxPrice": "Precio máx.",
@@ -2703,7 +2705,10 @@
     "clearFilters": "Borrar filtros",
     "noMatchingListings": "Ningún anuncio coincide con sus filtros.",
     "primaryImage": "Foto de portada",
-    "setPrimary": "Establecer como portada"
+    "setPrimary": "Establecer como portada",
+    "myMineTab": "Mi mina",
+    "allMinesTab": "Todas las minas",
+    "buyersSharedHint": "Un único grupo compartido entre todas las minas de esta plataforma: aprobar a un comprador aquí le otorga acceso al mercado de todas las minas a la vez, no solo la suya."
   },
   "tenders": {
     "nav": "Licitaciones y Contratos",

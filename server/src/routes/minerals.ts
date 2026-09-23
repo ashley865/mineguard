@@ -75,7 +75,9 @@ const bidReviewSchema = z.object({ decision: z.enum(["ACCEPTED", "REJECTED"]) })
 const listingSelect = {
   id: true,
   siteId: true,
-  site: { select: { id: true, name: true } },
+  // The vendor identity a buyer actually cares about is the mine, not the site — a mine
+  // with several sites should read as one seller across the marketplace, not several.
+  site: { select: { id: true, name: true, mine: { select: { id: true, name: true } } } },
   mineralType: true,
   grade: true,
   quantity: true,
@@ -123,6 +125,7 @@ const SORT_OPTIONS = {
 // not mine-scoped, unlike every authenticated management route below it.
 router.get("/", async (req, res) => {
   const siteId = req.query.siteId as string | undefined;
+  const mineId = req.query.mineId as string | undefined;
   const status = req.query.status as string | undefined;
   const mineralType = req.query.mineralType as string | undefined;
   const search = (req.query.search as string | undefined)?.trim();
@@ -134,6 +137,7 @@ router.get("/", async (req, res) => {
   const listings = await prisma.mineralListing.findMany({
     where: {
       siteId: siteId || undefined,
+      site: mineId ? { mineId } : undefined,
       status: (status as any) || undefined,
       mineralType: (mineralType as any) || undefined,
       pricePerUnit: minPrice !== undefined || maxPrice !== undefined ? { gte: minPrice, lte: maxPrice } : undefined,
@@ -148,6 +152,20 @@ router.get("/", async (req, res) => {
     },
     select: listingSelect,
     orderBy,
+  });
+  res.json(listings.map(withBidCount));
+});
+
+// Staff-facing "my mine" view: the same shape as the public storefront above, but scoped
+// to the logged-in staff member's own mine, so their management tab can default to showing
+// (and letting them edit) only their own inventory rather than the whole shared platform.
+router.get("/mine", requireAuth, async (req, res) => {
+  const mineId = requireMineId(req, res);
+  if (!mineId) return;
+  const listings = await prisma.mineralListing.findMany({
+    where: { site: { mineId } },
+    select: listingSelect,
+    orderBy: { createdAt: "desc" },
   });
   res.json(listings.map(withBidCount));
 });

@@ -380,6 +380,7 @@ export default function BuyersTab() {
 
   return (
     <div className="space-y-4">
+      <p className="text-xs text-mine-400">{t("marketplace.buyersSharedHint")}</p>
       <div className="flex items-center justify-between flex-wrap gap-2">
         <div className="flex gap-1 flex-wrap">
           {statusFilters.map((s) => (
