@@ -6,11 +6,11 @@ import { prisma } from "../prisma";
 // this many days of continued access before login is actually blocked, giving a genuine
 // renewal delay (an invoice in transit, a signature pending) room to resolve without an
 // unannounced lockout on a live mine safety system.
-const GRACE_PERIOD_DAYS = 14;
+export const GRACE_PERIOD_DAYS = 14;
 // Surfaced as a non-blocking warning this many days before expiry, so it's never a surprise.
-const WARN_BEFORE_EXPIRY_DAYS = 14;
+export const WARN_BEFORE_EXPIRY_DAYS = 14;
 
-const DAY_MS = 24 * 60 * 60 * 1000;
+export const DAY_MS = 24 * 60 * 60 * 1000;
 
 export function generateLicenseKey(): string {
   const segment = () => crypto.randomBytes(2).toString("hex").toUpperCase();

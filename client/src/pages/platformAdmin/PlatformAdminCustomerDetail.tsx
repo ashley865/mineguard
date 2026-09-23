@@ -1,7 +1,7 @@
 import { FormEvent, useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { platformAdminApi } from "../../api/platformAdminClient";
-import { Customer, CustomerStatus, LicenseKey, LicenseKeyStatus, LicensePlan, PlatformAdminMine } from "../../api/types";
+import { Customer, CustomerActivity, CustomerStatus, LicenseKey, LicenseKeyStatus, LicensePlan, PlatformAdminMine } from "../../api/types";
 
 const inputClass = "w-full border border-slate-300 rounded-md px-3 py-2 text-sm";
 const labelClass = "block text-xs font-semibold text-slate-600 mb-1";
@@ -165,6 +165,54 @@ function MineLink({ customer, onChanged }: { customer: Customer; onChanged: (c: 
       <p className="text-[11px] text-slate-400">
         Until a mine is linked here, that tenant is unrestricted by licensing (grandfathered), not blocked.
       </p>
+    </div>
+  );
+}
+
+function ActivityStat({ label, value }: { label: string; value: string | number }) {
+  return (
+    <div>
+      <div className="text-[10px] uppercase tracking-wide text-slate-400">{label}</div>
+      <div className="text-lg font-bold tabular-nums text-slate-900">{value}</div>
+    </div>
+  );
+}
+
+/** Whether a customer is actually using what they're paying for — pulled read-only from
+ * their mine's own tenant data, which this tool otherwise never touches. */
+function ActivityInsights({ mineId }: { mineId: string | null | undefined }) {
+  const [activity, setActivity] = useState<CustomerActivity | null>(null);
+  const customerId = useParams<{ id: string }>().id;
+
+  useEffect(() => {
+    if (!mineId || !customerId) {
+      setActivity(null);
+      return;
+    }
+    platformAdminApi.get<CustomerActivity>(`/platform-admin/customers/${customerId}/activity`).then((r) => setActivity(r.data));
+  }, [mineId, customerId]);
+
+  if (!mineId) {
+    return (
+      <div className="bg-white border border-slate-200 rounded-xl p-5">
+        <h2 className="text-sm font-bold mb-2">Activity</h2>
+        <p className="text-sm text-slate-400">Link a mine to see usage.</p>
+      </div>
+    );
+  }
+  if (!activity) return <div className="bg-white border border-slate-200 rounded-xl p-5 text-sm text-slate-400">Loading activity…</div>;
+
+  return (
+    <div className="bg-white border border-slate-200 rounded-xl p-5">
+      <h2 className="text-sm font-bold mb-3">Activity</h2>
+      <div className="grid grid-cols-3 gap-3">
+        <ActivityStat label="Users" value={`${activity.activeUsers ?? 0}/${activity.totalUsers ?? 0}`} />
+        <ActivityStat label="Sites" value={activity.siteCount ?? 0} />
+        <ActivityStat label="Sensors" value={activity.sensorCount ?? 0} />
+      </div>
+      <div className="mt-3 text-xs text-slate-500">
+        Last login: {activity.lastLoginAt ? new Date(activity.lastLoginAt).toLocaleString() : "Never"}
+      </div>
     </div>
   );
 }
@@ -344,7 +392,10 @@ export default function PlatformAdminCustomerDetail() {
 
       <div className="grid lg:grid-cols-2 gap-4">
         <CustomerEditForm customer={customer} onSaved={setCustomer} />
-        <MineLink customer={customer} onChanged={setCustomer} />
+        <div className="space-y-4">
+          <MineLink customer={customer} onChanged={setCustomer} />
+          <ActivityInsights mineId={customer.mineId} />
+        </div>
       </div>
 
       <div className="bg-white border border-slate-200 rounded-xl p-5 space-y-4">

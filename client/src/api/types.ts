@@ -5577,6 +5577,28 @@ export interface PlatformAdmin {
   email: string;
   createdAt: string;
   accessKeyIssuedAt?: string | null;
+  lastLoginAt?: string | null;
+}
+
+export interface PlatformAdminAuditLogEntry {
+  id: string;
+  action: string;
+  targetType: string;
+  targetId?: string | null;
+  detail?: string | null;
+  actor?: { id: string; name: string } | null;
+  createdAt: string;
+}
+
+export type RenewalUrgency = "EXPIRED" | "SUSPENDED" | "GRACE_PERIOD" | "EXPIRES_SOON" | "NO_LICENSE";
+
+export interface CustomerActivity {
+  linked: boolean;
+  totalUsers?: number;
+  activeUsers?: number;
+  lastLoginAt?: string | null;
+  siteCount?: number;
+  sensorCount?: number;
 }
 
 export type CustomerStatus = "LEAD" | "ACTIVE" | "INACTIVE";

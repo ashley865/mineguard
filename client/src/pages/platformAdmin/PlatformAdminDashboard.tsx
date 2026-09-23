@@ -26,9 +26,14 @@ export default function PlatformAdminDashboard() {
     <div className="space-y-6">
       <div className="flex items-center justify-between flex-wrap gap-3">
         <h1 className="text-xl font-bold">Licensing overview</h1>
-        <Link to="/platform-admin/customers" className="text-sm font-semibold text-slate-900 underline underline-offset-2">
-          Manage customers →
-        </Link>
+        <div className="flex gap-4">
+          <Link to="/platform-admin/renewals" className="text-sm font-semibold text-slate-900 underline underline-offset-2">
+            Renewals worklist →
+          </Link>
+          <Link to="/platform-admin/customers" className="text-sm font-semibold text-slate-900 underline underline-offset-2">
+            Manage customers →
+          </Link>
+        </div>
       </div>
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">

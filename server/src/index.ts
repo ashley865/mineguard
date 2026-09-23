@@ -162,6 +162,8 @@ import liveDataRoutes from "./routes/liveData";
 import requestNotificationsRoutes from "./routes/requestNotifications";
 import platformAdminAuthRoutes from "./routes/platformAdminAuth";
 import platformAdminCustomersRoutes from "./routes/platformAdminCustomers";
+import platformAdminTeamRoutes from "./routes/platformAdminTeam";
+import { sendLicenseRenewalReminders } from "./services/licenseReminderScheduler";
 import { sanitizeBody } from "./middleware/sanitize";
 import { startSimulator } from "./services/simulator";
 import { scanCompliance } from "./services/complianceScanner";
@@ -380,6 +382,7 @@ app.use("/api/ai", aiRoutes);
 // to Mine/User, same reasoning as buyer-auth/contractor-auth above.
 app.use("/api/platform-admin/auth", platformAdminAuthRoutes);
 app.use("/api/platform-admin", platformAdminCustomersRoutes);
+app.use("/api/platform-admin", platformAdminTeamRoutes);
 
 app.use((err: any, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
   if (err?.message === "UNSUPPORTED_FILE_TYPE") {
@@ -444,6 +447,10 @@ httpServer.listen(port, () => {
   setInterval(() => {
     scanCompliance(io).catch((err) => console.error("Compliance scan failed", err));
   }, COMPLIANCE_SCAN_INTERVAL_MS);
+  sendLicenseRenewalReminders().catch((err) => console.error("License reminder scheduler failed", err));
+  setInterval(() => {
+    sendLicenseRenewalReminders().catch((err) => console.error("License reminder scheduler failed", err));
+  }, 6 * 60 * 60 * 1000);
   sendMonthlyPayrollApprovalRequests(io).catch((err) => console.error("Payroll approval scheduler failed", err));
   setInterval(() => {
     sendMonthlyPayrollApprovalRequests(io).catch((err) => console.error("Payroll approval scheduler failed", err));

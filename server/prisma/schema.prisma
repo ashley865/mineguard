@@ -1731,11 +1731,31 @@ model PlatformAdmin {
   passwordHash       String?
   accessKeyHash      String?
   accessKeyIssuedAt  DateTime?
+  lastLoginAt        DateTime?
 
   createdAt DateTime @default(now())
 
-  issuedLicenses LicenseKey[]
+  issuedLicenses   LicenseKey[]
   createdCustomers Customer[]
+  auditLogs        PlatformAdminAuditLog[]
+}
+
+// Every write this tool makes, attributed to whoever made it — the same reasoning as
+// CyberLoginEvent/auditLog.ts for the mine-facing app, but for the one part of the system
+// with cross-tenant reach. actorId is nullable rather than required so a removed admin's
+// past actions stay on record instead of failing a foreign key or vanishing.
+model PlatformAdminAuditLog {
+  id String @id @default(cuid())
+
+  actorId String?
+  actor   PlatformAdmin? @relation(fields: [actorId], references: [id], onDelete: SetNull)
+
+  action     String
+  targetType String
+  targetId   String?
+  detail     String?
+
+  createdAt DateTime @default(now())
 }
 
 enum CustomerStatus {
@@ -1800,6 +1820,12 @@ model LicenseKey {
   expiresAt   DateTime?
   revokedAt   DateTime?
   notes       String?
+
+  // Stamped the first time each reminder actually goes out (see
+  // services/licenseReminderScheduler.ts), so a license sits in its warning window for
+  // days without re-sending the same email — each stage fires exactly once.
+  expiryReminderSentAt DateTime?
+  graceReminderSentAt  DateTime?
 
   issuedById String?
   issuedBy   PlatformAdmin? @relation(fields: [issuedById], references: [id], onDelete: SetNull)

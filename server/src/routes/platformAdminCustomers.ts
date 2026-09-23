@@ -3,6 +3,7 @@ import { z } from "zod";
 import { prisma } from "../prisma";
 import { requirePlatformAdminAuth } from "../middleware/platformAdminAuth";
 import { generateLicenseKey } from "../lib/licensing";
+import { logAdminAction } from "../lib/platformAdminAudit";
 
 const router = Router();
 router.use(requirePlatformAdminAuth);
@@ -80,6 +81,7 @@ router.post("/customers", async (req, res) => {
     data: { ...parsed.data, createdById: req.platformAdminAuth!.platformAdminId },
     select: customerSelect,
   });
+  await logAdminAction(req.platformAdminAuth!.platformAdminId, "CUSTOMER_CREATED", "Customer", customer.id, customer.companyName);
   res.status(201).json({ ...customer, currentLicense: null });
 });
 
@@ -95,6 +97,7 @@ router.put("/customers/:id", async (req, res) => {
   const existing = await prisma.customer.findUnique({ where: { id: req.params.id } });
   if (!existing) return res.status(404).json({ error: "Customer not found" });
   const customer = await prisma.customer.update({ where: { id: existing.id }, data: parsed.data, select: customerSelect });
+  await logAdminAction(req.platformAdminAuth!.platformAdminId, "CUSTOMER_UPDATED", "Customer", customer.id, customer.companyName);
   res.json({ ...customer, currentLicense: currentLicense(customer.licenses) });
 });
 
@@ -109,6 +112,7 @@ router.delete("/customers/:id", async (req, res) => {
     return res.status(409).json({ error: "This customer has a linked mine or license history and can't be deleted. Set status to INACTIVE instead." });
   }
   await prisma.customer.delete({ where: { id: existing.id } });
+  await logAdminAction(req.platformAdminAuth!.platformAdminId, "CUSTOMER_DELETED", "Customer", existing.id, existing.companyName);
   res.status(204).send();
 });
 
@@ -137,6 +141,7 @@ router.post("/customers/:id/link-mine", async (req, res) => {
     data: { mineId: mine.id, status: customer.status === "LEAD" ? "ACTIVE" : customer.status },
     select: customerSelect,
   });
+  await logAdminAction(req.platformAdminAuth!.platformAdminId, "MINE_LINKED", "Customer", updated.id, `Linked ${updated.mine?.name ?? mine.id} to ${updated.companyName}`);
   res.json({ ...updated, currentLicense: currentLicense(updated.licenses) });
 });
 
@@ -144,6 +149,7 @@ router.post("/customers/:id/unlink-mine", async (req, res) => {
   const customer = await prisma.customer.findUnique({ where: { id: req.params.id } });
   if (!customer) return res.status(404).json({ error: "Customer not found" });
   const updated = await prisma.customer.update({ where: { id: customer.id }, data: { mineId: null }, select: customerSelect });
+  await logAdminAction(req.platformAdminAuth!.platformAdminId, "MINE_UNLINKED", "Customer", updated.id, updated.companyName);
   res.json({ ...updated, currentLicense: currentLicense(updated.licenses) });
 });
 
@@ -164,6 +170,7 @@ router.post("/customers/:id/licenses", async (req, res) => {
     },
     select: licenseSelect,
   });
+  await logAdminAction(req.platformAdminAuth!.platformAdminId, "LICENSE_ISSUED", "LicenseKey", license.id, `${license.plan} for ${customer.companyName} (${license.key})`);
   res.status(201).json(license);
 });
 
@@ -178,7 +185,77 @@ router.put("/licenses/:id", async (req, res) => {
     data: { ...parsed.data, ...(revokedAt ? { revokedAt } : {}) },
     select: licenseSelect,
   });
+  const action = parsed.data.status === "REVOKED" ? "LICENSE_REVOKED" : parsed.data.status === "SUSPENDED" ? "LICENSE_SUSPENDED" : parsed.data.status === "ACTIVE" && existing.status !== "ACTIVE" ? "LICENSE_REACTIVATED" : "LICENSE_UPDATED";
+  await logAdminAction(req.platformAdminAuth!.platformAdminId, action, "LicenseKey", license.id, license.key);
   res.json(license);
+});
+
+type RenewalUrgency = "EXPIRED" | "SUSPENDED" | "GRACE_PERIOD" | "EXPIRES_SOON" | "NO_LICENSE";
+const THIRTY_DAYS_MS = 30 * 24 * 60 * 60 * 1000;
+
+/**
+ * Everything needing a renewal conversation, ranked by how urgent it is — the dashboard
+ * only ever showed counts; this is the actual worklist behind them.
+ */
+router.get("/renewals", async (req, res) => {
+  const customers = await prisma.customer.findMany({
+    where: { status: { not: "INACTIVE" } },
+    select: customerSelect,
+  });
+
+  const now = Date.now();
+  const rows: { customer: (typeof customers)[number]; currentLicense: ReturnType<typeof currentLicense>; urgency: RenewalUrgency; daysUntil: number | null }[] = [];
+
+  for (const c of customers) {
+    const license = currentLicense(c.licenses);
+    if (!license) {
+      // A lead with no license yet isn't a renewal — it's a sale that hasn't happened,
+      // a different conversation from "this customer's access is about to lapse".
+      if (c.status === "ACTIVE") rows.push({ customer: c, currentLicense: null, urgency: "NO_LICENSE", daysUntil: null });
+      continue;
+    }
+    if (license.status === "SUSPENDED") {
+      rows.push({ customer: c, currentLicense: license, urgency: "SUSPENDED", daysUntil: null });
+    } else if (license.expiresAt) {
+      const daysUntil = Math.ceil((license.expiresAt.getTime() - now) / (24 * 60 * 60 * 1000));
+      if (daysUntil < 0) rows.push({ customer: c, currentLicense: license, urgency: "EXPIRED", daysUntil });
+      else if (license.expiresAt.getTime() - now < THIRTY_DAYS_MS) {
+        rows.push({ customer: c, currentLicense: license, urgency: daysUntil <= 0 ? "GRACE_PERIOD" : "EXPIRES_SOON", daysUntil });
+      }
+    }
+  }
+
+  const order: Record<RenewalUrgency, number> = { EXPIRED: 0, SUSPENDED: 1, GRACE_PERIOD: 2, EXPIRES_SOON: 3, NO_LICENSE: 4 };
+  rows.sort((a, b) => order[a.urgency] - order[b.urgency] || (a.daysUntil ?? 0) - (b.daysUntil ?? 0));
+
+  res.json(rows.map((r) => ({ ...r.customer, currentLicense: r.currentLicense, urgency: r.urgency, daysUntil: r.daysUntil })));
+});
+
+// Read-only signals from the customer's actual mine tenant — the one place in this tool
+// that legitimately reaches into mine-tenant data, since knowing whether a customer is
+// actually using what they're paying for is exactly what an account manager needs.
+router.get("/customers/:id/activity", async (req, res) => {
+  const customer = await prisma.customer.findUnique({ where: { id: req.params.id }, select: { mineId: true } });
+  if (!customer) return res.status(404).json({ error: "Customer not found" });
+  if (!customer.mineId) return res.json({ linked: false });
+
+  const mineId = customer.mineId;
+  const [totalUsers, activeUsers, lastLogin, siteCount, sensorCount] = await Promise.all([
+    prisma.user.count({ where: { mineId } }),
+    prisma.user.count({ where: { mineId, isActive: true } }),
+    prisma.user.aggregate({ where: { mineId }, _max: { lastLoginAt: true } }),
+    prisma.site.count({ where: { mineId } }),
+    prisma.sensor.count({ where: { zone: { site: { mineId } } } }),
+  ]);
+
+  res.json({
+    linked: true,
+    totalUsers,
+    activeUsers,
+    lastLoginAt: lastLogin._max.lastLoginAt,
+    siteCount,
+    sensorCount,
+  });
 });
 
 router.get("/dashboard/summary", async (req, res) => {

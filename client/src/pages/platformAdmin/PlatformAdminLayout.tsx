@@ -29,6 +29,9 @@ export default function PlatformAdminLayout() {
         <nav className="flex gap-5">
           <NavLink to="/platform-admin/dashboard" className={navLink}>Dashboard</NavLink>
           <NavLink to="/platform-admin/customers" className={navLink}>Customers</NavLink>
+          <NavLink to="/platform-admin/renewals" className={navLink}>Renewals</NavLink>
+          <NavLink to="/platform-admin/team" className={navLink}>Team</NavLink>
+          <NavLink to="/platform-admin/audit-log" className={navLink}>Audit log</NavLink>
         </nav>
         <div className="ml-auto flex items-center gap-4 text-sm">
           <span className="text-slate-400">{admin?.name}</span>

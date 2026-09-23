@@ -58,6 +58,9 @@ import PlatformAdminLayout from "./pages/platformAdmin/PlatformAdminLayout";
 import PlatformAdminDashboard from "./pages/platformAdmin/PlatformAdminDashboard";
 import PlatformAdminCustomers from "./pages/platformAdmin/PlatformAdminCustomers";
 import PlatformAdminCustomerDetail from "./pages/platformAdmin/PlatformAdminCustomerDetail";
+import PlatformAdminRenewals from "./pages/platformAdmin/PlatformAdminRenewals";
+import PlatformAdminTeam from "./pages/platformAdmin/PlatformAdminTeam";
+import PlatformAdminAuditLog from "./pages/platformAdmin/PlatformAdminAuditLog";
 import ProductionTracking from "./pages/ProductionTracking";
 import FinancialPerformance from "./pages/FinancialPerformance";
 import ShiftHandoverLog from "./pages/ShiftHandoverLog";
@@ -150,6 +153,9 @@ export default function App() {
           <Route path="/platform-admin/dashboard" element={<PlatformAdminDashboard />} />
           <Route path="/platform-admin/customers" element={<PlatformAdminCustomers />} />
           <Route path="/platform-admin/customers/:id" element={<PlatformAdminCustomerDetail />} />
+          <Route path="/platform-admin/renewals" element={<PlatformAdminRenewals />} />
+          <Route path="/platform-admin/team" element={<PlatformAdminTeam />} />
+          <Route path="/platform-admin/audit-log" element={<PlatformAdminAuditLog />} />
         </Route>
       </Route>
       <Route element={<ProtectedRoute />}>

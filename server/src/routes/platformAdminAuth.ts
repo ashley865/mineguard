@@ -28,7 +28,7 @@ const changePasswordSchema = z.object({
   newPassword: z.string().min(8),
 });
 
-const selfSelect = { id: true, name: true, email: true, createdAt: true, accessKeyIssuedAt: true } as const;
+const selfSelect = { id: true, name: true, email: true, createdAt: true, accessKeyIssuedAt: true, lastLoginAt: true } as const;
 
 /**
  * Creates the very first platform admin, with a generated access key rather than a
@@ -63,6 +63,7 @@ router.post("/login", authLimiter, async (req, res) => {
     return res.status(401).json({ error: "Invalid email or password" });
   }
 
+  await prisma.platformAdmin.update({ where: { id: admin.id }, data: { lastLoginAt: new Date() } }).catch(() => {});
   const token = signPlatformAdminToken(admin.id);
   res.json({ token, admin: { id: admin.id, name: admin.name, email: admin.email } });
 });
@@ -80,6 +81,7 @@ router.post("/login-with-key", authLimiter, async (req, res) => {
   const candidates = await prisma.platformAdmin.findMany({ where: { accessKeyHash: { not: null } } });
   for (const admin of candidates) {
     if (admin.accessKeyHash && (await verifyPlatformAdminAccessKey(parsed.data.accessKey, admin.accessKeyHash))) {
+      await prisma.platformAdmin.update({ where: { id: admin.id }, data: { lastLoginAt: new Date() } }).catch(() => {});
       const token = signPlatformAdminToken(admin.id);
       return res.json({ token, admin: { id: admin.id, name: admin.name, email: admin.email } });
     }
