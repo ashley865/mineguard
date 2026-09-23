@@ -5576,6 +5576,7 @@ export interface PlatformAdmin {
   name: string;
   email: string;
   createdAt: string;
+  accessKeyIssuedAt?: string | null;
 }
 
 export type CustomerStatus = "LEAD" | "ACTIVE" | "INACTIVE";

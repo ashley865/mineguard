@@ -1719,11 +1719,20 @@ model Mine {
 // isn't either (see middleware/buyerAuth.ts, middleware/contractorAuth.ts).
 
 model PlatformAdmin {
-  id           String   @id @default(cuid())
-  name         String
-  email        String   @unique
-  passwordHash String
-  createdAt    DateTime @default(now())
+  id    String @id @default(cuid())
+  name  String
+  email String @unique
+
+  // Two independent, optional credentials rather than one required field: an admin can
+  // sign in with either, and the bootstrap endpoint (routes/platformAdminAuth.ts) only
+  // ever sets the access key, never a password — there is no email/password entry point
+  // for the very first account, since that requires already being able to reach the
+  // database directly. Both hashed, never stored or logged in plaintext after issuance.
+  passwordHash       String?
+  accessKeyHash      String?
+  accessKeyIssuedAt  DateTime?
+
+  createdAt DateTime @default(now())
 
   issuedLicenses LicenseKey[]
   createdCustomers Customer[]

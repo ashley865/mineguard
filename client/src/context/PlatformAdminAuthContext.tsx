@@ -7,7 +7,9 @@ interface PlatformAdminAuthContextValue {
   token: string | null;
   loading: boolean;
   login: (email: string, password: string) => Promise<void>;
+  loginWithKey: (accessKey: string) => Promise<void>;
   changePassword: (currentPassword: string, newPassword: string) => Promise<void>;
+  rotateKey: () => Promise<string>;
   logout: () => void;
 }
 
@@ -62,8 +64,18 @@ export function PlatformAdminAuthProvider({ children }: { children: ReactNode })
     persist(res.data.token, res.data.admin);
   }
 
+  async function loginWithKey(accessKey: string) {
+    const res = await platformAdminApi.post("/platform-admin/auth/login-with-key", { accessKey });
+    persist(res.data.token, res.data.admin);
+  }
+
   async function changePassword(currentPassword: string, newPassword: string) {
     await platformAdminApi.post("/platform-admin/auth/change-password", { currentPassword, newPassword });
+  }
+
+  async function rotateKey(): Promise<string> {
+    const res = await platformAdminApi.post("/platform-admin/auth/rotate-key");
+    return res.data.accessKey as string;
   }
 
   function logout() {
@@ -74,7 +86,7 @@ export function PlatformAdminAuthProvider({ children }: { children: ReactNode })
   }
 
   return (
-    <PlatformAdminAuthContext.Provider value={{ admin, token, loading, login, changePassword, logout }}>
+    <PlatformAdminAuthContext.Provider value={{ admin, token, loading, login, loginWithKey, changePassword, rotateKey, logout }}>
       {children}
     </PlatformAdminAuthContext.Provider>
   );
