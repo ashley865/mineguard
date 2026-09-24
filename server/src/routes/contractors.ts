@@ -7,8 +7,11 @@ import { requireAuth, requireRole } from "../middleware/auth";
 import { requireMineId } from "../lib/mineScope";
 import { documentFileFilter } from "../lib/uploadFilters";
 import { verifyAdminPassword } from "../lib/verifyPassword";
-import { signContractorAuthToken } from "../lib/jwt";
 import { authLimiter } from "../middleware/rateLimit";
+import { isIpBlocked } from "../lib/ipBlocklist";
+import { isHoneypotFilled, recordPublicSubmission } from "../lib/publicAbuseGuard";
+import { verifyTurnstileToken } from "../lib/turnstile";
+import { sendContractorVerificationEmail } from "../lib/emailVerification";
 
 const router = Router();
 
@@ -83,6 +86,11 @@ const contractorSchema = z.object({
 const publicRegisterSchema = contractorSchema.omit({ status: true, siteId: true }).extend({
   contactEmail: z.string().email(),
   password: z.string().min(8),
+  // Honeypot: a hidden field no real contractor ever fills in — see isHoneypotFilled.
+  website: z.string().optional(),
+  // Present once Turnstile is configured server-side (see lib/turnstile.ts); ignored
+  // (verification is a no-op) until then.
+  turnstileToken: z.string().optional(),
 });
 
 // Public: lets a contractor self-register via a link or QR code shared for a specific site.
@@ -99,13 +107,23 @@ router.post("/register/:siteId", authLimiter, upload.array("documents", 6), asyn
   const site = await prisma.site.findUnique({ where: { id: req.params.siteId } });
   if (!site) return res.status(404).json({ error: "Site not found" });
 
+  if (await isIpBlocked(site.mineId, req.ip)) {
+    return res.status(403).json({ error: "Access blocked from this network" });
+  }
+
   const parsed = publicRegisterSchema.safeParse(req.body);
   if (!parsed.success) return res.status(400).json({ error: parsed.error.flatten() });
+  if (isHoneypotFilled(parsed.data.website)) {
+    return res.status(400).json({ error: "Invalid submission" });
+  }
+  if (!(await verifyTurnstileToken(parsed.data.turnstileToken, req.ip))) {
+    return res.status(400).json({ error: "Verification failed. Please try again." });
+  }
 
   const existing = await prisma.contractor.findFirst({ where: { contactEmail: parsed.data.contactEmail } });
   if (existing) return res.status(409).json({ error: "A contractor with this email is already registered" });
 
-  const { password, ...contractorData } = parsed.data;
+  const { password, website: _website, turnstileToken: _turnstileToken, ...contractorData } = parsed.data;
   const passwordHash = await bcrypt.hash(password, 12);
   const files = (req.files as Express.Multer.File[] | undefined) ?? [];
   const item = await prisma.contractor.create({
@@ -124,9 +142,13 @@ router.post("/register/:siteId", authLimiter, upload.array("documents", 6), asyn
       },
     },
   });
-  const token = signContractorAuthToken(item.id);
-  const { passwordHash: _passwordHash, ...safeContractor } = item;
-  res.status(201).json({ token, contractor: safeContractor });
+
+  // No token issued here: unlike before, the account isn't usable until the emailed link
+  // is clicked (see lib/emailVerification.ts) — contractorAuth.ts's login refuses an
+  // unverified account, so a typo'd or unowned email can never reach the portal.
+  await sendContractorVerificationEmail(item.id, item.contactEmail!, item.contactName);
+  await recordPublicSubmission("CONTRACTOR_REGISTER", req.ip, site.mineId);
+  res.status(201).json({ pendingVerification: true, email: item.contactEmail });
 });
 
 router.use(requireAuth);
@@ -150,7 +172,9 @@ router.post("/", requireRole("ADMIN", "SUPERVISOR", "EXECUTIVE"), async (req, re
   if (!parsed.success) return res.status(400).json({ error: parsed.error.flatten() });
   const site = await prisma.site.findFirst({ where: { id: parsed.data.siteId, mineId } });
   if (!site) return res.status(404).json({ error: "Site not found" });
-  const data = { ...parsed.data, contactEmail: parsed.data.contactEmail || undefined };
+  // Staff creating this record has already vetted the contractor directly, unlike public
+  // self-registration below — trusted immediately rather than requiring an email click.
+  const data = { ...parsed.data, contactEmail: parsed.data.contactEmail || undefined, emailVerifiedAt: new Date() };
   const item = await prisma.contractor.create({ data, select: contractorSelect });
   res.status(201).json(withPortalAccess(item));
 });

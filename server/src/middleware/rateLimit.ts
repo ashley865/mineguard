@@ -44,6 +44,48 @@ export const apiLimiter = rateLimit({
 });
 
 /**
+ * A real visitor checks in for one visit at a time — this is generous enough for a group
+ * arriving from behind the same NAT/office gateway, but tight enough that automated
+ * flooding of a site's check-in form is caught well before the blanket apiLimiter would
+ * ever notice.
+ */
+export const visitorCheckinLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  limit: 10,
+  standardHeaders: true,
+  legacyHeaders: false,
+  keyGenerator: (req) => req.ip || "anonymous",
+  message: { error: "Too many check-in attempts. Please try again later." },
+});
+
+/**
+ * Shared by both marketplace and tender bid submission — a real bidder might place a
+ * handful of bids in a sitting, but not dozens.
+ */
+export const bidLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  limit: 15,
+  standardHeaders: true,
+  legacyHeaders: false,
+  keyGenerator: (req) => req.ip || "anonymous",
+  message: { error: "Too many bids submitted. Please try again later." },
+});
+
+/**
+ * The mine/site directory is small and rarely needs refetching — this is loose enough for
+ * the /portal page itself (which fetches it once) but tight enough that scraping the full
+ * list of every mine and site on the platform takes real effort, not one script.
+ */
+export const publicDirectoryLimiter = rateLimit({
+  windowMs: 5 * 60 * 1000,
+  limit: 20,
+  standardHeaders: true,
+  legacyHeaders: false,
+  keyGenerator: (req) => req.ip || "anonymous",
+  message: { error: "Too many requests. Please try again shortly." },
+});
+
+/**
  * Every AI request costs real money once a provider key is configured, so this
  * caps spend per person rather than per IP (several executives can share an
  * office network) by keying on the authenticated user id set by requireAuth.

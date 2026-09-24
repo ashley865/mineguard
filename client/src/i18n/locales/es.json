@@ -2234,7 +2234,9 @@
     "password": "Contraseña",
     "confirmPassword": "Confirmar contraseña",
     "passwordTooShort": "La contraseña debe tener al menos 8 caracteres.",
-    "passwordMismatch": "Las contraseñas no coinciden."
+    "passwordMismatch": "Las contraseñas no coinciden.",
+    "checkEmailTitle": "Revise su correo",
+    "checkEmailBody": "Enviamos un enlace de verificación a {{email}}. Haga clic en él para activar su cuenta y luego inicie sesión."
   },
   "visitors": {
     "nav": "Gestión de Visitantes",
@@ -2508,7 +2510,9 @@
     "signIn": "Iniciar sesión",
     "signingIn": "Iniciando sesión…",
     "error": "Error al iniciar sesión. Verifica tu correo y contraseña.",
-    "noAccountHint": "¿Aún no estás registrado? Usa el enlace de registro compartido por el sitio con el que estás contratado."
+    "noAccountHint": "¿Aún no estás registrado? Usa el enlace de registro compartido por el sitio con el que estás contratado.",
+    "resendVerification": "Reenviar correo de verificación",
+    "verificationResent": "Si ese correo está registrado y aún no verificado, se ha enviado un nuevo enlace."
   },
   "contractorPortal": {
     "title": "Portal de Contratista",
@@ -2534,7 +2538,9 @@
     "error": "Error al iniciar sesión. Verifica tu correo y contraseña.",
     "noAccount": "¿Aún no estás registrado?",
     "registerLink": "Regístrate como comprador",
-    "backToMarketplace": "Volver al mercado"
+    "backToMarketplace": "Volver al mercado",
+    "resendVerification": "Reenviar correo de verificación",
+    "verificationResent": "Si ese correo está registrado y aún no verificado, se ha enviado un nuevo enlace."
   },
   "buyerPortal": {
     "title": "Portal de Comprador",
@@ -2613,7 +2619,9 @@
     "password": "Contraseña",
     "confirmPassword": "Confirmar contraseña",
     "passwordTooShort": "La contraseña debe tener al menos 8 caracteres.",
-    "passwordMismatch": "Las contraseñas no coinciden."
+    "passwordMismatch": "Las contraseñas no coinciden.",
+    "checkEmailTitle": "Revise su correo",
+    "checkEmailBody": "Enviamos un enlace de verificación a {{email}}. Haga clic en él para activar su cuenta y luego inicie sesión."
   },
   "marketplace": {
     "nav": "Mercado",
@@ -6968,5 +6976,13 @@
     "selectMine": "Seleccione una mina…",
     "selectSite": "Seleccione un sitio…",
     "staffLogin": "¿Personal de MineGuard? Inicie sesión aquí"
+  },
+  "verifyEmail": {
+    "verifying": "Verificando su correo…",
+    "successTitle": "Correo verificado",
+    "errorTitle": "Verificación fallida",
+    "goToLogin": "Continuar para iniciar sesión",
+    "invalidLink": "Este enlace de verificación falta o es inválido.",
+    "genericError": "Algo salió mal. Intente de nuevo o solicite un nuevo enlace."
   }
 }

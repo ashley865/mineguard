@@ -1,5 +1,7 @@
 import { Router } from "express";
 import { prisma } from "../prisma";
+import { publicDirectoryLimiter } from "../middleware/rateLimit";
+import { isGlobalIpBlocked } from "../lib/ipBlocklist";
 
 const router = Router();
 
@@ -10,7 +12,12 @@ const router = Router();
 // names and locations are exposed — the same information already printed on a site's own
 // gate signage or QR code, nothing that isn't already public knowledge to anyone physically
 // going there.
-router.get("/directory", async (req, res) => {
+router.get("/directory", publicDirectoryLimiter, async (req, res) => {
+  // No single mine to scope a block to here — checked against the shared global list,
+  // same as buyer login.
+  if (await isGlobalIpBlocked(req.ip)) {
+    return res.status(403).json({ error: "Access blocked from this network" });
+  }
   const mines = await prisma.mine.findMany({
     select: {
       id: true,

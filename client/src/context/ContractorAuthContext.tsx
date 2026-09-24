@@ -7,7 +7,7 @@ interface ContractorAuthContextValue {
   token: string | null;
   loading: boolean;
   login: (email: string, password: string) => Promise<void>;
-  registerWithForm: (siteId: string, form: FormData) => Promise<void>;
+  registerWithForm: (siteId: string, form: FormData) => Promise<{ pendingVerification: boolean; email: string }>;
   changePassword: (currentPassword: string, newPassword: string) => Promise<void>;
   refreshContractor: () => Promise<void>;
   logout: () => void;
@@ -64,11 +64,13 @@ export function ContractorAuthProvider({ children }: { children: ReactNode }) {
     persist(res.data.token, res.data.contractor);
   }
 
+  // No token is returned anymore — the account isn't usable until the emailed
+  // verification link is clicked, so there's nothing to persist here yet.
   async function registerWithForm(siteId: string, form: FormData) {
     const res = await contractorApi.post(`/contractors/register/${siteId}`, form, {
       headers: { "Content-Type": "multipart/form-data" },
     });
-    persist(res.data.token, res.data.contractor);
+    return { pendingVerification: !!res.data.pendingVerification, email: res.data.email as string };
   }
 
   async function changePassword(currentPassword: string, newPassword: string) {

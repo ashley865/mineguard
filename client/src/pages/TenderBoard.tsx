@@ -7,6 +7,8 @@ import Modal from "../components/Modal";
 import { contractCategories } from "./marketplace/ContractOpportunitiesTab";
 import { buttonPrimary, buttonSecondary, cardClass, inputClass, labelClass, selectClass } from "../components/ui";
 import { LogoMark, Wordmark } from "../components/Logo";
+import Honeypot from "../components/Honeypot";
+import TurnstileWidget from "../components/TurnstileWidget";
 
 function ContractBidForm({ opportunity, onDone }: { opportunity: ContractOpportunity; onDone: () => void }) {
   const { t } = useTranslation();
@@ -16,6 +18,8 @@ function ContractBidForm({ opportunity, onDone }: { opportunity: ContractOpportu
   const [contactEmail, setContactEmail] = useState("");
   const [bidAmount, setBidAmount] = useState("");
   const [proposalNotes, setProposalNotes] = useState("");
+  const [website, setWebsite] = useState("");
+  const [turnstileToken, setTurnstileToken] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [done, setDone] = useState(false);
@@ -32,6 +36,8 @@ function ContractBidForm({ opportunity, onDone }: { opportunity: ContractOpportu
         contactEmail,
         bidAmount,
         proposalNotes: proposalNotes || undefined,
+        website,
+        turnstileToken: turnstileToken || undefined,
       });
       setDone(true);
     } catch (err: any) {
@@ -52,6 +58,7 @@ function ContractBidForm({ opportunity, onDone }: { opportunity: ContractOpportu
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
+      <Honeypot value={website} onChange={setWebsite} />
       <div className="grid grid-cols-2 gap-3">
         <div>
           <label className={labelClass}>{t("marketplace.companyName")}</label>
@@ -80,6 +87,8 @@ function ContractBidForm({ opportunity, onDone }: { opportunity: ContractOpportu
         <label className={labelClass}>{t("marketplace.proposalNotes")}</label>
         <textarea className={inputClass} rows={3} value={proposalNotes} onChange={(e) => setProposalNotes(e.target.value)} />
       </div>
+      <TurnstileWidget onToken={setTurnstileToken} />
+
       {error && <div className="text-danger-500 text-xs">{error}</div>}
       <button type="submit" className={`${buttonPrimary} w-full`} disabled={submitting}>
         {submitting ? t("common.saving") : t("marketplace.submitBid")}

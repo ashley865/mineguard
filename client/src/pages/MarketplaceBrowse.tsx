@@ -11,6 +11,7 @@ import { buttonPrimary, buttonSecondary, cardClass, inputClass, labelClass, sele
 import { mineralTypes } from "../lib/minerals";
 import { DISPLAY_CURRENCIES, DisplayCurrency, formatCurrency, useFxRates } from "../lib/currency";
 import { LogoMark, Wordmark } from "../components/Logo";
+import Honeypot from "../components/Honeypot";
 
 function coverImage(listing: MineralListing) {
   return listing.images.find((img) => img.isPrimary) ?? listing.images[0] ?? null;
@@ -185,6 +186,7 @@ function MineralBidForm({ listing, onDone }: { listing: MineralListing; onDone: 
   const [quantity, setQuantity] = useState("");
   const [offerPrice, setOfferPrice] = useState("");
   const [notes, setNotes] = useState("");
+  const [website, setWebsite] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [done, setDone] = useState(false);
@@ -194,7 +196,7 @@ function MineralBidForm({ listing, onDone }: { listing: MineralListing; onDone: 
     setError(null);
     setSubmitting(true);
     try {
-      await buyerApi.post(`/minerals/${listing.id}/bids`, { quantity, offerPrice, notes: notes || undefined });
+      await buyerApi.post(`/minerals/${listing.id}/bids`, { quantity, offerPrice, notes: notes || undefined, website });
       setDone(true);
     } catch (err: any) {
       setError(err.response?.data?.error ?? t("marketplace.bidError"));
@@ -226,6 +228,7 @@ function MineralBidForm({ listing, onDone }: { listing: MineralListing; onDone: 
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
+      <Honeypot value={website} onChange={setWebsite} />
       <p className="text-xs text-mine-400">{t("marketplace.bidBuyerHint", { name: buyer.legalName })}</p>
       <div className="grid grid-cols-2 gap-3">
         <div>

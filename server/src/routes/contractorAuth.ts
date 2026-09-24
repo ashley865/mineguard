@@ -8,6 +8,7 @@ import { authLimiter, passwordChangeLimiter } from "../middleware/rateLimit";
 import { isIpBlocked } from "../lib/ipBlocklist";
 import { autoBlockMineIpIfBruteForced } from "../lib/autoBlock";
 import { resolveBooleanSetting } from "../lib/systemSettings";
+import { sendContractorVerificationEmail, verifyContractorEmailToken } from "../lib/emailVerification";
 
 const router = Router();
 
@@ -15,6 +16,9 @@ const loginSchema = z.object({
   email: z.string().email(),
   password: z.string().min(1),
 });
+
+const verifySchema = z.object({ token: z.string().min(1) });
+const resendSchema = z.object({ email: z.string().email() });
 
 const changePasswordSchema = z.object({
   currentPassword: z.string().min(1),
@@ -102,6 +106,9 @@ router.post("/login", authLimiter, async (req, res) => {
   if (contractor.status === "SUSPENDED" || contractor.status === "TERMINATED") {
     return res.status(403).json({ error: "This contractor account is no longer active" });
   }
+  if (!contractor.emailVerifiedAt) {
+    return res.status(403).json({ error: "Please verify your email before signing in. Check your inbox for the verification link.", emailUnverified: true });
+  }
 
   await prisma.cyberLoginEvent
     .create({ data: { mineId, contractorId: contractor.id, eventType: "LOGIN_SUCCESS", ipAddress, userAgent } })
@@ -111,6 +118,26 @@ router.post("/login", authLimiter, async (req, res) => {
   const token = signContractorAuthToken(contractor.id);
   const full = await prisma.contractor.findUnique({ where: { id: contractor.id }, select: contractorSelfSelect });
   res.json({ token, contractor: full });
+});
+
+router.post("/verify-email", authLimiter, async (req, res) => {
+  const parsed = verifySchema.safeParse(req.body);
+  if (!parsed.success) return res.status(400).json({ error: parsed.error.flatten() });
+  res.json(await verifyContractorEmailToken(parsed.data.token));
+});
+
+// Lets someone who mistyped their email at registration, or whose verification email
+// never arrived, get a fresh link without needing staff to intervene.
+router.post("/resend-verification", authLimiter, async (req, res) => {
+  const parsed = resendSchema.safeParse(req.body);
+  if (!parsed.success) return res.status(400).json({ error: parsed.error.flatten() });
+  const contractor = await prisma.contractor.findFirst({ where: { contactEmail: parsed.data.email } });
+  // Same response whether or not the email exists — confirming which emails are
+  // registered contractors would itself be a data leak.
+  if (contractor && contractor.contactEmail && !contractor.emailVerifiedAt) {
+    await sendContractorVerificationEmail(contractor.id, contractor.contactEmail, contractor.contactName);
+  }
+  res.json({ message: "If that email is registered and not yet verified, a new verification link has been sent." });
 });
 
 router.get("/me", requireContractorAuth, async (req, res) => {

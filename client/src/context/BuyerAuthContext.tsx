@@ -7,7 +7,7 @@ interface BuyerAuthContextValue {
   token: string | null;
   loading: boolean;
   login: (email: string, password: string) => Promise<void>;
-  registerWithForm: (form: FormData) => Promise<void>;
+  registerWithForm: (form: FormData) => Promise<{ pendingVerification: boolean; email: string }>;
   changePassword: (currentPassword: string, newPassword: string) => Promise<void>;
   refreshBuyer: () => Promise<void>;
   logout: () => void;
@@ -64,9 +64,11 @@ export function BuyerAuthProvider({ children }: { children: ReactNode }) {
     persist(res.data.token, res.data.buyer);
   }
 
+  // No token is returned anymore — the account isn't usable until the emailed
+  // verification link is clicked, so there's nothing to persist here yet.
   async function registerWithForm(form: FormData) {
     const res = await buyerApi.post("/buyers/register", form, { headers: { "Content-Type": "multipart/form-data" } });
-    persist(res.data.token, res.data.buyer);
+    return { pendingVerification: !!res.data.pendingVerification, email: res.data.email as string };
   }
 
   async function changePassword(currentPassword: string, newPassword: string) {

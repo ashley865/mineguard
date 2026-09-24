@@ -1,19 +1,23 @@
 import { FormEvent, useEffect, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { api } from "../api/client";
 import { useContractorAuth } from "../context/ContractorAuthContext";
 import { buttonPrimary, cardClass, inputClass, labelClass } from "../components/ui";
 import DateField from "../components/DateField";
+import Honeypot from "../components/Honeypot";
+import TurnstileWidget from "../components/TurnstileWidget";
 import { LogoMark, Wordmark } from "../components/Logo";
 
 export default function ContractorRegister() {
   const { t } = useTranslation();
   const { siteId } = useParams<{ siteId: string }>();
   const { registerWithForm } = useContractorAuth();
-  const navigate = useNavigate();
   const [site, setSite] = useState<{ id: string; name: string; location: string } | null>(null);
   const [notFound, setNotFound] = useState(false);
+  const [website, setWebsite] = useState("");
+  const [turnstileToken, setTurnstileToken] = useState("");
+  const [submittedEmail, setSubmittedEmail] = useState<string | null>(null);
 
   const [companyName, setCompanyName] = useState("");
   const [registrationNumber, setRegistrationNumber] = useState("");
@@ -65,8 +69,10 @@ export default function ContractorRegister() {
       if (goodStandingExpiry) form.append("goodStandingExpiry", goodStandingExpiry);
       if (insuranceExpiry) form.append("insuranceExpiry", insuranceExpiry);
       form.append("password", password);
-      await registerWithForm(siteId, form);
-      navigate("/contractor-portal");
+      form.append("website", website);
+      if (turnstileToken) form.append("turnstileToken", turnstileToken);
+      const result = await registerWithForm(siteId, form);
+      setSubmittedEmail(result.email);
     } catch (err: any) {
       setError(err.response?.data?.error ?? t("contractorRegister.submitError"));
     } finally {
@@ -78,6 +84,19 @@ export default function ContractorRegister() {
     return (
       <div className="min-h-screen flex items-center justify-center bg-mine-950 p-4">
         <div className={`${cardClass} p-6 max-w-md text-center`}>{t("contractorRegister.siteNotFound")}</div>
+      </div>
+    );
+  }
+
+  if (submittedEmail) {
+    return (
+      <div className="min-h-screen bg-mine-950 flex items-center justify-center p-4">
+        <div className={`${cardClass} p-6 w-full max-w-md space-y-4 text-center`}>
+          <div className="flex justify-center"><LogoMark size={28} /></div>
+          <h1 className="text-base font-semibold">{t("contractorRegister.checkEmailTitle")}</h1>
+          <p className="text-sm text-mine-300">{t("contractorRegister.checkEmailBody", { email: submittedEmail })}</p>
+          <Link to="/contractor-login" className={`${buttonPrimary} w-full block text-center`}>{t("contractorLogin.signIn")}</Link>
+        </div>
       </div>
     );
   }
@@ -94,6 +113,7 @@ export default function ContractorRegister() {
         {error && <div className="text-danger-500 text-sm bg-danger-500/10 border border-danger-500/30 rounded-md px-3 py-2">{error}</div>}
 
         <form onSubmit={handleSubmit} className="space-y-4">
+          <Honeypot value={website} onChange={setWebsite} />
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className={labelClass}>{t("contractors.companyName")}</label>
@@ -158,6 +178,8 @@ export default function ContractorRegister() {
               <input className={inputClass} type="password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} minLength={8} required />
             </div>
           </div>
+
+          <TurnstileWidget onToken={setTurnstileToken} />
 
           <button type="submit" className={`${buttonPrimary} w-full`} disabled={submitting}>
             {submitting ? t("common.saving") : t("contractorRegister.submit")}

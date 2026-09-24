@@ -3,6 +3,10 @@ import { z } from "zod";
 import { prisma } from "../prisma";
 import { requireAuth, requireRole } from "../middleware/auth";
 import { requireMineId } from "../lib/mineScope";
+import { bidLimiter } from "../middleware/rateLimit";
+import { isIpBlocked } from "../lib/ipBlocklist";
+import { isHoneypotFilled, recordPublicSubmission } from "../lib/publicAbuseGuard";
+import { verifyTurnstileToken } from "../lib/turnstile";
 
 const router = Router();
 
@@ -42,6 +46,13 @@ const bidSchema = z.object({
   contactEmail: z.string().email(),
   bidAmount: z.coerce.number().positive(),
   proposalNotes: z.string().optional(),
+  // Honeypot: a hidden field no real bidder ever fills in — see isHoneypotFilled. This
+  // route is the softest in the app (fully anonymous, no login of any kind), so it gets
+  // every layer: rate limit, IP blocklist, honeypot and Turnstile — see the route below.
+  website: z.string().optional(),
+  // Present once Turnstile is configured server-side (see lib/turnstile.ts); ignored
+  // (verification is a no-op) until then.
+  turnstileToken: z.string().optional(),
 });
 
 const bidReviewSchema = z.object({ decision: z.enum(["SHORTLISTED", "AWARDED", "REJECTED"]) });
@@ -132,21 +143,37 @@ router.get("/mine", requireAuth, async (req, res) => {
 
 // Public: any contractor can submit a bid on an open opportunity, no prior registration
 // required — vetting happens if/when the mine decides to award the contract.
-router.post("/:id/bids", async (req, res) => {
+router.post("/:id/bids", bidLimiter, async (req, res) => {
+  const opportunity = await prisma.contractOpportunity.findUnique({
+    where: { id: req.params.id },
+    include: { site: { select: { mineId: true } } },
+  });
+  if (!opportunity) return res.status(404).json({ error: "Opportunity not found" });
+
+  if (await isIpBlocked(opportunity.site.mineId, req.ip)) {
+    return res.status(403).json({ error: "Access blocked from this network" });
+  }
+
   const parsed = bidSchema.safeParse(req.body);
   if (!parsed.success) return res.status(400).json({ error: parsed.error.flatten() });
+  if (isHoneypotFilled(parsed.data.website)) {
+    return res.status(400).json({ error: "Invalid submission" });
+  }
+  if (!(await verifyTurnstileToken(parsed.data.turnstileToken, req.ip))) {
+    return res.status(400).json({ error: "Verification failed. Please try again." });
+  }
 
-  const opportunity = await prisma.contractOpportunity.findUnique({ where: { id: req.params.id } });
-  if (!opportunity) return res.status(404).json({ error: "Opportunity not found" });
   if (opportunity.status !== "OPEN") return res.status(409).json({ error: "This opportunity is no longer open for bids" });
   if (new Date() > opportunity.submissionDeadline) {
     return res.status(409).json({ error: "The submission deadline for this opportunity has passed" });
   }
 
+  const { website: _website, turnstileToken: _turnstileToken, ...bidData } = parsed.data;
   const bid = await prisma.contractBid.create({
-    data: { opportunityId: opportunity.id, ...parsed.data },
+    data: { opportunityId: opportunity.id, ...bidData },
     select: bidSelect,
   });
+  await recordPublicSubmission("CONTRACT_BID", req.ip, opportunity.site.mineId);
   res.status(201).json(bid);
 });
 

@@ -6,6 +6,7 @@ import { api } from "../api/client";
 import { buttonPrimary, cardClass, inputClass, labelClass } from "../components/ui";
 import { isValidIdOrPassport } from "../lib/saId";
 import FileDropzone from "../components/FileDropzone";
+import Honeypot from "../components/Honeypot";
 import { LogoMark, Wordmark } from "../components/Logo";
 
 const MIN_LEAD_MINUTES = 60;
@@ -34,6 +35,7 @@ export default function VisitorCheckIn() {
   const [scheduledFor, setScheduledFor] = useState(defaultScheduledFor());
   const [isEmergency, setIsEmergency] = useState(false);
   const [documents, setDocuments] = useState<FileList | null>(null);
+  const [website, setWebsite] = useState("");
   const [inductionAcknowledged, setInductionAcknowledged] = useState(false);
   const [popiaConsentAccepted, setPopiaConsentAccepted] = useState(false);
   const [indemnityAccepted, setIndemnityAccepted] = useState(false);
@@ -85,6 +87,7 @@ export default function VisitorCheckIn() {
       form.append("inductionAcknowledged", "true");
       form.append("popiaConsentAccepted", "true");
       form.append("indemnityAccepted", "true");
+      form.append("website", website);
       if (documents) {
         Array.from(documents).forEach((file) => form.append("documents", file));
       }
@@ -140,6 +143,7 @@ export default function VisitorCheckIn() {
         {error && <div className="text-danger-500 text-sm bg-danger-500/10 border border-danger-500/30 rounded-md px-3 py-2">{error}</div>}
 
         <form onSubmit={handleSubmit} className="space-y-4">
+          <Honeypot value={website} onChange={setWebsite} />
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className={labelClass}>{t("visitorCheckin.fullName")}</label>

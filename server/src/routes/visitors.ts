@@ -10,6 +10,9 @@ import { isValidIdOrPassport } from "../lib/saId";
 import { documentFileFilter } from "../lib/uploadFilters";
 import { requireMineId } from "../lib/mineScope";
 import { notifyExecutives } from "../lib/notify";
+import { visitorCheckinLimiter } from "../middleware/rateLimit";
+import { isIpBlocked } from "../lib/ipBlocklist";
+import { isHoneypotFilled, recordPublicSubmission } from "../lib/publicAbuseGuard";
 
 const router = Router();
 
@@ -55,6 +58,8 @@ const checkinSchema = z.object({
   inductionAcknowledged: z.coerce.boolean(),
   popiaConsentAccepted: z.coerce.boolean(),
   indemnityAccepted: z.coerce.boolean(),
+  // Honeypot: a hidden field no real visitor ever fills in — see isHoneypotFilled.
+  website: z.string().optional(),
 });
 
 const visitorSelect = {
@@ -108,12 +113,19 @@ router.get("/site/:siteId/info", async (req, res) => {
   res.json(site);
 });
 
-router.post("/checkin/:siteId", upload.array("documents", 5), async (req, res) => {
+router.post("/checkin/:siteId", visitorCheckinLimiter, upload.array("documents", 5), async (req, res) => {
   const site = await prisma.site.findUnique({ where: { id: req.params.siteId } });
   if (!site) return res.status(404).json({ error: "Site not found" });
 
+  if (await isIpBlocked(site.mineId, req.ip)) {
+    return res.status(403).json({ error: "Access blocked from this network" });
+  }
+
   const parsed = checkinSchema.safeParse(req.body);
   if (!parsed.success) return res.status(400).json({ error: parsed.error.flatten() });
+  if (isHoneypotFilled(parsed.data.website)) {
+    return res.status(400).json({ error: "Invalid submission" });
+  }
   const { inductionAcknowledged, popiaConsentAccepted, indemnityAccepted, isEmergency } = parsed.data;
   if (!inductionAcknowledged || !popiaConsentAccepted || !indemnityAccepted) {
     return res.status(400).json({
@@ -171,6 +183,7 @@ router.post("/checkin/:siteId", upload.array("documents", 5), async (req, res) =
     });
   }
 
+  await recordPublicSubmission("VISITOR_CHECKIN", req.ip, site.mineId);
   res.status(201).json(visitor);
 });
 

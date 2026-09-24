@@ -1,5 +1,5 @@
 import { FormEvent, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { BuyerType } from "../api/types";
 import { useBuyerAuth } from "../context/BuyerAuthContext";
@@ -7,6 +7,8 @@ import { buttonPrimary, cardClass, inputClass, labelClass, selectClass } from ".
 import LanguageSwitcher from "../components/LanguageSwitcher";
 import DateField from "../components/DateField";
 import FileDropzone from "../components/FileDropzone";
+import Honeypot from "../components/Honeypot";
+import TurnstileWidget from "../components/TurnstileWidget";
 import { isValidIdOrPassport } from "../lib/saId";
 import { LogoMark, Wordmark } from "../components/Logo";
 
@@ -15,7 +17,9 @@ const buyerTypes: BuyerType[] = ["INDIVIDUAL", "COMPANY", "TRUST", "PARTNERSHIP"
 export default function BuyerRegister() {
   const { t } = useTranslation();
   const { registerWithForm } = useBuyerAuth();
-  const navigate = useNavigate();
+  const [website, setWebsite] = useState("");
+  const [turnstileToken, setTurnstileToken] = useState("");
+  const [submittedEmail, setSubmittedEmail] = useState<string | null>(null);
 
   const [buyerType, setBuyerType] = useState<BuyerType>("COMPANY");
   const [legalName, setLegalName] = useState("");
@@ -109,15 +113,30 @@ export default function BuyerRegister() {
       form.append("ficaDeclarationAccepted", "true");
       form.append("amlDeclarationAccepted", "true");
       form.append("password", password);
+      form.append("website", website);
+      if (turnstileToken) form.append("turnstileToken", turnstileToken);
       Array.from(documents).forEach((file) => form.append("documents", file));
 
-      await registerWithForm(form);
-      navigate("/buyer-portal");
+      const result = await registerWithForm(form);
+      setSubmittedEmail(result.email);
     } catch (err: any) {
       setError(err.response?.data?.error ?? t("buyerRegister.submitError"));
     } finally {
       setSubmitting(false);
     }
+  }
+
+  if (submittedEmail) {
+    return (
+      <div className="min-h-screen bg-mine-950 flex items-center justify-center p-4 py-8">
+        <div className={`${cardClass} p-6 w-full max-w-md space-y-4 text-center`}>
+          <div className="flex justify-center"><LogoMark size={28} /></div>
+          <h1 className="text-base font-semibold">{t("buyerRegister.checkEmailTitle")}</h1>
+          <p className="text-sm text-mine-300">{t("buyerRegister.checkEmailBody", { email: submittedEmail })}</p>
+          <Link to="/buyer-login" className={`${buttonPrimary} w-full block text-center`}>{t("buyerLogin.signIn")}</Link>
+        </div>
+      </div>
+    );
   }
 
   return (
@@ -139,6 +158,7 @@ export default function BuyerRegister() {
         {error && <div className="text-danger-500 text-sm bg-danger-500/10 border border-danger-500/30 rounded-md px-3 py-2">{error}</div>}
 
         <form onSubmit={handleSubmit} className="space-y-4">
+          <Honeypot value={website} onChange={setWebsite} />
           <div className="text-xs font-semibold text-mine-300 uppercase pt-2">{t("buyerRegister.sectionIdentity")}</div>
           <div>
             <label className={labelClass}>{t("buyerRegister.buyerType")}</label>
@@ -301,6 +321,8 @@ export default function BuyerRegister() {
               <span>{t("buyerRegister.amlDeclaration")}</span>
             </label>
           </div>
+
+          <TurnstileWidget onToken={setTurnstileToken} />
 
           <button type="submit" className={`${buttonPrimary} w-full`} disabled={submitting}>
             {submitting ? t("common.saving") : t("buyerRegister.submit")}

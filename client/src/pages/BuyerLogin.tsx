@@ -2,7 +2,8 @@ import { FormEvent, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useBuyerAuth } from "../context/BuyerAuthContext";
-import { buttonPrimary, cardClass, inputClass, labelClass } from "../components/ui";
+import { buyerApi } from "../api/buyerClient";
+import { buttonPrimary, buttonSecondary, cardClass, inputClass, labelClass } from "../components/ui";
 import LanguageSwitcher from "../components/LanguageSwitcher";
 import { LogoMark, Wordmark } from "../components/Logo";
 
@@ -14,16 +15,31 @@ export default function BuyerLogin() {
   const [password, setPassword] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [emailUnverified, setEmailUnverified] = useState(false);
+  const [resent, setResent] = useState(false);
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
     setError(null);
+    setEmailUnverified(false);
+    setResent(false);
     setSubmitting(true);
     try {
       await login(email, password);
       navigate("/buyer-portal");
     } catch (err: any) {
       setError(err.response?.data?.error ?? t("buyerLogin.error"));
+      setEmailUnverified(!!err.response?.data?.emailUnverified);
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
+  async function resendVerification() {
+    setSubmitting(true);
+    try {
+      await buyerApi.post("/buyer-auth/resend-verification", { email });
+      setResent(true);
     } finally {
       setSubmitting(false);
     }
@@ -41,7 +57,17 @@ export default function BuyerLogin() {
           <p className="text-mine-300 text-sm">{t("buyerLogin.subtitle")}</p>
         </div>
 
-        {error && <div className="text-danger-500 text-sm bg-danger-500/10 border border-danger-500/30 rounded-md px-3 py-2">{error}</div>}
+        {error && (
+          <div className="text-danger-500 text-sm bg-danger-500/10 border border-danger-500/30 rounded-md px-3 py-2 space-y-2">
+            <p>{error}</p>
+            {emailUnverified && !resent && (
+              <button type="button" className={`${buttonSecondary} text-xs`} onClick={resendVerification} disabled={submitting}>
+                {t("buyerLogin.resendVerification")}
+              </button>
+            )}
+            {resent && <p className="text-mine-300 text-xs">{t("buyerLogin.verificationResent")}</p>}
+          </div>
+        )}
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>

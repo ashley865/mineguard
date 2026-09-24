@@ -36,3 +36,7 @@ services:
       # coordination needed, so this can be generated the same way as JWT_SECRET.
       - key: SENSOR_SECRET_KEY
         generateValue: true
+      # Optional: Cloudflare Turnstile CAPTCHA on public registration/bid forms stays
+      # dormant until this is set in the Render dashboard — see server/.env.example.
+      - key: TURNSTILE_SECRET_KEY
+        sync: false

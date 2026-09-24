@@ -2,7 +2,8 @@ import { FormEvent, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useContractorAuth } from "../context/ContractorAuthContext";
-import { buttonPrimary, cardClass, inputClass, labelClass } from "../components/ui";
+import { contractorApi } from "../api/contractorClient";
+import { buttonPrimary, buttonSecondary, cardClass, inputClass, labelClass } from "../components/ui";
 import LanguageSwitcher from "../components/LanguageSwitcher";
 import { LogoMark, Wordmark } from "../components/Logo";
 
@@ -14,16 +15,31 @@ export default function ContractorLogin() {
   const [password, setPassword] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [emailUnverified, setEmailUnverified] = useState(false);
+  const [resent, setResent] = useState(false);
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
     setError(null);
+    setEmailUnverified(false);
+    setResent(false);
     setSubmitting(true);
     try {
       await login(email, password);
       navigate("/contractor-portal");
     } catch (err: any) {
       setError(err.response?.data?.error ?? t("contractorLogin.error"));
+      setEmailUnverified(!!err.response?.data?.emailUnverified);
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
+  async function resendVerification() {
+    setSubmitting(true);
+    try {
+      await contractorApi.post("/contractor-auth/resend-verification", { email });
+      setResent(true);
     } finally {
       setSubmitting(false);
     }
@@ -41,7 +57,17 @@ export default function ContractorLogin() {
           <p className="text-mine-300 text-sm">{t("contractorLogin.subtitle")}</p>
         </div>
 
-        {error && <div className="text-danger-500 text-sm bg-danger-500/10 border border-danger-500/30 rounded-md px-3 py-2">{error}</div>}
+        {error && (
+          <div className="text-danger-500 text-sm bg-danger-500/10 border border-danger-500/30 rounded-md px-3 py-2 space-y-2">
+            <p>{error}</p>
+            {emailUnverified && !resent && (
+              <button type="button" className={`${buttonSecondary} text-xs`} onClick={resendVerification} disabled={submitting}>
+                {t("contractorLogin.resendVerification")}
+              </button>
+            )}
+            {resent && <p className="text-mine-300 text-xs">{t("contractorLogin.verificationResent")}</p>}
+          </div>
+        )}
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>

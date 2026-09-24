@@ -2234,7 +2234,9 @@
     "password": "Passwort",
     "confirmPassword": "Passwort bestätigen",
     "passwordTooShort": "Das Passwort muss mindestens 8 Zeichen lang sein.",
-    "passwordMismatch": "Die Passwörter stimmen nicht überein."
+    "passwordMismatch": "Die Passwörter stimmen nicht überein.",
+    "checkEmailTitle": "Überprüfen Sie Ihre E-Mails",
+    "checkEmailBody": "Wir haben einen Bestätigungslink an {{email}} gesendet. Klicken Sie darauf, um Ihr Konto zu aktivieren, und melden Sie sich dann an."
   },
   "visitors": {
     "nav": "Besucherverwaltung",
@@ -2508,7 +2510,9 @@
     "signIn": "Anmelden",
     "signingIn": "Anmeldung läuft…",
     "error": "Anmeldung fehlgeschlagen. Bitte prüfen Sie E-Mail und Passwort.",
-    "noAccountHint": "Noch nicht registriert? Verwenden Sie den Registrierungslink, den der Standort, für den Sie beauftragt wurden, geteilt hat."
+    "noAccountHint": "Noch nicht registriert? Verwenden Sie den Registrierungslink, den der Standort, für den Sie beauftragt wurden, geteilt hat.",
+    "resendVerification": "Bestätigungs-E-Mail erneut senden",
+    "verificationResent": "Falls diese E-Mail registriert und noch nicht bestätigt ist, wurde ein neuer Link gesendet."
   },
   "contractorPortal": {
     "title": "Auftragnehmerportal",
@@ -2534,7 +2538,9 @@
     "error": "Anmeldung fehlgeschlagen. Bitte prüfen Sie E-Mail und Passwort.",
     "noAccount": "Noch nicht registriert?",
     "registerLink": "Als Käufer registrieren",
-    "backToMarketplace": "Zurück zum Marktplatz"
+    "backToMarketplace": "Zurück zum Marktplatz",
+    "resendVerification": "Bestätigungs-E-Mail erneut senden",
+    "verificationResent": "Falls diese E-Mail registriert und noch nicht bestätigt ist, wurde ein neuer Link gesendet."
   },
   "buyerPortal": {
     "title": "Käuferportal",
@@ -2613,7 +2619,9 @@
     "password": "Passwort",
     "confirmPassword": "Passwort bestätigen",
     "passwordTooShort": "Das Passwort muss mindestens 8 Zeichen lang sein.",
-    "passwordMismatch": "Die Passwörter stimmen nicht überein."
+    "passwordMismatch": "Die Passwörter stimmen nicht überein.",
+    "checkEmailTitle": "Überprüfen Sie Ihre E-Mails",
+    "checkEmailBody": "Wir haben einen Bestätigungslink an {{email}} gesendet. Klicken Sie darauf, um Ihr Konto zu aktivieren, und melden Sie sich dann an."
   },
   "marketplace": {
     "nav": "Marktplatz",
@@ -6968,5 +6976,13 @@
     "selectMine": "Mine auswählen…",
     "selectSite": "Standort auswählen…",
     "staffLogin": "MineGuard-Mitarbeiter? Hier anmelden"
+  },
+  "verifyEmail": {
+    "verifying": "Ihre E-Mail wird bestätigt…",
+    "successTitle": "E-Mail bestätigt",
+    "errorTitle": "Bestätigung fehlgeschlagen",
+    "goToLogin": "Weiter zur Anmeldung",
+    "invalidLink": "Dieser Bestätigungslink fehlt oder ist fehlerhaft.",
+    "genericError": "Etwas ist schiefgelaufen. Bitte versuchen Sie es erneut oder fordern Sie einen neuen Link an."
   }
 }

@@ -8,6 +8,7 @@ import { authLimiter, passwordChangeLimiter } from "../middleware/rateLimit";
 import { isGlobalIpBlocked } from "../lib/ipBlocklist";
 import { autoBlockGlobalIpIfBruteForced } from "../lib/autoBlock";
 import { resolveBooleanSetting } from "../lib/systemSettings";
+import { sendBuyerVerificationEmail, verifyBuyerEmailToken } from "../lib/emailVerification";
 
 const router = Router();
 
@@ -15,6 +16,9 @@ const loginSchema = z.object({
   email: z.string().email(),
   password: z.string().min(1),
 });
+
+const verifySchema = z.object({ token: z.string().min(1) });
+const resendSchema = z.object({ email: z.string().email() });
 
 const changePasswordSchema = z.object({
   currentPassword: z.string().min(1),
@@ -111,6 +115,9 @@ router.post("/login", authLimiter, async (req, res) => {
   if (buyer.status === "SUSPENDED") {
     return res.status(403).json({ error: "This buyer account has been suspended" });
   }
+  if (!buyer.emailVerifiedAt) {
+    return res.status(403).json({ error: "Please verify your email before signing in. Check your inbox for the verification link.", emailUnverified: true });
+  }
 
   await prisma.buyerLoginEvent
     .create({ data: { buyerId: buyer.id, eventType: "LOGIN_SUCCESS", ipAddress, userAgent } })
@@ -122,6 +129,26 @@ router.post("/login", authLimiter, async (req, res) => {
   const token = signBuyerAuthToken(buyer.id);
   const full = await prisma.buyer.findUnique({ where: { id: buyer.id }, select: buyerSelfSelect });
   res.json({ token, buyer: full });
+});
+
+router.post("/verify-email", authLimiter, async (req, res) => {
+  const parsed = verifySchema.safeParse(req.body);
+  if (!parsed.success) return res.status(400).json({ error: parsed.error.flatten() });
+  res.json(await verifyBuyerEmailToken(parsed.data.token));
+});
+
+// Lets someone who mistyped their email at registration, or whose verification email
+// never arrived, get a fresh link without needing staff to intervene.
+router.post("/resend-verification", authLimiter, async (req, res) => {
+  const parsed = resendSchema.safeParse(req.body);
+  if (!parsed.success) return res.status(400).json({ error: parsed.error.flatten() });
+  const buyer = await prisma.buyer.findUnique({ where: { contactEmail: parsed.data.email } });
+  // Same response whether or not the email exists — confirming which emails are
+  // registered buyers would itself be a data leak.
+  if (buyer && !buyer.emailVerifiedAt) {
+    await sendBuyerVerificationEmail(buyer.id, buyer.contactEmail, buyer.contactName);
+  }
+  res.json({ message: "If that email is registered and not yet verified, a new verification link has been sent." });
 });
 
 router.get("/me", requireBuyerAuth, async (req, res) => {

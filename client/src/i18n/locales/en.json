@@ -2252,7 +2252,9 @@
     "password": "Password",
     "confirmPassword": "Confirm password",
     "passwordTooShort": "Password must be at least 8 characters.",
-    "passwordMismatch": "Passwords do not match."
+    "passwordMismatch": "Passwords do not match.",
+    "checkEmailTitle": "Check your email",
+    "checkEmailBody": "We've sent a verification link to {{email}}. Click it to activate your account, then sign in."
   },
   "visitors": {
     "nav": "Visitor Management",
@@ -2802,7 +2804,9 @@
     "signIn": "Sign in",
     "signingIn": "Signing in…",
     "error": "Login failed. Please check your email and password.",
-    "noAccountHint": "Not registered yet? Use the registration link shared by the site you're contracted to."
+    "noAccountHint": "Not registered yet? Use the registration link shared by the site you're contracted to.",
+    "resendVerification": "Resend verification email",
+    "verificationResent": "If that email is registered and not yet verified, a new link has been sent."
   },
   "contractorPortal": {
     "title": "Contractor Portal",
@@ -2828,7 +2832,9 @@
     "error": "Login failed. Please check your email and password.",
     "noAccount": "Not registered yet?",
     "registerLink": "Register as a buyer",
-    "backToMarketplace": "Back to marketplace"
+    "backToMarketplace": "Back to marketplace",
+    "resendVerification": "Resend verification email",
+    "verificationResent": "If that email is registered and not yet verified, a new link has been sent."
   },
   "buyerPortal": {
     "title": "Buyer Portal",
@@ -2907,7 +2913,9 @@
     "password": "Password",
     "confirmPassword": "Confirm password",
     "passwordTooShort": "Password must be at least 8 characters.",
-    "passwordMismatch": "Passwords do not match."
+    "passwordMismatch": "Passwords do not match.",
+    "checkEmailTitle": "Check your email",
+    "checkEmailBody": "We've sent a verification link to {{email}}. Click it to activate your account, then sign in."
   },
   "marketplace": {
     "nav": "Marketplace",
@@ -6968,5 +6976,13 @@
     "selectMine": "Select a mine…",
     "selectSite": "Select a site…",
     "staffLogin": "MineGuard staff? Sign in here"
+  },
+  "verifyEmail": {
+    "verifying": "Verifying your email…",
+    "successTitle": "Email verified",
+    "errorTitle": "Verification failed",
+    "goToLogin": "Continue to sign in",
+    "invalidLink": "This verification link is missing or malformed.",
+    "genericError": "Something went wrong. Please try again or request a new link."
   }
 }

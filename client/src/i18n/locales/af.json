@@ -2234,7 +2234,9 @@
     "password": "Wagwoord",
     "confirmPassword": "Bevestig wagwoord",
     "passwordTooShort": "Wagwoord moet ten minste 8 karakters wees.",
-    "passwordMismatch": "Wagwoorde stem nie ooreen nie."
+    "passwordMismatch": "Wagwoorde stem nie ooreen nie.",
+    "checkEmailTitle": "Gaan jou e-pos na",
+    "checkEmailBody": "Ons het 'n bevestigingskakel na {{email}} gestuur. Klik daarop om jou rekening te aktiveer, teken dan aan."
   },
   "visitors": {
     "nav": "Besoekersbestuur",
@@ -2508,7 +2510,9 @@
     "signIn": "Meld aan",
     "signingIn": "Meld tans aan…",
     "error": "Aanmelding het misluk. Kontroleer jou e-pos en wagwoord.",
-    "noAccountHint": "Nog nie geregistreer nie? Gebruik die registrasieskakel wat deur die terrein waarvoor jy gekontrakteer is, gedeel is."
+    "noAccountHint": "Nog nie geregistreer nie? Gebruik die registrasieskakel wat deur die terrein waarvoor jy gekontrakteer is, gedeel is.",
+    "resendVerification": "Stuur bevestigings-e-pos weer",
+    "verificationResent": "As daardie e-pos geregistreer is en nog nie bevestig is nie, is 'n nuwe skakel gestuur."
   },
   "contractorPortal": {
     "title": "Kontrakteurportaal",
@@ -2534,7 +2538,9 @@
     "error": "Aanmelding het misluk. Kontroleer jou e-pos en wagwoord.",
     "noAccount": "Nog nie geregistreer nie?",
     "registerLink": "Registreer as 'n koper",
-    "backToMarketplace": "Terug na mark"
+    "backToMarketplace": "Terug na mark",
+    "resendVerification": "Stuur bevestigings-e-pos weer",
+    "verificationResent": "As daardie e-pos geregistreer is en nog nie bevestig is nie, is 'n nuwe skakel gestuur."
   },
   "buyerPortal": {
     "title": "Koperportaal",
@@ -2613,7 +2619,9 @@
     "password": "Wagwoord",
     "confirmPassword": "Bevestig wagwoord",
     "passwordTooShort": "Wagwoord moet ten minste 8 karakters wees.",
-    "passwordMismatch": "Wagwoorde stem nie ooreen nie."
+    "passwordMismatch": "Wagwoorde stem nie ooreen nie.",
+    "checkEmailTitle": "Gaan jou e-pos na",
+    "checkEmailBody": "Ons het 'n bevestigingskakel na {{email}} gestuur. Klik daarop om jou rekening te aktiveer, teken dan aan."
   },
   "marketplace": {
     "nav": "Mark",
@@ -6968,5 +6976,13 @@
     "selectMine": "Kies 'n myn…",
     "selectSite": "Kies 'n terrein…",
     "staffLogin": "MineGuard-personeel? Teken hier in"
+  },
+  "verifyEmail": {
+    "verifying": "Besig om jou e-pos te bevestig…",
+    "successTitle": "E-pos bevestig",
+    "errorTitle": "Bevestiging het misluk",
+    "goToLogin": "Gaan voort om aan te teken",
+    "invalidLink": "Hierdie bevestigingskakel ontbreek of is ongeldig.",
+    "genericError": "Iets het verkeerd geloop. Probeer weer of versoek 'n nuwe skakel."
   }
 }

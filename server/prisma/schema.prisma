@@ -1933,6 +1933,13 @@ model Contractor {
   // POST /contractors/register/:siteId) do — staff can set/reset it afterward.
   passwordHash        String?
   lastLoginAt         DateTime?
+  // Set immediately for a staff-onboarded contractor (staff already vetted them) but left
+  // null for a public self-registration until they click the link sent to contactEmail —
+  // see lib/emailVerification.ts. Login is refused until this is set, the same way a
+  // deactivated account is refused, so a typo'd or unowned email can never reach the portal.
+  emailVerifiedAt              DateTime?
+  emailVerificationTokenHash   String?
+  emailVerificationSentAt      DateTime?
 
   permitsToWork    PermitToWork[]
   documents        ContractorDocument[]
@@ -2211,6 +2218,13 @@ model Buyer {
   reviewedAt              DateTime?
   reviewedById            String?
   reviewedBy              User?       @relation(fields: [reviewedById], references: [id], onDelete: SetNull)
+  // Same reasoning as Contractor.emailVerifiedAt: set immediately for a staff-onboarded
+  // buyer, left null for public self-registration until the link sent to contactEmail is
+  // clicked. Login is refused until then, independent of and prior to the staff
+  // FICA-style APPROVED review above — a buyer needs both to actually trade.
+  emailVerifiedAt              DateTime?
+  emailVerificationTokenHash   String?
+  emailVerificationSentAt      DateTime?
 
   documents        BuyerDocument[]
   bids             MineralBid[]
@@ -2248,6 +2262,22 @@ model GlobalBlockedIp {
   reason      String?
   autoBlocked Boolean  @default(false)
   createdAt   DateTime @default(now())
+}
+
+// Every attempt on a public, unauthenticated form (visitor check-in, contractor/buyer
+// self-registration, a marketplace or tender bid) — not who they were, just that one
+// happened, from where. Purely an abuse-detection log: lib/publicAbuseGuard.ts counts
+// recent rows per IP+formType to auto-block a burst the same way autoBlock.ts already
+// does for repeated login failures, which have their own event table (CyberLoginEvent/
+// BuyerLoginEvent) that these forms have no equivalent of.
+model PublicSubmissionEvent {
+  id        String   @id @default(cuid())
+  formType  String
+  ip        String
+  mineId    String?
+  createdAt DateTime @default(now())
+
+  @@index([formType, ip, createdAt])
 }
 
 enum BuyerDocumentType {

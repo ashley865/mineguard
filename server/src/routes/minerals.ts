@@ -9,6 +9,8 @@ import { imageFileFilter } from "../lib/uploadFilters";
 import { requireMineId } from "../lib/mineScope";
 import { mineralTypeEnum } from "../lib/minerals";
 import { isIpBlocked } from "../lib/ipBlocklist";
+import { bidLimiter } from "../middleware/rateLimit";
+import { isHoneypotFilled, recordPublicSubmission } from "../lib/publicAbuseGuard";
 
 const router = Router();
 
@@ -68,6 +70,8 @@ const bidSchema = z.object({
   quantity: z.coerce.number().positive(),
   offerPrice: z.coerce.number().positive(),
   notes: z.string().optional(),
+  // Honeypot: a hidden field no real bidder ever fills in — see isHoneypotFilled.
+  website: z.string().optional(),
 });
 
 const bidReviewSchema = z.object({ decision: z.enum(["ACCEPTED", "REJECTED"]) });
@@ -209,9 +213,12 @@ router.get("/:id/images/:imageId", async (req, res) => {
 // Requires a logged-in, APPROVED buyer — the buyer's identity comes from their auth
 // token (requireBuyerAuth), never from a client-supplied email, so one buyer can no
 // longer submit a bid "as" another registered buyer just by typing their address.
-router.post("/:id/bids", requireBuyerAuth, async (req, res) => {
+router.post("/:id/bids", bidLimiter, requireBuyerAuth, async (req, res) => {
   const parsed = bidSchema.safeParse(req.body);
   if (!parsed.success) return res.status(400).json({ error: parsed.error.flatten() });
+  if (isHoneypotFilled(parsed.data.website)) {
+    return res.status(400).json({ error: "Invalid submission" });
+  }
 
   const listing = await prisma.mineralListing.findUnique({
     where: { id: req.params.id },
@@ -241,6 +248,7 @@ router.post("/:id/bids", requireBuyerAuth, async (req, res) => {
     },
     select: bidSelect,
   });
+  await recordPublicSubmission("MINERAL_BID", req.ip, listing.site.mineId);
   res.status(201).json(bid);
 });
 

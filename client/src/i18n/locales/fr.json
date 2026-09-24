@@ -2234,7 +2234,9 @@
     "password": "Mot de passe",
     "confirmPassword": "Confirmer le mot de passe",
     "passwordTooShort": "Le mot de passe doit contenir au moins 8 caractères.",
-    "passwordMismatch": "Les mots de passe ne correspondent pas."
+    "passwordMismatch": "Les mots de passe ne correspondent pas.",
+    "checkEmailTitle": "Vérifiez votre e-mail",
+    "checkEmailBody": "Nous avons envoyé un lien de vérification à {{email}}. Cliquez dessus pour activer votre compte, puis connectez-vous."
   },
   "visitors": {
     "nav": "Gestion des Visiteurs",
@@ -2508,7 +2510,9 @@
     "signIn": "Se connecter",
     "signingIn": "Connexion…",
     "error": "Échec de la connexion. Vérifiez votre e-mail et votre mot de passe.",
-    "noAccountHint": "Pas encore inscrit ? Utilisez le lien d'inscription partagé par le site pour lequel vous êtes contracté."
+    "noAccountHint": "Pas encore inscrit ? Utilisez le lien d'inscription partagé par le site pour lequel vous êtes contracté.",
+    "resendVerification": "Renvoyer l'e-mail de vérification",
+    "verificationResent": "Si cet e-mail est enregistré et pas encore vérifié, un nouveau lien a été envoyé."
   },
   "contractorPortal": {
     "title": "Portail Sous-traitant",
@@ -2534,7 +2538,9 @@
     "error": "Échec de la connexion. Vérifiez votre e-mail et votre mot de passe.",
     "noAccount": "Pas encore inscrit ?",
     "registerLink": "S'inscrire comme acheteur",
-    "backToMarketplace": "Retour au marché"
+    "backToMarketplace": "Retour au marché",
+    "resendVerification": "Renvoyer l'e-mail de vérification",
+    "verificationResent": "Si cet e-mail est enregistré et pas encore vérifié, un nouveau lien a été envoyé."
   },
   "buyerPortal": {
     "title": "Portail Acheteur",
@@ -2613,7 +2619,9 @@
     "password": "Mot de passe",
     "confirmPassword": "Confirmer le mot de passe",
     "passwordTooShort": "Le mot de passe doit contenir au moins 8 caractères.",
-    "passwordMismatch": "Les mots de passe ne correspondent pas."
+    "passwordMismatch": "Les mots de passe ne correspondent pas.",
+    "checkEmailTitle": "Vérifiez votre e-mail",
+    "checkEmailBody": "Nous avons envoyé un lien de vérification à {{email}}. Cliquez dessus pour activer votre compte, puis connectez-vous."
   },
   "marketplace": {
     "nav": "Marché",
@@ -6968,5 +6976,13 @@
     "selectMine": "Sélectionnez une mine…",
     "selectSite": "Sélectionnez un site…",
     "staffLogin": "Personnel MineGuard ? Connectez-vous ici"
+  },
+  "verifyEmail": {
+    "verifying": "Vérification de votre e-mail…",
+    "successTitle": "E-mail vérifié",
+    "errorTitle": "Échec de la vérification",
+    "goToLogin": "Continuer vers la connexion",
+    "invalidLink": "Ce lien de vérification est manquant ou invalide.",
+    "genericError": "Une erreur s'est produite. Réessayez ou demandez un nouveau lien."
   }
 }

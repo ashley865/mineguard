@@ -104,6 +104,7 @@ import Geology from "./pages/Geology";
 import WinderShaft from "./pages/WinderShaft";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 import PublicPortal from "./pages/PublicPortal";
+import VerifyEmail from "./pages/VerifyEmail";
 
 function HomeRoute() {
   const { user } = useAuth();
@@ -148,6 +149,7 @@ export default function App() {
       <Route path="/safety-report/:siteId" element={<SafetyObservationReport />} />
       <Route path="/privacy-policy" element={<PrivacyPolicy />} />
       <Route path="/portal" element={<PublicPortal />} />
+      <Route path="/verify-email" element={<VerifyEmail />} />
       <Route path="/platform-admin/login" element={<PlatformAdminLogin />} />
       <Route element={<PlatformAdminProtectedRoute />}>
         <Route element={<PlatformAdminLayout />}>
