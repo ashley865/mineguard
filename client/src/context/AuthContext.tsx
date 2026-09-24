@@ -8,6 +8,7 @@ export interface RegisterMinePayload {
   registrationNumber?: string;
   miningRightNumber?: string;
   description?: string;
+  licenseKey?: string;
   adminName: string;
   adminEmail: string;
   adminPassword: string;

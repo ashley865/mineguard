@@ -39,6 +39,12 @@ const registerMineSchema = z.object({
   adminName: z.string().min(1),
   adminEmail: z.string().email(),
   adminPassword: z.string().min(8),
+  // Optional: links this new mine to the Customer/LicenseKey a platform admin already
+  // issued (see routes/platformAdminCustomers.ts), instead of leaving the platform team to
+  // find and link it by hand afterward. Left blank, the mine registers exactly as before —
+  // unrestricted/grandfathered until someone links a customer to it later (see
+  // lib/licensing.ts) — this is additive, not a new requirement.
+  licenseKey: z.string().trim().optional(),
 });
 
 router.get("/search", async (req, res) => {
@@ -164,12 +170,23 @@ router.get("/:id", async (req, res) => {
 router.post("/register", authLimiter, async (req, res) => {
   const parsed = registerMineSchema.safeParse(req.body);
   if (!parsed.success) return res.status(400).json({ error: parsed.error.flatten() });
-  const { mineName, location, registrationNumber, miningRightNumber, description, adminName, adminEmail, adminPassword } =
+  const { mineName, location, registrationNumber, miningRightNumber, description, adminName, adminEmail, adminPassword, licenseKey } =
     parsed.data;
 
   const existingUser = await prisma.user.findUnique({ where: { email: adminEmail } });
   if (existingUser) {
     return res.status(409).json({ error: "Email already registered" });
+  }
+
+  // Validated before creating anything, so a bad key fails the whole registration up
+  // front rather than leaving a half-linked mine behind to clean up.
+  let customer: { id: string; status: "LEAD" | "ACTIVE" | "INACTIVE" } | null = null;
+  if (licenseKey) {
+    const license = await prisma.licenseKey.findUnique({ where: { key: licenseKey }, include: { customer: true } });
+    if (!license) return res.status(400).json({ error: "Invalid license key" });
+    if (license.status === "REVOKED") return res.status(400).json({ error: "This license key has been revoked" });
+    if (license.customer.mineId) return res.status(409).json({ error: "This license key is already linked to a mine" });
+    customer = license.customer;
   }
 
   const passkey = crypto.randomBytes(20).toString("hex");
@@ -186,6 +203,15 @@ router.post("/register", authLimiter, async (req, res) => {
       passkeyHash,
     },
   });
+
+  if (customer) {
+    // Same rule as the platform admin's own link-mine action: a lead becomes active the
+    // moment a real mine is behind it, but a deliberately inactive customer stays that way.
+    await prisma.customer.update({
+      where: { id: customer.id },
+      data: { mineId: mine.id, status: customer.status === "LEAD" ? "ACTIVE" : customer.status },
+    });
+  }
 
   const user = await prisma.user.create({
     data: {

@@ -17,6 +17,7 @@ export default function RegisterMine() {
   const [registrationNumber, setRegistrationNumber] = useState("");
   const [miningRightNumber, setMiningRightNumber] = useState("");
   const [description, setDescription] = useState("");
+  const [licenseKey, setLicenseKey] = useState("");
   const [adminName, setAdminName] = useState("");
   const [adminEmail, setAdminEmail] = useState("");
   const [adminPassword, setAdminPassword] = useState("");
@@ -38,6 +39,7 @@ export default function RegisterMine() {
         registrationNumber: registrationNumber || undefined,
         miningRightNumber: miningRightNumber || undefined,
         description: description || undefined,
+        licenseKey: licenseKey.trim() || undefined,
         adminName,
         adminEmail,
         adminPassword,
@@ -157,6 +159,20 @@ export default function RegisterMine() {
           <div>
             <label className={labelClass}>{t("common.description")}</label>
             <textarea className={inputClass} value={description} onChange={(e) => setDescription(e.target.value)} rows={2} />
+          </div>
+
+          <div className="text-xs font-semibold text-mine-300 uppercase pt-2 border-t border-mine-800">
+            {t("registerMine.licenseSection")}
+          </div>
+          <div>
+            <label className={labelClass}>{t("registerMine.licenseKeyLabel")}</label>
+            <input
+              className={`${inputClass} font-mono`}
+              value={licenseKey}
+              onChange={(e) => setLicenseKey(e.target.value)}
+              placeholder="MG-XXXX-XXXX-XXXX-XXXX"
+            />
+            <div className="text-xs text-mine-400 mt-1">{t("registerMine.licenseKeyHint")}</div>
           </div>
 
           <div className="text-xs font-semibold text-mine-300 uppercase pt-2 border-t border-mine-800">
