@@ -3014,7 +3014,19 @@
     "setPrimary": "Set as cover",
     "myMineTab": "My mine",
     "allMinesTab": "All mines",
-    "buyersSharedHint": "A single shared pool across every mine on this platform — approving a buyer here grants them marketplace access to all mines at once, not just yours."
+    "buyersSharedHint": "A single shared pool across every mine on this platform — approving a buyer here grants them marketplace access to all mines at once, not just yours.",
+    "bidSectionCompany": "Company",
+    "taxNumber": "Tax number",
+    "bbbeeLevel": "B-BBEE level",
+    "yearsInBusiness": "Years in business",
+    "bidSectionProposal": "Proposal",
+    "proposedStartDate": "Proposed start date",
+    "proposedCompletionDate": "Proposed completion date",
+    "references": "References",
+    "referencesPlaceholder": "Previous clients or projects you can point to, with contact details",
+    "bidSectionDocuments": "Supporting documents",
+    "supportingDocuments": "Documents",
+    "supportingDocumentsHint": "Company profile, tax clearance, B-BBEE certificate, insurance, reference letters (optional)"
   },
   "tenders": {
     "nav": "Tenders & Contracts",

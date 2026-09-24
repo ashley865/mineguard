@@ -1,4 +1,5 @@
 import { Router } from "express";
+import multer from "multer";
 import { z } from "zod";
 import { prisma } from "../prisma";
 import { requireAuth, requireRole } from "../middleware/auth";
@@ -7,8 +8,15 @@ import { bidLimiter } from "../middleware/rateLimit";
 import { isIpBlocked } from "../lib/ipBlocklist";
 import { isHoneypotFilled, recordPublicSubmission } from "../lib/publicAbuseGuard";
 import { verifyTurnstileToken } from "../lib/turnstile";
+import { documentFileFilter } from "../lib/uploadFilters";
 
 const router = Router();
+
+const upload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 10 * 1024 * 1024 },
+  fileFilter: documentFileFilter,
+});
 
 const contractCategoryEnum = z.enum([
   "TRUCKING_HAULAGE",
@@ -46,6 +54,16 @@ const bidSchema = z.object({
   contactEmail: z.string().email(),
   bidAmount: z.coerce.number().positive(),
   proposalNotes: z.string().optional(),
+  // Credentials a real tender evaluates a bidder on — all optional, since a bid predates
+  // any vetting relationship (unlike the marketplace's Buyer, who registers and is
+  // approved before ever bidding).
+  registrationNumber: z.string().optional(),
+  taxNumber: z.string().optional(),
+  bbbeeLevel: z.string().optional(),
+  yearsInBusiness: z.coerce.number().int().nonnegative().optional(),
+  proposedStartDate: z.coerce.date().optional(),
+  proposedCompletionDate: z.coerce.date().optional(),
+  references: z.string().optional(),
   // Honeypot: a hidden field no real bidder ever fills in — see isHoneypotFilled. This
   // route is the softest in the app (fully anonymous, no login of any kind), so it gets
   // every layer: rate limit, IP blocklist, honeypot and Turnstile — see the route below.
@@ -105,7 +123,17 @@ const bidSelect = {
   contactEmail: true,
   bidAmount: true,
   proposalNotes: true,
+  registrationNumber: true,
+  taxNumber: true,
+  bbbeeLevel: true,
+  yearsInBusiness: true,
+  proposedStartDate: true,
+  proposedCompletionDate: true,
+  references: true,
   status: true,
+  documents: {
+    select: { id: true, docType: true, fileName: true, fileMimeType: true, fileSize: true, createdAt: true },
+  },
   createdAt: true,
 } as const;
 
@@ -143,7 +171,7 @@ router.get("/mine", requireAuth, async (req, res) => {
 
 // Public: any contractor can submit a bid on an open opportunity, no prior registration
 // required — vetting happens if/when the mine decides to award the contract.
-router.post("/:id/bids", bidLimiter, async (req, res) => {
+router.post("/:id/bids", bidLimiter, upload.array("documents", 6), async (req, res) => {
   const opportunity = await prisma.contractOpportunity.findUnique({
     where: { id: req.params.id },
     include: { site: { select: { mineId: true } } },
@@ -169,8 +197,21 @@ router.post("/:id/bids", bidLimiter, async (req, res) => {
   }
 
   const { website: _website, turnstileToken: _turnstileToken, ...bidData } = parsed.data;
+  const files = (req.files as Express.Multer.File[] | undefined) ?? [];
   const bid = await prisma.contractBid.create({
-    data: { opportunityId: opportunity.id, ...bidData },
+    data: {
+      opportunityId: opportunity.id,
+      ...bidData,
+      documents: {
+        create: files.map((f) => ({
+          docType: "OTHER" as const,
+          fileName: f.originalname,
+          fileMimeType: f.mimetype,
+          fileSize: f.size,
+          fileData: Uint8Array.from(f.buffer),
+        })),
+      },
+    },
     select: bidSelect,
   });
   await recordPublicSubmission("CONTRACT_BID", req.ip, opportunity.site.mineId);
@@ -223,6 +264,18 @@ router.get("/bids/list", requireRole("ADMIN", "SUPERVISOR", "EXECUTIVE"), async 
     orderBy: { bidAmount: "asc" },
   });
   res.json(bids);
+});
+
+router.get("/bids/:bidId/documents/:docId/download", requireRole("ADMIN", "SUPERVISOR", "EXECUTIVE"), async (req, res) => {
+  const mineId = requireMineId(req, res);
+  if (!mineId) return;
+  const doc = await prisma.contractBidDocument.findFirst({
+    where: { id: req.params.docId, bidId: req.params.bidId, bid: { opportunity: { site: { mineId } } } },
+  });
+  if (!doc) return res.status(404).json({ error: "Document not found" });
+  res.setHeader("Content-Type", doc.fileMimeType);
+  res.setHeader("Content-Disposition", `attachment; filename="${encodeURIComponent(doc.fileName)}"`);
+  res.send(Buffer.from(doc.fileData));
 });
 
 router.post("/bids/:id/review", requireRole("ADMIN", "SUPERVISOR", "EXECUTIVE"), async (req, res) => {

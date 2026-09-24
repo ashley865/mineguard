@@ -2720,7 +2720,19 @@
     "setPrimary": "Stel as voorblad",
     "myMineTab": "My myn",
     "allMinesTab": "Alle myne",
-    "buyersSharedHint": "'n Enkele gedeelde poel oor elke myn op hierdie platform — om 'n koper hier goed te keur, gee hulle mark toegang tot alle myne gelyktydig, nie net joune nie."
+    "buyersSharedHint": "'n Enkele gedeelde poel oor elke myn op hierdie platform — om 'n koper hier goed te keur, gee hulle mark toegang tot alle myne gelyktydig, nie net joune nie.",
+    "bidSectionCompany": "Maatskappy",
+    "taxNumber": "Belastingnommer",
+    "bbbeeLevel": "SEBS-vlak",
+    "yearsInBusiness": "Jare in besigheid",
+    "bidSectionProposal": "Voorstel",
+    "proposedStartDate": "Voorgestelde aanvangsdatum",
+    "proposedCompletionDate": "Voorgestelde voltooiingsdatum",
+    "references": "Verwysings",
+    "referencesPlaceholder": "Vorige kliënte of projekte waarna jy kan verwys, met kontakbesonderhede",
+    "bidSectionDocuments": "Stawende dokumente",
+    "supportingDocuments": "Dokumente",
+    "supportingDocumentsHint": "Maatskappyprofiel, belastingklaringsertifikaat, SEBS-sertifikaat, versekering, verwysingsbriewe (opsioneel)"
   },
   "tenders": {
     "nav": "Tenders & Kontrakte",

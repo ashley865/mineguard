@@ -2104,6 +2104,17 @@ export interface ContractOpportunity {
 
 export type ContractBidStatus = "SUBMITTED" | "SHORTLISTED" | "AWARDED" | "REJECTED" | "WITHDRAWN";
 
+export type ContractBidDocumentType = "COMPANY_PROFILE" | "TAX_CLEARANCE" | "BBBEE_CERTIFICATE" | "INSURANCE" | "REFERENCE_LETTER" | "OTHER";
+
+export interface ContractBidDocument {
+  id: string;
+  docType: ContractBidDocumentType;
+  fileName: string;
+  fileMimeType: string;
+  fileSize: number;
+  createdAt: string;
+}
+
 export interface ContractBid {
   id: string;
   opportunityId: string;
@@ -2114,7 +2125,15 @@ export interface ContractBid {
   contactEmail: string;
   bidAmount: number;
   proposalNotes?: string | null;
+  registrationNumber?: string | null;
+  taxNumber?: string | null;
+  bbbeeLevel?: string | null;
+  yearsInBusiness?: number | null;
+  proposedStartDate?: string | null;
+  proposedCompletionDate?: string | null;
+  references?: string | null;
   status: ContractBidStatus;
+  documents: ContractBidDocument[];
   createdAt: string;
 }
 

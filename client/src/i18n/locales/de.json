@@ -2720,7 +2720,19 @@
     "setPrimary": "Als Titelbild festlegen",
     "myMineTab": "Meine Mine",
     "allMinesTab": "Alle Minen",
-    "buyersSharedHint": "Ein gemeinsamer Pool für alle Minen auf dieser Plattform — die Genehmigung eines Käufers hier gewährt ihm sofort Marktzugang zu allen Minen, nicht nur zu Ihrer."
+    "buyersSharedHint": "Ein gemeinsamer Pool für alle Minen auf dieser Plattform — die Genehmigung eines Käufers hier gewährt ihm sofort Marktzugang zu allen Minen, nicht nur zu Ihrer.",
+    "bidSectionCompany": "Unternehmen",
+    "taxNumber": "Steuernummer",
+    "bbbeeLevel": "B-BBEE-Stufe",
+    "yearsInBusiness": "Jahre im Geschäft",
+    "bidSectionProposal": "Angebot",
+    "proposedStartDate": "Vorgeschlagenes Startdatum",
+    "proposedCompletionDate": "Vorgeschlagenes Fertigstellungsdatum",
+    "references": "Referenzen",
+    "referencesPlaceholder": "Frühere Kunden oder Projekte, auf die Sie verweisen können, mit Kontaktdaten",
+    "bidSectionDocuments": "Begleitdokumente",
+    "supportingDocuments": "Dokumente",
+    "supportingDocumentsHint": "Unternehmensprofil, Steuerunbedenklichkeitsbescheinigung, B-BBEE-Zertifikat, Versicherung, Referenzschreiben (optional)"
   },
   "tenders": {
     "nav": "Ausschreibungen & Verträge",

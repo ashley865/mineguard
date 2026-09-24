@@ -9,6 +9,8 @@ import { buttonPrimary, buttonSecondary, cardClass, inputClass, labelClass, sele
 import { LogoMark, Wordmark } from "../components/Logo";
 import Honeypot from "../components/Honeypot";
 import TurnstileWidget from "../components/TurnstileWidget";
+import DateField from "../components/DateField";
+import FileDropzone from "../components/FileDropzone";
 
 function ContractBidForm({ opportunity, onDone }: { opportunity: ContractOpportunity; onDone: () => void }) {
   const { t } = useTranslation();
@@ -18,6 +20,14 @@ function ContractBidForm({ opportunity, onDone }: { opportunity: ContractOpportu
   const [contactEmail, setContactEmail] = useState("");
   const [bidAmount, setBidAmount] = useState("");
   const [proposalNotes, setProposalNotes] = useState("");
+  const [registrationNumber, setRegistrationNumber] = useState("");
+  const [taxNumber, setTaxNumber] = useState("");
+  const [bbbeeLevel, setBbbeeLevel] = useState("");
+  const [yearsInBusiness, setYearsInBusiness] = useState("");
+  const [proposedStartDate, setProposedStartDate] = useState("");
+  const [proposedCompletionDate, setProposedCompletionDate] = useState("");
+  const [references, setReferences] = useState("");
+  const [documents, setDocuments] = useState<FileList | null>(null);
   const [website, setWebsite] = useState("");
   const [turnstileToken, setTurnstileToken] = useState("");
   const [submitting, setSubmitting] = useState(false);
@@ -29,16 +39,25 @@ function ContractBidForm({ opportunity, onDone }: { opportunity: ContractOpportu
     setError(null);
     setSubmitting(true);
     try {
-      await api.post(`/contracts/${opportunity.id}/bids`, {
-        companyName,
-        contactName,
-        contactPhone,
-        contactEmail,
-        bidAmount,
-        proposalNotes: proposalNotes || undefined,
-        website,
-        turnstileToken: turnstileToken || undefined,
-      });
+      const form = new FormData();
+      form.append("companyName", companyName);
+      form.append("contactName", contactName);
+      form.append("contactPhone", contactPhone);
+      form.append("contactEmail", contactEmail);
+      form.append("bidAmount", bidAmount);
+      if (proposalNotes) form.append("proposalNotes", proposalNotes);
+      if (registrationNumber) form.append("registrationNumber", registrationNumber);
+      if (taxNumber) form.append("taxNumber", taxNumber);
+      if (bbbeeLevel) form.append("bbbeeLevel", bbbeeLevel);
+      if (yearsInBusiness) form.append("yearsInBusiness", yearsInBusiness);
+      if (proposedStartDate) form.append("proposedStartDate", proposedStartDate);
+      if (proposedCompletionDate) form.append("proposedCompletionDate", proposedCompletionDate);
+      if (references) form.append("references", references);
+      form.append("website", website);
+      if (turnstileToken) form.append("turnstileToken", turnstileToken);
+      if (documents) Array.from(documents).forEach((file) => form.append("documents", file));
+
+      await api.post(`/contracts/${opportunity.id}/bids`, form, { headers: { "Content-Type": "multipart/form-data" } });
       setDone(true);
     } catch (err: any) {
       setError(err.response?.data?.error ?? t("marketplace.bidError"));
@@ -59,6 +78,8 @@ function ContractBidForm({ opportunity, onDone }: { opportunity: ContractOpportu
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <Honeypot value={website} onChange={setWebsite} />
+
+      <div className="text-xs font-semibold text-mine-300 uppercase">{t("marketplace.bidSectionCompany")}</div>
       <div className="grid grid-cols-2 gap-3">
         <div>
           <label className={labelClass}>{t("marketplace.companyName")}</label>
@@ -79,14 +100,63 @@ function ContractBidForm({ opportunity, onDone }: { opportunity: ContractOpportu
           <input className={inputClass} type="email" value={contactEmail} onChange={(e) => setContactEmail(e.target.value)} required />
         </div>
       </div>
+      <div className="grid grid-cols-2 gap-3">
+        <div>
+          <label className={labelClass}>{t("contractors.registrationNumber")}</label>
+          <input className={inputClass} value={registrationNumber} onChange={(e) => setRegistrationNumber(e.target.value)} />
+        </div>
+        <div>
+          <label className={labelClass}>{t("marketplace.taxNumber")}</label>
+          <input className={inputClass} value={taxNumber} onChange={(e) => setTaxNumber(e.target.value)} />
+        </div>
+      </div>
+      <div className="grid grid-cols-2 gap-3">
+        <div>
+          <label className={labelClass}>{t("marketplace.bbbeeLevel")}</label>
+          <input className={inputClass} value={bbbeeLevel} onChange={(e) => setBbbeeLevel(e.target.value)} />
+        </div>
+        <div>
+          <label className={labelClass}>{t("marketplace.yearsInBusiness")}</label>
+          <input className={inputClass} type="number" min={0} step={1} value={yearsInBusiness} onChange={(e) => setYearsInBusiness(e.target.value)} />
+        </div>
+      </div>
+
+      <div className="text-xs font-semibold text-mine-300 uppercase pt-2 border-t border-mine-800">{t("marketplace.bidSectionProposal")}</div>
       <div>
         <label className={labelClass}>{t("marketplace.bidAmount")}</label>
         <input className={inputClass} type="number" step="any" value={bidAmount} onChange={(e) => setBidAmount(e.target.value)} required />
+      </div>
+      <div className="grid grid-cols-2 gap-3">
+        <div>
+          <label className={labelClass}>{t("marketplace.proposedStartDate")}</label>
+          <DateField value={proposedStartDate} onChange={setProposedStartDate} />
+        </div>
+        <div>
+          <label className={labelClass}>{t("marketplace.proposedCompletionDate")}</label>
+          <DateField value={proposedCompletionDate} onChange={setProposedCompletionDate} />
+        </div>
       </div>
       <div>
         <label className={labelClass}>{t("marketplace.proposalNotes")}</label>
         <textarea className={inputClass} rows={3} value={proposalNotes} onChange={(e) => setProposalNotes(e.target.value)} />
       </div>
+      <div>
+        <label className={labelClass}>{t("marketplace.references")}</label>
+        <textarea
+          className={inputClass}
+          rows={3}
+          value={references}
+          onChange={(e) => setReferences(e.target.value)}
+          placeholder={t("marketplace.referencesPlaceholder") ?? ""}
+        />
+      </div>
+
+      <div className="text-xs font-semibold text-mine-300 uppercase pt-2 border-t border-mine-800">{t("marketplace.bidSectionDocuments")}</div>
+      <div>
+        <label className={labelClass}>{t("marketplace.supportingDocuments")}</label>
+        <FileDropzone multiple accept="image/*,.pdf" hint={t("marketplace.supportingDocumentsHint")} onFiles={setDocuments} />
+      </div>
+
       <TurnstileWidget onToken={setTurnstileToken} />
 
       {error && <div className="text-danger-500 text-xs">{error}</div>}

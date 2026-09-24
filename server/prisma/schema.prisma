@@ -2464,9 +2464,45 @@ model ContractBid {
   contactEmail  String
   bidAmount     Float
   proposalNotes String?
-  status        ContractBidStatus @default(SUBMITTED)
-  payee         Payee?
-  expense       Expense?
+
+  // Credentials a real tender evaluates a bidder on, same fields Buyer registration
+  // already asks for — all optional since a bid predates any vetting relationship, unlike
+  // a buyer who has already gone through FICA-style registration before bidding.
+  registrationNumber     String?
+  taxNumber              String?
+  bbbeeLevel             String?
+  yearsInBusiness        Int?
+  proposedStartDate      DateTime?
+  proposedCompletionDate DateTime?
+  references             String?
+
+  status  ContractBidStatus @default(SUBMITTED)
+  payee   Payee?
+  expense Expense?
+
+  documents ContractBidDocument[]
+
+  createdAt DateTime @default(now())
+}
+
+enum ContractBidDocumentType {
+  COMPANY_PROFILE
+  TAX_CLEARANCE
+  BBBEE_CERTIFICATE
+  INSURANCE
+  REFERENCE_LETTER
+  OTHER
+}
+
+model ContractBidDocument {
+  id           String                  @id @default(cuid())
+  bidId        String
+  bid          ContractBid             @relation(fields: [bidId], references: [id], onDelete: Cascade)
+  docType      ContractBidDocumentType @default(OTHER)
+  fileName     String
+  fileMimeType String
+  fileSize     Int
+  fileData     Bytes
 
   createdAt DateTime @default(now())
 }

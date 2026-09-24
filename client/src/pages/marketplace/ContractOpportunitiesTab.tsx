@@ -136,6 +136,18 @@ function BidsModal({ opportunity, onClose }: { opportunity: ContractOpportunity;
     await load();
   }
 
+  async function download(bidId: string, doc: { id: string; fileName: string }) {
+    const res = await api.get(`/contracts/bids/${bidId}/documents/${doc.id}/download`, { responseType: "blob" });
+    const url = window.URL.createObjectURL(res.data);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = doc.fileName;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    window.URL.revokeObjectURL(url);
+  }
+
   return (
     <Modal title={t("marketplace.bidsFor", { name: opportunity.title })} onClose={onClose}>
       {loading && <div className="text-mine-300 text-sm">{t("common.loading")}</div>}
@@ -143,14 +155,45 @@ function BidsModal({ opportunity, onClose }: { opportunity: ContractOpportunity;
       {!loading && !loadError && bids.length === 0 && <div className="text-mine-400 text-sm">{t("marketplace.noBids")}</div>}
       <div className="space-y-3">
         {bids.map((b) => (
-          <div key={b.id} className="border border-mine-800 rounded-md p-3 space-y-1">
+          <div key={b.id} className="border border-mine-800 rounded-md p-3 space-y-1.5">
             <div className="flex items-center justify-between">
               <div className="text-sm font-medium">{b.companyName}</div>
               <StatusBadge status={b.status} />
             </div>
             <div className="text-xs text-mine-400">{b.contactName} · {b.contactEmail} · {b.contactPhone}</div>
             <div className="text-sm text-mine-300 font-semibold">{b.bidAmount}</div>
+            <div className="flex flex-wrap gap-x-3 gap-y-0.5 text-[11px] text-mine-400">
+              {b.registrationNumber && <span>{t("contractors.registrationNumber")}: {b.registrationNumber}</span>}
+              {b.taxNumber && <span>{t("marketplace.taxNumber")}: {b.taxNumber}</span>}
+              {b.bbbeeLevel && <span>{t("marketplace.bbbeeLevel")}: {b.bbbeeLevel}</span>}
+              {b.yearsInBusiness != null && <span>{t("marketplace.yearsInBusiness")}: {b.yearsInBusiness}</span>}
+            </div>
+            {(b.proposedStartDate || b.proposedCompletionDate) && (
+              <div className="text-[11px] text-mine-400">
+                {b.proposedStartDate && <>{t("marketplace.proposedStartDate")}: {new Date(b.proposedStartDate).toLocaleDateString()} </>}
+                {b.proposedCompletionDate && <>· {t("marketplace.proposedCompletionDate")}: {new Date(b.proposedCompletionDate).toLocaleDateString()}</>}
+              </div>
+            )}
             {b.proposalNotes && <div className="text-xs text-mine-400 italic">"{b.proposalNotes}"</div>}
+            {b.references && (
+              <div className="text-xs text-mine-400">
+                <span className="font-semibold text-mine-300">{t("marketplace.references")}:</span> {b.references}
+              </div>
+            )}
+            {b.documents.length > 0 && (
+              <div className="flex flex-wrap gap-1.5 pt-1">
+                {b.documents.map((doc) => (
+                  <button
+                    key={doc.id}
+                    type="button"
+                    onClick={() => download(b.id, doc)}
+                    className="text-[10px] px-2 py-1 rounded bg-mine-800 text-mine-300 hover:bg-mine-700 hover:text-mine-50"
+                  >
+                    📎 {doc.fileName}
+                  </button>
+                ))}
+              </div>
+            )}
             {(b.status === "SUBMITTED" || b.status === "SHORTLISTED") && (
               <div className="flex gap-2 pt-1 flex-wrap">
                 {b.status === "SUBMITTED" && (

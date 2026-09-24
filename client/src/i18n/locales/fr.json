@@ -2720,7 +2720,19 @@
     "setPrimary": "Définir comme couverture",
     "myMineTab": "Ma mine",
     "allMinesTab": "Toutes les mines",
-    "buyersSharedHint": "Un seul groupe partagé entre toutes les mines de cette plateforme — approuver un acheteur ici lui donne accès au marché de toutes les mines à la fois, pas seulement la vôtre."
+    "buyersSharedHint": "Un seul groupe partagé entre toutes les mines de cette plateforme — approuver un acheteur ici lui donne accès au marché de toutes les mines à la fois, pas seulement la vôtre.",
+    "bidSectionCompany": "Entreprise",
+    "taxNumber": "Numéro fiscal",
+    "bbbeeLevel": "Niveau B-BBEE",
+    "yearsInBusiness": "Années d'activité",
+    "bidSectionProposal": "Proposition",
+    "proposedStartDate": "Date de début proposée",
+    "proposedCompletionDate": "Date d'achèvement proposée",
+    "references": "Références",
+    "referencesPlaceholder": "Clients ou projets antérieurs auxquels vous pouvez vous référer, avec coordonnées",
+    "bidSectionDocuments": "Documents justificatifs",
+    "supportingDocuments": "Documents",
+    "supportingDocumentsHint": "Profil de l'entreprise, attestation fiscale, certificat B-BBEE, assurance, lettres de référence (facultatif)"
   },
   "tenders": {
     "nav": "Appels d'Offres et Contrats",
